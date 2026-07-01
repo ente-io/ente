@@ -11,7 +11,6 @@ class CastViewModel: ObservableObject {
     @Published var currentVideoData: Data?
     @Published var currentFile: CastFile?
     @Published var statusMessage: String = ""
-    @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
     // MARK: - Private Properties
@@ -59,7 +58,6 @@ class CastViewModel: ObservableObject {
                 if data != nil && (self.currentView == .connecting || self.currentView == .empty) {
                     self.currentView = .slideshow
                     self.statusMessage = ""
-                    self.isLoading = false
                     self.errorMessage = nil
                 }
             }
@@ -76,7 +74,6 @@ class CastViewModel: ObservableObject {
                 if data != nil && (self.currentView == .connecting || self.currentView == .empty) {
                     self.currentView = .slideshow
                     self.statusMessage = ""
-                    self.isLoading = false
                     self.errorMessage = nil
                 }
             }
@@ -130,9 +127,8 @@ class CastViewModel: ObservableObject {
 
     func startCastSession() {
         castSession.setState(.registering)
-        currentView = .connecting
-        isLoading = true
-        statusMessage = "Registering device..."
+        deviceCode = ""
+        currentView = .pairing
 
         Task {
             do {
@@ -143,7 +139,6 @@ class CastViewModel: ObservableObject {
                     castSession.setState(.waitingForPairing(deviceCode: device.deviceCode))
                     currentView = .pairing
                     statusMessage = "Waiting for connection..."
-                    isLoading = false
                 }
 
                 pairingService.startPolling(
@@ -175,7 +170,6 @@ class CastViewModel: ObservableObject {
         currentVideoData = nil
         currentFile = nil
         statusMessage = ""
-        isLoading = false
         errorMessage = nil
 
         pairingService.stopPolling()
@@ -192,7 +186,6 @@ class CastViewModel: ObservableObject {
         castSession.setState(.connected(payload))
         currentView = .connecting
         statusMessage = ""
-        isLoading = true
 
         Task {
             // Add a small delay to prevent flickering from rapid state changes
@@ -211,7 +204,6 @@ class CastViewModel: ObservableObject {
                 } else {
                     currentView = .slideshow
                     statusMessage = ""
-                    isLoading = false
                 }
             }
         }
@@ -254,15 +246,13 @@ class CastViewModel: ObservableObject {
             currentView = .connecting
 
         case .registering:
-            currentView = .connecting
-            statusMessage = "Registering device..."
-            isLoading = true
+            deviceCode = ""
+            currentView = .pairing
 
         case .waitingForPairing(let code):
             deviceCode = code
             currentView = .pairing
             statusMessage = "Waiting for connection..."
-            isLoading = false
 
         case .connected(let payload):
             handlePayloadReceived(payload)
@@ -289,7 +279,6 @@ class CastViewModel: ObservableObject {
         if isEmptyStateError {
             currentView = .empty
             statusMessage = ""
-            isLoading = false
         } else {
             handleError(error)
         }
@@ -299,7 +288,6 @@ class CastViewModel: ObservableObject {
         print("Cast Error: \(message)")
         currentView = .error
         errorMessage = message
-        isLoading = false
         statusMessage = ""
         castSession.setState(.error(message))
     }
@@ -326,7 +314,6 @@ class CastViewModel: ObservableObject {
                 currentView = .connecting
                 errorMessage = nil
                 statusMessage = "Starting fresh session..."
-                isLoading = true
             }
 
             startCastSession()
@@ -335,7 +322,6 @@ class CastViewModel: ObservableObject {
 
     private func handleSlideshowRestarted() {
         statusMessage = ""
-        isLoading = false
         errorMessage = nil
 
         if slideshowService.currentImageData != nil || slideshowService.currentVideoData != nil {

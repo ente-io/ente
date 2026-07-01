@@ -43,17 +43,32 @@ struct PairingView: View {
                                 .frame(height: geometry.size.height * 0.05)
                             
                             // Pairing code box
-                            Text(deviceCode)
-                                .font(.system(size: geometry.size.width * 0.09, weight: .heavy, design: .monospaced))
-                                .tracking(geometry.size.width * 0.015)
-                                .foregroundColor(.white)
-                                .scaleEffect(pulseScale)
-                                .padding(.horizontal, geometry.size.width * 0.04)
-                                .padding(.vertical, geometry.size.height * 0.025)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 32)
-                                        .fill(Color(red: 0/255, green: 150/255, blue: 51/255))
-                                )
+                            ZStack {
+                                // Reserve the 6-char code footprint so the box doesn't resize when the code arrives
+                                Text(deviceCode.isEmpty ? "000000" : deviceCode)
+                                    .font(.system(size: geometry.size.width * 0.09, weight: .heavy, design: .monospaced))
+                                    .tracking(geometry.size.width * 0.015)
+                                    .opacity(0)
+
+                                if deviceCode.isEmpty {
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                        .tint(.white)
+                                        .scaleEffect(1.8)
+                                } else {
+                                    Text(deviceCode)
+                                        .font(.system(size: geometry.size.width * 0.09, weight: .heavy, design: .monospaced))
+                                        .tracking(geometry.size.width * 0.015)
+                                        .foregroundColor(.white)
+                                        .scaleEffect(pulseScale)
+                                }
+                            }
+                            .padding(.horizontal, geometry.size.width * 0.04)
+                            .padding(.vertical, geometry.size.height * 0.025)
+                            .background(
+                                RoundedRectangle(cornerRadius: 32)
+                                    .fill(Color(red: 0/255, green: 150/255, blue: 51/255))
+                            )
                             
                             Spacer()
                                 .frame(height: geometry.size.height * 0.08)

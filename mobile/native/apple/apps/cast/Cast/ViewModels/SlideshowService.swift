@@ -1089,7 +1089,7 @@ class RealSlideshowService: ObservableObject {
         }
         
         do {
-            let decryptedFileKey = try Crypto.secretBoxOpen(cipherText: encryptedKeyData, nonce: nonceData, key: collectionKeyData)
+            let decryptedFileKey = try openSecretBox(ciphertext: encryptedKeyData, nonce: nonceData, key: collectionKeyData)
             return decryptedFileKey
         } catch {
             throw CastError.decryptionError("SecretBox decryption failed for file key: \(error)")
@@ -1106,7 +1106,7 @@ class RealSlideshowService: ObservableObject {
         print("XChaCha20: encrypted=\(encryptedBytes.count)b, header=\(headerBytes.count)b, key=\(fileKey.count)b")
         
         do {
-            let decryptedData = try Crypto.decryptSecretStream(encryptedData: encryptedBytes, key: fileKey, header: headerBytes)
+            let decryptedData = try decryptSecretStream(encryptedData: encryptedBytes, header: headerBytes, key: fileKey)
             print("Metadata decrypted using Rust crypto: \(decryptedData.count) bytes")
             return decryptedData
         } catch {
@@ -1123,7 +1123,7 @@ class RealSlideshowService: ObservableObject {
     if verboseDecryptionLogging { print("File decryption: encrypted=\(encryptedData.count)b, header=\(headerBytes.count)b, key=\(fileKey.count)b") }
         
         do {
-            return try Crypto.decryptSecretStream(encryptedData: encryptedData, key: fileKey, header: headerBytes)
+            return try decryptSecretStream(encryptedData: encryptedData, header: headerBytes, key: fileKey)
         } catch {
             throw CastError.decryptionError("file content decryption failed: \(error)")
         }

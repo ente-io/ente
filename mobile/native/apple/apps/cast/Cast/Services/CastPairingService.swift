@@ -63,12 +63,8 @@ class RealCastPairingService {
         return newInterval
     }
     
-    private func generateKeyPair() throws -> (publicKey: Data, privateKey: Data) {
-        try Crypto.generateKeyPair()
-    }
-    
     func registerDevice() async throws -> CastDevice {
-        let keys = try generateKeyPair()
+        let keys = generateKeyPair()
         let publicKeyBase64 = keys.publicKey.base64EncodedString()
         
         print("POST \(baseURL)/cast/device-info")
@@ -186,10 +182,10 @@ class RealCastPairingService {
                 throw CastError.decryptionError("Invalid encrypted cast payload")
             }
 
-            let decryptedData = try Crypto.sealedBoxOpen(
-                cipherText: encryptedBytes,
+            let decryptedData = try openSealedBox(
+                ciphertext: encryptedBytes,
                 publicKey: publicKey,
-                secretKey: privateKey
+                privateKey: privateKey
             )
             
             // Handle potential base64 preprocessing from mobile client
