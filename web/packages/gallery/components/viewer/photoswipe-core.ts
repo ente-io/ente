@@ -8,7 +8,7 @@ import { MediaMuteButton } from "media-chrome";
 import "media-chrome/menu";
 import { MediaChromeMenu, MediaChromeMenuButton } from "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
-import { type ItemData, type ItemDataOpts } from "./data-source-core";
+import type { ItemData, ItemDataOpts } from "./data-source-core";
 import {
     commentSVGPath,
     createPSRegisterElementIconHTML,

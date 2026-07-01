@@ -1,5 +1,5 @@
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
-import { type ComponentProps } from "react";
+import type { ComponentProps } from "react";
 import { DownloadStatusNotifications } from "./DownloadStatusNotifications";
 
 type ActiveDownloadStatusNotificationsProps = Omit<

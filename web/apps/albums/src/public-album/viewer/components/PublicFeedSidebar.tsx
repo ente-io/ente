@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { useColorScheme } from "@mui/material/styles";
 import { useInterval } from "ente-base/components/utils/hooks";
-import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";

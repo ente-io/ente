@@ -24,7 +24,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
@@ -37,7 +37,7 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { type Comment, type UnifiedReaction } from "../lib/social-types";
+import type { Comment, UnifiedReaction } from "../lib/social-types";
 import { AddNameModal } from "./AddNameModal";
 import { PublicCommentModal } from "./PublicCommentModal";
 import { PublicLikeModal } from "./PublicLikeModal";

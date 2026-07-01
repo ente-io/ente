@@ -1,6 +1,6 @@
-import {
-    type FileViewerInitialSidebar,
-    type FileViewerProps,
+import type {
+    FileViewerInitialSidebar,
+    FileViewerProps,
 } from "@/public-album/viewer/components/FileViewer";
 import {
     LazyFileViewer,

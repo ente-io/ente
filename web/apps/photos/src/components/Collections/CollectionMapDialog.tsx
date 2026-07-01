@@ -21,8 +21,8 @@ import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { downloadManager } from "ente-gallery/services/download";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
-import { type Collection } from "ente-media/collection";
-import { type EnteFile } from "ente-media/file";
+import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import {
     fileCreationPhotoSortTime,
     fileLocation,
@@ -34,7 +34,7 @@ import {
     addToFavoritesCollection,
     removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
-import { type CollectionSummary } from "ente-new/photos/services/collection-summary";
+import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
     savedCollectionFiles,
