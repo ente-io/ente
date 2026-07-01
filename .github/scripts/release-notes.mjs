@@ -22,7 +22,9 @@ function readMarkdown(file) {
 
 function changesetFiles(dir) {
     return fs
-        .readdirSync(dir)
+        .readdirSync(dir, { withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => entry.name)
         .filter((name) => name.endsWith(".md") && name !== "README.md")
         .sort()
         .map((name) => path.join(dir, name));
