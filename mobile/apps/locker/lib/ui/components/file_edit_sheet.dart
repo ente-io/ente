@@ -22,13 +22,11 @@ class FileEditSheetResult {
 class FileEditSheet extends StatefulWidget {
   final EnteFile file;
   final List<Collection> collections;
-  final BuildContext snackBarContext;
 
   const FileEditSheet({
     super.key,
     required this.file,
     required this.collections,
-    required this.snackBarContext,
   });
 
   @override
@@ -164,14 +162,9 @@ Future<FileEditSheetResult?> showFileEditSheet(
   BuildContext context, {
   required EnteFile file,
   required List<Collection> collections,
-  BuildContext? snackBarContext,
 }) async {
   return showBottomSheetComponent<FileEditSheetResult>(
     context: context,
-    builder: (_) => FileEditSheet(
-      file: file,
-      collections: collections,
-      snackBarContext: snackBarContext ?? context,
-    ),
+    builder: (_) => FileEditSheet(file: file, collections: collections),
   );
 }

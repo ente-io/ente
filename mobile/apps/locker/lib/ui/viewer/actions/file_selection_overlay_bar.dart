@@ -632,7 +632,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final result = await showAddToCollectionSheet(
       context,
       collections: dedupedCollections,
-      snackBarContext: context,
     );
 
     if (result != null && context.mounted) {
@@ -836,7 +835,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final result = await showAddToCollectionSheet(
       context,
       collections: dedupedCollections,
-      snackBarContext: context,
     );
 
     if (result == null || result.selectedCollections.isEmpty) {
