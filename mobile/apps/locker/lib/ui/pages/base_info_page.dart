@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_components/ente_components.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
@@ -20,7 +21,6 @@ import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import 'package:locker/services/trash/models/trash_file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
-import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:logging/logging.dart';
 
@@ -43,7 +43,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     extends State<W> {
   final _logger = Logger('BaseInfoPageState');
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
   late InfoPageMode _currentMode;
 
   @protected
@@ -100,7 +99,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   @protected
   bool get isSaveEnabled =>
-      !_isLoading &&
       _hasLoadedCollectionSelection &&
       (widget.existingFile == null || _selectedCollectionIds.isNotEmpty);
 
@@ -242,10 +240,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
       // Create InfoItem using the subclass implementation
       final infoData = createInfoData();
@@ -263,19 +257,13 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
         await _createNewFile(infoItem);
       }
 
-      if (mounted) {
+      if (mounted && widget.existingFile != null) {
+        // Switch to view mode with updated data
         setState(() {
-          _isLoading = false;
+          _currentMode = InfoPageMode.view;
         });
 
-        if (widget.existingFile != null) {
-          // Switch to view mode with updated data
-          setState(() {
-            _currentMode = InfoPageMode.view;
-          });
-
-          showToast(context, context.l10n.recordSavedSuccessfully);
-        }
+        showToast(context, context.l10n.recordSavedSuccessfully);
       }
     } on StorageLimitExceededError {
       if (mounted) {
@@ -295,12 +283,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     } catch (e) {
       if (mounted) {
         await showGenericErrorBottomSheet(context: context, error: e);
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
@@ -499,8 +481,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       assetPath: "assets/warning-grey.png",
       isDismissible: true,
       buttons: [
-        GradientButton(
-          text: context.l10n.contactSupport,
+        ButtonComponent(
+          label: context.l10n.contactSupport,
           onTap: () async {
             await sendEmail(context, to: "support@ente.com", body: message);
           },
@@ -690,14 +672,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                   if (isEditMode) ...[
                     const SizedBox(height: 8),
                     SafeArea(
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: GradientButton(
-                          onTap: isSaveEnabled ? _saveRecord : null,
-                          text: _isLoading
-                              ? context.l10n.pleaseWait
-                              : submitButtonText,
-                        ),
+                      child: ButtonComponent(
+                        label: submitButtonText,
+                        onTap: isSaveEnabled ? _saveRecord : null,
                       ),
                     ),
                     const SizedBox(height: 8),
