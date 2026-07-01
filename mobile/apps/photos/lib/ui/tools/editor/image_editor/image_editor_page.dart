@@ -224,6 +224,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         return null;
       }
       return image.exif;
+    } catch (e, s) {
+      _logger.warning("Image Editor: _readOriginalImageExif failed: ", e, s);
+      return null;
     } finally {
       if (!enteFile.isRemoteFile && Platform.isIOS) {
         await file.delete();
