@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_components/ente_components.dart";
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -102,7 +103,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         Center(
           child: Padding(
             padding: const EdgeInsets.only(top: 28),
-            child: Image.asset("assets/photo_backup.png", height: 252),
+            child: Image.asset("assets/grant_permissions.png", height: 252),
           ),
         ),
         const SizedBox(height: 22),
@@ -317,10 +318,10 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset(
-                          "assets/ducky_permission.png",
+                          "assets/grant_permissions.png",
                           height: 164,
                           errorBuilder: (context, error, stackTrace) {
                             return const SizedBox(height: 164);
@@ -328,12 +329,16 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                         ),
                         const SizedBox(height: 22),
                         Text(
-                          AppLocalizations.of(context).welcome,
+                          AppLocalizations.of(
+                            context,
+                          ).grantGalleryPermissionTitle,
+                          textAlign: .center,
                           style: TextStyle(
-                            fontFamily: "Nunito",
-                            fontWeight: FontWeight.w900,
-                            fontSize: 32,
-                            letterSpacing: -1.4,
+                            fontWeight: .w800,
+                            fontFamily: TextStyles.outfitFontFamily,
+                            package: TextStyles.fontPackage,
+                            fontSize: 36,
+                            height: 1,
                             color: colorScheme.textBase,
                           ),
                         ),
@@ -347,7 +352,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                             color: colorScheme.textMuted,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 32),
                         ButtonWidgetV2(
                           buttonType: ButtonTypeV2.neutral,
                           labelText: AppLocalizations.of(
