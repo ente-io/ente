@@ -28,18 +28,29 @@ import "package:path/path.dart" as p;
 
 class FileUtil {
   static final Logger _logger = Logger("FileUtil");
+  static final Map<int, DateTime> _lastTapTimes = {};
 
   static Future<void> openFile(BuildContext context, EnteFile file) async {
-    if (InfoFileService.instance.isInfoFile(file)) {
-      return _openInfoFile(context, file);
-    }
-
     if (file.uploadedFileID == null) {
       await showGenericErrorBottomSheet(
         context: context,
         error: Exception(context.l10n.errorOpeningFile),
       );
       return;
+    }
+
+    final fileId = file.uploadedFileID!;
+    final now = DateTime.now();
+    final lastTap = _lastTapTimes[fileId];
+
+    if (lastTap != null && now.difference(lastTap) < const Duration(seconds: 1)) {
+      return;
+    }
+
+    _lastTapTimes[fileId] = now;
+
+    if (InfoFileService.instance.isInfoFile(file)) {
+      return _openInfoFile(context, file);
     }
 
     final cachedDecryptedFile = File(getCachedDecryptedFilePath(file));
@@ -109,7 +120,7 @@ class FileUtil {
     } catch (e) {
       await dialog.hide();
       await showGenericErrorBottomSheet(context: context, error: e);
-    }
+    } 
   }
 
   static Future<bool> downloadFile(BuildContext context, EnteFile file) {
