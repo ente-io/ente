@@ -133,6 +133,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                             style: getEnteTextTheme(context).body.copyWith(
                               fontSize: widget.height * 0.09,
                               fontFamily: TextStyles.outfitFontFamily,
+                              package: TextStyles.fontPackage,
                               color: isSeen ? textFaintDark : Colors.white,
                               fontWeight: .w500,
                             ),
