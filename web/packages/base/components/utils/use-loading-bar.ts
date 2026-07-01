@@ -1,5 +1,9 @@
 import { useCallback, useRef } from "react";
-import type { LoadingBarRef } from "react-top-loading-bar";
+
+export interface LoadingBarController {
+    continuousStart: () => void;
+    complete: () => void;
+}
 
 /**
  * A convenience hook for returning stable functions tied to a
@@ -12,7 +16,7 @@ import type { LoadingBarRef } from "react-top-loading-bar";
  * loading bar. This hook returns these functions (and the ref).
  */
 export const useLoadingBar = () => {
-    const loadingBarRef = useRef<LoadingBarRef | null>(null);
+    const loadingBarRef = useRef<LoadingBarController | null>(null);
 
     const showLoadingBar = useCallback(() => {
         loadingBarRef.current?.continuousStart();

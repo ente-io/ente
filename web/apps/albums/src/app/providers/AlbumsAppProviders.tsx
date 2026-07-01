@@ -4,7 +4,6 @@ import {
     LazyAttributedMiniDialog,
     LazyNotification,
 } from "@/app/lazy/global-ui";
-import { useLoadingBar } from "@/shared/hooks/useLoadingBar";
 import { ThemedLoadingBar } from "@/shared/ui/feedback/ThemedLoadingBar";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -14,6 +13,7 @@ import { LoadingIndicator } from "ente-base/components/loaders";
 import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
 import { useSetupI18n } from "ente-base/components/utils/hooks-app";
 import { photosTheme } from "ente-base/components/utils/theme";
+import { useLoadingBar } from "ente-base/components/utils/use-loading-bar";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import { useCallback, useMemo, type PropsWithChildren } from "react";

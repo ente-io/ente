@@ -18,6 +18,7 @@ import {
     TranslucentLoadingOverlay,
 } from "ente-base/components/loaders";
 import { AttributedMiniDialog } from "ente-base/components/MiniDialog";
+import { Notification } from "ente-base/components/Notification";
 import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
 import {
     useIsRouteChangeInProgress,
@@ -25,6 +26,7 @@ import {
     useSetupLogs,
 } from "ente-base/components/utils/hooks-app";
 import { photosTheme } from "ente-base/components/utils/theme";
+import { useLoadingBar } from "ente-base/components/utils/use-loading-bar";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { logStartupBanner } from "ente-base/log-web";
@@ -34,7 +36,6 @@ import {
     isHLSGenerationSupported,
 } from "ente-gallery/services/video";
 import { AppLockReauthenticationDialog } from "ente-new/photos/components/app-lock/AppLockReauthenticationDialog";
-import { Notification } from "ente-new/photos/components/Notification";
 import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import {
     updateAvailableForDownloadDialogAttributes,
@@ -44,7 +45,6 @@ import {
     useAutoLockWhenBackgrounded,
     useSetupAppLock,
 } from "ente-new/photos/components/utils/use-app-lock";
-import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
 import { useAppLockSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { resumeExportsIfNeeded } from "ente-new/photos/services/export";
 import { runMigrations } from "ente-new/photos/services/migration";
