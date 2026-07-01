@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ente_components/ente_components.dart';
 import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
@@ -11,7 +12,6 @@ import 'package:locker/models/selected_collections.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/ui/components/empty_state_widget.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/ui/pages/collection_page.dart';
 import "package:locker/ui/viewer/actions/collection_selection_overlay_bar.dart";
@@ -167,7 +167,10 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
                 showBorder: false,
               ),
               const SizedBox(height: 20),
-              GradientButton(onTap: _loadCollections, text: context.l10n.retry),
+              ButtonComponent(
+                label: context.l10n.retry,
+                onTap: _loadCollections,
+              ),
             ],
           ),
         ),
