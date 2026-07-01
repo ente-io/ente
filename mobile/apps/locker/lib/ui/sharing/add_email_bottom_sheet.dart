@@ -18,6 +18,7 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/custom_list_scrollbar.dart";
 import "package:locker/ui/viewer/date/date_time_picker.dart";
 import "package:locker/utils/collection_actions.dart";
 
@@ -117,6 +118,7 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
       keyboardType: TextInputType.emailAddress,
       autofillHints: const [AutofillHints.email],
       autocorrect: false,
+      shouldUnfocusOnClearOrSubmit: true,
       onChanged: (value) {
         _email = value.trim();
         _emailIsValid = _isValidEmail(_email);
@@ -221,70 +223,17 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
             ),
             if (showScrollbar) ...[
               const SizedBox(width: 4),
-              _buildCustomScrollbar(
-                filteredUsers.length,
-                maxVisibleHeight,
-                colorScheme,
+              CustomListScrollbar(
+                scrollController: _scrollController,
+                itemCount: filteredUsers.length,
+                visibleItems: 2,
+                containerHeight: maxVisibleHeight,
+                colorScheme: colorScheme,
               ),
             ],
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildCustomScrollbar(
-    int itemCount,
-    double containerHeight,
-    colorScheme,
-  ) {
-    const visibleItems = 2;
-    final thumbHeightRatio = visibleItems / itemCount;
-    final thumbHeight = containerHeight * thumbHeightRatio;
-
-    return AnimatedBuilder(
-      animation: _scrollController,
-      builder: (context, child) {
-        double thumbPosition = 0;
-        if (_scrollController.hasClients &&
-            _scrollController.positions.length == 1) {
-          final maxExtent = _scrollController.position.hasContentDimensions
-              ? _scrollController.position.maxScrollExtent
-              : 0.0;
-          if (maxExtent > 0) {
-            final scrollFraction = _scrollController.offset / maxExtent;
-            thumbPosition = scrollFraction * (containerHeight - thumbHeight);
-          }
-        }
-
-        return SizedBox(
-          height: containerHeight,
-          width: 5,
-          child: Stack(
-            children: [
-              Container(
-                width: 5,
-                height: containerHeight,
-                decoration: BoxDecoration(
-                  color: colorScheme.strokeFaint,
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-              Positioned(
-                top: thumbPosition,
-                child: Container(
-                  width: 5,
-                  height: thumbHeight,
-                  decoration: BoxDecoration(
-                    color: colorScheme.strokeMuted,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
