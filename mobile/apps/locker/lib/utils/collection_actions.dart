@@ -1,13 +1,13 @@
 import "dart:async";
 
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/progress_dialog.dart";
-import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_ui/utils/toast_util.dart";
 import 'package:flutter/material.dart';
@@ -19,7 +19,6 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/input_sheet.dart";
 import "package:locker/ui/components/subscription_required_sheet.dart";
 import 'package:logging/logging.dart';
@@ -317,11 +316,9 @@ class CollectionActions {
       message: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
       assetPath: "assets/warning-grey.png",
       buttons: [
-        SizedBox(
-          child: GradientButton(
-            text: context.l10n.leaveCollection,
-            onTap: () => Navigator.of(context).pop(true),
-          ),
+        ButtonComponent(
+          label: context.l10n.leaveCollection,
+          onTap: () => Navigator.of(context).pop(true),
         ),
       ],
     );
@@ -352,11 +349,9 @@ class CollectionActions {
       message: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
       assetPath: "assets/warning-grey.png",
       buttons: [
-        SizedBox(
-          child: GradientButton(
-            text: context.l10n.leaveCollection,
-            onTap: () => Navigator.of(context).pop(true),
-          ),
+        ButtonComponent(
+          label: context.l10n.leaveCollection,
+          onTap: () => Navigator.of(context).pop(true),
         ),
       ],
     );
@@ -407,7 +402,6 @@ class CollectionActions {
     BuildContext context,
     Collection collection,
   ) async {
-    final colorScheme = getEnteColorScheme(context);
     final shouldRemove = await showAlertBottomSheet<bool>(
       context,
       title: context.l10n.removePublicLink,
@@ -416,9 +410,9 @@ class CollectionActions {
       ),
       assetPath: "assets/warning-grey.png",
       buttons: [
-        GradientButton(
-          text: context.l10n.yesRemove,
-          backgroundColor: colorScheme.warning400,
+        ButtonComponent(
+          label: context.l10n.yesRemove,
+          variant: ButtonComponentVariant.critical,
           onTap: () => Navigator.of(context).pop(true),
         ),
       ],
