@@ -133,6 +133,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
   @override
   void initState() {
     super.initState();
+    _configureGroupId();
     widget.submitNotifier?.addListener(_handleSubmitRequested);
     widget.cancelNotifier?.addListener(_handleCancel);
     _internalController = widget.controller == null
@@ -200,6 +201,23 @@ class _TextInputComponentState extends State<TextInputComponent> {
     super.dispose();
   }
 
+  Object? _groupId;
+  final _defaultGroupId = Object();
+  final _disabledGroupId = Object();
+
+  @override
+  void didChangeDependencies() {
+    _configureGroupId();
+    super.didChangeDependencies();
+  }
+
+  void _configureGroupId() {
+    _groupId = _defaultGroupId;
+    if (widget.isDisabled) {
+      _groupId = _disabledGroupId;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
@@ -233,6 +251,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
           const SizedBox(height: Spacing.sm),
         ],
         TextFieldTapRegion(
+          groupId: _groupId,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.isDisabled ? null : _focusNode.requestFocus,
