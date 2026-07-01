@@ -3,7 +3,6 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
-import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
@@ -27,11 +26,9 @@ Future<void> showShareCollectionSheet(
   BuildContext context, {
   required Collection collection,
 }) {
-  return showBaseBottomSheet<void>(
-    context,
-    title: context.l10n.shareCollection,
-    headerSpacing: 20,
-    child: ShareCollectionSheet(collection: collection),
+  return showBottomSheetComponent<void>(
+    context: context,
+    builder: (_) => ShareCollectionSheet(collection: collection),
   );
 }
 
@@ -73,23 +70,26 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
     final textTheme = getEnteTextTheme(context);
     final shouldShowSharedWithLabel = !_isOwner || _sharees.isNotEmpty;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_isOwner) ...[
-          _buildOwnerActions(colorScheme, textTheme),
-          const SizedBox(height: 20),
+    return BottomSheetComponent(
+      title: context.l10n.shareCollection,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_isOwner) ...[
+            _buildOwnerActions(colorScheme, textTheme),
+            const SizedBox(height: 20),
+          ],
+          if (shouldShowSharedWithLabel) ...[
+            Text(
+              context.l10n.sharedWith,
+              style: textTheme.small.copyWith(color: colorScheme.textMuted),
+            ),
+            const SizedBox(height: 8),
+          ],
+          _buildShareesList(colorScheme, textTheme),
         ],
-        if (shouldShowSharedWithLabel) ...[
-          Text(
-            context.l10n.sharedWith,
-            style: textTheme.small.copyWith(color: colorScheme.textMuted),
-          ),
-          const SizedBox(height: 8),
-        ],
-        _buildShareesList(colorScheme, textTheme),
-      ],
+      ),
     );
   }
 
