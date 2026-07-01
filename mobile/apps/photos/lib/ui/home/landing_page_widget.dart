@@ -93,6 +93,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                         style: const TextStyle(
                           fontWeight: .w800,
                           fontFamily: TextStyles.outfitFontFamily,
+                          package: TextStyles.fontPackage,
                           fontSize: 36,
                           height: 1,
                           color: Colors.white,

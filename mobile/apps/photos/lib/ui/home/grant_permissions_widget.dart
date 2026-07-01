@@ -336,6 +336,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                           style: TextStyle(
                             fontWeight: .w800,
                             fontFamily: TextStyles.outfitFontFamily,
+                            package: TextStyles.fontPackage,
                             fontSize: 36,
                             height: 1,
                             color: colorScheme.textBase,
