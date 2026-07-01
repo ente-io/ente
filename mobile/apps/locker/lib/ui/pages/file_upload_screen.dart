@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
@@ -9,7 +10,6 @@ import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import 'package:path/path.dart' as path;
 
@@ -191,21 +191,18 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
               ),
               const SizedBox(height: 12),
               SafeArea(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: GradientButton(
-                    onTap: () async {
-                      final selectedCollections = _availableCollections
-                          .where((c) => _selectedCollectionIds.contains(c.id))
-                          .toList();
-                      final result = FileUploadScreenResult(
-                        note: '',
-                        selectedCollections: selectedCollections,
-                      );
-                      Navigator.of(context).pop(result);
-                    },
-                    text: context.l10n.save,
-                  ),
+                child: ButtonComponent(
+                  label: context.l10n.save,
+                  onTap: () async {
+                    final selectedCollections = _availableCollections
+                        .where((c) => _selectedCollectionIds.contains(c.id))
+                        .toList();
+                    final result = FileUploadScreenResult(
+                      note: '',
+                      selectedCollections: selectedCollections,
+                    );
+                    Navigator.of(context).pop(result);
+                  },
                 ),
               ),
             ],

@@ -1,6 +1,7 @@
 import "dart:convert";
 
 import "package:ente_accounts/ente_accounts.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
@@ -11,7 +12,6 @@ import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/email_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/ui/components/gradient_button.dart";
 
 class DeleteAccountPage extends StatelessWidget {
   final BaseConfiguration config;
@@ -74,8 +74,8 @@ class DeleteAccountPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              GradientButton(
-                text: l10n.sendFeedback,
+              ButtonComponent(
+                label: l10n.sendFeedback,
                 onTap: () async {
                   await sendEmail(
                     context,
@@ -90,9 +90,9 @@ class DeleteAccountPage extends StatelessWidget {
                 style: textTheme.body.copyWith(color: colorScheme.textMuted),
               ),
               const SizedBox(height: 16),
-              GradientButton(
-                text: l10n.deleteAccount,
-                backgroundColor: colorScheme.warning700,
+              ButtonComponent(
+                label: l10n.deleteAccount,
+                variant: ButtonComponentVariant.critical,
                 onTap: () async => {await _initiateDelete(context)},
               ),
             ],
@@ -142,17 +142,15 @@ class DeleteAccountPage extends StatelessWidget {
   }
 
   Future<bool?> _showDeleteConfirmationSheet(BuildContext context) async {
-    final colorScheme = getEnteColorScheme(context);
-
     return showAlertBottomSheet<bool>(
       context,
       title: context.strings.confirmAccountDeleteTitle,
       message: context.strings.confirmAccountDeleteMessage,
       assetPath: "assets/warning-grey.png",
       buttons: [
-        GradientButton(
-          text: context.strings.delete,
-          backgroundColor: colorScheme.warning700,
+        ButtonComponent(
+          label: context.strings.delete,
+          variant: ButtonComponentVariant.critical,
           onTap: () => Navigator.of(context).pop(true),
         ),
       ],

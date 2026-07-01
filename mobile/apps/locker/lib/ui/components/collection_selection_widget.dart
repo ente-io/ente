@@ -163,6 +163,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     final textTheme = getEnteTextTheme(context);
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () async {
         await _createNewCollection();
       },

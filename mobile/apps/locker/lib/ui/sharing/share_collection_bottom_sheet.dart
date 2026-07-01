@@ -1,3 +1,4 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
@@ -17,7 +18,6 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
 import "package:locker/ui/sharing/add_email_bottom_sheet.dart";
 import "package:locker/ui/sharing/manage_links_widget.dart";
@@ -406,14 +406,12 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
           user.displayName ?? user.email,
         ),
         buttons: [
-          SizedBox(
-            child: GradientButton(
-              backgroundColor: getEnteColorScheme(context).warning400,
-              text: context.l10n.yesConvertToViewer,
-              onTap: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
+          ButtonComponent(
+            label: context.l10n.yesConvertToViewer,
+            variant: ButtonComponentVariant.critical,
+            onTap: () {
+              Navigator.of(context).pop(true);
+            },
           ),
         ],
         assetPath: "assets/warning-grey.png",
@@ -447,14 +445,12 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
       ),
       assetPath: "assets/warning-grey.png",
       buttons: [
-        SizedBox(
-          child: GradientButton(
-            backgroundColor: getEnteColorScheme(context).warning400,
-            text: context.l10n.yesRemove,
-            onTap: () {
-              Navigator.of(context).pop(true);
-            },
-          ),
+        ButtonComponent(
+          label: context.l10n.yesRemove,
+          variant: ButtonComponentVariant.critical,
+          onTap: () {
+            Navigator.of(context).pop(true);
+          },
         ),
       ],
     );

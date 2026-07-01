@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:ente_components/ente_components.dart';
 import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
@@ -8,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
-import 'package:locker/ui/components/gradient_button.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
 
 class PersonalNotePage extends BaseInfoPage<PersonalNoteData> {
@@ -451,16 +451,15 @@ class _PersonalNotePageState
   }
 
   Future<bool> _showDiscardChangesDialog() async {
-    final colorScheme = getEnteColorScheme(context);
     final result = await showAlertBottomSheet<bool>(
       context,
       title: context.l10n.unsavedNoteChangesTitle,
       message: context.l10n.unsavedNoteChangesDescription,
       assetPath: 'assets/warning-grey.png',
       buttons: [
-        GradientButton(
-          text: context.l10n.discardChanges,
-          backgroundColor: colorScheme.warning400,
+        ButtonComponent(
+          label: context.l10n.discardChanges,
+          variant: ButtonComponentVariant.critical,
           onTap: () => Navigator.of(context).pop(true),
         ),
       ],

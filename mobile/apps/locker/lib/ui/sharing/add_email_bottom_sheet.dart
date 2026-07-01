@@ -1,5 +1,6 @@
 import "package:email_validator/email_validator.dart";
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_components/ente_components.dart";
 import 'package:ente_contacts/contacts.dart';
 import "package:ente_sharing/extensions/user_extension.dart";
 import "package:ente_sharing/models/user.dart";
@@ -18,7 +19,6 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/viewer/date/date_time_picker.dart";
 import "package:locker/utils/collection_actions.dart";
 
@@ -436,12 +436,9 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
     final buttonText = _shareLater
         ? context.l10n.scheduleShare
         : context.l10n.share;
-    return SizedBox(
-      width: double.infinity,
-      child: GradientButton(
-        text: buttonText,
-        onTap: canShare ? _onShareTap : null,
-      ),
+    return ButtonComponent(
+      label: buttonText,
+      onTap: canShare ? _onShareTap : null,
     );
   }
 

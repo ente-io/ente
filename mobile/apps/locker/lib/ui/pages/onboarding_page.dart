@@ -14,7 +14,6 @@ import 'package:flutter/rendering.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
-import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/home_page.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -137,8 +136,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 isDismissible: false,
                 showCloseButton: false,
                 buttons: [
-                  GradientButton(
-                    text: l10n.yes,
+                  ButtonComponent(
+                    label: l10n.yes,
                     onTap: () async {
                       Navigator.of(context).pop();
                       await Navigator.of(context).push(

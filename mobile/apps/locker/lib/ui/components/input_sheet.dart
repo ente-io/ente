@@ -1,8 +1,8 @@
 import "package:ente_base/typedefs.dart";
+import "package:ente_components/ente_components.dart";
 import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:locker/ui/components/gradient_button.dart";
 
 class InputSheet extends StatefulWidget {
   final String title;
@@ -69,9 +69,7 @@ class _InputSheetState extends State<InputSheet> {
       return;
     }
 
-    setState(() {
-      _isSubmitting = true;
-    });
+    _isSubmitting = true;
 
     try {
       await widget.onSubmit(text);
@@ -81,10 +79,7 @@ class _InputSheetState extends State<InputSheet> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-
+        _isSubmitting = false;
         Navigator.of(context).pop(e);
       }
     }
@@ -145,12 +140,9 @@ class _InputSheetState extends State<InputSheet> {
           onSubmitted: (_) => _onSubmit(),
         ),
         const SizedBox(height: 28),
-        SizedBox(
-          width: double.infinity,
-          child: GradientButton(
-            onTap: !_isInputValid || _isSubmitting ? null : _onSubmit,
-            text: widget.submitButtonLabel,
-          ),
+        ButtonComponent(
+          label: widget.submitButtonLabel,
+          onTap: _isInputValid ? _onSubmit : null,
         ),
       ],
     );

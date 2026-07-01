@@ -1,6 +1,7 @@
 import "dart:io";
 import "dart:typed_data";
 
+import "package:ente_components/ente_components.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/progress_dialog.dart";
 import "package:ente_ui/utils/dialog_util.dart";
@@ -16,7 +17,6 @@ import "package:locker/services/files/download/file_downloader.dart"
 import "package:locker/services/files/offline/offline_file_storage.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/pages/account_credentials_page.dart";
 import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
@@ -97,8 +97,8 @@ class FileUtil {
           message: context.l10n.failedToDownloadOrDecrypt,
           assetPath: "assets/warning-grey.png",
           buttons: [
-            GradientButton(
-              text: context.l10n.contactSupport,
+            ButtonComponent(
+              label: context.l10n.contactSupport,
               onTap: () async {
                 await sendLogs(context, "support@ente.com", postShare: () {});
               },
@@ -349,8 +349,8 @@ class FileUtil {
           message: "Unable to extract information from this file",
           assetPath: "assets/warning-grey.png",
           buttons: [
-            GradientButton(
-              text: context.l10n.contactSupport,
+            ButtonComponent(
+              label: context.l10n.contactSupport,
               onTap: () async {
                 await sendLogs(context, "support@ente.com", postShare: () {});
               },
@@ -514,8 +514,8 @@ class FileUtil {
       message: _openFileErrorMessage(context, error, resultType: resultType),
       assetPath: "assets/warning-grey.png",
       buttons: [
-        GradientButton(
-          text: context.l10n.download,
+        ButtonComponent(
+          label: context.l10n.download,
           onTap: () async {
             Navigator.of(context).pop();
             await downloadFile(context, lockerFile!);

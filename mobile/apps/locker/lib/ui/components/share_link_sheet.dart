@@ -1,3 +1,4 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
@@ -12,7 +13,6 @@ import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
-import "package:locker/ui/components/gradient_button.dart";
 
 Future<void> showShareLinkSheet(
   BuildContext context,
@@ -108,15 +108,12 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
           ),
         ),
         const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: GradientButton(
-            onTap: () async {
-              Navigator.of(context).pop();
-              await shareText(widget.url, context: widget.rootContext);
-            },
-            text: l10n.shareLink,
-          ),
+        ButtonComponent(
+          label: l10n.shareLink,
+          onTap: () async {
+            Navigator.of(context).pop();
+            await shareText(widget.url, context: widget.rootContext);
+          },
         ),
         const SizedBox(height: 16),
         Center(
@@ -140,7 +137,6 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
   }
 
   Future<void> _deleteShareLink(BuildContext context) async {
-    final colorScheme = getEnteColorScheme(context);
     final l10n = context.l10n;
 
     final result = await showAlertBottomSheet<ButtonResult>(
@@ -149,9 +145,9 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
       message: l10n.deleteShareLinkConfirmation,
       assetPath: 'assets/file_delete_icon.png',
       buttons: [
-        GradientButton(
-          text: l10n.delete,
-          backgroundColor: colorScheme.warning400,
+        ButtonComponent(
+          label: l10n.delete,
+          variant: ButtonComponentVariant.critical,
           onTap: () =>
               Navigator.of(context).pop(ButtonResult(ButtonAction.first)),
         ),

@@ -24,7 +24,6 @@ import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/states/user_details_state.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
-import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
@@ -344,19 +343,16 @@ class _HomePageState extends UploaderPageState<HomePage>
       isDismissible: false,
       showCloseButton: false,
       buttons: [
-        SizedBox(
-          width: double.infinity,
-          child: GradientButton(
-            text: context.l10n.ok,
-            onTap: () async {
-              navigator.pop();
-              final dialog = createProgressDialog(context, l10n.pleaseWait);
-              await dialog.show();
-              await Configuration.instance.logout();
-              await dialog.hide();
-              navigator.popUntil((route) => route.isFirst);
-            },
-          ),
+        ButtonComponent(
+          label: context.l10n.ok,
+          onTap: () async {
+            navigator.pop();
+            final dialog = createProgressDialog(context, l10n.pleaseWait);
+            await dialog.show();
+            await Configuration.instance.logout();
+            await dialog.hide();
+            navigator.popUntil((route) => route.isFirst);
+          },
         ),
       ],
     );
@@ -452,8 +448,8 @@ class _HomePageState extends UploaderPageState<HomePage>
           message: context.l10n.somethingWentWrong,
           assetPath: "assets/warning-grey.png",
           buttons: [
-            GradientButton(
-              text: context.l10n.contactSupport,
+            ButtonComponent(
+              label: context.l10n.contactSupport,
               onTap: () async {
                 await sendLogs(context, "support@ente.com", postShare: () {});
               },
@@ -739,7 +735,10 @@ class _HomePageState extends UploaderPageState<HomePage>
                 showBorder: false,
               ),
               const SizedBox(height: 20),
-              GradientButton(onTap: _loadCollections, text: context.l10n.retry),
+              ButtonComponent(
+                label: context.l10n.retry,
+                onTap: _loadCollections,
+              ),
             ],
           ),
         ),
