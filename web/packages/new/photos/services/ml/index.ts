@@ -10,7 +10,7 @@ import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
 import { ensureMasterKeyFromSession } from "ente-base/session";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import { type ProcessableUploadItem } from "ente-gallery/services/upload";
+import type { ProcessableUploadItem } from "ente-gallery/services/upload";
 import { createUtilityProcess } from "ente-gallery/utils/native-worker";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";

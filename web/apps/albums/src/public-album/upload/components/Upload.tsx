@@ -53,7 +53,7 @@ import { CanvasReadbackBlockedDialog } from "ente-gallery/components/upload/Canv
 import { UploadProgress } from "ente-gallery/components/UploadProgress";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import { hasReliableCanvasReadback } from "ente-gallery/utils/upload/canvas-integrity";
-import { type Collection } from "ente-media/collection";
+import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";

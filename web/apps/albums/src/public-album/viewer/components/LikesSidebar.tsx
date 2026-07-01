@@ -12,7 +12,7 @@ import {
     styled,
     Typography,
 } from "@mui/material";
-import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
@@ -24,7 +24,7 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { type UnifiedReaction } from "../lib/social-types";
+import type { UnifiedReaction } from "../lib/social-types";
 
 // =============================================================================
 // Icons

@@ -53,11 +53,11 @@ import { savedAuthToken } from "ente-base/token";
 import type { Location } from "ente-base/types";
 import { ensureContactsReady } from "ente-contacts-web";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
-import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
+import type { UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
-import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
+import type { FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import { CollectionSubType, type Collection } from "ente-media/collection";
-import { type EnteFile } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import { ItemVisibility, metadataHash } from "ente-media/file-metadata";
 import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import {
@@ -151,9 +151,9 @@ import {
     filterSearchableFiles,
     updateSearchCollectionsAndFiles,
 } from "ente-new/photos/services/search";
-import {
-    type SearchOption,
-    type SidebarActionID,
+import type {
+    SearchOption,
+    SidebarActionID,
 } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {

@@ -1,6 +1,6 @@
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import dynamic from "next/dynamic";
-import { type DownloadStatusNotificationsProps } from "./DownloadStatusNotifications";
+import type { DownloadStatusNotificationsProps } from "./DownloadStatusNotifications";
 
 const LazyDownloadStatusNotifications =
     dynamic<DownloadStatusNotificationsProps>(

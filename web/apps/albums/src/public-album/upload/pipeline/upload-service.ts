@@ -7,7 +7,7 @@ import {
 } from "@/public-album/media/processing/ffmpeg";
 import type { BytesOrB64 } from "ente-base/crypto/types";
 import { streamEncryptionChunkSize } from "ente-base/crypto/types";
-import { type CryptoWorker } from "ente-base/crypto/worker";
+import type { CryptoWorker } from "ente-base/crypto/worker";
 import { nameAndExtension } from "ente-base/file-name";
 import {
     ensureOk,
