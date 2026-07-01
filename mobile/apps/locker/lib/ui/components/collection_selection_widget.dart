@@ -91,7 +91,6 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     final containsUncategorized = _uncategorizedCollection != null;
 
     final chips = <Widget>[];
@@ -135,7 +134,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.title.isNotEmpty) ...[
-          Text(widget.title, style: textTheme.body),
+          Text(widget.title, style: TextStyles.bodyBold),
           const SizedBox(height: 12),
         ],
         ClipRRect(
