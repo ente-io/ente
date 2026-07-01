@@ -2,7 +2,7 @@ import "package:ente_base/typedefs.dart";
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 
-Future<dynamic> showInputSheet(
+Future<dynamic> showTextInputSheet(
   BuildContext context, {
   required String title,
   required String hintText,
