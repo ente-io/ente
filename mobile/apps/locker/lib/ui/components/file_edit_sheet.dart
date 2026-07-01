@@ -107,7 +107,7 @@ class _FileEditSheetState extends State<FileEditSheet> {
     return uniqueCollectionsById(source);
   }
 
-  Future<void> _onSave() async {
+  void _onSave() {
     final selectedCollections = _availableCollections
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
@@ -162,7 +162,7 @@ Future<FileEditSheetResult?> showFileEditSheet(
   BuildContext context, {
   required EnteFile file,
   required List<Collection> collections,
-}) async {
+}) {
   return showBottomSheetComponent<FileEditSheetResult>(
     context: context,
     builder: (_) => FileEditSheet(file: file, collections: collections),

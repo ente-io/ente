@@ -17,22 +17,26 @@ Future<DateTime?> showDatePickerSheet(
       decoration: BoxDecoration(
         color: colorScheme.backgroundElevated,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(12),
-          topRight: Radius.circular(12),
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: DateTimePickerWidget(
-          (DateTime dateTime) {
-            Navigator.of(sheetContext).pop(dateTime);
-          },
-          () {
-            Navigator.of(sheetContext).pop(null);
-          },
-          initialDate,
-          minDateTime: minDate,
-          maxDateTime: maxDate,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DateTimePickerWidget(
+            (DateTime dateTime) {
+              Navigator.of(sheetContext).pop(dateTime);
+            },
+            () {
+              Navigator.of(sheetContext).pop(null);
+            },
+            initialDate,
+            minDateTime: minDate,
+            maxDateTime: maxDate,
+            startWithTime: startWithTime,
+          ),
         ),
       ),
     ),

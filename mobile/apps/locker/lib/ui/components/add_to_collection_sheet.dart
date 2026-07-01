@@ -48,7 +48,7 @@ class _AddToCollectionSheetState extends State<AddToCollectionSheet> {
     });
   }
 
-  Future<void> _onSave() async {
+  void _onSave() {
     final selectedCollections = _availableCollections
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
@@ -81,7 +81,7 @@ class _AddToCollectionSheetState extends State<AddToCollectionSheet> {
 Future<AddToCollectionSheetResult?> showAddToCollectionSheet(
   BuildContext context, {
   required List<Collection> collections,
-}) async {
+}) {
   return showBottomSheetComponent<AddToCollectionSheetResult>(
     context: context,
     builder: (_) => AddToCollectionSheet(collections: collections),

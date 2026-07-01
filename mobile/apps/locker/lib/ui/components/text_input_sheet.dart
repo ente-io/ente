@@ -13,7 +13,10 @@ Future<dynamic> showTextInputSheet(
   int? maxLength = 200,
   bool isPasswordInput = false,
 }) {
-  var currentText = initialValue ?? '';
+  final initial = initialValue ?? '';
+  var currentText = maxLength != null && initial.length > maxLength
+      ? initial.substring(0, maxLength)
+      : initial;
   var isSubmitting = false;
 
   final canSubmit = ValueNotifier<bool>(currentText.trim().isNotEmpty);
