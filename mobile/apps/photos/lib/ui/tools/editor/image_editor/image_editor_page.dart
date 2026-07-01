@@ -81,17 +81,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         quality: 95,
         format: CompressFormat.jpeg,
       );
+      late final img.Image? image;
+      late final img.ExifData? originalImageExif;
       if (flagService.internalUser) {
-        final originalImageExif = await _readOriginalImageExif(
-          widget.originalFile,
-        );
-        final image = img.decodeJpg(result);
-        if (image == null) {
-          throw Exception("Failed to decode image");
-        }
-        if (originalImageExif != null) {
-          image.exif = originalImageExif;
-        }
+        originalImageExif = await _readOriginalImageExif(widget.originalFile);
+        image = img.decodeJpg(result);
+      }
+      if (originalImageExif != null && image != null) {
+        image.exif = originalImageExif;
         for (final key in [
           "Orientation",
           "WhitePoint",
