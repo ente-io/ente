@@ -22,7 +22,6 @@ import { ActiveDownloadStatusNotifications } from "@/public-album/download/compo
 import { downloadManager } from "@/public-album/download/services/download-manager";
 import { thumbnailManager } from "@/public-album/media/thumbnails/thumbnail-manager";
 import { sortFiles } from "@/public-album/media/utils/sort-files";
-import type { FullScreenDropZoneProps } from "@/public-album/upload/components/CollectDropZone";
 import type { UploadProps } from "@/public-album/upload/components/Upload";
 import {
     getSelectedFiles,
@@ -62,6 +61,7 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiOrigin, isCustomAPIOrigin } from "ente-base/origins";
+import type { FullScreenDropZoneProps } from "ente-gallery/components/FullScreenDropZone";
 import {
     useSaveGroupsActions,
     type AddSaveGroup,
@@ -999,7 +999,7 @@ const LazyCollectDropZone: React.FC<LazyCollectDropZoneProps> = ({
         if (!enabled || DropZoneComponent) return;
 
         let isCancelled = false;
-        void import("@/public-album/upload/components/CollectDropZone").then(
+        void import("ente-gallery/components/FullScreenDropZone").then(
             ({ FullScreenDropZone }) => {
                 if (isCancelled) return;
                 setDropZoneComponent(() => FullScreenDropZone);

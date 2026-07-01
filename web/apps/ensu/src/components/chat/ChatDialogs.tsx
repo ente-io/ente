@@ -29,7 +29,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import {
     Notification,
     type NotificationAttributes,
-} from "ente-new/photos/components/Notification";
+} from "ente-base/components/Notification";
 import React, { memo } from "react";
 
 interface IconProps {

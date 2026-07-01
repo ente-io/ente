@@ -59,13 +59,13 @@ import {
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
 import { NavbarBase } from "ente-base/components/Navbar";
+import type { NotificationAttributes } from "ente-base/components/Notification";
 import { useBaseContext } from "ente-base/context";
 import { buildEnvEnsuDesktopVersion } from "ente-base/env";
 import { getKV, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { saveStringAsFile } from "ente-base/utils/web";
-import type { NotificationAttributes } from "ente-new/photos/components/Notification";
 import { useRouter } from "next/router";
 import React, {
     useCallback,

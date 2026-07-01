@@ -14,13 +14,13 @@ import {
     styled,
     Typography,
 } from "@mui/material";
+import { Notification } from "ente-base/components/Notification";
 import { useBaseContext } from "ente-base/context";
 import {
     isSaveComplete,
     isSaveCompleteWithErrors,
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
-import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -34,7 +34,7 @@ const truncateAlbumName = (name: string): string => {
     return name.slice(0, MAX_ALBUM_NAME_LENGTH) + "...";
 };
 
-interface DownloadStatusNotificationsProps {
+export interface DownloadStatusNotificationsProps {
     /**
      * A list of user-initiated downloads for which a status should be shown.
      *
