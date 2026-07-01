@@ -3,7 +3,6 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
-import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
@@ -18,6 +17,7 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/custom_list_scrollbar.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
 import "package:locker/ui/sharing/add_email_bottom_sheet.dart";
 import "package:locker/ui/sharing/manage_links_widget.dart";
@@ -27,11 +27,9 @@ Future<void> showShareCollectionSheet(
   BuildContext context, {
   required Collection collection,
 }) {
-  return showBaseBottomSheet<void>(
-    context,
-    title: context.l10n.shareCollection,
-    headerSpacing: 20,
-    child: ShareCollectionSheet(collection: collection),
+  return showBottomSheetComponent<void>(
+    context: context,
+    builder: (_) => ShareCollectionSheet(collection: collection),
   );
 }
 
@@ -73,23 +71,26 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
     final textTheme = getEnteTextTheme(context);
     final shouldShowSharedWithLabel = !_isOwner || _sharees.isNotEmpty;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_isOwner) ...[
-          _buildOwnerActions(colorScheme, textTheme),
-          const SizedBox(height: 20),
+    return BottomSheetComponent(
+      title: context.l10n.shareCollection,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_isOwner) ...[
+            _buildOwnerActions(colorScheme, textTheme),
+            const SizedBox(height: 20),
+          ],
+          if (shouldShowSharedWithLabel) ...[
+            Text(
+              context.l10n.sharedWith,
+              style: textTheme.small.copyWith(color: colorScheme.textMuted),
+            ),
+            const SizedBox(height: 8),
+          ],
+          _buildShareesList(colorScheme, textTheme),
         ],
-        if (shouldShowSharedWithLabel) ...[
-          Text(
-            context.l10n.sharedWith,
-            style: textTheme.small.copyWith(color: colorScheme.textMuted),
-          ),
-          const SizedBox(height: 8),
-        ],
-        _buildShareesList(colorScheme, textTheme),
-      ],
+      ),
     );
   }
 
@@ -174,7 +175,13 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
         ),
         if (showScrollbar) ...[
           const SizedBox(width: 4),
-          _buildCustomScrollbar(allUsers.length, maxVisibleHeight, colorScheme),
+          CustomListScrollbar(
+            scrollController: _scrollController,
+            itemCount: allUsers.length,
+            visibleItems: 4,
+            containerHeight: maxVisibleHeight,
+            colorScheme: colorScheme,
+          ),
         ],
       ],
     );
@@ -238,61 +245,6 @@ class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
         await shareText(url, context: context);
       }
     }
-  }
-
-  Widget _buildCustomScrollbar(
-    int itemCount,
-    double containerHeight,
-    colorScheme,
-  ) {
-    const visibleItems = 4;
-    final thumbHeightRatio = visibleItems / itemCount;
-    final thumbHeight = containerHeight * thumbHeightRatio;
-
-    return AnimatedBuilder(
-      animation: _scrollController,
-      builder: (context, child) {
-        double thumbPosition = 0;
-        if (_scrollController.hasClients &&
-            _scrollController.positions.length == 1) {
-          final maxExtent = _scrollController.position.hasContentDimensions
-              ? _scrollController.position.maxScrollExtent
-              : 0.0;
-          if (maxExtent > 0) {
-            final scrollFraction = _scrollController.offset / maxExtent;
-            thumbPosition = scrollFraction * (containerHeight - thumbHeight);
-          }
-        }
-
-        return SizedBox(
-          height: containerHeight,
-          width: 5,
-          child: Stack(
-            children: [
-              Container(
-                width: 5,
-                height: containerHeight,
-                decoration: BoxDecoration(
-                  color: colorScheme.strokeFaint,
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-              Positioned(
-                top: thumbPosition,
-                child: Container(
-                  width: 5,
-                  height: thumbHeight,
-                  decoration: BoxDecoration(
-                    color: colorScheme.strokeMuted,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   Widget _buildRoleIcon(CollectionParticipantRole role, colorScheme) {

@@ -19,8 +19,8 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
-import "package:locker/ui/components/input_sheet.dart";
 import "package:locker/ui/components/subscription_required_sheet.dart";
+import "package:locker/ui/components/text_input_sheet.dart";
 import 'package:logging/logging.dart';
 
 /// Utility class for common collection actions like edit and delete
@@ -34,7 +34,7 @@ class CollectionActions {
   }) async {
     Collection? createdCollection;
 
-    final result = await showInputSheet(
+    final result = await showTextInputSheet(
       context,
       title: context.l10n.newCollection,
       hintText: context.l10n.enterCollectionName,
@@ -78,7 +78,7 @@ class CollectionActions {
       return;
     }
 
-    await showInputSheet(
+    await showTextInputSheet(
       context,
       title: context.l10n.renameCollection,
       initialValue: collection.name ?? '',

@@ -20,7 +20,7 @@ import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/public_url.dart";
-import "package:locker/ui/components/input_sheet.dart";
+import "package:locker/ui/components/text_input_sheet.dart";
 import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
@@ -140,7 +140,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       value: () => url.passwordEnabled,
                       onChanged: () async {
                         if (!url.passwordEnabled) {
-                          await showInputSheet(
+                          await showTextInputSheet(
                             context,
                             title: context.l10n.setAPassword,
                             submitButtonLabel: context.l10n.lockButtonLabel,

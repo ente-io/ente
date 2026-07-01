@@ -183,7 +183,6 @@
       }
     }
   },
-  "pleaseSelectAtLeastOneCollection": "Please select at least one collection",
   "unknownItemType": "Unknown item type",
   "fileDeletedSuccessfully": "Item deleted successfully",
   "failedToDeleteFile": "Failed to delete item: {error}",

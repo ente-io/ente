@@ -1,6 +1,6 @@
+import "package:ente_components/ente_components.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/cupertino.dart";
-import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 
 Future<DateTime?> showDatePickerSheet(
@@ -9,37 +9,38 @@ Future<DateTime?> showDatePickerSheet(
   DateTime? maxDate,
   DateTime? minDate,
   bool startWithTime = false,
-}) async {
+}) {
   final colorScheme = getEnteColorScheme(context);
-  final sheet = Container(
-    decoration: BoxDecoration(
-      color: colorScheme.backgroundElevated,
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(12),
-        topRight: Radius.circular(12),
-      ),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: DateTimePickerWidget(
-        (DateTime dateTime) {
-          Navigator.of(context).pop(dateTime);
-        },
-        () {
-          Navigator.of(context).pop(null);
-        },
-        initialDate,
-        minDateTime: minDate,
-        maxDateTime: maxDate,
-      ),
-    ),
-  );
-  final newDate = await showModalBottomSheet<DateTime?>(
+  return showBottomSheetComponent<DateTime?>(
     context: context,
-    isScrollControlled: true,
-    builder: (context) => sheet,
+    builder: (sheetContext) => Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DateTimePickerWidget(
+            (DateTime dateTime) {
+              Navigator.of(sheetContext).pop(dateTime);
+            },
+            () {
+              Navigator.of(sheetContext).pop(null);
+            },
+            initialDate,
+            minDateTime: minDate,
+            maxDateTime: maxDate,
+            startWithTime: startWithTime,
+          ),
+        ),
+      ),
+    ),
   );
-  return newDate;
 }
 
 class DateTimePickerWidget extends StatefulWidget {
