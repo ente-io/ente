@@ -133,6 +133,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
   @override
   void initState() {
     super.initState();
+    _configureGroupId();
     widget.submitNotifier?.addListener(_handleSubmitRequested);
     widget.cancelNotifier?.addListener(_handleCancel);
     _internalController = widget.controller == null
@@ -200,6 +201,23 @@ class _TextInputComponentState extends State<TextInputComponent> {
     super.dispose();
   }
 
+  Object? _groupId;
+  final _defaultGroupId = Object();
+  final _disabledGroupId = Object();
+
+  @override
+  void didChangeDependencies() {
+    _configureGroupId();
+    super.didChangeDependencies();
+  }
+
+  void _configureGroupId() {
+    _groupId = _defaultGroupId;
+    if (widget.isDisabled) {
+      _groupId = _disabledGroupId;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
@@ -232,91 +250,95 @@ class _TextInputComponentState extends State<TextInputComponent> {
           ),
           const SizedBox(height: Spacing.sm),
         ],
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.isDisabled ? null : _focusNode.requestFocus,
-          child: Container(
-            height: _isMultiline ? null : _kHeight,
-            constraints: _isMultiline
-                ? const BoxConstraints(minHeight: _kHeight)
-                : null,
-            decoration: BoxDecoration(
-              color: _backgroundColor(colors),
-              borderRadius: BorderRadius.circular(Radii.lg),
-              border: Border.all(color: _borderColor(colors)),
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              fit: _isMultiline ? StackFit.loose : StackFit.expand,
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: Spacing.lg,
-                    vertical: _isMultiline ? Spacing.lg : 0,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: _isMultiline
-                        ? CrossAxisAlignment.start
-                        : CrossAxisAlignment.center,
-                    children: [
-                      if (prefix != null) ...[
-                        prefix,
-                        const SizedBox(width: Spacing.sm),
-                      ],
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          focusNode: _focusNode,
-                          enabled: !widget.isDisabled,
-                          autofocus: widget.autofocus,
-                          obscureText: _obscureText,
-                          maxLines: widget.isPasswordInput
-                              ? 1
-                              : widget.maxLines ?? (_isMultiline ? null : 1),
-                          minLines: widget.isPasswordInput
-                              ? null
-                              : widget.minLines,
-                          keyboardType: widget.keyboardType,
-                          textCapitalization: widget.textCapitalization,
-                          inputFormatters: _inputFormatters,
-                          autofillHints:
-                              widget.autofillHints ??
-                              (widget.isPasswordInput
-                                  ? const [AutofillHints.password]
-                                  : const []),
-                          autocorrect:
-                              widget.autocorrect && !widget.isPasswordInput,
-                          enableSuggestions: !widget.isPasswordInput,
-                          textAlignVertical: _isMultiline
-                              ? TextAlignVertical.top
-                              : TextAlignVertical.center,
-                          onEditingComplete: _handleEditingComplete,
-                          style: TextStyles.body.copyWith(
-                            color: _textColor(colors),
-                          ),
-                          decoration: InputDecoration(
-                            hintText: widget.hintText,
-                            hintStyle: TextStyles.body.copyWith(
-                              color: _hintColor(colors),
+        TextFieldTapRegion(
+          groupId: _groupId,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.isDisabled ? null : _focusNode.requestFocus,
+            child: Container(
+              height: _isMultiline ? null : _kHeight,
+              constraints: _isMultiline
+                  ? const BoxConstraints(minHeight: _kHeight)
+                  : null,
+              decoration: BoxDecoration(
+                color: _backgroundColor(colors),
+                borderRadius: BorderRadius.circular(Radii.lg),
+                border: Border.all(color: _borderColor(colors)),
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                fit: _isMultiline ? StackFit.loose : StackFit.expand,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Spacing.lg,
+                      vertical: _isMultiline ? Spacing.lg : 0,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: _isMultiline
+                          ? CrossAxisAlignment.start
+                          : CrossAxisAlignment.center,
+                      children: [
+                        if (prefix != null) ...[
+                          prefix,
+                          const SizedBox(width: Spacing.sm),
+                        ],
+                        Expanded(
+                          child: TextField(
+                            controller: _controller,
+                            focusNode: _focusNode,
+                            enabled: !widget.isDisabled,
+                            autofocus: widget.autofocus,
+                            obscureText: _obscureText,
+                            maxLines: widget.isPasswordInput
+                                ? 1
+                                : widget.maxLines ?? (_isMultiline ? null : 1),
+                            minLines: widget.isPasswordInput
+                                ? null
+                                : widget.minLines,
+                            keyboardType: widget.keyboardType,
+                            textCapitalization: widget.textCapitalization,
+                            inputFormatters: _inputFormatters,
+                            autofillHints:
+                                widget.autofillHints ??
+                                (widget.isPasswordInput
+                                    ? const [AutofillHints.password]
+                                    : const []),
+                            autocorrect:
+                                widget.autocorrect && !widget.isPasswordInput,
+                            enableSuggestions: !widget.isPasswordInput,
+                            textAlignVertical: _isMultiline
+                                ? TextAlignVertical.top
+                                : TextAlignVertical.center,
+                            onEditingComplete: _handleEditingComplete,
+                            onTapOutside: (_) => _focusNode.unfocus(),
+                            style: TextStyles.body.copyWith(
+                              color: _textColor(colors),
                             ),
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
+                            decoration: InputDecoration(
+                              hintText: widget.hintText,
+                              hintStyle: TextStyles.body.copyWith(
+                                color: _hintColor(colors),
+                              ),
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
                           ),
                         ),
-                      ),
-                      if (suffix != null) ...[
-                        const SizedBox(width: Spacing.sm),
-                        suffix,
+                        if (suffix != null) ...[
+                          const SizedBox(width: Spacing.sm),
+                          suffix,
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                if (suffixTap != null) _suffixTapTarget(suffixTap),
-              ],
+                  if (suffixTap != null) _suffixTapTarget(suffixTap),
+                ],
+              ),
             ),
           ),
         ),

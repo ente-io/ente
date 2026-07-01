@@ -98,6 +98,35 @@ void main() {
     );
   });
 
+  testWidgets("TextInputComponent unfocuses when tapping outside", (
+    tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      _wrap(
+        Column(
+          children: [
+            TextInputComponent(label: "Email", focusNode: focusNode),
+            const SizedBox(height: 40),
+            const Text("Outside"),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isTrue);
+
+    await tester.tap(find.text("Outside"));
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   testWidgets("TextInputComponent maps error and success states to borders", (
     tester,
   ) async {
