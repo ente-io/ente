@@ -130,9 +130,9 @@ class CastViewModel: ObservableObject {
 
     func startCastSession() {
         castSession.setState(.registering)
-        currentView = .connecting
+        deviceCode = ""
+        currentView = .pairing
         isLoading = true
-        statusMessage = "Registering device..."
 
         Task {
             do {
@@ -254,8 +254,8 @@ class CastViewModel: ObservableObject {
             currentView = .connecting
 
         case .registering:
-            currentView = .connecting
-            statusMessage = "Registering device..."
+            deviceCode = ""
+            currentView = .pairing
             isLoading = true
 
         case .waitingForPairing(let code):
