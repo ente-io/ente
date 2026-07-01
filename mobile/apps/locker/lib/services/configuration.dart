@@ -1,10 +1,12 @@
+import 'package:ente_account_deletion/account_deletion.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_lock_screen/lock_screen_host.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/offline/offline_file_storage.dart';
 
-class Configuration extends BaseConfiguration implements LockScreenHost {
+class Configuration extends BaseConfiguration
+    implements LockScreenHost, AccountDeletionHost {
   Configuration._privateConstructor();
   static final Configuration instance = Configuration._privateConstructor();
 

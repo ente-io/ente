@@ -271,6 +271,7 @@ _windowsLocalAuthenticationExceptionForLocalAuthException(
 Future<bool> requestAuthentication(
   BuildContext context,
   String defaultReason, {
+  String? title,
   String? macOSReason,
   bool isOpeningApp = false,
   bool isAuthenticatingForInAppChange = false,
@@ -300,7 +301,7 @@ Future<bool> requestAuthentication(
         AndroidAuthMessages(
           cancelButton: l10n.androidCancelButton,
           signInHint: l10n.androidBiometricHint,
-          signInTitle: l10n.androidSignInTitle,
+          signInTitle: title ?? l10n.androidSignInTitle,
         ),
         IOSAuthMessages(
           cancelButton: l10n.iOSOkButton,

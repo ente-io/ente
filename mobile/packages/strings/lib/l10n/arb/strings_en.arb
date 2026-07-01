@@ -230,33 +230,108 @@
   "@deleteAccount": {
     "description": "Delete account button label"
   },
-  "deleteAccountQuery": "We'll be sorry to see you go. Are you facing some issue?",
-  "@deleteAccountQuery": {
-    "description": "Message asking user why they want to delete account"
+  "authenticateToContinue": "Authenticate to continue",
+  "@authenticateToContinue": {
+    "description": "Title for the bottom sheet shown before a sensitive action"
   },
-  "yesSendFeedbackAction": "Yes, send feedback",
-  "@yesSendFeedbackAction": {
-    "description": "Button to confirm sending feedback"
+  "unlockToDeleteAccount": "Unlock to delete your account",
+  "@unlockToDeleteAccount": {
+    "description": "Subtitle for authentication before deleting an account"
   },
-  "noDeleteAccountAction": "No, delete account",
-  "@noDeleteAccountAction": {
-    "description": "Button to proceed with account deletion"
+  "whyAreYouLeaving": "Why are you leaving?",
+  "@whyAreYouLeaving": {
+    "description": "Heading asking why the user is deleting their account"
   },
-  "deleteAccountWarning": "This will delete your Ente Auth, Ente Photos and Ente Locker account.",
-  "@deleteAccountWarning": {
-    "description": "Warning message shown before account deletion"
+  "thisHelpsUsImproveEnte": "This helps us improve Ente",
+  "@thisHelpsUsImproveEnte": {
+    "description": "Subtitle under account deletion reason prompt"
   },
-  "initiateAccountDeleteTitle": "Please authenticate to initiate account deletion",
-  "@initiateAccountDeleteTitle": {
-    "description": "Title for authentication dialog before account deletion"
+  "reasonForLeaving": "Reason for leaving",
+  "@reasonForLeaving": {
+    "description": "Label for account deletion reason picker"
   },
-  "confirmAccountDeleteTitle": "Confirm account deletion",
-  "@confirmAccountDeleteTitle": {
-    "description": "Title for account deletion confirmation dialog"
+  "selectReason": "Select reason",
+  "@selectReason": {
+    "description": "Placeholder for account deletion reason picker"
   },
-  "confirmAccountDeleteMessage": "This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
-  "@confirmAccountDeleteMessage": {
-    "description": "Message warning about account deletion consequences"
+  "deleteReasonMissingFeature": "It's missing a key feature I need",
+  "@deleteReasonMissingFeature": {
+    "description": "Account deletion reason option"
+  },
+  "deleteReasonBehaviour": "The app or a feature does not behave as I expect",
+  "@deleteReasonBehaviour": {
+    "description": "Account deletion reason option"
+  },
+  "deleteReasonFoundAnotherService": "I found another service that I like better",
+  "@deleteReasonFoundAnotherService": {
+    "description": "Account deletion reason option"
+  },
+  "deleteReasonNotListed": "My reason isn't listed",
+  "@deleteReasonNotListed": {
+    "description": "Account deletion reason option"
+  },
+  "anythingElse": "Anything else?",
+  "@anythingElse": {
+    "description": "Label for optional account deletion feedback"
+  },
+  "shareYourFeedbackHere": "Share your feedback here",
+  "@shareYourFeedbackHere": {
+    "description": "Placeholder for optional account deletion feedback"
+  },
+  "permanentlyDeleteYourEnteAccount": "Permanently delete your Ente account?",
+  "@permanentlyDeleteYourEnteAccount": {
+    "description": "Heading for final account deletion confirmation"
+  },
+  "oneAccountAcrossEnteApps": "You have one account across Ente Photos, Ente Auth, and Ente Locker.",
+  "@oneAccountAcrossEnteApps": {
+    "description": "Explains that account deletion affects all Ente apps"
+  },
+  "photosAndVideosCount": "{count, plural, one {{count} photo & video} other {{count} photos & videos}}",
+  "@photosAndVideosCount": {
+    "description": "Delete impact row for Photos data",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "authenticatorCodesCount": "{count, plural, one {{count} authenticator code} other {{count} authenticator codes}}",
+  "@authenticatorCodesCount": {
+    "description": "Delete impact row for Auth data",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lockerRecordsCount": "{count, plural, one {{count} record} other {{count} records}}",
+  "@lockerRecordsCount": {
+    "description": "Delete impact row for Locker data",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entePhotos": "Ente Photos",
+  "@entePhotos": {
+    "description": "Product name"
+  },
+  "enteAuth": "Ente Auth",
+  "@enteAuth": {
+    "description": "Product name"
+  },
+  "enteLocker": "Ente Locker",
+  "@enteLocker": {
+    "description": "Product name"
+  },
+  "confirmDeleteAccountAcrossApps": "I understand this deletes my data across Ente Photos, Ente Auth, and Ente Locker.",
+  "@confirmDeleteAccountAcrossApps": {
+    "description": "Checkbox label for final account deletion confirmation"
+  },
+  "deleteEnteAccount": "Delete Ente account",
+  "@deleteEnteAccount": {
+    "description": "Final destructive button label for account deletion"
   },
   "delete": "Delete",
   "@delete": {
@@ -769,10 +844,6 @@
   "noRecoveryKey": "No recovery key",
   "@noRecoveryKey": {
     "description": "Error message when no recovery key is found"
-  },
-  "yourAccountHasBeenDeleted": "Your account has been deleted",
-  "@yourAccountHasBeenDeleted": {
-    "description": "Confirmation message when account has been deleted"
   },
   "verificationId": "Verification ID",
   "@verificationId": {

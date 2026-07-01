@@ -4,6 +4,7 @@ import "dart:io";
 
 import 'package:backup_exclusion/backup_exclusion.dart';
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:ente_account_deletion/account_deletion.dart';
 import 'package:ente_contacts/contacts.dart';
 import "package:ente_crypto/ente_crypto.dart";
 import 'package:ente_lock_screen/lock_screen_host.dart';
@@ -50,7 +51,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import "package:tuple/tuple.dart";
 import 'package:uuid/uuid.dart';
 
-class Configuration implements LockScreenHost {
+class Configuration implements LockScreenHost, AccountDeletionHost {
   Configuration._privateConstructor();
 
   static final Configuration instance = Configuration._privateConstructor();
@@ -566,6 +567,16 @@ class Configuration implements LockScreenHost {
     } else {
       return KeyAttributes.fromJson(jsonValue);
     }
+  }
+
+  @override
+  String decryptDeleteChallenge(String encryptedChallenge) {
+    final challenge = CryptoUtil.openSealSync(
+      CryptoUtil.base642bin(encryptedChallenge),
+      CryptoUtil.base642bin(getKeyAttributes()!.publicKey),
+      getSecretKey()!,
+    );
+    return utf8.decode(challenge);
   }
 
   Future<void> setKey(String? key) async {

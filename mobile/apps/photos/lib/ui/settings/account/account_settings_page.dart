@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_account_deletion/account_deletion.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:flutter/material.dart";
@@ -8,7 +9,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/ui/account/change_email_dialog.dart";
-import "package:photos/ui/account/delete_account_page.dart";
 import "package:photos/ui/account/password_entry_page.dart";
 import "package:photos/ui/account/recovery_key_page.dart";
 import "package:photos/ui/payment/subscription.dart";
@@ -187,16 +187,17 @@ class AccountSettingsPage extends StatelessWidget {
           context,
           AppLocalizations.of(context).authToInitiateAccountDeletion,
         );
-    if (hasAuthenticated) {
-      unawaited(
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const DeleteAccountPage();
-            },
-          ),
-        ),
-      );
+    if (!context.mounted || !hasAuthenticated) {
+      return;
     }
+    unawaited(
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return const DeleteAccountPage();
+          },
+        ),
+      ),
+    );
   }
 }

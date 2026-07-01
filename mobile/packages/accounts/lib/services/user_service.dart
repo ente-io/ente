@@ -5,7 +5,6 @@ import "dart:math";
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
-import 'package:ente_accounts/models/delete_account.dart';
 import 'package:ente_accounts/models/errors.dart';
 import 'package:ente_accounts/models/sessions.dart';
 import 'package:ente_accounts/models/set_keys_request.dart';
@@ -307,46 +306,6 @@ class UserService {
       unawaited(
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
       );
-    }
-  }
-
-  Future<DeleteChallengeResponse?> getDeleteChallenge(
-    BuildContext context,
-  ) async {
-    try {
-      final response = await _enteDio.get("/users/delete-challenge");
-      if (response.statusCode == 200) {
-        return DeleteChallengeResponse(
-          encryptedChallenge: response.data["encryptedChallenge"],
-        );
-      } else {
-        throw Exception("delete action failed");
-      }
-    } catch (e) {
-      _logger.severe(e);
-      await showGenericErrorDialog(context: context, error: e);
-      return null;
-    }
-  }
-
-  Future<void> deleteAccount(
-    BuildContext context,
-    String challengeResponse,
-  ) async {
-    try {
-      final response = await _enteDio.delete(
-        "/users/delete",
-        data: {"challenge": challengeResponse},
-      );
-      if (response.statusCode == 200) {
-        // clear data
-        await _config.logout();
-      } else {
-        throw Exception("delete action failed");
-      }
-    } catch (e) {
-      _logger.severe(e);
-      rethrow;
     }
   }
 

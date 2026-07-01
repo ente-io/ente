@@ -17,7 +17,6 @@ import "package:photos/events/account_configured_event.dart";
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import 'package:photos/gateways/users/models/delete_account.dart';
 import 'package:photos/gateways/users/models/key_attributes.dart';
 import 'package:photos/gateways/users/models/key_gen_result.dart';
 import 'package:photos/gateways/users/models/sessions.dart';
@@ -313,38 +312,6 @@ class UserService {
         const Duration(milliseconds: 150),
         () => showGenericErrorBottomSheet(context: context, error: null),
       );
-    }
-  }
-
-  Future<DeleteChallengeResponse?> getDeleteChallenge(
-    BuildContext context,
-  ) async {
-    try {
-      return await _gateway.getDeleteChallenge();
-    } catch (e) {
-      _logger.warning(e);
-      await showGenericErrorBottomSheet(context: context, error: e);
-      return null;
-    }
-  }
-
-  Future<void> deleteAccount(
-    BuildContext context,
-    String challengeResponse, {
-    required String reasonCategory,
-    required String feedback,
-  }) async {
-    try {
-      await _gateway.deleteAccount(
-        challengeResponse: challengeResponse,
-        reasonCategory: reasonCategory,
-        feedback: feedback,
-      );
-      // clear data
-      await Configuration.instance.logout();
-    } catch (e) {
-      _logger.warning(e);
-      rethrow;
     }
   }
 

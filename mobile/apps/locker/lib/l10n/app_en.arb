@@ -379,6 +379,7 @@
   "authToChangeYourEmail": "Please authenticate to change your email",
   "changePasswordTitle": "Change password",
   "authToChangeYourPassword": "Please authenticate to change your password",
+  "authToInitiateAccountDeletion": "Unlock to delete your account",
   "recoveryKey": "Recovery key",
   "ok": "Ok",
   "logout": "Logout",
