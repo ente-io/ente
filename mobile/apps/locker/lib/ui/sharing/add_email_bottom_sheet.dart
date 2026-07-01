@@ -6,7 +6,6 @@ import "package:ente_sharing/extensions/user_extension.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
-import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
@@ -27,12 +26,10 @@ Future<void> showAddEmailSheet(
   required Collection collection,
   required VoidCallback onShareAdded,
 }) {
-  return showBaseBottomSheet<void>(
-    context,
-    title: context.l10n.addNewEmail,
-    headerSpacing: 20,
-    isKeyboardAware: true,
-    child: AddEmailSheet(collection: collection, onShareAdded: onShareAdded),
+  return showBottomSheetComponent<void>(
+    context: context,
+    builder: (_) =>
+        AddEmailSheet(collection: collection, onShareAdded: onShareAdded),
   );
 }
 
@@ -83,18 +80,19 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: ContactsDisplayService.instance.changes,
-      builder: (context, _, _) {
-        final colorScheme = getEnteColorScheme(context);
-        final textTheme = getEnteTextTheme(context);
-
-        return SingleChildScrollView(
-          child: Column(
+    return BottomSheetComponent(
+      title: context.l10n.addNewEmail,
+      isKeyboardAware: true,
+      content: ValueListenableBuilder<int>(
+        valueListenable: ContactsDisplayService.instance.changes,
+        builder: (context, _, _) {
+          final colorScheme = getEnteColorScheme(context);
+          final textTheme = getEnteTextTheme(context);
+          return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildEmailInputField(colorScheme, textTheme),
+              _buildEmailInputField(),
               if (_suggestedUsers.isNotEmpty) ...[
                 const SizedBox(height: 20),
                 _buildExistingContactsSection(colorScheme, textTheme),
@@ -103,61 +101,27 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
                 const SizedBox(height: 12),
                 _buildScheduleDateTimeRow(colorScheme, textTheme),
               ],
-              const SizedBox(height: 20),
-              _buildShareButton(),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
+      actions: [_buildShareButton()],
     );
   }
 
-  Widget _buildEmailInputField(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.fillFaint,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _textController,
-              focusNode: _textFieldFocusNode,
-              autofillHints: const [AutofillHints.email],
-              decoration: InputDecoration(
-                hintText: context.l10n.enterNameOrEmailToShareWith,
-                hintStyle: textTheme.body.copyWith(
-                  color: colorScheme.textMuted,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                border: InputBorder.none,
-                isDense: true,
-              ),
-              onChanged: (value) {
-                _email = value.trim();
-                _emailIsValid = _isValidEmail(_email);
-                setState(() {});
-              },
-              autocorrect: false,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.done,
-            ),
-          ),
-          // TODO: Re-enable role selection when collaborator role is available
-          // Padding(
-          //   padding: const EdgeInsets.only(right: 8),
-          //   child: _buildRoleDropdown(colorScheme, textTheme),
-          // ),
-        ],
-      ),
+  Widget _buildEmailInputField() {
+    return TextInputComponent(
+      controller: _textController,
+      focusNode: _textFieldFocusNode,
+      hintText: context.l10n.enterNameOrEmailToShareWith,
+      keyboardType: TextInputType.emailAddress,
+      autofillHints: const [AutofillHints.email],
+      autocorrect: false,
+      onChanged: (value) {
+        _email = value.trim();
+        _emailIsValid = _isValidEmail(_email);
+        setState(() {});
+      },
     );
   }
 
