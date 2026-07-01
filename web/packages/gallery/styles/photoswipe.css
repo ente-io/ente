@@ -1,3 +1,5 @@
+@import "photoswipe/dist/photoswipe.css";
+
 .pswp-ente {
     /* The default z-index for PhotoSwipe is 10k, way beyond everything else.
       Give it a more moderate value so that MUI elements can be used with it. */
