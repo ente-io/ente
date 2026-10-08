@@ -27,7 +27,7 @@ import {
     type CollectionOp,
     type FileOp,
 } from "@/components/SelectedFileOptions";
-import { Upload } from "@/components/Upload";
+import { Upload, type UploadHandle } from "@/components/Upload";
 import { WhatsNew } from "@/components/WhatsNew";
 import {
     GalleryEmptyState,
@@ -175,7 +175,6 @@ import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 
 const Page: React.FC = () => {
@@ -210,9 +209,7 @@ const Page: React.FC = () => {
     });
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
-    const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
-        [],
-    );
+    const uploadRef = useRef<UploadHandle>(null);
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
     const [slideshow, setSlideshow] = useState<{
         files: EnteFile[];
@@ -1900,7 +1897,7 @@ const Page: React.FC = () => {
                 watchFolderView ? t("watch_folder_dropzone_hint") : undefined
             }
             disabled={shouldDisableDropzone || !!slideshow}
-            onDrop={setDragAndDropFiles}
+            onDrop={(files) => uploadRef.current?.handleDrop(files)}
         >
             {blockingLoad && <TranslucentLoadingOverlay />}
             {!sidebarVisibilityProps.open && subscriptionDialogs}
@@ -2042,12 +2039,8 @@ const Page: React.FC = () => {
             />
 
             <Upload
-                {...{
-                    user,
-                    dragAndDropFiles,
-                    uploadTypeSelectorIntent,
-                    uploadTypeSelectorView,
-                }}
+                ref={uploadRef}
+                {...{ user, uploadTypeSelectorIntent, uploadTypeSelectorView }}
                 isFirstUpload={haveOnlySystemCollections(
                     normalCollectionSummaries,
                 )}
