@@ -125,7 +125,12 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
   Future<void> _openDocument() async {
     try {
       _document = await widget.openPdf(widget.localFile.path);
-      if (_document!.pagesCount < 1) throw StateError('PDF has no pages');
+      if (_document!.pagesCount < 1) {
+        final document = _document!;
+        _document = null;
+        await document.close();
+        throw StateError('PDF has no pages');
+      }
       if (mounted) setState(() => _loading = false);
     } catch (error, stack) {
       _logger.warning('Failed to open PDF document', error, stack);
