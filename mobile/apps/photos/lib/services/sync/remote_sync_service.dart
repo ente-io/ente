@@ -14,6 +14,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/diff_sync_complete_event.dart';
+import "package:photos/events/file_public_metadata_updated_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -307,6 +308,7 @@ class RemoteSyncService {
     }
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
+      Bus.instance.fire(FilePublicMetadataUpdatedEvent(diff.updatedFiles));
       _logger.info(
         "[Collection-$collectionID] Updated ${diff.updatedFiles.length} files"
         " from remote",

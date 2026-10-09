@@ -8,6 +8,8 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/events/file_caption_updated_event.dart";
+import "package:photos/events/file_public_metadata_updated_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -130,6 +132,15 @@ class FileMagicService {
           ..pubMmdVersion = update.nextVersion;
       }
       await _filesDB.insertMultiple(files);
+      Bus.instance.fire(FilePublicMetadataUpdatedEvent(files));
+      for (final file in files) {
+        final metadata =
+            metadataUpdateMap?[file.uploadedFileID] ?? newMetadataUpdate;
+        if (metadata?.containsKey(captionKey) == true &&
+            file.generatedID != null) {
+          Bus.instance.fire(FileCaptionUpdatedEvent(file.generatedID!));
+        }
+      }
       RemoteSyncService.instance.sync(silently: true).ignore();
     } on DioException catch (e) {
       if (e.response != null && e.response!.statusCode == 409) {

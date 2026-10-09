@@ -9,10 +9,13 @@ import "package:media_extension/media_extension_action_types.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_uploaded_event.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file_type.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/module/share/picker_result_uri.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/common/touch_cross_detector.dart";
@@ -20,6 +23,8 @@ import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/component/gallery_file_indicators.dart";
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -117,6 +122,29 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
       selectionColor = getUserAvatarColor(context, owner);
     }
     final String heroTag = widget.tag + widget.file.tag;
+    final galleryContext = GalleryContextState.of(context);
+    final useGroupedIndicators =
+        !isLocalGalleryMode &&
+        !widget.limitSelectionToOne &&
+        !widget.file.isTrash &&
+        (widget.file.fileType == FileType.image ||
+            widget.file.fileType == FileType.livePhoto) &&
+        galleryContext?.type != GroupType.size &&
+        widget.file.debugCaption == null &&
+        !localSettings.showLocalIDOverThumbnails &&
+        const {
+          GalleryType.homepage,
+          GalleryType.archive,
+          GalleryType.uncategorized,
+          GalleryType.hiddenSection,
+          GalleryType.hiddenOwnedCollection,
+          GalleryType.favorite,
+          GalleryType.localFolder,
+          GalleryType.sharedCollection,
+          GalleryType.ownedCollection,
+          GalleryType.searchResults,
+        }.contains(galleryContext?.galleryType) &&
+        flagService.internalUser;
     final effectiveThumbnailSize =
         widget.thumbnailSize ??
         (widget.photoGridSize < photoGridSizeDefault
@@ -126,7 +154,9 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
       widget.file,
       diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
       serverLoadDeferDuration: galleryThumbnailServerLoadDeferDuration,
-      shouldShowLivePhotoOverlay: true,
+      shouldShowLivePhotoOverlay: !useGroupedIndicators,
+      shouldShowFavoriteIcon: !useGroupedIndicators,
+      shouldShowSyncStatus: !useGroupedIndicators,
       // Recreate the loader when the effective tier changes, such as when
       // switching between Grid and Justified layouts.
       key: ValueKey((heroTag, effectiveThumbnailSize)),
@@ -151,68 +181,57 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
             ? _onLongPressWithSelectionLimit(context, widget.file)
             : _onLongPressNoSelectionLimit(context, widget.file);
       },
-      child: _isFileSelected
-          ? Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ClipRRect(
-                  key: ValueKey(heroTag),
-                  borderRadius: borderRadius,
-                  child: Hero(
-                    tag: heroTag,
-                    flightShuttleBuilder:
-                        (
-                          flightContext,
-                          animation,
-                          flightDirection,
-                          fromHeroContext,
-                          toHeroContext,
-                        ) => (toHeroContext.widget as Hero).child,
-                    transitionOnUserGestures: true,
-                    child: ClipRRect(
-                      borderRadius: borderRadius,
-                      child: thumbnailWidget,
-                    ),
-                  ),
-                ),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(102, 0, 0, 0),
-                    borderRadius: borderRadius,
-                  ),
-                ),
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: SelectAllStatusIcon(
-                    isSelected: true,
-                    size: 16,
-                    selectedFillColor: selectionColor,
-                    selectedTickCutsOut: true,
-                  ),
-                ),
-              ],
-            )
-          : ClipRRect(
-              key: ValueKey(heroTag),
-              borderRadius: borderRadius,
-              child: Hero(
-                tag: heroTag,
-                flightShuttleBuilder:
-                    (
-                      flightContext,
-                      animation,
-                      flightDirection,
-                      fromHeroContext,
-                      toHeroContext,
-                    ) => (toHeroContext.widget as Hero).child,
-                transitionOnUserGestures: true,
-                child: ClipRRect(
-                  borderRadius: borderRadius,
-                  child: thumbnailWidget,
-                ),
+      child: Stack(
+        fit: StackFit.expand,
+        clipBehavior: Clip.none,
+        children: [
+          ClipRRect(
+            key: ValueKey(heroTag),
+            borderRadius: borderRadius,
+            child: Hero(
+              tag: heroTag,
+              flightShuttleBuilder:
+                  (
+                    flightContext,
+                    animation,
+                    flightDirection,
+                    fromHeroContext,
+                    toHeroContext,
+                  ) => (toHeroContext.widget as Hero).child,
+              transitionOnUserGestures: true,
+              child: ClipRRect(
+                borderRadius: borderRadius,
+                child: thumbnailWidget,
               ),
             ),
+          ),
+          if (useGroupedIndicators)
+            IgnorePointer(
+              child: GalleryFileIndicators(
+                file: widget.file,
+                photoGridSize: widget.photoGridSize,
+              ),
+            ),
+          if (_isFileSelected)
+            Container(
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(102, 0, 0, 0),
+                borderRadius: borderRadius,
+              ),
+            ),
+          if (_isFileSelected)
+            Positioned(
+              right: 4,
+              top: 4,
+              child: SelectAllStatusIcon(
+                isSelected: true,
+                size: 16,
+                selectedFillColor: selectionColor,
+                selectedTickCutsOut: true,
+              ),
+            ),
+        ],
+      ),
     );
   }
 

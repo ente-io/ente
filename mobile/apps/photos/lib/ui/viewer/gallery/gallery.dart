@@ -11,6 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/event.dart';
+import "package:photos/events/file_public_metadata_updated_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/gallery_layout_changed_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
@@ -159,6 +160,9 @@ class GalleryState extends State<Gallery> {
   bool _allFilesLoaded = false;
   bool _completedJumpToDate = false;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
+  StreamSubscription<FilePublicMetadataUpdatedEvent>?
+  _publicMetadataSubscription;
+  final _metadataDuringLoad = <int, FilePublicMetadataUpdate>{};
   StreamSubscription<GalleryLayoutChangedEvent>? _layoutChangeSubscription;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
@@ -193,6 +197,19 @@ class GalleryState extends State<Gallery> {
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}_x";
     _logger = Logger(_logTag);
     _logger.info("init Gallery");
+    _publicMetadataSubscription = Bus.instance
+        .on<FilePublicMetadataUpdatedEvent>()
+        .listen((event) {
+          _applyPublicMetadata(_allGalleryFiles, event.updates);
+          if (_activeFileLoads > 0) {
+            for (final update in event.updates.values) {
+              final pending = _metadataDuringLoad[update.uploadedFileID];
+              if (pending == null || pending.version < update.version) {
+                _metadataDuringLoad[update.uploadedFileID] = update;
+              }
+            }
+          }
+        });
 
     if (widget.limitSelectionToOne) {
       assert(widget.showSelectAll == false);
@@ -608,9 +625,39 @@ class GalleryState extends State<Gallery> {
   }
 
   bool _onFilesLoaded(List<EnteFile> files) {
+    if (_allGalleryFiles.isNotEmpty &&
+        files.isNotEmpty &&
+        !identical(files, _allGalleryFiles)) {
+      final previousFiles = <int, EnteFile>{};
+      for (final file in _allGalleryFiles) {
+        final id = file.uploadedFileID;
+        if (id != null &&
+            file.pubMmdVersion > 0 &&
+            (previousFiles[id]?.pubMmdVersion ?? 0) < file.pubMmdVersion) {
+          previousFiles[id] = file;
+        }
+      }
+      for (final file in files) {
+        final previous = previousFiles[file.uploadedFileID];
+        if (previous != null && previous.pubMmdVersion > file.pubMmdVersion) {
+          file
+            ..pubMmdEncodedJson = previous.pubMmdEncodedJson
+            ..pubMmdVersion = previous.pubMmdVersion;
+        }
+      }
+    }
     _allGalleryFiles = files;
     _hasLoadedFiles = true;
     return false;
+  }
+
+  void _applyPublicMetadata(
+    List<EnteFile> files,
+    Map<int, FilePublicMetadataUpdate> updates,
+  ) {
+    for (final file in files) {
+      updates[file.uploadedFileID]?.applyTo(file);
+    }
   }
 
   Future<bool> _tryAddNewLocalFiles(LocalPhotosAddedEvent event) async {
@@ -701,6 +748,7 @@ class GalleryState extends State<Gallery> {
         limit: limit,
         asc: _sortOrderAsc,
       );
+      _applyPublicMetadata(result.files, _metadataDuringLoad);
       final endTime = DateTime.now().microsecondsSinceEpoch;
       final duration = Duration(microseconds: endTime - startTime);
       _logger.info(
@@ -734,6 +782,7 @@ class GalleryState extends State<Gallery> {
       rethrow;
     } finally {
       _activeFileLoads--;
+      if (_activeFileLoads == 0) _metadataDuringLoad.clear();
     }
   }
 
@@ -742,6 +791,7 @@ class GalleryState extends State<Gallery> {
     _boundariesProvider?.setScrollController(null);
 
     _reloadEventSubscription?.cancel();
+    _publicMetadataSubscription?.cancel();
     _layoutChangeSubscription?.cancel();
     _tabDoubleTapEvent?.cancel();
     for (final subscription in _forceReloadEventSubscriptions) {
