@@ -127,6 +127,7 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
                 );
             paint();
             field.style.opacity = "1";
+            field.dataset.ready = "true";
         };
         const observer = new ResizeObserver(resize);
         observer.observe(field);
@@ -236,9 +237,20 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
                 position: "relative",
                 userSelect: "none",
                 width: "100%",
+                "&[data-ready] > li > button": {
+                    animation:
+                        "spaceFriendCircleEnter 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--space-friend-enter-delay) both",
+                },
+                "@keyframes spaceFriendCircleEnter": {
+                    from: { transform: "scale(0)" },
+                    to: { transform: "scale(1)" },
+                },
+                "@media (prefers-reduced-motion: reduce)": {
+                    "&[data-ready] > li > button": { animation: "none" },
+                },
             }}
         >
-            {items.map((item) => (
+            {items.map((item, index) => (
                 <Box
                     component="li"
                     key={item.id}
@@ -253,6 +265,7 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
                     onLostPointerCapture={endDrag}
                     onContextMenu={(event) => event.preventDefault()}
                     sx={{
+                        "--space-friend-enter-delay": `${(index * 137) % 480}ms`,
                         borderRadius: "50%",
                         cursor: heldFriendID == item.id ? "grabbing" : "grab",
                         left: 0,

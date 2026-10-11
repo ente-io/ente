@@ -2905,12 +2905,14 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                                         display: "flex",
                                         flexDirection: "column",
                                         gap: "22px",
-                                        inset: 0,
                                         justifyContent: "center",
                                         pointerEvents: "none",
                                         position: "absolute",
                                         px: 3,
                                         textAlign: "center",
+                                        top: "calc(var(--space-viewport-height, 100svh) / 2)",
+                                        transform: "translateY(-50%)",
+                                        width: "100%",
                                     }}
                                 >
                                     <Box
