@@ -97,29 +97,27 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
             ? context.strings.peopleWidgetDesc
             : context.strings.addPeopleWidgetPrompt,
         slivers: <Widget>[
-          if (!hasInstalledAny) ...[
+          if (!hasInstalledAny)
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.5 - 200,
-                    ),
-                    Image.asset("assets/people-widget-static.png", height: 160),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  Stack(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: MediaQuery.sizeOf(context).height * 0.5 - 200,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: MLProgressBanner(),
+                      ),
+                    ],
+                  ),
+                  Image.asset("assets/people-widget-static.png", height: 160),
+                ],
               ),
-            ),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
-                child: MLProgressBanner(),
-              ),
-            ),
-          ] else ...[
+            )
+          else ...[
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
