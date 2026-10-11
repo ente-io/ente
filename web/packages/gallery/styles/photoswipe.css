@@ -259,6 +259,8 @@
 
 .pswp-ente .pswp__img {
     cursor: auto;
+    background-image: repeating-conic-gradient(#262626 0% 25%, #181818 0% 50%);
+    background-size: 24px 24px;
 }
 
 .pswp-ente video[controls] {
