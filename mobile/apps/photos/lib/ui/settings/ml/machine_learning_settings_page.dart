@@ -39,6 +39,7 @@ class _MachineLearningSettingsPageState
   int _titleTapCount = 0;
   Timer? _advancedOptionsTimer;
   bool _hasAcknowledgedMLConsent = false;
+  bool _isEnabling = false;
   bool _mlDecryptionRecordsReady = false;
 
   @override
@@ -141,45 +142,51 @@ class _MachineLearningSettingsPageState
   }
 
   Widget _buildDisabledMLScreen(BuildContext context) {
-    return SettingsPageScaffold(
-      title: context.strings.machineLearning,
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ButtonComponent(
-                label: context.strings.mlConsent,
-                isDisabled: !_hasAcknowledgedMLConsent,
-                onTap: _enableAndOpenSearch,
-              ),
-              const SizedBox(height: Spacing.md),
-              MLConsentCancelLink(onTap: _declineAndClose),
-            ],
+    return PopScope(
+      canPop: !_isEnabling,
+      child: SettingsPageScaffold(
+        title: context.strings.machineLearning,
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ButtonComponent(
+                  label: context.strings.mlConsent,
+                  isDisabled: !_hasAcknowledgedMLConsent,
+                  onTap: _enableAndOpenSearch,
+                ),
+                const SizedBox(height: Spacing.md),
+                MLConsentCancelLink(
+                  onTap: _isEnabling ? null : _declineAndClose,
+                ),
+              ],
+            ),
           ),
         ),
+        children: [
+          const MLConsentDescription(),
+          const SizedBox(height: 20),
+          Center(
+            child: Image.asset(
+              "assets/ducky_ml.png",
+              height: 150,
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: 20),
+          MLConsentAcknowledgement(
+            selected: _hasAcknowledgedMLConsent,
+            onChanged: () {
+              if (_isEnabling) return;
+              setState(() {
+                _hasAcknowledgedMLConsent = !_hasAcknowledgedMLConsent;
+              });
+            },
+          ),
+        ],
       ),
-      children: [
-        const MLConsentDescription(),
-        const SizedBox(height: 20),
-        Center(
-          child: Image.asset(
-            "assets/ducky_ml.png",
-            height: 150,
-            fit: BoxFit.contain,
-          ),
-        ),
-        const SizedBox(height: 20),
-        MLConsentAcknowledgement(
-          selected: _hasAcknowledgedMLConsent,
-          onChanged: () {
-            setState(() {
-              _hasAcknowledgedMLConsent = !_hasAcknowledgedMLConsent;
-            });
-          },
-        ),
-      ],
     );
   }
 
@@ -208,7 +215,15 @@ class _MachineLearningSettingsPageState
   }
 
   Future<void> _enableAndOpenSearch() async {
-    await enableMLConsent();
+    setState(() => _isEnabling = true);
+    try {
+      await enableMLConsent();
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isEnabling = false);
+      }
+      rethrow;
+    }
     if (!mounted) return;
     Navigator.of(
       context,
