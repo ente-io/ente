@@ -62,7 +62,10 @@ if curl -fsSL "$policy_url" -o "$policy" &&
   # Give polkit time to pick up the new action via inotify
   sleep 1
 
-  pkaction --action-id com.ente.auth.unlock --verbose
+  pkaction --action-id com.ente.auth.unlock --verbose || {
+    echo "Could not verify Ente Auth's Polkit action. Check the errors above." >&2
+    echo "If installation succeeded, wait briefly and rerun the pkaction command." >&2
+  }
 else
   echo "Policy download or checksum verification failed. Not installing."
 fi
