@@ -10,6 +10,7 @@ import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/settings/local_settings.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/banners/ml_progress_banner.dart";
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 
 class PeopleWidgetSettings extends StatefulWidget {
@@ -96,7 +97,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
             ? context.strings.peopleWidgetDesc
             : context.strings.addPeopleWidgetPrompt,
         slivers: <Widget>[
-          if (!hasInstalledAny)
+          if (!hasInstalledAny) ...[
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -111,8 +112,20 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                   ],
                 ),
               ),
-            )
-          else ...[
+            ),
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
+                child: MLProgressBanner(),
+              ),
+            ),
+          ] else ...[
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: MLProgressBanner(),
+              ),
+            ),
             if (kDebugMode)
               SliverToBoxAdapter(
                 child: Padding(
