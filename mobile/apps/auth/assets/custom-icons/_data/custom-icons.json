@@ -1869,6 +1869,10 @@
       "hex": "FFFFFF"
     },
     {
+      "title": "OpenSRS",
+      "slug": "opensrs"
+    },
+    {
       "title": "Opera",
       "slug": "opera",
       "altNames": [
