@@ -152,27 +152,30 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         if (widget.isResetPasswordScreen)
           Center(child: _buildResendCodeButton())
         else
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: Spacing.lg,
-            children: [
-              TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: colors.textLighter,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  textStyle: TextStyles.bodyLink,
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: Spacing.lg,
+              children: [
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: colors.textLighter,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: TextStyles.bodyLink,
+                  ),
+                  onPressed: _isSubmitting || _isResendingCode
+                      ? null
+                      : () {
+                          Navigator.of(context).pop();
+                          widget.onChangeEmail?.call();
+                        },
+                  child: Text(context.strings.changeEmail),
                 ),
-                onPressed: _isSubmitting || _isResendingCode
-                    ? null
-                    : () {
-                        Navigator.of(context).pop();
-                        widget.onChangeEmail?.call();
-                      },
-                child: Text(context.strings.changeEmail),
-              ),
-              _buildResendCodeButton(),
-            ],
+                _buildResendCodeButton(),
+              ],
+            ),
           ),
       ],
     );
