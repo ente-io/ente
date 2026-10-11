@@ -52,12 +52,10 @@ export const SpacePostGrid = <Item extends PostGridItem>({
                       (item.width && item.height
                           ? item.width / item.height
                           : 1);
-                  const aspectRatio = fullWidth
-                      ? Math.max(
-                            minimumPostPhotoFrameAspectRatio,
-                            photoAspectRatio,
-                        )
-                      : photoAspectRatio;
+                  const aspectRatio = Math.max(
+                      minimumPostPhotoFrameAspectRatio,
+                      photoAspectRatio,
+                  );
                   const height = columnWidth / aspectRatio;
                   columnHeights[column] = top + height + gap;
                   return (

@@ -12,13 +12,45 @@ import type { FriendProfile } from "data/friends";
 import log from "ente-base/log";
 import React, { useState } from "react";
 import type { SpaceFriendRequest } from "services/space";
-import { spaceAppBackground, spaceSurface, spaceText } from "styles/colors";
+import { spaceEmptyStateButtonSx } from "styles/buttons";
+import {
+    spaceAppBackground,
+    spaceSurface,
+    spaceText,
+    spaceTextMuted,
+} from "styles/colors";
 import { spaceTouchTargetSize } from "styles/touch-targets";
 
 const green = "#08C225";
 const avatarSkeletonBackground = spaceSurface;
 const textBase = spaceText;
 const friendAvatarLoadRootMargin = "800px 0px";
+
+const orbitGlassSx = {
+    isolation: "isolate",
+    overflow: "hidden",
+    position: "relative",
+    "&::after": {
+        content: '""',
+        borderRadius: "inherit",
+        inset: 0,
+        pointerEvents: "none",
+        position: "absolute",
+        zIndex: 1,
+        opacity: 0.9,
+        background:
+            "linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75) 4%, transparent 24%, transparent 76%, rgba(230, 240, 255, 0.55) 96%, rgba(230, 240, 255, 0.75))",
+        mask: "radial-gradient(farthest-side, transparent 94%, #000 98%)",
+        animation: "spaceFriendGlassShimmer 12s ease-in-out infinite alternate",
+    },
+    "@keyframes spaceFriendGlassShimmer": {
+        from: { transform: "rotate(-5deg)", opacity: 0.85 },
+        to: { transform: "rotate(5deg)", opacity: 1 },
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+        "&::after": { animation: "none" },
+    },
+} as const;
 
 const friendAvatarCacheKey = (friend: FriendProfile) =>
     [
@@ -127,6 +159,7 @@ const FriendIdentity: React.FC<FriendIdentityProps> = ({
             <Box
                 ref={avatarRef}
                 sx={{
+                    ...orbitGlassSx,
                     alignItems: "center",
                     bgcolor: avatarSkeletonBackground,
                     border: "1px solid #454545",
@@ -136,7 +169,6 @@ const FriendIdentity: React.FC<FriendIdentityProps> = ({
                     height: "auto",
                     aspectRatio: "1",
                     justifyContent: "center",
-                    overflow: "hidden",
                     width: "100%",
                     boxShadow: "0 8px 28px rgba(0, 0, 0, 0.2)",
                 }}
@@ -160,6 +192,7 @@ const FriendIdentity: React.FC<FriendIdentityProps> = ({
 };
 
 const orbitCircleSx = {
+    ...orbitGlassSx,
     alignItems: "center",
     bgcolor: spaceSurface,
     border: "1px solid #454545",
@@ -392,7 +425,6 @@ export const FriendsScreen: React.FC<FriendsScreenProps> = ({
                             justifySelf: "flex-end",
                             p: 0,
                             width: spaceTouchTargetSize,
-                            "&:disabled": { opacity: 0.45 },
                             "&:focus-visible": {
                                 outline: `2px solid ${green}`,
                                 outlineOffset: 2,
@@ -435,7 +467,7 @@ export const FriendsScreen: React.FC<FriendsScreenProps> = ({
                         >
                             <SpaceLoadingSpinner ariaLabel="Loading friends" />
                         </Box>
-                    ) : (
+                    ) : friends.length > 0 || friendRequests.length > 0 ? (
                         <FriendOrbit
                             items={[
                                 ...friends.map((friend) => ({
@@ -469,6 +501,49 @@ export const FriendsScreen: React.FC<FriendsScreenProps> = ({
                                 })),
                             ]}
                         />
+                    ) : (
+                        <Box
+                            sx={{
+                                alignItems: "center",
+                                color: spaceTextMuted,
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "22px",
+                                justifyContent: "center",
+                                fontFamily:
+                                    '"Inter Variable", Inter, sans-serif',
+                                fontSize: 14,
+                                fontWeight: 500,
+                                lineHeight: "20px",
+                                pointerEvents: "none",
+                                position: "absolute",
+                                px: "24px",
+                                textAlign: "center",
+                                top: "calc(var(--space-viewport-height, 100svh) / 2)",
+                                transform: "translateY(-50%)",
+                                width: "100%",
+                            }}
+                        >
+                            <Box component="p" sx={{ m: 0, maxWidth: 260 }}>
+                                Invite your friends and family. Share everyday
+                                photos and keep up with each other.
+                            </Box>
+                            <Box
+                                className="green-bg"
+                                component="button"
+                                type="button"
+                                aria-haspopup="dialog"
+                                onClick={() => setIsAddFriendOpen(true)}
+                                sx={spaceEmptyStateButtonSx}
+                            >
+                                <HugeiconsIcon
+                                    icon={UserAdd02Icon}
+                                    size={18}
+                                    strokeWidth={1.8}
+                                />
+                                Add friends
+                            </Box>
+                        </Box>
                     )}
                 </Box>
             </Box>

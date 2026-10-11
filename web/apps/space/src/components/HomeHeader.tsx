@@ -130,7 +130,7 @@ export const SpaceHomeHeader: React.FC = () => {
                             aria-hidden
                             className="space-unread-indicator"
                             sx={{
-                                bgcolor: "#F63A3A",
+                                bgcolor: "#FF0000",
                                 border: `2.5px solid ${spaceAppBackgroundColor}`,
                                 borderRadius: "50%",
                                 height: 11.5,

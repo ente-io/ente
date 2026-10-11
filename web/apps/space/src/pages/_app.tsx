@@ -130,10 +130,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 />
                 <meta name="color-scheme" content="dark" />
                 <meta name="theme-color" content={spaceAppBackgroundColor} />
-                <meta name="application-name" content="Ente Space" />
+                <meta name="application-name" content="Space" />
                 <meta name="mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
-                <meta name="apple-mobile-web-app-title" content="Ente Space" />
+                <meta name="apple-mobile-web-app-title" content="Space" />
                 <meta
                     name="apple-mobile-web-app-status-bar-style"
                     content="black"

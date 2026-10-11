@@ -72,7 +72,6 @@ const viewerHeaderAvatarSize = 32;
 const draftPostExitDurationMs = 320;
 const keyboardInsetThresholdPx = 80;
 const keyboardDismissMaxDurationMs = 500;
-const postTransitionDurationMs = 300;
 
 interface ViewerViewportSize {
     x: number;
@@ -158,7 +157,6 @@ interface SpaceFileViewerProps {
     onLoadPhoto?: SpacePostAssetURLLoader;
     isDraftPostPreviewPending?: boolean;
     onClose: () => void;
-    onNavigatePost?: (direction: -1 | 1) => boolean;
     onAddDraftPhoto?: () => void;
     onEditDraftPhoto?: () => void;
     onDeletePost?: () => Promise<void> | void;
@@ -367,7 +365,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     focusReplyOnOpen = false,
     isDraftPostPreviewPending = false,
     onClose,
-    onNavigatePost,
     onAddDraftPhoto,
     onEditDraftPhoto,
     onDeletePost,
@@ -458,12 +455,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     videoLoaderRef.current = onLoadPhoto;
     const viewerPhotosRef = React.useRef(viewerPhotos);
     const onCloseRef = React.useRef(onClose);
-    const onNavigatePostRef = React.useRef(onNavigatePost);
-    const postAnimationsRef = React.useRef<Animation[]>([]);
-    const postSnapshotRef = React.useRef<HTMLElement | undefined>(undefined);
-    const postNavigationRef = React.useRef<
-        { offset: number; direction: -1 | 1 } | undefined
-    >(undefined);
     const onPhotoIndexChangeRef = React.useRef(onPhotoIndexChange);
     const initialPhotoIndexRef = React.useRef(activePhotoIndex);
     const fallbackPhotoRef = React.useRef(activePhoto);
@@ -476,7 +467,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     closeOnSwipePastEndRef.current = closeOnSwipePastEnd;
     viewerPhotosRef.current = viewerPhotos;
     onCloseRef.current = onClose;
-    onNavigatePostRef.current = onNavigatePost;
     onPhotoIndexChangeRef.current = onPhotoIndexChange;
     fallbackPhotoRef.current = activePhoto;
     const viewerPhotosContentKey = viewerPhotos
@@ -614,25 +604,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         };
         stableViewportSizeRef.current = nextSize;
         return nextSize;
-    }, []);
-
-    const animatePostOffset = React.useCallback((from: number, to: number) => {
-        const root = viewerRootRef.current!;
-        const options = {
-            duration: window.matchMedia("(prefers-reduced-motion: reduce)")
-                .matches
-                ? 0
-                : postTransitionDurationMs,
-            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-        };
-        root.style.setProperty("--space-viewer-post-offset", `${to}px`);
-        postAnimationsRef.current = [
-            pswpRef.current!.element!.animate(
-                [{ translate: `0 ${from}px` }, { translate: `0 ${to}px` }],
-                options,
-            ),
-        ];
-        return options;
     }, []);
 
     const requestAddFriendForPostAction = (intent: SpaceInviteIntent) => {
@@ -1077,31 +1048,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         isSyncingPhotosRef.current = false;
     }, [activePhotoIndex, viewerPhotosContentKey]);
 
-    React.useLayoutEffect(() => {
-        const navigation = postNavigationRef.current;
-        const snapshot = postSnapshotRef.current;
-        if (!navigation || !snapshot) return;
-        postNavigationRef.current = undefined;
-        const height = viewerViewportSize().y;
-        const options = animatePostOffset(
-            navigation.direction * height + navigation.offset,
-            0,
-        );
-        const animation = snapshot.animate(
-            [
-                { translate: `0 ${navigation.offset}px` },
-                { translate: `0 ${-navigation.direction * height}px` },
-            ],
-            options,
-        );
-        postAnimationsRef.current.push(animation);
-        animation.onfinish = () => {
-            snapshot.remove();
-            postSnapshotRef.current = undefined;
-            postAnimationsRef.current = [];
-        };
-    }, [activePostKey, animatePostOffset, viewerViewportSize]);
-
     React.useEffect(() => {
         pswpRef.current?.updateSize(true);
     }, [hasDraftPhotoControls]);
@@ -1189,13 +1135,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         let pswp: PhotoSwipe | undefined;
         let swipeStart:
             { x: number; y: number; photoIndex: number } | undefined;
-        let postDragOffset = 0;
-
-        const resetPostDrag = () => {
-            if (!postDragOffset) return;
-            animatePostOffset(postDragOffset, 0);
-            postDragOffset = 0;
-        };
 
         void import("photoswipe").then(({ default: PhotoSwipeClass }) => {
             if (disposed || !viewerRootRef.current) return;
@@ -1310,18 +1249,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 if (!closedByReact) onCloseRef.current();
             });
             pswp.on("verticalDrag", (event) => {
-                if (isDismissBlockedRef.current) {
-                    event.preventDefault();
-                    return;
-                }
-                if (!onNavigatePostRef.current) return;
-                event.preventDefault();
-                if (!swipeStart) return;
-                postDragOffset = pswp!.gestures.p1.y - pswp!.gestures.startP1.y;
-                root.style.setProperty(
-                    "--space-viewer-post-offset",
-                    `${postDragOffset}px`,
-                );
+                if (isDismissBlockedRef.current) event.preventDefault();
             });
             pswp.on("zoomPanUpdate", () => {
                 root.style.setProperty(
@@ -1346,23 +1274,16 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 }
             });
             pswp.on("pointerDown", (event) => {
-                if (
-                    isSwipeBlockedRef.current ||
-                    postAnimationsRef.current.some(
-                        (animation) => animation.playState == "running",
-                    )
-                ) {
+                if (isSwipeBlockedRef.current) {
                     event.preventDefault();
                     return;
                 }
                 if (swipeStart) {
                     swipeStart = undefined;
-                    resetPostDrag();
                     return;
                 }
                 if (
-                    (!closeOnSwipePastEndRef.current &&
-                        !onNavigatePostRef.current) ||
+                    !closeOnSwipePastEndRef.current ||
                     isDismissBlockedRef.current ||
                     viewerSwipeStartsOnInteractiveTarget(
                         event.originalEvent.target,
@@ -1383,45 +1304,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                     isDismissBlockedRef.current ||
                     pswp!.gestures.isMultitouch ||
                     pswp!.currSlide?.isPannable()
-                ) {
-                    resetPostDrag();
+                )
                     return;
-                }
                 const end = viewerTouchPoint(originalEvent);
                 if (!end) return;
                 const dx = end.x - start.x;
                 const dy = end.y - start.y;
                 if (
-                    onNavigatePostRef.current &&
-                    Math.abs(dy) > 72 &&
-                    Math.abs(dy) > Math.abs(dx) * 1.5
-                ) {
-                    const direction = dy < 0 ? 1 : -1;
-                    const snapshot = pswp!.element!.cloneNode(
-                        true,
-                    ) as HTMLElement;
-                    snapshot.setAttribute("aria-hidden", "true");
-                    snapshot.setAttribute(
-                        "data-space-viewer-post-snapshot",
-                        "true",
-                    );
-                    snapshot.inert = true;
-                    snapshot.style.pointerEvents = "none";
-                    snapshot.style.zIndex = "1";
-                    root.append(snapshot);
-                    postSnapshotRef.current = snapshot;
-                    postNavigationRef.current = {
-                        offset: postDragOffset,
-                        direction,
-                    };
-                    if (onNavigatePostRef.current(direction)) {
-                        postDragOffset = 0;
-                        return;
-                    }
-                    snapshot.remove();
-                    postSnapshotRef.current = undefined;
-                    postNavigationRef.current = undefined;
-                } else if (
                     closeOnSwipePastEndRef.current &&
                     Math.abs(dx) > 72 &&
                     Math.abs(dx) > Math.abs(dy) * 1.5 &&
@@ -1432,7 +1321,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 ) {
                     onCloseRef.current();
                 }
-                resetPostDrag();
             });
             pswp.init();
         });
@@ -1442,14 +1330,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             closedByReact = true;
             pswpRef.current = undefined;
             pswp?.destroy();
-            postAnimationsRef.current.forEach((animation) =>
-                animation.cancel(),
-            );
-            postSnapshotRef.current?.remove();
             root.style.removeProperty("--space-viewer-bg-opacity");
-            root.style.removeProperty("--space-viewer-post-offset");
         };
-    }, [animatePostOffset, isDraftPost, viewerViewportSize]);
+    }, [isDraftPost, viewerViewportSize]);
 
     React.useEffect(() => {
         if (typeof document == "undefined") return;
@@ -1527,11 +1410,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 transition: `opacity ${draftPostExitDurationMs}ms cubic-bezier(0.22, 1, 0.36, 1)`,
                 width: "100%",
                 zIndex: 1300,
-                "& > .pswp:not([data-space-viewer-post-snapshot])": {
-                    translate: onNavigatePost
-                        ? "0 var(--space-viewer-post-offset, 0px)"
-                        : undefined,
-                },
                 "& .space-photo-placeholder": {
                     alignItems: "center",
                     color: spaceTextMuted,

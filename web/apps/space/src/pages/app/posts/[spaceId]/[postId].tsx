@@ -4,10 +4,12 @@ import { SpaceRouteFallback } from "components/RouteFallback";
 import log from "ente-base/log";
 import React from "react";
 import {
+    deleteCurrentPost,
     loadCurrentSpacePost,
     loadCurrentSpacePostAssetURL,
     replyToCurrentPost,
     setCurrentPostLiked,
+    updateCurrentPostCaption,
     type SpacePost,
 } from "services/space";
 import { useSpaceAppState } from "state/app-state";
@@ -65,7 +67,13 @@ const viewerPhotoFromPost = (post: SpacePost) => ({
 
 const Page: React.FC = () => {
     const router = useSpaceRouter();
-    const { profile, profileLoadError, profileLoadStatus } = useSpaceAppState();
+    const {
+        profile,
+        profileLoadError,
+        profileLoadStatus,
+        setLocalFeedPosts,
+        setPostPublication,
+    } = useSpaceAppState();
     const pathParams = routeParamsFromPath();
     const spaceId =
         valueFromQuery(router.query.spaceId) ?? pathParams.spaceId ?? "";
@@ -201,6 +209,73 @@ const Page: React.FC = () => {
                 postActionMode={isOwnPost ? "hidden" : "like-only"}
                 onClose={closePost}
                 onOpenProfile={openOwnerProfile}
+                onDeletePost={
+                    isOwnPost
+                        ? async () => {
+                              await deleteCurrentPost(actorSpaceId, postId);
+                              setPostPublication((current) =>
+                                  current?.post.postId == postId
+                                      ? null
+                                      : current,
+                              );
+                              setLocalFeedPosts((currentPosts) =>
+                                  currentPosts.filter(
+                                      (item) =>
+                                          item.status == "pending" ||
+                                          item.status == "failed" ||
+                                          item.post.postId != postId,
+                                  ),
+                              );
+                          }
+                        : undefined
+                }
+                onUpdatePostCaption={
+                    isOwnPost
+                        ? async (nextPostId, caption) => {
+                              await updateCurrentPostCaption(
+                                  actorSpaceId,
+                                  nextPostId,
+                                  caption,
+                              );
+                              const normalizedCaption =
+                                  caption.trim() || undefined;
+                              setPost((current) =>
+                                  current?.postId == nextPostId
+                                      ? {
+                                            ...current,
+                                            caption: normalizedCaption,
+                                        }
+                                      : current,
+                              );
+                              setPostPublication((current) =>
+                                  current?.post.postId == nextPostId
+                                      ? {
+                                            ...current,
+                                            post: {
+                                                ...current.post,
+                                                caption: normalizedCaption,
+                                            },
+                                        }
+                                      : current,
+                              );
+                              setLocalFeedPosts((currentPosts) =>
+                                  currentPosts.map((item) =>
+                                      (item.status == "posted" ||
+                                          item.status == "ready") &&
+                                      item.post.postId == nextPostId
+                                          ? {
+                                                ...item,
+                                                post: {
+                                                    ...item.post,
+                                                    caption: normalizedCaption,
+                                                },
+                                            }
+                                          : item,
+                                  ),
+                              );
+                          }
+                        : undefined
+                }
                 onReplyToPost={
                     isOwnPost
                         ? undefined

@@ -23,18 +23,18 @@ test("new activity takes priority and history follows local calendar boundaries"
             isNew: false,
         },
         {
-            id: "this-week",
+            id: "two-days-ago",
             createdAtMs: new Date(2026, 9, 19).getTime(),
             isNew: false,
         },
         {
-            id: "last-week",
-            createdAtMs: new Date(2026, 9, 12).getTime(),
+            id: "seven-days-ago",
+            createdAtMs: new Date(2026, 9, 14).getTime(),
             isNew: false,
         },
         {
-            id: "this-month",
-            createdAtMs: new Date(2026, 9, 1).getTime(),
+            id: "before-seven-days",
+            createdAtMs: new Date(2026, 9, 13, 23, 59, 59, 999).getTime(),
             isNew: false,
         },
         {
@@ -52,19 +52,17 @@ test("new activity takes priority and history follows local calendar boundaries"
         { title: "New", ids: ["old-unread"] },
         { title: "Today", ids: ["today"] },
         { title: "Yesterday", ids: ["yesterday"] },
-        { title: "This week", ids: ["this-week"] },
-        { title: "Last week", ids: ["last-week"] },
-        { title: "This month", ids: ["this-month"] },
-        { title: "Earlier", ids: ["earlier"] },
+        { title: "Last 7 days", ids: ["two-days-ago", "seven-days-ago"] },
+        { title: "Earlier", ids: ["before-seven-days", "earlier"] },
     ]);
 });
 
 test.each([
     {
-        name: "Sunday stays in the current week",
+        name: "seven-day range crosses calendar weeks",
         now: new Date(2026, 9, 25, 12),
-        dates: [new Date(2026, 9, 19), new Date(2026, 9, 18, 23, 59)],
-        titles: ["This week", "Last week"],
+        dates: [new Date(2026, 9, 18), new Date(2026, 9, 17, 23, 59)],
+        titles: ["Last 7 days", "Earlier"],
     },
     {
         name: "yesterday takes priority when Monday crosses a year boundary",
@@ -75,18 +73,18 @@ test.each([
             new Date(2026, 11, 28),
             new Date(2026, 11, 27, 23, 59),
         ],
-        titles: ["Yesterday", "Last week", "Last week", "Earlier"],
+        titles: ["Yesterday", "Last 7 days", "Last 7 days", "Earlier"],
     },
     {
-        name: "calendar weeks span month and daylight-saving boundaries",
+        name: "seven-day range spans month and daylight-saving boundaries",
         now: new Date(2026, 10, 4, 12),
         dates: [
             new Date(2026, 10, 2),
             new Date(2026, 10, 1),
-            new Date(2026, 9, 26),
-            new Date(2026, 9, 25, 23, 59),
+            new Date(2026, 9, 28),
+            new Date(2026, 9, 27, 23, 59),
         ],
-        titles: ["This week", "Last week", "Last week", "Earlier"],
+        titles: ["Last 7 days", "Last 7 days", "Last 7 days", "Earlier"],
     },
 ])("$name", ({ now, dates, titles }) => {
     vi.useFakeTimers();

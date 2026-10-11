@@ -328,9 +328,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             !item.isUnavailable &&
             !unavailablePostsByKey[profilePostImageCacheKey(item)],
     );
-    const viewerPostIndexByID = new Map(
-        viewerPostItems.map((item, index) => [item.id, index]),
-    );
+    const viewerPostIDs = new Set(viewerPostItems.map((item) => item.id));
     const postsSharedCount = visiblePostItems.length;
     const displayedPostsCount = postsCount ?? postsSharedCount;
     const canOpenFriends = isOwnerProfile && Boolean(onOpenFriends);
@@ -511,38 +509,30 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         [loadedPhotoDimensionsByID],
     );
 
-    const profileViewerPhotos = viewerPostItems.map((item) =>
+    const profileViewerPhotos = viewerPostItems.flatMap((item) =>
         viewerPhotosFromPost({
             ...item,
             ...dimensionsForPost(item),
             avatarUrl: profile.avatarUrl,
             imageUrl: loadedPostImageURLFor(item),
             name: displayName,
-        }),
+        }).map((photo) => ({ ...photo, id: item.id })),
     );
-    const selectedPostIndex = selectedPost
-        ? viewerPostIndexByID.get(selectedPost.id)
-        : undefined;
-    const selectedPostPhotos =
-        selectedPostIndex == undefined
-            ? undefined
-            : profileViewerPhotos[selectedPostIndex];
+    const selectedPhotoIndex = selectedPost
+        ? profileViewerPhotos.findIndex(
+              (photo) =>
+                  photo.id == selectedPost.id &&
+                  photo.postPhotoIndex == selectedPost.photoIndex,
+          )
+        : 0;
     const handleSelectedPostIndexChange = (photoIndex: number) => {
-        const photo = selectedPostPhotos?.[photoIndex];
-        if (photo && selectedPost)
-            setSelectedPost({ ...selectedPost, photo, photoIndex });
-    };
-    const navigatePost = (direction: -1 | 1) => {
-        if (selectedPostIndex == undefined) return false;
-        const postIndex = selectedPostIndex + direction;
-        const item = viewerPostItems[postIndex];
-        if (!item) return false;
-        setSelectedPost({
-            id: item.id,
-            photo: profileViewerPhotos[postIndex]![0]!,
-            photoIndex: 0,
-        });
-        return true;
+        const photo = profileViewerPhotos[photoIndex];
+        if (photo)
+            setSelectedPost({
+                id: photo.id,
+                photo,
+                photoIndex: photo.postPhotoIndex!,
+            });
     };
 
     const shareInvite = async () => {
@@ -579,7 +569,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
     const renderPostTile = (item: ProfilePostItem, index: number) => {
         const imageUrl = loadedPostImageURLFor(item);
-        const isUnavailable = !viewerPostIndexByID.has(item.id);
+        const isUnavailable = !viewerPostIDs.has(item.id);
         return (
             <SpacePostTile
                 key={item.id}
@@ -597,15 +587,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     }))
                 }
                 onOpen={(openedImageUrl) => {
-                    const postIndex = viewerPostIndexByID.get(item.id);
-                    if (postIndex == undefined) return;
+                    const photo = profileViewerPhotos.find(
+                        (photo) => photo.id == item.id,
+                    );
+                    if (!photo) return;
                     setSelectedPost({
                         id: item.id,
                         photoIndex: 0,
-                        photo: {
-                            ...profileViewerPhotos[postIndex]![0]!,
-                            imageUrl: openedImageUrl,
-                        },
+                        photo: { ...photo, imageUrl: openedImageUrl },
                     });
                 }}
                 onRememberDimensions={rememberLoadedPhotoDimensions}
@@ -1417,13 +1406,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     <SpaceFileViewer
                         closeOnSwipePastEnd
                         photo={selectedPost.photo}
-                        photos={selectedPostPhotos}
-                        photoIndex={selectedPost.photoIndex}
+                        photos={profileViewerPhotos}
+                        photoIndex={selectedPhotoIndex}
                         onPhotoIndexChange={handleSelectedPostIndexChange}
                         onLoadPhoto={onLoadPostImage}
                         postActionMode={selectedPostActionMode}
                         onClose={closeSelectedPost}
-                        onNavigatePost={navigatePost}
                         onAddFriendForPostAction={
                             isPublicProfile
                                 ? onAddFriendForPostAction

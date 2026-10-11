@@ -62,10 +62,10 @@
 
 html[data-space-route-motion]::view-transition-old(root),
 html[data-space-route-motion]::view-transition-new(root) {
-    animation-duration: 180ms;
+    animation-duration: 220ms;
     animation-fill-mode: both;
-    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
-    mix-blend-mode: normal;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    mix-blend-mode: plus-lighter;
 }
 
 html[data-space-route-motion]::view-transition-old(root) {
