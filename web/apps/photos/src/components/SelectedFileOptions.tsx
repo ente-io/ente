@@ -1,6 +1,5 @@
 import type { CollectionSelectorAttributes } from "@/components/CollectionSelector";
 import type { GalleryBarMode } from "@/components/gallery/reducer";
-import { trashFilesDialogAttributes } from "@/components/gallery/trash-files-dialog";
 import {
     getAvailableFileActions,
     type FileContextAction,
@@ -59,6 +58,7 @@ interface SelectedFileOptionsProps {
     selectedOwnFileCount: number;
     selectedFavoriteCount: number;
     onClearSelection: () => void;
+    onDelete: () => void;
     onRemoveFilesFromCollection: (collection: Collection) => void;
     onOpenCollectionSelector: (
         attributes: CollectionSelectorAttributes,
@@ -83,6 +83,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     selectedOwnFileCount,
     selectedFavoriteCount,
     onClearSelection,
+    onDelete,
     onRemoveFilesFromCollection,
     onOpenCollectionSelector,
     createOnCreateForCollectionOp,
@@ -102,16 +103,6 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleSendLink = createFileOpHandler("sendLink");
     const handleArchive = createFileOpHandler("archive");
     const handleUnarchive = createFileOpHandler("unarchive");
-
-    const handleDelete = () =>
-        showMiniDialog({
-            ...trashFilesDialogAttributes(selectedOwnFileCount),
-            continue: {
-                text: t("move_to_trash"),
-                color: "critical",
-                action: createFileOpHandler("trash"),
-            },
-        });
 
     const handleRestore = () =>
         onOpenCollectionSelector({
@@ -264,7 +255,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             case "unhide":
                 return <UnhideButton key={action} onClick={handleUnhide} />;
             case "trash":
-                return <DeleteButton key={action} onClick={handleDelete} />;
+                return <DeleteButton key={action} onClick={onDelete} />;
             case "deletePermanently":
                 return (
                     <DeletePermanentlyButton

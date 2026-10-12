@@ -39,6 +39,7 @@ import {
     NormalNavbarContents,
     UploadButton,
 } from "@/components/gallery/NormalNavbarContents";
+import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 import {
     findCollectionCreatingIfNeeded,
     performCollectionOp,
@@ -47,7 +48,6 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/components/gallery/reducer";
-import { trashFilesDialogAttributes } from "@/components/gallery/trash-files-dialog";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import {
     notifyOthersFilesDialogAttributes,
@@ -192,6 +192,14 @@ const Page: React.FC = () => {
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+    const [trashFilesDialog, setTrashFilesDialog] = useState<{
+        count: number;
+        onConfirm: () => void;
+    }>();
+    const {
+        show: showTrashFilesDialog,
+        props: trashFilesDialogVisibilityProps,
+    } = useModalVisibility();
     const [suppressContextSelectionBar, setSuppressContextSelectionBar] =
         useState(false);
     const [selected, setSelected] = useState<SelectedState>({
@@ -1559,6 +1567,19 @@ const Page: React.FC = () => {
 
     const selectedCount = selected.count;
     const selectedOwnCount = selected.ownCount;
+    const handleDeleteFiles = useCallback(
+        (suppressSelectionBar = false) => {
+            if (selectedOwnCount === 0) return;
+            setTrashFilesDialog({
+                count: selectedOwnCount,
+                onConfirm: createFileOpHandler("trash", {
+                    suppressSelectionBar,
+                }),
+            });
+            showTrashFilesDialog();
+        },
+        [selectedOwnCount, createFileOpHandler, showTrashFilesDialog],
+    );
     const selectedFavoriteCount = useMemo(
         () => countSelectedFavorites(selected, favoriteFileIDs),
         [favoriteFileIDs, selected],
@@ -1636,16 +1657,7 @@ const Page: React.FC = () => {
                     createFileOpHandler("fixTime", { suppressSelectionBar })();
                     break;
                 case "trash":
-                    showMiniDialog({
-                        ...trashFilesDialogAttributes(selectedOwnCount),
-                        continue: {
-                            text: t("move_to_trash"),
-                            color: "critical",
-                            action: createFileOpHandler("trash", {
-                                suppressSelectionBar,
-                            }),
-                        },
-                    });
+                    handleDeleteFiles(suppressSelectionBar);
                     break;
                 case "deletePermanently":
                     showMiniDialog({
@@ -1773,6 +1785,7 @@ const Page: React.FC = () => {
             createOnSelectForCollectionOp,
             handleOpenCollectionSelector,
             handleRemoveFilesFromCollection,
+            handleDeleteFiles,
             showMiniDialog,
             showContextMenuAssignPerson,
             showEditLocation,
@@ -1916,6 +1929,12 @@ const Page: React.FC = () => {
                 files={fixCreationTimeFiles}
                 onRemotePull={remotePull}
             />
+            {trashFilesDialog && (
+                <TrashFilesDialog
+                    {...trashFilesDialogVisibilityProps}
+                    {...trashFilesDialog}
+                />
+            )}
             <NavbarBase
                 sx={[
                     {
@@ -1940,6 +1959,7 @@ const Page: React.FC = () => {
                         selectedOwnFileCount={selected.ownCount}
                         selectedFavoriteCount={selectedFavoriteCount}
                         onClearSelection={clearSelection}
+                        onDelete={() => handleDeleteFiles()}
                         onRemoveFilesFromCollection={
                             handleRemoveFilesFromCollection
                         }
