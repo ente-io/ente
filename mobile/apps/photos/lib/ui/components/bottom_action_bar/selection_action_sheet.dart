@@ -57,7 +57,7 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
   double _maxExtent = 1;
   bool _isCollapsing = false;
 
-  static const _duration = Motion.slow;
+  static const _duration = Motion.standard;
 
   @override
   void didChangeDependencies() {
