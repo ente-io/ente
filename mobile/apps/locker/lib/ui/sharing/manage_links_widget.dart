@@ -123,19 +123,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   _LinkSettingsGroup(
                     items: [
                       MenuComponent(
-                        title: context.strings.linkExpiry,
-                        leading: linkIcon(HugeIcons.strokeRoundedCalendar03),
-                        subtitle: url.hasExpiry
-                            ? (url.isExpired
-                                  ? context.strings.linkExpired
-                                  : context.strings.linkEnabled)
-                            : context.strings.linkNeverExpires,
+                        title: context.strings.linkDeviceLimit,
+                        leading: linkIcon(HugeIcons.strokeRoundedLaptop),
+                        subtitle: url.deviceLimit == 0
+                            ? context.strings.noLimit
+                            : "${url.deviceLimit}",
                         trailing: chevron,
                         onTap: () async {
                           unawaited(
                             routeToPage(
                               context,
-                              LinkExpiryPickerPage(widget.collection!),
+                              DeviceLimitPickerPage(widget.collection!),
                             ).then((value) {
                               if (mounted) {
                                 setState(() {});
@@ -183,17 +181,19 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         ),
                       ),
                       MenuComponent(
-                        title: context.strings.linkDeviceLimit,
-                        leading: linkIcon(HugeIcons.strokeRoundedLaptop),
-                        subtitle: url.deviceLimit == 0
-                            ? context.strings.noLimit
-                            : "${url.deviceLimit}",
+                        title: context.strings.linkExpiry,
+                        leading: linkIcon(HugeIcons.strokeRoundedCalendar03),
+                        subtitle: url.hasExpiry
+                            ? (url.isExpired
+                                  ? context.strings.linkExpired
+                                  : context.strings.linkEnabled)
+                            : context.strings.linkNeverExpires,
                         trailing: chevron,
                         onTap: () async {
                           unawaited(
                             routeToPage(
                               context,
-                              DeviceLimitPickerPage(widget.collection!),
+                              LinkExpiryPickerPage(widget.collection!),
                             ).then((value) {
                               if (mounted) {
                                 setState(() {});

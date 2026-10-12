@@ -102,9 +102,9 @@ void main() {
       'Copy link',
       'Send link',
       'Anyone with the link can open the collection without an Ente account.',
-      'Link expiry',
-      'Password',
       'Device limit',
+      'Password',
+      'Link expiry',
       'Remove link',
     ];
     for (var index = 0; index < labels.length - 1; index++) {
