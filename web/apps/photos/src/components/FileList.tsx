@@ -484,15 +484,18 @@ export const FileList: React.FC<FileListProps> = ({
             previousSelectionRef.current !== null;
         let selectionCount: number;
         let favoriteCount: number;
+        let hasOwnFiles: boolean;
         let hasOnlyOwnFiles: boolean;
 
         if (isTemporarySingleSelection) {
             selectionCount = 1;
             favoriteCount = favoriteFileIDs?.has(contextMenu.file.id) ? 1 : 0;
             hasOnlyOwnFiles = contextMenu.file.ownerID === user?.id;
+            hasOwnFiles = hasOnlyOwnFiles;
         } else {
             selectionCount = selected.count;
             favoriteCount = selectedFavoriteCount;
+            hasOwnFiles = selected.ownCount > 0;
             hasOnlyOwnFiles =
                 selectionCount > 0 && selected.ownCount === selectionCount;
         }
@@ -500,6 +503,7 @@ export const FileList: React.FC<FileListProps> = ({
             barMode: mode,
             isInSearchMode: modePlus === "search",
             collectionSummary,
+            hasOwnFiles,
             hasOnlyOwnFiles,
             showAddPerson: !!showAddPersonAction,
             showEditLocation: !!showEditLocationAction && hasOnlyOwnFiles,
