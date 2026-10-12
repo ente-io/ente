@@ -92,6 +92,7 @@ class ImageZoomViewer extends StatefulWidget {
   final FilterQuality filterQuality;
   final bool gaplessPlayback;
   final bool gesturesEnabled;
+  final bool useHeroImageAsPlaceholder;
   final ImageZoomLoadingBuilder? loadingBuilder;
   final ImageErrorWidgetBuilder? errorBuilder;
   final String? semanticLabel;
@@ -111,6 +112,7 @@ class ImageZoomViewer extends StatefulWidget {
     this.filterQuality = FilterQuality.high,
     this.gaplessPlayback = true,
     this.gesturesEnabled = true,
+    this.useHeroImageAsPlaceholder = true,
     this.loadingBuilder,
     this.errorBuilder,
     this.semanticLabel,
@@ -726,7 +728,8 @@ class _ImageZoomViewerState extends State<ImageZoomViewer>
             semanticLabel: widget.semanticLabel,
             errorBuilder: widget.errorBuilder,
           );
-        } else if (_heroSource?.image != null) {
+        } else if (widget.useHeroImageAsPlaceholder &&
+            _heroSource?.image != null) {
           image = RawImage(image: _heroSource!.image, fit: BoxFit.fill);
         } else if (_imageError != null) {
           image =

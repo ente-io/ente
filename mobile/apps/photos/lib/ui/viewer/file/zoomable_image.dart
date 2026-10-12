@@ -229,6 +229,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
       initialFit: widget.shouldCover ? BoxFit.cover : BoxFit.contain,
       // Collage already owns its transform with an outer InteractiveViewer.
       gesturesEnabled: !widget.shouldCover,
+      useHeroImageAsPlaceholder: !_showingThumbnailFallback,
       onInteractionLockChanged: _onInteractionLockChanged,
       onImageFrameReady: () => _imageFrameReady.value = true,
       loadingBuilder: (context, event) {

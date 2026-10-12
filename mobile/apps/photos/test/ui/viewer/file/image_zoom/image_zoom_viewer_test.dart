@@ -175,6 +175,47 @@ void main() {
     );
   }
 
+  testWidgets("an explicit thumbnail fallback replaces the Hero source", (
+    tester,
+  ) async {
+    var showingThumbnailFallback = false;
+    late StateSetter updateViewer;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ImageHeroSource(
+          tag: "photo",
+          image: landscapeImage,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              updateViewer = setState;
+              return ImageZoomViewer(
+                imageProvider: null,
+                heroTag: "photo",
+                useHeroImageAsPlaceholder: !showingThumbnailFallback,
+                loadingBuilder: (_, _) =>
+                    const Text("Large thumbnail fallback"),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    final heroState = tester.state(find.byType(Hero));
+    expect(
+      tester.widget<RawImage>(find.byType(RawImage)).image,
+      landscapeImage,
+    );
+    expect(find.text("Large thumbnail fallback"), findsNothing);
+
+    updateViewer(() => showingThumbnailFallback = true);
+    await tester.pump();
+
+    expect(find.text("Large thumbnail fallback"), findsOneWidget);
+    expect(find.byType(RawImage), findsNothing);
+    expect(tester.state(find.byType(Hero)), same(heroState));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     "a cold flight keeps its thumbnail mounted without duplicating it",
     (tester) async {
