@@ -12,7 +12,6 @@ import {
     loadCurrentFriendAvatarURL,
     loadCurrentFriendRequests,
     loadCurrentSpaceFriends,
-    removeCurrentSpaceFriend,
     requestFriendByUsername,
     type SpaceFriendRequest,
 } from "services/space";
@@ -89,8 +88,8 @@ const Page: React.FC = () => {
                 friendRequests={friendRequests}
                 friends={friends}
                 isLoading={isFriendsLoading}
+                onBack={() => void router.back(spaceRoutes.home)}
                 onLoadFriendAvatar={loadCurrentFriendAvatarURL}
-                onBack={() => void router.push(spaceRoutes.profile)}
                 onAddFriend={async (username) => {
                     const actorSpaceId = profile.spaceId;
                     if (!actorSpaceId) throw new Error("Missing space.");
@@ -119,14 +118,6 @@ const Page: React.FC = () => {
                     }
                     return status;
                 }}
-                onMessage={(friendID) => {
-                    const friend = friends.find(
-                        (candidate) => candidate.id == friendID,
-                    );
-                    if (friend?.spaceId) {
-                        void router.push(spaceRoutes.message(friend.spaceId));
-                    }
-                }}
                 onOpenFriend={(friendID) => {
                     const friend = friends.find(
                         (candidate) =>
@@ -145,7 +136,7 @@ const Page: React.FC = () => {
                 username={profile.username}
                 onAcceptFriendRequest={async (requestID) => {
                     const actorSpaceId = profile.spaceId;
-                    if (!actorSpaceId) return;
+                    if (!actorSpaceId) return false;
                     try {
                         await confirmCurrentFriendRequest(
                             actorSpaceId,
@@ -159,7 +150,7 @@ const Page: React.FC = () => {
                             ),
                         );
                         setShowFriendRequestCanceledToast(true);
-                        return;
+                        return false;
                     }
                     const loadedFriends =
                         await loadCurrentSpaceFriends(actorSpaceId);
@@ -169,6 +160,7 @@ const Page: React.FC = () => {
                         ),
                     );
                     setFriends(loadedFriends);
+                    return true;
                 }}
                 onDeleteFriendRequest={async (requestID) => {
                     const actorSpaceId = profile.spaceId;
@@ -205,21 +197,6 @@ const Page: React.FC = () => {
                             (request) => request.requestId != requestID,
                         ),
                     );
-                }}
-                onUnfriend={async (friendID) => {
-                    const actorSpaceId = profile.spaceId;
-                    if (!actorSpaceId) return;
-
-                    const friend = friends.find(
-                        (candidate) => candidate.id == friendID,
-                    );
-                    if (!friend?.spaceId) return;
-
-                    await removeCurrentSpaceFriend(
-                        actorSpaceId,
-                        friend.spaceId,
-                    );
-                    window.location.reload();
                 }}
             />
             {showFriendRequestCanceledToast && (

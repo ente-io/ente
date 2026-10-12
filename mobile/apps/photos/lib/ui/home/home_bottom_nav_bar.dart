@@ -13,7 +13,7 @@ import "package:photos/models/selected_albums.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/tabs/nav_bar.dart';
 
-const double _homeNavContainerHeight = 70;
+const double homeBottomNavigationBarHeight = 70;
 const double _homeNavButtonPadding = 10;
 const double _homeNavItemSpacing = 22;
 
@@ -126,7 +126,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
           curve: Curves.easeInOut,
           height: filesAreSelected || albumsAreSelected
               ? 0
-              : _homeNavContainerHeight,
+              : homeBottomNavigationBarHeight,
           child: IgnorePointer(
             ignoring: filesAreSelected || albumsAreSelected,
             child: ListView(

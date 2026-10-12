@@ -11,7 +11,7 @@ import {
     Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Box, Menu, MenuItem } from "@mui/material";
+import { Box, Fade, Menu, MenuItem, Modal } from "@mui/material";
 import { keyframes } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
 import {
@@ -19,6 +19,7 @@ import {
     type SpaceActionPhase,
 } from "components/ActionFeedback";
 import { SpaceAvatarImage } from "components/AvatarImage";
+import { SpaceBottomSheetTransition } from "components/BottomSheetTransition";
 import { SpaceCaptionText } from "components/CaptionText";
 import { ConfirmationActionSheet } from "components/ConfirmationActionSheet";
 import { spacePostLikePopDurationMs } from "components/post-like-animation";
@@ -160,8 +161,7 @@ interface SpaceFileViewerProps {
     onEditDraftPhoto?: () => void;
     onDeletePost?: () => Promise<void> | void;
     onDraftPostExitAnimationStart?: () => void;
-    onDraftPostExitStart?: () => void;
-    onDraftPostPublished?: () => void;
+    onDraftPostExitStart?: () => Promise<void>;
     onAddFriendForPostAction?: (intent: SpaceInviteIntent) => void;
     onOpenProfile?: () => void;
     onPublishDraftPost?: (caption: string) => Promise<void>;
@@ -296,107 +296,65 @@ const viewerCaptionTextSx = {
 
 const SpaceViewerPhotoOverlay: React.FC<{
     caption: string;
+    onOpenCaption: () => void;
     photoIndex: number;
     photoCount: number;
-}> = ({ caption, photoIndex, photoCount }) => {
-    const bubbleRef = React.useRef<HTMLParagraphElement | null>(null);
-    const [isLongCaption, setIsLongCaption] = React.useState(false);
-
-    React.useLayoutEffect(() => {
-        const bubble = bubbleRef.current;
-        if (!bubble) return;
-
-        const updateLayout = () => {
-            const lineHeight = parseFloat(getComputedStyle(bubble).lineHeight);
-            setIsLongCaption(
-                bubble.getBoundingClientRect().height > lineHeight * 4,
-            );
-        };
-        updateLayout();
-        const observer = new ResizeObserver(updateLayout);
-        observer.observe(bubble);
-        return () => observer.disconnect();
-    }, [caption]);
+}> = ({ caption, onOpenCaption, photoIndex, photoCount }) => {
+    const [isCaptionTruncated, setIsCaptionTruncated] = React.useState(false);
 
     return (
-        <>
-            <Box
-                aria-hidden={isLongCaption || undefined}
-                data-space-viewer-chrome="true"
-                sx={{
-                    alignItems: "center",
-                    bottom: "14%",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "16px",
-                    left: "50%",
-                    pointerEvents: "none",
-                    position: "fixed",
-                    transform: "translateX(-50%)",
-                    visibility: isLongCaption ? "hidden" : "visible",
-                    width: "78vw",
-                    zIndex: 2,
-                }}
-            >
-                <SpacePostPhotosDots index={photoIndex} count={photoCount} />
+        <Box
+            data-space-viewer-chrome="true"
+            sx={{
+                alignItems: "center",
+                bottom: "14%",
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px",
+                left: "50%",
+                pointerEvents: "none",
+                position: "fixed",
+                transform: "translateX(-50%)",
+                width: "78vw",
+                zIndex: 2,
+            }}
+        >
+            <SpacePostPhotosDots index={photoIndex} count={photoCount} />
+            {caption && (
                 <Box
-                    ref={bubbleRef}
-                    component="p"
-                    title={caption}
+                    component={isCaptionTruncated ? "button" : "div"}
+                    type={isCaptionTruncated ? "button" : undefined}
+                    aria-label={
+                        isCaptionTruncated ? "Read full caption" : undefined
+                    }
+                    aria-haspopup={isCaptionTruncated ? "dialog" : undefined}
+                    onClick={isCaptionTruncated ? onOpenCaption : undefined}
                     sx={{
                         ...viewerCaptionTextSx,
-                        display: caption ? "block" : "none",
+                        appearance: "none",
+                        bgcolor: "transparent",
+                        border: 0,
+                        cursor: isCaptionTruncated ? "pointer" : undefined,
                         m: 0,
                         minWidth: 0,
                         overflowWrap: "break-word",
+                        p: 0,
+                        pointerEvents: isCaptionTruncated ? "auto" : "none",
                         width: "100%",
+                        "&:focus-visible": {
+                            outline: `2px solid ${green}`,
+                            outlineOffset: 4,
+                        },
                     }}
                 >
-                    <SpaceCaptionText caption={caption} />
-                </Box>
-            </Box>
-            {isLongCaption && (
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "16px",
-                    }}
-                >
-                    <SpacePostPhotosDots
-                        index={photoIndex}
-                        count={photoCount}
+                    <SpaceCaptionText
+                        caption={caption}
+                        lineClamp={4}
+                        onTruncationChange={setIsCaptionTruncated}
                     />
-                    <Box
-                        role="region"
-                        aria-label="Caption"
-                        tabIndex={0}
-                        sx={{
-                            ...viewerCaptionTextSx,
-                            bgcolor: "rgba(32, 32, 32, 0.85)",
-                            borderRadius: "16px",
-                            boxSizing: "border-box",
-                            fontWeight: 400,
-                            lineHeight: "22px",
-                            maxHeight: "33svh",
-                            overflowWrap: "anywhere",
-                            overflowY: "auto",
-                            overscrollBehaviorY: "contain",
-                            p: "14px 16px",
-                            scrollbarWidth: "thin",
-                            textAlign: "left",
-                            textWrap: "wrap",
-                            "&:focus-visible": {
-                                outline: `2px solid ${green}`,
-                                outlineOffset: 2,
-                            },
-                        }}
-                    >
-                        {caption}
-                    </Box>
                 </Box>
             )}
-        </>
+        </Box>
     );
 };
 
@@ -412,7 +370,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     onDeletePost,
     onDraftPostExitAnimationStart,
     onDraftPostExitStart,
-    onDraftPostPublished,
     onAddFriendForPostAction,
     onOpenProfile,
     onPublishDraftPost,
@@ -502,6 +459,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     const initialPhotoIndexRef = React.useRef(activePhotoIndex);
     const fallbackPhotoRef = React.useRef(activePhoto);
     const pswpRef = React.useRef<PhotoSwipe | undefined>(undefined);
+    const isSyncingPhotosRef = React.useRef(false);
     const videoContentsRef = React.useRef(
         new Map<object, ReturnType<typeof createSpaceVideoContent>>(),
     );
@@ -525,6 +483,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         activePhoto.caption ?? "",
     );
     const [isCaptionEditing, setIsCaptionEditing] = React.useState(false);
+    const [isCaptionDialogOpen, setIsCaptionDialogOpen] = React.useState(false);
     const [captionUpdateActionPhase, setCaptionUpdateActionPhase] =
         React.useState<SpaceActionPhase | null>(null);
     const [hasCaptionUpdateError, setHasCaptionUpdateError] =
@@ -566,6 +525,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     const dateLabel = formatSpaceDate(activePhoto.timestampMs);
     const displayCaption = isDraftPost ? "" : caption.trim();
     const hasDisplayCaption = displayCaption.length > 0;
+    const CaptionTransition = isDesktopViewer
+        ? Fade
+        : SpaceBottomSheetTransition;
     const viewerRootRef = React.useRef<HTMLDivElement | null>(null);
     const stableViewportSizeRef = React.useRef<ViewerViewportSize>(
         currentViewerViewportSize(null),
@@ -622,6 +584,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         isDeleteExit ||
         isDraftPostExit ||
         isCaptionEditing ||
+        isCaptionDialogOpen ||
         isReplyActionRunning ||
         isDraftPostActionRunning;
     const isDismissBlockedRef = React.useRef(false);
@@ -824,10 +787,16 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 return;
             }
             setDraftPostExitPhase("waiting-for-keyboard");
-            onDraftPostExitStart?.();
+            const exitReady = onDraftPostExitStart?.();
             dismissCaptionKeyboard(() => {
-                setDraftPostExitPhase("animating");
-                onDraftPostExitAnimationStart?.();
+                void Promise.resolve(exitReady)
+                    .catch((error: unknown) => {
+                        log.error("Failed to open the home feed", error);
+                    })
+                    .then(() => {
+                        setDraftPostExitPhase("animating");
+                        onDraftPostExitAnimationStart?.();
+                    });
             });
             void publication.catch((error: unknown) => {
                 log.error("Failed to publish space post", error);
@@ -988,6 +957,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         setCaptionUpdateActionPhase(null);
         setHasCaptionUpdateError(false);
         setIsCaptionEditing(false);
+        setIsCaptionDialogOpen(false);
     }, [activePostKey]);
 
     React.useLayoutEffect(() => {
@@ -1060,10 +1030,12 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         return () => window.clearTimeout(timer);
     }, [photoRetryAt]);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const pswp = pswpRef.current;
         if (!pswp) return;
 
+        isSyncingPhotosRef.current = true;
+        if (pswp.currIndex != activePhotoIndex) pswp.goTo(activePhotoIndex);
         pswp.options.allowPanToNext = viewerPhotosRef.current.length > 1;
         const contentKeys = viewerPhotosRef.current.map(viewerPhotoContentKey);
         const previousKeys = displayedContentKeysRef.current;
@@ -1073,13 +1045,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 pswp.refreshSlideContent(index);
             }
         });
-    }, [viewerPhotosContentKey]);
-
-    React.useEffect(() => {
-        const pswp = pswpRef.current;
-        if (pswp && pswp.currIndex != activePhotoIndex)
-            pswp.goTo(activePhotoIndex);
-    }, [activePhotoIndex]);
+        isSyncingPhotosRef.current = false;
+    }, [activePhotoIndex, viewerPhotosContentKey]);
 
     React.useEffect(() => {
         pswpRef.current?.updateSize(true);
@@ -1109,16 +1076,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         onClose();
     }, [isDeleteExit, onClose]);
 
-    const finishDraftPostExit = React.useCallback(() => {
-        onClose();
-        onDraftPostPublished?.();
-    }, [onClose, onDraftPostPublished]);
-
     React.useEffect(() => {
         if (!isDraftPostExitAnimating) return;
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-            finishDraftPostExit();
-    }, [finishDraftPostExit, isDraftPostExitAnimating]);
+            onClose();
+    }, [onClose, isDraftPostExitAnimating]);
 
     React.useEffect(() => {
         const root = viewerRootRef.current;
@@ -1171,7 +1133,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         let disposed = false;
         let closedByReact = false;
         let pswp: PhotoSwipe | undefined;
-        let edgeSwipeStart: { x: number; y: number } | undefined;
+        let swipeStart:
+            { x: number; y: number; photoIndex: number } | undefined;
 
         void import("photoswipe").then(({ default: PhotoSwipeClass }) => {
             if (disposed || !viewerRootRef.current) return;
@@ -1298,7 +1261,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 const nextIndex = pswp?.currIndex;
                 if (nextIndex != undefined) {
                     setLocalPhotoIndex(nextIndex);
-                    onPhotoIndexChangeRef.current?.(nextIndex);
+                    if (!isSyncingPhotosRef.current)
+                        onPhotoIndexChangeRef.current?.(nextIndex);
                 }
             });
             pswp.on("keydown", (event) => {
@@ -1314,22 +1278,26 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                     event.preventDefault();
                     return;
                 }
-                if (edgeSwipeStart) {
-                    edgeSwipeStart = undefined;
+                if (swipeStart) {
+                    swipeStart = undefined;
                     return;
                 }
                 if (
                     !closeOnSwipePastEndRef.current ||
                     isDismissBlockedRef.current ||
-                    pswp!.currIndex != viewerPhotosRef.current.length - 1 ||
+                    viewerSwipeStartsOnInteractiveTarget(
+                        event.originalEvent.target,
+                    ) ||
                     pswp!.currSlide?.isPannable()
                 )
                     return;
-                edgeSwipeStart = viewerTouchPoint(event.originalEvent);
+                const point = viewerTouchPoint(event.originalEvent);
+                if (point)
+                    swipeStart = { ...point, photoIndex: pswp!.currIndex };
             });
             pswp.on("pointerUp", ({ originalEvent }) => {
-                const start = edgeSwipeStart;
-                edgeSwipeStart = undefined;
+                const start = swipeStart;
+                swipeStart = undefined;
                 if (
                     !start ||
                     originalEvent.type.endsWith("cancel") ||
@@ -1342,7 +1310,15 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 if (!end) return;
                 const dx = end.x - start.x;
                 const dy = end.y - start.y;
-                if (dx < -72 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                if (
+                    closeOnSwipePastEndRef.current &&
+                    Math.abs(dx) > 72 &&
+                    Math.abs(dx) > Math.abs(dy) * 1.5 &&
+                    ((dx < 0 &&
+                        start.photoIndex ==
+                            viewerPhotosRef.current.length - 1) ||
+                        (dx > 0 && start.photoIndex == 0))
+                ) {
                     onCloseRef.current();
                 }
             });
@@ -1373,6 +1349,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             if (
                 addFriendSheetOpen ||
                 deleteSheetOpen ||
+                isCaptionDialogOpen ||
                 isDraftPostExit ||
                 isDraftPostActionRunning
             )
@@ -1395,6 +1372,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         deleteSheetOpen,
         isDraftPostExit,
         isCaptionEditing,
+        isCaptionDialogOpen,
         isCaptionUpdateActionRunning,
     ]);
 
@@ -1412,7 +1390,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 )
                     return;
 
-                finishDraftPostExit();
+                onClose();
             }}
             sx={{
                 bgcolor: "rgb(0 0 0 / var(--space-viewer-bg-opacity, 1))",
@@ -1474,7 +1452,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                     minHeight: viewerHeaderHeight,
                     position: "relative",
                     pl: "16px",
-                    pr: "8px",
+                    pr: "4px",
                     width: "100%",
                     zIndex: 2,
                 }}
@@ -1627,23 +1605,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                             onClick={(event) =>
                                 setActionsAnchor(event.currentTarget)
                             }
-                            sx={draftHeaderButtonSx}
+                            sx={{ ...draftHeaderButtonSx, color: "#C0C0C0" }}
                         >
-                            <Box
-                                component="span"
-                                sx={{
-                                    ...draftHeaderButtonContentSx,
-                                    width: 32,
-                                    p: 0,
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <HugeiconsIcon
-                                    icon={MoreHorizontalIcon}
-                                    size={20}
-                                    strokeWidth={1.8}
-                                />
-                            </Box>
+                            <HugeiconsIcon
+                                icon={MoreHorizontalIcon}
+                                size={20}
+                                strokeWidth={1.8}
+                            />
                         </Box>
                     )}
                     {isDraftPost && onAddDraftPhoto && (
@@ -1686,7 +1654,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                 );
                                 onEditDraftPhoto();
                             }}
-                            sx={draftHeaderButtonSx}
+                            sx={[
+                                draftHeaderButtonSx,
+                                { "&:disabled": { opacity: 1 } },
+                            ]}
                         >
                             <Box
                                 component="span"
@@ -1711,23 +1682,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                         }
                         disabled={isDraftPostActionRunning}
                         onClick={closeViewer}
-                        sx={draftHeaderButtonSx}
+                        sx={{ ...draftHeaderButtonSx, color: "#C0C0C0" }}
                     >
-                        <Box
-                            component="span"
-                            sx={{
-                                ...draftHeaderButtonContentSx,
-                                width: 32,
-                                p: 0,
-                                justifyContent: "center",
-                            }}
-                        >
-                            <HugeiconsIcon
-                                icon={Cancel01Icon}
-                                size={20}
-                                strokeWidth={1.8}
-                            />
-                        </Box>
+                        <HugeiconsIcon
+                            icon={Cancel01Icon}
+                            size={20}
+                            strokeWidth={1.8}
+                        />
                     </Box>
                 </Box>
                 {canManagePost && (
@@ -2351,6 +2312,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                             <SpaceViewerPhotoOverlay
                                 key={activePostKey}
                                 caption={displayCaption}
+                                onOpenCaption={() =>
+                                    setIsCaptionDialogOpen(true)
+                                }
                                 photoIndex={postPhotoIndex}
                                 photoCount={postPhotoCount}
                             />
@@ -2398,6 +2362,71 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                         )}
                     </Box>
                 )}
+            <Modal
+                open={isCaptionDialogOpen}
+                onClose={() => setIsCaptionDialogOpen(false)}
+                closeAfterTransition
+                disableAutoFocus
+                sx={{
+                    alignItems: "center",
+                    boxSizing: "border-box",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflowY: "auto",
+                    overscrollBehaviorY: "contain",
+                    pt: "max(24px, env(safe-area-inset-top))",
+                    zIndex: 1500,
+                    "@media (min-width: 600px)": { p: "24px" },
+                }}
+                slotProps={{
+                    backdrop: { sx: { bgcolor: "rgba(0, 0, 0, 0.64)" } },
+                }}
+            >
+                <CaptionTransition
+                    in={isCaptionDialogOpen}
+                    onEntered={(node) => node.focus({ preventScroll: true })}
+                >
+                    <Box
+                        role="dialog"
+                        aria-label="Full caption"
+                        aria-modal="true"
+                        tabIndex={-1}
+                        sx={{
+                            bgcolor: viewerBackground,
+                            border: "1px solid rgba(255, 255, 255, 0.1)",
+                            borderBottom: 0,
+                            borderRadius: "24px 24px 0 0",
+                            boxShadow: "0 16px 48px rgba(0, 0, 0, 0.28)",
+                            boxSizing: "border-box",
+                            flexShrink: 0,
+                            mt: "auto",
+                            outline: "none",
+                            p: "24px 24px max(24px, env(safe-area-inset-bottom))",
+                            width: "100%",
+                            "@media (min-width: 600px)": {
+                                borderBottom:
+                                    "1px solid rgba(255, 255, 255, 0.1)",
+                                borderRadius: "18px",
+                                maxWidth: 480,
+                                mb: "auto",
+                                p: "24px",
+                            },
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                ...viewerCaptionTextSx,
+                                color: "#D0D0D0",
+                                overflowWrap: "anywhere",
+                                textAlign: "left",
+                                textWrap: "wrap",
+                            }}
+                        >
+                            {displayCaption}
+                        </Box>
+                    </Box>
+                </CaptionTransition>
+            </Modal>
             {canDeletePost && (
                 <ConfirmationActionSheet
                     open={deleteSheetOpen}
