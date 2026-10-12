@@ -204,7 +204,7 @@ export interface PreUploadSkippedFile {
     type: "hiddenFile" | "failedZip";
 }
 
-interface PendingUploads {
+export interface PendingUploads {
     collectionName?: string;
     filePaths: string[];
     zipItems: ZipItem[];

@@ -38,6 +38,7 @@ import log from "ente-base/log";
 import type {
     CollectionMapping,
     Electron,
+    PendingUploads,
     PreUploadSkippedFile,
     ZipItem,
 } from "ente-base/types/ipc";
@@ -318,32 +319,22 @@ export const Upload: React.FC<UploadProps> = ({
         retrySharedAlbumUploadTarget.current = undefined;
     };
 
-    const handlePendingUpload = useEffectEvent(
-        (
-            pending: NonNullable<
-                Awaited<ReturnType<Electron["pendingUploads"]>>
-            >,
-        ) => {
-            const {
-                filePaths,
-                zipItems,
-                preUploadSkippedFiles,
-                ...pendingUpload
-            } = pending;
-            void submitUpload(
-                [
-                    ...filePaths.map((path): UploadItemAndPath => [path, path]),
-                    ...zipItems.map(
-                        (item): UploadItemAndPath => [
-                            item,
-                            joinPath(dirname(item[0]), item[1]),
-                        ],
-                    ),
-                ],
-                { skippedFiles: preUploadSkippedFiles, pendingUpload },
-            ).catch(onGenericError);
-        },
-    );
+    const handlePendingUpload = useEffectEvent((pending: PendingUploads) => {
+        const { filePaths, zipItems, preUploadSkippedFiles, ...pendingUpload } =
+            pending;
+        void submitUpload(
+            [
+                ...filePaths.map((path): UploadItemAndPath => [path, path]),
+                ...zipItems.map(
+                    (item): UploadItemAndPath => [
+                        item,
+                        joinPath(dirname(item[0]), item[1]),
+                    ],
+                ),
+            ],
+            { skippedFiles: preUploadSkippedFiles, pendingUpload },
+        ).catch(onGenericError);
+    });
 
     useEffect(() => {
         const lifetime = { active: true };
