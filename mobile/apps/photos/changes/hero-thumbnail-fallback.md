@@ -1,0 +1,1 @@
+- Fixed gallery previews getting stuck at low resolution when an original photo cannot be displayed.
