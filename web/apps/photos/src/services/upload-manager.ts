@@ -330,7 +330,7 @@ class UploadManager {
         );
         const batchID = uploadProgress.batchID;
         let nextItemIndex = 0;
-        const fileSizesPromise = Promise.all(
+        void Promise.all(
             Array.from(
                 { length: Math.min(maxConcurrentUploads, mediaItems.length) },
                 async () => {
@@ -373,7 +373,9 @@ class UploadManager {
                     }
                 },
             ),
-        );
+        ).catch((e: unknown) => {
+            log.warn("Could not finish collecting upload sizes", e);
+        });
         await UploadService.setFileCount(mediaItems.length);
         this.abortIfCancelled();
         uploadProgress.setUploadPhase("uploading");
@@ -388,7 +390,7 @@ class UploadManager {
             const worker = await this.comlinkCryptoWorkers[i]!.remote;
             uploadProcesses.push(this.uploadNextItemInQueue(worker, options));
         }
-        await Promise.all([fileSizesPromise, ...uploadProcesses]);
+        await Promise.all(uploadProcesses);
     }
 
     private async uploadNextItemInQueue(
