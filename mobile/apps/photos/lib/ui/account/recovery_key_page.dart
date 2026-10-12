@@ -129,7 +129,6 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     );
   }
 
-  // Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=25356-307349&m=dev
   Widget _buildKeyCard(String recoveryKey) {
     final colors = context.componentColors;
     final lightComponentTheme = ComponentTheme.lightTheme(

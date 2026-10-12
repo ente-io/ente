@@ -236,7 +236,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     );
   }
 
-  // Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=25356-307413&m=dev
   Widget _buildOnboardingPage() {
     final colors = context.componentColors;
     return OnboardingPageScaffold(

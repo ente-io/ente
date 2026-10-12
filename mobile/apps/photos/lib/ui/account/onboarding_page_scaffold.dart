@@ -9,8 +9,6 @@ import "package:hugeicons/hugeicons.dart";
 import "package:photos/ui/settings/developer_settings_tap_area.dart";
 import "package:rive/rive.dart" as rive;
 
-// Each artboard is 500x509; scale and offsets place the duck where the
-// matching Figma frame draws it, relative to the status bar and screen centre.
 enum OnboardingIllustration {
   login("assets/onboarding_login.riv", 0.535, -30.8, 3.9),
   signUp("assets/onboarding_login.riv", 0.44, -53.9, 3.6),
@@ -40,11 +38,8 @@ enum OnboardingIllustration {
   double get height => artboardHeight * scale;
 }
 
-// Where the back button lives: in the card's title row, or as white icons on
-// the green header with the card title standing alone.
 enum OnboardingTitleBarStyle { card, header }
 
-// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=25356-305965&m=dev
 class OnboardingPageScaffold extends StatefulWidget {
   const OnboardingPageScaffold({
     super.key,
@@ -76,9 +71,7 @@ class OnboardingPageScaffold extends StatefulWidget {
   final Widget? headerTrailing;
   final bool isBodyCentered;
 
-  // Keeps the actions below the scrolling body instead of letting them scroll
-  // with it when the card is short. Only for list pages that never show the
-  // keyboard, since a fixed footer cannot give space back.
+  // Only pin actions on pages that never show the keyboard.
   final bool pinActions;
   final bool showDeveloperSettingsTapArea;
 
@@ -110,9 +103,7 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
   bool _hasExited = false;
   int _illustrationGeneration = 0;
 
-  // Fires a view-model trigger on the illustration. Triggers wait for the
-  // file to load and for the entry animation to finish, since interrupting
-  // the entry leaves the state machine frozen mid-pose.
+  // Wait for entry to finish; interrupting it can freeze the pose.
   void trigger(String name) {
     _latestTrigger = name;
     if (_viewModel == null) {
@@ -135,8 +126,7 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
     _fileLoader = _loadIllustration();
   }
 
-  // The Rive runtime is a native library that can be unavailable, as in
-  // headless test runs; the page must still work without its illustration.
+  // Keep onboarding usable when the native Rive runtime is unavailable.
   rive.FileLoader? _loadIllustration() {
     try {
       return rive.FileLoader.fromAsset(
@@ -520,7 +510,6 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
   }
 }
 
-// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=25356-305710&m=dev
 class OnboardingAccountPrompt extends StatelessWidget {
   const OnboardingAccountPrompt({
     super.key,

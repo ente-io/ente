@@ -5,7 +5,6 @@ import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:ente_strings/ente_strings.dart";
 import 'package:flutter/material.dart';
 
-// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=25356-307413&m=dev
 class SubscriptionPlanWidget extends StatelessWidget {
   const SubscriptionPlanWidget({
     super.key,
@@ -33,8 +32,6 @@ class SubscriptionPlanWidget extends StatelessWidget {
   final String price;
   final String period;
 
-  // Price of the monthly plan with the same storage, shown struck through
-  // next to the per-month cost of a yearly plan.
   final String? monthlyPrice;
   final bool isActive;
   final bool isPopular;

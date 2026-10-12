@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:photos/core/network/network.dart';
 
-// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=25356-307595&m=dev
 class BillingQuestionsWidget extends StatefulWidget {
   const BillingQuestionsWidget({super.key});
 
@@ -54,7 +53,6 @@ class _BillingQuestionsWidgetState extends State<BillingQuestionsWidget> {
   }
 }
 
-// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=7471-2992&m=dev
 class FaqWidget extends StatefulWidget {
   const FaqWidget({super.key, required this.faq});
 

@@ -92,7 +92,6 @@ class AddOnBonusValidity extends StatelessWidget {
   }
 }
 
-// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=25356-307413&m=dev
 class SubFaqWidget extends StatelessWidget {
   const SubFaqWidget({super.key});
 
@@ -120,7 +119,6 @@ class SubFaqWidget extends StatelessWidget {
   }
 }
 
-// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=25356-307595&m=dev
 Future<void> showPlanFaqSheet(BuildContext context) {
   return showBottomSheetComponent<void>(
     context: context,
@@ -152,7 +150,6 @@ class SubscriptionPlanList extends StatelessWidget {
   }
 }
 
-// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=25356-307503&m=dev
 class SubscriptionToggle extends StatefulWidget {
   final bool isYearly;
   final Function(bool) onToggle;
