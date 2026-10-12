@@ -367,15 +367,14 @@ export const Upload: React.FC<UploadProps> = ({
             if (!lifetime.active) return;
             await submitUpload(
                 [
-                    ...fileAndPaths.map(
-                        (item): UploadItemAndPath => [item, item.path],
-                    ),
-                    ...zipItems.map(
-                        (item): UploadItemAndPath => [
-                            item,
-                            joinPath(dirname(item[0]), item[1]),
-                        ],
-                    ),
+                    ...fileAndPaths.map((item): UploadItemAndPath => [
+                        item,
+                        item.path,
+                    ]),
+                    ...zipItems.map((item): UploadItemAndPath => [
+                        item,
+                        joinPath(dirname(item[0]), item[1]),
+                    ]),
                 ],
                 {
                     uploadType,
