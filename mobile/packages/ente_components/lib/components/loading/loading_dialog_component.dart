@@ -1,4 +1,5 @@
 import 'package:ente_components/components/loading/loading_component.dart';
+import 'package:ente_components/theme/colors.dart';
 import 'package:ente_components/theme/motion.dart';
 import 'package:ente_components/theme/radii.dart';
 import 'package:ente_components/theme/shadows.dart';
@@ -13,15 +14,13 @@ LoadingComponentHandle showLoadingComponent(
   String message, {
   bool isDismissible = false,
 }) {
-  final navigator = Navigator.of(context, rootNavigator: true);
   final route = _LoadingComponentRoute(
     message: message,
     isDismissible: isDismissible,
-    themes: InheritedTheme.capture(from: context, to: navigator.context),
-    barrierColor: context.componentColors.specialScrim,
+    colors: context.componentColors,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   );
-  navigator.push(route);
+  Navigator.of(context, rootNavigator: true).push(route);
   return LoadingComponentHandle._(route);
 }
 
@@ -55,13 +54,12 @@ class _LoadingComponentRoute extends PopupRoute<void> {
   _LoadingComponentRoute({
     required String message,
     required bool isDismissible,
-    required this.themes,
-    required this.barrierColor,
+    required this.colors,
     required this.barrierLabel,
   }) : message = ValueNotifier(message),
        barrierDismissible = isDismissible;
 
-  final CapturedThemes themes;
+  final ColorTokens colors;
   final ValueNotifier<String> message;
   final value = ValueNotifier<double?>(null);
 
@@ -69,10 +67,10 @@ class _LoadingComponentRoute extends PopupRoute<void> {
   final bool barrierDismissible;
 
   @override
-  final Color barrierColor;
+  final String barrierLabel;
 
   @override
-  final String barrierLabel;
+  Color get barrierColor => colors.specialScrim;
 
   @override
   Duration get transitionDuration => Motion.standard;
@@ -90,50 +88,41 @@ class _LoadingComponentRoute extends PopupRoute<void> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return themes.wrap(
-      PopScope(
-        canPop: barrierDismissible,
-        child: Center(
-          child: Material(
-            type: MaterialType.transparency,
-            child: Builder(
-              builder: (context) {
-                final colors = context.componentColors;
-                return Container(
-                  width: 288,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: Spacing.xxl,
-                    vertical: Spacing.xl,
+    return PopScope(
+      canPop: barrierDismissible,
+      child: Center(
+        child: Material(
+          type: MaterialType.transparency,
+          child: Container(
+            width: 288,
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.xxl,
+              vertical: Spacing.xl,
+            ),
+            decoration: BoxDecoration(
+              color: colors.backgroundBase,
+              border: Border.all(color: colors.strokeFaint),
+              borderRadius: Radii.buttonBorder,
+              boxShadow: Shadows.floating,
+            ),
+            child: Row(
+              children: [
+                ValueListenableBuilder<double?>(
+                  valueListenable: value,
+                  builder: (_, value, _) =>
+                      LoadingComponent(value: value, color: colors.primary),
+                ),
+                const SizedBox(width: Spacing.lg),
+                Expanded(
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: message,
+                    builder: (_, message, _) => Text(
+                      message,
+                      style: TextStyles.body.copyWith(color: colors.textBase),
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: colors.backgroundBase,
-                    border: Border.all(color: colors.strokeFaint),
-                    borderRadius: Radii.buttonBorder,
-                    boxShadow: Shadows.floating,
-                  ),
-                  child: Row(
-                    children: [
-                      ValueListenableBuilder<double?>(
-                        valueListenable: value,
-                        builder: (_, value, _) =>
-                            LoadingComponent(value: value),
-                      ),
-                      const SizedBox(width: Spacing.lg),
-                      Expanded(
-                        child: ValueListenableBuilder<String>(
-                          valueListenable: message,
-                          builder: (_, message, _) => Text(
-                            message,
-                            style: TextStyles.body.copyWith(
-                              color: colors.textBase,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                ),
+              ],
             ),
           ),
         ),
