@@ -1,4 +1,10 @@
 import { sidebarTheme } from "@/components/sidebar/theme";
+import {
+    matchesSearchCategory,
+    searchCategories,
+    searchCategoryCounts,
+    type SearchCategory,
+} from "@/services/search/search-categories";
 import { sidebarSearchOptionsForString } from "@/services/search/sidebar-search-registry";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -16,6 +22,8 @@ import {
     IconButton,
     Stack,
     styled,
+    Tab,
+    Tabs,
     ThemeProvider,
     Tooltip,
     Typography,
@@ -47,12 +55,13 @@ import type { SearchOption } from "ente-new/photos/services/search/types";
 import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
     type InputActionMeta,
     type InputProps,
+    type MenuProps,
     type OptionProps,
     type SelectInstance,
     type StylesConfig,
@@ -195,6 +204,7 @@ const SearchInput: React.FC<
     // undefined makes react-select switch from controlled to uncontrolled.
     const [value, setValue] = useState<SearchOption | null>(null);
     const [inputValue, setInputValue] = useState("");
+    const [category, setCategory] = useState<SearchCategory>("all");
     const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false);
 
     const theme = useTheme();
@@ -203,7 +213,10 @@ const SearchInput: React.FC<
         () => createSelectStyles(theme, isKeyboardNavigating),
         [theme, isKeyboardNavigating],
     );
-    const components = useMemo(() => ({ Control, Input, Option }), []);
+    const components = useMemo(
+        () => ({ Control, Input, Option, Menu: SearchMenu }),
+        [],
+    );
 
     useEffect(() => {
         if (open) selectRef.current?.focus();
@@ -219,9 +232,11 @@ const SearchInput: React.FC<
         ) {
             setValue(null);
             setInputValue("");
+            setCategory("all");
         } else {
             setValue(value);
             setInputValue(value?.suggestion.label ?? "");
+            if (!value) setCategory("all");
         }
 
         onSelectSearchOption(nullToUndefined(value), {
@@ -259,6 +274,7 @@ const SearchInput: React.FC<
             setInputValue(value);
 
             if (value === "") {
+                setCategory("all");
                 setValue(null);
                 setInputValue("");
                 onSelectSearchOption(undefined, {
@@ -278,6 +294,7 @@ const SearchInput: React.FC<
 
         setValue(null);
         setInputValue("");
+        setCategory("all");
 
         onSelectSearchOption(undefined, { shouldExitSearchMode: true });
         onClose();
@@ -321,15 +338,21 @@ const SearchInput: React.FC<
         <SearchInputWrapper onMouseMove={() => setIsKeyboardNavigating(false)}>
             <AsyncSelect
                 ref={selectRef}
-                value={value}
+                {...{ searchCategory: { category, setCategory } }}
+                value={value ? [value] : []}
                 components={components}
                 styles={styles}
                 loadOptions={loadOptions}
+                cacheOptions={open}
+                filterOption={({ data }) =>
+                    matchesSearchCategory(data, category)
+                }
                 onChange={handleChange}
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 isClearable
+                tabSelectsValue={false}
                 aria-label={t("search")}
                 escapeClearsValue
                 menuIsOpen={
@@ -338,7 +361,7 @@ const SearchInput: React.FC<
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 placeholder={t("search_hint")}
-                loadingMessage={() => null}
+                loadingMessage={() => t("loading")}
                 noOptionsMessage={({ inputValue }) => {
                     if (inputValue) {
                         return t("no_results");
@@ -357,6 +380,107 @@ const SearchInput: React.FC<
         </SearchInputWrapper>
     );
 };
+
+interface SearchCategoryProps {
+    searchCategory: {
+        category: SearchCategory;
+        setCategory: (category: SearchCategory) => void;
+    };
+}
+
+function SearchMenu(props: MenuProps<SearchOption, false>) {
+    const {
+        searchCategory: { category, setCategory },
+    } = props.selectProps as typeof props.selectProps & SearchCategoryProps;
+    const id = useId();
+    const hasQuery = !!props.selectProps.inputValue.trim();
+    const counts = searchCategoryCounts(
+        props.options as readonly SearchOption[],
+    );
+
+    return (
+        <SelectComponents.Menu {...props}>
+            {hasQuery && (
+                <Tabs
+                    value={category}
+                    onChange={(_, value: SearchCategory) => setCategory(value)}
+                    onMouseDown={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => {
+                        if (event.key !== "Escape") event.stopPropagation();
+                    }}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    aria-label={t("search_results")}
+                    sx={{
+                        minHeight: 36,
+                        mb: 2,
+                        borderBottom: "1px solid",
+                        borderColor: "stroke.faint",
+                        "& .MuiTabs-indicator": { bgcolor: "text.base" },
+                        "& .MuiTab-root": {
+                            minWidth: 0,
+                            minHeight: 36,
+                            p: 0,
+                            mr: "24px",
+                            fontSize: 14,
+                            textTransform: "none",
+                            color: "text.muted",
+                        },
+                        "& .MuiTab-root.Mui-selected": {
+                            color: "text.base",
+                            fontWeight: 600,
+                        },
+                    }}
+                >
+                    {searchCategories.map((category) => (
+                        <Tab
+                            key={category}
+                            value={category}
+                            id={`${id}-${category}`}
+                            aria-controls={`${id}-results`}
+                            label={
+                                <Stack
+                                    direction="row"
+                                    sx={{ alignItems: "center", gap: 0.5 }}
+                                >
+                                    {t(
+                                        category === "places"
+                                            ? "search_places"
+                                            : category,
+                                    )}
+                                    {counts[category] > 0 && (
+                                        <Typography
+                                            component="span"
+                                            variant="mini"
+                                            sx={{ color: "text.muted" }}
+                                        >
+                                            {counts[category]}
+                                        </Typography>
+                                    )}
+                                </Stack>
+                            }
+                        />
+                    ))}
+                </Tabs>
+            )}
+            <div
+                id={`${id}-results`}
+                role={hasQuery ? "tabpanel" : undefined}
+                aria-labelledby={hasQuery ? `${id}-${category}` : undefined}
+            >
+                {props.isLoading && counts[category] > 0 && (
+                    <Typography
+                        role="status"
+                        sx={{ color: "text.muted", textAlign: "center", p: 1 }}
+                    >
+                        {t("loading")}
+                    </Typography>
+                )}
+                {props.children}
+            </div>
+        </SelectComponents.Menu>
+    );
+}
 
 const SearchInputWrapper = styled("div")`
     display: flex;
@@ -379,7 +503,7 @@ const createSelectStyles = (
     theme: Theme,
     isKeyboardNavigating: boolean,
 ): StylesConfig<SearchOption, false> => ({
-    container: (style) => ({ ...style, flex: 1 }),
+    container: (style) => ({ ...style, flex: 1, minWidth: 0 }),
     control: (style) => ({
         ...style,
         minHeight: "52px",
