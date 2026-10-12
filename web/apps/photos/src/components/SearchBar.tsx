@@ -506,6 +506,12 @@ function SearchEmptyState() {
                 py: "20px",
             }}
         >
+            <Box
+                component="img"
+                src="/images/auth-ducky.svg"
+                alt=""
+                sx={{ width: 130, height: 100, objectFit: "contain" }}
+            />
             <Typography variant="h3" sx={{ color: "text.base" }}>
                 {t("search_no_matches")}
             </Typography>
