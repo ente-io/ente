@@ -1,5 +1,6 @@
 import type { CollectionSelectorAttributes } from "@/components/CollectionSelector";
 import type { GalleryBarMode } from "@/components/gallery/reducer";
+import { trashFilesDialogAttributes } from "@/components/gallery/trash-files-dialog";
 import {
     getAvailableFileActions,
     type FileContextAction,
@@ -30,7 +31,6 @@ import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
-import { trashFilesDialogAttributes } from "ente-gallery/components/trash-files-dialog";
 import type { Collection } from "ente-media/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";

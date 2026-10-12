@@ -3,7 +3,7 @@
 import { Box } from "@mui/material";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { t } from "i18next";
-import warningRed from "./assets/warning-red.png";
+import warningRed from "./warning-red.png";
 
 export const trashFilesDialogAttributes = (
     count: number,

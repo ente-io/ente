@@ -47,6 +47,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/components/gallery/reducer";
+import { trashFilesDialogAttributes } from "@/components/gallery/trash-files-dialog";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import {
     notifyOthersFilesDialogAttributes,
@@ -91,7 +92,6 @@ import { initContacts, pullContacts } from "ente-contacts";
 import { DownloadStatusNotifications } from "ente-gallery/components/DownloadStatusNotifications";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import type { UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
-import { trashFilesDialogAttributes } from "ente-gallery/components/trash-files-dialog";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import type { FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";

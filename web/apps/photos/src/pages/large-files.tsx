@@ -25,7 +25,6 @@ import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
-import { trashFilesDialogAttributes } from "ente-gallery/components/trash-files-dialog";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { formattedByteSize } from "ente-gallery/utils/units";
 import {
@@ -91,7 +90,8 @@ const Page: React.FC = () => {
 
     const handleDeleteFiles = useCallback(() => {
         showMiniDialog({
-            ...trashFilesDialogAttributes(state.selectedCount),
+            title: t("trash_files_title"),
+            message: t("trash_files_message"),
             continue: {
                 text: t("move_to_trash"),
                 color: "critical",
@@ -112,7 +112,7 @@ const Page: React.FC = () => {
                 },
             },
         });
-    }, [showMiniDialog, onGenericError, state.largeFiles, state.selectedCount]);
+    }, [showMiniDialog, onGenericError, state.largeFiles]);
 
     const handleOpenViewer = useCallback(
         (index: number) => {
