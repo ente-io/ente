@@ -1,9 +1,11 @@
+import CloseIcon from "@mui/icons-material/Close";
 import type { ButtonProps, ModalProps } from "@mui/material";
 import {
     Box,
     Dialog,
     DialogContent,
     DialogTitle,
+    IconButton,
     Stack,
     Typography,
     type DialogProps,
@@ -18,6 +20,7 @@ import { InlineErrorIndicator } from "./ErrorIndicator";
 export interface MiniDialogAttributes {
     title?: React.ReactNode;
     icon?: React.ReactNode;
+    illustration?: React.ReactNode;
     message?: React.ReactNode;
     nonClosable?: boolean;
     nonReplaceable?: boolean;
@@ -140,9 +143,56 @@ export const AttributedMiniDialog: React.FC<
             {...{ open, sx }}
             onClose={handleClose}
             fullWidth
-            slotProps={{ paper: { sx: { maxWidth: "360px" } } }}
+            slotProps={{
+                paper: {
+                    sx: attributes.illustration
+                        ? {
+                              maxWidth: "440px",
+                              borderRadius: "24px",
+                              position: "relative",
+                              textAlign: "center",
+                              "& .MuiDialogContent-root": {
+                                  padding: "16px 28px 24px",
+                              },
+                              "& .MuiButton-root": {
+                                  fontWeight: 500,
+                                  minHeight: "48px",
+                                  padding: "14px 24px",
+                                  borderRadius: "20px",
+                              },
+                          }
+                        : { maxWidth: "360px" },
+                },
+            }}
         >
-            {(attributes.icon ?? attributes.title) ? (
+            {attributes.illustration ? (
+                <Stack sx={{ alignItems: "center", pt: "38px", px: 3.5 }}>
+                    {!attributes.nonClosable && (
+                        <IconButton
+                            aria-label={t("close")}
+                            disabled={
+                                phase == "loading" ||
+                                phase == "secondary-loading"
+                            }
+                            onClick={resetPhaseAndClose}
+                            sx={{
+                                position: "absolute",
+                                top: 16,
+                                right: 16,
+                                width: 36,
+                                height: 36,
+                                backgroundColor: "fill.faint",
+                            }}
+                        >
+                            <CloseIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                    )}
+                    {attributes.illustration}
+                    <DialogTitle sx={{ "&&&": { p: 0, mt: 3 }, fontSize: 20 }}>
+                        {attributes.title}
+                    </DialogTitle>
+                </Stack>
+            ) : (attributes.icon ?? attributes.title) ? (
                 <Stack
                     direction="row"
                     sx={[

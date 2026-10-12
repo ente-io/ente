@@ -30,6 +30,7 @@ import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
+import { trashFilesDialogAttributes } from "ente-gallery/components/trash-files-dialog";
 import type { Collection } from "ente-media/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
@@ -104,8 +105,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 
     const handleDelete = () =>
         showMiniDialog({
-            title: t("trash_files_title"),
-            message: t("trash_files_message"),
+            ...trashFilesDialogAttributes(selectedOwnFileCount),
             continue: {
                 text: t("move_to_trash"),
                 color: "critical",

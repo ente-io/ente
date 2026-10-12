@@ -91,6 +91,7 @@ import { initContacts, pullContacts } from "ente-contacts";
 import { DownloadStatusNotifications } from "ente-gallery/components/DownloadStatusNotifications";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import type { UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
+import { trashFilesDialogAttributes } from "ente-gallery/components/trash-files-dialog";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import type { FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
@@ -1636,8 +1637,7 @@ const Page: React.FC = () => {
                     break;
                 case "trash":
                     showMiniDialog({
-                        title: t("trash_files_title"),
-                        message: t("trash_files_message"),
+                        ...trashFilesDialogAttributes(selectedOwnCount),
                         continue: {
                             text: t("move_to_trash"),
                             color: "critical",
