@@ -1,3 +1,5 @@
+import "dart:ui" show SemanticsRole;
+
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
@@ -13,17 +15,22 @@ void main() {
   );
   const tick = Duration(milliseconds: 1);
 
-  testWidgets("LoadingComponent paints a ring; large shows the %", (
+  testWidgets("LoadingComponent paints a rotating ring in the three sizes", (
     tester,
   ) async {
-    await tester.pumpWidget(app(const LoadingComponent()));
-    expect(paint, findsOneWidget);
-    await tester.pumpWidget(
-      app(
-        const LoadingComponent(size: LoadingComponentSize.large, value: 0.45),
-      ),
-    );
-    expect(find.text("45%"), findsOneWidget);
+    for (final sample in {
+      LoadingComponentSize.small: 16.0,
+      LoadingComponentSize.medium: 24.0,
+      LoadingComponentSize.large: 40.0,
+    }.entries) {
+      await tester.pumpWidget(app(LoadingComponent(size: sample.key)));
+      expect(paint, findsOneWidget);
+      expect(
+        tester.getSize(find.byType(LoadingComponent)),
+        Size.square(sample.value),
+      );
+      expect(tester.hasRunningAnimations, isTrue);
+    }
   });
 
   testWidgets("showLoadingComponent updates in place and hides", (
@@ -39,7 +46,7 @@ void main() {
     expect(handle.isShowing(), isTrue);
     expect(find.text("Deleting 3 items"), findsOneWidget);
 
-    handle.update(message: "Almost done", value: 0.45);
+    handle.update(message: "Almost done");
     await tester.pump();
     expect(find.text("Almost done"), findsOneWidget);
 
@@ -60,6 +67,9 @@ void main() {
     await tester.pump();
     await tester.pump(Motion.standard);
     await tester.pump(tick);
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(fixed.isShowing(), isTrue);
     await tester.tapAt(const Offset(5, 5));
     await tester.pump();
     await tester.pump(Motion.standard);
@@ -87,16 +97,23 @@ void main() {
     await dismissible.hide();
   });
 
-  testWidgets("LoadingComponent exposes its label and progress to semantics", (
+  testWidgets("LoadingComponent exposes its label and spinner role", (
     tester,
   ) async {
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      app(const LoadingComponent(value: 0.45, semanticsLabel: "Downloading")),
+      app(const LoadingComponent(semanticsLabel: "Downloading")),
     );
     expect(
       tester.getSemantics(find.byType(LoadingComponent)),
-      isSemantics(label: "Downloading", value: "45%"),
+      isSemantics(label: "Downloading"),
+    );
+    expect(
+      tester
+          .getSemantics(find.byType(LoadingComponent))
+          .getSemanticsData()
+          .role,
+      SemanticsRole.loadingSpinner,
     );
     handle.dispose();
   });
@@ -127,24 +144,117 @@ void main() {
     expect((card.decoration! as BoxDecoration).color, colors.backgroundBase);
   });
 
-  testWidgets("LoadingComponent keeps the % on one line at large text sizes", (
+  testWidgets("showLoadingComponent establishes a semantic route", (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(app(const SizedBox()));
+    showLoadingComponent(tester.element(find.byType(Scaffold)), "Opening");
+    await tester.pump();
+    await tester.pump(Motion.standard);
+
+    var node = tester.getSemantics(find.text("Opening"));
+    final spinnerRole = tester
+        .getSemantics(find.byType(LoadingComponent))
+        .getSemanticsData()
+        .role;
+    var scopesRoute = false;
+    while (true) {
+      scopesRoute |= node.getSemanticsData().flagsCollection.scopesRoute;
+      final parent = node.parent;
+      if (parent == null) break;
+      node = parent;
+    }
+    semantics.dispose();
+    expect(scopesRoute, isTrue);
+    expect(spinnerRole, SemanticsRole.loadingSpinner);
+  });
+
+  testWidgets("showLoadingComponent keeps focus traversal inside the dialog", (
     tester,
   ) async {
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-        child: app(
-          const LoadingComponent(size: LoadingComponentSize.large, value: 0.45),
+      MaterialApp(
+        theme: ComponentTheme.lightTheme(),
+        builder: (_, _) => Navigator(
+          routeTraversalEdgeBehavior: TraversalEdgeBehavior.leaveFlutterView,
+          onGenerateRoute: (_) => MaterialPageRoute<void>(
+            builder: (_) => const Scaffold(body: SizedBox()),
+          ),
         ),
       ),
     );
-    expect(tester.getSize(find.text("45%")).height, 16);
+    showLoadingComponent(tester.element(find.byType(Scaffold)), "Opening");
+    await tester.pump();
+    await tester.pump(Motion.standard);
+    expect(
+      FocusScope.of(tester.element(find.text("Opening"))).traversalEdgeBehavior,
+      TraversalEdgeBehavior.closedLoop,
+    );
+  });
+
+  testWidgets("download progress remains in the message and null keeps it", (
+    tester,
+  ) async {
+    await tester.pumpWidget(app(const SizedBox()));
+    final handle = showLoadingComponent(
+      tester.element(find.byType(Scaffold)),
+      "Downloading",
+    );
+    await tester.pump();
+    await tester.pump(Motion.standard);
+
+    handle.update(message: "Downloading 45%");
+    await tester.pump();
+    handle.update(message: null);
+    await tester.pump();
+    expect(find.text("Downloading 45%"), findsOneWidget);
+    expect(tester.hasRunningAnimations, isTrue);
+  });
+
+  testWidgets(
+    "hide before the first frame completes without popping the page",
+    (tester) async {
+      await tester.pumpWidget(app(const Text("Page")));
+      final handle = showLoadingComponent(
+        tester.element(find.byType(Scaffold)),
+        "Opening",
+      );
+      final hidden = handle.hide();
+      await tester.pumpAndSettle();
+      await hidden;
+      expect(handle.isShowing(), isFalse);
+      expect(find.text("Opening"), findsNothing);
+      expect(find.text("Page"), findsOneWidget);
+      handle.update(message: "After dismissal");
+      await handle.hide();
+    },
+  );
+
+  testWidgets("hide leaves a newer page on the navigator", (tester) async {
+    await tester.pumpWidget(app(const Text("Page")));
+    final context = tester.element(find.byType(Scaffold));
+    final handle = showLoadingComponent(context, "Opening");
+    await tester.pump();
+    await tester.pump(Motion.standard);
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const Scaffold(body: Text("New page"))),
+    );
+    await tester.pumpAndSettle();
+
+    final hidden = handle.hide();
+    await tester.pumpAndSettle();
+    await hidden;
+    expect(handle.isShowing(), isFalse);
+    expect(find.text("New page"), findsOneWidget);
   });
 
   testWidgets("showLoadingComponent centres the card above the keyboard", (
     tester,
   ) async {
-    tester.view.viewInsets = const FakeViewPadding(bottom: 900);
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
     addTearDown(tester.view.reset);
     await tester.pumpWidget(app(const SizedBox()));
     showLoadingComponent(tester.element(find.byType(Scaffold)), "Opening");

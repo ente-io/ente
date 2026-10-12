@@ -254,7 +254,7 @@ class _CatalogHomeState extends State<CatalogHome> {
       CatalogSection(
         title: 'Loading',
         icon: HugeIcons.strokeRoundedLoading03,
-        components: const ['Indicator', 'Determinate', 'Dialog'],
+        components: const ['Indicator', 'Dialog'],
         previewBuilder: (_) => const _LoadingPreview(),
       ),
       CatalogSection(
@@ -4222,8 +4222,6 @@ class _LoadingPreview extends StatefulWidget {
 }
 
 class _LoadingPreviewState extends State<_LoadingPreview> {
-  double _value = 0.45;
-
   Future<void> _showDialog() async {
     final dialog = showLoadingComponent(context, 'Deleting 3 items');
     await Future<void>.delayed(const Duration(milliseconds: 1500));
@@ -4240,10 +4238,7 @@ class _LoadingPreviewState extends State<_LoadingPreview> {
     );
     for (var step = 1; step <= 30; step++) {
       await Future<void>.delayed(const Duration(milliseconds: 100));
-      dialog.update(
-        message: 'Downloading ${(step / 30 * 100).round()}%',
-        value: step / 30,
-      );
+      dialog.update(message: 'Downloading ${(step / 30 * 100).round()}%');
     }
     await dialog.hide();
   }
@@ -4262,37 +4257,6 @@ class _LoadingPreviewState extends State<_LoadingPreview> {
                   label: size.name,
                   child: LoadingComponent(size: size),
                 ),
-            ],
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Determinate',
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  for (final value in [0.0, 0.45, 1.0])
-                    _LoadingSample(
-                      label: '${(value * 100).round()}%',
-                      child: LoadingComponent(
-                        size: LoadingComponentSize.large,
-                        value: value,
-                      ),
-                    ),
-                  _LoadingSample(
-                    label: 'slider',
-                    child: LoadingComponent(
-                      size: LoadingComponentSize.large,
-                      value: _value,
-                    ),
-                  ),
-                ],
-              ),
-              SliderComponent(
-                value: _value,
-                onChanged: (value) => setState(() => _value = value),
-              ),
             ],
           ),
         ),

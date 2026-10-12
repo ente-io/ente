@@ -1,10 +1,9 @@
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsRole;
 
-import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
 
-// Figma: https://www.figma.com/design/BuBNPPytxlVnqfmCUW0mgz/Ente-Visual-Design?node-id=7884-4001&m=dev
 enum LoadingComponentSize {
   small(16, 2),
   medium(24, 2.5),
@@ -20,13 +19,11 @@ class LoadingComponent extends StatefulWidget {
   const LoadingComponent({
     super.key,
     this.size = LoadingComponentSize.medium,
-    this.value,
     this.color,
     this.semanticsLabel,
   });
 
   final LoadingComponentSize size;
-  final double? value;
   final Color? color;
   final String? semanticsLabel;
 
@@ -44,21 +41,7 @@ class _LoadingComponentState extends State<LoadingComponent>
   @override
   void initState() {
     super.initState();
-    _syncTurn();
-  }
-
-  @override
-  void didUpdateWidget(covariant LoadingComponent oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _syncTurn();
-  }
-
-  void _syncTurn() {
-    if (widget.value == null) {
-      if (!_turn.isAnimating) _turn.repeat();
-    } else {
-      _turn.stop();
-    }
+    _turn.repeat();
   }
 
   @override
@@ -69,35 +52,20 @@ class _LoadingComponentState extends State<LoadingComponent>
 
   @override
   Widget build(BuildContext context) {
-    final value = widget.value;
-    final percent = value == null ? null : '${(value * 100).round()}%';
-    final color = widget.color ?? context.componentColors.primary;
     return Semantics(
       label: widget.semanticsLabel,
-      value: percent,
+      role: SemanticsRole.loadingSpinner,
       child: SizedBox.square(
         dimension: widget.size.diameter,
-        child: RepaintBoundary(
-          child: CustomPaint(
-            painter: _LoadingPainter(
-              color: color,
-              stroke: widget.size.stroke,
-              value: value,
-              turn: _turn,
+        child: RotationTransition(
+          turns: _turn,
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _LoadingPainter(
+                color: widget.color ?? context.componentColors.primary,
+                stroke: widget.size.stroke,
+              ),
             ),
-            child: percent != null && widget.size == LoadingComponentSize.large
-                ? Center(
-                    child: ExcludeSemantics(
-                      child: Text(
-                        percent,
-                        style: TextStyles.mini.copyWith(color: color),
-                        textScaler: MediaQuery.textScalerOf(
-                          context,
-                        ).clamp(maxScaleFactor: 1),
-                      ),
-                    ),
-                  )
-                : null,
           ),
         ),
       ),
@@ -106,44 +74,30 @@ class _LoadingComponentState extends State<LoadingComponent>
 }
 
 class _LoadingPainter extends CustomPainter {
-  _LoadingPainter({
-    required this.color,
-    required this.stroke,
-    required this.value,
-    required this.turn,
-  }) : super(repaint: value == null ? turn : null);
+  _LoadingPainter({required this.color, required this.stroke});
 
   final Color color;
   final double stroke;
-  final double? value;
-  final Animation<double> turn;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect =
-        Offset(stroke / 2, stroke / 2) &
-        Size(size.width - stroke, size.height - stroke);
+    final rect = (Offset.zero & size).deflate(stroke / 2);
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawOval(rect, paint..color = color.withValues(alpha: 0.16));
-    paint.color = color;
-    final value = this.value;
-    if (value == null) {
-      canvas.drawArc(
-        rect,
-        -math.pi / 2 + 2 * math.pi * turn.value,
-        math.pi / 2,
-        false,
-        paint,
-      );
-    } else if (value > 0) {
-      canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * value, false, paint);
-    }
+      ..strokeCap = StrokeCap.round
+      ..color = color.withValues(alpha: 0.16);
+    canvas.drawOval(rect, paint);
+    canvas.drawArc(
+      rect,
+      -math.pi / 2,
+      math.pi / 2,
+      false,
+      paint..color = color,
+    );
   }
 
   @override
   bool shouldRepaint(_LoadingPainter old) =>
-      old.color != color || old.stroke != stroke || old.value != value;
+      old.color != color || old.stroke != stroke;
 }
