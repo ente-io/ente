@@ -11,12 +11,14 @@ export const trashFilesDialogAttributes = (
     title: t("trash_items_title", {
         count,
         fallbackLng: false,
-        defaultValue: t("trash_files_title"),
+        defaultValue: t(count === 1 ? "trash_file_title" : "trash_files_title"),
     }),
     message: t("trash_items_message", {
         count,
         fallbackLng: false,
-        defaultValue: t("trash_files_message"),
+        defaultValue: t(
+            count === 1 ? "trash_file_message" : "trash_files_message",
+        ),
     }),
     illustration: (
         <Box

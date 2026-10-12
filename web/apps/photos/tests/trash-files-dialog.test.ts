@@ -13,12 +13,16 @@ beforeEach(async () => {
             "en-US": { translation: en },
             "fr-FR": {
                 translation: {
+                    trash_file_title: fr.trash_file_title,
+                    trash_file_message: fr.trash_file_message,
                     trash_files_title: fr.trash_files_title,
                     trash_files_message: fr.trash_files_message,
                 },
             },
             "es-ES": {
                 translation: {
+                    trash_file_title: es.trash_file_title,
+                    trash_file_message: es.trash_file_message,
                     trash_files_title: es.trash_files_title,
                     trash_files_message: es.trash_files_message,
                 },
@@ -45,8 +49,14 @@ test.each([
     await i18n.changeLanguage(locale);
     for (const count of [1, 2]) {
         expect(trashFilesDialogAttributes(count)).toMatchObject({
-            title: strings.trash_files_title,
-            message: strings.trash_files_message,
+            title:
+                count === 1
+                    ? strings.trash_file_title
+                    : strings.trash_files_title,
+            message:
+                count === 1
+                    ? strings.trash_file_message
+                    : strings.trash_files_message,
         });
     }
 });
