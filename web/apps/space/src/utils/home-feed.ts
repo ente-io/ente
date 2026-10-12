@@ -10,31 +10,12 @@ export type HomeFeedEntry =
       }
     | { identity: string; item: SpacePost; kind: "remote"; renderKey: string };
 
-export const homeFeedSeparatorBefore = (
-    entries: HomeFeedEntry[],
-    previousNewestPost: Pick<SpacePost, "postId" | "timestampMs"> | undefined,
-) => {
-    if (!previousNewestPost) return undefined;
-    let hasNewPosts = false;
-    for (const entry of entries) {
-        if (entry.kind != "remote") continue;
-        const post = entry.item;
-        if (
-            post.timestampMs > previousNewestPost.timestampMs ||
-            (post.timestampMs == previousNewestPost.timestampMs &&
-                post.postId > previousNewestPost.postId)
-        ) {
-            hasNewPosts = true;
-        } else {
-            return hasNewPosts ? entry.identity : undefined;
-        }
-    }
-    return undefined;
-};
-
 export const homeFeedEntries = (
     feedItems: SpacePost[],
     localFeedPosts: LocalSpaceFeedPost[],
+    newPostsSinceMs: number | undefined,
+    latestPostIDs?: ReadonlySet<number>,
+    viewerSpaceId?: string,
 ) => {
     const localResolvedPostIds = new Set(
         localFeedPosts.map((item) =>
@@ -43,7 +24,7 @@ export const homeFeedEntries = (
                 : item.postId,
         ),
     );
-    return [
+    const entries: HomeFeedEntry[] = [
         ...localFeedPosts.map((item): HomeFeedEntry => ({
             identity:
                 item.status == "posted" || item.status == "ready"
@@ -64,4 +45,38 @@ export const homeFeedEntries = (
                 renderKey: `post:${item.postId}`,
             })),
     ];
+    const latest: HomeFeedEntry[] = [];
+    const history: SpacePost[] = [];
+    for (const entry of entries) {
+        let post: SpacePost;
+        if (entry.kind == "remote") {
+            post = entry.item;
+        } else {
+            if (entry.item.status != "ready") {
+                latest.push(entry);
+                continue;
+            }
+            post = entry.item.post;
+        }
+        if (
+            latestPostIDs?.has(post.postId) ||
+            (post.spaceId != viewerSpaceId &&
+                newPostsSinceMs != undefined &&
+                post.timestampMs > newPostsSinceMs)
+        ) {
+            latest.push(entry);
+        } else {
+            history.push(post);
+        }
+    }
+    history.sort(
+        (a, b) => b.timestampMs - a.timestampMs || b.postId - a.postId,
+    );
+    return { latest, history };
 };
+
+export const homeFeedSeparatorBefore = (
+    latest: HomeFeedEntry[],
+    history: SpacePost[],
+) =>
+    history.length && latest.length ? `post:${history[0]!.postId}` : undefined;

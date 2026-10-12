@@ -25,6 +25,7 @@ import {
     type SpaceViewerPhoto,
     type SpaceViewerPostActionMode,
 } from "components/FileViewer";
+import { SpacePostGrid } from "components/PostGrid";
 import { SpacePostPhotoInput } from "components/PostPhotoInput";
 import { SpacePostTile, type SpacePostTileItem } from "components/PostTile";
 import { SpaceLoadingSpinner } from "components/RouteFallback";
@@ -1354,7 +1355,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                                 width: "calc(100% - 16px)",
                             }}
                         >
-                            {visiblePostItems.map(renderPostTile)}
+                            <SpacePostGrid
+                                items={visiblePostItems.map((item) => ({
+                                    ...item,
+                                    ...dimensionsForPost(item),
+                                }))}
+                                postCount={displayedPostsCount}
+                                renderTile={renderPostTile}
+                            />
                         </Box>
                     ) : shouldShowPostLoadingIndicator ? (
                         <ProfilePostLoadingIndicator />
