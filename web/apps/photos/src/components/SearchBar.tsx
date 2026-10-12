@@ -712,7 +712,11 @@ const EmptyState: React.FC<
 
     const hasPeople = people && people.length > 0;
     if (!hasPeople && !label) {
-        return null;
+        return (
+            <Typography variant="small" sx={{ color: "text.muted", py: 1 }}>
+                {t("search_start_typing")}
+            </Typography>
+        );
     }
 
     return (
