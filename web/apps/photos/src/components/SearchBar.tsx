@@ -343,7 +343,7 @@ const SearchInput: React.FC<
                 menuIsOpen={open}
                 onFocus={handleFocus}
                 placeholder={t("search_hint")}
-                loadingMessage={() => t("loading")}
+                loadingMessage={() => null}
                 noOptionsMessage={({ inputValue }) => {
                     if (inputValue.trim()) {
                         return <SearchEmptyState />;
@@ -449,14 +449,6 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
                 role={hasQuery ? "tabpanel" : undefined}
                 aria-labelledby={hasQuery ? `${id}-${category}` : undefined}
             >
-                {props.isLoading && counts[category] > 0 && (
-                    <Typography
-                        role="status"
-                        sx={{ color: "text.muted", textAlign: "center", p: 1 }}
-                    >
-                        {t("loading")}
-                    </Typography>
-                )}
                 {props.children}
             </div>
             <Typography
@@ -623,6 +615,14 @@ const createSelectStyles = (
         color: theme.vars.palette.text.muted,
         whiteSpace: "nowrap",
         overflowX: "hidden",
+    }),
+    loadingIndicator: (style) => ({
+        ...style,
+        color: theme.vars.palette.text.muted,
+        paddingRight: "16px",
+        "@media (prefers-reduced-motion: reduce)": {
+            "& span": { animation: "none" },
+        },
     }),
     dropdownIndicator: (style) => ({ ...style, display: "none" }),
     indicatorSeparator: (style) => ({ ...style, display: "none" }),
