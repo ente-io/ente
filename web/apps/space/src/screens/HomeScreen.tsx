@@ -27,6 +27,7 @@ import {
     spacePostLikePopDurationMs,
     spacePostLikePopTiming,
 } from "components/post-like-animation";
+import { paintStretchingDot } from "components/post-photos-dots";
 import { SpacePostAvatar } from "components/PostAvatar";
 import { SpacePostGrid } from "components/PostGrid";
 import { SpacePostPhotosCounter } from "components/PostPhotosCounter";
@@ -36,6 +37,7 @@ import { SpacePWAInstallPrompt } from "components/PWAInstallPrompt";
 import { SpaceLoadingSpinner } from "components/RouteFallback";
 import { SpaceShareInviteButton } from "components/ShareInviteButton";
 import { SpaceSkipLink } from "components/SkipLink";
+import { viewerOriginKey } from "components/viewer-transition";
 import log from "ente-base/log";
 import { useBrowserBackClose } from "hooks/use-browser-back-close";
 import { useDecodedImage } from "hooks/use-decoded-image";
@@ -617,6 +619,7 @@ const FeedPhotoOverlay: React.FC<{
                 index={photoIndex}
                 count={photoCount}
                 activeColor={green}
+                stretches
             />
             {caption && (
                 <Box title={caption} sx={{ minWidth: 0, width: "100%" }}>
@@ -640,6 +643,7 @@ const FeedPhoto: React.FC<{
     shouldLoad: boolean;
     shouldPreloadVideo: boolean;
     thumbHash?: string;
+    viewerOrigin?: string;
 }> = ({
     imageUrl,
     isActive,
@@ -653,6 +657,7 @@ const FeedPhoto: React.FC<{
     shouldPreloadVideo,
     thumbHash,
     video,
+    viewerOrigin,
 }) => {
     const decodedPhoto = useDecodedImage(imageUrl, true);
     const isPostUnavailable = isUnavailable || Boolean(decodedPhoto.failed);
@@ -695,6 +700,7 @@ const FeedPhoto: React.FC<{
             }
             disabled={video ? undefined : !canOpenPhoto}
             tabIndex={!video && isActive ? 0 : -1}
+            data-space-viewer-origin={viewerOrigin}
             onClick={video ? undefined : onOpenPhoto}
             onFocus={(event: React.FocusEvent<HTMLElement>) => {
                 if (video && event.target == event.currentTarget)
@@ -706,6 +712,7 @@ const FeedPhoto: React.FC<{
                 appearance: "none",
                 bgcolor: "transparent",
                 border: 0,
+                borderRadius: "inherit",
                 cursor: canOpenPhoto ? "pointer" : "default",
                 display: "block",
                 height: "100%",
@@ -1347,6 +1354,11 @@ const FeedItem: React.FC<FeedItemProps> = ({
                     }}
                     onScroll={(event) => {
                         const carousel = event.currentTarget;
+                        paintStretchingDot(
+                            rootRef.current!,
+                            carousel.scrollLeft / carousel.clientWidth,
+                            photoCount,
+                        );
                         const index = Math.round(
                             carousel.scrollLeft / carousel.clientWidth,
                         );
@@ -1374,6 +1386,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                         scrollToPhoto(index);
                     }}
                     sx={{
+                        borderRadius: "inherit",
                         display: "flex",
                         height: "100%",
                         overflowX: "hidden",
@@ -1414,6 +1427,11 @@ const FeedItem: React.FC<FeedItemProps> = ({
                             shouldPreloadVideo={shouldPreloadVideo}
                             thumbHash={photo.thumbHash}
                             video={photo.video}
+                            viewerOrigin={
+                                index == photoIndex
+                                    ? viewerOriginKey(spaceId, postId)
+                                    : undefined
+                            }
                         />
                     ))}
                 </Box>

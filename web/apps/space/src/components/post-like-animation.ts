@@ -1,15 +1,5 @@
 import { keyframes } from "@mui/material/styles";
 
-// The burst, draw and flip animations in like.riv.
-export const likeAnimationVariants = [0, 2, 4];
-
-export const pickLikeVariant = (previous: number, random = Math.random) => {
-    const choices = likeAnimationVariants.filter(
-        (variant) => variant != previous,
-    );
-    return choices[Math.floor(random() * choices.length)]!;
-};
-
 export const spacePostLikePopDurationMs = 520;
 export const spacePostLikePopTiming = "cubic-bezier(0.2, 0.82, 0.22, 1)";
 

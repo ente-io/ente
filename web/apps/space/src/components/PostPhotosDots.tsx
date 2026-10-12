@@ -1,7 +1,5 @@
 import { Box } from "@mui/material";
-
-// A 5px dot and the 6px gap after it.
-export const photoDotStep = 11;
+import { photoDotStep } from "components/post-photos-dots";
 
 export const SpacePostPhotosDots = ({
     index,

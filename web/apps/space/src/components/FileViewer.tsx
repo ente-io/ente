@@ -23,7 +23,8 @@ import { SpaceBottomSheetTransition } from "components/BottomSheetTransition";
 import { SpaceCaptionText } from "components/CaptionText";
 import { ConfirmationActionSheet } from "components/ConfirmationActionSheet";
 import { spacePostLikePopDurationMs } from "components/post-like-animation";
-import { photoDotStep, SpacePostPhotosDots } from "components/PostPhotosDots";
+import { paintStretchingDot } from "components/post-photos-dots";
+import { SpacePostPhotosDots } from "components/PostPhotosDots";
 import { SpacePostReplyControls } from "components/PostReplyControls";
 import { createSpaceVideoContent } from "components/PostVideoContent";
 import { SpaceVideoError } from "components/VideoError";
@@ -212,31 +213,18 @@ const viewerPadding = (hasDraftPhotoControls: boolean) => {
 };
 
 // index is the photo whose dots are shown, position the gallery index as a float.
-const paintStretchingDot = (
+const paintViewerPhotoDot = (
     root: HTMLElement,
     photos: SpaceViewerPhoto[],
     index: number,
     position: number,
 ) => {
-    const dot = root.querySelector<HTMLElement>(
-        "[data-space-photo-dots-indicator]",
-    );
     const photo = photos[index];
-    if (!dot || !photo) return;
+    if (!photo) return;
     const count = photo.postPhotoCount ?? 1;
     const neighbour = photos[position > index ? index + 1 : index - 1];
     const offset = neighbour?.postId == photo.postId ? position - index : 0;
-    const p = Math.min(
-        count - 1,
-        Math.max(0, (photo.postPhotoIndex ?? 0) + offset),
-    );
-    const from = Math.min(Math.floor(p), count - 2);
-    const head =
-        (from + Math.min(1, Math.max(0, (p - from) * 2))) * photoDotStep;
-    const tail =
-        (from + Math.min(1, Math.max(0, (p - from) * 2 - 1))) * photoDotStep;
-    dot.style.transform = `translate(${tail - 0.5}px, -50%)`;
-    dot.style.width = `${head - tail + 6}px`;
+    paintStretchingDot(root, (photo.postPhotoIndex ?? 0) + offset, count);
 };
 
 interface ViewerMotion {
@@ -251,6 +239,7 @@ const endOpenFlight = (motion: ViewerMotion, root: HTMLElement) => {
     motion.flight?.release();
     motion.flight = undefined;
     delete root.dataset.spaceViewerFlying;
+    delete root.dataset.spaceViewerWaiting;
     setViewerBackground(root, 1);
 };
 
@@ -260,21 +249,18 @@ const handOverOpenFlight = (
     motion: ViewerMotion,
     root: HTMLElement,
     pswp: PhotoSwipe | undefined,
-    attempt = 0,
 ) => {
     if (!motion.flight || !motion.landed || !pswp) return;
     const content = pswp.currSlide?.content;
+    const image = content?.element;
     const isShown =
-        !content?.element ||
-        content.isError() ||
-        (content.element.isConnected && !content.isDecoding);
-    if (!isShown && attempt < 120) {
-        requestAnimationFrame(() =>
-            handOverOpenFlight(motion, root, pswp, attempt + 1),
-        );
-        return;
-    }
-    endOpenFlight(motion, root);
+        content?.isError() ||
+        (image instanceof HTMLImageElement &&
+            image.complete &&
+            image.naturalWidth > 0 &&
+            image.isConnected &&
+            !content?.isDecoding);
+    if (isShown) endOpenFlight(motion, root);
 };
 
 const viewerTouchPoint = (event: Event) => {
@@ -581,7 +567,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         activePhoto.viewerLiked ?? false,
     );
     const [photoLikePopID, setPhotoLikePopID] = React.useState(0);
-    const [photoLikeToggleID, setPhotoLikeToggleID] = React.useState(0);
     const [caption, setCaption] = React.useState(activePhoto.caption ?? "");
     const [captionEditValue, setCaptionEditValue] = React.useState(
         activePhoto.caption ?? "",
@@ -773,7 +758,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         motion.flight = undefined;
         motion.reveal?.();
         motion.reveal = undefined;
-        if (root) delete root.dataset.spaceViewerFlying;
+        if (root) {
+            delete root.dataset.spaceViewerFlying;
+            delete root.dataset.spaceViewerWaiting;
+        }
         const stop =
             root && item && origin && from && src
                 ? playViewerClose(
@@ -819,7 +807,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         }
 
         const nextLiked = !isPhotoLiked;
-        setPhotoLikeToggleID((id) => id + 1);
         if (!activePhoto.postId || !onSetPostLiked) {
             setIsPhotoLiked(nextLiked);
             if (nextLiked) setPhotoLikePopID((id) => id + 1);
@@ -1337,7 +1324,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             motion.stopClose = undefined;
             motion.reveal?.();
             motion.reveal = undefined;
-            if (root) delete root.dataset.spaceViewerFlying;
+            if (root) {
+                delete root.dataset.spaceViewerFlying;
+                delete root.dataset.spaceViewerWaiting;
+            }
         };
         const item = fallbackPhotoRef.current;
         if (!root || isDraftPost || item.video || !item.imageUrl)
@@ -1356,6 +1346,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             (t) => setViewerBackground(root, viewerBackgroundOpacity(t)),
             () => {
                 motion.landed = true;
+                root.dataset.spaceViewerWaiting = "true";
                 handOverOpenFlight(motion, root, pswpRef.current);
             },
         );
@@ -1441,6 +1432,14 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 videos.get(content)?.destroy();
                 videos.delete(content);
             });
+            const handOver = () => {
+                queueMicrotask(() => {
+                    if (!disposed)
+                        handOverOpenFlight(motionRef.current, root, pswp);
+                });
+            };
+            pswp.on("contentAppendImage", handOver);
+            pswp.on("loadComplete", handOver);
             pswp.on("destroy", () => {
                 videos.forEach((video) => video.destroy());
                 videos.clear();
@@ -1555,7 +1554,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                             ? `${-offset * viewportSize.x * 0.4}px 0`
                             : "";
                 }
-                paintStretchingDot(
+                paintViewerPhotoDot(
                     root,
                     viewerPhotosRef.current,
                     currIndex,
@@ -1751,6 +1750,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 },
                 "&[data-space-viewer-flying='true'] :is([data-space-viewer-chrome='true'], [data-space-viewer-bottom='true'], [data-space-viewer-chrome='true'] *, [data-space-viewer-bottom='true'] *)":
                     { pointerEvents: "none !important" },
+                "&[data-space-viewer-waiting='true'] [data-space-viewer-close], &[data-space-viewer-waiting='true'] [data-space-viewer-close] *":
+                    { pointerEvents: "auto !important" },
                 "@media (prefers-reduced-motion: reduce)": {
                     transition: "none",
                 },
@@ -2009,6 +2010,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                 ? "Cancel caption edit"
                                 : "Close viewer"
                         }
+                        data-space-viewer-close
                         disabled={isDraftPostActionRunning}
                         onClick={closeViewer}
                         sx={{ ...draftHeaderButtonSx, color: "#C0C0C0" }}
@@ -2654,7 +2656,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                 isReplyMode={isReplyMode}
                                 liked={isPhotoLiked}
                                 likePopID={photoLikePopID}
-                                likeToggleID={photoLikeToggleID}
                                 onLike={handlePhotoLikeClick}
                                 onSendReply={sendReply}
                                 replyActionPhase={replyActionPhase}

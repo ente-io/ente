@@ -14,7 +14,6 @@ import {
     spacePostLikePopDurationMs,
     spacePostLikePopTiming,
 } from "components/post-like-animation";
-import { SpacePostLikeHeart } from "components/PostLikeHeart";
 import React from "react";
 import {
     spaceControlBackground,
@@ -61,7 +60,6 @@ interface SpacePostReplyControlsProps {
     isReplyMode: boolean;
     liked: boolean;
     likePopID: number;
-    likeToggleID: number;
     onLike: () => void;
     onSendReply: () => void;
     replyActionPhase: SpaceActionPhase | null;
@@ -76,7 +74,6 @@ export const SpacePostReplyControls: React.FC<SpacePostReplyControlsProps> = ({
     isReplyMode,
     liked,
     likePopID,
-    likeToggleID,
     onLike,
     onSendReply,
     replyActionPhase,
@@ -239,38 +236,29 @@ export const SpacePostReplyControls: React.FC<SpacePostReplyControlsProps> = ({
                             />
                         )
                     ) : (
-                        <SpacePostLikeHeart
-                            liked={liked}
-                            toggleID={likeToggleID}
-                            fallback={
-                                <Box
-                                    key={
-                                        isLikePopping
-                                            ? `heart-${likePopID}`
-                                            : "heart"
-                                    }
-                                    component="span"
-                                    sx={{
-                                        animation: isLikePopping
-                                            ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
-                                            : undefined,
-                                        display: "flex",
-                                        lineHeight: 0,
-                                        transformOrigin: "50% 58%",
-                                        "@media (prefers-reduced-motion: reduce)":
-                                            { animation: "none" },
-                                    }}
-                                >
-                                    <HugeiconsIcon
-                                        fill={liked ? green : "none"}
-                                        icon={FavouriteIcon}
-                                        primaryColor={liked ? green : undefined}
-                                        size={26}
-                                        strokeWidth={1.8}
-                                    />
-                                </Box>
-                            }
-                        />
+                        <Box
+                            key={isLikePopping ? `heart-${likePopID}` : "heart"}
+                            component="span"
+                            sx={{
+                                animation: isLikePopping
+                                    ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
+                                    : undefined,
+                                display: "flex",
+                                lineHeight: 0,
+                                transformOrigin: "50% 58%",
+                                "@media (prefers-reduced-motion: reduce)": {
+                                    animation: "none",
+                                },
+                            }}
+                        >
+                            <HugeiconsIcon
+                                fill={liked ? green : "none"}
+                                icon={FavouriteIcon}
+                                primaryColor={liked ? green : undefined}
+                                size={26}
+                                strokeWidth={1.8}
+                            />
+                        </Box>
                     )}
                 </Box>
             </Box>
