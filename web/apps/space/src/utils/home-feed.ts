@@ -13,9 +13,6 @@ export type HomeFeedEntry =
 export const homeFeedEntries = (
     feedItems: SpacePost[],
     localFeedPosts: LocalSpaceFeedPost[],
-    newPostsSinceMs: number | undefined,
-    latestPostIDs?: ReadonlySet<number>,
-    viewerSpaceId?: string,
 ) => {
     const localResolvedPostIds = new Set(
         localFeedPosts.map((item) =>
@@ -24,7 +21,7 @@ export const homeFeedEntries = (
                 : item.postId,
         ),
     );
-    const entries: HomeFeedEntry[] = [
+    return [
         ...localFeedPosts.map((item): HomeFeedEntry => ({
             identity:
                 item.status == "posted" || item.status == "ready"
@@ -45,32 +42,4 @@ export const homeFeedEntries = (
                 renderKey: `post:${item.postId}`,
             })),
     ];
-    const latest: HomeFeedEntry[] = [];
-    const history: SpacePost[] = [];
-    for (const entry of entries) {
-        let post: SpacePost;
-        if (entry.kind == "remote") {
-            post = entry.item;
-        } else {
-            if (entry.item.status != "ready") {
-                latest.push(entry);
-                continue;
-            }
-            post = entry.item.post;
-        }
-        if (
-            latestPostIDs?.has(post.postId) ||
-            (post.spaceId != viewerSpaceId &&
-                newPostsSinceMs != undefined &&
-                post.timestampMs > newPostsSinceMs)
-        ) {
-            latest.push(entry);
-        } else {
-            history.push(post);
-        }
-    }
-    history.sort(
-        (a, b) => b.timestampMs - a.timestampMs || b.postId - a.postId,
-    );
-    return { latest, history };
 };

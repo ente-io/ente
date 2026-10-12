@@ -12,7 +12,6 @@ const spaceFeedCacheSize = 20;
 const SpaceFeedCacheSnapshotSchema = z.object({
     dirty: z.boolean(),
     items: CachedSpacePost.array(),
-    lastVisitedAtMs: z.number().optional(),
     nextCursor: z.string().optional(),
     spaceId: z.string(),
     syncedAtMs: z.number(),
@@ -22,7 +21,6 @@ const SpaceFeedCacheSnapshotSchema = z.object({
 export interface SpaceFeedCacheSnapshot {
     dirty: boolean;
     items: SpacePost[];
-    lastVisitedAtMs?: number;
     nextCursor?: string;
     spaceId: string;
     syncedAtMs: number;
@@ -30,8 +28,6 @@ export interface SpaceFeedCacheSnapshot {
 }
 
 export interface SpaceFeedSession {
-    newPostsSinceMs: number;
-    latestPosts: SpacePost[];
     presentedPostIdentities: Set<string>;
 }
 
@@ -39,7 +35,6 @@ const memoryCache = new Map<string, SpaceFeedCacheSnapshot | undefined>();
 const feedSessions = new Map<string, SpaceFeedSession>();
 const cacheOperations = new Map<string, Promise<void>>();
 let cacheGeneration = 0;
-let appOpenedAtMs = Date.now();
 
 const cacheKey = async (spaceId: string) => {
     const userID = savedPartialLocalUser()?.id;
@@ -145,65 +140,16 @@ export const loadCachedSpaceFeed = async (
     }
 };
 
-const feedSessionForSnapshot = (
-    key: string,
-    cached: SpaceFeedCacheSnapshot | undefined,
-) => {
-    let session = feedSessions.get(key);
-    if (!session) {
-        const newPostsSinceMs = cached?.lastVisitedAtMs ?? appOpenedAtMs;
-        session = {
-            newPostsSinceMs,
-            latestPosts: (cached?.items ?? []).filter(
-                (post) =>
-                    post.spaceId != cached?.spaceId &&
-                    post.timestampMs > newPostsSinceMs,
-            ),
-            presentedPostIdentities: new Set(),
-        };
-        feedSessions.set(key, session);
-    }
-    return session;
-};
-
 export const loadSpaceFeedSession = async (spaceId: string) => {
     const generation = cacheGeneration;
     const key = await cacheKey(spaceId);
     if (!key || generation != cacheGeneration) return undefined;
-    const cached = await loadCachedSpaceFeed(spaceId);
-    if (generation != cacheGeneration) return undefined;
-    return feedSessionForSnapshot(key, cached);
-};
-
-export const spaceFeedSessionItems = (
-    session: SpaceFeedSession | undefined,
-    items: SpacePost[],
-) =>
-    [
-        ...new Map(
-            [...(session?.latestPosts ?? []), ...items].map((post) => [
-                post.postId,
-                post,
-            ]),
-        ).values(),
-    ].sort(descendingPostOrder);
-
-const rememberSessionPosts = (
-    session: SpaceFeedSession,
-    items: SpacePost[],
-    spaceId: string,
-) => {
-    const latestPostIDs = new Set(
-        session.latestPosts.map((post) => post.postId),
-    );
-    session.latestPosts = spaceFeedSessionItems(session, items)
-        .filter(
-            (post) =>
-                (post.spaceId != spaceId &&
-                    post.timestampMs > session.newPostsSinceMs) ||
-                latestPostIDs.has(post.postId),
-        )
-        .map(cacheablePost);
+    let session = feedSessions.get(key);
+    if (!session) {
+        session = { presentedPostIdentities: new Set() };
+        feedSessions.set(key, session);
+    }
+    return session;
 };
 
 const writeCachedSpaceFeed = async (
@@ -221,27 +167,7 @@ const writeCachedSpaceFeed = async (
         if (generation != cacheGeneration) return;
         if (previous && memoryCache.get(key)?.syncedAtMs != previous.syncedAtMs)
             return;
-        normalized.lastVisitedAtMs =
-            Math.max(
-                normalized.lastVisitedAtMs ?? 0,
-                memoryCache.get(key)?.lastVisitedAtMs ?? 0,
-            ) || undefined;
         applied = true;
-        const session = feedSessions.get(key);
-        if (session) {
-            const refreshedPostIDs = new Set(
-                snapshot.items.map((post) => post.postId),
-            );
-            const oldestPost = snapshot.nextCursor
-                ? snapshot.items.at(-1)
-                : undefined;
-            session.latestPosts = session.latestPosts.filter(
-                (post) =>
-                    refreshedPostIDs.has(post.postId) ||
-                    (oldestPost && descendingPostOrder(post, oldestPost) > 0),
-            );
-            rememberSessionPosts(session, snapshot.items, snapshot.spaceId);
-        }
         memoryCache.set(key, normalized);
         await setKV(key, normalized);
         if (generation != cacheGeneration) {
@@ -256,13 +182,11 @@ export const cacheCurrentSpaceFeedPage = async (
     spaceId: string,
     page: SpacePostPage,
     previous?: { syncedAtMs?: number },
-    lastVisitedAtMs?: number,
 ) =>
     writeCachedSpaceFeed(
         {
             dirty: false,
             items: page.items,
-            lastVisitedAtMs,
             nextCursor: page.nextCursor,
             spaceId,
             syncedAtMs: Date.now(),
@@ -308,15 +232,6 @@ const updateCachedSpaceFeed = async (
             syncedAtMs: Math.max(Date.now(), snapshot.syncedAtMs + 1),
         });
         if (generation != cacheGeneration) return;
-        const session = createIfMissing
-            ? feedSessionForSnapshot(key, snapshot)
-            : feedSessions.get(key);
-        if (session) {
-            session.latestPosts = update({
-                ...cloneSnapshot(snapshot),
-                items: session.latestPosts.map(clonePost),
-            }).items.map(cacheablePost);
-        }
         memoryCache.set(key, nextSnapshot);
         await setKV(key, nextSnapshot);
         if (generation != cacheGeneration) {
@@ -328,14 +243,6 @@ const updateCachedSpaceFeed = async (
 
 const descendingPostOrder = (a: SpacePost, b: SpacePost) =>
     b.timestampMs - a.timestampMs || b.postId - a.postId;
-
-export const rememberSpaceFeedSessionPosts = async (
-    spaceId: string,
-    posts: SpacePost[],
-) => {
-    const session = await loadSpaceFeedSession(spaceId);
-    if (session) rememberSessionPosts(session, posts, spaceId);
-};
 
 export const prependCachedSpaceFeedPost = (spaceId: string, post: SpacePost) =>
     updateCachedSpaceFeed(
@@ -394,5 +301,4 @@ export const clearSpaceFeedMemoryCache = () => {
     cacheGeneration += 1;
     memoryCache.clear();
     feedSessions.clear();
-    appOpenedAtMs = Date.now();
 };
