@@ -1,1 +1,0 @@
-- Fixed overscrolling and inconsistent icon sizes on the upload screen.
