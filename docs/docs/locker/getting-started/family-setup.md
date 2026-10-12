@@ -112,13 +112,16 @@ Gather your family's important documents and upload them to Locker.
 
 ### How to upload
 
-1. Use your phone's camera or a scanning app to create clear images or PDFs
-2. Open Ente Locker and tap **+**
-3. Select **Documents**
-4. Choose the scanned file
-5. Add a descriptive title (e.g., "John Passport - Expires 2028")
-6. Add to the appropriate collection
-7. Tap **Save**
+To scan paper documents, use the Locker app on Android or iOS.
+
+1. In Locker, tap the camera button on the home screen
+2. Scan the pages, then tap the check-mark button to review them
+3. Adjust the crop, rotate or retake pages as needed, and give the PDF a descriptive name (e.g., "John Passport - Expires 2028")
+4. Tap **Save to Ente**
+5. Select the appropriate collection
+6. Tap **Save**
+
+For documents already on your device, tap **+**, select **File**, and choose the files to upload. See [Document](/locker/features/information-types/documents) for detailed scanning and upload steps.
 
 ## Step 4: Share collections with family members
 

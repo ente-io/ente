@@ -9,9 +9,9 @@ Secrets let you securely store login information for websites and services. Keep
 
 ## What you can store
 
-- **Name**: A recognizable name for the account (e.g., "Gmail", "Bank Account")
-- **Username**: Your login identifier (username or email)
-- **Password**: Your account password
+- **Name**: A recognizable name for the account (required; e.g., "Gmail", "Bank Account")
+- **Username**: Your login identifier (optional; username or email)
+- **Password**: Your account password (optional)
 - **Notes**: Additional information about the account (optional)
 
 ## Creating a secret
@@ -28,12 +28,14 @@ Secrets let you securely store login information for websites and services. Keep
 2. Tap the **+** button
 3. Select **Secret**
 4. Fill in the fields:
-    - **Name**: A recognizable name (e.g., "Gmail", "Bank Account")
-    - **Username**: Your username or email for the account
-    - **Password**: Your password
+    - **Name**: A recognizable name (required; e.g., "Gmail", "Bank Account")
+    - **Username**: Your username or email for the account (optional)
+    - **Password**: Your password (optional)
     - **Notes**: Any additional details (optional)
 5. Select one or more collections
 6. Tap **Save**
+
+You can save a Secret with just its name and add the username, password or notes later by editing it.
 
 ## Features
 

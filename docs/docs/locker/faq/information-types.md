@@ -20,6 +20,10 @@ Ente Locker supports four item types:
 
 Learn more about [Item Types](/locker/features/information-types/).
 
+### Do I need to fill in every field? {#locker-required-fields}
+
+No. A Note needs content, a Thing needs a name, and a Secret needs an account name. You can leave the other fields blank and add them later by editing the item. If you leave a Note's title blank, Locker generates one from its content.
+
 ### Can I create custom item types? {#locker-custom-types}
 
 Currently, Locker supports only the four built-in item types. Custom types are not available.
@@ -62,7 +66,7 @@ Open Apple Photos, choose the photo, open the share sheet, and select Ente Locke
 
 In the Locker mobile app on Android or iOS, tap the camera button on the home screen. Point the camera at a page and use automatic or manual capture to add one or more pages.
 
-Review the pages, adjust the crop or rotation if needed, and tap **Save to Ente**. Locker combines the pages into a PDF and lets you choose the collections to upload it to.
+Review the pages, adjust the crop or rotation, or retake individual pages if needed. Then tap **Save to Ente**. Locker combines the pages into a PDF and lets you choose the collections to upload it to.
 
 For detailed steps, see [Document](/locker/features/information-types/documents#scanning-a-document).
 
