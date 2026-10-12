@@ -27,7 +27,6 @@ interface FileActionContext {
     barMode?: GalleryBarMode;
     isInSearchMode: boolean;
     collectionSummary: CollectionSummary | undefined;
-    hasOwnFiles: boolean;
     hasOnlyOwnFiles: boolean;
     showAddPerson: boolean;
     showEditLocation: boolean;
@@ -40,7 +39,6 @@ export function getAvailableFileActions(
         barMode,
         isInSearchMode,
         collectionSummary,
-        hasOwnFiles,
         hasOnlyOwnFiles,
         showAddPerson,
         showEditLocation,
@@ -62,9 +60,7 @@ export function getAvailableFileActions(
         insertAddPersonBeforeModifications(actions);
     }
 
-    return hasOwnFiles
-        ? actions
-        : actions.filter((action) => action !== "trash");
+    return actions;
 }
 
 function getBaseActions(
