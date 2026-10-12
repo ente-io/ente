@@ -43,3 +43,32 @@ test.each([" secret", "secret ", " secret ", "   "])(
         ).toBe(true);
     },
 );
+
+test.each([
+    "title",
+    "content",
+    "name",
+    "username",
+    "password",
+    "location",
+    "contactDetails",
+    "notes",
+])(
+    "detects whitespace edits to %s without normalizing reopened values",
+    (field) => {
+        const initial = { [field]: "value" };
+        for (const value of [" value", "value ", "\u00a0value\t"]) {
+            expect(
+                hasUnsavedItemChanges({ [field]: value }, initial, [], [], ""),
+            ).toBe(true);
+        }
+        const whitespace = { [field]: " \t " };
+        expect(hasUnsavedItemChanges(whitespace, {}, [], [], "")).toBe(true);
+        expect(hasUnsavedItemChanges(whitespace, whitespace, [], [], "")).toBe(
+            false,
+        );
+        expect(
+            hasUnsavedItemChanges({ [field]: "" }, whitespace, [], [], ""),
+        ).toBe(true);
+    },
+);

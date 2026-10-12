@@ -4,12 +4,12 @@ import { itemFormDataForSave } from "../src/components/create-item/item-form-fie
 test("content-only notes derive a title from the first five words", () => {
     expect(
         itemFormDataForSave("note", {
-            title: "  ",
+            title: "",
             content: "  Remember where the spare key lives\nMore details  ",
         }),
     ).toEqual({
         title: "Remember where the spare key",
-        content: "Remember where the spare key lives\nMore details",
+        content: "  Remember where the spare key lives\nMore details  ",
     });
 });
 
@@ -27,7 +27,7 @@ test("an explicit note title is kept, and clearing it regenerates the title", ()
             title: "  My own title  ",
             content: "New content",
         }).title,
-    ).toBe("My own title");
+    ).toBe("  My own title  ");
     expect(
         itemFormDataForSave("note", { title: "", content: "New content" })
             .title,
@@ -41,7 +41,7 @@ test("cleared Thing and Secret fields are omitted on save", () => {
             location: "  ",
             notes: "",
         }),
-    ).toEqual({ name: "Spare key" });
+    ).toEqual({ name: "  Spare key  ", location: "  " });
     expect(
         itemFormDataForSave("accountCredential", {
             name: "  Netflix  ",
@@ -49,7 +49,7 @@ test("cleared Thing and Secret fields are omitted on save", () => {
             password: "",
             notes: "",
         }),
-    ).toEqual({ name: "Netflix" });
+    ).toEqual({ name: "  Netflix  " });
 });
 
 test.each([" secret", "secret ", " secret ", "   "])(
@@ -62,10 +62,10 @@ test.each([" secret", "secret ", " secret ", "   "])(
             notes: "  Notes  ",
         });
         expect(data).toEqual({
-            name: "Account",
-            username: "user",
+            name: "  Account  ",
+            username: "  user  ",
             password,
-            notes: "Notes",
+            notes: "  Notes  ",
         });
         expect(
             itemFormDataForSave("accountCredential", {
@@ -74,9 +74,55 @@ test.each([" secret", "secret ", " secret ", "   "])(
             }),
         ).toEqual({
             name: "Renamed",
-            username: "user",
+            username: "  user  ",
             password,
-            notes: "Notes",
+            notes: "  Notes  ",
         });
     },
 );
+
+const infoFields = [
+    ["note", ["title", "content"]],
+    ["accountCredential", ["name", "username", "password", "notes"]],
+    ["physicalRecord", ["name", "location", "notes"]],
+    ["emergencyContact", ["name", "contactDetails", "notes"]],
+] as const;
+
+for (const [type, fields] of infoFields) {
+    test.each(["  entered text  ", " \t\u00a0 ", "line one\nline two\n"])(
+        `${type} preserves all entered field values: %j`,
+        (value) => {
+            const data = Object.fromEntries(
+                fields.map((field) => [field, value]),
+            );
+            expect(itemFormDataForSave(type, data)).toEqual(data);
+            expect(
+                itemFormDataForSave(
+                    type,
+                    JSON.parse(JSON.stringify(data)) as Record<string, string>,
+                ),
+            ).toEqual(data);
+        },
+    );
+}
+
+test("generated note titles ignore leading blank lines without changing content", () => {
+    const content = "\n\n  one two three four five six\nsecond line\n";
+    expect(itemFormDataForSave("note", { title: "", content })).toEqual({
+        title: "one two three four five",
+        content,
+    });
+});
+
+test("whitespace-only note titles remain explicit titles", () => {
+    expect(
+        itemFormDataForSave("note", { title: " \t ", content: "Body" }),
+    ).toEqual({ title: " \t ", content: "Body" });
+});
+
+test("file forms retain filename trimming", () => {
+    expect(itemFormDataForSave("file", { name: "  notes.txt  " })).toEqual({
+        name: "notes.txt",
+    });
+    expect(itemFormDataForSave("file", { name: "   " })).toEqual({});
+});

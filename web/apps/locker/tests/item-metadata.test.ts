@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { itemFormDataForSave } from "../src/components/create-item/item-form-fields-utils";
-import { updateFileItem, updateInfoItem } from "../src/services/items";
+import {
+    createInfoItem,
+    updateFileItem,
+    updateInfoItem,
+} from "../src/services/items";
 import {
     getEncryptedFileRecord,
     replaceLockerCache,
@@ -22,12 +26,20 @@ vi.mock("ente-base/origins", () => ({ apiURL: (path: string) => path }));
 vi.mock("ente-base/log", () => ({ default: {} }));
 vi.mock("ente-locker-wasm", () => ({
     decryptBox: () => "file-key",
+    generateKey: () => "file-key",
+    encryptBox: () => ({ encryptedData: "encrypted-key", nonce: "nonce" }),
     decryptMetadataJSON,
     encryptBlob,
 }));
 vi.mock("../src/services/authenticated-session", () => ({}));
 vi.mock("../src/services/sync/decrypt", () => ({
     decryptCollectionKey: () => "collection-key",
+}));
+
+vi.mock("../src/services/collections", () => ({
+    ensureFavoritesCollection: vi.fn(),
+    resolveCollectionIDsWithUncategorizedFallback: (ids: number[]) =>
+        Promise.resolve(ids),
 }));
 
 const fetchMock = vi.fn<typeof fetch>();
@@ -101,7 +113,7 @@ test.each(["file", "note"] as const)(
         expect(metadata).toEqual({
             retained: "custom metadata",
             noThumb: true,
-            editedName: "Renamed",
+            editedName: type === "file" ? "Renamed" : "  Renamed  ",
             editedTime: metadata.editedTime,
             info: {
                 type: "note",
@@ -193,3 +205,65 @@ test.each([" secret", "secret ", " secret ", "   "])(
         });
     },
 );
+
+for (const type of [
+    "note",
+    "accountCredential",
+    "physicalRecord",
+    "emergencyContact",
+] as const) {
+    test.each(["  entered title  ", " \t\u00a0 "])(
+        `${type} metadata preserves the exact info title: %j`,
+        async (title) => {
+            const data =
+                type === "note"
+                    ? { title, content: "  body  " }
+                    : { name: title, notes: "  notes  " };
+            await updateInfoItem(1, type, data);
+            const metadata = JSON.parse(
+                new TextDecoder().decode(
+                    encryptBlob.mock.calls[0]![0] as Uint8Array,
+                ),
+            ) as Record<string, unknown>;
+            expect(metadata.editedName).toBe(title);
+            expect(metadata.info).toEqual({ type, data });
+        },
+    );
+}
+
+for (const type of [
+    "note",
+    "accountCredential",
+    "physicalRecord",
+    "emergencyContact",
+] as const) {
+    test.each(["  entered title  ", " \t\u00a0 "])(
+        `${type} creation preserves the title and info data before encryption: %j`,
+        async (title) => {
+            fetchMock.mockResolvedValue(
+                new Response(JSON.stringify({ id: 10 }), { status: 200 }),
+            );
+            const data =
+                type === "note"
+                    ? { title, content: "  body  " }
+                    : {
+                          name: title,
+                          contactDetails: "  555-0100  ",
+                          notes: "   ",
+                      };
+            await createInfoItem([2], type, data, "master-key");
+            const metadata = JSON.parse(
+                new TextDecoder().decode(
+                    encryptBlob.mock.calls[0]![0] as Uint8Array,
+                ),
+            ) as Record<string, unknown>;
+            const publicMetadata = JSON.parse(
+                new TextDecoder().decode(
+                    encryptBlob.mock.calls[1]![0] as Uint8Array,
+                ),
+            ) as Record<string, unknown>;
+            expect(metadata.title).toBe(title);
+            expect(publicMetadata.info).toEqual({ type, data });
+        },
+    );
+}

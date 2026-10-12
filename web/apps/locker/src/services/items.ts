@@ -32,8 +32,8 @@ const infoItemTitle = (
     infoData: Record<string, unknown>,
 ) => {
     const namedTitle =
-        (infoData.title as string | undefined)?.trim() ||
-        (infoData.name as string | undefined)?.trim();
+        (infoData.title as string | undefined) ||
+        (infoData.name as string | undefined);
     if (namedTitle) {
         return namedTitle;
     }

@@ -26,18 +26,13 @@ export const itemFormDataForSave = (
         Object.entries(formData)
             .map(
                 ([key, value]) =>
-                    [
-                        key,
-                        type === "accountCredential" && key === "password"
-                            ? value
-                            : value.trim(),
-                    ] as const,
+                    [key, type === "file" ? value.trim() : value] as const,
             )
             .filter(([, value]) => value),
     );
 
     if (type === "note" && !data.title) {
-        const firstLine = data.content?.split("\n", 1)[0]?.trim() ?? "";
+        const firstLine = data.content?.trim().split("\n", 1)[0]?.trim() ?? "";
         const title = firstLine.split(/\s+/).slice(0, 5).join(" ");
         data.title =
             title.length <= 40 ? title : `${title.slice(0, 40).trimEnd()}...`;
