@@ -349,12 +349,10 @@ const SearchInput: React.FC<
             >
                 <AsyncSelect
                     ref={selectRef}
-                    // A fresh value also refreshes react-select's filtered keyboard targets.
                     value={value ? [value] : []}
                     components={components}
                     styles={styles}
                     loadOptions={loadOptions}
-                    // Moving focus to a tab must not reload the current query.
                     cacheOptions={open}
                     filterOption={({ data }) =>
                         matchesSearchCategory(data, category)
