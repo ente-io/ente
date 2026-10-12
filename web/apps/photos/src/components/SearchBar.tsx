@@ -564,6 +564,8 @@ const createSelectStyles = (
     }),
     menuList: (style) => ({
         ...style,
+        minHeight: "clamp(120px, calc(100dvh - 280px), 320px)",
+        maxHeight: "clamp(120px, calc(100dvh - 280px), 320px)",
         display: "flex",
         flexDirection: "column",
         gap: "8px",
@@ -598,6 +600,7 @@ const createSelectStyles = (
         },
     }),
     groupHeading: (style) => ({ ...style, margin: 0, padding: 0 }),
+    noOptionsMessage: (style) => ({ ...style, padding: 0 }),
     option: (style, { isFocused }) => ({
         ...style,
         padding: 0,
@@ -744,9 +747,7 @@ const EmptyState: React.FC<
 
 const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
     <UnstyledButton {...{ onClick }}>
-        <Typography
-            sx={{ color: "text.muted", ":hover": { color: "text.base" } }}
-        >
+        <Typography variant="h6" sx={{ color: "text.base" }}>
             {t("people")}
         </Typography>
     </UnstyledButton>

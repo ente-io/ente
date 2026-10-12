@@ -11,6 +11,8 @@ export 'components/centered_constrained_component.dart';
 export 'components/divider_component.dart';
 export 'components/ente_app_icon.dart';
 export 'components/filter_chip_component.dart';
+export 'components/loading/loading_component.dart';
+export 'components/loading/loading_dialog_component.dart';
 export 'components/menu_component.dart';
 export 'components/menu_group_component.dart';
 export 'components/more_from_ente_section.dart';

@@ -35,6 +35,7 @@ import {
     SearchResultsHeader,
     type RemotePullOpts,
 } from "@/components/gallery";
+import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import {
     NormalNavbarContents,
@@ -191,7 +192,10 @@ const Page: React.FC = () => {
     const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
 
-    const [isLargeFilesOpen, setIsLargeFilesOpen] = useState(false);
+    const [cleanupView, setCleanupView] = useState<
+        "large-files" | "duplicates"
+    >();
+    const isCleanupViewOpen = cleanupView !== undefined;
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [trashFilesDialog, setTrashFilesDialog] = useState<{
@@ -830,16 +834,16 @@ const Page: React.FC = () => {
     const keyboardShortcutHandlerRef = useRef({
         selectAll,
         clearSelection,
-        isLargeFilesOpen,
+        isCleanupViewOpen,
     });
 
     useEffect(() => {
         keyboardShortcutHandlerRef.current = {
             selectAll,
             clearSelection,
-            isLargeFilesOpen,
+            isCleanupViewOpen,
         };
-    }, [selectAll, clearSelection, isLargeFilesOpen]);
+    }, [selectAll, clearSelection, isCleanupViewOpen]);
 
     const showSessionExpiredDialog = useCallback(
         () => showMiniDialog(sessionExpiredDialogAttributes(logout)),
@@ -926,7 +930,7 @@ const Page: React.FC = () => {
 
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
-            if (keyboardShortcutHandlerRef.current.isLargeFilesOpen) return;
+            if (keyboardShortcutHandlerRef.current.isCleanupViewOpen) return;
             switch (e.key) {
                 case "Escape":
                     keyboardShortcutHandlerRef.current.clearSelection();
@@ -1399,7 +1403,7 @@ const Page: React.FC = () => {
 
     const handleShowCollectionSummaryWithID = useCallback(
         (collectionSummaryID: number | undefined) => {
-            setIsLargeFilesOpen(false);
+            setCleanupView(undefined);
             // Museum deletes collection contents asynchronously; pull on entry.
             if (collectionSummaryID == PseudoCollectionID.trash) {
                 void remoteFilesPull();
@@ -1435,21 +1439,33 @@ const Page: React.FC = () => {
         [authenticateUser, handleShowCollectionSummaryWithID, barMode],
     );
 
-    const handleShowLargeFiles = useCallback(() => {
-        setSelected({
-            ownCount: 0,
-            count: 0,
-            collectionID: 0,
-            context: undefined,
-        });
-        closeCollectionMap();
-        closeSlideshow();
-        dispatch({ type: "exitSearch", shouldExitSearchMode: true });
-        setIsLargeFilesOpen(true);
-    }, [closeCollectionMap, closeSlideshow]);
+    const handleShowCleanupView = useCallback(
+        (view: "large-files" | "duplicates") => {
+            setSelected({
+                ownCount: 0,
+                count: 0,
+                collectionID: 0,
+                context: undefined,
+            });
+            closeCollectionMap();
+            closeSlideshow();
+            dispatch({ type: "exitSearch", shouldExitSearchMode: true });
+            setCleanupView(view);
+        },
+        [closeCollectionMap, closeSlideshow],
+    );
 
-    const handleCloseLargeFiles = useCallback(() => {
-        setIsLargeFilesOpen(false);
+    const handleShowLargeFiles = useCallback(
+        () => handleShowCleanupView("large-files"),
+        [handleShowCleanupView],
+    );
+    const handleShowDuplicates = useCallback(
+        () => handleShowCleanupView("duplicates"),
+        [handleShowCleanupView],
+    );
+
+    const handleCloseCleanupView = useCallback(() => {
+        setCleanupView(undefined);
         dispatch({ type: "showAll" });
     }, []);
 
@@ -1929,7 +1945,7 @@ const Page: React.FC = () => {
             message={
                 watchFolderView ? t("watch_folder_dropzone_hint") : undefined
             }
-            disabled={shouldDisableDropzone || !!slideshow || isLargeFilesOpen}
+            disabled={shouldDisableDropzone || !!slideshow || isCleanupViewOpen}
             onDrop={setDragAndDropFiles}
         >
             {blockingLoad && <TranslucentLoadingOverlay />}
@@ -1965,7 +1981,7 @@ const Page: React.FC = () => {
                     {...trashFilesDialog}
                 />
             )}
-            {!isLargeFilesOpen && (
+            {!isCleanupViewOpen && (
                 <>
                     <NavbarBase
                         sx={[
@@ -2115,6 +2131,7 @@ const Page: React.FC = () => {
                 {...sidebarVisibilityProps}
                 onClose={handleSidebarClose}
                 onShowLargeFiles={handleShowLargeFiles}
+                onShowDuplicates={handleShowDuplicates}
                 normalCollectionSummaries={normalCollectionSummaries}
                 uncategorizedCollectionSummaryID={
                     state.uncategorizedCollectionSummaryID
@@ -2136,9 +2153,14 @@ const Page: React.FC = () => {
                 title={t("add_a_person")}
                 onSelectPerson={handleContextMenuSelectPerson}
             />
-            {isLargeFilesOpen ? (
+            {cleanupView === "duplicates" ? (
+                <DuplicatesView
+                    onBack={handleCloseCleanupView}
+                    onRemoteFilesPull={remoteFilesPull}
+                />
+            ) : cleanupView === "large-files" ? (
                 <LargeFilesView
-                    onBack={handleCloseLargeFiles}
+                    onBack={handleCloseCleanupView}
                     onRemoteFilesPull={remoteFilesPull}
                 />
             ) : !isInSearchMode &&
