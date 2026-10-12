@@ -1,10 +1,9 @@
 import "dart:async";
 import "dart:math" as math;
-import "dart:ui" as ui;
 
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/ui/settings/developer_settings_tap_area.dart";
 import "package:rive/rive.dart" as rive;
@@ -557,31 +556,27 @@ class _OnboardingBackdrop extends StatefulWidget {
 }
 
 class _OnboardingBackdropState extends State<_OnboardingBackdrop> {
-  static Future<ui.Image?>? _texture;
+  static Future<PictureInfo?>? _texture;
 
-  ui.Image? _image;
+  PictureInfo? _picture;
 
   @override
   void initState() {
     super.initState();
     _texture ??= _loadTexture();
     unawaited(
-      _texture!.then((image) {
-        if (mounted && image != null) setState(() => _image = image);
+      _texture!.then((picture) {
+        if (mounted && picture != null) setState(() => _picture = picture);
       }),
     );
   }
 
-  static Future<ui.Image?> _loadTexture() async {
+  static Future<PictureInfo?> _loadTexture() async {
     try {
-      final data = await rootBundle.load("assets/onboarding_doodle.png");
-      final codec = await ui.instantiateImageCodec(
-        data.buffer.asUint8List(),
-        targetWidth: _OnboardingBackdropPainter.textureWidth.toInt(),
+      return await vg.loadPicture(
+        const SvgAssetLoader("assets/onboarding_doodle.svg"),
+        null,
       );
-      final frame = await codec.getNextFrame();
-      codec.dispose();
-      return frame.image;
     } catch (e) {
       return null;
     }
@@ -592,9 +587,10 @@ class _OnboardingBackdropState extends State<_OnboardingBackdrop> {
     return RepaintBoundary(
       child: ClipRect(
         child: CustomPaint(
+          isComplex: true,
           painter: _OnboardingBackdropPainter(
             color: widget.color,
-            texture: _image,
+            texture: _picture,
           ),
         ),
       ),
@@ -611,22 +607,30 @@ class _OnboardingBackdropPainter extends CustomPainter {
   static const double textureOpacity = 0.38 * 0.4;
 
   final Color color;
-  final ui.Image? texture;
+  final PictureInfo? texture;
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawRect(Offset.zero & size, Paint()..color = color);
     final texture = this.texture;
     if (texture == null) return;
-    canvas.drawImageRect(
-      texture,
-      Rect.fromLTWH(0, 0, texture.width.toDouble(), texture.height.toDouble()),
-      const Rect.fromLTWH(textureLeft, 0, textureWidth, textureHeight),
+    const textureBounds = Rect.fromLTWH(
+      textureLeft,
+      0,
+      textureWidth,
+      textureHeight,
+    );
+    canvas.saveLayer(
+      textureBounds.intersect(Offset.zero & size),
       Paint()
         ..blendMode = BlendMode.softLight
-        ..filterQuality = FilterQuality.low
         ..color = Colors.white.withValues(alpha: textureOpacity),
     );
+    canvas.drawRect(textureBounds, Paint()..color = Colors.black);
+    canvas.translate(textureLeft, 0);
+    canvas.scale(textureWidth / texture.size.width);
+    canvas.drawPicture(texture.picture);
+    canvas.restore();
   }
 
   @override
