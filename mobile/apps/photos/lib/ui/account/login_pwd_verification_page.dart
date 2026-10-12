@@ -144,6 +144,9 @@ class _LoginPasswordVerificationPageState
   }
 
   Future<void> verifyPassword(BuildContext context, String password) async {
+    setState(() {
+      _isPasswordIncorrect = false;
+    });
     final dialog = createProgressDialog(
       context,
       context.strings.pleaseWait,
@@ -165,10 +168,15 @@ class _LoginPasswordVerificationPageState
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('server reject, failed verify SRP login', e, s);
-        if (!mounted) return;
+        if (!mounted || !context.mounted) return;
         setState(() {
           _isPasswordIncorrect = true;
         });
+        await _showContactSupportDialog(
+          context,
+          context.strings.incorrectPasswordTitle,
+          context.strings.pleaseTryAgain,
+        );
       } else {
         _logger.severe('API failure during SRP login ${e.type}', e, s);
         if (e.type == DioExceptionType.connectionTimeout ||

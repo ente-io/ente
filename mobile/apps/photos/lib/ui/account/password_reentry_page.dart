@@ -18,6 +18,7 @@ import 'package:photos/ui/components/buttons/button_widget.dart'
     show ButtonAction;
 import 'package:photos/ui/tabs/home_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/email_util.dart';
 
 class PasswordReentryPage extends StatefulWidget {
   const PasswordReentryPage({super.key});
@@ -80,6 +81,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   Future<void> verifyPassword(String password) async {
     FocusScope.of(context).unfocus();
+    setState(() {
+      _isPasswordIncorrect = false;
+    });
     final dialog = createProgressDialog(context, context.strings.pleaseWait);
     await dialog.show();
     try {
@@ -111,13 +115,26 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         );
       }
       return;
-    } catch (e) {
-      _logger.warning("Password verification failed: $e");
+    } on IncorrectPasswordError catch (e, s) {
+      _logger.warning("Password verification failed", e, s);
       await dialog.hide();
       if (!mounted) return;
       setState(() {
         _isPasswordIncorrect = true;
       });
+      await _showContactSupportDialog(
+        context.strings.incorrectPasswordTitle,
+        context.strings.pleaseTryAgain,
+      );
+      return;
+    } catch (e, s) {
+      _logger.severe("Password verification failed", e, s);
+      await dialog.hide();
+      if (!mounted) return;
+      await _showContactSupportDialog(
+        context.strings.somethingWentWrong,
+        context.strings.verificationFailedPleaseTryAgain,
+      );
       return;
     }
     await dialog.hide();
@@ -135,6 +152,24 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         (route) => false,
       ),
     );
+  }
+
+  Future<void> _showContactSupportDialog(String title, String message) async {
+    final dialogChoice = await showChoiceDialog(
+      context,
+      title: title,
+      body: message,
+      firstButtonLabel: context.strings.contactSupport,
+      secondButtonLabel: context.strings.ok,
+    );
+    if (dialogChoice?.action == ButtonAction.first && mounted) {
+      await sendLogs(
+        context,
+        context.strings.contactSupport,
+        "support@ente.com",
+        postShare: () {},
+      );
+    }
   }
 
   Future<void> _registerSRPForExistingUsers(Uint8List key) async {
