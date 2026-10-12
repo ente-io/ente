@@ -19,7 +19,6 @@ import CameraIcon from "@mui/icons-material/PhotoCameraOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
     Box,
-    Button,
     Dialog,
     IconButton,
     Stack,
@@ -373,12 +372,7 @@ const SearchInput: React.FC<
                 loadingMessage={() => t("loading")}
                 noOptionsMessage={({ inputValue }) => {
                     if (inputValue) {
-                        return (
-                            <SearchNoMatches
-                                category={category}
-                                onSeeAll={() => setCategory("all")}
-                            />
-                        );
+                        return <SearchNoMatches />;
                     }
                     if (shouldShowEmptyState(inputValue)) {
                         return (
@@ -519,13 +513,7 @@ function SearchGroupHeading(props: GroupHeadingProps<SearchOption, false>) {
     );
 }
 
-function SearchNoMatches({
-    category,
-    onSeeAll,
-}: {
-    category: SearchCategory;
-    onSeeAll: () => void;
-}) {
+function SearchNoMatches() {
     return (
         <Stack
             sx={{
@@ -545,21 +533,8 @@ function SearchNoMatches({
                 {t("search_no_matches")}
             </Typography>
             <Typography variant="small" sx={{ color: "text.muted" }}>
-                {t(
-                    category === "all"
-                        ? "search_try_another"
-                        : "search_empty_category",
-                )}
+                {t("search_try_another")}
             </Typography>
-            {category !== "all" && (
-                <Button
-                    color="secondary"
-                    onMouseDown={(event) => event.stopPropagation()}
-                    onClick={onSeeAll}
-                >
-                    {t("search_see_all")}
-                </Button>
-            )}
         </Stack>
     );
 }
