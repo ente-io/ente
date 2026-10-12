@@ -55,15 +55,7 @@ import type { SearchOption } from "ente-new/photos/services/search/types";
 import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useId,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
@@ -343,65 +335,63 @@ const SearchInput: React.FC<
     };
 
     return (
-        <SearchCategoryContext.Provider value={{ category, setCategory }}>
-            <SearchInputWrapper
-                onMouseMove={() => setIsKeyboardNavigating(false)}
-            >
-                <AsyncSelect
-                    ref={selectRef}
-                    value={value ? [value] : []}
-                    components={components}
-                    styles={styles}
-                    loadOptions={loadOptions}
-                    cacheOptions={open}
-                    filterOption={({ data }) =>
-                        matchesSearchCategory(data, category)
+        <SearchInputWrapper onMouseMove={() => setIsKeyboardNavigating(false)}>
+            <AsyncSelect
+                ref={selectRef}
+                {...{ searchCategory: { category, setCategory } }}
+                value={value ? [value] : []}
+                components={components}
+                styles={styles}
+                loadOptions={loadOptions}
+                cacheOptions={open}
+                filterOption={({ data }) =>
+                    matchesSearchCategory(data, category)
+                }
+                onChange={handleChange}
+                inputValue={inputValue}
+                onInputChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                isClearable
+                tabSelectsValue={false}
+                aria-label={t("search")}
+                escapeClearsValue
+                menuIsOpen={
+                    open && (inputValue !== "" || shouldShowEmptyState(""))
+                }
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                placeholder={t("search_hint")}
+                loadingMessage={() => t("loading")}
+                noOptionsMessage={({ inputValue }) => {
+                    if (inputValue) {
+                        return t("no_results");
                     }
-                    onChange={handleChange}
-                    inputValue={inputValue}
-                    onInputChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    isClearable
-                    tabSelectsValue={false}
-                    aria-label={t("search")}
-                    escapeClearsValue
-                    menuIsOpen={
-                        open && (inputValue !== "" || shouldShowEmptyState(""))
+                    if (shouldShowEmptyState(inputValue)) {
+                        return (
+                            <EmptyState
+                                onSelectPeople={handleSelectPeople}
+                                onSelectPerson={handleSelectPerson}
+                            />
+                        );
                     }
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
-                    placeholder={t("search_hint")}
-                    loadingMessage={() => t("loading")}
-                    noOptionsMessage={({ inputValue }) => {
-                        if (inputValue) {
-                            return t("no_results");
-                        }
-                        if (shouldShowEmptyState(inputValue)) {
-                            return (
-                                <EmptyState
-                                    onSelectPeople={handleSelectPeople}
-                                    onSelectPerson={handleSelectPerson}
-                                />
-                            );
-                        }
-                        return null;
-                    }}
-                />
-            </SearchInputWrapper>
-        </SearchCategoryContext.Provider>
+                    return null;
+                }}
+            />
+        </SearchInputWrapper>
     );
 };
 
-const SearchCategoryContext = createContext<
-    | {
-          category: SearchCategory;
-          setCategory: (category: SearchCategory) => void;
-      }
-    | undefined
->(undefined);
+interface SearchCategoryProps {
+    searchCategory: {
+        category: SearchCategory;
+        setCategory: (category: SearchCategory) => void;
+    };
+}
 
 function SearchMenu(props: MenuProps<SearchOption, false>) {
-    const { category, setCategory } = useContext(SearchCategoryContext)!;
+    const {
+        searchCategory: { category, setCategory },
+    } = props.selectProps as typeof props.selectProps & SearchCategoryProps;
     const id = useId();
     const hasQuery = !!props.selectProps.inputValue.trim();
     const counts = searchCategoryCounts(
