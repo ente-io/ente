@@ -36,7 +36,7 @@ fn reads_do_not_initialize_storage() {
         assert!(help.contains(&format!("=== {binary} photos file download ===")));
         assert!(help.contains(&format!("=== {binary} vault key generate ===")));
         assert!(help.contains("--hardlinks"));
-        assert!(help.contains("Edits and file attributes are shared"));
+        assert!(help.contains("Linked files share contents, timestamps and permissions."));
         let output = home
             .command(&["accounts", "list"])
             .env("ENTE_CLI_HOME", &path)

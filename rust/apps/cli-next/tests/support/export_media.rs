@@ -437,11 +437,17 @@ fn engine_consolidates_copies_and_keeps_linked_history() {
     let first = root.join("First/Photo.jpg");
     let second = root.join("Second/Photo.jpg");
     assert!(!same_file::is_same_file(&first, &second).unwrap());
+    let permissions = fs::metadata(&first).unwrap().permissions();
+    let mut readonly = permissions.clone();
+    readonly.set_readonly(true);
+    fs::set_permissions(&first, readonly).unwrap();
     engine.hardlinks = true;
     assert_eq!(run(&mut engine, true)["changes"]["exported"], 2);
     assert!(same_file::is_same_file(&first, &second).unwrap());
     assert!(!same_file::is_same_file(&first, root.join("Second/Other.jpg")).unwrap());
     assert_eq!(run(&mut engine, true)["changes"]["exported"], 0);
+    assert!(fs::metadata(&second).unwrap().permissions().readonly());
+    fs::set_permissions(&first, permissions).unwrap();
     assert_eq!(count(&engine.db(), "SELECT count(*) FROM temporaries"), 0);
     for album in ["First", "Second"] {
         for entry in fs::read_dir(root.join(album)).unwrap() {
@@ -535,6 +541,7 @@ fn engine_recovers_interrupted_link_publication() {
     for boundary in [
         "BEFORE INSERT ON pending WHEN new.album=2 AND json_type(new.action,'$.Publish.output.Media') IS NOT NULL",
         "BEFORE UPDATE ON pending WHEN old.album=2 AND json_type(old.action,'$.Publish.output.Media') IS NOT NULL AND new.action='null'",
+        "BEFORE UPDATE ON components WHEN new.folder='active:2' AND old.intended_time IS NULL AND new.intended_time IS NOT NULL",
     ] {
         let mut server = mockito::Server::new();
         let key = Key::generate();
@@ -552,6 +559,26 @@ fn engine_recovers_interrupted_link_publication() {
             b"original"
         );
         db.execute_batch("DROP TRIGGER stop_link").unwrap();
+        if boundary.contains("ON components") {
+            let photo = root.join("Second/Photo.jpg");
+            let modified = fs::metadata(&photo).unwrap().modified().unwrap();
+            fs::write(&photo, b"modified").unwrap();
+            fs::File::options()
+                .write(true)
+                .open(&photo)
+                .unwrap()
+                .set_modified(modified)
+                .unwrap();
+            engine.hardlinks = false;
+            for _ in 0..2 {
+                let result = engine.run(false, &["Second"]).unwrap();
+                assert!(!result.complete);
+                assert_eq!(result.json["conflicts"], 1);
+            }
+            assert_eq!(fs::read(&photo).unwrap(), b"modified");
+            fs::write(&photo, b"original").unwrap();
+            engine.hardlinks = true;
+        }
         run(&mut engine, true);
         assert!(linked(&root, "First/Photo.jpg", "Second/Photo.jpg"));
         assert_eq!(count(&db, "SELECT count(*) FROM temporaries"), 0);
@@ -573,6 +600,13 @@ fn engine_link_failure_preserves_existing_copy() {
     let directory = engine.root().join("Second");
     let permissions = fs::metadata(&directory).unwrap().permissions();
     fs::set_permissions(&directory, fs::Permissions::from_mode(0o500)).unwrap();
+    let probe = directory.join("permission-probe");
+    if fs::hard_link(directory.join("Photo.jpg"), &probe).is_ok() {
+        fs::set_permissions(&directory, permissions).unwrap();
+        fs::remove_file(probe).unwrap();
+        eprintln!("skipping: directory permissions do not prevent hard links");
+        return;
+    }
     let result = engine.run(false, &[]);
     fs::set_permissions(&directory, permissions).unwrap();
     let result = result.unwrap();
@@ -595,7 +629,7 @@ fn engine_link_failure_preserves_existing_copy() {
 
 #[test]
 #[cfg(unix)]
-fn engine_rechecks_link_source_after_an_edit_and_timestamp_reset() {
+fn engine_rechecks_link_source_before_resetting_timestamp() {
     use std::os::unix::fs::PermissionsExt;
     use std::time::{Duration, UNIX_EPOCH};
     let mut server = mockito::Server::new();
@@ -603,7 +637,7 @@ fn engine_rechecks_link_source_after_an_edit_and_timestamp_reset() {
     let (record, bytes) = original_fixture(&key, b"original", false, true, 10);
     let fetched = download(&mut server, 10, &bytes, 1);
     let mut engine = new_engine(&server, key, record.clone());
-    for (id, name) in [(3, "Third"), (4, "Fourth"), (5, "Fifth")] {
+    for (id, name) in [(3, "Third"), (4, "Fourth")] {
         engine.catalog.albums.insert(id, name.into());
         engine.catalog.files.insert((id, 10), record.clone());
     }
@@ -627,6 +661,13 @@ fn engine_rechecks_link_source_after_an_edit_and_timestamp_reset() {
     let directory = root.join("Third");
     let permissions = fs::metadata(&directory).unwrap().permissions();
     fs::set_permissions(&directory, fs::Permissions::from_mode(0o500)).unwrap();
+    let probe = directory.join("permission-probe");
+    if fs::hard_link(&first, &probe).is_ok() {
+        fs::set_permissions(&directory, permissions).unwrap();
+        fs::remove_file(probe).unwrap();
+        eprintln!("skipping: directory permissions do not prevent hard links");
+        return;
+    }
     let result = engine.execute_with_report(export, &|line| {
         eprintln!("{line}");
         if line.starts_with("file:3:10:") && line.contains("cannot link") {
@@ -644,10 +685,15 @@ fn engine_rechecks_link_source_after_an_edit_and_timestamp_reset() {
     let result = result.unwrap();
     assert!(!result.complete);
     assert_eq!(result.json["conflicts"], 1);
-    assert_eq!(result.json["copies"]["completed"], 3);
+    assert_eq!(result.json["copies"]["completed"], 2);
     assert_eq!(fs::read(&first).unwrap(), b"modified");
-    assert_eq!(fs::metadata(&first).unwrap().modified().unwrap(), modified);
-    assert_component(&root, "Fifth", "Photo.jpg", b"original");
-    assert!(!linked(&root, "First/Photo.jpg", "Fifth/Photo.jpg"));
+    assert_eq!(
+        fs::metadata(&first).unwrap().modified().unwrap(),
+        modified + Duration::from_secs(1)
+    );
+    let result = engine.run(false, &["First", "Second", "Fourth"]).unwrap();
+    assert!(!result.complete);
+    assert_eq!(result.json["conflicts"], 3);
+    assert_eq!(result.json["copies"]["completed"], 0);
     fetched.assert();
 }

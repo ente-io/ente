@@ -215,7 +215,7 @@ pub struct ExportArgs {
     #[arg(
         long,
         help = "Share originals across albums using hard links",
-        long_help = "Share originals across albums using hard links, including verified copies already in selected albums. Edits and file attributes are shared. Omitting this flag later does not undo existing links. The destination must support hard links."
+        long_help = "Share originals across albums using hard links. Replace unchanged copies in selected albums with links, reusing originals elsewhere in this export, including unselected albums and Trash. Linked files share contents, timestamps and permissions. Later runs without this flag keep existing links. Requires a filesystem that supports hard links. Otherwise, omit this flag to use copies."
     )]
     pub hardlinks: bool,
     #[arg(

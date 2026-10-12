@@ -255,7 +255,7 @@ impl Run<'_> {
                     size: *size,
                     hash: hash.clone(),
                     signature: signature.clone(),
-                    properties: Some(properties),
+                    properties: None,
                     intended_time: None,
                 };
                 store.save_component(&component)?;
@@ -1353,20 +1353,22 @@ impl Run<'_> {
             {
                 let verified = if self.hardlinks {
                     let properties = Properties::read(&path)?;
-                    prepared
+                    let source = prepared
                         .components
                         .iter_mut()
-                        .find(|source| {
-                            source.role == component.role
-                                && (source.location == destination || same_source)
-                        })
-                        .and_then(|source| {
-                            source.verified_properties = source
-                                .verified_properties
-                                .take()
-                                .filter(|verified| *verified == properties);
-                            source.verified_properties.as_mut()
-                        })
+                        .find(|source| source.role == component.role)
+                        .context("no original is available for verification")?;
+                    if source.verified_properties.as_ref().or(observed) != Some(&properties) {
+                        ensure!(
+                            fs::matches(&path, published.size, &published.hash, self.cancel)?,
+                            super::Conflict(format!(
+                                "at {}: locally changed media",
+                                path.display()
+                            ))
+                        );
+                        source.verified_properties = Some(properties);
+                    }
+                    source.verified_properties.as_mut()
                 } else {
                     None
                 };
