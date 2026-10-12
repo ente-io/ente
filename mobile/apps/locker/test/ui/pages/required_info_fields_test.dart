@@ -446,23 +446,42 @@ void main() {
   ];
 
   for (final info in infoPages) {
-    testWidgets('${info.type} rejects only exactly empty required fields', (
-      tester,
-    ) async {
-      final page = info.page(null, InfoPageMode.edit);
-      await showPage(tester, page);
-      final state = tester.state(find.byType(page.runtimeType)) as dynamic;
-      for (final index in info.requiredIndices) {
-        await tester.enterText(find.byType(TextField).at(index), ' \t\u00a0 ');
-      }
-      expect(state.validateForm(), isTrue);
-      for (final index in info.requiredIndices) {
-        await tester.enterText(find.byType(TextField).at(index), '');
-        expect(state.validateForm(), isFalse);
-        await tester.enterText(find.byType(TextField).at(index), ' \t\u00a0 ');
-        expect(state.validateForm(), isTrue);
-      }
-    });
+    for (final editingExisting in [false, true]) {
+      testWidgets(
+        '${info.type} rejects empty or whitespace-only required fields '
+        'when ${editingExisting ? 'editing' : 'creating'}',
+        (tester) async {
+          final page = info.page(
+            editingExisting
+                ? (partialFile(info.type, {
+                    for (final key in info.keys) key: '  entered text  ',
+                  })..ownerID = 1)
+                : null,
+            InfoPageMode.edit,
+          );
+          await showPage(tester, page);
+          final state = tester.state(find.byType(page.runtimeType)) as dynamic;
+          for (final index in info.requiredIndices) {
+            await tester.enterText(
+              find.byType(TextField).at(index),
+              '  entered text  ',
+            );
+          }
+          expect(state.validateForm(), isTrue);
+          for (final index in info.requiredIndices) {
+            for (final value in ['', '   ', '\t\n', ' \u00a0\u2003 ']) {
+              await tester.enterText(find.byType(TextField).at(index), value);
+              expect(state.validateForm(), isFalse, reason: info.keys[index]);
+            }
+            await tester.enterText(
+              find.byType(TextField).at(index),
+              '  entered text  ',
+            );
+            expect(state.validateForm(), isTrue);
+          }
+        },
+      );
+    }
 
     for (final value in [
       '  entered text  ',
@@ -480,6 +499,11 @@ void main() {
                 ? '  entered text  '
                 : value,
         };
+        if (value.trim().isEmpty) {
+          for (final index in info.requiredIndices) {
+            expected[info.keys[index]] = '  entered text  ';
+          }
+        }
         for (var index = 0; index < info.keys.length; index++) {
           await tester.enterText(
             find.byType(TextField).at(index),
@@ -487,6 +511,7 @@ void main() {
           );
         }
         final state = tester.state(find.byType(page.runtimeType)) as dynamic;
+        expect(state.validateForm(), isTrue);
         final data = state.createInfoData() as InfoData;
         expect(data.toJson(), expected);
         final file = partialFile(
@@ -506,6 +531,7 @@ void main() {
           );
         }
         final reopened = tester.state(find.byType(page.runtimeType)) as dynamic;
+        expect(reopened.validateForm(), isTrue);
         expect(reopened.hasUnsavedChanges, isFalse);
         expect((reopened.createInfoData() as InfoData).toJson(), expected);
       });

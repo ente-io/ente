@@ -85,7 +85,7 @@ class _AccountCredentialsPageState
 
   @override
   bool validateForm() {
-    return _nameController.text.isNotEmpty;
+    return _nameController.text.trim().isNotEmpty;
   }
 
   @override

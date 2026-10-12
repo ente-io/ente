@@ -62,8 +62,8 @@ class _EmergencyContactPageState
 
   @override
   bool validateForm() {
-    return _nameController.text.isNotEmpty &&
-        _contactDetailsController.text.isNotEmpty;
+    return _nameController.text.trim().isNotEmpty &&
+        _contactDetailsController.text.trim().isNotEmpty;
   }
 
   @override

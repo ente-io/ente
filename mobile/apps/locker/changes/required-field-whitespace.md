@@ -1,0 +1,1 @@
+- Rejected whitespace-only required fields in info items while preserving entered text and passwords.

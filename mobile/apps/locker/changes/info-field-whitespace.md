@@ -1,1 +1,1 @@
-- Preserved entered whitespace in info items when saving, editing, viewing and copying, including whitespace-only required fields.
+- Preserved entered whitespace in info items when saving, editing, viewing and copying.

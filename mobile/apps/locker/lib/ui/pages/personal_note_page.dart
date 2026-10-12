@@ -79,8 +79,7 @@ class _PersonalNotePageState
 
   @override
   bool validateForm() {
-    final content = _contentController.text;
-    return content.isNotEmpty;
+    return _contentController.text.trim().isNotEmpty;
   }
 
   @override
