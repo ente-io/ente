@@ -64,6 +64,7 @@ internal fun MessageInput(
     modifier: Modifier,
     messageText: String,
     attachments: List<Attachment>,
+    supportsImageAttachments: Boolean,
     editingMessage: ChatMessage?,
     isProcessingAttachments: Boolean,
     isGenerating: Boolean,
@@ -262,7 +263,7 @@ internal fun MessageInput(
 
                 Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
 
-                if (editingMessage == null) {
+                if (editingMessage == null && supportsImageAttachments) {
                     val canAddImageAttachment =
                         !isGenerating && !isDownloading && !isImageAttachmentLimitReached
                     IconButton(

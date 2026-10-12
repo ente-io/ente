@@ -25,6 +25,7 @@ import io.ente.ensu.llm.LlmMessage
 import io.ente.ensu.llm.LlmMessageRole
 import io.ente.ensu.llm.LlmModelSelection
 import io.ente.ensu.llm.LlmProvider
+import io.ente.ensu.llm.ModelImagesUnsupported
 import io.ente.ensu.llm.ModelMemoryDeferred
 import io.ente.ensu.llm.ModelMemoryUnavailable
 import io.ente.ensu.llm.ModelSettingsActions
@@ -348,7 +349,14 @@ internal class ChatStoreActions(
         ownerScope.launch {
             priorGeneration?.join()
             priorSummary?.join()
-            llmProvider.resetContext()
+            if (
+                parent.attachments.none { it.type == AttachmentType.Image } ||
+                    llmProvider.supportsImages(
+                        modelSettingsActions.resolveSelection(state.value.modelSettings)
+                    )
+            ) {
+                llmProvider.resetContext()
+            }
             startGeneration(sessionId, parent)
         }
     }
@@ -489,7 +497,6 @@ internal class ChatStoreActions(
         val scope = scope ?: return
         if (!state.value.chat.deviceCapability.isChatSupported()) return
         modelSettingsActions.cancelChatWarmup(releaseLoadedModel = false)
-        val prompt = buildPrompt(userMessage.text, userMessage.attachments)
         val priorGeneration = generationJob
         val priorSummary = sessionSummaryJob
         activePreparation?.cancel()
@@ -501,6 +508,24 @@ internal class ChatStoreActions(
 
         val settings = state.value.modelSettings
         val selection = modelSettingsActions.resolveSelection(settings)
+        if (
+            userMessage.attachments.any { it.type == AttachmentType.Image } &&
+                !llmProvider.supportsImages(selection)
+        ) {
+            resetGenerationState()
+            state.update {
+                it.copy(
+                    chat =
+                        it.chat.copy(
+                            transientAssistantError = ModelImagesUnsupported().message,
+                            transientAssistantParentId = userMessage.id,
+                        )
+                )
+            }
+            rebuildChatState(sessionId)
+            return
+        }
+        val prompt = buildPrompt(userMessage.text, userMessage.attachments)
 
         clearTransientAssistantError()
         val generationToken = nextGenerationToken()
@@ -803,6 +828,7 @@ internal class ChatStoreActions(
         var awaitingOverflow = false
         var acquiredContext = false
         try {
+            if (!llmProvider.supportsImages(selection)) throw ModelImagesUnsupported()
             llmProvider.withConversationContext(selection, onModelProgress) { context ->
                 acquiredContext = true
                 val contextLength = context.contextSize().toInt()
@@ -958,28 +984,30 @@ internal class ChatStoreActions(
             throw err
         } catch (_: LlmException.Cancelled) {
             interrupted = true
-        } catch (err: ModelMemoryUnavailable) {
-            if (isActive() && !stopRequested) {
-                state.update {
-                    it.copy(
-                        chat =
-                            it.chat.copy(
-                                transientAssistantError = err.message,
-                                transientAssistantParentId = userMessage.id,
-                            )
+        } catch (err: Throwable) {
+            if (err is ModelMemoryUnavailable || err is ModelImagesUnsupported) {
+                if (isActive() && !stopRequested) {
+                    state.update {
+                        it.copy(
+                            chat =
+                                it.chat.copy(
+                                    transientAssistantError = err.message,
+                                    transientAssistantParentId = userMessage.id,
+                                )
+                        )
+                    }
+                }
+            } else {
+                interrupted = stopRequested
+                if (!interrupted) {
+                    logRepository.log(
+                        LogLevel.Error,
+                        "Generation failed",
+                        details = err.message,
+                        tag = "LLM",
+                        throwable = err,
                     )
                 }
-            }
-        } catch (err: Throwable) {
-            interrupted = stopRequested
-            if (!interrupted) {
-                logRepository.log(
-                    LogLevel.Error,
-                    "Generation failed",
-                    details = err.message,
-                    tag = "LLM",
-                    throwable = err,
-                )
             }
         } finally {
             if (!acquiredContext && isActive()) modelSettingsActions.refreshModelDownloadInfo()
