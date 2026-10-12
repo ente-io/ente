@@ -1,1 +1,1 @@
-- Refreshed loading dialogs for uploads, collection renaming and downloads for internal users.
+- Refreshed loading dialogs for internal users.

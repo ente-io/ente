@@ -1,1 +1,0 @@
-- Refreshed the remaining sharing, trash and session-expiry loading dialogs for internal users while preserving dismissal behavior.
