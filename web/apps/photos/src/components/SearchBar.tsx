@@ -207,14 +207,10 @@ const SearchInput: React.FC<
     const [value, setValue] = useState<SearchOption | null>(null);
     const [inputValue, setInputValue] = useState("");
     const [category, setCategory] = useState<SearchCategory>("all");
-    const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false);
 
     const theme = useTheme();
 
-    const styles = useMemo(
-        () => createSelectStyles(theme, isKeyboardNavigating),
-        [theme, isKeyboardNavigating],
-    );
+    const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(
         () => ({
             Control,
@@ -278,7 +274,6 @@ const SearchInput: React.FC<
             return inputValue;
         }
         if (actionMeta.action == "input-change") {
-            setIsKeyboardNavigating(false);
             setInputValue(value);
 
             if (value === "") {
@@ -328,14 +323,7 @@ const SearchInput: React.FC<
         }
     };
 
-    const handleBlur = () => {
-        setIsKeyboardNavigating(false);
-    };
-
     const handleKeyDown = (event: React.KeyboardEvent) => {
-        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-            setIsKeyboardNavigating(true);
-        }
         if (event.key === "Escape") {
             selectRef.current?.blur();
             onClose();
@@ -343,7 +331,7 @@ const SearchInput: React.FC<
     };
 
     return (
-        <SearchInputWrapper onMouseMove={() => setIsKeyboardNavigating(false)}>
+        <SearchInputWrapper>
             <AsyncSelect
                 ref={selectRef}
                 {...{ searchCategory: { category, setCategory } }}
@@ -367,7 +355,6 @@ const SearchInput: React.FC<
                     open && (inputValue !== "" || shouldShowEmptyState(""))
                 }
                 onFocus={handleFocus}
-                onBlur={handleBlur}
                 placeholder={t("search_hint")}
                 loadingMessage={() => t("loading")}
                 noOptionsMessage={({ inputValue }) => {
@@ -558,7 +545,6 @@ const loadOptions = pDebounce(async (input: string) => {
 
 const createSelectStyles = (
     theme: Theme,
-    isKeyboardNavigating: boolean,
 ): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1, minWidth: 0 }),
     control: (style) => ({
@@ -629,13 +615,12 @@ const createSelectStyles = (
         padding: 0,
         backgroundColor: "transparent !important",
         "& :hover": { cursor: "pointer" },
-        "& .option-contents":
-            isFocused && isKeyboardNavigating
-                ? {
-                      outline: `2px solid ${theme.vars.palette.accent.main}`,
-                      outlineOffset: "-2px",
-                  }
-                : {},
+        "& .option-contents": isFocused
+            ? {
+                  outline: `2px solid ${theme.vars.palette.accent.main}`,
+                  outlineOffset: "-2px",
+              }
+            : {},
     }),
     placeholder: (style) => ({
         ...style,
