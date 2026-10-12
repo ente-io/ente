@@ -99,7 +99,7 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
   static const double _footerSpacing = Spacing.lg;
   static const double _footerInset = Spacing.xxl;
 
-  late final rive.FileLoader _fileLoader;
+  rive.FileLoader? _fileLoader;
   rive.ViewModelInstance? _viewModel;
   String? _pendingTrigger;
   Timer? _deferredTrigger;
@@ -131,10 +131,20 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
   @override
   void initState() {
     super.initState();
-    _fileLoader = rive.FileLoader.fromAsset(
-      widget.illustration.asset,
-      riveFactory: rive.Factory.flutter,
-    );
+    _fileLoader = _loadIllustration();
+  }
+
+  // The Rive runtime is a native library that can be unavailable, as in
+  // headless test runs; the page must still work without its illustration.
+  rive.FileLoader? _loadIllustration() {
+    try {
+      return rive.FileLoader.fromAsset(
+        widget.illustration.asset,
+        riveFactory: rive.Factory.flutter,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
@@ -160,7 +170,7 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
     );
     _deferredTrigger?.cancel();
     _viewModel = null;
-    _fileLoader.dispose();
+    _fileLoader?.dispose();
     super.dispose();
   }
 
@@ -290,42 +300,43 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
               ],
             ),
           ),
-        Positioned(
-          top: mediaQuery.padding.top + illustration.topOffset,
-          left: 0,
-          right: 0,
-          height: illustration.height,
-          child: IgnorePointer(
-            child: Visibility(
-              visible: !_isIllustrationHidden,
-              maintainState: true,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Transform.translate(
-                  offset: Offset(illustration.centerOffset, 0),
-                  child: SizedBox(
-                    width: illustration.width,
-                    height: illustration.height,
-                    child: rive.RiveWidgetBuilder(
-                      fileLoader: _fileLoader,
-                      dataBind: rive.DataBind.auto(),
-                      onLoaded: _onLoaded,
-                      builder: (BuildContext context, rive.RiveState state) {
-                        if (state is rive.RiveLoaded) {
-                          return rive.RiveWidget(
-                            controller: state.controller,
-                            fit: rive.Fit.contain,
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
+        if (_fileLoader != null)
+          Positioned(
+            top: mediaQuery.padding.top + illustration.topOffset,
+            left: 0,
+            right: 0,
+            height: illustration.height,
+            child: IgnorePointer(
+              child: Visibility(
+                visible: !_isIllustrationHidden,
+                maintainState: true,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Transform.translate(
+                    offset: Offset(illustration.centerOffset, 0),
+                    child: SizedBox(
+                      width: illustration.width,
+                      height: illustration.height,
+                      child: rive.RiveWidgetBuilder(
+                        fileLoader: _fileLoader!,
+                        dataBind: rive.DataBind.auto(),
+                        onLoaded: _onLoaded,
+                        builder: (BuildContext context, rive.RiveState state) {
+                          if (state is rive.RiveLoaded) {
+                            return rive.RiveWidget(
+                              controller: state.controller,
+                              fit: rive.Fit.contain,
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
       ],
     );
   }
