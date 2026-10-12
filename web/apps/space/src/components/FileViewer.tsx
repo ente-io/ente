@@ -1769,7 +1769,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                         opacity:
                             "calc((var(--space-viewer-bg-opacity, 1) - 0.5) * 2)",
                     },
-                "&[data-space-viewer-leaving='true'] [data-space-viewer-chrome='true'], &[data-space-viewer-leaving='true'] [data-space-viewer-bottom='true']":
+                "&[data-space-viewer-leaving='true'] :is([data-space-viewer-chrome='true'], [data-space-viewer-bottom='true'], [data-space-viewer-close])":
                     { opacity: 0, transition: "opacity 140ms ease" },
                 // PhotoSwipe sets an inline opacity, so hide it with visibility.
                 "&[data-space-viewer-flying='true'] .pswp": {
@@ -1777,10 +1777,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 },
                 "&[data-space-viewer-flying='true'] :is([data-space-viewer-chrome='true'], [data-space-viewer-bottom='true'], [data-space-viewer-chrome='true'] *, [data-space-viewer-bottom='true'] *)":
                     { pointerEvents: "none !important" },
-                "&[data-space-viewer-waiting='true'] [data-space-viewer-close], &[data-space-viewer-waiting='true'] [data-space-viewer-close] *":
-                    { pointerEvents: "auto !important" },
-                "&[data-space-viewer-waiting='true'] [data-space-viewer-chrome='true']":
-                    { opacity: 1 },
                 "@media (prefers-reduced-motion: reduce)": {
                     transition: "none",
                 },
@@ -1801,7 +1797,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             )}
             <Box
                 component="header"
-                data-space-viewer-chrome="true"
                 sx={{
                     alignItems: "center",
                     display: "grid",
@@ -1817,6 +1812,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 }}
             >
                 <Box
+                    data-space-viewer-chrome="true"
                     sx={{
                         alignItems: "center",
                         display: "flex",
@@ -1954,6 +1950,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                         <Box
                             component="button"
                             id={actionsButtonID}
+                            data-space-viewer-chrome="true"
                             type="button"
                             aria-label="Post actions"
                             aria-controls={
@@ -1978,6 +1975,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                             component="button"
                             type="button"
                             aria-label="Add photos or videos"
+                            data-space-viewer-chrome="true"
                             title="Add photos or videos"
                             disabled={isDraftPostActionRunning}
                             onClick={onAddDraftPhoto}
@@ -2001,6 +1999,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                             component="button"
                             type="button"
                             aria-label="Edit item"
+                            data-space-viewer-chrome="true"
                             title="Edit item"
                             disabled={
                                 isDraftPostActionRunning ||
