@@ -617,7 +617,7 @@ const createSelectStyles = (
         "& :hover": { cursor: "pointer" },
         "& .option-contents": isFocused
             ? {
-                  outline: `2px solid ${theme.vars.palette.accent.main}`,
+                  outline: `2px solid color-mix(in srgb, ${theme.vars.palette.accent.main} 55%, transparent)`,
                   outlineOffset: "-2px",
               }
             : {},
