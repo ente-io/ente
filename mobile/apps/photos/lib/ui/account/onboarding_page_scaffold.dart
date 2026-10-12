@@ -284,8 +284,8 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
           Positioned(
             top:
                 mediaQuery.padding.top + _headerBarCenter - _titleBarHeight / 2,
-            left: _headerBarLeftInset,
-            right: _headerBarRightInset,
+            left: mediaQuery.padding.left + _headerBarLeftInset,
+            right: mediaQuery.padding.right + _headerBarRightInset,
             height: _titleBarHeight,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -394,10 +394,14 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
               slivers: [
                 if (hasCardTitleBar)
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(
-                      OnboardingPageScaffold.horizontalPadding - Spacing.md,
+                    padding: EdgeInsets.fromLTRB(
+                      mediaQuery.padding.left +
+                          OnboardingPageScaffold.horizontalPadding -
+                          Spacing.md,
                       _titleBarTopInset,
-                      OnboardingPageScaffold.horizontalPadding - Spacing.md,
+                      mediaQuery.padding.right +
+                          OnboardingPageScaffold.horizontalPadding -
+                          Spacing.md,
                       _titleBarBottomInset,
                     ),
                     sliver: SliverToBoxAdapter(
@@ -418,17 +422,24 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(
-                      OnboardingPageScaffold.horizontalPadding,
+                    padding: EdgeInsets.fromLTRB(
+                      mediaQuery.padding.left +
+                          OnboardingPageScaffold.horizontalPadding,
                       _inlineTitleTopInset,
-                      OnboardingPageScaffold.horizontalPadding,
+                      mediaQuery.padding.right +
+                          OnboardingPageScaffold.horizontalPadding,
                       _inlineTitleBottomInset,
                     ),
                     sliver: SliverToBoxAdapter(child: titleContent),
                   ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: OnboardingPageScaffold.horizontalPadding,
+                  padding: EdgeInsets.only(
+                    left:
+                        mediaQuery.padding.left +
+                        OnboardingPageScaffold.horizontalPadding,
+                    right:
+                        mediaQuery.padding.right +
+                        OnboardingPageScaffold.horizontalPadding,
                   ),
                   sliver: SliverLayoutBuilder(
                     builder: (context, constraints) {
@@ -473,9 +484,9 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
     final horizontalInset = inline ? 0.0 : _footerInset;
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        horizontalInset,
+        horizontalInset + (inline ? 0 : mediaQuery.padding.left),
         _footerInset,
-        horizontalInset,
+        horizontalInset + (inline ? 0 : mediaQuery.padding.right),
         _footerInset +
             (mediaQuery.viewInsets.bottom > 0 ? 0 : mediaQuery.padding.bottom),
       ),
