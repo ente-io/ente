@@ -1,7 +1,10 @@
 import { expect, test } from "vitest";
 import type { SpacePost } from "../src/services/space";
 import type { LocalSpaceFeedPost } from "../src/state/app-state";
-import { homeFeedEntries } from "../src/utils/home-feed";
+import {
+    homeFeedEntries,
+    homeFeedSeparatorBefore,
+} from "../src/utils/home-feed";
 
 const post = (postId: number, timestampMs: number): SpacePost => ({
     friendID: "friend",
@@ -96,4 +99,87 @@ test("own posts stay in the same feed after the local publication is removed", (
         uploaded,
         existing,
     ]);
+});
+
+test.each([1, 3])(
+    "separates a refresh with %s new posts from the previous feed",
+    (count) => {
+        const previous = post(2, 200);
+        const newPosts = Array.from({ length: count }, (_, index) =>
+            post(count + 2 - index, 300 + count - index),
+        );
+        expect(
+            homeFeedSeparatorBefore(
+                homeFeedEntries([...newPosts, previous, post(1, 100)], []),
+                previous,
+            ),
+        ).toBe("post:2");
+    },
+);
+
+test("does not separate initial loads, unchanged refreshes, or older pages", () => {
+    const posts = [post(2, 200), post(1, 100)];
+    expect(
+        homeFeedSeparatorBefore(homeFeedEntries(posts, []), undefined),
+    ).toBeUndefined();
+    expect(
+        homeFeedSeparatorBefore(homeFeedEntries(posts, []), posts[0]),
+    ).toBeUndefined();
+    expect(
+        homeFeedSeparatorBefore(
+            homeFeedEntries([...posts, post(0, 50)], []),
+            posts[0],
+        ),
+    ).toBeUndefined();
+});
+
+test("keeps the boundary when the previously newest post has been deleted", () => {
+    expect(
+        homeFeedSeparatorBefore(
+            homeFeedEntries([post(3, 300), post(1, 100)], []),
+            post(2, 200),
+        ),
+    ).toBe("post:1");
+});
+
+test("waits for older posts when new posts fill the first page", () => {
+    const posts = [post(4, 400), post(3, 300)];
+    const previous = post(2, 200);
+    expect(
+        homeFeedSeparatorBefore(homeFeedEntries(posts, []), previous),
+    ).toBeUndefined();
+    expect(
+        homeFeedSeparatorBefore(
+            homeFeedEntries([...posts, previous, post(1, 100)], []),
+            previous,
+        ),
+    ).toBe("post:2");
+});
+
+test("uses post order to separate posts sharing a timestamp", () => {
+    const previous = post(2, 200);
+    expect(
+        homeFeedSeparatorBefore(
+            homeFeedEntries([post(3, 200), previous, post(1, 100)], []),
+            previous,
+        ),
+    ).toBe("post:2");
+});
+
+test("a local upload alone does not create a new-post boundary", () => {
+    const previous = post(2, 200);
+    const local: LocalSpaceFeedPost = {
+        id: "upload",
+        post: post(4, 400),
+        status: "ready",
+    };
+    expect(
+        homeFeedSeparatorBefore(homeFeedEntries([previous], [local]), previous),
+    ).toBeUndefined();
+    expect(
+        homeFeedSeparatorBefore(
+            homeFeedEntries([post(3, 300), previous], [local]),
+            previous,
+        ),
+    ).toBe("post:2");
 });
