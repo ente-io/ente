@@ -57,7 +57,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           SliverSafeArea(
             top: false,
             sliver: SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+              padding: const EdgeInsets.fromLTRB(
+                Spacing.lg,
+                0,
+                Spacing.lg,
+                Spacing.xl,
+              ),
               sliver: SliverList.list(
                 children: [
                   _LinkSettingsGroup(
