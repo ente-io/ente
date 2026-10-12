@@ -91,6 +91,9 @@ class _LoadingComponentState extends State<LoadingComponent>
                       child: Text(
                         percent,
                         style: TextStyles.mini.copyWith(color: color),
+                        textScaler: MediaQuery.textScalerOf(
+                          context,
+                        ).clamp(maxScaleFactor: 1),
                       ),
                     ),
                   )

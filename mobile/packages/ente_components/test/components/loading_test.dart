@@ -126,4 +126,35 @@ void main() {
     );
     expect((card.decoration! as BoxDecoration).color, colors.backgroundBase);
   });
+
+  testWidgets("LoadingComponent keeps the % on one line at large text sizes", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+        child: app(
+          const LoadingComponent(size: LoadingComponentSize.large, value: 0.45),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.text("45%")).height, 16);
+  });
+
+  testWidgets("showLoadingComponent centres the card above the keyboard", (
+    tester,
+  ) async {
+    tester.view.viewInsets = const FakeViewPadding(bottom: 900);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(const SizedBox()));
+    showLoadingComponent(tester.element(find.byType(Scaffold)), "Opening");
+    await tester.pump();
+    await tester.pump(Motion.standard);
+
+    final card = find.ancestor(
+      of: find.text("Opening"),
+      matching: find.byType(Container),
+    );
+    expect(tester.getCenter(card).dy, 150);
+  });
 }

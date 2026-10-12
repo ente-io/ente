@@ -90,39 +90,42 @@ class _LoadingComponentRoute extends PopupRoute<void> {
   ) {
     return PopScope(
       canPop: barrierDismissible,
-      child: Center(
-        child: Material(
-          type: MaterialType.transparency,
-          child: Container(
-            width: 288,
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.xxl,
-              vertical: Spacing.xl,
-            ),
-            decoration: BoxDecoration(
-              color: colors.backgroundBase,
-              border: Border.all(color: colors.strokeFaint),
-              borderRadius: Radii.buttonBorder,
-              boxShadow: Shadows.floating,
-            ),
-            child: Row(
-              children: [
-                ValueListenableBuilder<double?>(
-                  valueListenable: value,
-                  builder: (_, value, _) =>
-                      LoadingComponent(value: value, color: colors.primary),
-                ),
-                const SizedBox(width: Spacing.lg),
-                Expanded(
-                  child: ValueListenableBuilder<String>(
-                    valueListenable: message,
-                    builder: (_, message, _) => Text(
-                      message,
-                      style: TextStyles.body.copyWith(color: colors.textBase),
+      child: Padding(
+        padding: MediaQuery.viewInsetsOf(context),
+        child: Center(
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              width: 288,
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.xxl,
+                vertical: Spacing.xl,
+              ),
+              decoration: BoxDecoration(
+                color: colors.backgroundBase,
+                border: Border.all(color: colors.strokeFaint),
+                borderRadius: Radii.buttonBorder,
+                boxShadow: Shadows.floating,
+              ),
+              child: Row(
+                children: [
+                  ValueListenableBuilder<double?>(
+                    valueListenable: value,
+                    builder: (_, value, _) =>
+                        LoadingComponent(value: value, color: colors.primary),
+                  ),
+                  const SizedBox(width: Spacing.lg),
+                  Expanded(
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: message,
+                      builder: (_, message, _) => Text(
+                        message,
+                        style: TextStyles.body.copyWith(color: colors.textBase),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
