@@ -4240,7 +4240,10 @@ class _LoadingPreviewState extends State<_LoadingPreview> {
     );
     for (var step = 1; step <= 30; step++) {
       await Future<void>.delayed(const Duration(milliseconds: 100));
-      dialog.update(value: step / 30);
+      dialog.update(
+        message: 'Downloading ${(step / 30 * 100).round()}%',
+        value: step / 30,
+      );
     }
     await dialog.hide();
   }

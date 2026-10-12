@@ -86,4 +86,44 @@ void main() {
     dismissible.update(message: "Still safe after dismissal");
     await dismissible.hide();
   });
+
+  testWidgets("LoadingComponent exposes its label and progress to semantics", (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      app(const LoadingComponent(value: 0.45, semanticsLabel: "Downloading")),
+    );
+    expect(
+      tester.getSemantics(find.byType(LoadingComponent)),
+      isSemantics(label: "Downloading", value: "45%"),
+    );
+    handle.dispose();
+  });
+
+  testWidgets("showLoadingComponent uses the caller's theme for every part", (
+    tester,
+  ) async {
+    final local = ComponentTheme.darkTheme(app: ComponentApp.locker);
+    final colors = local.extension<ComponentColorTokens>()!.colors;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ComponentTheme.lightTheme(),
+        home: Theme(
+          data: local,
+          child: const Scaffold(body: SizedBox()),
+        ),
+      ),
+    );
+    showLoadingComponent(tester.element(find.byType(Scaffold)), "Opening");
+    await tester.pump();
+    await tester.pump(Motion.standard);
+
+    final ring = tester.widget<CustomPaint>(paint);
+    expect((ring.painter! as dynamic).color, colors.primary);
+    final card = tester.widget<Container>(
+      find.ancestor(of: find.text("Opening"), matching: find.byType(Container)),
+    );
+    expect((card.decoration! as BoxDecoration).color, colors.backgroundBase);
+  });
 }

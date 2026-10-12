@@ -22,11 +22,13 @@ class LoadingComponent extends StatefulWidget {
     this.size = LoadingComponentSize.medium,
     this.value,
     this.color,
+    this.semanticsLabel,
   });
 
   final LoadingComponentSize size;
   final double? value;
   final Color? color;
+  final String? semanticsLabel;
 
   @override
   State<LoadingComponent> createState() => _LoadingComponentState();
@@ -68,25 +70,32 @@ class _LoadingComponentState extends State<LoadingComponent>
   @override
   Widget build(BuildContext context) {
     final value = widget.value;
+    final percent = value == null ? null : '${(value * 100).round()}%';
     final color = widget.color ?? context.componentColors.primary;
-    return SizedBox.square(
-      dimension: widget.size.diameter,
-      child: RepaintBoundary(
-        child: CustomPaint(
-          painter: _LoadingPainter(
-            color: color,
-            stroke: widget.size.stroke,
-            value: value,
-            turn: _turn,
+    return Semantics(
+      label: widget.semanticsLabel,
+      value: percent,
+      child: SizedBox.square(
+        dimension: widget.size.diameter,
+        child: RepaintBoundary(
+          child: CustomPaint(
+            painter: _LoadingPainter(
+              color: color,
+              stroke: widget.size.stroke,
+              value: value,
+              turn: _turn,
+            ),
+            child: percent != null && widget.size == LoadingComponentSize.large
+                ? Center(
+                    child: ExcludeSemantics(
+                      child: Text(
+                        percent,
+                        style: TextStyles.mini.copyWith(color: color),
+                      ),
+                    ),
+                  )
+                : null,
           ),
-          child: value != null && widget.size == LoadingComponentSize.large
-              ? Center(
-                  child: Text(
-                    '${(value * 100).round()}%',
-                    style: TextStyles.mini.copyWith(color: color),
-                  ),
-                )
-              : null,
         ),
       ),
     );
