@@ -152,12 +152,14 @@ void main() {
     WidgetTester tester, {
     required int files,
     required int collections,
+    TargetPlatform? platform,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(platform: platform),
         localizationsDelegates: StringsLocalizations.localizationsDelegates,
         supportedLocales: const [Locale('en')],
         home: FileUploadScreenV2(
@@ -257,5 +259,63 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('New collection').hitTestable(), findsOneWidget);
+  });
+
+  for (var index = 0; index < 2; index++) {
+    final section = index == 0 ? 'items' : 'collections';
+    testWidgets('$section stops at both scroll boundaries on iOS', (
+      tester,
+    ) async {
+      await cardHeights(
+        tester,
+        files: 10,
+        collections: 10,
+        platform: TargetPlatform.iOS,
+      );
+
+      final card = find.byType(ScrollCard).at(index);
+      final scrollable = find.descendant(
+        of: card,
+        matching: find.byType(Scrollable),
+      );
+      final position = tester.state<ScrollableState>(scrollable).position;
+      final gesture = await tester.startGesture(tester.getCenter(card));
+      await gesture.moveBy(const Offset(0, 30));
+      await gesture.moveBy(const Offset(0, 150));
+      await tester.pump();
+      expect(position.pixels, 0);
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      await tester.drag(card, const Offset(0, -1000));
+      await tester.pumpAndSettle();
+      expect(position.pixels, position.maxScrollExtent);
+      final endGesture = await tester.startGesture(tester.getCenter(card));
+      await endGesture.moveBy(const Offset(0, -30));
+      await endGesture.moveBy(const Offset(0, -150));
+      await tester.pump();
+      expect(position.pixels, position.maxScrollExtent);
+      await endGesture.up();
+      await tester.pumpAndSettle();
+    });
+  }
+
+  testWidgets('file, collection and add icons render at the same size', (
+    tester,
+  ) async {
+    await cardHeights(tester, files: 2, collections: 1);
+    final icons = tester.widgetList<HugeIcon>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is HugeIcon &&
+            (widget.icon == HugeIcons.strokeRoundedFile01 ||
+                widget.icon == HugeIcons.strokeRoundedFolder01 ||
+                widget.icon == HugeIcons.strokeRoundedAdd01),
+      ),
+    );
+    expect(icons.length, 4);
+    for (final icon in icons) {
+      expect(tester.getSize(find.byWidget(icon)), const Size(18, 18));
+    }
   });
 }

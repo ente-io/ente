@@ -58,7 +58,10 @@ class _CollectionSelectionWidgetV2State
             title: l10n.newCollection,
             titleColor: colors.primary,
             iconColor: colors.primary,
-            leading: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
+            leading: const HugeIcon(
+              icon: HugeIcons.strokeRoundedAdd01,
+              size: null,
+            ),
             onTap: _createCollection,
           );
         }
@@ -79,6 +82,7 @@ class _CollectionSelectionWidgetV2State
               icon: collection.type == CollectionType.favorites
                   ? HugeIcons.strokeRoundedStar
                   : HugeIcons.strokeRoundedFolder01,
+              size: null,
             ),
             trailing: widget.selectedCollectionIds.contains(collection.id)
                 ? const SelectionCheckBadge()
@@ -147,6 +151,7 @@ class _ScrollCardState extends State<ScrollCard> {
                 thumbVisibility: widget.showScrollbar,
                 child: ListView.separated(
                   controller: _controller,
+                  physics: const ClampingScrollPhysics(),
                   shrinkWrap: true,
                   padding: EdgeInsets.zero,
                   itemCount: widget.itemCount,
