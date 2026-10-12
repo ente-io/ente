@@ -30,6 +30,7 @@ import {
 import { paintStretchingDot } from "components/post-photos-dots";
 import { SpacePostAvatar } from "components/PostAvatar";
 import { SpacePostGrid } from "components/PostGrid";
+import { SpacePostLikeHeart } from "components/PostLikeHeart";
 import { SpacePostPhotosCounter } from "components/PostPhotosCounter";
 import { SpacePostPhotosDots } from "components/PostPhotosDots";
 import { SpacePostTile } from "components/PostTile";
@@ -512,12 +513,14 @@ interface FeedLikeButtonProps {
     isLiked: boolean;
     onClick: () => void;
     popID: number;
+    toggleID: number;
 }
 
 const FeedLikeButton: React.FC<FeedLikeButtonProps> = ({
     isLiked,
     onClick,
     popID,
+    toggleID,
 }) => {
     const isPopping = isLiked && popID > 0;
 
@@ -564,31 +567,41 @@ const FeedLikeButton: React.FC<FeedLikeButtonProps> = ({
                 },
             }}
         >
-            <Box
-                key={isPopping ? `heart-${popID}` : "heart"}
-                component="span"
-                sx={{
-                    animation: isPopping
-                        ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
-                        : undefined,
-                    display: "flex",
-                    lineHeight: 0,
-                    position: "relative",
-                    transformOrigin: "50% 58%",
-                    zIndex: 1,
-                    "@media (prefers-reduced-motion: reduce)": {
-                        animation: "none",
-                    },
-                }}
-            >
-                <HugeiconsIcon
-                    fill={isLiked ? green : "none"}
-                    icon={FavouriteIcon}
-                    primaryColor={isLiked ? green : feedActionForeground}
-                    size={feedActionIconSize}
-                    strokeWidth={2.2}
-                />
-            </Box>
+            <SpacePostLikeHeart
+                liked={isLiked}
+                toggleID={toggleID}
+                popID={popID}
+                size={feedActionIconSize}
+                fallback={
+                    <Box
+                        key={isPopping ? `heart-${popID}` : "heart"}
+                        component="span"
+                        sx={{
+                            animation: isPopping
+                                ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
+                                : undefined,
+                            display: "flex",
+                            lineHeight: 0,
+                            position: "relative",
+                            transformOrigin: "50% 58%",
+                            zIndex: 1,
+                            "@media (prefers-reduced-motion: reduce)": {
+                                animation: "none",
+                            },
+                        }}
+                    >
+                        <HugeiconsIcon
+                            fill={isLiked ? green : "none"}
+                            icon={FavouriteIcon}
+                            primaryColor={
+                                isLiked ? green : feedActionForeground
+                            }
+                            size={feedActionIconSize}
+                            strokeWidth={2.2}
+                        />
+                    </Box>
+                }
+            />
         </Box>
     );
 };
@@ -856,6 +869,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
     const [isLiked, setIsLiked] = useState(viewerLiked);
     const [muted, setMuted] = useState(true);
     const [likePopID, setLikePopID] = useState(0);
+    const [likeToggleID, setLikeToggleID] = useState(0);
     const [shouldLoadMedia, setShouldLoadMedia] = useState(
         !isUnavailable && Boolean(imageUrl) && !isAvatarPending,
     );
@@ -1078,6 +1092,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
 
         const nextLiked = !isLiked;
         setIsLiked(nextLiked);
+        setLikeToggleID((id) => id + 1);
         if (nextLiked) setLikePopID((id) => id + 1);
         void onSetPostLiked?.(postId, nextLiked).catch((error: unknown) => {
             log.error("Failed to update post like", error);
@@ -1731,6 +1746,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                         isLiked={isLiked}
                         onClick={handleLikeClick}
                         popID={likePopID}
+                        toggleID={likeToggleID}
                     />
                 </Box>
             )}

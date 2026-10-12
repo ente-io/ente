@@ -7,6 +7,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Box } from "@mui/material";
+import { preloadPostLikeAnimation } from "components/post-like-rive";
 import { SpacePostPhotoInput } from "components/PostPhotoInput";
 import log from "ente-base/log";
 import { isSpaceIOS } from "hooks/use-pwa-install-prompt";
@@ -52,6 +53,10 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
     const layoutRef = React.useRef<HTMLDivElement>(null);
     const postInputRef = React.useRef<HTMLInputElement>(null);
     const path = router.asPath.split(/[?#]/)[0] ?? router.pathname;
+
+    React.useEffect(() => {
+        if (showNavigation) void preloadPostLikeAnimation();
+    }, [showNavigation]);
 
     React.useEffect(() => {
         if (!spaceID) {

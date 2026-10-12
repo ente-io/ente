@@ -567,6 +567,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         activePhoto.viewerLiked ?? false,
     );
     const [photoLikePopID, setPhotoLikePopID] = React.useState(0);
+    const [photoLikeToggleID, setPhotoLikeToggleID] = React.useState(0);
     const [caption, setCaption] = React.useState(activePhoto.caption ?? "");
     const [captionEditValue, setCaptionEditValue] = React.useState(
         activePhoto.caption ?? "",
@@ -807,6 +808,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         }
 
         const nextLiked = !isPhotoLiked;
+        setPhotoLikeToggleID((id) => id + 1);
         if (!activePhoto.postId || !onSetPostLiked) {
             setIsPhotoLiked(nextLiked);
             if (nextLiked) setPhotoLikePopID((id) => id + 1);
@@ -2656,6 +2658,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                 isReplyMode={isReplyMode}
                                 liked={isPhotoLiked}
                                 likePopID={photoLikePopID}
+                                likeToggleID={photoLikeToggleID}
+                                postKey={activePostKey}
                                 onLike={handlePhotoLikeClick}
                                 onSendReply={sendReply}
                                 replyActionPhase={replyActionPhase}
