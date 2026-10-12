@@ -12,6 +12,8 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/notification_event.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/ml_model_download_service.dart";
+import "package:photos/services/machine_learning/ml_service.dart";
+import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/utils/ml_util.dart";
@@ -25,11 +27,13 @@ class MLProgressBanner extends StatefulWidget {
   State<MLProgressBanner> createState() => _MLProgressBannerState();
 }
 
-class _MLProgressBannerState extends State<MLProgressBanner> {
+class _MLProgressBannerState extends State<MLProgressBanner>
+    with WidgetsBindingObserver {
   IndexStatus? _indexStatus;
   Timer? _timer;
   bool _dismissed = false;
   bool _indexingComplete = false;
+  bool _keepsScreenAwake = false;
   late final StreamSubscription<LocalPhotosUpdatedEvent>
   _localPhotosUpdatedSubscription;
   late final StreamSubscription<NotificationEvent> _notificationSubscription;
@@ -39,6 +43,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     widget.isOnSearchTab?.addListener(_onSearchTabChanged);
     _localPhotosUpdatedSubscription = Bus.instance
         .on<LocalPhotosUpdatedEvent>()
@@ -69,6 +74,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
   void _stopPolling() {
     _timer?.cancel();
     _timer = null;
+    _updateWakeLock();
   }
 
   void _onSearchTabChanged() {
@@ -106,6 +112,20 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
         status.pendingItems > 0;
   }
 
+  void _updateWakeLock() {
+    final keepScreenAwake =
+        (widget.isOnSearchTab?.value ?? false) &&
+        _isShown &&
+        MLService.instance.isRunningML &&
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    if (keepScreenAwake == _keepsScreenAwake) return;
+    _keepsScreenAwake = keepScreenAwake;
+    wakeLockService.updateWakeLock(
+      enable: keepScreenAwake,
+      wakeLockFor: WakeLockFor.mlProgressBanner,
+    );
+  }
+
   Future<void> _fetchStatus() async {
     try {
       final status = await getIndexStatus();
@@ -117,8 +137,14 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
           _indexingComplete = true;
           _stopPolling();
         }
+        _updateWakeLock();
       }
     } catch (_) {}
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _updateWakeLock();
   }
 
   @override
@@ -133,10 +159,17 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     widget.isOnSearchTab?.removeListener(_onSearchTabChanged);
     _localPhotosUpdatedSubscription.cancel();
     _notificationSubscription.cancel();
     _timer?.cancel();
+    if (_keepsScreenAwake) {
+      wakeLockService.updateWakeLock(
+        enable: false,
+        wakeLockFor: WakeLockFor.mlProgressBanner,
+      );
+    }
     super.dispose();
   }
 
