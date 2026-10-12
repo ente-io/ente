@@ -167,6 +167,9 @@ const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
         rider.setAttribute("aria-hidden", "true");
         rider.inert = true;
         rider.append(shade.cloneNode(true), header.cloneNode(true));
+        for (const element of rider.querySelectorAll("*"))
+            if (element instanceof HTMLElement)
+                element.style.animation = "none";
         Object.assign(rider.style, {
             borderRadius: getComputedStyle(tile).borderRadius,
             height: `${bounds.h}px`,
