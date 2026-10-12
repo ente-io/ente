@@ -40,7 +40,9 @@ Public links to shared content can also be viewed in any web browser.
 
 Yes. Folder upload is available in Locker on the web. Open [locker.ente.com](https://locker.ente.com) in a desktop browser and upload the folder there.
 
-The Locker mobile app's **File** option is for selecting files. If folder upload on the web does not work, contact support with your browser version and what happens when you try.
+Each file in the folder is saved as a separate Locker item. You can group those items in a collection, similar to a folder.
+
+The Locker mobile app's **File** option is for selecting files.
 
 ## Account
 
