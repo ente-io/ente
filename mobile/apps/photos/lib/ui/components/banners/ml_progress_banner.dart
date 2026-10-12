@@ -28,7 +28,7 @@ class MLProgressBanner extends StatefulWidget {
 }
 
 class _MLProgressBannerState extends State<MLProgressBanner>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   IndexStatus? _indexStatus;
   Timer? _timer;
   bool _dismissed = false;
@@ -48,7 +48,6 @@ class _MLProgressBannerState extends State<MLProgressBanner>
     _localPhotosUpdatedSubscription = Bus.instance
         .on<LocalPhotosUpdatedEvent>()
         .listen((_) {
-          _indexStatus = null;
           _indexingComplete = false;
           _ensurePolling();
         });
@@ -174,7 +173,11 @@ class _MLProgressBannerState extends State<MLProgressBanner>
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (!_isShown) return const SizedBox.shrink();
 
     final status = _indexStatus!;
