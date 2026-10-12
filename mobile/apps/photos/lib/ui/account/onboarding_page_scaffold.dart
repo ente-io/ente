@@ -101,20 +101,21 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
 
   rive.FileLoader? _fileLoader;
   rive.ViewModelInstance? _viewModel;
-  String? _pendingTrigger;
+  String? _latestTrigger;
   Timer? _deferredTrigger;
   DateTime _entryCompletesAt = DateTime.now();
   ModalRoute<dynamic>? _route;
   bool _isIllustrationHidden = false;
   bool _hasBuilt = false;
   bool _hasExited = false;
+  int _illustrationGeneration = 0;
 
   // Fires a view-model trigger on the illustration. Triggers wait for the
   // file to load and for the entry animation to finish, since interrupting
   // the entry leaves the state machine frozen mid-pose.
   void trigger(String name) {
+    _latestTrigger = name;
     if (_viewModel == null) {
-      _pendingTrigger = name;
       return;
     }
     _deferredTrigger?.cancel();
@@ -177,16 +178,29 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
   void _onRouteAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.reverse) {
       _triggerExit();
+    } else if (status == AnimationStatus.forward) {
+      _restartIllustration();
     }
   }
 
   void _onSecondaryAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.forward) {
       _triggerExit();
-    } else if (status == AnimationStatus.reverse) {
-      _hasExited = false;
-      _playEntry();
+    } else if (status == AnimationStatus.reverse ||
+        status == AnimationStatus.dismissed) {
+      _restartIllustration();
     }
+  }
+
+  void _restartIllustration() {
+    if (!_hasExited) return;
+    _hasExited = false;
+    _deferredTrigger?.cancel();
+    if (_viewModel == null) return;
+    _viewModel = null;
+    setState(() {
+      _illustrationGeneration++;
+    });
   }
 
   void _onLoaded(rive.RiveLoaded state) {
@@ -202,9 +216,8 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
       animation.dispose();
     }
     _playEntry();
-    final pending = _pendingTrigger;
-    _pendingTrigger = null;
-    if (pending != null) trigger(pending);
+    final latest = _latestTrigger;
+    if (latest != null) trigger(latest);
   }
 
   Duration _entryDuration = const Duration(seconds: 5);
@@ -279,7 +292,10 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Positioned.fill(child: _OnboardingBackdrop(color: colors.green)),
+        Positioned.fill(
+          bottom: -_cardRadius,
+          child: _OnboardingBackdrop(color: colors.green),
+        ),
         if (hasHeaderBar)
           Positioned(
             top:
@@ -318,6 +334,7 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
                       width: illustration.width,
                       height: illustration.height,
                       child: rive.RiveWidgetBuilder(
+                        key: ValueKey(_illustrationGeneration),
                         fileLoader: _fileLoader!,
                         dataBind: rive.DataBind.auto(),
                         onLoaded: _onLoaded,
@@ -584,10 +601,12 @@ class _OnboardingBackdropState extends State<_OnboardingBackdrop> {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: CustomPaint(
-        painter: _OnboardingBackdropPainter(
-          color: widget.color,
-          texture: _image,
+      child: ClipRect(
+        child: CustomPaint(
+          painter: _OnboardingBackdropPainter(
+            color: widget.color,
+            texture: _image,
+          ),
         ),
       ),
     );
