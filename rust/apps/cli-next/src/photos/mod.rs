@@ -1,3 +1,6 @@
+mod export;
+pub mod replica;
+
 use std::{io::Seek, path::Path};
 
 use anyhow::{Context, Result, bail, ensure};
@@ -7,11 +10,11 @@ use serde_json::json;
 
 use crate::{
     api,
-    args::{AlbumCommand, FileCommand, Options, PhotosLibraryCommand, Product},
+    args::{AlbumCommand, App, FileCommand, Options, PhotosLibraryCommand},
     db, home,
     output::{self, AlbumView, FileView},
-    replica::Replica,
 };
+use replica::Replica;
 
 const MAX_CANDIDATES: usize = 10;
 
@@ -21,7 +24,7 @@ pub async fn run(
     options: &Options,
 ) -> Result<()> {
     if let PhotosLibraryCommand::Export(args) = command {
-        return crate::export::run(args, selected, options).await;
+        return export::run(args, selected, options).await;
     }
     ensure!(
         !options.offline
@@ -35,7 +38,7 @@ pub async fn run(
         "original files are not stored locally; download requires network access"
     );
     let (account, home) = home::open_account(selected, !options.offline)?;
-    let session = api::session(&account, Product::Photos)?;
+    let session = api::session(&account, App::Photos)?;
     let mut db = db::open(&home.path, &account.db_key, !options.offline)?;
     let mut replica = Replica::new(&mut db, session.user_id);
     if !options.offline {

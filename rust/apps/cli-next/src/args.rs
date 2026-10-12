@@ -1,6 +1,6 @@
 use std::{io::IsTerminal, num::NonZeroUsize, path::PathBuf};
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -81,12 +81,12 @@ pub enum Command {
         #[command(subcommand)]
         command: PhotosCommand,
     },
-    #[command(about = "Manage Locker sessions and make API requests")]
+    #[command(about = "Manage Ente Locker")]
     Locker {
         #[command(flatten)]
         selector: AccountSelector,
         #[command(subcommand)]
-        command: SessionCommand,
+        command: AppCommand,
     },
     #[command(about = "Manage Ente Auth")]
     Auth {
@@ -95,8 +95,8 @@ pub enum Command {
         #[command(subcommand)]
         command: AuthCommand,
     },
-    #[command(about = "Manage accounts on this device", alias = "account")]
-    Accounts {
+    #[command(about = "Manage Ente accounts", alias = "accounts")]
+    Account {
         #[command(subcommand)]
         command: AccountCommand,
     },
@@ -117,7 +117,7 @@ Keep the same home and key across unattended invocations."
 #[derive(Subcommand)]
 pub enum AuthCommand {
     #[command(flatten)]
-    Session(SessionCommand),
+    App(AppCommand),
     #[command(about = "Export your Auth codes; encrypted by default")]
     #[command(
         after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
@@ -165,7 +165,7 @@ pub struct AuthExportArgs {
 #[derive(Subcommand)]
 pub enum PhotosCommand {
     #[command(flatten)]
-    Session(SessionCommand),
+    App(AppCommand),
     #[command(flatten)]
     Library(PhotosLibraryCommand),
 }
@@ -177,7 +177,7 @@ pub enum PhotosLibraryCommand {
         after_long_help = "Refreshes metadata and downloads originals to DESTINATION; requires network access.
 Progress goes to stderr; the result goes to stdout. Use --json for a structured result."
     )]
-    Export(ExportArgs),
+    Export(PhotosExportArgs),
     #[command(about = "Manage albums")]
     Album {
         #[command(subcommand)]
@@ -198,7 +198,7 @@ Progress goes to stderr; the result goes to stdout. Use --json for a structured 
 }
 
 #[derive(Args)]
-pub struct ExportArgs {
+pub struct PhotosExportArgs {
     #[arg(
         long,
         value_name = "ALBUM",
@@ -225,7 +225,7 @@ pub struct ExportArgs {
 }
 
 #[derive(Subcommand)]
-pub enum SessionCommand {
+pub enum AppCommand {
     #[command(
         about = "Log in",
         after_help = "Non-interactive login reads JSON from --input:
@@ -340,7 +340,7 @@ pub enum FileCommand {
 
 const ACCOUNT_HELP: &str = "Reads accounts stored on this device without network access.
 With --json, list returns an array and view returns one object.
-Fields: id, name, email, host (strings); products (string array); selected (boolean).";
+Fields: id, name, email, host (strings); apps (string array); selected (boolean).";
 
 #[derive(Subcommand)]
 pub enum AccountCommand {
@@ -352,6 +352,22 @@ pub enum AccountCommand {
     View {
         #[arg(help = "Account name")]
         name: String,
+    },
+    #[command(about = "Print the saved API token for an account")]
+    #[command(
+        after_long_help = "Uses --account NAME, otherwise the selected account, otherwise the only saved account.
+With several accounts and none selected, use --account NAME or account switch.
+--app is required and selects that account's saved login.
+Reads the saved token from the local vault without contacting the server or refreshing it.
+This prints a secret and does not check whether the server still accepts it.
+Plain output is padded URL-safe Base64 followed by a newline.
+With --json, returns {\"token\":\"...\"}."
+    )]
+    Token {
+        #[command(flatten)]
+        selector: AccountSelector,
+        #[arg(long, value_enum, help = "App whose token to print")]
+        app: App,
     },
     #[command(about = "Make an account the selected one")]
     Switch {
@@ -365,7 +381,7 @@ pub enum AccountCommand {
         #[arg(help = "New local name")]
         new_name: String,
     },
-    #[command(about = "Log out of every product and remove the account from this device")]
+    #[command(about = "Log out of every app and remove the account from this device")]
     Logout {
         #[arg(help = "Account name")]
         name: String,
@@ -392,15 +408,15 @@ pub enum KeyCommand {
     Generate,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, ValueEnum)]
 #[serde(rename_all = "lowercase")]
-pub enum Product {
+pub enum App {
     Photos,
     Locker,
     Auth,
 }
 
-impl Product {
+impl App {
     pub fn name(self) -> &'static str {
         match self {
             Self::Photos => "photos",

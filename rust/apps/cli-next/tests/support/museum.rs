@@ -379,7 +379,9 @@ async fn exercise(origin: String) -> TestResult {
     assert_eq!(home.read_vault()["accounts"][0]["storage_id"], first_id);
 
     login(&home, "auth", &bob_email, &["--host", &origin]);
-    assert!(failure(&home.run(&["photos", "album", "list"])).contains("no photos session"));
+    assert!(
+        failure(&home.run(&["photos", "album", "list"])).contains("is not logged into Ente Photos")
+    );
     login(&home, "locker", &alice_email, &["--account", "work"]);
     let accounts = home.json(&["account", "list"]);
     assert!(
@@ -394,7 +396,7 @@ async fn exercise(origin: String) -> TestResult {
             .as_array()
             .unwrap()
             .iter()
-            .any(|a| a["name"] == "work" && a["products"] == json!(["photos", "locker"]))
+            .any(|a| a["name"] == "work" && a["apps"] == json!(["photos", "locker"]))
     );
 
     login(&home, "photos", &bob_email, &["--account", &bob_email]);
@@ -609,7 +611,10 @@ async fn exercise(origin: String) -> TestResult {
     let token: Vec<u8> =
         serde_json::from_value(state["accounts"][0]["sessions"]["photos"]["token"].clone())
             .unwrap();
-    success(home.run(&["photos", "logout"]));
+    assert_eq!(
+        success(home.run(&["photos", "logout"])).stdout,
+        b"Logged out of Ente Photos for \"work\".\n"
+    );
     let response = reqwest::Client::new()
         .get(format!("{origin}/collections/v2"))
         .header("x-auth-token", b64::encode_url_safe(&token))
@@ -620,7 +625,7 @@ async fn exercise(origin: String) -> TestResult {
     assert_eq!(response.status(), reqwest::StatusCode::UNAUTHORIZED);
     failure(&home.run(&["photos", "album", "list"]));
     assert_eq!(
-        home.json(&["account", "view", "work"])["products"],
+        home.json(&["account", "view", "work"])["apps"],
         json!(["locker"])
     );
     let account_dir = home
@@ -658,12 +663,20 @@ async fn exercise(origin: String) -> TestResult {
     Ok(())
 }
 
-fn login(home: &TestHome, product: &str, email: &str, options: &[&str]) {
-    let mut args = vec![product, "login", "--input", "-", "--json"];
+fn login(home: &TestHome, app: &str, email: &str, options: &[&str]) {
+    let mut args = vec![app, "login", "--input", "-", "--json"];
     args.extend_from_slice(options);
     let output = success(home.with_input(&args, &credentials(email)));
     let result: Value = serde_json::from_slice(&output.stdout).unwrap();
-    assert_eq!(result["product"], product);
+    assert_eq!(result["app"], app);
+    assert_eq!(
+        result["account"],
+        home.json(&[
+            "account",
+            "view",
+            result["account"]["name"].as_str().unwrap()
+        ])
+    );
 }
 
 fn credentials(email: &str) -> Vec<u8> {

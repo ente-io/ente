@@ -83,7 +83,7 @@ fn export_and_download_preserve_non_utf8_paths() {
         assert_eq!(result["complete"], true);
         assert_eq!(result["changes"]["exported"], exported);
         assert_eq!(
-            result["destination"],
+            result["output"],
             fs::canonicalize(&root).unwrap().to_string_lossy().as_ref()
         );
         assert_component(&root, "First", "Photo.jpg", b"original");

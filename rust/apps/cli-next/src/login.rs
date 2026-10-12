@@ -14,13 +14,13 @@ use zeroize::{ZeroizeOnDrop, Zeroizing};
 
 use crate::{
     api,
-    args::{LoginArgs, Options, Product},
+    args::{App, LoginArgs, Options},
     parse_json, read_input,
     vault::{Account, AccountKeys, DbKey, State, StoredSession, Vault},
 };
 
 pub async fn login(
-    product: Product,
+    app: App,
     args: LoginArgs,
     selected: Option<&str>,
     options: &Options,
@@ -64,7 +64,7 @@ pub async fn login(
         Some(credentials) => credentials,
         None => Credentials::prompt()?,
     };
-    let client = api::accounts_client(&origin, product)?;
+    let client = api::accounts_client(&origin, app)?;
     let mut authenticated = authenticate(&client, &mut credentials, interactive).await?;
     client.set_auth_token(Some(ente_core::b64::encode_url_safe(
         &authenticated.secrets.token,
@@ -134,12 +134,12 @@ pub async fn login(
         let index = if let Some(index) = existing {
             ensure!(
                 !supplied_name,
-                "account already exists; use accounts rename to change its local name"
+                "account already exists; use account rename to change its local name"
             );
             let account = &mut vault.state.accounts[index];
             account.email = email;
             account.identity = identity;
-            previous_session = account.sessions.insert(product, session);
+            previous_session = account.sessions.insert(app, session);
             index
         } else {
             vault.state.check_name(&new_name)?;
@@ -152,7 +152,7 @@ pub async fn login(
                 origin,
                 user_id: authenticated.user_id,
                 identity,
-                sessions: BTreeMap::from([(product, session)]),
+                sessions: BTreeMap::from([(app, session)]),
             });
             index
         };
@@ -177,7 +177,7 @@ pub async fn login(
         } else {
             "previous"
         };
-        eprintln!("Could not revoke the {session} login session: {error}");
+        eprintln!("Could not end the {session} login: {error}");
     }
     result
 }

@@ -3,12 +3,10 @@ mod args;
 mod auth;
 mod core_db;
 mod db;
-mod export;
 mod home;
 mod login;
 mod output;
 mod photos;
-mod replica;
 mod vault;
 
 use std::{
@@ -24,11 +22,10 @@ use serde_json::json;
 use zeroize::Zeroizing;
 
 use args::{
-    AccountCommand, Cli, Command, KeyCommand, Options, PhotosCommand, Product, SessionCommand,
-    VaultCommand,
+    AccountCommand, App, AppCommand, Cli, Command, KeyCommand, Options, PhotosCommand, VaultCommand,
 };
 use output::AccountView;
-use vault::{State, Vault};
+use vault::{Account, State, Vault};
 
 #[tokio::main]
 async fn main() {
@@ -78,33 +75,19 @@ async fn run(cli: Cli) -> Result<()> {
     match command {
         Command::Photos {
             selector,
-            command: PhotosCommand::Session(command),
-        } => {
-            session(
-                Product::Photos,
-                command,
-                selector.account.as_deref(),
-                &options,
-            )
-            .await
-        }
+            command: PhotosCommand::App(command),
+        } => app_command(App::Photos, command, selector.account.as_deref(), &options).await,
         Command::Photos {
             selector,
             command: PhotosCommand::Library(command),
         } => photos::run(command, selector.account.as_deref(), &options).await,
         Command::Locker { selector, command } => {
-            session(
-                Product::Locker,
-                command,
-                selector.account.as_deref(),
-                &options,
-            )
-            .await
+            app_command(App::Locker, command, selector.account.as_deref(), &options).await
         }
         Command::Auth { selector, command } => {
             auth::run(command, selector.account.as_deref(), &options).await
         }
-        Command::Accounts { command } => account_command(command, &options).await,
+        Command::Account { command } => account_command(command, &options).await,
         Command::Vault {
             command:
                 VaultCommand::Key {
@@ -123,54 +106,66 @@ fn vault_key(json_output: bool) -> Result<()> {
     }
 }
 
-async fn session(
-    product: Product,
-    command: SessionCommand,
+async fn app_command(
+    app: App,
+    command: AppCommand,
     selected: Option<&str>,
     options: &Options,
 ) -> Result<()> {
     ensure!(!options.offline, "this command requires network access");
     match command {
-        SessionCommand::Api(args) => {
+        AppCommand::Api(args) => {
             let state = State::load()?;
             let index = state.resolve(selected)?;
-            api::raw(&state.accounts[index], product, args).await
+            api::raw(&state.accounts[index], app, args).await
         }
-        SessionCommand::Login(args) => {
-            let (state, index) = login::login(product, args, selected, options).await?;
+        AppCommand::Login(args) => {
+            let (state, index) = login::login(app, args, selected, options).await?;
             let account = AccountView::new(&state.accounts[index], state.selected);
             if options.json {
-                output::json(&json!({ "account": account, "product": product }))
+                output::json(&json!({ "account": account, "app": app }))
             } else {
                 output::account(&account)
             }
         }
-        SessionCommand::Logout => {
+        AppCommand::Logout => {
             let mut vault = Vault::open()?;
             let index = vault.state.resolve(selected)?;
             let home = home::try_lock_account(vault.state.accounts[index].storage_id)?;
             let name = vault.state.accounts[index].name.clone();
             let sessions = &vault.state.accounts[index].sessions;
-            let removal = if sessions.len() == 1 && sessions.contains_key(&product) {
+            let removal = if sessions.len() == 1 && sessions.contains_key(&app) {
                 Some(home.for_removal()?)
             } else {
                 None
             };
-            api::logout(&vault.state.accounts[index], product).await?;
-            vault.state.accounts[index].sessions.remove(&product);
-            let removed = vault.state.accounts[index].sessions.is_empty();
-            if removed {
-                remove_account(&mut vault.state, index);
-            }
+            api::logout(&vault.state.accounts[index], app).await?;
+            vault.state.accounts[index].sessions.remove(&app);
+            let removed = vault.state.accounts[index]
+                .sessions
+                .is_empty()
+                .then(|| remove_account(&mut vault.state, index));
             vault.save()?;
             if let Some(removal) = removal {
                 removal.remove()?;
             }
-            drop(vault);
+            let state = vault.into_state();
+            let account = AccountView::new(
+                removed.as_ref().unwrap_or_else(|| &state.accounts[index]),
+                state.selected,
+            );
+            let message = if removed.is_some() {
+                format!(
+                    "Logged out of {}. Removed account {name:?} from this device.",
+                    app.display_name()
+                )
+            } else {
+                format!("Logged out of {} for {name:?}.", app.display_name())
+            };
             output::action(
                 options.json,
-                &json!({ "account": name, "product": product, "loggedOut": true }),
-                &format!("Logged out of {} for {:?}.", product.display_name(), name),
+                &json!({ "account": account, "app": app, "remoteLogout": true }),
+                &message,
             )
         }
     }
@@ -198,6 +193,16 @@ async fn account_command(command: AccountCommand, options: &Options) -> Result<(
                 output::json(&account)
             } else {
                 output::account(&account)
+            }
+        }
+        AccountCommand::Token { selector, app } => {
+            let state = State::load()?;
+            let index = state.resolve(selector.account.as_deref())?;
+            let token = Zeroizing::new(b64::encode_url_safe(state.accounts[index].token(app)?));
+            if options.json {
+                output::json(&json!({ "token": token.as_str() }))
+            } else {
+                writeln!(std::io::stdout(), "{}", token.as_str()).map_err(Into::into)
             }
         }
         AccountCommand::Switch { name } => {
@@ -231,15 +236,15 @@ async fn account_command(command: AccountCommand, options: &Options) -> Result<(
             let index = vault.state.named(&name)?;
             let home =
                 home::try_lock_account(vault.state.accounts[index].storage_id)?.for_removal()?;
-            let products = vault.state.accounts[index]
+            let apps = vault.state.accounts[index]
                 .sessions
                 .keys()
                 .copied()
                 .collect::<Vec<_>>();
             if !local {
-                for product in &products {
-                    if let Err(error) = api::logout(&vault.state.accounts[index], *product).await {
-                        if vault.state.accounts[index].sessions.len() < products.len() {
+                for app in &apps {
+                    if let Err(error) = api::logout(&vault.state.accounts[index], *app).await {
+                        if vault.state.accounts[index].sessions.len() < apps.len() {
                             vault.save()?;
                         }
                         let remaining = vault.state.accounts[index]
@@ -249,33 +254,35 @@ async fn account_command(command: AccountCommand, options: &Options) -> Result<(
                             .collect::<Vec<_>>();
                         bail!(
                             "cannot log out of {} for {name:?}: {error:#}. Still logged in: {}. Retry when the server is reachable, or use --local to forget the account on this device.",
-                            product.display_name(),
-                            product_names(&remaining),
+                            app.display_name(),
+                            app_names(&remaining),
                         );
                     }
-                    vault.state.accounts[index].sessions.remove(product);
+                    vault.state.accounts[index].sessions.remove(app);
                 }
             }
-            remove_account(&mut vault.state, index);
+            let mut account = remove_account(&mut vault.state, index);
+            account.sessions.clear();
+            let selected = vault.state.selected;
             vault.save()?;
             home.remove()?;
             drop(vault);
-            let message = if local && !products.is_empty() {
-                format!(
-                    "Logged out of {name:?} on this device only. Still logged in on the server: {}.",
-                    product_names(&products)
-                )
-            } else if products.is_empty() {
+            let message = if local && !apps.is_empty() {
+                format!("Removed account {name:?} from this device. Server logout was skipped.")
+            } else if apps.is_empty() {
                 format!("Removed account {name:?} from this device.")
             } else {
-                format!("Logged out of {} for {name:?}.", product_names(&products))
+                format!(
+                    "Logged out of {}. Removed account {name:?} from this device.",
+                    app_names(&apps)
+                )
             };
             output::action(
                 options.json,
                 &json!({
-                    "account": name,
-                    "products": products,
-                    "sessions": if local { "active" } else { "revoked" },
+                    "account": AccountView::new(&account, selected),
+                    "apps": apps,
+                    "remoteLogout": !local,
                 }),
                 &message,
             )
@@ -283,17 +290,18 @@ async fn account_command(command: AccountCommand, options: &Options) -> Result<(
     }
 }
 
-fn remove_account(state: &mut State, index: usize) {
-    let storage_id = state.accounts.remove(index).storage_id;
-    if state.selected == Some(storage_id) {
+fn remove_account(state: &mut State, index: usize) -> Account {
+    let account = state.accounts.remove(index);
+    if state.selected == Some(account.storage_id) {
         state.selected = None;
     }
+    account
 }
 
-fn product_names(products: &[Product]) -> String {
-    let names = products
+fn app_names(apps: &[App]) -> String {
+    let names = apps
         .iter()
-        .map(|product| product.display_name())
+        .map(|app| app.display_name())
         .collect::<Vec<_>>();
     match names.as_slice() {
         [] => String::new(),

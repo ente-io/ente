@@ -9,12 +9,12 @@ use tokio::sync::watch;
 
 use crate::{
     api,
-    args::{ExportArgs, Options, Product},
+    args::{App, Options, PhotosExportArgs},
     db, home, output,
     vault::State,
 };
 
-pub async fn run(args: ExportArgs, selected: Option<&str>, options: &Options) -> Result<()> {
+pub async fn run(args: PhotosExportArgs, selected: Option<&str>, options: &Options) -> Result<()> {
     ensure!(
         !options.offline,
         "export requires network access; remove --offline"
@@ -28,11 +28,11 @@ pub async fn run(args: ExportArgs, selected: Option<&str>, options: &Options) ->
     .await?
 }
 
-async fn run_locked(args: ExportArgs, selected: Option<&str>, as_json: bool) -> Result<()> {
+async fn run_locked(args: PhotosExportArgs, selected: Option<&str>, as_json: bool) -> Result<()> {
     let mut state = State::load()?;
     let index = state.resolve(selected)?;
     let account = state.accounts.swap_remove(index);
-    let session = api::session(&account, Product::Photos)?;
+    let session = api::session(&account, App::Photos)?;
     // Declare first so export's stores drop before this lock.
     let _storage_use;
     let mut export = Export::open(
@@ -52,7 +52,7 @@ async fn run_locked(args: ExportArgs, selected: Option<&str>, as_json: bool) -> 
         .into_iter()
         .find(|a| a.storage_id == account.storage_id)
         .context("account was removed while waiting for access")?;
-    let session = api::session(&account, Product::Photos)?;
+    let session = api::session(&account, App::Photos)?;
     export.verify_source(&session.master_key)?;
     _storage_use = account_home.storage_use()?;
     home::create(&account_home.path)?;

@@ -16,7 +16,7 @@ use url::Url;
 use zeroize::Zeroizing;
 
 use crate::{
-    args::{ApiArgs, Product},
+    args::{ApiArgs, App},
     parse_json, read_input,
     vault::Account,
 };
@@ -32,17 +32,17 @@ pub fn http() -> Result<Client> {
         .build()?)
 }
 
-pub fn accounts_client(origin: &str, product: Product) -> Result<AccountsClient> {
+pub fn accounts_client(origin: &str, app: App) -> Result<AccountsClient> {
     Ok(AccountsClient::new(
-        AccountsClientConfig::new(product.client_package())
+        AccountsClientConfig::new(app.client_package())
             .with_origin(origin)
             .with_user_agent(USER_AGENT),
     )?)
 }
 
-pub async fn logout(account: &Account, product: Product) -> Result<()> {
-    let client = accounts_client(&account.origin, product)?;
-    client.set_auth_token(Some(b64::encode_url_safe(account.token(product)?)));
+pub async fn logout(account: &Account, app: App) -> Result<()> {
+    let client = accounts_client(&account.origin, app)?;
+    client.set_auth_token(Some(b64::encode_url_safe(account.token(app)?)));
     match client.logout().await {
         Ok(()) => Ok(()),
         Err(ente_accounts::Error::Http(error)) if error.status_code() == Some(401) => Ok(()),
@@ -50,11 +50,11 @@ pub async fn logout(account: &Account, product: Product) -> Result<()> {
     }
 }
 
-pub fn session(account: &Account, product: Product) -> Result<Session> {
+pub fn session(account: &Account, app: App) -> Result<Session> {
     let mut config = ApiConfig::new(account.origin.clone());
-    config.client_package = Some(product.client_package().into());
+    config.client_package = Some(app.client_package().into());
     config.user_agent = Some(USER_AGENT.into());
-    config.auth = Some(Auth::User(b64::encode_url_safe(account.token(product)?)));
+    config.auth = Some(Auth::User(b64::encode_url_safe(account.token(app)?)));
     Session::new(
         config,
         account.user_id,
@@ -65,7 +65,7 @@ pub fn session(account: &Account, product: Product) -> Result<Session> {
     .map_err(Into::into)
 }
 
-pub async fn raw(account: &Account, product: Product, args: ApiArgs) -> Result<()> {
+pub async fn raw(account: &Account, app: App, args: ApiArgs) -> Result<()> {
     ensure!(
         !(args.headers.as_deref() == Some(Path::new("-"))
             && args.body.as_deref() == Some(Path::new("-"))),
@@ -100,7 +100,7 @@ pub async fn raw(account: &Account, product: Product, args: ApiArgs) -> Result<(
                 "Host cannot redirect stored account credentials"
             );
         }
-        let token = Zeroizing::new(b64::encode_url_safe(account.token(product)?));
+        let token = Zeroizing::new(b64::encode_url_safe(account.token(app)?));
         let mut value = HeaderValue::from_str(&token)?;
         value.set_sensitive(true);
         headers.insert("x-auth-token", value);
@@ -108,7 +108,7 @@ pub async fn raw(account: &Account, product: Product, args: ApiArgs) -> Result<(
     if !headers.contains_key("x-client-package") {
         headers.insert(
             "x-client-package",
-            HeaderValue::from_static(product.client_package()),
+            HeaderValue::from_static(app.client_package()),
         );
     }
     let method = Method::from_bytes(args.method.to_ascii_uppercase().as_bytes())?;
