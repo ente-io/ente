@@ -4,6 +4,7 @@ import type {
 } from "ente-new/photos/services/search/types";
 import { describe, expect, test } from "vitest";
 import {
+    groupSearchOptions,
     matchesSearchCategory,
     searchCategories,
     searchCategoryCounts,
@@ -97,4 +98,21 @@ describe("search categories", () => {
             settings: 0,
         });
     });
+});
+
+test("groups results in tab order while preserving rows within each category", () => {
+    const firstPhoto = option("clip");
+    const secondPhoto = option("fileName");
+    const album = option("collection");
+    const place = option("city");
+    const setting = option("sidebarAction");
+    const options = [firstPhoto, setting, place, secondPhoto, album];
+    expect(groupSearchOptions(options)).toEqual([
+        { label: "albums", options: [album] },
+        { label: "places", options: [place] },
+        { label: "photos", options: [firstPhoto, secondPhoto] },
+        { label: "settings", options: [setting] },
+    ]);
+    expect(options).toEqual([firstPhoto, setting, place, secondPhoto, album]);
+    expect(groupSearchOptions([])).toEqual([]);
 });

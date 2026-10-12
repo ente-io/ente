@@ -52,3 +52,14 @@ export const searchCategoryCounts = (options: readonly SearchOption[]) => {
         counts[searchCategoryForType(option.suggestion.type)]++;
     return counts;
 };
+
+export const groupSearchOptions = (options: readonly SearchOption[]) =>
+    searchCategories
+        .filter((category) => category !== "all")
+        .map((category) => ({
+            label: category,
+            options: options.filter((option) =>
+                matchesSearchCategory(option, category),
+            ),
+        }))
+        .filter((group) => group.options.length > 0);

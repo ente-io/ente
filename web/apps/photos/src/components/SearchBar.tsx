@@ -1,5 +1,6 @@
 import { sidebarTheme } from "@/components/sidebar/theme";
 import {
+    groupSearchOptions,
     matchesSearchCategory,
     searchCategories,
     searchCategoryCounts,
@@ -18,6 +19,7 @@ import CameraIcon from "@mui/icons-material/PhotoCameraOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
     Box,
+    Button,
     Dialog,
     IconButton,
     Stack,
@@ -59,6 +61,7 @@ import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
+    type GroupHeadingProps,
     type InputActionMeta,
     type InputProps,
     type MenuProps,
@@ -214,7 +217,13 @@ const SearchInput: React.FC<
         [theme, isKeyboardNavigating],
     );
     const components = useMemo(
-        () => ({ Control, Input, Option, Menu: SearchMenu }),
+        () => ({
+            Control,
+            Input,
+            Option,
+            Menu: SearchMenu,
+            GroupHeading: SearchGroupHeading,
+        }),
         [],
     );
 
@@ -364,7 +373,12 @@ const SearchInput: React.FC<
                 loadingMessage={() => t("loading")}
                 noOptionsMessage={({ inputValue }) => {
                     if (inputValue) {
-                        return t("no_results");
+                        return (
+                            <SearchNoMatches
+                                category={category}
+                                onSeeAll={() => setCategory("all")}
+                            />
+                        );
                     }
                     if (shouldShowEmptyState(inputValue)) {
                         return (
@@ -395,7 +409,9 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
     const id = useId();
     const hasQuery = !!props.selectProps.inputValue.trim();
     const counts = searchCategoryCounts(
-        props.options as readonly SearchOption[],
+        props.options.flatMap((option) =>
+            "options" in option ? [...option.options] : [option],
+        ),
     );
 
     return (
@@ -482,6 +498,72 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
     );
 }
 
+function SearchGroupHeading(props: GroupHeadingProps<SearchOption, false>) {
+    const {
+        searchCategory: { category },
+    } = props.selectProps as typeof props.selectProps & SearchCategoryProps;
+    if (category !== "all") return null;
+    return (
+        <SelectComponents.GroupHeading {...props}>
+            <Typography
+                variant="h6"
+                sx={{ color: "text.base", textTransform: "none", mb: 1 }}
+            >
+                {t(
+                    props.data.label === "places"
+                        ? "search_places"
+                        : props.data.label!,
+                )}
+            </Typography>
+        </SelectComponents.GroupHeading>
+    );
+}
+
+function SearchNoMatches({
+    category,
+    onSeeAll,
+}: {
+    category: SearchCategory;
+    onSeeAll: () => void;
+}) {
+    return (
+        <Stack
+            sx={{
+                alignItems: "center",
+                textAlign: "center",
+                gap: "16px",
+                py: "20px",
+            }}
+        >
+            <Box
+                component="img"
+                src="/images/auth-ducky.svg"
+                alt=""
+                sx={{ width: 130, height: 100, objectFit: "contain" }}
+            />
+            <Typography variant="h3" sx={{ color: "text.base" }}>
+                {t("search_no_matches")}
+            </Typography>
+            <Typography variant="small" sx={{ color: "text.muted" }}>
+                {t(
+                    category === "all"
+                        ? "search_try_another"
+                        : "search_empty_category",
+                )}
+            </Typography>
+            {category !== "all" && (
+                <Button
+                    color="secondary"
+                    onMouseDown={(event) => event.stopPropagation()}
+                    onClick={onSeeAll}
+                >
+                    {t("search_see_all")}
+                </Button>
+            )}
+        </Stack>
+    );
+}
+
 const SearchInputWrapper = styled("div")`
     display: flex;
     width: 100%;
@@ -496,7 +578,7 @@ const loadOptions = pDebounce(async (input: string) => {
     const sidebarActions = sidebarSearchOptionsForString(input);
     const photoOptions = await searchOptionsForString(input);
 
-    return [...photoOptions, ...sidebarActions];
+    return groupSearchOptions([...photoOptions, ...sidebarActions]);
 }, 250);
 
 const createSelectStyles = (
@@ -554,6 +636,14 @@ const createSelectStyles = (
             "&::-webkit-scrollbar-button": { display: "none" },
         },
     }),
+    group: (style) => ({
+        ...style,
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        padding: 0,
+    }),
+    groupHeading: (style) => ({ ...style, margin: 0, padding: 0 }),
     option: (style, { isFocused }) => ({
         ...style,
         padding: 0,
