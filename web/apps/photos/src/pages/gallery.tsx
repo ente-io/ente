@@ -35,6 +35,7 @@ import {
     SearchResultsHeader,
     type RemotePullOpts,
 } from "@/components/gallery";
+import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import {
     NormalNavbarContents,
     UploadButton,
@@ -173,17 +174,10 @@ import {
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
-import dynamic from "next/dynamic";
 import { useRouter, type NextRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
-
-const LargeFilesView = dynamic(() =>
-    import("@/components/gallery/LargeFilesView").then(
-        (module) => module.LargeFilesView,
-    ),
-);
 
 const Page: React.FC = () => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
