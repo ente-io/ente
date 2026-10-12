@@ -15,15 +15,15 @@ import { ut } from "ente-base/i18n";
 import { t } from "i18next";
 import type { ReactNode } from "react";
 
-type PhotosNavigationSheelProps = SearchBarProps & {
+type PhotosNavigationShellProps = SearchBarProps & {
     onSidebar: () => void;
     onUpload: () => void;
     onHome: () => void;
 };
 
-export const PhotosNavigationSheel: React.FC<
+export const PhotosNavigationShell: React.FC<
     React.PropsWithChildren<
-        PhotosNavigationSheelProps & {
+        PhotosNavigationShellProps & {
             showRail: boolean;
             showNormalNavigation: boolean;
             hasSelection: boolean;
@@ -119,7 +119,7 @@ export const PhotosNavigationSheel: React.FC<
     );
 };
 
-const NormalHeaderContents: React.FC<PhotosNavigationSheelProps> = ({
+const NormalHeaderContents: React.FC<PhotosNavigationShellProps> = ({
     onSidebar,
     onUpload,
     onHome,

@@ -38,9 +38,9 @@ import {
 import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import {
-    PhotosNavigationSheel,
+    PhotosNavigationShell,
     UploadButton,
-} from "@/components/gallery/PhotosNavigationSheel";
+} from "@/components/gallery/PhotosNavigationShell";
 import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 import {
     findCollectionCreatingIfNeeded,
@@ -1986,7 +1986,7 @@ const Page: React.FC = () => {
                     {...trashFilesDialog}
                 />
             )}
-            <PhotosNavigationSheel
+            <PhotosNavigationShell
                 showRail={!isCleanupViewOpen}
                 showNormalNavigation={showNormalNavigation}
                 hasSelection={showSelectionBar}
@@ -2187,7 +2187,7 @@ const Page: React.FC = () => {
                         }
                     />
                 )}
-            </PhotosNavigationSheel>
+            </PhotosNavigationShell>
             <Upload
                 {...{
                     user,
