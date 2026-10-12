@@ -107,9 +107,13 @@ class _ScrollCardState extends State<ScrollCard> {
     super.dispose();
   }
 
-  bool _onMetrics(ScrollMetrics metrics) {
-    final hasMore = metrics.extentAfter > 0;
-    if (hasMore != _hasMore) setState(() => _hasMore = hasMore);
+  bool _onScroll(Notification notification) {
+    if (notification
+        case ScrollMetricsNotification(:final metrics) ||
+            ScrollUpdateNotification(:final metrics)) {
+      final hasMore = metrics.extentAfter > 0;
+      if (hasMore != _hasMore) setState(() => _hasMore = hasMore);
+    }
     return false;
   }
 
@@ -124,49 +128,46 @@ class _ScrollCardState extends State<ScrollCard> {
       ),
       child: ClipRRect(
         borderRadius: Radii.buttonBorder,
-        child: NotificationListener<ScrollMetricsNotification>(
-          onNotification: (n) => _onMetrics(n.metrics),
-          child: NotificationListener<ScrollUpdateNotification>(
-            onNotification: (n) => _onMetrics(n.metrics),
-            child: Stack(
-              children: [
-                Scrollbar(
+        child: NotificationListener<Notification>(
+          onNotification: _onScroll,
+          child: Stack(
+            children: [
+              Scrollbar(
+                controller: _controller,
+                thumbVisibility: widget.showScrollbar,
+                child: SingleChildScrollView(
                   controller: _controller,
-                  thumbVisibility: widget.showScrollbar,
-                  child: SingleChildScrollView(
-                    controller: _controller,
-                    child: MenuGroupComponent(
-                      showDividers: true,
-                      items: widget.rows,
-                    ),
+                  child: MenuGroupComponent(
+                    showDividers: true,
+                    items: widget.rows,
                   ),
                 ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: Spacing.xxl,
-                  child: IgnorePointer(
-                    child: AnimatedOpacity(
-                      opacity: _hasMore ? 1 : 0,
-                      duration: Motion.quick,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              colors.fillLight.withValues(alpha: 0),
-                              colors.fillLight,
-                            ],
-                          ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: Spacing.xxl,
+                child: IgnorePointer(
+                  child: AnimatedOpacity(
+                    opacity: _hasMore ? 1 : 0,
+                    duration: Motion.quick,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            colors.fillLight.withValues(alpha: 0),
+                            colors.fillLight,
+                          ],
                         ),
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
