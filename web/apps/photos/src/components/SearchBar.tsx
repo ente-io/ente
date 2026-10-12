@@ -1,5 +1,6 @@
 import { sidebarTheme } from "@/components/sidebar/theme";
 import {
+    groupSearchOptions,
     matchesSearchCategory,
     searchCategories,
     searchCategoryCounts,
@@ -33,10 +34,6 @@ import {
 import type { ButtonishProps } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
-import {
-    hlsGenerationStatusSnapshot,
-    isHLSGenerationSupported,
-} from "ente-gallery/services/video";
 import { SearchPeopleList } from "ente-new/photos/components/PeopleList";
 import { ItemCard } from "ente-new/photos/components/Tiles";
 import { UnstyledButton } from "ente-new/photos/components/UnstyledButton";
@@ -45,11 +42,6 @@ import {
     useMLStatusSnapshot,
     usePeopleStateSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
-import {
-    isMLSupported,
-    mlStatusSnapshot,
-    peopleStateSnapshot,
-} from "ente-new/photos/services/ml";
 import { searchOptionsForString } from "ente-new/photos/services/search";
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { nullToUndefined } from "ente-utils/transform";
@@ -59,6 +51,7 @@ import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
+    type GroupHeadingProps,
     type InputActionMeta,
     type InputProps,
     type MenuProps,
@@ -199,22 +192,22 @@ const SearchInput: React.FC<
     onClose,
 }) => {
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
-    // Subscribe even though reads happen through peopleStateSnapshot().
-    usePeopleStateSnapshot();
     // undefined makes react-select switch from controlled to uncontrolled.
     const [value, setValue] = useState<SearchOption | null>(null);
     const [inputValue, setInputValue] = useState("");
     const [category, setCategory] = useState<SearchCategory>("all");
-    const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false);
 
     const theme = useTheme();
 
-    const styles = useMemo(
-        () => createSelectStyles(theme, isKeyboardNavigating),
-        [theme, isKeyboardNavigating],
-    );
+    const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(
-        () => ({ Control, Input, Option, Menu: SearchMenu }),
+        () => ({
+            Control,
+            Input,
+            Option,
+            Menu: SearchMenu,
+            GroupHeading: SearchGroupHeading,
+        }),
         [],
     );
 
@@ -270,7 +263,6 @@ const SearchInput: React.FC<
             return inputValue;
         }
         if (actionMeta.action == "input-change") {
-            setIsKeyboardNavigating(false);
             setInputValue(value);
 
             if (value === "") {
@@ -320,14 +312,7 @@ const SearchInput: React.FC<
         }
     };
 
-    const handleBlur = () => {
-        setIsKeyboardNavigating(false);
-    };
-
     const handleKeyDown = (event: React.KeyboardEvent) => {
-        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-            setIsKeyboardNavigating(true);
-        }
         if (event.key === "Escape") {
             selectRef.current?.blur();
             onClose();
@@ -335,7 +320,7 @@ const SearchInput: React.FC<
     };
 
     return (
-        <SearchInputWrapper onMouseMove={() => setIsKeyboardNavigating(false)}>
+        <SearchInputWrapper>
             <AsyncSelect
                 ref={selectRef}
                 {...{ searchCategory: { category, setCategory } }}
@@ -355,26 +340,20 @@ const SearchInput: React.FC<
                 tabSelectsValue={false}
                 aria-label={t("search")}
                 escapeClearsValue
-                menuIsOpen={
-                    open && (inputValue !== "" || shouldShowEmptyState(""))
-                }
+                menuIsOpen={open}
                 onFocus={handleFocus}
-                onBlur={handleBlur}
                 placeholder={t("search_hint")}
-                loadingMessage={() => t("loading")}
+                loadingMessage={() => null}
                 noOptionsMessage={({ inputValue }) => {
-                    if (inputValue) {
-                        return t("no_results");
+                    if (inputValue.trim()) {
+                        return <SearchEmptyState />;
                     }
-                    if (shouldShowEmptyState(inputValue)) {
-                        return (
-                            <EmptyState
-                                onSelectPeople={handleSelectPeople}
-                                onSelectPerson={handleSelectPerson}
-                            />
-                        );
-                    }
-                    return null;
+                    return (
+                        <EmptyState
+                            onSelectPeople={handleSelectPeople}
+                            onSelectPerson={handleSelectPerson}
+                        />
+                    );
                 }}
             />
         </SearchInputWrapper>
@@ -395,7 +374,9 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
     const id = useId();
     const hasQuery = !!props.selectProps.inputValue.trim();
     const counts = searchCategoryCounts(
-        props.options as readonly SearchOption[],
+        props.options.flatMap((option) =>
+            "options" in option ? [...option.options] : [option],
+        ),
     );
 
     return (
@@ -468,17 +449,68 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
                 role={hasQuery ? "tabpanel" : undefined}
                 aria-labelledby={hasQuery ? `${id}-${category}` : undefined}
             >
-                {props.isLoading && counts[category] > 0 && (
-                    <Typography
-                        role="status"
-                        sx={{ color: "text.muted", textAlign: "center", p: 1 }}
-                    >
-                        {t("loading")}
-                    </Typography>
-                )}
                 {props.children}
             </div>
+            <Typography
+                variant="mini"
+                sx={{
+                    mt: 2,
+                    pt: "12px",
+                    borderTop: "1px solid",
+                    borderColor: "stroke.faint",
+                    color: "text.muted",
+                }}
+            >
+                {t("search_navigate_hint")}
+            </Typography>
         </SelectComponents.Menu>
+    );
+}
+
+function SearchGroupHeading(props: GroupHeadingProps<SearchOption, false>) {
+    const {
+        searchCategory: { category },
+    } = props.selectProps as typeof props.selectProps & SearchCategoryProps;
+    if (category !== "all") return null;
+    return (
+        <SelectComponents.GroupHeading {...props}>
+            <Typography
+                variant="h6"
+                sx={{ color: "text.base", textTransform: "none", mb: 1 }}
+            >
+                {t(
+                    props.data.label === "places"
+                        ? "search_places"
+                        : props.data.label!,
+                )}
+            </Typography>
+        </SelectComponents.GroupHeading>
+    );
+}
+
+function SearchEmptyState() {
+    return (
+        <Stack
+            sx={{
+                alignItems: "center",
+                textAlign: "center",
+                gap: "16px",
+                py: "20px",
+            }}
+        >
+            <Box
+                component="img"
+                src="/images/auth-ducky.svg"
+                alt=""
+                sx={{ width: 130, height: 100, objectFit: "contain" }}
+            />
+            <Typography variant="h3" sx={{ color: "text.base" }}>
+                {t("search_no_matches")}
+            </Typography>
+            <Typography variant="small" sx={{ color: "text.muted" }}>
+                {t("search_try_another")}
+            </Typography>
+        </Stack>
     );
 }
 
@@ -496,12 +528,11 @@ const loadOptions = pDebounce(async (input: string) => {
     const sidebarActions = sidebarSearchOptionsForString(input);
     const photoOptions = await searchOptionsForString(input);
 
-    return [...photoOptions, ...sidebarActions];
+    return groupSearchOptions([...photoOptions, ...sidebarActions]);
 }, 250);
 
 const createSelectStyles = (
     theme: Theme,
-    isKeyboardNavigating: boolean,
 ): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1, minWidth: 0 }),
     control: (style) => ({
@@ -554,24 +585,44 @@ const createSelectStyles = (
             "&::-webkit-scrollbar-button": { display: "none" },
         },
     }),
+    group: (style) => ({
+        ...style,
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        padding: 0,
+        "& > div:last-child": {
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+        },
+    }),
+    groupHeading: (style) => ({ ...style, margin: 0, padding: 0 }),
     option: (style, { isFocused }) => ({
         ...style,
         padding: 0,
         backgroundColor: "transparent !important",
         "& :hover": { cursor: "pointer" },
-        "& .option-contents":
-            isFocused && isKeyboardNavigating
-                ? {
-                      outline: `2px solid ${theme.vars.palette.accent.main}`,
-                      outlineOffset: "-2px",
-                  }
-                : {},
+        "& .option-contents": isFocused
+            ? {
+                  outline: `2px solid color-mix(in srgb, ${theme.vars.palette.accent.main} 55%, transparent)`,
+                  outlineOffset: "-2px",
+              }
+            : {},
     }),
     placeholder: (style) => ({
         ...style,
         color: theme.vars.palette.text.muted,
         whiteSpace: "nowrap",
         overflowX: "hidden",
+    }),
+    loadingIndicator: (style) => ({
+        ...style,
+        color: theme.vars.palette.text.muted,
+        paddingRight: "16px",
+        "@media (prefers-reduced-motion: reduce)": {
+            "& span": { animation: "none" },
+        },
     }),
     dropdownIndicator: (style) => ({ ...style, display: "none" }),
     indicatorSeparator: (style) => ({ ...style, display: "none" }),
@@ -635,33 +686,6 @@ const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
     />
 );
 
-// noOptionsMessage must return null or react-select leaves an empty menu div.
-const shouldShowEmptyState = (inputValue: string) => {
-    if (inputValue) return false;
-
-    if (!isMLSupported && !isHLSGenerationSupported) {
-        return false;
-    }
-
-    const mlStatus = mlStatusSnapshot();
-    const vpStatus = hlsGenerationStatusSnapshot();
-
-    const isMLInactive =
-        !mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done";
-    const isVideoProcessing =
-        vpStatus?.enabled && vpStatus.status == "processing";
-
-    if (isMLInactive && !isVideoProcessing) {
-        const people = peopleStateSnapshot()?.visiblePeople;
-        const hasPeople = people && people.length > 0;
-        if (!hasPeople) {
-            return false;
-        }
-    }
-
-    return true;
-};
-
 const EmptyState: React.FC<
     Pick<SearchBarProps, "onSelectPeople" | "onSelectPerson">
 > = ({ onSelectPeople, onSelectPerson }) => {
@@ -694,7 +718,11 @@ const EmptyState: React.FC<
 
     const hasPeople = people && people.length > 0;
     if (!hasPeople && !label) {
-        return <></>;
+        return (
+            <Typography variant="small" sx={{ color: "text.muted", py: 1 }}>
+                {t("search_start_typing")}
+            </Typography>
+        );
     }
 
     return (
