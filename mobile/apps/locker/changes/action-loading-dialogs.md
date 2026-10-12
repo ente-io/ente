@@ -1,0 +1,1 @@
+- Refreshed loading dialogs for offline saves, file edits, adding to collections, Important actions and file/collection deletions for internal users.

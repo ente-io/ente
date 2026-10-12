@@ -14,6 +14,7 @@ import "package:locker/services/trash/models/trash_file.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/file_edit_sheet.dart";
+import "package:locker/ui/components/locker_progress_dialog.dart";
 import "package:locker/ui/components/share_link_sheet.dart";
 import "package:locker/ui/components/subscription_required_sheet.dart";
 import "package:locker/ui/pages/account_credentials_page.dart";
@@ -74,13 +75,8 @@ class FileActions {
         .getCollections();
 
     final dialog = context.mounted
-        ? createProgressDialog(
-            context,
-            context.strings.pleaseWait,
-            isDismissible: false,
-          )
+        ? await showLockerProgressDialog(context, context.strings.pleaseWait)
         : null;
-    await dialog?.show();
 
     try {
       final currentTitle = file.displayName;
@@ -295,16 +291,10 @@ class FileActions {
     }
 
     final dialog = context.mounted
-        ? createProgressDialog(
-            context,
-            context.strings.deletingFile,
-            isDismissible: false,
-          )
+        ? await showLockerProgressDialog(context, context.strings.deletingFile)
         : null;
 
     try {
-      await dialog?.show();
-
       final collections = await CollectionService.instance
           .getCollectionsForFile(file);
       if (collections.isNotEmpty) {
@@ -351,16 +341,10 @@ class FileActions {
     }
 
     final dialog = context.mounted
-        ? createProgressDialog(
-            context,
-            context.strings.deletingFile,
-            isDismissible: false,
-          )
+        ? await showLockerProgressDialog(context, context.strings.deletingFile)
         : null;
 
     try {
-      await dialog?.show();
-
       for (final file in files) {
         final collections = await CollectionService.instance
             .getCollectionsForFile(file);
@@ -405,17 +389,14 @@ class FileActions {
     VoidCallback? onSuccess,
   }) async {
     final isCurrentlyImportant = isImportant(file);
-    final dialog = createProgressDialog(
+    final dialog = await showLockerProgressDialog(
       context,
       isCurrentlyImportant
           ? context.strings.removingFromImportant
           : context.strings.markingAsImportant,
-      isDismissible: false,
     );
 
     try {
-      await dialog.show();
-
       if (isCurrentlyImportant) {
         await FavoritesService.instance.removeFromFavorites(file);
       } else {
@@ -449,15 +430,12 @@ class FileActions {
     List<EnteFile> files, {
     VoidCallback? onSuccess,
   }) async {
-    final dialog = createProgressDialog(
+    final dialog = await showLockerProgressDialog(
       context,
       context.strings.markingAsImportant,
-      isDismissible: false,
     );
 
     try {
-      await dialog.show();
-
       final filesToMark = files
           .where((file) => !FavoritesService.instance.isFavoriteCache(file))
           .toList();
