@@ -26,8 +26,6 @@ export 'components/selection_summary_chip_component.dart';
 export 'components/settings_item.dart';
 export 'components/settings_link.dart';
 export 'components/settings_page_scaffold.dart';
-export 'components/slider_component.dart';
-export 'components/stepper_component.dart';
 export 'components/tag_chip_component.dart';
 export 'components/text_input_component.dart';
 export 'components/toast_component.dart';

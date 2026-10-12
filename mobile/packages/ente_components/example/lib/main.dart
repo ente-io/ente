@@ -309,7 +309,7 @@ class _CatalogHomeState extends State<CatalogHome> {
       CatalogSection(
         title: 'Selection controls',
         icon: HugeIcons.strokeRoundedSlidersHorizontal,
-        components: const ['Checkbox', 'Radio', 'Switch', 'Slider', 'Stepper'],
+        components: const ['Checkbox', 'Radio', 'Switch'],
         previewBuilder: (_) => const _SelectionPreview(),
       ),
       CatalogSection(
@@ -3161,8 +3161,6 @@ class _SelectionPreviewState extends State<_SelectionPreview> {
   bool _checkbox = true;
   bool _radio = true;
   bool _switch = true;
-  double _slider = 0.42;
-  int _stepper = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -3223,35 +3221,6 @@ class _SelectionPreviewState extends State<_SelectionPreview> {
                 ),
                 label: 'Off switch',
               ),
-            ],
-          ),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Slider',
-          child: SliderComponent(
-            value: _slider,
-            onChanged: (value) => setState(() => _slider = value),
-          ),
-        ),
-        const _CatalogPreviewGroup(
-          title: 'Disabled slider',
-          child: SliderComponent(value: 0.7, onChanged: null),
-        ),
-        _CatalogPreviewGroup(
-          title: 'Stepper',
-          child: StepperComponent(
-            value: _stepper,
-            onChanged: (value) => setState(() => _stepper = value),
-          ),
-        ),
-        const _CatalogPreviewGroup(
-          title: 'Stepper limits',
-          child: Wrap(
-            spacing: Spacing.lg,
-            runSpacing: Spacing.md,
-            children: [
-              StepperComponent(value: 0, min: 0, max: 5, onChanged: null),
-              StepperComponent(value: 5, min: 0, max: 5, onChanged: null),
             ],
           ),
         ),
