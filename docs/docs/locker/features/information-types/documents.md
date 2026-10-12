@@ -33,10 +33,12 @@ Document scanning is available in the Locker mobile app on Android and iOS.
 1. Tap the camera button on the home screen
 2. Point the camera at the page. Keep **Auto** enabled for automatic capture, or switch to **Manual** and tap the shutter button
 3. Repeat for any additional pages, then tap the check-mark button
-4. Review the scan. You can adjust the crop, rotate or delete pages, add another page, and rename the PDF
+4. Review the scan. You can retake individual pages, adjust the crop, rotate or delete pages, add another page, and rename the PDF
 5. Tap **Save to Ente**
 6. Select one or more collections, or leave them unselected to save to **Uncategorized**
 7. Tap **Save**
+
+To retake a page, select it in the review screen and tap **Retake**. Capture the replacement page, then continue reviewing the scan.
 
 Locker combines all scanned pages into one PDF before uploading it.
 
@@ -48,8 +50,15 @@ Locker combines all scanned pages into one PDF before uploading it.
 2. Tap the **+** button
 3. Select **File**
 4. Choose one or more files from your device
-5. Select one or more collections, or leave them unselected to save to **Uncategorized**
-6. Tap **Save**
+5. To rename a file before uploading, tap the edit icon next to its name
+6. Select one or more collections, or leave them unselected to save to **Uncategorized**
+7. Tap **Save**
+
+### Sharing files into Locker on Android
+
+You can also select one or more files in another app and use Android's share menu to send them to **Ente Locker**. Review the files, choose collections if needed, and save them.
+
+Locker shows a **Skipped files** message if any shared files are unreadable or repeated. The remaining files can still be uploaded.
 
 ## Supported file formats
 
