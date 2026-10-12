@@ -18,7 +18,6 @@ import {
     styled,
     Typography,
 } from "@mui/material";
-import { useRedirectIfNeedsCredentials } from "ente-accounts/components/utils/use-redirect";
 import { CenteredFill, Overlay } from "ente-base/components/containers";
 import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -37,7 +36,6 @@ import {
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
-import { useRouter } from "next/router";
 import React, {
     memo,
     useCallback,
@@ -53,7 +51,15 @@ import {
     type ListChildComponentProps,
 } from "react-window";
 
-const Page: React.FC = () => {
+interface LargeFilesViewProps {
+    onBack: () => void;
+    onRemoteFilesPull: () => Promise<void>;
+}
+
+export function LargeFilesView({
+    onBack,
+    onRemoteFilesPull,
+}: LargeFilesViewProps) {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { setIsFileViewerOpen } = usePhotosAppContext();
 
@@ -63,8 +69,6 @@ const Page: React.FC = () => {
     );
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-
-    useRedirectIfNeedsCredentials("/large-files");
 
     useEffect(() => {
         let isCurrent = true;
@@ -101,6 +105,7 @@ const Page: React.FC = () => {
                         state.largeFiles,
                         (progress: number) =>
                             dispatch({ type: "setDeleteProgress", progress }),
+                        onRemoteFilesPull,
                     )
                         .then((removedIDs) =>
                             dispatch({ type: "deleteCompleted", removedIDs }),
@@ -112,7 +117,7 @@ const Page: React.FC = () => {
                 },
             },
         });
-    }, [showMiniDialog, onGenericError, state.largeFiles]);
+    }, [showMiniDialog, onGenericError, state.largeFiles, onRemoteFilesPull]);
 
     const handleOpenViewer = useCallback(
         (index: number) => {
@@ -172,8 +177,9 @@ const Page: React.FC = () => {
     })();
 
     return (
-        <Stack sx={{ height: "100vh" }}>
+        <Stack sx={{ flex: 1, minHeight: 0 }}>
             <Navbar
+                onBack={onBack}
                 filter={state.filter}
                 onChangeFilter={(filter) =>
                     dispatch({ type: "changeFilter", filter })
@@ -191,18 +197,15 @@ const Page: React.FC = () => {
             />
         </Stack>
     );
-};
-
-export default Page;
+}
 
 interface NavbarProps {
+    onBack: () => void;
     filter: LargeFileFilter;
     onChangeFilter: (filter: LargeFileFilter) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter }) => {
-    const router = useRouter();
-
+const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter, onBack }) => {
     return (
         <Stack>
             <Stack
@@ -215,7 +218,7 @@ const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter }) => {
                 })}
             >
                 <Box sx={{ minWidth: "100px" }}>
-                    <IconButton onClick={router.back}>
+                    <IconButton onClick={onBack} aria-label={t("go_back")}>
                         <ArrowBackIcon />
                     </IconButton>
                 </Box>

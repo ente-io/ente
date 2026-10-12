@@ -47,10 +47,10 @@ export const FullScreenDropZone: React.FC<
 
     const handleDragEnter = useCallback(
         (event: React.DragEvent<HTMLElement>) => {
-            if (!hasDraggedFiles(event.dataTransfer)) return;
+            if (disabled || !hasDraggedFiles(event.dataTransfer)) return;
             setIsDragActive(true);
         },
-        [],
+        [disabled],
     );
 
     const handleOverlayDrop = useCallback(
@@ -86,7 +86,7 @@ export const FullScreenDropZone: React.FC<
                 sx={{ flex: 1 }}
                 {...getRootProps({ onDragEnter: handleDragEnter })}
             >
-                {(isDragActive || isDropPending) && (
+                {!disabled && (isDragActive || isDropPending) && (
                     <DropZoneOverlay
                         onDrop={handleOverlayDrop}
                         onDragLeave={handleDragLeave}

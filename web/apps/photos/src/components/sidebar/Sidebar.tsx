@@ -91,6 +91,7 @@ type SidebarProps = ModalVisibilityProps & {
     uncategorizedCollectionSummaryID: number;
     pendingAction?: SidebarActionID;
     onActionHandled?: (actionID: SidebarActionID) => void;
+    onShowLargeFiles: () => void;
     onShowPlanSelector: () => void;
     onShowCollectionSummary: (
         collectionSummaryID: number,
@@ -112,6 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     pendingAction,
     onActionHandled,
     onShowPlanSelector,
+    onShowLargeFiles,
     onShowCollectionSummary,
     collectionNameByID,
     onAuthenticateUser,
@@ -437,6 +439,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
             {freeUpSpaceVisibilityProps.open && (
                 <FreeUpSpace
+                    onShowLargeFiles={onShowLargeFiles}
                     {...freeUpSpaceVisibilityProps}
                     onRootClose={onClose}
                     pendingAction={pendingFreeUpSpaceAction}
