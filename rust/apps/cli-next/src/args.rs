@@ -214,6 +214,12 @@ pub struct ExportArgs {
     pub adopt: bool,
     #[arg(
         long,
+        help = "Share originals across albums using hard links",
+        long_help = "Share originals across albums using hard links, including verified copies already in selected albums. Edits and file attributes are shared. Omitting this flag later does not undo existing links. The destination must support hard links."
+    )]
+    pub hardlinks: bool,
+    #[arg(
+        long,
         short = 'j',
         value_name = "N",
         default_value = "16",

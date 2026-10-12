@@ -69,6 +69,16 @@ fn export_selection_reuses_independent_album_copies() -> TestResult {
                     fs::metadata(root.join("Family/A.jpg"))?.ino()
                 );
             }
+            export(
+                &home,
+                &root,
+                &["--album", "Family", "--album", "Travel", "--hardlinks"],
+            );
+            assert!(same_file::is_same_file(
+                root.join("Travel/A.jpg"),
+                root.join("Family/A.jpg")
+            )?);
+            assert_eq!(objects.reads(), initial_reads + 1);
             let travel_time = fs::metadata(root.join("Travel/A.jpg"))?.modified()?;
             export(&home, &root, &["--album", "Family"]);
             assert_eq!(

@@ -38,6 +38,7 @@ rusqlite = { workspace = true, features = ["bundled-sqlcipher-vendored-openssl"]
 ente-test-support.workspace = true
 futures-util.workspace = true
 mockito.workspace = true
+same-file.workspace = true
 zip.workspace = true
 
 [lints]

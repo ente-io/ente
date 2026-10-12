@@ -43,6 +43,7 @@ pub struct Options {
     pub albums: Vec<String>,
     pub exclude_albums: Vec<String>,
     pub adopt: bool,
+    pub hardlinks: bool,
     pub jobs: NonZeroUsize,
 }
 
@@ -293,20 +294,13 @@ impl Export {
             store: &shared,
             cancel,
             report,
+            hardlinks: self.options.hardlinks,
         };
         let result = (|| {
             refreshed?;
             run.recover()?;
             run.albums()?;
-            transfers(
-                &self.destination,
-                &shared,
-                session,
-                cancel_send,
-                cancel,
-                self.options.jobs.get(),
-                report,
-            )?;
+            transfers(&run, session, cancel_send, self.options.jobs.get())?;
             run.check_cancel()?;
             run.retain_removed()
         })();
@@ -642,14 +636,12 @@ impl Drop for CancelWorkers<'_> {
 }
 
 fn transfers(
-    root: &Path,
-    store: &Mutex<Store>,
+    run: &reconcile::Run<'_>,
     session: &ente_core::Session,
     cancel_send: &watch::Sender<bool>,
-    cancel: &watch::Receiver<bool>,
     jobs: usize,
-    report: &(dyn Fn(&str) + Sync),
 ) -> Result<()> {
+    let (store, cancel, report) = (run.store, run.cancel, run.report);
     let (expected, files): (i64, i64) = store::lock(store)?.db.query_row(
         "SELECT count(*),count(DISTINCT file) FROM desired_files WHERE failure IS NULL",
         [],
@@ -665,7 +657,6 @@ fn transfers(
             let last_report = &last_report;
             workers.push(scope.spawn(move || {
                 let _cancel_on_panic = CancelWorkers(cancel_send);
-                let run = reconcile::Run { root, store, cancel, report };
                 let result = (|| {
                     loop {
                         if *cancel.borrow() {

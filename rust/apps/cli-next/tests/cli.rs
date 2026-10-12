@@ -35,6 +35,8 @@ fn reads_do_not_initialize_storage() {
         assert!(help.contains("Usage: ente-cli-next [OPTIONS] <COMMAND>"));
         assert!(help.contains(&format!("=== {binary} photos file download ===")));
         assert!(help.contains(&format!("=== {binary} vault key generate ===")));
+        assert!(help.contains("--hardlinks"));
+        assert!(help.contains("Edits and file attributes are shared"));
         let output = home
             .command(&["accounts", "list"])
             .env("ENTE_CLI_HOME", &path)

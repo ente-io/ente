@@ -192,6 +192,7 @@ fn adoption_reuses_captured_producer_shapes_and_converts_current_names() {
     for producer in ["go", "desktop"] {
         let mut server = mockito::Server::new();
         let (mut engine, downloads) = new_engine(&server, producer);
+        engine.hardlinks = true;
         let requests: Vec<_> = downloads
             .iter()
             .map(|(id, bytes)| download(&mut server, *id, bytes, 0))
@@ -261,6 +262,13 @@ fn adoption_reuses_captured_producer_shapes_and_converts_current_names() {
         }
         assert!(!root.join("Family").exists());
         assert!(root.join("Renamed/Portrait.jpg").is_file());
+        assert!(
+            same_file::is_same_file(
+                root.join("Renamed/Pair.jpg"),
+                root.join("Live Pair/Pair.jpg")
+            )
+            .unwrap()
+        );
         assert!(root.join("Renamed/Live-1.jpg").is_file());
         assert!(root.join("Renamed/Live.mov").is_file());
         assert_eq!(
