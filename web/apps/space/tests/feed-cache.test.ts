@@ -305,6 +305,34 @@ test("feed entrance animations stay remembered across navigation and reset on re
     expect(reopened.presentedPostIdentities.size).toBe(0);
 });
 
+test("the new-post boundary survives navigation and advances on the next reload", async () => {
+    await cacheCurrentSpaceFeedPage("self", { items: [post(2), post(1)] });
+    clearSpaceFeedMemoryCache();
+    const session = (await loadSpaceFeedSession("self"))!;
+    expect(session.previousNewestPost).toEqual({ postId: 2, timestampMs: 2 });
+
+    await cacheCurrentSpaceFeedPage("self", {
+        items: [post(4), post(3), post(2), post(1)],
+    });
+    expect(await loadSpaceFeedSession("self")).toBe(session);
+    expect(session.previousNewestPost).toEqual({ postId: 2, timestampMs: 2 });
+
+    clearSpaceFeedMemoryCache();
+    expect((await loadSpaceFeedSession("self"))?.previousNewestPost).toEqual({
+        postId: 4,
+        timestampMs: 4,
+    });
+});
+
+test("a first visit has no new-post boundary", async () => {
+    const session = (await loadSpaceFeedSession("self"))!;
+    expect(session.previousNewestPost).toBeUndefined();
+    await cacheCurrentSpaceFeedPage("self", { items: [post(2), post(1)] });
+    expect(
+        (await loadSpaceFeedSession("self"))?.previousNewestPost,
+    ).toBeUndefined();
+});
+
 test("feed animation sessions are isolated between accounts, spaces and servers", async () => {
     const session = (await loadSpaceFeedSession("self"))!;
     session.presentedPostIdentities.add("post:1");

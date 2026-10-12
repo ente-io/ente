@@ -36,6 +36,7 @@ import {
     viewerOriginKey,
 } from "components/viewer-transition";
 import log from "ente-base/log";
+import { isSpaceIOS } from "hooks/use-pwa-install-prompt";
 import type PhotoSwipe from "photoswipe";
 import React from "react";
 import type { SpaceInviteIntent } from "services/invite";
@@ -166,7 +167,12 @@ interface SpaceViewerDeleteSnapshot {
 
 type DraftPostExitPhase = "idle" | "waiting-for-keyboard" | "animating";
 
+export interface SpaceFileViewerController {
+    close: () => void;
+}
+
 interface SpaceFileViewerProps {
+    ref?: React.Ref<SpaceFileViewerController>;
     closeOnSwipePastEnd?: boolean;
     draftPhotoControls?: React.ReactNode;
     onLoadPhoto?: SpacePostAssetURLLoader;
@@ -446,6 +452,7 @@ const SpaceViewerPhotoOverlay: React.FC<{
 };
 
 export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
+    ref,
     closeOnSwipePastEnd = false,
     draftPhotoControls,
     onLoadPhoto,
@@ -797,6 +804,12 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         root.dataset.spaceViewerFlying = "true";
         root.dataset.spaceViewerLeaving = "true";
     };
+
+    React.useImperativeHandle(
+        ref,
+        () => ({ close: () => requestCloseRef.current() }),
+        [],
+    );
 
     const requestAddFriendForPostAction = (intent: SpaceInviteIntent) => {
         if (!onAddFriendForPostAction) return;
@@ -2655,7 +2668,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                         data-space-viewer-bottom="true"
                         sx={{
                             alignItems: "stretch",
-                            bottom: "max(24px, calc(env(safe-area-inset-bottom) + 16px))",
+                            bottom: isSpaceIOS()
+                                ? "max(24px, calc(env(safe-area-inset-bottom) + 16px), calc(var(--space-keyboard-inset, 0px) + 16px))"
+                                : "max(24px, calc(env(safe-area-inset-bottom) + 16px))",
                             display: "flex",
                             flexDirection: "column",
                             gap: "12px",

@@ -155,18 +155,17 @@ const createFlyer = (root: HTMLElement, src: string, base: ViewerRect) => {
 
 const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
     const card = tile.closest("article");
-    const header = card?.querySelector<HTMLElement>(
-        "[data-space-viewer-header]",
+    const overlays = card?.querySelectorAll<HTMLElement>(
+        "[data-space-viewer-header-shade], [data-space-viewer-header], [data-space-viewer-overlay]",
     );
-    const shade = card?.querySelector<HTMLElement>(
-        "[data-space-viewer-header-shade]",
-    );
-    if (header && shade) {
+    if (overlays?.length) {
         const bounds = rectOf(tile);
         const rider = document.createElement("div");
         rider.setAttribute("aria-hidden", "true");
         rider.inert = true;
-        rider.append(shade.cloneNode(true), header.cloneNode(true));
+        rider.append(
+            ...Array.from(overlays, (overlay) => overlay.cloneNode(true)),
+        );
         for (const element of rider.querySelectorAll("*"))
             if (element instanceof HTMLElement)
                 element.style.animation = "none";
@@ -183,8 +182,7 @@ const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
             zIndex: "2",
         });
         flyer.after(rider);
-        header.style.opacity = "0";
-        shade.style.opacity = "0";
+        for (const overlay of overlays) overlay.style.opacity = "0";
         return {
             element: rider,
             draw: ({ visible: v, radii }: ViewerPhotoState, t: number) => {
@@ -198,8 +196,7 @@ const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
             },
             remove: () => rider.remove(),
             reveal: () => {
-                header.style.opacity = "";
-                shade.style.opacity = "";
+                for (const overlay of overlays) overlay.style.opacity = "";
             },
         };
     }

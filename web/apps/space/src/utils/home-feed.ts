@@ -10,6 +10,28 @@ export type HomeFeedEntry =
       }
     | { identity: string; item: SpacePost; kind: "remote"; renderKey: string };
 
+export const homeFeedSeparatorBefore = (
+    entries: HomeFeedEntry[],
+    previousNewestPost: Pick<SpacePost, "postId" | "timestampMs"> | undefined,
+) => {
+    if (!previousNewestPost) return undefined;
+    let hasNewPosts = false;
+    for (const entry of entries) {
+        if (entry.kind != "remote") continue;
+        const post = entry.item;
+        if (
+            post.timestampMs > previousNewestPost.timestampMs ||
+            (post.timestampMs == previousNewestPost.timestampMs &&
+                post.postId > previousNewestPost.postId)
+        ) {
+            hasNewPosts = true;
+        } else {
+            return hasNewPosts ? entry.identity : undefined;
+        }
+    }
+    return undefined;
+};
+
 export const homeFeedEntries = (
     feedItems: SpacePost[],
     localFeedPosts: LocalSpaceFeedPost[],

@@ -29,6 +29,7 @@ export interface SpaceFeedCacheSnapshot {
 
 export interface SpaceFeedSession {
     presentedPostIdentities: Set<string>;
+    previousNewestPost?: Pick<SpacePost, "postId" | "timestampMs">;
 }
 
 const memoryCache = new Map<string, SpaceFeedCacheSnapshot | undefined>();
@@ -144,9 +145,20 @@ export const loadSpaceFeedSession = async (spaceId: string) => {
     const generation = cacheGeneration;
     const key = await cacheKey(spaceId);
     if (!key || generation != cacheGeneration) return undefined;
+    const cached = await loadCachedSpaceFeed(spaceId);
+    if (generation != cacheGeneration) return undefined;
     let session = feedSessions.get(key);
     if (!session) {
-        session = { presentedPostIdentities: new Set() };
+        const newestPost = cached?.items[0];
+        session = {
+            presentedPostIdentities: new Set(),
+            previousNewestPost: newestPost
+                ? {
+                      postId: newestPost.postId,
+                      timestampMs: newestPost.timestampMs,
+                  }
+                : undefined,
+        };
         feedSessions.set(key, session);
     }
     return session;
