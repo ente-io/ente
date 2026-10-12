@@ -5,7 +5,6 @@ import 'package:ente_components/ente_components.dart';
 import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
@@ -15,6 +14,7 @@ import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/public_url.dart";
+import "package:locker/ui/components/locker_progress_dialog.dart";
 import "package:locker/ui/components/text_input_sheet.dart";
 import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
@@ -286,9 +286,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     bool showProgressDialog = true,
   }) async {
     final dialog = showProgressDialog && context != null && context.mounted
-        ? createProgressDialog(context, context.strings.pleaseWait)
+        ? await showLockerProgressDialog(context, context.strings.pleaseWait)
         : null;
-    await dialog?.show();
     try {
       await CollectionApiClient.instance.updateShareUrl(
         widget.collection!,

@@ -1,5 +1,4 @@
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/core/errors.dart";
@@ -238,15 +237,12 @@ class FileActions {
   }
 
   static Future<void> shareFileLink(BuildContext context, EnteFile file) async {
-    final dialog = createProgressDialog(
-      context,
-      context.strings.creatingLink,
-      isDismissible: false,
-    );
-
+    LockerProgressDialog? dialog;
     try {
-      await dialog.show();
-
+      dialog = await showLockerProgressDialog(
+        context,
+        context.strings.creatingLink,
+      );
       final shareableLink = await LinksService.instance.getOrCreateLink(file);
 
       await dialog.hide();
@@ -261,7 +257,7 @@ class FileActions {
       }
     } catch (e, stackTrace) {
       _logger.severe("Failed to create file link", e, stackTrace);
-      await dialog.hide();
+      await dialog?.hide();
 
       if (context.mounted) {
         if (e is SharingNotPermittedForFreeAccountsError) {

@@ -7,9 +7,14 @@ Future<LockerProgressDialog> showLockerProgressDialog(
   BuildContext context,
   String message, {
   bool useNewUi = false,
+  bool isDismissible = false,
 }) async {
   if (useNewUi || FeatureFlagService.instance.internalUser) {
-    final dialog = showLoadingComponent(context, message);
+    final dialog = showLoadingComponent(
+      context,
+      message,
+      isDismissible: isDismissible,
+    );
     await WidgetsBinding.instance.endOfFrame;
     await WidgetsBinding.instance.endOfFrame;
     return LockerProgressDialog._(
@@ -20,7 +25,11 @@ Future<LockerProgressDialog> showLockerProgressDialog(
     );
   }
 
-  final dialog = createProgressDialog(context, message);
+  final dialog = createProgressDialog(
+    context,
+    message,
+    isDismissible: isDismissible,
+  );
   return LockerProgressDialog._(
     await dialog.show(),
     dialog.isShowing,

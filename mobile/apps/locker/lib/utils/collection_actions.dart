@@ -6,8 +6,6 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_sharing/models/user.dart";
 import 'package:ente_strings/ente_strings.dart';
-import "package:ente_ui/components/progress_dialog.dart";
-import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_ui/utils/toast_util.dart";
 import 'package:flutter/material.dart';
 import "package:locker/core/errors.dart";
@@ -459,15 +457,14 @@ class CollectionActions {
     String email, {
     bool showProgress = false,
   }) async {
-    ProgressDialog? dialog;
+    LockerProgressDialog? dialog;
     String? publicKey;
     if (showProgress) {
-      dialog = createProgressDialog(
+      dialog = await showLockerProgressDialog(
         context,
         context.strings.sharing,
         isDismissible: true,
       );
-      await dialog.show();
     }
     try {
       publicKey = await UserService.instance.getPublicKey(email);
@@ -524,15 +521,14 @@ class CollectionActions {
       return false;
     }
 
-    ProgressDialog? dialog;
+    LockerProgressDialog? dialog;
     String? publicKey;
     if (showProgress && context != null && context.mounted) {
-      dialog = createProgressDialog(
+      dialog = await showLockerProgressDialog(
         context,
         context.strings.sharing,
         isDismissible: true,
       );
-      await dialog.show();
     }
 
     try {
