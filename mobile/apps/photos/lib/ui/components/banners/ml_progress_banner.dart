@@ -3,14 +3,13 @@ import "dart:async";
 import "package:ente_components/theme/text_styles.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/notification_event.dart";
-import "package:photos/events/tab_changed_event.dart";
-import "package:photos/models/home_tab.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/ml_model_download_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -18,7 +17,9 @@ import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/utils/ml_util.dart";
 
 class MLProgressBanner extends StatefulWidget {
-  const MLProgressBanner({super.key});
+  const MLProgressBanner({super.key, this.isOnSearchTab});
+
+  final ValueListenable<bool>? isOnSearchTab;
 
   @override
   State<MLProgressBanner> createState() => _MLProgressBannerState();
@@ -29,26 +30,16 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
   Timer? _timer;
   bool _dismissed = false;
   bool _indexingComplete = false;
-  bool _isOnSearchTab = true;
-  late final StreamSubscription<TabChangedEvent> _tabChangedSubscription;
   late final StreamSubscription<LocalPhotosUpdatedEvent>
   _localPhotosUpdatedSubscription;
   late final StreamSubscription<NotificationEvent> _notificationSubscription;
 
+  bool get _isOnVisibleTab => widget.isOnSearchTab?.value ?? true;
+
   @override
   void initState() {
     super.initState();
-    _tabChangedSubscription = Bus.instance.on<TabChangedEvent>().listen((
-      event,
-    ) {
-      final wasOnSearchTab = _isOnSearchTab;
-      _isOnSearchTab = event.selectedIndex == searchTabIndex;
-      if (_isOnSearchTab && !wasOnSearchTab) {
-        _ensurePolling();
-      } else if (!_isOnSearchTab && wasOnSearchTab) {
-        _stopPolling();
-      }
-    });
+    widget.isOnSearchTab?.addListener(_onSearchTabChanged);
     _localPhotosUpdatedSubscription = Bus.instance
         .on<LocalPhotosUpdatedEvent>()
         .listen((_) {
@@ -61,6 +52,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     ) {
       _indexingComplete = false;
       _ensurePolling();
+      setState(() {});
     });
     _ensurePolling();
   }
@@ -79,8 +71,16 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     _timer = null;
   }
 
+  void _onSearchTabChanged() {
+    if (_isOnVisibleTab) {
+      _ensurePolling();
+    } else {
+      _stopPolling();
+    }
+  }
+
   void _ensurePolling() {
-    if (!_isOnSearchTab) return;
+    if (!_isOnVisibleTab) return;
     if (!_shouldPoll) {
       _stopPolling();
       return;
@@ -93,8 +93,18 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
       !_dismissed &&
       hasGrantedMLConsent &&
       !localSettings.isMLProgressBannerDismissed &&
-      !(isLocalGalleryMode && !localSettings.isMLLocalIndexingEnabled) &&
+      localSettings.isMLLocalIndexingEnabled &&
       !_indexingComplete;
+
+  bool get _isShown {
+    final status = _indexStatus;
+    return !_dismissed &&
+        hasGrantedMLConsent &&
+        !localSettings.isMLProgressBannerDismissed &&
+        localSettings.isMLLocalIndexingEnabled &&
+        status != null &&
+        status.pendingItems > 0;
+  }
 
   Future<void> _fetchStatus() async {
     try {
@@ -112,8 +122,18 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
   }
 
   @override
+  void didUpdateWidget(MLProgressBanner oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isOnSearchTab != widget.isOnSearchTab) {
+      oldWidget.isOnSearchTab?.removeListener(_onSearchTabChanged);
+      widget.isOnSearchTab?.addListener(_onSearchTabChanged);
+      _onSearchTabChanged();
+    }
+  }
+
+  @override
   void dispose() {
-    _tabChangedSubscription.cancel();
+    widget.isOnSearchTab?.removeListener(_onSearchTabChanged);
     _localPhotosUpdatedSubscription.cancel();
     _notificationSubscription.cancel();
     _timer?.cancel();
@@ -122,21 +142,10 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
 
   @override
   Widget build(BuildContext context) {
-    if (_dismissed) return const SizedBox.shrink();
-    if (!hasGrantedMLConsent) return const SizedBox.shrink();
-    if (localSettings.isMLProgressBannerDismissed) {
-      return const SizedBox.shrink();
-    }
-    if (isLocalGalleryMode && !localSettings.isMLLocalIndexingEnabled) {
-      return const SizedBox.shrink();
-    }
+    if (!_isShown) return const SizedBox.shrink();
 
-    final status = _indexStatus;
-    if (status == null) return const SizedBox.shrink();
-    if (status.pendingItems <= 0) return const SizedBox.shrink();
-
+    final status = _indexStatus!;
     final total = status.indexedItems + status.pendingItems;
-    if (total <= 0) return const SizedBox.shrink();
 
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);

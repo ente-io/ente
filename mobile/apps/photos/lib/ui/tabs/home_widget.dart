@@ -248,6 +248,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _logger.info('logged out, selectTab index to 0');
       _selectedTabIndex = 0;
       _selectedTabIndexNotifier.value = 0;
+      isOnSearchTabNotifier.value = false;
       _startWithoutAccount = false;
       if (mounted) {
         setState(() {});
@@ -1112,6 +1113,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                           SearchTab(
                             shouldConsumeBackNotifier:
                                 _shouldSearchTabSearchConsumeBackNotifier,
+                            isOnSearchTab: isOnSearchTabNotifier,
                           ),
                         ),
                       ],
