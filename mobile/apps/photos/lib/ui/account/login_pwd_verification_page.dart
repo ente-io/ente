@@ -172,11 +172,6 @@ class _LoginPasswordVerificationPageState
         setState(() {
           _isPasswordIncorrect = true;
         });
-        await _showContactSupportDialog(
-          context,
-          context.strings.incorrectPasswordTitle,
-          context.strings.pleaseTryAgain,
-        );
       } else {
         _logger.severe('API failure during SRP login ${e.type}', e, s);
         if (e.type == DioExceptionType.connectionTimeout ||

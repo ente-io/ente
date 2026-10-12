@@ -122,10 +122,6 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       setState(() {
         _isPasswordIncorrect = true;
       });
-      await _showContactSupportDialog(
-        context.strings.incorrectPasswordTitle,
-        context.strings.pleaseTryAgain,
-      );
       return;
     } catch (e, s) {
       _logger.severe("Password verification failed", e, s);
