@@ -49,6 +49,7 @@ class UploadProgressTracker {
     private transferredBytes = 0;
     private byteSamples: { time: number; bytes: number }[] = [];
     private uploadStartedAt: number | undefined;
+    private etaExpiryTimeout: ReturnType<typeof setTimeout> | undefined;
 
     getSnapshot = () => this.snapshot;
 
@@ -81,6 +82,25 @@ class UploadProgressTracker {
         this.inProgressUploads = new Map();
         this.finishedUploads = new Map();
         this.updateProgress();
+    }
+
+    setFileSize(batchID: number, localID: number, totalBytes: number) {
+        const fileBytes = this.fileBytes.get(localID);
+        if (
+            batchID != this.batchID ||
+            !fileBytes ||
+            fileBytes.totalBytes !== undefined ||
+            !Number.isFinite(totalBytes) ||
+            totalBytes < 0
+        ) {
+            return;
+        }
+        fileBytes.totalBytes = totalBytes;
+        this.remainingBytes += totalBytes;
+        this.unknownFileSizes--;
+        this.updateSnapshot({
+            estimatedSecondsRemaining: this.estimateRemainingSeconds(),
+        });
     }
 
     setUploadPhase(uploadPhase: UploadPhase) {
@@ -183,8 +203,9 @@ class UploadProgressTracker {
         }
         const estimatedSecondsRemaining = this.estimateRemainingSeconds();
         if (
+            bytes > 0 ||
             estimatedSecondsRemaining !==
-            this.snapshot.estimatedSecondsRemaining
+                this.snapshot.estimatedSecondsRemaining
         ) {
             this.updateSnapshot({ estimatedSecondsRemaining });
         }
@@ -208,6 +229,7 @@ class UploadProgressTracker {
         const first = this.byteSamples[0];
         if (
             !first ||
+            now - this.byteSamples.at(-1)!.time >= 30_000 ||
             this.unknownFileSizes > 0 ||
             now - this.uploadStartedAt < 5000
         ) {
@@ -256,6 +278,21 @@ class UploadProgressTracker {
 
     private updateSnapshot(update: Partial<UploadProgressSnapshot>) {
         this.snapshot = { ...this.snapshot, ...update };
+        if ("estimatedSecondsRemaining" in update) {
+            clearTimeout(this.etaExpiryTimeout);
+            this.etaExpiryTimeout = undefined;
+            if (update.estimatedSecondsRemaining !== undefined) {
+                const lastSample = this.byteSamples.at(-1)!;
+                this.etaExpiryTimeout = setTimeout(
+                    () => {
+                        this.updateSnapshot({
+                            estimatedSecondsRemaining: undefined,
+                        });
+                    },
+                    Math.max(0, 30_000 - (performance.now() - lastSample.time)),
+                );
+            }
+        }
         this.listeners.forEach((onChange) => onChange());
     }
 }

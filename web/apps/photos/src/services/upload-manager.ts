@@ -324,14 +324,27 @@ class UploadManager {
         options?: UploadItemsOptions,
     ) {
         this.itemsToBeUploaded = [...this.itemsToBeUploaded, ...mediaItems];
-        const fileSizes = new Map<number, number | undefined>();
+        uploadProgress.reset(
+            mediaItems.length,
+            new Map(mediaItems.map(({ localID }) => [localID, undefined])),
+        );
+        const batchID = uploadProgress.batchID;
         let nextItemIndex = 0;
-        await Promise.all(
+        const fileSizesPromise = Promise.all(
             Array.from(
                 { length: Math.min(maxConcurrentUploads, mediaItems.length) },
                 async () => {
                     while (nextItemIndex < mediaItems.length) {
-                        this.abortIfCancelled();
+                        if (
+                            !this.uploadInProgress ||
+                            this.shouldUploadBeCancelled ||
+                            this.fatalUploadError ||
+                            batchID != uploadProgress.batchID ||
+                            uploadProgress.getSnapshot().uploadCounter
+                                .finished == mediaItems.length
+                        ) {
+                            return;
+                        }
                         const item = mediaItems[nextItemIndex++]!;
                         try {
                             const size = item.isLivePhoto
@@ -346,22 +359,23 @@ class UploadManager {
                                       ])
                                   ).reduce((total, size) => total + size, 0)
                                 : await uploadItemSize(item.uploadItem!);
-                            fileSizes.set(item.localID, size);
+                            uploadProgress.setFileSize(
+                                batchID,
+                                item.localID,
+                                size,
+                            );
                         } catch (e) {
-                            this.abortIfCancelled();
                             log.warn(
                                 `Could not determine size of ${item.fileName}`,
                                 e,
                             );
-                            fileSizes.set(item.localID, undefined);
                         }
                     }
                 },
             ),
         );
-        this.abortIfCancelled();
-        uploadProgress.reset(mediaItems.length, fileSizes);
         await UploadService.setFileCount(mediaItems.length);
+        this.abortIfCancelled();
         uploadProgress.setUploadPhase("uploading");
 
         const uploadProcesses = new Array<Promise<void>>();
@@ -374,7 +388,7 @@ class UploadManager {
             const worker = await this.comlinkCryptoWorkers[i]!.remote;
             uploadProcesses.push(this.uploadNextItemInQueue(worker, options));
         }
-        await Promise.all(uploadProcesses);
+        await Promise.all([fileSizesPromise, ...uploadProcesses]);
     }
 
     private async uploadNextItemInQueue(
