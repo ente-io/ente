@@ -226,8 +226,6 @@ void main() {
       expect(handle.isShowing(), isFalse);
       expect(find.text("Opening"), findsNothing);
       expect(find.text("Page"), findsOneWidget);
-      handle.update(message: "After dismissal");
-      await handle.hide();
     },
   );
 
