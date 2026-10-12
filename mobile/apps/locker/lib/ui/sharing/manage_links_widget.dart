@@ -280,6 +280,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       expiryOptions.map((option) => option.expireAfterInMicroseconds),
     );
     var selectionPending = false;
+    Future<void>? pendingSave;
 
     final pickCustomExpiry = await showBottomSheetComponent<bool>(
       context: context,
@@ -313,12 +314,13 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     expiryOption.expireAfterInMicroseconds,
                   );
                   try {
-                    await _updateUrlSettings(
+                    pendingSave = _updateUrlSettings(
                       context,
                       {'validTill': newValidTill},
                       showProgressDialog: false,
                       showToast: false,
                     );
+                    await pendingSave;
                   } catch (_) {
                     selectionPending = false;
                     rethrow;
@@ -333,6 +335,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         ),
       ),
     );
+    await pendingSave;
     if (pickCustomExpiry == true && context.mounted) {
       await _pickCustomExpiry(context);
     }
@@ -402,6 +405,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       ...publicLinkDeviceLimits,
     ];
     var selectionPending = false;
+    Future<void>? pendingSave;
 
     await showBottomSheetComponent<void>(
       context: context,
@@ -424,12 +428,13 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   if (selectionPending) return;
                   selectionPending = true;
                   try {
-                    await _updateUrlSettings(
+                    pendingSave = _updateUrlSettings(
                       context,
                       {'deviceLimit': deviceLimit},
                       showProgressDialog: false,
                       showToast: false,
                     );
+                    await pendingSave;
                   } catch (_) {
                     selectionPending = false;
                     rethrow;
@@ -444,6 +449,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         ),
       ),
     );
+    await pendingSave;
   }
 
   Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
