@@ -29,6 +29,7 @@ Jump to a category:
 - [How do I install Ente Locker on iPhone or iPad?](/locker/faq/getting-started#locker-install-ios)
 - [Is Ente Locker available on desktop?](/locker/faq/getting-started#locker-desktop-availability)
 - [Can I access Locker from a web browser?](/locker/faq/getting-started#locker-web-access)
+- [Can I upload a whole folder to Ente Locker?](/locker/faq/getting-started#locker-folder-upload)
 
 ### Account
 

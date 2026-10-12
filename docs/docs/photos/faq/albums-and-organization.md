@@ -440,6 +440,12 @@ To restore photos deleted from your device on Android 11 and newer, select **Dev
 
 Restored photos will be moved to an album of choice.
 
+### If I restore several photos from Trash, will they return to their original albums? {#bulk-restore-original-albums}
+
+No. You can restore several photos together, but Ente moves the selection to an album you choose. It does not automatically return each photo to its previous album.
+
+If the photos came from different albums, restore them in separate groups and choose the right album for each group. Photos in Ente Trash can be restored within 30 days.
+
 ### How do I permanently delete photos or empty trash? {#empty-trash}
 
 To free up storage space immediately, you can permanently delete items from trash. If the **Ente** and **Device** tabs are shown, select the trash you want to empty first:

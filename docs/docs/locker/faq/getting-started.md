@@ -36,6 +36,12 @@ Yes. Open [locker.ente.com](https://locker.ente.com) in your browser and sign in
 
 Public links to shared content can also be viewed in any web browser.
 
+### Can I upload a whole folder to Ente Locker? {#locker-folder-upload}
+
+Yes. Folder upload is available in Locker on the web. Open [locker.ente.com](https://locker.ente.com) in a desktop browser and upload the folder there.
+
+The Locker mobile app's **File** option is for selecting files. If folder upload on the web does not work, contact support with your browser version and what happens when you try.
+
 ## Account
 
 ### How do I create a new Ente account? {#locker-create-account}

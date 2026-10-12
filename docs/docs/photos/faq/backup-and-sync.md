@@ -788,6 +788,12 @@ There is no separate "Import from Ente" option.
 
 Learn more in the [Watch folders guide](/photos/features/backup-and-sync/watch-folders).
 
+### Is continuous export an independent backup? {#continuous-export-independent-backup}
+
+Continuous export gives you a separate local copy of your Ente Photos library, but it is not a versioned backup. While the desktop app is running, it adds new files and reflects album changes.
+
+If you delete a photo in Ente, its exported copy moves to the local export Trash folder. Emptying Ente Trash does not remove that local copy. To keep earlier versions of your library, back up the export folder separately. Store that backup securely because exported files can be read outside Ente.
+
 ### What happens to deleted photos in continuous export? {#continuous-export-deleted-photos}
 
 If you delete a photo from Ente, it moves to Trash in Ente. In your continuous export folder, the exported copy is similarly moved into a local export Trash folder.
