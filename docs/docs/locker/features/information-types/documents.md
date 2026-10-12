@@ -40,7 +40,7 @@ Document scanning is available in the Locker mobile app on Android and iOS.
 
 Locker combines all scanned pages into one PDF before uploading it.
 
-To retake a page, select it in the review screen and tap the retake icon. Capture the page again to replace it without rescanning the other pages.
+To retake a page, select it in the review screen and tap the retake icon. Take a new photo of that page. The other pages stay as they are.
 
 ## Uploading an existing file
 
@@ -50,11 +50,11 @@ To retake a page, select it in the review screen and tap the retake icon. Captur
 2. Tap the **+** button
 3. Select **File**
 4. Choose one or more files from your device
-5. To rename a file before uploading, tap the pencil icon beside its name, enter a new name, and tap **Save**
+5. To rename a file, tap the pencil icon beside its name. Enter a new name and tap **Save**
 6. Select one or more collections, or leave them unselected to save to **Uncategorized**
 7. Tap **Save** to upload
 
-Renaming a file here changes its name in Locker. The original file on your device keeps its name, and Locker keeps the file extension, such as `.pdf`.
+Renaming a file here changes its name in Locker. The original file on your device keeps its name. The file type stays the same, so you do not need to add `.pdf` or another ending.
 
 ### Sharing files into Locker on Android
 
@@ -63,7 +63,7 @@ Renaming a file here changes its name in Locker. The original file on your devic
 3. Review the files and choose the collections to save them to, or leave collections unselected to use **Uncategorized**
 4. Tap **Save**
 
-Locker warns you if repeated files or files it cannot read are skipped. You can continue uploading the remaining files.
+Locker shows a warning if the same file was shared twice or a file cannot be opened. You can still upload the other files.
 
 ## Supported file formats
 

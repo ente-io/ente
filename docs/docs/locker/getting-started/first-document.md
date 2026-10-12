@@ -47,7 +47,7 @@ Document scanning is available in the Locker mobile app on Android and iOS.
 1. Tap the **+** button
 2. Select **File**
 3. Choose one or more files from your device
-4. To rename a file before uploading, tap the pencil icon beside its name, enter a new name, and tap **Save**
+4. To rename a file, tap the pencil icon beside its name. Enter a new name and tap **Save**
 5. Leave collections unselected to use **Uncategorized**, or select one or more collections
 6. Tap **Save** to upload
 
@@ -55,13 +55,11 @@ Document scanning is available in the Locker mobile app on Android and iOS.
 
 1. Tap the **+** button
 2. Select **Secret**
-3. Fill in the fields:
-    - **Name**: A name for this entry (required; e.g., "Bank Account")
-    - **Username**: Your username or email (optional)
-    - **Password**: Your password (optional)
-    - **Notes**: Any additional information (optional)
+3. Give the account a name, such as "Bank Account". Add a username, password or notes if you have them
 4. Leave collections unselected to use **Uncategorized**. Or select one or more collections to organize this item
 5. Tap **Save**
+
+You can save it with just a name and add more details later.
 
 ## Organizing with collections
 
