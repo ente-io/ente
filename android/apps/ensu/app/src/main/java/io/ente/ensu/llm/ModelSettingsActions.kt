@@ -109,6 +109,7 @@ internal class ModelSettingsActions(
                 chat =
                     appState.chat.copy(
                         isModelDownloaded = isDownloaded,
+                        supportsImageAttachments = llmProvider.supportsImages(selection),
                         isDownloading = if (isDownloaded) false else appState.chat.isDownloading,
                         downloadPercent = if (isDownloaded) null else appState.chat.downloadPercent,
                         downloadStatus = if (isDownloaded) null else appState.chat.downloadStatus,
