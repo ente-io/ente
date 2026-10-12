@@ -279,6 +279,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       url,
       expiryOptions.map((option) => option.expireAfterInMicroseconds),
     );
+    var selectionPending = false;
 
     await showBottomSheetComponent<void>(
       context: context,
@@ -302,6 +303,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 showOnlyLoadingState:
                     expiryOption.expireAfterInMicroseconds != -1,
                 onTap: () async {
+                  if (selectionPending) return;
+                  selectionPending = true;
                   if (expiryOption.expireAfterInMicroseconds < 0) {
                     Navigator.of(sheetContext).pop();
                     await _pickCustomExpiry(context);
@@ -311,12 +314,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   final newValidTill = _validTillForExpiryOption(
                     expiryOption.expireAfterInMicroseconds,
                   );
-                  await _updateUrlSettings(
-                    context,
-                    {'validTill': newValidTill},
-                    showProgressDialog: false,
-                    showToast: false,
-                  );
+                  try {
+                    await _updateUrlSettings(
+                      context,
+                      {'validTill': newValidTill},
+                      showProgressDialog: false,
+                      showToast: false,
+                    );
+                  } catch (_) {
+                    selectionPending = false;
+                    rethrow;
+                  }
                   if (sheetContext.mounted) {
                     Navigator.of(sheetContext).pop();
                   }
@@ -391,6 +399,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         currentDeviceLimit,
       ...publicLinkDeviceLimits,
     ];
+    var selectionPending = false;
 
     await showBottomSheetComponent<void>(
       context: context,
@@ -411,12 +420,19 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     : null,
                 showOnlyLoadingState: true,
                 onTap: () async {
-                  await _updateUrlSettings(
-                    context,
-                    {'deviceLimit': deviceLimit},
-                    showProgressDialog: false,
-                    showToast: false,
-                  );
+                  if (selectionPending) return;
+                  selectionPending = true;
+                  try {
+                    await _updateUrlSettings(
+                      context,
+                      {'deviceLimit': deviceLimit},
+                      showProgressDialog: false,
+                      showToast: false,
+                    );
+                  } catch (_) {
+                    selectionPending = false;
+                    rethrow;
+                  }
                   if (sheetContext.mounted) {
                     Navigator.of(sheetContext).pop();
                   }
