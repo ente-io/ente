@@ -368,6 +368,14 @@ internal class ChatStoreActions(
         val text = currentState.chat.messageText.trim()
         val attachments = currentState.chat.attachments
         if (text.isEmpty() && attachments.isEmpty()) return
+        if (
+            attachments.any { it.type == AttachmentType.Image } &&
+                !llmProvider.supportsImages(
+                    modelSettingsActions.resolveSelection(currentState.modelSettings)
+                )
+        ) {
+            return
+        }
 
         val sessionId = currentState.chat.currentSessionId ?: createNewSession()
         val timestamp = clock()
@@ -984,30 +992,40 @@ internal class ChatStoreActions(
             throw err
         } catch (_: LlmException.Cancelled) {
             interrupted = true
-        } catch (err: Throwable) {
-            if (err is ModelMemoryUnavailable || err is ModelImagesUnsupported) {
-                if (isActive() && !stopRequested) {
-                    state.update {
-                        it.copy(
-                            chat =
-                                it.chat.copy(
-                                    transientAssistantError = err.message,
-                                    transientAssistantParentId = userMessage.id,
-                                )
-                        )
-                    }
-                }
-            } else {
-                interrupted = stopRequested
-                if (!interrupted) {
-                    logRepository.log(
-                        LogLevel.Error,
-                        "Generation failed",
-                        details = err.message,
-                        tag = "LLM",
-                        throwable = err,
+        } catch (err: ModelMemoryUnavailable) {
+            if (isActive() && !stopRequested) {
+                state.update {
+                    it.copy(
+                        chat =
+                            it.chat.copy(
+                                transientAssistantError = err.message,
+                                transientAssistantParentId = userMessage.id,
+                            )
                     )
                 }
+            }
+        } catch (err: ModelImagesUnsupported) {
+            if (isActive() && !stopRequested) {
+                state.update {
+                    it.copy(
+                        chat =
+                            it.chat.copy(
+                                transientAssistantError = err.message,
+                                transientAssistantParentId = userMessage.id,
+                            )
+                    )
+                }
+            }
+        } catch (err: Throwable) {
+            interrupted = stopRequested
+            if (!interrupted) {
+                logRepository.log(
+                    LogLevel.Error,
+                    "Generation failed",
+                    details = err.message,
+                    tag = "LLM",
+                    throwable = err,
+                )
             }
         } finally {
             if (!acquiredContext && isActive()) modelSettingsActions.refreshModelDownloadInfo()

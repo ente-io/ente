@@ -40,7 +40,8 @@ final class ModelMemoryCoordinationTests: XCTestCase {
 
         for id in ["lfm-350m", "lfm-vl-1.6b"] {
             XCTAssertEqual(LlmModelSelection(id: id, contextLength: 512).contextCandidates, [512])
-            XCTAssertEqual(LlmModelSelection(id: id, contextLength: 1536).contextCandidates, [1536, 1024])
+            XCTAssertEqual(
+                LlmModelSelection(id: id, contextLength: 1536).contextCandidates, [1536, 1024])
         }
     }
 

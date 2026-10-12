@@ -595,7 +595,8 @@ final class ChatViewModel: ObservableObject {
                 )
                 await MainActor.run {
                     if !self.supportsImageAttachments
-                        || self.draftImageAttachmentCount >= ChatAttachmentLimits.maxImagesPerMessage
+                        || self.draftImageAttachmentCount
+                            >= ChatAttachmentLimits.maxImagesPerMessage
                     {
                         try? FileManager.default.removeItem(at: url)
                         self.isProcessingAttachments = false
@@ -1440,7 +1441,9 @@ final class ChatViewModel: ObservableObject {
                                 generationErrorMessage = detail
                             } else if case ConversationError.Stale = error {
                                 generationErrorMessage = "Conversation changed. Retry the message."
-                            } else if error is ModelMemoryUnavailable || error is ModelImagesUnsupported {
+                            } else if error is ModelMemoryUnavailable
+                                || error is ModelImagesUnsupported
+                            {
                                 generationErrorMessage = error.localizedDescription
                             } else {
                                 generationErrorMessage = "Response failed. Try again."

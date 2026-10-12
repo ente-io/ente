@@ -115,6 +115,8 @@ internal fun MessageInput(
     val bottomPadding = if (hasAttachmentContent) EnsuSpacing.sm.dp else EnsuSpacing.md.dp
     val isImageAttachmentLimitReached =
         attachments.count { it.type == AttachmentType.Image } >= MaxImageAttachmentsPerMessage
+    val hasUnsupportedImages =
+        !supportsImageAttachments && attachments.any { it.type == AttachmentType.Image }
 
     Column(
         modifier = modifier.background(EnsuColor.backgroundBase()),
@@ -156,6 +158,15 @@ internal fun MessageInput(
                     }
                 }
             }
+        }
+
+        if (hasUnsupportedImages) {
+            Text(
+                text = "This model doesn't support images. Remove the image attachments to send.",
+                style = EnsuTypography.small,
+                color = EnsuColor.stopButton,
+                modifier = Modifier.padding(horizontal = EnsuSpacing.pageHorizontal.dp),
+            )
         }
 
         if (isProcessingAttachments) {
@@ -328,7 +339,8 @@ internal fun MessageInput(
 
                 val canSend =
                     (messageText.isNotBlank() || attachments.isNotEmpty()) &&
-                        !voiceInputState.blocksSend
+                        !voiceInputState.blocksSend &&
+                        !hasUnsupportedImages
 
                 IconButton(
                     onClick = {

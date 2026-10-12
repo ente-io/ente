@@ -125,9 +125,9 @@ struct ModelSettingsView: View {
                                 ? "Context is limited to 2,048 tokens on this device. Response length adjusts automatically."
                                 : "Response length adjusts automatically to the context length."
                         )
-                            .font(EnsuTypography.small)
-                            .foregroundStyle(EnsuColor.textMuted)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        .font(EnsuTypography.small)
+                        .foregroundStyle(EnsuColor.textMuted)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                         Text("Leave blank to use model defaults")
                             .font(EnsuTypography.small)
