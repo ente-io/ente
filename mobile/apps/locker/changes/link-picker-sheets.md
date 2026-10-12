@@ -1,0 +1,1 @@
+- Changed Device limit and Link expiry settings to bottom sheets, matching Photos.

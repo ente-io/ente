@@ -1,23 +1,22 @@
-import "dart:async";
 import "dart:convert";
 
 import 'package:ente_components/ente_components.dart';
 import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/components/date_time_picker.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/core/constants.dart";
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/public_url.dart";
 import "package:locker/ui/components/text_input_sheet.dart";
-import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
-import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
 import "package:locker/utils/error_sheet.dart";
 
@@ -31,6 +30,8 @@ class ManageSharedLinkWidget extends StatefulWidget {
 }
 
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
+  static const Duration _expiryPresetSelectionTolerance = Duration(minutes: 5);
+
   final GlobalKey sendLinkButtonKey = GlobalKey();
 
   @override
@@ -135,16 +136,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             : "${url.deviceLimit}",
                         trailing: chevron,
                         onTap: () async {
-                          unawaited(
-                            routeToPage(
-                              context,
-                              DeviceLimitPickerPage(widget.collection!),
-                            ).then((value) {
-                              if (mounted) {
-                                setState(() {});
-                              }
-                            }),
-                          );
+                          await _showDeviceLimitSheet(context, url);
                         },
                       ),
                       MenuComponent(
@@ -195,16 +187,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             : context.strings.linkNeverExpires,
                         trailing: chevron,
                         onTap: () async {
-                          unawaited(
-                            routeToPage(
-                              context,
-                              LinkExpiryPickerPage(widget.collection!),
-                            ).then((value) {
-                              if (mounted) {
-                                setState(() {});
-                              }
-                            }),
-                          );
+                          await _showLinkExpirySheet(context, url);
                         },
                       ),
                     ],
@@ -266,6 +249,183 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     );
   }
 
+  Future<void> _showLinkExpirySheet(BuildContext context, PublicURL url) async {
+    final l10n = context.strings;
+    final expiryOptions = [
+      (title: l10n.never, expireAfterInMicroseconds: 0),
+      (
+        title: l10n.after1Hour,
+        expireAfterInMicroseconds: const Duration(hours: 1).inMicroseconds,
+      ),
+      (
+        title: l10n.after1Day,
+        expireAfterInMicroseconds: const Duration(days: 1).inMicroseconds,
+      ),
+      (
+        title: l10n.after1Week,
+        expireAfterInMicroseconds: const Duration(days: 7).inMicroseconds,
+      ),
+      (
+        title: l10n.after1Month,
+        expireAfterInMicroseconds: const Duration(days: 30).inMicroseconds,
+      ),
+      (
+        title: l10n.after1Year,
+        expireAfterInMicroseconds: const Duration(days: 365).inMicroseconds,
+      ),
+      (title: l10n.custom, expireAfterInMicroseconds: -1),
+    ];
+    final selectedExpiryOption = _selectedExpiryOption(
+      url,
+      expiryOptions.map((option) => option.expireAfterInMicroseconds),
+    );
+
+    await showBottomSheetComponent<void>(
+      context: context,
+      builder: (sheetContext) => BottomSheetComponent(
+        title: l10n.linkExpiry,
+        content: MenuGroupComponent(
+          items: [
+            for (final expiryOption in expiryOptions)
+              MenuComponent(
+                key: ValueKey(expiryOption.expireAfterInMicroseconds),
+                title: expiryOption.title,
+                trailing:
+                    selectedExpiryOption ==
+                        expiryOption.expireAfterInMicroseconds
+                    ? Icon(
+                        Icons.check,
+                        color: sheetContext.componentColors.primary,
+                      )
+                    : null,
+                showOnlyLoadingState:
+                    expiryOption.expireAfterInMicroseconds != -1,
+                onTap: () async {
+                  if (expiryOption.expireAfterInMicroseconds < 0) {
+                    Navigator.of(sheetContext).pop();
+                    await _pickCustomExpiry(context);
+                    return;
+                  }
+
+                  final newValidTill = _validTillForExpiryOption(
+                    expiryOption.expireAfterInMicroseconds,
+                  );
+                  await _updateUrlSettings(
+                    context,
+                    {'validTill': newValidTill},
+                    showProgressDialog: false,
+                    showToast: false,
+                  );
+                  if (sheetContext.mounted) {
+                    Navigator.of(sheetContext).pop();
+                  }
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickCustomExpiry(BuildContext context) async {
+    final now = DateTime.now();
+    final DateTime? picked = await showDateTimePickerSheet(
+      context,
+      initialDateTime: now,
+      minDateTime: now,
+    );
+    final timeInMicrosecondsFromEpoch = picked?.microsecondsSinceEpoch;
+    if (timeInMicrosecondsFromEpoch == null) {
+      return;
+    }
+
+    if (!context.mounted) return;
+    await _updateUrlSettings(
+      context,
+      {'validTill': timeInMicrosecondsFromEpoch},
+      showProgressDialog: false,
+      showToast: false,
+    );
+  }
+
+  int _validTillForExpiryOption(int expireAfterInMicroseconds) {
+    if (expireAfterInMicroseconds == 0) {
+      return 0;
+    }
+    return DateTime.now().microsecondsSinceEpoch + expireAfterInMicroseconds;
+  }
+
+  int _selectedExpiryOption(PublicURL url, Iterable<int> expireAfterOptions) {
+    if (!url.hasExpiry) {
+      return 0;
+    }
+
+    final remainingMicroseconds =
+        url.validTill - DateTime.now().microsecondsSinceEpoch;
+    if (remainingMicroseconds <= 0) {
+      return -1;
+    }
+
+    for (final expireAfterOption in expireAfterOptions) {
+      if (expireAfterOption <= 0) {
+        continue;
+      }
+      final difference = (remainingMicroseconds - expireAfterOption).abs();
+      if (difference <= _expiryPresetSelectionTolerance.inMicroseconds) {
+        return expireAfterOption;
+      }
+    }
+
+    return -1;
+  }
+
+  Future<void> _showDeviceLimitSheet(
+    BuildContext context,
+    PublicURL url,
+  ) async {
+    final l10n = context.strings;
+    final currentDeviceLimit = url.deviceLimit;
+    final deviceLimits = [
+      if (!publicLinkDeviceLimits.contains(currentDeviceLimit))
+        currentDeviceLimit,
+      ...publicLinkDeviceLimits,
+    ];
+
+    await showBottomSheetComponent<void>(
+      context: context,
+      builder: (sheetContext) => BottomSheetComponent(
+        title: l10n.linkDeviceLimit,
+        content: MenuGroupComponent(
+          items: [
+            for (final deviceLimit in deviceLimits)
+              MenuComponent(
+                key: ValueKey(deviceLimit),
+                title: deviceLimit == 0 ? l10n.noLimit : "$deviceLimit",
+                trailing: currentDeviceLimit == deviceLimit
+                    ? Icon(
+                        Icons.check,
+                        color: sheetContext.componentColors.primary,
+                      )
+                    : null,
+                showOnlyLoadingState: true,
+                onTap: () async {
+                  await _updateUrlSettings(
+                    context,
+                    {'deviceLimit': deviceLimit},
+                    showProgressDialog: false,
+                    showToast: false,
+                  );
+                  if (sheetContext.mounted) {
+                    Navigator.of(sheetContext).pop();
+                  }
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final result = await CryptoUtil.deriveInteractiveKey(
@@ -284,6 +444,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     BuildContext? context,
     Map<String, dynamic> prop, {
     bool showProgressDialog = true,
+    bool showToast = true,
   }) async {
     final dialog = showProgressDialog && context != null && context.mounted
         ? createProgressDialog(context, context.strings.pleaseWait)
@@ -295,7 +456,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         prop,
       );
       await dialog?.hide();
-      if (context != null && context.mounted) {
+      if (showToast && context != null && context.mounted) {
         showShortToast(context, context.strings.collectionUpdated);
       }
       if (mounted) {
