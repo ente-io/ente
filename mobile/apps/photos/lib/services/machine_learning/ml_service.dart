@@ -69,7 +69,7 @@ class MLService {
   static const _kPredownloadLocalModelsDelay = Duration(seconds: 10);
   static const _kDeniedRunRetryDelay = Duration(seconds: 15);
 
-  bool get _isRunningML =>
+  bool get isRunningML =>
       MlProcessLock.instance.activeOperation == MlOperation.fullRun;
 
   static const _kForceClusteringFaceCount = 8000;
@@ -354,7 +354,7 @@ class MLService {
       );
       return MlRunDisposition.stopped;
     }
-    if (_isRunningML) {
+    if (isRunningML) {
       _logger.info("runAllML called while already running, skipping");
       _scheduleDeniedRunRetry();
       return MlRunDisposition.denied;
