@@ -151,7 +151,12 @@ interface NewCollectionsOptions {
 interface UploadRequestOptions {
     uploadType?: UploadType;
     isDragAndDrop?: boolean;
-    skippedFiles?: PreUploadSkippedFile[];
+}
+
+interface DesktopUploadItems {
+    fileAndPaths: FileAndPath[];
+    zipItems: ZipItem[];
+    preUploadSkippedFiles: PreUploadSkippedFile[];
 }
 
 interface UploadSelection {
@@ -362,31 +367,11 @@ export const Upload: React.FC<UploadProps> = ({
         if (watchFolderView || !uploadLifetime.current.active) return;
         const lifetime = uploadLifetime.current;
         if (electron) {
-            const { fileAndPaths, zipItems, preUploadSkippedFiles } =
-                await desktopFilesAndZipItems(electron, files);
+            const items = await desktopFilesAndZipItems(electron, files);
             if (!lifetime.active) return;
-            await submitUpload(
-                [
-                    ...fileAndPaths.map((item): UploadItemAndPath => [
-                        item,
-                        item.path,
-                    ]),
-                    ...zipItems.map((item): UploadItemAndPath => [
-                        item,
-                        joinPath(dirname(item[0]), item[1]),
-                    ]),
-                ],
-                {
-                    uploadType,
-                    isDragAndDrop,
-                    skippedFiles: preUploadSkippedFiles,
-                },
-            );
+            await submitUpload(items, { uploadType, isDragAndDrop });
         } else {
-            await submitUpload(
-                files.map((file) => [file, pathLikeForWebFile(file)]),
-                { uploadType, isDragAndDrop },
-            );
+            await submitUpload(files, { uploadType, isDragAndDrop });
         }
     };
 
@@ -396,22 +381,27 @@ export const Upload: React.FC<UploadProps> = ({
     }));
 
     async function submitUpload(
-        items: UploadItemAndPath[] | PendingUploads,
-        {
-            uploadType,
-            isDragAndDrop,
-            skippedFiles = [],
-        }: UploadRequestOptions = {},
+        items: File[] | DesktopUploadItems | PendingUploads,
+        { uploadType, isDragAndDrop }: UploadRequestOptions = {},
     ) {
         let pendingUpload: PendingUploads | undefined;
-        let allItemAndPaths: UploadItemAndPath[];
+        let skippedFiles: PreUploadSkippedFile[] = [];
+        const allItemAndPaths: UploadItemAndPath[] = [];
         if (Array.isArray(items)) {
-            allItemAndPaths = items;
+            for (const file of items) {
+                allItemAndPaths.push([file, pathLikeForWebFile(file)]);
+            }
         } else {
-            pendingUpload = items;
-            allItemAndPaths = [];
-            for (const path of items.filePaths) {
-                allItemAndPaths.push([path, path]);
+            skippedFiles = items.preUploadSkippedFiles ?? [];
+            if ("filePaths" in items) {
+                pendingUpload = items;
+                for (const path of items.filePaths) {
+                    allItemAndPaths.push([path, path]);
+                }
+            } else {
+                for (const item of items.fileAndPaths) {
+                    allItemAndPaths.push([item, item.path]);
+                }
             }
             for (const item of items.zipItems) {
                 allItemAndPaths.push([
@@ -429,9 +419,7 @@ export const Upload: React.FC<UploadProps> = ({
             }
             return true;
         });
-        const nextPreUploadSkippedFiles = (
-            pendingUpload?.preUploadSkippedFiles ?? skippedFiles
-        ).concat(hiddenFiles);
+        const nextPreUploadSkippedFiles = skippedFiles.concat(hiddenFiles);
 
         if (prunedItemAndPaths.length == 0) {
             if (
@@ -1264,7 +1252,10 @@ const Inputs: React.FC<InputsProps> = ({
     </>
 );
 
-const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
+const desktopFilesAndZipItems = async (
+    electron: Electron,
+    files: File[],
+): Promise<DesktopUploadItems> => {
     const fileAndPaths: FileAndPath[] = [];
     let zipItems: ZipItem[] = [];
     let preUploadSkippedFiles: PreUploadSkippedFile[] = [];
