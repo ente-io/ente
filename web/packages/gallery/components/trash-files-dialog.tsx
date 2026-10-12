@@ -1,3 +1,5 @@
+/// <reference types="next/image-types/global" />
+
 import { Box } from "@mui/material";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { t } from "i18next";
