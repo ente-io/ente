@@ -173,10 +173,10 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
     final gridRowSpacing = isLandscape ? Spacing.sm : Spacing.md;
     final colors = context.componentColors;
     final sheetColor = widget.backgroundColor ?? colors.fillLight;
-    final miniHeight =
-        media.textScaler.scale(TextStyles.mini.fontSize!) *
-        TextStyles.mini.height!;
-    final rowHeight = math.max(48.0, miniHeight * 2 + Spacing.lg);
+    final labelLineHeight =
+        media.textScaler.scale(TextStyles.body.fontSize!) *
+        TextStyles.body.height!;
+    final rowHeight = math.max(48.0, labelLineHeight * 2 + Spacing.lg);
     final controlsHeight = math.max(
       44.0,
       media.textScaler.scale(TextStyles.body.fontSize!) *
@@ -196,8 +196,8 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
         );
         final minTileWidth =
             64 *
-            media.textScaler.scale(TextStyles.mini.fontSize!) /
-            TextStyles.mini.fontSize!;
+            media.textScaler.scale(TextStyles.body.fontSize!) /
+            TextStyles.body.fontSize!;
         final gridWidth = sheetWidth - Spacing.md * 2;
         final availableColumns =
             isLandscape &&
@@ -212,10 +212,10 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
         final labelWidth =
             (sheetWidth - Spacing.md * 2 - Spacing.xs * (columns - 1)) /
             columns;
-        var labelHeight = miniHeight;
+        var labelHeight = labelLineHeight;
         for (final action in grid) {
           final painter = TextPainter(
-            text: TextSpan(text: action.labelText, style: TextStyles.mini),
+            text: TextSpan(text: action.labelText, style: TextStyles.body),
             textDirection: Directionality.of(context),
             textScaler: media.textScaler,
             maxLines: 2,
@@ -226,7 +226,7 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
         }
         final tileHeight = math.max(
           64.0,
-          IconSizes.small + Spacing.sm * 2 + Spacing.xs * 3 + labelHeight,
+          _SheetAction.iconSize + Spacing.sm * 2 + Spacing.xs * 3 + labelHeight,
         );
         final gridHeight =
             gridRows * tileHeight + (gridRows - 1) * gridRowSpacing;
@@ -293,7 +293,9 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
                     ? const Duration(milliseconds: 1)
                     : _duration,
                 builder: (context, scrollController) {
-                  _actionsController = scrollController;
+                  _actionsController = _minExtent == _maxExtent
+                      ? null
+                      : scrollController;
                   return Column(
                     children: [
                       SizedBox(
@@ -311,7 +313,8 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
                           child: SafeArea(
                             top: false,
                             child: CustomScrollView(
-                              controller: scrollController,
+                              controller: _actionsController,
+                              primary: false,
                               slivers: [
                                 SliverPersistentHeader(
                                   pinned: true,
@@ -486,6 +489,8 @@ class _SheetHandle extends SliverPersistentHeaderDelegate {
 }
 
 class _SheetAction extends StatelessWidget {
+  static const iconSize = 22.0;
+
   const _SheetAction({
     required this.action,
     required this.height,
@@ -500,22 +505,20 @@ class _SheetAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
-    final iconColor = action.onTap == null
+    final foregroundColor = action.onTap == null
         ? colors.textLightest
         : action.isCritical
         ? colors.warning
-        : colors.textLight;
-    final textColor = action.onTap != null && isRow && !action.isCritical
-        ? colors.textBase
-        : iconColor;
+        : colors.textBase;
     final icon = action.hugeIcon != null
         ? HugeIcon(
             icon: action.hugeIcon!,
-            size: IconSizes.small,
-            color: iconColor,
+            size: iconSize,
+            strokeWidth: 1.5 * 24 / iconSize,
+            color: foregroundColor,
           )
         : IconTheme.merge(
-            data: IconThemeData(size: IconSizes.small, color: iconColor),
+            data: IconThemeData(size: iconSize, color: foregroundColor),
             child: action.iconWidget!,
           );
     final label = Text(
@@ -523,7 +526,7 @@ class _SheetAction extends StatelessWidget {
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       textAlign: isRow ? TextAlign.start : TextAlign.center,
-      style: TextStyles.mini.copyWith(color: textColor),
+      style: TextStyles.body.copyWith(color: foregroundColor),
     );
     return Semantics(
       button: true,

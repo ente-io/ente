@@ -81,7 +81,9 @@ void main() {
       );
       controller ??= sheet.controller;
       expect(sheet.controller, same(controller));
-      sheet.controller!.jumpTo(sheet.maxChildSize);
+      if (sheet.controller!.isAttached) {
+        sheet.controller!.jumpTo(sheet.maxChildSize);
+      }
       final scrollable = find.descendant(
         of: find.byType(CustomScrollView),
         matching: find.byType(Scrollable),

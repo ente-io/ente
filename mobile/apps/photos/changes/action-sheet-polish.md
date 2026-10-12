@@ -1,0 +1,1 @@
+- Improved action sheet legibility with consistent icons and text.
