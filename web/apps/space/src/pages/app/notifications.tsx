@@ -43,6 +43,7 @@ import {
     spaceControlBackground,
     spaceControlBackgroundHover,
     spaceOnAccent,
+    spaceSurface,
     spaceSurfaceHover,
     spaceText,
     spaceTextMuted,
@@ -92,6 +93,7 @@ const actorName = (actor: SpaceNotification["actors"][number]) =>
 
 const NotificationRow: React.FC<{
     group: SpaceNotification;
+    isNew: boolean;
     spaceId: string;
     loadPostPreview: (postId: number) => Promise<SpacePostPreview | undefined>;
     onPostSomething: () => void;
@@ -103,6 +105,7 @@ const NotificationRow: React.FC<{
     ) => Promise<void>;
 }> = ({
     group,
+    isNew,
     spaceId,
     loadPostPreview,
     onFriendRequest,
@@ -117,6 +120,7 @@ const NotificationRow: React.FC<{
     const otherCount = group.actorCount - 1;
     const isFriendRequest = group.kind == "friend_request";
     const isPostLike = group.kind == "post_like";
+    const backgroundColor = isNew ? spaceSurface : "transparent";
     const [isRequestPending, setIsRequestPending] = React.useState(false);
     const [requestError, setRequestError] = React.useState<string>();
     const actOnRequest = async (accept: boolean) => {
@@ -162,14 +166,19 @@ const NotificationRow: React.FC<{
                 data-notification-id={group.id}
                 sx={{
                     ...spaceActivityRowSx,
+                    bgcolor: backgroundColor,
+                    borderRadius: 0,
+                    mx: "-16px",
+                    px: "16px",
+                    width: "calc(100% + 32px)",
                     gridTemplateColumns:
                         isFriendRequest || showPostSomething
                             ? "44px minmax(0, 1fr) auto"
                             : "44px minmax(0, 1fr)",
                     "&:has(> [data-space-row-action]:hover), &:has(> [data-space-row-action]:active)":
-                        { bgcolor: "transparent" },
+                        { bgcolor: backgroundColor },
                     ...(isFriendRequest && {
-                        "&:hover, &:active": { bgcolor: "transparent" },
+                        "&:hover, &:active": { bgcolor: backgroundColor },
                     }),
                 }}
             >
@@ -910,6 +919,7 @@ const NotificationsFeed: React.FC<{ spaceId: string; profileLink: string }> = ({
                             <NotificationRow
                                 key={`${group.kind}:${group.postId ?? group.id}`}
                                 group={group}
+                                isNew={newIDs.has(group.id)}
                                 spaceId={spaceId}
                                 loadPostPreview={loadPostPreview}
                                 onFriendRequest={handleFriendRequest}
