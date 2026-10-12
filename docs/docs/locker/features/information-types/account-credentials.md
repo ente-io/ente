@@ -9,10 +9,10 @@ Secrets let you securely store login information for websites and services. Keep
 
 ## What you can store
 
-- **Name**: A name for the account, such as "Gmail" or "Bank Account"
-- **Username**: The username or email you use to sign in
+- **Name**: A recognizable name for the account (e.g., "Gmail", "Bank Account")
+- **Username**: Your login identifier (username or email)
 - **Password**: Your account password
-- **Notes**: Anything else you want to remember about the account
+- **Notes**: Additional information about the account (optional)
 
 ## Creating a secret
 
@@ -27,11 +27,13 @@ Secrets let you securely store login information for websites and services. Keep
 1. Open Ente Locker
 2. Tap the **+** button
 3. Select **Secret**
-4. Give the account a name. Add a username, password or notes if you have them
+4. Fill in the fields:
+    - **Name**: A recognizable name (e.g., "Gmail", "Bank Account")
+    - **Username**: Your username or email for the account
+    - **Password**: Your password
+    - **Notes**: Any additional details (optional)
 5. Select one or more collections
 6. Tap **Save**
-
-You can save a Secret with just a name. Open it and tap the pencil icon to add more details later.
 
 ## Features
 

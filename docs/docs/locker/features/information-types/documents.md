@@ -54,7 +54,7 @@ To retake a page, select it in the review screen and tap the retake icon. Take a
 6. Select one or more collections, or leave them unselected to save to **Uncategorized**
 7. Tap **Save** to upload
 
-Renaming a file here changes its name in Locker. The original file on your device keeps its name. The file type stays the same, so you do not need to add `.pdf` or another ending.
+Renaming a file here changes its name in Locker. The original file on your device keeps its name.
 
 ### Sharing files into Locker on Android
 

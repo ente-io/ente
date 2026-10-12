@@ -31,11 +31,12 @@ Things help you remember where important physical documents are stored. Track th
 1. Open Ente Locker
 2. Tap the **+** button
 3. Select **Thing**
-4. Give the item a name, such as "Passport" or "House Deed". Add where you keep it and any notes you want to remember
+4. Fill in the fields:
+    - **Name**: Document name (e.g., "Passport", "House Deed")
+    - **Location**: Where it's stored (e.g., "Home safe, top drawer")
+    - **Notes**: Any other relevant information (optional)
 5. Select one or more collections
 6. Tap **Save**
-
-You can save a Thing with just a name. Open it and tap the pencil icon to add its location or notes later.
 
 ## Features
 

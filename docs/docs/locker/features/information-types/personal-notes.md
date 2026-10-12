@@ -29,8 +29,8 @@ Notes let you store any text securely with end-to-end encryption. Use them for s
 1. Open Ente Locker
 2. Tap the **+** button
 3. Select **Note**
-4. Enter a title or leave it blank. Locker will choose a title from your note
-5. Write your note
+4. Enter a title for your note
+5. Write your note content in the text field
 6. Select one or more collections
 7. Tap **Save**
 

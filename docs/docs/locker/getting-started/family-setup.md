@@ -116,10 +116,11 @@ To scan paper documents, use the Locker app on Android or iOS.
 
 1. In Locker, tap the camera button on the home screen
 2. Scan the pages, then tap the check-mark button to review them
-3. Crop, rotate or retake any page you want to change. Give the PDF a name you will recognize, such as "John Passport - Expires 2028"
-4. Tap **Save to Ente**
-5. Select the appropriate collection
-6. Tap **Save**
+3. Crop, rotate or retake any page you want to change
+4. Add a descriptive title (e.g., "John Passport - Expires 2028")
+5. Tap **Save to Ente**
+6. Select the appropriate collection
+7. Tap **Save**
 
 If the documents are already on your device, tap **+** and select **File**. Choose the files to upload. See [Document](/locker/features/information-types/documents) for the full steps.
 
