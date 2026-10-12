@@ -8,8 +8,16 @@ import warningRed from "./assets/warning-red.png";
 export const trashFilesDialogAttributes = (
     count: number,
 ): Pick<MiniDialogAttributes, "title" | "message" | "illustration"> => ({
-    title: t("trash_items_title", { count }),
-    message: t("trash_items_message", { count }),
+    title: t("trash_items_title", {
+        count,
+        fallbackLng: false,
+        defaultValue: t("trash_files_title"),
+    }),
+    message: t("trash_items_message", {
+        count,
+        fallbackLng: false,
+        defaultValue: t("trash_files_message"),
+    }),
     illustration: (
         <Box
             component="img"
