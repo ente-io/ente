@@ -3231,6 +3231,7 @@
     }
   },
   "publicLink": "Public link",
+  "publicCollectionLinkAccessDescription": "Anyone with the link can open the collection without an Ente account.",
   "publicLinkAccessDescription": "Anyone with the link can open the album without an Ente account.",
   "publicLinkCollectDescription": "Anyone with this link can add photos to your album.",
   "publicLinkEnabled": "Public link enabled",
