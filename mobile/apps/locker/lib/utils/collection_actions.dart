@@ -132,10 +132,9 @@ class CollectionActions {
 
     if (dialogChoice == null) return;
 
-    ProgressDialog? progressDialog;
+    LockerProgressDialog? progressDialog;
     if (context.mounted) {
-      progressDialog = createProgressDialog(context, l10n.pleaseWait);
-      await progressDialog.show();
+      progressDialog = await showLockerProgressDialog(context, l10n.pleaseWait);
     }
 
     bool isFavoriteCollection = false;
@@ -243,10 +242,12 @@ class CollectionActions {
     final fileCount = await CollectionService.instance.getFileCount(collection);
 
     if (fileCount == 0) {
-      ProgressDialog? progressDialog;
+      LockerProgressDialog? progressDialog;
       if (context.mounted) {
-        progressDialog = createProgressDialog(context, l10n.pleaseWait);
-        await progressDialog.show();
+        progressDialog = await showLockerProgressDialog(
+          context,
+          l10n.pleaseWait,
+        );
       }
 
       try {
@@ -285,10 +286,9 @@ class CollectionActions {
       return;
     }
 
-    ProgressDialog? progressDialog;
+    LockerProgressDialog? progressDialog;
     if (context.mounted) {
-      progressDialog = createProgressDialog(context, l10n.pleaseWait);
-      await progressDialog.show();
+      progressDialog = await showLockerProgressDialog(context, l10n.pleaseWait);
     }
 
     try {
