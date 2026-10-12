@@ -1,10 +1,12 @@
 import { SearchBar, type SearchBarProps } from "@/components/SearchBar";
 import { uploadManager } from "@/services/upload-manager";
-import { Upload01Icon } from "@hugeicons/core-free-icons";
+import {
+    Home01Icon,
+    Settings01Icon,
+    Upload01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import HomeIcon from "@mui/icons-material/HomeOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import SettingsIcon from "@mui/icons-material/SettingsOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import type { ButtonishProps } from "ente-base/components/mui";
@@ -151,7 +153,7 @@ const NormalHeaderContents: React.FC<PhotosNavigationShellProps> = ({
                             borderRadius: "12px",
                         }}
                     >
-                        <HomeIcon sx={{ fontSize: 20 }} />
+                        <HugeiconsIcon icon={Home01Icon} size={20} />
                     </FocusVisibleButton>
                 </Tooltip>
             )}
@@ -194,7 +196,7 @@ const NormalNavigationRail: React.FC<
                     borderRadius: "12px",
                 }}
             >
-                <SettingsIcon sx={{ fontSize: 20 }} />
+                <HugeiconsIcon icon={Settings01Icon} size={20} />
             </FocusVisibleButton>
         </Tooltip>
     </>
