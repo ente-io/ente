@@ -12,109 +12,88 @@ const post = (postId: number, timestampMs: number): SpacePost => ({
     viewerLiked: false,
 });
 
-test("the first visit puts all existing posts in the grid, including later pages", () => {
+test("existing posts and later pages remain in one continuous feed", () => {
     const posts = [post(3, 300), post(2, 200), post(1, 100)];
-    expect(homeFeedEntries(posts, [], undefined)).toEqual({
-        latest: [],
-        history: posts,
-    });
-    expect(homeFeedEntries(posts, [], 400)).toEqual({
-        latest: [],
-        history: posts,
-    });
+    const firstPage = homeFeedEntries(posts.slice(0, 2), []);
+    const nextPage = homeFeedEntries(posts, []);
+    expect(nextPage.slice(0, 2)).toEqual(firstPage);
+    expect(nextPage.map((entry) => entry.item)).toEqual(posts);
+    expect(homeFeedEntries(posts, [])).toEqual(nextPage);
 });
 
-test("new posts stay full size for the visit and join history on the next visit", () => {
-    const newest = post(3, 300);
-    const existing = post(2, 200);
-    const older = post(1, 100);
-    const firstPage = homeFeedEntries([newest, existing], [], 200);
-    expect(firstPage.latest.map((entry) => entry.identity)).toEqual(["post:3"]);
-    expect(firstPage.history).toEqual([existing]);
-    const nextPage = homeFeedEntries([newest, existing, older], [], 200);
-    expect(nextPage.latest).toEqual(firstPage.latest);
-    expect(nextPage.history).toEqual([existing, older]);
-    expect(homeFeedEntries([newest, existing, older], [], 400)).toEqual({
-        latest: [],
-        history: [newest, existing, older],
-    });
-});
-
-test("upload completion does not duplicate a post or move it into the grid", () => {
-    const uploaded = post(3, 300);
-    const existing = post(2, 200);
-    const local: LocalSpaceFeedPost = {
-        id: "upload",
-        post: uploaded,
-        status: "ready",
-    };
-    const uploading = homeFeedEntries([existing], [local], 200);
-    const refreshed = homeFeedEntries([uploaded, existing], [local], 200);
-    expect(refreshed).toEqual(uploading);
-    expect(refreshed.latest.map((entry) => entry.identity)).toEqual(["post:3"]);
-    expect(refreshed.history).toEqual([existing]);
-    const resolved = homeFeedEntries([uploaded, existing], [], 200);
-    expect(resolved.latest.map((entry) => entry.identity)).toEqual(["post:3"]);
-    expect(resolved.history).toEqual([existing]);
-    expect(homeFeedEntries([uploaded, existing], [local], 400)).toEqual({
-        latest: [],
-        history: [uploaded, existing],
-    });
-});
-
-test("pending and failed uploads remain cards even without a previous visit", () => {
-    const pending: LocalSpaceFeedPost = {
-        caption: "Uploading",
-        frameAspectRatio: 1,
-        friendID: "self",
-        id: "upload",
-        imageUrl: "blob:preview",
-        name: "Me",
-        photoCount: 1,
-        spaceId: "self",
-        status: "pending",
-        timestampMs: 300,
-    };
-    for (const status of ["pending", "failed"] as const) {
-        const result = homeFeedEntries([], [{ ...pending, status }], undefined);
-        expect(result.latest.map((entry) => entry.identity)).toEqual([
-            "local:upload",
+test.each(["posted", "ready"] as const)(
+    "%s uploads are not duplicated when the server returns the post",
+    (status) => {
+        const uploaded = post(3, 300);
+        const existing = post(2, 200);
+        const local: LocalSpaceFeedPost = {
+            id: "upload",
+            post: uploaded,
+            status,
+        };
+        const uploading = homeFeedEntries([existing], [local]);
+        const refreshed = homeFeedEntries([uploaded, existing], [local]);
+        expect(refreshed).toEqual(uploading);
+        expect(refreshed.map((entry) => entry.identity)).toEqual([
+            "post:3",
+            "post:2",
         ]);
-        expect(result.history).toEqual([]);
-    }
-});
+        const resolved = homeFeedEntries([uploaded, existing], []);
+        expect(resolved.map((entry) => entry.identity)).toEqual([
+            "post:3",
+            "post:2",
+        ]);
+    },
+);
 
-test("a post published in this session stays latest after the server replaces the local upload", () => {
-    const uploaded = { ...post(3, 200), spaceId: "self", friendID: "self" };
+test.each(["pending", "failed"] as const)(
+    "%s uploads remain before fetched posts and keep their identity when confirmed",
+    (status) => {
+        const pending = {
+            caption: "Uploading",
+            frameAspectRatio: 1,
+            friendID: "self",
+            id: "upload",
+            imageUrl: "blob:preview",
+            name: "Me",
+            photoCount: 1,
+            spaceId: "self",
+            status,
+            timestampMs: 300,
+        } satisfies LocalSpaceFeedPost;
+        const existing = post(2, 200);
+        const entries = homeFeedEntries([existing], [pending]);
+        expect(entries.map((entry) => entry.identity)).toEqual([
+            "local:upload",
+            "post:2",
+        ]);
+        const confirmed = homeFeedEntries(
+            [post(3, 300), existing],
+            [{ ...pending, postId: 3 }],
+        );
+        expect(confirmed.map((entry) => entry.identity)).toEqual([
+            "post:3",
+            "post:2",
+        ]);
+        expect(confirmed[0]?.renderKey).toBe(entries[0]?.renderKey);
+    },
+);
+
+test("own posts stay in the same feed after the local publication is removed", () => {
+    const uploaded = { ...post(3, 300), spaceId: "self", friendID: "self" };
+    const existing = post(2, 200);
     const local: LocalSpaceFeedPost = {
         id: "upload",
         post: uploaded,
         status: "ready",
     };
-    const latestPostIDs = new Set([uploaded.postId]);
-    const localEntries = homeFeedEntries(
-        [uploaded],
-        [local],
-        300,
-        latestPostIDs,
-        "self",
+    const localEntries = homeFeedEntries([uploaded, existing], [local]);
+    const remoteEntries = homeFeedEntries([uploaded, existing], []);
+    expect(remoteEntries.map((entry) => entry.identity)).toEqual(
+        localEntries.map((entry) => entry.identity),
     );
-    const remoteEntries = homeFeedEntries(
-        [uploaded],
-        [],
-        300,
-        latestPostIDs,
-        "self",
-    );
-    expect(localEntries.latest.map((entry) => entry.identity)).toEqual([
-        "post:3",
+    expect(remoteEntries.map((entry) => entry.item)).toEqual([
+        uploaded,
+        existing,
     ]);
-    expect(remoteEntries.latest.map((entry) => entry.identity)).toEqual([
-        "post:3",
-    ]);
-    expect(remoteEntries.history).toEqual([]);
-    expect(homeFeedEntries([uploaded], [], 100, new Set(), "self")).toEqual({
-        latest: [],
-        history: [uploaded],
-    });
 });
