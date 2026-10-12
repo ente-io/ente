@@ -4,6 +4,7 @@ import {
     SpacePostPhotosBadge,
     SpacePostVideoBadge,
 } from "components/PostPhotosBadge";
+import { viewerOriginKey } from "components/viewer-transition";
 import log from "ente-base/log";
 import { useDecodedImage } from "hooks/use-decoded-image";
 import React from "react";
@@ -50,6 +51,7 @@ interface SpacePostTileProps {
     onOpen: (imageUrl: string) => void;
     onOpenProfile?: () => void;
     onRememberDimensions?: (itemID: string, image: HTMLImageElement) => void;
+    photoIndex?: number;
 }
 
 export const SpacePostTile: React.FC<SpacePostTileProps> = ({
@@ -68,21 +70,25 @@ export const SpacePostTile: React.FC<SpacePostTileProps> = ({
     onOpen,
     onOpenProfile,
     onRememberDimensions,
+    photoIndex = 0,
 }) => {
     const [shouldLoad, setShouldLoad] = React.useState(Boolean(imageUrl));
     const [readyImageUrl, setReadyImageUrl] = React.useState<string>();
-    const [imageDecodeFailed, setImageDecodeFailed] = React.useState(false);
+    const [failedImageUrl, setFailedImageUrl] = React.useState<string>();
     const decodedAvatar = useDecodedImage(
         showAvatar ? item.avatarUrl : undefined,
         true,
     );
     const tileRef = React.useRef<HTMLButtonElement | null>(null);
+    const shownPhoto = item.photos?.[photoIndex];
+    const thumbHash = photoIndex > 0 ? shownPhoto?.thumbHash : item.thumbHash;
     const thumbHashDataURL = React.useMemo(
-        () => thumbHashDataURLFromBase64(item.thumbHash),
-        [item.thumbHash],
+        () => thumbHashDataURLFromBase64(thumbHash),
+        [thumbHash],
     );
     const isCurrentImageReady = Boolean(imageUrl && readyImageUrl == imageUrl);
-    const isUnavailable = isPostUnavailable || imageDecodeFailed;
+    const isUnavailable =
+        isPostUnavailable || Boolean(imageUrl && failedImageUrl == imageUrl);
     const photoCount = item.photos?.length ?? 1;
 
     React.useEffect(() => {
@@ -150,6 +156,10 @@ export const SpacePostTile: React.FC<SpacePostTileProps> = ({
                           }`
                 }
                 disabled={!imageUrl || isUnavailable}
+                data-space-viewer-origin={viewerOriginKey(
+                    item.spaceId,
+                    item.postId,
+                )}
                 onClick={() => {
                     if (imageUrl && !isUnavailable) onOpen(imageUrl);
                 }}
@@ -209,16 +219,17 @@ export const SpacePostTile: React.FC<SpacePostTileProps> = ({
                         alt={`${displayName} post ${index + 1}`}
                         onLoad={(event) => {
                             setReadyImageUrl(imageUrl);
-                            onRememberDimensions?.(
-                                item.id,
-                                event.currentTarget,
-                            );
+                            if (photoIndex == 0)
+                                onRememberDimensions?.(
+                                    item.id,
+                                    event.currentTarget,
+                                );
                         }}
                         onError={() => {
                             log.warn(
                                 `Post ${item.postId} is unavailable because the browser could not decode its image`,
                             );
-                            setImageDecodeFailed(true);
+                            setFailedImageUrl(imageUrl);
                             onImageDecodeError();
                         }}
                         src={imageUrl}
@@ -252,7 +263,9 @@ export const SpacePostTile: React.FC<SpacePostTileProps> = ({
                             subtle={subtlePhotosBadge}
                         />
                         <SpacePostVideoBadge
-                            durationMs={item.photos?.[0]?.video?.durationMs}
+                            durationMs={
+                                item.photos?.[photoIndex]?.video?.durationMs
+                            }
                             size={18}
                         />
                     </>
@@ -279,6 +292,7 @@ export const SpacePostTile: React.FC<SpacePostTileProps> = ({
                     component="button"
                     type="button"
                     aria-label={`Open ${displayName}'s profile`}
+                    data-space-viewer-avatar
                     disabled={!onOpenProfile}
                     onClick={onOpenProfile}
                     sx={{

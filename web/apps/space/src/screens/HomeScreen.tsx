@@ -2313,11 +2313,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                     };
                                 })}
                                 renderTile={(item, index) => {
-                                    const photo = {
-                                        ...spacePostPhotos(item)[0]!,
+                                    const postPhotos = spacePostPhotos(item);
+                                    const photoAt = (index: number) => ({
+                                        ...postPhotos[index]!,
                                         postId: item.postId,
                                         spaceId: item.spaceId,
-                                    };
+                                    });
+                                    const remembered = Math.min(
+                                        feedPhotoIndices[item.postId] ?? 0,
+                                        postPhotos.length - 1,
+                                    );
+                                    const photoIndex =
+                                        remembered > 0 &&
+                                        unavailableFeedPostsByKey[
+                                            feedPostImageCacheKey(
+                                                photoAt(remembered),
+                                            )
+                                        ]
+                                            ? 0
+                                            : remembered;
+                                    const photo = photoAt(photoIndex);
                                     const imageUrl =
                                         loadedFeedImageURLFor(photo);
                                     const avatarUrl =
@@ -2335,6 +2350,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                         <SpacePostTile
                                             key={item.id}
                                             item={{ ...item, avatarUrl }}
+                                            photoIndex={photoIndex}
                                             displayName={item.name}
                                             showAvatar
                                             subtlePhotosBadge
@@ -2384,14 +2400,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                                 const post = {
                                                     ...item,
                                                     avatarUrl,
-                                                    imageUrl,
+                                                    imageUrl:
+                                                        photoIndex == 0
+                                                            ? imageUrl
+                                                            : item.imageUrl,
                                                 };
-                                                openFeedPhoto(
-                                                    post,
-                                                    viewerPhotosFromPost(
+                                                openFeedPhoto(post, {
+                                                    ...viewerPhotosFromPost(
                                                         post,
-                                                    )[0]!,
-                                                );
+                                                    )[photoIndex]!,
+                                                    imageUrl,
+                                                });
                                             }}
                                         />
                                     );

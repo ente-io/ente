@@ -23,10 +23,16 @@ import { SpaceBottomSheetTransition } from "components/BottomSheetTransition";
 import { SpaceCaptionText } from "components/CaptionText";
 import { ConfirmationActionSheet } from "components/ConfirmationActionSheet";
 import { spacePostLikePopDurationMs } from "components/post-like-animation";
-import { SpacePostPhotosDots } from "components/PostPhotosDots";
+import { photoDotStep, SpacePostPhotosDots } from "components/PostPhotosDots";
 import { SpacePostReplyControls } from "components/PostReplyControls";
 import { createSpaceVideoContent } from "components/PostVideoContent";
 import { SpaceVideoError } from "components/VideoError";
+import {
+    findViewerOrigin,
+    playViewerClose,
+    playViewerOpen,
+    viewerOriginKey,
+} from "components/viewer-transition";
 import log from "ente-base/log";
 import type PhotoSwipe from "photoswipe";
 import React from "react";
@@ -48,6 +54,12 @@ import {
 import { spaceTouchTargetSize } from "styles/touch-targets";
 import { firstNameFrom, formatSpaceDate } from "utils/display";
 import { clampSpaceMessageText } from "utils/message-limits";
+import {
+    shownPhotoState,
+    viewerBackgroundOpacity,
+    type ViewerPhotoState,
+    type ViewerRect,
+} from "utils/viewer-geometry";
 
 const green = "#08C225";
 const textBase = spaceText;
@@ -181,6 +193,89 @@ interface SpaceFileViewerProps {
     focusReplyOnOpen?: boolean;
     postActionMode?: SpaceViewerPostActionMode;
 }
+
+const setViewerBackground = (root: HTMLElement, opacity: number) =>
+    root.style.setProperty("--space-viewer-bg-opacity", String(opacity));
+
+const viewerPadding = (hasDraftPhotoControls: boolean) => {
+    const isDesktop = window.innerWidth >= viewerDesktopMinWidth;
+    return {
+        bottom: hasDraftPhotoControls
+            ? 176
+            : isDesktop
+              ? 0
+              : viewerBottomPadding,
+        left: 0,
+        right: 0,
+        top: isDesktop ? 0 : viewerHeaderHeight,
+    };
+};
+
+// index is the photo whose dots are shown, position the gallery index as a float.
+const paintStretchingDot = (
+    root: HTMLElement,
+    photos: SpaceViewerPhoto[],
+    index: number,
+    position: number,
+) => {
+    const dot = root.querySelector<HTMLElement>(
+        "[data-space-photo-dots-indicator]",
+    );
+    const photo = photos[index];
+    if (!dot || !photo) return;
+    const count = photo.postPhotoCount ?? 1;
+    const neighbour = photos[position > index ? index + 1 : index - 1];
+    const offset = neighbour?.postId == photo.postId ? position - index : 0;
+    const p = Math.min(
+        count - 1,
+        Math.max(0, (photo.postPhotoIndex ?? 0) + offset),
+    );
+    const from = Math.min(Math.floor(p), count - 2);
+    const head =
+        (from + Math.min(1, Math.max(0, (p - from) * 2))) * photoDotStep;
+    const tail =
+        (from + Math.min(1, Math.max(0, (p - from) * 2 - 1))) * photoDotStep;
+    dot.style.transform = `translate(${tail - 0.5}px, -50%)`;
+    dot.style.width = `${head - tail + 6}px`;
+};
+
+interface ViewerMotion {
+    closing: boolean;
+    landed: boolean;
+    flight?: ReturnType<typeof playViewerOpen>;
+    reveal?: () => void;
+    stopClose?: () => void;
+}
+
+const endOpenFlight = (motion: ViewerMotion, root: HTMLElement) => {
+    motion.flight?.release();
+    motion.flight = undefined;
+    delete root.dataset.spaceViewerFlying;
+    setViewerBackground(root, 1);
+};
+
+// The flying photo stays until PhotoSwipe shows its own, which Safari only does
+// once the image has decoded.
+const handOverOpenFlight = (
+    motion: ViewerMotion,
+    root: HTMLElement,
+    pswp: PhotoSwipe | undefined,
+    attempt = 0,
+) => {
+    if (!motion.flight || !motion.landed || !pswp) return;
+    const content = pswp.currSlide?.content;
+    const isShown =
+        !content?.element ||
+        content.isError() ||
+        (content.element.isConnected && !content.isDecoding);
+    if (!isShown && attempt < 120) {
+        requestAnimationFrame(() =>
+            handOverOpenFlight(motion, root, pswp, attempt + 1),
+        );
+        return;
+    }
+    endOpenFlight(motion, root);
+};
 
 const viewerTouchPoint = (event: Event) => {
     if ("changedTouches" in event) {
@@ -319,7 +414,11 @@ const SpaceViewerPhotoOverlay: React.FC<{
                 zIndex: 2,
             }}
         >
-            <SpacePostPhotosDots index={photoIndex} count={photoCount} />
+            <SpacePostPhotosDots
+                index={photoIndex}
+                count={photoCount}
+                stretches
+            />
             {caption && (
                 <Box
                     component={isCaptionTruncated ? "button" : "div"}
@@ -459,6 +558,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     const initialPhotoIndexRef = React.useRef(activePhotoIndex);
     const fallbackPhotoRef = React.useRef(activePhoto);
     const pswpRef = React.useRef<PhotoSwipe | undefined>(undefined);
+    const motionRef = React.useRef<ViewerMotion>({
+        closing: false,
+        landed: false,
+    });
     const isSyncingPhotosRef = React.useRef(false);
     const videoContentsRef = React.useRef(
         new Map<object, ReturnType<typeof createSpaceVideoContent>>(),
@@ -478,6 +581,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         activePhoto.viewerLiked ?? false,
     );
     const [photoLikePopID, setPhotoLikePopID] = React.useState(0);
+    const [photoLikeToggleID, setPhotoLikeToggleID] = React.useState(0);
     const [caption, setCaption] = React.useState(activePhoto.caption ?? "");
     const [captionEditValue, setCaptionEditValue] = React.useState(
         activePhoto.caption ?? "",
@@ -606,6 +710,102 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         return nextSize;
     }, []);
 
+    const viewerPhotoRect = React.useCallback(
+        (width: number, height: number): ViewerRect => {
+            const viewport = viewerViewportSize();
+            const { top, bottom } = viewerPadding(
+                hasDraftPhotoControlsRef.current,
+            );
+            const areaHeight = viewport.y - top - bottom;
+            const scale = Math.min(1, viewport.x / width, areaHeight / height);
+            const w = width * scale;
+            const h = height * scale;
+            return {
+                x: (viewport.x - w) / 2,
+                y: top + (areaHeight - h) / 2,
+                w,
+                h,
+            };
+        },
+        [viewerViewportSize],
+    );
+
+    const requestCloseRef = React.useRef<
+        (throwVelocity?: { x: number; y: number }) => void
+    >(() => undefined);
+    requestCloseRef.current = (throwVelocity = { x: 0, y: 0 }) => {
+        const motion = motionRef.current;
+        if (motion.closing) return;
+        const root = viewerRootRef.current;
+        const pswp = pswpRef.current;
+        const item =
+            viewerPhotosRef.current[pswp?.currIndex ?? activePhotoIndex];
+        const element = pswp?.currSlide?.content.element;
+        let from: ViewerPhotoState | undefined = motion.flight?.current();
+        let src = from ? item?.imageUrl : undefined;
+        const rect = element?.getBoundingClientRect();
+        if (
+            !from &&
+            rect &&
+            rect.width > 0 &&
+            rect.height > 0 &&
+            element instanceof HTMLImageElement &&
+            element.complete &&
+            element.naturalWidth > 0
+        ) {
+            const scale = Number(pswp?.currSlide?.container.style.scale) || 1;
+            from = shownPhotoState(
+                { x: rect.left, y: rect.top, w: rect.width, h: rect.height },
+                { x: 0, y: 0, w: window.innerWidth, h: window.innerHeight },
+                (parseFloat(element.style.borderRadius) || 0) * scale,
+            );
+            src = element.currentSrc || element.src;
+        }
+        const origin =
+            item && !isDraftPost && !item.video
+                ? findViewerOrigin(viewerOriginKey(item.spaceId, item.postId))
+                : null;
+        const background = root?.style.getPropertyValue(
+            "--space-viewer-bg-opacity",
+        );
+        const startBackground = background ? Number(background) : 1;
+        motion.flight?.stop();
+        motion.flight = undefined;
+        motion.reveal?.();
+        motion.reveal = undefined;
+        if (root) delete root.dataset.spaceViewerFlying;
+        const stop =
+            root && item && origin && from && src
+                ? playViewerClose(
+                      root,
+                      {
+                          origin,
+                          src,
+                          photo: {
+                              width: item.width ?? defaultPhotoWidth,
+                              height: item.height ?? defaultPhotoHeight,
+                          },
+                      },
+                      from,
+                      throwVelocity,
+                      (t) =>
+                          setViewerBackground(
+                              root,
+                              startBackground * viewerBackgroundOpacity(t),
+                          ),
+                      () => onCloseRef.current(),
+                  )
+                : undefined;
+        if (!stop || !root) {
+            onCloseRef.current();
+            return;
+        }
+        motion.closing = true;
+        motion.stopClose = stop;
+        root.dataset.spaceViewerFlying = "true";
+        root.dataset.spaceViewerLeaving = "true";
+    };
+
     const requestAddFriendForPostAction = (intent: SpaceInviteIntent) => {
         if (!onAddFriendForPostAction) return;
         setAddFriendIntent(intent);
@@ -619,6 +819,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         }
 
         const nextLiked = !isPhotoLiked;
+        setPhotoLikeToggleID((id) => id + 1);
         if (!activePhoto.postId || !onSetPostLiked) {
             setIsPhotoLiked(nextLiked);
             if (nextLiked) setPhotoLikePopID((id) => id + 1);
@@ -659,7 +860,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             cancelCaptionEdit();
             return;
         }
-        onClose();
+        requestCloseRef.current();
     };
 
     const updateCaption = () => {
@@ -1126,6 +1327,47 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             root.removeEventListener("pointerdown", blockPhotoGesture, true);
     }, [isCaptionEditing]);
 
+    React.useLayoutEffect(() => {
+        const motion = motionRef.current;
+        const root = viewerRootRef.current;
+        const stopMotion = () => {
+            motion.flight?.stop();
+            motion.flight = undefined;
+            motion.stopClose?.();
+            motion.stopClose = undefined;
+            motion.reveal?.();
+            motion.reveal = undefined;
+            if (root) delete root.dataset.spaceViewerFlying;
+        };
+        const item = fallbackPhotoRef.current;
+        if (!root || isDraftPost || item.video || !item.imageUrl)
+            return stopMotion;
+        const origin = findViewerOrigin(
+            viewerOriginKey(item.spaceId, item.postId),
+        );
+        if (!origin) return stopMotion;
+
+        const width = item.width ?? defaultPhotoWidth;
+        const height = item.height ?? defaultPhotoHeight;
+        const flight = playViewerOpen(
+            root,
+            { origin, src: item.imageUrl, photo: { width, height } },
+            viewerPhotoRect(width, height),
+            (t) => setViewerBackground(root, viewerBackgroundOpacity(t)),
+            () => {
+                motion.landed = true;
+                handOverOpenFlight(motion, root, pswpRef.current);
+            },
+        );
+        if (flight) {
+            motion.flight = flight;
+            motion.landed = false;
+            motion.reveal = flight.reveal;
+            root.dataset.spaceViewerFlying = "true";
+        }
+        return stopMotion;
+    }, [isDraftPost, viewerPhotoRect]);
+
     React.useEffect(() => {
         const root = viewerRootRef.current;
         if (!root) return;
@@ -1136,7 +1378,12 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         let swipeStart:
             { x: number; y: number; photoIndex: number } | undefined;
 
-        void import("photoswipe").then(({ default: PhotoSwipeClass }) => {
+        const loadPhotoSwipe = import("photoswipe");
+        void loadPhotoSwipe.catch((error: unknown) => {
+            log.error("Failed to load the photo viewer", error);
+            endOpenFlight(motionRef.current, root);
+        });
+        void loadPhotoSwipe.then(({ default: PhotoSwipeClass }) => {
             if (disposed || !viewerRootRef.current) return;
 
             pswp = new PhotoSwipeClass({
@@ -1159,23 +1406,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 index: initialPhotoIndexRef.current,
                 loop: false,
                 mainClass: "pswp-space-viewer",
-                paddingFn: () => ({
-                    bottom: hasDraftPhotoControlsRef.current
-                        ? 176
-                        : window.innerWidth >= viewerDesktopMinWidth
-                          ? 0
-                          : viewerBottomPadding,
-                    left: 0,
-                    right: 0,
-                    top:
-                        window.innerWidth >= viewerDesktopMinWidth
-                            ? 0
-                            : viewerHeaderHeight,
-                }),
+                paddingFn: () =>
+                    viewerPadding(hasDraftPhotoControlsRef.current),
                 pinchToClose: false,
                 returnFocus: false,
                 showHideAnimationType: "none",
-                spacing: 0,
+                // A 16px gap between photos on a phone.
+                spacing: 0.04,
                 tapAction: false,
                 trapFocus: false,
                 wheelToZoom: true,
@@ -1246,18 +1483,87 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 };
             });
             pswp.on("close", () => {
-                if (!closedByReact) onCloseRef.current();
+                if (!closedByReact)
+                    requestCloseRef.current(pswp!.gestures.velocity);
             });
             pswp.on("verticalDrag", (event) => {
                 if (isDismissBlockedRef.current) event.preventDefault();
             });
+            const reduceMotion = window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+            ).matches;
+            // The drag pose and the parallax use the separate `scale` and
+            // `translate` properties, which leave PhotoSwipe's transform alone.
+            let posed:
+                { container: HTMLElement; element?: HTMLElement } | undefined;
+            const clearDismissPose = () => {
+                if (!posed) return;
+                posed.container.style.scale = "";
+                posed.container.style.translate = "";
+                if (posed.element) posed.element.style.borderRadius = "";
+                posed = undefined;
+            };
+            const applyDismissPose = () => {
+                const slide = pswp!.currSlide;
+                if (!slide || reduceMotion) return;
+                if (posed?.container != slide.container) clearDismissPose();
+                const isAtFit =
+                    slide.currZoomLevel <= slide.zoomLevels.fit + 0.001;
+                const dy = isAtFit ? slide.pan.y - slide.bounds.center.y : 0;
+                const element = slide.content.element;
+                if (Math.abs(dy) < 0.5) {
+                    clearDismissPose();
+                    return;
+                }
+                posed = { container: slide.container, element };
+                const scale =
+                    1 -
+                    0.32 *
+                        Math.min(
+                            1,
+                            Math.abs(dy) / (pswp!.viewportSize.y * 0.55),
+                        );
+                const { x, y } = pswp!.gestures.startP1;
+                slide.container.style.scale = String(scale);
+                slide.container.style.translate = `${x * (1 - scale)}px ${y * (1 - scale)}px`;
+                if (element)
+                    element.style.borderRadius = `${(24 * Math.min(1, Math.abs(dy) / 140)) / scale}px`;
+            };
             pswp.on("zoomPanUpdate", () => {
+                applyDismissPose();
+                if (motionRef.current.flight || motionRef.current.closing)
+                    return;
                 root.style.setProperty(
                     "--space-viewer-bg-opacity",
                     String(pswp!.bgOpacity),
                 );
             });
+            pswp.on("moveMainScroll", () => {
+                if (reduceMotion) return;
+                const { currIndex, mainScroll, potentialIndex, viewportSize } =
+                    pswp!;
+                const drift =
+                    (mainScroll.x - mainScroll.getCurrSlideX()) /
+                    mainScroll.slideWidth;
+                for (const { slide } of mainScroll.itemHolders) {
+                    if (!slide) continue;
+                    const offset = slide.index - potentialIndex + drift;
+                    const isAtRest =
+                        slide.currZoomLevel <= slide.zoomLevels.initial + 0.001;
+                    slide.container.style.translate =
+                        isAtRest && Math.abs(offset) > 0.001
+                            ? `${-offset * viewportSize.x * 0.4}px 0`
+                            : "";
+                }
+                paintStretchingDot(
+                    root,
+                    viewerPhotosRef.current,
+                    currIndex,
+                    potentialIndex - drift,
+                );
+            });
             pswp.on("change", () => {
+                clearDismissPose();
                 const nextIndex = pswp?.currIndex;
                 if (nextIndex != undefined) {
                     setLocalPhotoIndex(nextIndex);
@@ -1268,6 +1574,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             pswp.on("keydown", (event) => {
                 if (
                     isSwipeBlockedRef.current ||
+                    motionRef.current.flight ||
+                    motionRef.current.closing ||
                     event.originalEvent.target instanceof HTMLTextAreaElement
                 ) {
                     event.preventDefault();
@@ -1319,10 +1627,20 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                             viewerPhotosRef.current.length - 1) ||
                         (dx > 0 && start.photoIndex == 0))
                 ) {
-                    onCloseRef.current();
+                    requestCloseRef.current();
                 }
             });
             pswp.init();
+            const shown =
+                pswp.currSlide?.content.element?.getBoundingClientRect();
+            if (shown && shown.width > 0)
+                motionRef.current.flight?.retarget({
+                    x: shown.left,
+                    y: shown.top,
+                    w: shown.width,
+                    h: shown.height,
+                });
+            handOverOpenFlight(motionRef.current, root, pswp);
         });
 
         return () => {
@@ -1360,7 +1678,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 cancelCaptionEdit();
                 return;
             }
-            onCloseRef.current();
+            requestCloseRef.current();
         };
 
         window.addEventListener("keydown", closeOnEscape);
@@ -1421,7 +1739,18 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                     fontSize: 14,
                 },
                 "& [data-space-viewer-chrome='true'], & [data-space-viewer-bottom='true']":
-                    { opacity: "var(--space-viewer-bg-opacity, 1)" },
+                    {
+                        opacity:
+                            "calc((var(--space-viewer-bg-opacity, 1) - 0.5) * 2)",
+                    },
+                "&[data-space-viewer-leaving='true'] [data-space-viewer-chrome='true'], &[data-space-viewer-leaving='true'] [data-space-viewer-bottom='true']":
+                    { opacity: 0, transition: "opacity 140ms ease" },
+                // PhotoSwipe sets an inline opacity, so hide it with visibility.
+                "&[data-space-viewer-flying='true'] .pswp": {
+                    visibility: "hidden !important",
+                },
+                "&[data-space-viewer-flying='true'] :is([data-space-viewer-chrome='true'], [data-space-viewer-bottom='true'], [data-space-viewer-chrome='true'] *, [data-space-viewer-bottom='true'] *)":
+                    { pointerEvents: "none !important" },
                 "@media (prefers-reduced-motion: reduce)": {
                     transition: "none",
                 },
@@ -2325,6 +2654,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                 isReplyMode={isReplyMode}
                                 liked={isPhotoLiked}
                                 likePopID={photoLikePopID}
+                                likeToggleID={photoLikeToggleID}
                                 onLike={handlePhotoLikeClick}
                                 onSendReply={sendReply}
                                 replyActionPhase={replyActionPhase}
