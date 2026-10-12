@@ -17,6 +17,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
+import 'package:locker/ui/components/locker_progress_dialog.dart';
 import "package:locker/ui/components/subscription_required_sheet.dart";
 import "package:locker/ui/components/text_input_sheet.dart";
 import "package:locker/utils/bottom_sheet_illustration.dart";
@@ -85,8 +86,10 @@ class CollectionActions {
       onSubmit: (String newName) async {
         if (newName.isEmpty || newName == collection.name) return;
 
-        final progressDialog = createProgressDialog(context, l10n.pleaseWait);
-        await progressDialog.show();
+        final progressDialog = await showLockerProgressDialog(
+          context,
+          l10n.pleaseWait,
+        );
 
         try {
           await CollectionService.instance.rename(collection, newName);
