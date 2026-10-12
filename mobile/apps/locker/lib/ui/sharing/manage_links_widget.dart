@@ -281,7 +281,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     );
     var selectionPending = false;
 
-    await showBottomSheetComponent<void>(
+    final pickCustomExpiry = await showBottomSheetComponent<bool>(
       context: context,
       builder: (sheetContext) => BottomSheetComponent(
         title: l10n.linkExpiry,
@@ -305,8 +305,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   if (selectionPending) return;
                   selectionPending = true;
                   if (expiryOption.expireAfterInMicroseconds < 0) {
-                    Navigator.of(sheetContext).pop();
-                    await _pickCustomExpiry(context);
+                    Navigator.of(sheetContext).pop(true);
                     return;
                   }
 
@@ -324,7 +323,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     selectionPending = false;
                     rethrow;
                   }
-                  if (sheetContext.mounted) {
+                  if (sheetContext.mounted &&
+                      ModalRoute.of(sheetContext)!.isCurrent) {
                     Navigator.of(sheetContext).pop();
                   }
                 },
@@ -333,6 +333,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         ),
       ),
     );
+    if (pickCustomExpiry == true && context.mounted) {
+      await _pickCustomExpiry(context);
+    }
   }
 
   Future<void> _pickCustomExpiry(BuildContext context) async {
@@ -431,7 +434,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     selectionPending = false;
                     rethrow;
                   }
-                  if (sheetContext.mounted) {
+                  if (sheetContext.mounted &&
+                      ModalRoute.of(sheetContext)!.isCurrent) {
                     Navigator.of(sheetContext).pop();
                   }
                 },
