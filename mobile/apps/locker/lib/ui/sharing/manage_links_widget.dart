@@ -285,7 +285,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       context: context,
       builder: (sheetContext) => BottomSheetComponent(
         title: l10n.linkExpiry,
-        isScrollable: true,
         content: MenuGroupComponent(
           items: [
             for (final expiryOption in expiryOptions)
@@ -405,7 +404,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       context: context,
       builder: (sheetContext) => BottomSheetComponent(
         title: l10n.linkDeviceLimit,
-        isScrollable: true,
         content: MenuGroupComponent(
           items: [
             for (final deviceLimit in deviceLimits)
