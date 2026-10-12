@@ -5,17 +5,19 @@ export interface ViewerRect {
     h: number;
 }
 
+export type ViewerCornerRadii = [number, number, number, number];
+
 // image is where the whole photo is, visible is the part of it that shows.
 export interface ViewerPhotoState {
     image: ViewerRect;
     visible: ViewerRect;
-    radius: number;
+    radii: ViewerCornerRadii;
 }
 
 export const tilePhotoState = (
     tile: ViewerRect,
     photo: { width: number; height: number },
-    radius: number,
+    radii: ViewerCornerRadii,
 ): ViewerPhotoState => {
     const scale = Math.max(tile.w / photo.width, tile.h / photo.height);
     const w = photo.width * scale;
@@ -28,23 +30,23 @@ export const tilePhotoState = (
             h,
         },
         visible: { ...tile },
-        radius,
+        radii,
     };
 };
 
 export const fullPhotoState = (
     rect: ViewerRect,
-    radius = 0,
-): ViewerPhotoState => ({ image: { ...rect }, visible: { ...rect }, radius });
+    radii: ViewerCornerRadii = [0, 0, 0, 0],
+): ViewerPhotoState => ({ image: { ...rect }, visible: { ...rect }, radii });
 
 // A photo zoomed in past the viewport is cut to it.
 export const shownPhotoState = (
     image: ViewerRect,
     viewport: ViewerRect,
-    radius: number,
+    radii: ViewerCornerRadii,
 ): ViewerPhotoState => {
     if (image.w <= viewport.w && image.h <= viewport.h)
-        return fullPhotoState(image, radius);
+        return fullPhotoState(image, radii);
     const x = Math.max(image.x, viewport.x);
     const y = Math.max(image.y, viewport.y);
     const w = Math.min(image.x + image.w, viewport.x + viewport.w) - x;
@@ -52,7 +54,7 @@ export const shownPhotoState = (
     return {
         image: { ...image },
         visible: { x, y, w: Math.max(0, w), h: Math.max(0, h) },
-        radius,
+        radii,
     };
 };
 
@@ -72,7 +74,9 @@ export const mixPhotoState = (
 ): ViewerPhotoState => ({
     image: mixRect(from.image, to.image, t),
     visible: mixRect(from.visible, to.visible, t),
-    radius: Math.max(0, mix(from.radius, to.radius, t)),
+    radii: from.radii.map((radius, index) =>
+        Math.max(0, mix(radius, to.radii[index]!, t)),
+    ) as ViewerCornerRadii,
 });
 
 export const photoStateTravel = (a: ViewerPhotoState, b: ViewerPhotoState) =>

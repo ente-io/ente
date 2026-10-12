@@ -3,6 +3,8 @@ import {
     mixPhotoState,
     photoStateTravel,
     tilePhotoState,
+    viewerBackgroundOpacity,
+    type ViewerCornerRadii,
     type ViewerPhotoState,
     type ViewerRect,
 } from "utils/viewer-geometry";
@@ -49,8 +51,18 @@ const isOnScreen = (element: Element) => {
 const prefersReducedMotion = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const tileRadius = (tile: Element) =>
-    parseFloat(getComputedStyle(tile).borderTopLeftRadius) || 0;
+export const viewerCornerRadii = (
+    element: Element,
+    scale = 1,
+): ViewerCornerRadii => {
+    const style = getComputedStyle(element);
+    return [
+        style.borderTopLeftRadius,
+        style.borderTopRightRadius,
+        style.borderBottomRightRadius,
+        style.borderBottomLeftRadius,
+    ].map((radius) => (parseFloat(radius) || 0) * scale) as ViewerCornerRadii;
+};
 
 const runSpring = ({
     from,
@@ -131,17 +143,54 @@ const createFlyer = (root: HTMLElement, src: string, base: ViewerRect) => {
     flyer.append(image);
     root.prepend(flyer);
 
-    const draw = ({ image: i, visible: v, radius }: ViewerPhotoState) => {
+    const draw = ({ image: i, visible: v, radii }: ViewerPhotoState) => {
         const sx = v.w / base.w;
         const sy = v.h / base.h;
         flyer.style.transform = `translate3d(${v.x}px, ${v.y}px, 0) scale(${sx}, ${sy})`;
-        flyer.style.borderRadius = `${radius / sx}px / ${radius / sy}px`;
+        flyer.style.borderRadius = `${radii.map((radius) => `${radius / sx}px`).join(" ")} / ${radii.map((radius) => `${radius / sy}px`).join(" ")}`;
         image.style.transform = `translate3d(${(i.x - v.x) / sx}px, ${(i.y - v.y) / sy}px, 0) scale(${i.w / v.w}, ${i.h / v.h})`;
     };
-    return { flyer, draw };
+    return { flyer, image, draw };
 };
 
 const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
+    const card = tile.closest("article");
+    const header = card?.querySelector<HTMLElement>(
+        "[data-space-viewer-header]",
+    );
+    const shade = card?.querySelector<HTMLElement>(
+        "[data-space-viewer-header-shade]",
+    );
+    if (header && shade) {
+        const bounds = rectOf(tile);
+        const rider = document.createElement("div");
+        rider.setAttribute("aria-hidden", "true");
+        rider.inert = true;
+        rider.append(shade.cloneNode(true), header.cloneNode(true));
+        Object.assign(rider.style, {
+            borderRadius: getComputedStyle(tile).borderRadius,
+            height: `${bounds.h}px`,
+            left: `${bounds.x}px`,
+            overflow: "hidden",
+            pointerEvents: "none",
+            position: "absolute",
+            top: `${bounds.y}px`,
+            width: `${bounds.w}px`,
+            zIndex: "2",
+        });
+        flyer.after(rider);
+        header.style.opacity = "0";
+        return {
+            element: rider,
+            draw: (_state: ViewerPhotoState, t: number) => {
+                rider.style.opacity = String(1 - viewerBackgroundOpacity(t));
+            },
+            remove: () => rider.remove(),
+            reveal: () => {
+                header.style.opacity = "";
+            },
+        };
+    }
     const button = tile.parentElement?.querySelector<HTMLElement>(
         "[data-space-viewer-avatar]",
     );
@@ -166,6 +215,7 @@ const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
     button.style.opacity = "0";
 
     return {
+        element: rider,
         draw: ({ visible: v }: ViewerPhotoState, t: number) => {
             rider.style.transform = `translate3d(${v.x + left}px, ${v.y + v.h - fromBottom}px, 0)`;
             rider.style.opacity = String(
@@ -189,21 +239,40 @@ export const playViewerOpen = (
 ) => {
     if (prefersReducedMotion() || !isOnScreen(origin)) return undefined;
 
-    const from = tilePhotoState(rectOf(origin), photo, tileRadius(origin));
+    const from = tilePhotoState(
+        rectOf(origin),
+        photo,
+        viewerCornerRadii(origin),
+    );
     let end = fullPhotoState(to);
     let t = 0;
-    const { flyer, draw } = createFlyer(root, src, to);
-    const rider = createRider(flyer, origin);
+    const tileImage = origin.querySelector<HTMLImageElement>(
+        "img:not([aria-hidden])",
+    );
+    const thumbnail =
+        origin.querySelector<HTMLImageElement>("img[aria-hidden]");
+    const preview =
+        tileImage?.complete && tileImage.naturalWidth > 0
+            ? tileImage
+            : thumbnail;
+    const flightSrc = preview?.currentSrc || src;
+    const { flyer, image, draw } = createFlyer(root, flightSrc, to);
+    let rider: ReturnType<typeof createRider>;
+    let started = false;
+    let disposed = false;
+    let stopSpring: () => void = () => undefined;
     const drawAt = (value: number) => {
         const state = mixPhotoState(from, end, value);
         draw(state);
         rider?.draw(state, value);
     };
-    origin.style.opacity = "0";
+    flyer.style.visibility = "hidden";
+    root.dataset.spaceViewerWaiting = "true";
     drawAt(0);
     setProgress(0);
 
     const release = () => {
+        disposed = true;
         flyer.remove();
         rider?.remove();
     };
@@ -211,22 +280,37 @@ export const playViewerOpen = (
         origin.style.opacity = "";
         rider?.reveal();
     };
-    const stopSpring = runSpring({
-        from: 0,
-        to: 1,
-        velocity: 0,
-        duration: openDuration,
-        bounce: openBounce,
-        restDelta: 1.5 / Math.max(1, photoStateTravel(from, end)),
-        onUpdate: (value) => {
-            t = value;
-            drawAt(t);
-            setProgress(t);
+    void image.decode().then(
+        () => {
+            if (disposed) return;
+            started = true;
+            flyer.style.visibility = "";
+            origin.style.opacity = "0";
+            delete root.dataset.spaceViewerWaiting;
+            rider = createRider(flyer, origin);
+            drawAt(0);
+            stopSpring = runSpring({
+                from: 0,
+                to: 1,
+                velocity: 0,
+                duration: openDuration,
+                bounce: openBounce,
+                restDelta: 1.5 / Math.max(1, photoStateTravel(from, end)),
+                onUpdate: (value) => {
+                    t = value;
+                    drawAt(t);
+                    setProgress(t);
+                },
+                onDone: onLanded,
+            });
         },
-        onDone: onLanded,
-    });
+        () => {
+            if (!disposed) onLanded();
+        },
+    );
     return {
-        current: () => mixPhotoState(from, end, t),
+        src: flightSrc,
+        current: () => (started ? mixPhotoState(from, end, t) : undefined),
         release,
         reveal,
         retarget: (rect: ViewerRect) => {
@@ -252,7 +336,11 @@ export const playViewerClose = (
 ) => {
     if (prefersReducedMotion() || !isOnScreen(origin)) return undefined;
 
-    const end = tilePhotoState(rectOf(origin), photo, tileRadius(origin));
+    const end = tilePhotoState(
+        rectOf(origin),
+        photo,
+        viewerCornerRadii(origin),
+    );
     const { flyer, draw } = createFlyer(root, src, from.image);
     const rider = createRider(flyer, origin);
     const drawAt = (t: number) => {
@@ -307,6 +395,15 @@ export const playViewerClose = (
                     zIndex: "1301",
                 });
                 document.body.append(ghost);
+                const overlay = rider?.element.cloneNode(true) as
+                    HTMLElement | undefined;
+                if (overlay) {
+                    Object.assign(overlay.style, {
+                        position: "fixed",
+                        zIndex: "1302",
+                    });
+                    document.body.append(overlay);
+                }
                 flyer.remove();
                 ghost
                     .animate([{ opacity: 1 }, { opacity: 0 }], {
@@ -314,7 +411,10 @@ export const playViewerClose = (
                         easing: "ease",
                         fill: "forwards",
                     })
-                    .addEventListener("finish", () => ghost.remove());
+                    .addEventListener("finish", () => {
+                        ghost.remove();
+                        overlay?.remove();
+                    });
             }
             onDone();
         },

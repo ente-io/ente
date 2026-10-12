@@ -1452,6 +1452,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                 </Box>
                 <Box
                     aria-hidden
+                    data-space-viewer-header-shade
                     sx={{
                         background:
                             "linear-gradient(180deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0))",
@@ -1466,6 +1467,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                     }}
                 />
                 <Box
+                    data-space-viewer-header
                     sx={{
                         alignItems: "center",
                         boxSizing: "border-box",

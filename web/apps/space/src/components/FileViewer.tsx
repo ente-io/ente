@@ -32,6 +32,7 @@ import {
     findViewerOrigin,
     playViewerClose,
     playViewerOpen,
+    viewerCornerRadii,
     viewerOriginKey,
 } from "components/viewer-transition";
 import log from "ente-base/log";
@@ -58,6 +59,7 @@ import { clampSpaceMessageText } from "utils/message-limits";
 import {
     shownPhotoState,
     viewerBackgroundOpacity,
+    type ViewerCornerRadii,
     type ViewerPhotoState,
     type ViewerRect,
 } from "utils/viewer-geometry";
@@ -728,10 +730,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             viewerPhotosRef.current[pswp?.currIndex ?? activePhotoIndex];
         const element = pswp?.currSlide?.content.element;
         let from: ViewerPhotoState | undefined = motion.flight?.current();
-        let src = from ? item?.imageUrl : undefined;
+        let src = from ? motion.flight?.src : undefined;
         const rect = element?.getBoundingClientRect();
         if (
             !from &&
+            !motion.flight &&
             rect &&
             rect.width > 0 &&
             rect.height > 0 &&
@@ -743,7 +746,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             from = shownPhotoState(
                 { x: rect.left, y: rect.top, w: rect.width, h: rect.height },
                 { x: 0, y: 0, w: window.innerWidth, h: window.innerHeight },
-                (parseFloat(element.style.borderRadius) || 0) * scale,
+                viewerCornerRadii(element, scale),
             );
             src = element.currentSrc || element.src;
         }
@@ -1496,7 +1499,12 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             // The drag pose and the parallax use the separate `scale` and
             // `translate` properties, which leave PhotoSwipe's transform alone.
             let posed:
-                { container: HTMLElement; element?: HTMLElement } | undefined;
+                | {
+                      container: HTMLElement;
+                      element?: HTMLElement;
+                      radii: ViewerCornerRadii;
+                  }
+                | undefined;
             const clearDismissPose = () => {
                 if (!posed) return;
                 posed.container.style.scale = "";
@@ -1516,7 +1524,19 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                     clearDismissPose();
                     return;
                 }
-                posed = { container: slide.container, element };
+                if (!posed) {
+                    const item = viewerPhotosRef.current[pswp!.currIndex];
+                    const origin = findViewerOrigin(
+                        viewerOriginKey(item?.spaceId, item?.postId),
+                    );
+                    posed = {
+                        container: slide.container,
+                        element,
+                        radii: origin
+                            ? viewerCornerRadii(origin)
+                            : [24, 24, 24, 24],
+                    };
+                }
                 const scale =
                     1 -
                     0.32 *
@@ -1528,7 +1548,12 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 slide.container.style.scale = String(scale);
                 slide.container.style.translate = `${x * (1 - scale)}px ${y * (1 - scale)}px`;
                 if (element)
-                    element.style.borderRadius = `${(24 * Math.min(1, Math.abs(dy) / 140)) / scale}px`;
+                    element.style.borderRadius = posed.radii
+                        .map(
+                            (radius) =>
+                                `${(radius * Math.min(1, Math.abs(dy) / 140)) / scale}px`,
+                        )
+                        .join(" ");
             };
             pswp.on("zoomPanUpdate", () => {
                 applyDismissPose();
@@ -1754,6 +1779,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                     { pointerEvents: "none !important" },
                 "&[data-space-viewer-waiting='true'] [data-space-viewer-close], &[data-space-viewer-waiting='true'] [data-space-viewer-close] *":
                     { pointerEvents: "auto !important" },
+                "&[data-space-viewer-waiting='true'] [data-space-viewer-chrome='true']":
+                    { opacity: 1 },
                 "@media (prefers-reduced-motion: reduce)": {
                     transition: "none",
                 },
