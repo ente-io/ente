@@ -620,7 +620,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                         icon: const HugeIcon(
                           icon: HugeIcons.strokeRoundedEdit03,
                         ),
-                        variant: IconButtonComponentVariant.unfilled,
+                        variant: IconButtonComponentVariant.primary,
                         shouldSurfaceExecutionStates: false,
                         onTap: _toggleMode,
                         tooltip: context.strings.edit,
