@@ -496,7 +496,7 @@ function SearchGroupHeading(props: GroupHeadingProps<SearchOption, false>) {
     );
 }
 
-function SearchEmptyState({ initial = false }: { initial?: boolean }) {
+function SearchEmptyState() {
     return (
         <Stack
             sx={{
@@ -506,20 +506,12 @@ function SearchEmptyState({ initial = false }: { initial?: boolean }) {
                 py: "20px",
             }}
         >
-            <Box
-                component="img"
-                src="/images/auth-ducky.svg"
-                alt=""
-                sx={{ width: 130, height: 100, objectFit: "contain" }}
-            />
             <Typography variant="h3" sx={{ color: "text.base" }}>
-                {t(initial ? "search_start_typing" : "search_no_matches")}
+                {t("search_no_matches")}
             </Typography>
-            {!initial && (
-                <Typography variant="small" sx={{ color: "text.muted" }}>
-                    {t("search_try_another")}
-                </Typography>
-            )}
+            <Typography variant="small" sx={{ color: "text.muted" }}>
+                {t("search_try_another")}
+            </Typography>
         </Stack>
     );
 }
@@ -720,7 +712,7 @@ const EmptyState: React.FC<
 
     const hasPeople = people && people.length > 0;
     if (!hasPeople && !label) {
-        return <SearchEmptyState initial />;
+        return null;
     }
 
     return (
