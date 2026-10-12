@@ -1,0 +1,1 @@
+- Added caption indicators and improved spacing between gallery thumbnail icons for internal users.
