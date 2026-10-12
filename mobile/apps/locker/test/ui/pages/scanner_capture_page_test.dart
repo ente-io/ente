@@ -17,6 +17,7 @@ import 'package:locker/src/rust/frb_generated.dart';
 import 'package:locker/ui/pages/scanner/scan_quad_overlay.dart';
 import 'package:locker/ui/pages/scanner/scanner_capture_page.dart';
 import 'package:locker/ui/pages/scanner/scanner_capture_widgets.dart';
+import 'package:locker/ui/pages/scanner/scanner_review_page.dart';
 
 void main() {
   late _Camera camera;
@@ -153,6 +154,39 @@ void main() {
     await flushCamera(tester);
     expect(camera.starts, 1);
     expect(find.byType(CameraPreview), findsOneWidget);
+    navigator.currentState!.pop();
+    await finishClose(tester);
+  }, variant: mobilePlatforms);
+
+  testWidgets('review opens after stream-stop failure and camera resumes', (
+    tester,
+  ) async {
+    await open(tester);
+    await tester.pump(const Duration(milliseconds: 500));
+    await flushCamera(tester);
+    await tester.tap(find.byType(ScannerShutterButton));
+    await flushCamera(tester);
+    await tester.pump(const Duration(seconds: 1));
+    await flushCamera(tester);
+    expect(
+      tester.widget<ScannerDoneButton>(find.byType(ScannerDoneButton)).visible,
+      isTrue,
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    camera.failStop = true;
+    await tester.tap(find.byType(ScannerDoneButton));
+    await flushCamera(tester);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(camera.stops, 1);
+    expect(camera.disposals, 1);
+    expect(find.byType(ScannerReviewPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    camera.failStop = false;
+    navigator.currentState!.pop();
+    await tester.pump(const Duration(milliseconds: 500));
+    await flushCamera(tester);
+    expect(find.byType(CameraPreview), findsOneWidget);
+    expect(camera.starts, 2);
     navigator.currentState!.pop();
     await finishClose(tester);
   }, variant: mobilePlatforms);

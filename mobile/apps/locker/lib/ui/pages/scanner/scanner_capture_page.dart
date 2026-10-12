@@ -267,6 +267,8 @@ class _ScannerCapturePageState extends State<ScannerCapturePage>
       if (camera.value.isStreamingImages) {
         await camera.stopImageStream();
       }
+    } catch (error, stack) {
+      _logger.warning('Failed to stop image stream', error, stack);
     } finally {
       await camera.dispose();
     }
