@@ -37,6 +37,63 @@ void main() {
       expectsNewUi: true,
     ),
   ]) {
+    for (final dismissWithBack in [false, true]) {
+      testWidgets(
+        '${mode.flow} allows sharing dialog dismissal by ${dismissWithBack ? 'back' : 'barrier'}',
+        (tester) async {
+          await FeatureFlagService.instance.setInternalUserDisabled(
+            mode.disabled,
+          );
+          late LockerProgressDialog dialog;
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: ComponentTheme.lightTheme(app: ComponentApp.locker),
+              home: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () async {
+                    dialog = await showLockerProgressDialog(
+                      context,
+                      'Sharing',
+                      useNewUi: mode.useNewUi,
+                      isDismissible: true,
+                    );
+                  },
+                  child: const Text('share'),
+                ),
+              ),
+            ),
+          );
+
+          await tester.tap(find.text('share'));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 16));
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(find.text('Sharing'), findsOneWidget);
+          expect(
+            find.byType(LoadingComponent),
+            mode.expectsNewUi ? findsOneWidget : findsNothing,
+          );
+
+          if (dismissWithBack) {
+            await tester.binding.handlePopRoute();
+          } else {
+            await tester.tapAt(const Offset(5, 5));
+          }
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(find.text('Sharing'), findsNothing);
+          expect(find.text('share'), findsOneWidget);
+
+          final hidden = dialog.hide();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+          await hidden;
+          expect(find.text('share'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+
     testWidgets('${mode.flow} keeps progress updates and dismissal', (
       tester,
     ) async {

@@ -2,7 +2,6 @@ import 'package:ente_components/ente_components.dart';
 import "package:ente_events/event_bus.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
@@ -863,14 +862,11 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final targetCollection = result.selectedCollections.first;
 
     final dialog = context.mounted
-        ? createProgressDialog(
+        ? await showLockerProgressDialog(
             context,
             context.strings.restoringItems,
-            isDismissible: false,
           )
         : null;
-
-    await dialog?.show();
 
     try {
       await TrashService.instance.restore(files, targetCollection);
@@ -914,14 +910,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     }
 
     final dialog = context.mounted
-        ? createProgressDialog(
-            context,
-            context.strings.deletingFiles,
-            isDismissible: false,
-          )
+        ? await showLockerProgressDialog(context, context.strings.deletingFiles)
         : null;
-
-    await dialog?.show();
 
     try {
       await TrashService.instance.deleteFromTrash(files);

@@ -67,6 +67,14 @@ void main() {
     }
   }
 
+  Future<void> pumpUntil(WidgetTester tester, bool Function() ready) async {
+    // Capture I/O and decoding run outside the animation clock.
+    for (var attempt = 0; attempt < 50 && !ready(); attempt++) {
+      await flushCamera(tester);
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
   Future<void> open(WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -161,13 +169,17 @@ void main() {
   testWidgets('review opens after stream-stop failure and camera resumes', (
     tester,
   ) async {
+    camera.pictureDelay = const Duration(milliseconds: 200);
     await open(tester);
     await tester.pump(const Duration(milliseconds: 500));
     await flushCamera(tester);
     await tester.tap(find.byType(ScannerShutterButton));
-    await flushCamera(tester);
-    await tester.pump(const Duration(seconds: 1));
-    await flushCamera(tester);
+    await pumpUntil(
+      tester,
+      () => tester
+          .widget<ScannerDoneButton>(find.byType(ScannerDoneButton))
+          .visible,
+    );
     expect(
       tester.widget<ScannerDoneButton>(find.byType(ScannerDoneButton)).visible,
       isTrue,
@@ -175,7 +187,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     camera.failStop = true;
     await tester.tap(find.byType(ScannerDoneButton));
-    await flushCamera(tester);
+    await pumpUntil(
+      tester,
+      () => find.byType(ScannerReviewPage).evaluate().isNotEmpty,
+    );
     await tester.pump(const Duration(milliseconds: 500));
     expect(camera.stops, 1);
     expect(camera.disposals, 1);
@@ -184,7 +199,7 @@ void main() {
     camera.failStop = false;
     navigator.currentState!.pop();
     await tester.pump(const Duration(milliseconds: 500));
-    await flushCamera(tester);
+    await pumpUntil(tester, () => camera.starts == 2);
     expect(find.byType(CameraPreview), findsOneWidget);
     expect(camera.starts, 2);
     navigator.currentState!.pop();
@@ -397,6 +412,7 @@ class _Camera extends CameraPlatform {
   int disposals = 0;
   int creations = 0;
   int pictures = 0;
+  Duration pictureDelay = Duration.zero;
   bool failStream = false;
   bool failStop = false;
   bool failDispose = false;
@@ -486,6 +502,9 @@ class _Camera extends CameraPlatform {
   @override
   Future<XFile> takePicture(int cameraId) async {
     pictures++;
+    if (pictureDelay != Duration.zero) {
+      await Future<void>.delayed(pictureDelay);
+    }
     return shot!;
   }
 
