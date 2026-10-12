@@ -77,7 +77,12 @@ for (const [type, fields, requiredFields] of infoFields) {
         `${type} reopens and submits exact text: %j`,
         async (value) => {
             const data = Object.fromEntries(
-                fields.map((field) => [field, value]),
+                fields.map((field) => [
+                    field,
+                    (requiredFields as readonly string[]).includes(field)
+                        ? "  entered text  "
+                        : value,
+                ]),
             );
             const { state, onSave, onClose } = formState(type, data);
             expect(state.formData).toEqual(data);
@@ -89,8 +94,8 @@ for (const [type, fields, requiredFields] of infoFields) {
     );
 
     for (const field of requiredFields) {
-        test.each(["", undefined])(
-            `${type} rejects an empty or missing ${field}: %j`,
+        test.each(["", "   ", "\t\n", " \u00a0\u2003 ", undefined])(
+            `${type} rejects an empty, whitespace-only or missing ${field}: %j`,
             async (value) => {
                 const data = Object.fromEntries(
                     fields
@@ -101,7 +106,7 @@ for (const [type, fields, requiredFields] of infoFields) {
                         ]),
                 );
                 const { state, onSave, onClose } = formState(type, data);
-                expect(state.canSave).toBe(false);
+                expect.soft(state.canSave).toBe(false);
                 await state.handleSave();
                 expect(onSave).not.toHaveBeenCalled();
                 expect(onClose).not.toHaveBeenCalled();
@@ -110,13 +115,13 @@ for (const [type, fields, requiredFields] of infoFields) {
     }
 }
 
-test("a note with whitespace-only content and an empty title can save", async () => {
+test("a note with whitespace-only content and an empty title cannot save", async () => {
     const data = { title: "", content: "   " };
     const { state, onSave, onClose } = formState("note", data);
-    expect(state.canSave).toBe(true);
+    expect(state.canSave).toBe(false);
     await state.handleSave();
-    expect(onSave).toHaveBeenCalledWith("note", data, [2]);
-    expect(onClose).toHaveBeenCalledOnce();
+    expect(onSave).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
 });
 
 test("file rename validation and trimming remain unchanged", async () => {

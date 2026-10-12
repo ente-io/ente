@@ -459,10 +459,7 @@ export const useCreateItemDialogState = ({
 
         for (const field of getRequiredFields(formType)) {
             const value = formData[field];
-            if (
-                typeof value !== "string" ||
-                !(formType === "file" ? value.trim() : value)
-            ) {
+            if (typeof value !== "string" || !value.trim()) {
                 setError(t("required_field"));
                 return;
             }
@@ -490,10 +487,7 @@ export const useCreateItemDialogState = ({
         formType !== null &&
         getRequiredFields(formType).every(
             (field) =>
-                typeof formData[field] === "string" &&
-                (formType === "file"
-                    ? formData[field].trim()
-                    : formData[field]),
+                typeof formData[field] === "string" && formData[field].trim(),
         );
     const canUpload = isFileMode && pendingUploads;
     const savedUploadCount = completedFileKeys.size;
