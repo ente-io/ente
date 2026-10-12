@@ -84,6 +84,8 @@ You can help translate your language, even if it is not close to 90% yet:
 - [Ente Photos mobile app](https://crowdin.com/project/ente-photos-app)
 - [Ente Photos web and desktop](https://crowdin.com/project/ente-photos-web)
 
+If your language is not listed on Crowdin, request it on GitHub for [mobile](https://github.com/ente/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A+%0AProject%3A+mobile) or [web and desktop](https://github.com/ente/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A+%0AProject%3A+web) before you start translating.
+
 If a new language translation is complete but is still not available in the app, email [support@ente.com](mailto:support@ente.com) so we can confirm its approval status.
 
 ## Multi-Device Setup
