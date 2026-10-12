@@ -45,53 +45,63 @@ class _CollectionSelectionWidgetV2State
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     final l10n = context.strings;
+    final collections = uniqueCollectionsById([
+      ..._created,
+      ...widget.collections,
+    ]);
     return ScrollCard(
       showScrollbar: true,
-      rows: [
-        MenuComponent(
-          title: l10n.newCollection,
-          titleColor: colors.primary,
-          iconColor: colors.primary,
-          leading: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
-          onTap: _createCollection,
-        ),
-        for (final collection in uniqueCollectionsById([
-          ..._created,
-          ...widget.collections,
-        ]))
-          FutureBuilder<int>(
-            key: ValueKey(collection.id),
-            future: _fileCounts.putIfAbsent(
-              collection.id,
-              () => CollectionService.instance.getFileCount(collection),
-            ),
-            builder: (context, count) => MenuComponent(
-              title: collection.type == CollectionType.uncategorized
-                  ? l10n.uncategorized
-                  : collection.displayName ?? l10n.unnamedCollection,
-              titleMaxLines: 1,
-              subtitle: l10n.itemCount(count: count.data ?? 0),
-              leading: HugeIcon(
-                icon: collection.type == CollectionType.favorites
-                    ? HugeIcons.strokeRoundedStar
-                    : HugeIcons.strokeRoundedFolder01,
-              ),
-              trailing: widget.selectedCollectionIds.contains(collection.id)
-                  ? const SelectionCheckBadge()
-                  : null,
-              onTap: () => widget.onToggleCollection(collection.id),
-            ),
+      itemCount: collections.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return MenuComponent(
+            title: l10n.newCollection,
+            titleColor: colors.primary,
+            iconColor: colors.primary,
+            leading: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
+            onTap: _createCollection,
+          );
+        }
+        final collection = collections[index - 1];
+        return FutureBuilder<int>(
+          key: ValueKey(collection.id),
+          future: _fileCounts.putIfAbsent(
+            collection.id,
+            () => CollectionService.instance.getFileCount(collection),
           ),
-      ],
+          builder: (context, count) => MenuComponent(
+            title: collection.type == CollectionType.uncategorized
+                ? l10n.uncategorized
+                : collection.displayName ?? l10n.unnamedCollection,
+            titleMaxLines: 1,
+            subtitle: l10n.itemCount(count: count.data ?? 0),
+            leading: HugeIcon(
+              icon: collection.type == CollectionType.favorites
+                  ? HugeIcons.strokeRoundedStar
+                  : HugeIcons.strokeRoundedFolder01,
+            ),
+            trailing: widget.selectedCollectionIds.contains(collection.id)
+                ? const SelectionCheckBadge()
+                : null,
+            onTap: () => widget.onToggleCollection(collection.id),
+          ),
+        );
+      },
     );
   }
 }
 
 class ScrollCard extends StatefulWidget {
-  final List<Widget> rows;
+  final int itemCount;
+  final IndexedWidgetBuilder itemBuilder;
   final bool showScrollbar;
 
-  const ScrollCard({super.key, required this.rows, this.showScrollbar = false});
+  const ScrollCard({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.showScrollbar = false,
+  });
 
   @override
   State<ScrollCard> createState() => _ScrollCardState();
@@ -135,11 +145,21 @@ class _ScrollCardState extends State<ScrollCard> {
               Scrollbar(
                 controller: _controller,
                 thumbVisibility: widget.showScrollbar,
-                child: SingleChildScrollView(
+                child: ListView.separated(
                   controller: _controller,
-                  child: MenuGroupComponent(
-                    showDividers: true,
-                    items: widget.rows,
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  itemCount: widget.itemCount,
+                  separatorBuilder: (_, _) => ColoredBox(
+                    color: colors.fillLight,
+                    child: const DividerComponent(),
+                  ),
+                  itemBuilder: (context, index) => MenuGroupComponent(
+                    borderRadius: MenuGroupComponent.itemBorderRadius(
+                      index: index,
+                      itemCount: widget.itemCount,
+                    ),
+                    items: [widget.itemBuilder(context, index)],
                   ),
                 ),
               ),

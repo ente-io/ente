@@ -198,6 +198,16 @@ void main() {
     expect(heights[0], lessThan(844 * 0.35));
   });
 
+  testWidgets('a large batch only builds the visible file rows', (
+    tester,
+  ) async {
+    await cardHeights(tester, files: 1000, collections: 0);
+    expect(
+      find.byType(MenuComponent, skipOffstage: false).evaluate().length,
+      lessThan(50),
+    );
+  });
+
   testWidgets('large system text keeps Save on screen', (tester) async {
     tester.view.physicalSize = const Size(320, 568);
     tester.view.devicePixelRatio = 1;

@@ -126,36 +126,37 @@ class _FileUploadScreenV2State extends State<FileUploadScreenV2> {
                           duration: Motion.standard,
                           child: hasFiles
                               ? ScrollCard(
-                                  rows: [
-                                    for (final file in _files)
-                                      MenuComponent(
-                                        key: ValueKey(file.path),
-                                        title: _nameOf(file),
-                                        titleMaxLines: 1,
-                                        leading: FileIconUtils.getFileIcon(
-                                          context,
-                                          _nameOf(file),
-                                          backgroundColor: Colors.transparent,
-                                          size: IconSizes.small,
-                                        ),
-                                        trailing: Builder(
-                                          builder: (anchor) =>
-                                              IconButtonComponent(
-                                                variant:
-                                                    IconButtonComponentVariant
-                                                        .unfilled,
-                                                shouldSurfaceExecutionStates:
-                                                    false,
-                                                icon: const HugeIcon(
-                                                  icon: HugeIcons
-                                                      .strokeRoundedMoreVertical,
-                                                ),
-                                                onTap: () =>
-                                                    _showFileMenu(anchor, file),
-                                              ),
-                                        ),
+                                  itemCount: _files.length,
+                                  itemBuilder: (context, index) {
+                                    final file = _files[index];
+                                    return MenuComponent(
+                                      key: ValueKey(file.path),
+                                      title: _nameOf(file),
+                                      titleMaxLines: 1,
+                                      leading: FileIconUtils.getFileIcon(
+                                        context,
+                                        _nameOf(file),
+                                        backgroundColor: Colors.transparent,
+                                        size: IconSizes.small,
                                       ),
-                                  ],
+                                      trailing: Builder(
+                                        builder: (anchor) =>
+                                            IconButtonComponent(
+                                              variant:
+                                                  IconButtonComponentVariant
+                                                      .unfilled,
+                                              shouldSurfaceExecutionStates:
+                                                  false,
+                                              icon: const HugeIcon(
+                                                icon: HugeIcons
+                                                    .strokeRoundedMoreVertical,
+                                              ),
+                                              onTap: () =>
+                                                  _showFileMenu(anchor, file),
+                                            ),
+                                      ),
+                                    );
+                                  },
                                 )
                               : _EmptyItems(onAdd: _addFiles),
                         );
