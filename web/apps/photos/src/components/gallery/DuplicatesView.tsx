@@ -18,7 +18,6 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { useRedirectIfNeedsCredentials } from "ente-accounts/components/utils/use-redirect";
 import { CenteredFill, SpacedRow } from "ente-base/components/containers";
 import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -41,7 +40,6 @@ import {
     type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { t } from "i18next";
-import { useRouter } from "next/router";
 import React, {
     memo,
     useCallback,
@@ -56,23 +54,36 @@ import {
     type ListChildComponentProps,
 } from "react-window";
 
-const Page: React.FC = () => {
+interface DuplicatesViewProps {
+    onBack: () => void;
+    onRemoteFilesPull: () => Promise<void>;
+}
+
+export function DuplicatesView({
+    onBack,
+    onRemoteFilesPull,
+}: DuplicatesViewProps) {
     const { onGenericError } = useBaseContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
 
-    useRedirectIfNeedsCredentials("/duplicates");
-
     useEffect(() => {
+        let isCurrent = true;
         dispatch({ type: "analyze" });
         void deduceDuplicates()
-            .then((duplicateGroups) =>
-                dispatch({ type: "analysisCompleted", duplicateGroups }),
-            )
+            .then((duplicateGroups) => {
+                if (isCurrent)
+                    dispatch({ type: "analysisCompleted", duplicateGroups });
+            })
             .catch((e: unknown) => {
-                log.error("Failed to detect duplicates", e);
-                dispatch({ type: "analysisFailed" });
+                if (isCurrent) {
+                    log.error("Failed to detect duplicates", e);
+                    dispatch({ type: "analysisFailed" });
+                }
             });
+        return () => {
+            isCurrent = false;
+        };
     }, []);
 
     const handleRemoveDuplicates = useCallback(() => {
@@ -81,6 +92,7 @@ const Page: React.FC = () => {
             state.duplicateGroups,
             (progress: number) =>
                 dispatch({ type: "setDedupeProgress", progress }),
+            onRemoteFilesPull,
         )
             .then((removedGroupIDs) =>
                 dispatch({ type: "dedupeCompleted", removedGroupIDs }),
@@ -90,7 +102,7 @@ const Page: React.FC = () => {
                 onGenericError(e);
                 dispatch({ type: "dedupeFailed" });
             });
-    }, [state.duplicateGroups, onGenericError]);
+    }, [state.duplicateGroups, onGenericError, onRemoteFilesPull]);
 
     const contents = (() => {
         switch (state.analysisStatus) {
@@ -121,8 +133,9 @@ const Page: React.FC = () => {
     })();
 
     return (
-        <Stack sx={{ height: "100vh" }}>
+        <Stack sx={{ flex: 1, minHeight: 0 }}>
             <Navbar
+                onBack={onBack}
                 sortOrder={state.sortOrder}
                 onChangeSortOrder={(sortOrder) =>
                     dispatch({ type: "changeSortOrder", sortOrder })
@@ -132,9 +145,7 @@ const Page: React.FC = () => {
             {contents}
         </Stack>
     );
-};
-
-export default Page;
+}
 
 type SortOrder = "prunableCount" | "prunableSize";
 
@@ -274,18 +285,18 @@ const deducePrunableCountAndSize = (duplicateGroups: DuplicateGroup[]) => {
 };
 
 interface NavbarProps {
+    onBack: () => void;
     sortOrder: SortOrder;
     onChangeSortOrder: (sortOrder: SortOrder) => void;
     onDeselectAll: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({
+    onBack,
     sortOrder,
     onChangeSortOrder,
     onDeselectAll,
 }) => {
-    const router = useRouter();
-
     return (
         <Stack
             direction="row"
@@ -302,7 +313,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     minWidth: "100px",
                 }}
             >
-                <IconButton onClick={router.back}>
+                <IconButton onClick={onBack} aria-label={t("go_back")}>
                     <ArrowBackIcon />
                 </IconButton>
             </Box>
