@@ -152,12 +152,6 @@ interface UploadRequestOptions {
     uploadType?: UploadType;
     isDragAndDrop?: boolean;
     skippedFiles?: PreUploadSkippedFile[];
-    pendingUpload?: Pick<
-        NewCollectionsOptions,
-        | "collectionName"
-        | "importTakeoutFavorites"
-        | "includePartnerSharedFiles"
-    >;
 }
 
 interface UploadSelection {
@@ -319,22 +313,7 @@ export const Upload: React.FC<UploadProps> = ({
         retrySharedAlbumUploadTarget.current = undefined;
     };
 
-    const handlePendingUpload = useEffectEvent((pending: PendingUploads) => {
-        const { filePaths, zipItems, preUploadSkippedFiles, ...pendingUpload } =
-            pending;
-        void submitUpload(
-            [
-                ...filePaths.map((path): UploadItemAndPath => [path, path]),
-                ...zipItems.map(
-                    (item): UploadItemAndPath => [
-                        item,
-                        joinPath(dirname(item[0]), item[1]),
-                    ],
-                ),
-            ],
-            { skippedFiles: preUploadSkippedFiles, pendingUpload },
-        ).catch(onGenericError);
-    });
+    const submitUploadFromEffect = useEffectEvent(submitUpload);
 
     useEffect(() => {
         const lifetime = { active: true };
@@ -349,11 +328,11 @@ export const Upload: React.FC<UploadProps> = ({
             watcher.init(
                 (collectionName, filePaths) => {
                     if (!lifetime.active) return;
-                    handlePendingUpload({
+                    void submitUploadFromEffect({
                         collectionName,
                         filePaths,
                         zipItems: [],
-                    });
+                    }).catch(onGenericError);
                 },
                 () => void onRemotePull({ source: "watcher-upload" }),
             );
@@ -366,7 +345,7 @@ export const Upload: React.FC<UploadProps> = ({
                 log.info(
                     `Resuming pending of upload of ${filePaths.length + zipItems.length} items${collectionName ? " to collection " + collectionName : ""}`,
                 );
-                handlePendingUpload(pending);
+                void submitUploadFromEffect(pending).catch(onGenericError);
             });
         }
         return () => {
@@ -417,15 +396,31 @@ export const Upload: React.FC<UploadProps> = ({
             void handleFiles(files, undefined, true).catch(onGenericError),
     }));
 
-    const submitUpload = async (
-        allItemAndPaths: UploadItemAndPath[],
+    async function submitUpload(
+        items: UploadItemAndPath[] | PendingUploads,
         {
             uploadType,
             isDragAndDrop,
             skippedFiles = [],
-            pendingUpload,
         }: UploadRequestOptions = {},
-    ) => {
+    ) {
+        let pendingUpload: PendingUploads | undefined;
+        let allItemAndPaths: UploadItemAndPath[];
+        if (Array.isArray(items)) {
+            allItemAndPaths = items;
+        } else {
+            pendingUpload = items;
+            allItemAndPaths = [];
+            for (const path of items.filePaths) {
+                allItemAndPaths.push([path, path]);
+            }
+            for (const item of items.zipItems) {
+                allItemAndPaths.push([
+                    item,
+                    joinPath(dirname(item[0]), item[1]),
+                ]);
+            }
+        }
         const hiddenFiles: PreUploadSkippedFile[] = [];
         const prunedItemAndPaths = allItemAndPaths.filter(([, p]) => {
             const name = basename(p);
@@ -435,7 +430,9 @@ export const Upload: React.FC<UploadProps> = ({
             }
             return true;
         });
-        const nextPreUploadSkippedFiles = skippedFiles.concat(hiddenFiles);
+        const nextPreUploadSkippedFiles = (
+            pendingUpload?.preUploadSkippedFiles ?? skippedFiles
+        ).concat(hiddenFiles);
 
         if (prunedItemAndPaths.length == 0) {
             if (
@@ -500,20 +497,22 @@ export const Upload: React.FC<UploadProps> = ({
         props.setLoading(false);
 
         if (pendingUpload) {
-            if (pendingUpload.collectionName) {
-                // Watch folders must match hidden albums instead of duplicating them.
-                void uploadFilesToNewCollections("root", {
+            const {
+                collectionName,
+                importTakeoutFavorites,
+                includePartnerSharedFiles,
+            } = pendingUpload;
+            // Watch folders must match hidden albums instead of duplicating them.
+            void uploadFilesToNewCollections(
+                collectionName ? "root" : "parent",
+                {
                     includeHiddenCollections: true,
                     skipConfirmation: true,
-                    ...pendingUpload,
-                });
-            } else {
-                void uploadFilesToNewCollections("parent", {
-                    includeHiddenCollections: true,
-                    skipConfirmation: true,
-                    ...pendingUpload,
-                });
-            }
+                    collectionName,
+                    importTakeoutFavorites,
+                    includePartnerSharedFiles,
+                },
+            );
             return;
         }
 
@@ -558,7 +557,7 @@ export const Upload: React.FC<UploadProps> = ({
             onCreateCollection: showNextModal,
             onCancel: handleCollectionSelectorCancel,
         });
-    };
+    }
 
     const preCollectionCreationAction = () => {
         onCloseCollectionSelector?.();
