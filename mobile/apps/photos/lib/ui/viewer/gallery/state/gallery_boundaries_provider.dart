@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 
 class GalleryBoundariesProvider extends StatefulWidget {
@@ -25,6 +26,7 @@ class GalleryBoundariesProviderState extends State<GalleryBoundariesProvider> {
   late final ValueNotifier<double?> selectionSheetMinHeightNotifier;
 
   late final ValueNotifier<ScrollController?> scrollControllerNotifier;
+  ValueListenable<bool>? swipeActiveNotifier;
 
   @override
   void initState() {
@@ -44,7 +46,11 @@ class GalleryBoundariesProviderState extends State<GalleryBoundariesProvider> {
     super.dispose();
   }
 
-  void setScrollController(ScrollController? controller) {
+  void setScrollController(
+    ScrollController? controller, {
+    ValueListenable<bool>? swipeActiveNotifier,
+  }) {
+    this.swipeActiveNotifier = swipeActiveNotifier;
     scrollControllerNotifier.value = controller;
   }
 
@@ -86,8 +92,16 @@ class InheritedGalleryBoundaries extends InheritedWidget {
   ValueNotifier<ScrollController?> get scrollControllerNotifier =>
       state.scrollControllerNotifier;
 
-  void setScrollController(ScrollController? controller) {
-    state.setScrollController(controller);
+  ValueListenable<bool>? get swipeActiveNotifier => state.swipeActiveNotifier;
+
+  void setScrollController(
+    ScrollController? controller, {
+    ValueListenable<bool>? swipeActiveNotifier,
+  }) {
+    state.setScrollController(
+      controller,
+      swipeActiveNotifier: swipeActiveNotifier,
+    );
   }
 
   void setTopBoundary(double? boundary) {

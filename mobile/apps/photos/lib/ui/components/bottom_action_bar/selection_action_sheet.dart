@@ -3,6 +3,7 @@ import "dart:math" as math;
 
 import "package:ente_components/ente_components.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:flutter/foundation.dart" show ValueListenable;
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart" show ScrollDirection;
 import "package:hugeicons/hugeicons.dart";
@@ -51,6 +52,7 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
   InheritedGalleryBoundaries? _boundaries;
   ScrollController? _galleryController;
   ValueNotifier<bool>? _galleryScrolling;
+  ValueListenable<bool>? _gallerySwipeActive;
   ScrollController? _actionsController;
   double? _minHeight;
   double _minExtent = 0;
@@ -74,20 +76,29 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
   void _bindGallery() {
     _galleryController?.removeListener(_onGalleryScroll);
     _galleryScrolling?.removeListener(_onGalleryActivityChanged);
+    _gallerySwipeActive?.removeListener(_onGalleryActivityChanged);
     _galleryController = _boundaries?.scrollControllerNotifier.value;
     _galleryController?.addListener(_onGalleryScroll);
     _galleryScrolling = _galleryController?.positions.length == 1
         ? _galleryController!.position.isScrollingNotifier
         : null;
     _galleryScrolling?.addListener(_onGalleryActivityChanged);
+    _gallerySwipeActive = _boundaries?.swipeActiveNotifier;
+    _gallerySwipeActive?.addListener(_onGalleryActivityChanged);
+    _isCollapsing = false;
   }
 
   void _onGalleryScroll() {
+    if (_galleryController?.positions.length != 1) return;
+    if (_galleryScrolling != _galleryController!.position.isScrollingNotifier ||
+        _gallerySwipeActive != _boundaries?.swipeActiveNotifier) {
+      _bindGallery();
+    }
     if (_isCollapsing ||
         !_sheetController.isAttached ||
-        _galleryController?.positions.length != 1 ||
-        _galleryController!.position.userScrollDirection ==
-            ScrollDirection.idle ||
+        (_galleryController!.position.userScrollDirection ==
+                ScrollDirection.idle &&
+            !(_gallerySwipeActive?.value ?? false)) ||
         _sheetController.size <= _minExtent + 0.001) {
       return;
     }
@@ -96,7 +107,10 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
   }
 
   void _onGalleryActivityChanged() {
-    if (!(_galleryScrolling?.value ?? false)) _isCollapsing = false;
+    if (!(_galleryScrolling?.value ?? false) &&
+        !(_gallerySwipeActive?.value ?? false)) {
+      _isCollapsing = false;
+    }
   }
 
   void _toggleSheet() {
@@ -143,6 +157,7 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
     _boundaries?.scrollControllerNotifier.removeListener(_bindGallery);
     _galleryController?.removeListener(_onGalleryScroll);
     _galleryScrolling?.removeListener(_onGalleryActivityChanged);
+    _gallerySwipeActive?.removeListener(_onGalleryActivityChanged);
     _sheetController.dispose();
     super.dispose();
   }
