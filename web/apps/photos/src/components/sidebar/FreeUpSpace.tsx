@@ -15,6 +15,7 @@ export type FreeUpSpaceAction = Extract<
 >;
 
 type FreeUpSpaceProps = NestedSidebarDrawerVisibilityProps & {
+    onShowLargeFiles: () => void;
     pendingAction?: FreeUpSpaceAction;
     onActionHandled?: (action?: FreeUpSpaceAction) => void;
 };
@@ -25,6 +26,7 @@ export const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
     onRootClose,
     pendingAction,
     onActionHandled,
+    onShowLargeFiles,
 }) => {
     const router = useRouter();
 
@@ -40,8 +42,8 @@ export const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
 
     const handleLargeFiles = useCallback(() => {
         onRootClose();
-        void router.push("/large-files");
-    }, [onRootClose, router]);
+        onShowLargeFiles();
+    }, [onRootClose, onShowLargeFiles]);
 
     useEffect(() => {
         if (!open || !pendingAction) return;
