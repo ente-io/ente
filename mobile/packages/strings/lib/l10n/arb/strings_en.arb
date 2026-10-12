@@ -133,6 +133,7 @@
       "count": {}
     }
   },
+  "addItems": "Add items",
   "addLocation": "Add location",
   "addLocationButton": "Add",
   "addMember": "Add member",
@@ -168,6 +169,7 @@
   "addTo": "Add to",
   "addToAlbum": "Add to album",
   "addToCollection": "Add to collection",
+  "addToCollections": "Add to collections",
   "addToEnte": "Add to Ente",
   "addToHiddenAlbum": "Add to hidden album",
   "addToPerson": "Add to person",
@@ -1084,6 +1086,8 @@
   "disablingTwofactorAuthentication": "Disabling two-factor authentication...",
   "discardChanges": "Discard",
   "discardEditsQuestion": "Discard edits?",
+  "discardUploadMessage": "The items you picked won't be saved.",
+  "discardUploadTitle": "Discard upload?",
   "discover": "Discover",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -2117,6 +2121,7 @@
       }
     }
   },
+  "itemsLabel": "Items",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Items show the number of days remaining before permanent deletion",
   "itemsStored": "Items stored",
   "itemsWillBeDeletedFromAllCollections": "{count, plural, one{This item will be deleted from all collections. You can recover it from Trash.} other{These items will be deleted from all collections. You can recover them from Trash.}}",
@@ -4586,6 +4591,7 @@
   "unavailableReferralCode": "This code is already taken",
   "uncategorized": "Uncategorized",
   "uncategorizedItemsWillShowUpHere": "Uncategorized items will show up here",
+  "uncategorizedUploadHint": "If you skip this, items go to Uncategorized",
   "undo": "Undo",
   "unhide": "Unhide",
   "unhideToAlbum": "Unhide to album",
@@ -4684,6 +4690,7 @@
     }
   },
   "uploadingSingleMemory": "Preserving 1 memory...",
+  "uploadItemsRemoved": "No items left to upload",
   "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
   "@uploadIsIgnoredDueToIgnorereason": {
     "placeholders": {

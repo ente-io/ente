@@ -13,9 +13,11 @@ import 'package:locker/core/errors.dart';
 import 'package:locker/events/user_details_refresh_event.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import 'package:locker/services/feature_flag_service.dart';
 import 'package:locker/services/files/sync/metadata_updater_service.dart';
 import 'package:locker/services/files/upload/file_upload_service.dart';
 import 'package:locker/ui/pages/file_upload_screen.dart';
+import 'package:locker/ui/pages/file_upload_screen_v2.dart';
 import "package:locker/utils/bottom_sheet_illustration.dart";
 import "package:locker/utils/error_sheet.dart";
 import 'package:logging/logging.dart';
@@ -83,11 +85,17 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       final uploadResult = await Navigator.of(context)
           .push<FileUploadScreenResult>(
             MaterialPageRoute(
-              builder: (context) => FileUploadScreen(
-                files: files,
-                collections: regularCollections,
-                selectedCollection: selectedCollection,
-              ),
+              builder: (context) => FeatureFlagService.instance.internalUser
+                  ? FileUploadScreenV2(
+                      files: files,
+                      collections: regularCollections,
+                      selectedCollection: selectedCollection,
+                    )
+                  : FileUploadScreen(
+                      files: files,
+                      collections: regularCollections,
+                      selectedCollection: selectedCollection,
+                    ),
             ),
           );
 
