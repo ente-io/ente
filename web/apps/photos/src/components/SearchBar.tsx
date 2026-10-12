@@ -564,8 +564,8 @@ const createSelectStyles = (
     }),
     menuList: (style) => ({
         ...style,
-        minHeight: "min(320px, max(0px, calc(100dvh - 280px)))",
-        maxHeight: "min(320px, max(0px, calc(100dvh - 280px)))",
+        minHeight: "clamp(120px, calc(100dvh - 280px), 320px)",
+        maxHeight: "clamp(120px, calc(100dvh - 280px), 320px)",
         display: "flex",
         flexDirection: "column",
         gap: "8px",

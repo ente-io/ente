@@ -10,7 +10,6 @@ import type {
 } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { ItemCard } from "./Tiles";
 import { UnstyledButton } from "./UnstyledButton";
 
 export interface SearchPeopleListProps {
@@ -30,11 +29,13 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
                     key={person.id}
                     onClick={() => onSelectPerson(person.id)}
                 >
-                    <ItemCard
-                        TileComponent={SearchPersonAvatar}
-                        coverFaceID={person.displayFaceID}
-                        coverFile={person.displayFaceFile}
-                    />
+                    <SearchPersonAvatar>
+                        <FaceCropImageView
+                            faceID={person.displayFaceID}
+                            file={person.displayFaceFile}
+                            placeholderDimension={40}
+                        />
+                    </SearchPersonAvatar>
                     <Stack sx={{ flex: 1, minWidth: 0, gap: "4px" }}>
                         {person.name && (
                             <Typography
