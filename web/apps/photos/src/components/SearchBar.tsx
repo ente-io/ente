@@ -617,6 +617,11 @@ const createSelectStyles = (
         flexDirection: "column",
         gap: "8px",
         padding: 0,
+        "& > div:last-child": {
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+        },
     }),
     groupHeading: (style) => ({ ...style, margin: 0, padding: 0 }),
     option: (style, { isFocused }) => ({
