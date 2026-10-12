@@ -34,10 +34,6 @@ import {
 import type { ButtonishProps } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
-import {
-    hlsGenerationStatusSnapshot,
-    isHLSGenerationSupported,
-} from "ente-gallery/services/video";
 import { SearchPeopleList } from "ente-new/photos/components/PeopleList";
 import { ItemCard } from "ente-new/photos/components/Tiles";
 import { UnstyledButton } from "ente-new/photos/components/UnstyledButton";
@@ -46,11 +42,6 @@ import {
     useMLStatusSnapshot,
     usePeopleStateSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
-import {
-    isMLSupported,
-    mlStatusSnapshot,
-    peopleStateSnapshot,
-} from "ente-new/photos/services/ml";
 import { searchOptionsForString } from "ente-new/photos/services/search";
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { nullToUndefined } from "ente-utils/transform";
@@ -201,8 +192,6 @@ const SearchInput: React.FC<
     onClose,
 }) => {
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
-    // Subscribe even though reads happen through peopleStateSnapshot().
-    usePeopleStateSnapshot();
     // undefined makes react-select switch from controlled to uncontrolled.
     const [value, setValue] = useState<SearchOption | null>(null);
     const [inputValue, setInputValue] = useState("");
@@ -351,25 +340,20 @@ const SearchInput: React.FC<
                 tabSelectsValue={false}
                 aria-label={t("search")}
                 escapeClearsValue
-                menuIsOpen={
-                    open && (inputValue !== "" || shouldShowEmptyState(""))
-                }
+                menuIsOpen={open}
                 onFocus={handleFocus}
                 placeholder={t("search_hint")}
                 loadingMessage={() => t("loading")}
                 noOptionsMessage={({ inputValue }) => {
-                    if (inputValue) {
-                        return <SearchNoMatches />;
+                    if (inputValue.trim()) {
+                        return <SearchEmptyState />;
                     }
-                    if (shouldShowEmptyState(inputValue)) {
-                        return (
-                            <EmptyState
-                                onSelectPeople={handleSelectPeople}
-                                onSelectPerson={handleSelectPerson}
-                            />
-                        );
-                    }
-                    return null;
+                    return (
+                        <EmptyState
+                            onSelectPeople={handleSelectPeople}
+                            onSelectPerson={handleSelectPerson}
+                        />
+                    );
                 }}
             />
         </SearchInputWrapper>
@@ -475,6 +459,18 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
                 )}
                 {props.children}
             </div>
+            <Typography
+                variant="mini"
+                sx={{
+                    mt: 2,
+                    pt: "12px",
+                    borderTop: "1px solid",
+                    borderColor: "stroke.faint",
+                    color: "text.muted",
+                }}
+            >
+                {t("search_navigate_hint")}
+            </Typography>
         </SelectComponents.Menu>
     );
 }
@@ -500,7 +496,7 @@ function SearchGroupHeading(props: GroupHeadingProps<SearchOption, false>) {
     );
 }
 
-function SearchNoMatches() {
+function SearchEmptyState({ initial = false }: { initial?: boolean }) {
     return (
         <Stack
             sx={{
@@ -517,11 +513,13 @@ function SearchNoMatches() {
                 sx={{ width: 130, height: 100, objectFit: "contain" }}
             />
             <Typography variant="h3" sx={{ color: "text.base" }}>
-                {t("search_no_matches")}
+                {t(initial ? "search_start_typing" : "search_no_matches")}
             </Typography>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                {t("search_try_another")}
-            </Typography>
+            {!initial && (
+                <Typography variant="small" sx={{ color: "text.muted" }}>
+                    {t("search_try_another")}
+                </Typography>
+            )}
         </Stack>
     );
 }
@@ -690,33 +688,6 @@ const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
     />
 );
 
-// noOptionsMessage must return null or react-select leaves an empty menu div.
-const shouldShowEmptyState = (inputValue: string) => {
-    if (inputValue) return false;
-
-    if (!isMLSupported && !isHLSGenerationSupported) {
-        return false;
-    }
-
-    const mlStatus = mlStatusSnapshot();
-    const vpStatus = hlsGenerationStatusSnapshot();
-
-    const isMLInactive =
-        !mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done";
-    const isVideoProcessing =
-        vpStatus?.enabled && vpStatus.status == "processing";
-
-    if (isMLInactive && !isVideoProcessing) {
-        const people = peopleStateSnapshot()?.visiblePeople;
-        const hasPeople = people && people.length > 0;
-        if (!hasPeople) {
-            return false;
-        }
-    }
-
-    return true;
-};
-
 const EmptyState: React.FC<
     Pick<SearchBarProps, "onSelectPeople" | "onSelectPerson">
 > = ({ onSelectPeople, onSelectPerson }) => {
@@ -749,7 +720,7 @@ const EmptyState: React.FC<
 
     const hasPeople = people && people.length > 0;
     if (!hasPeople && !label) {
-        return <></>;
+        return <SearchEmptyState initial />;
     }
 
     return (
