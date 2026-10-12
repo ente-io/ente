@@ -8,6 +8,7 @@ import 'package:ente_components/theme/text_styles.dart';
 import 'package:ente_components/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 enum TextInputComponentMessageType { helper, error, alert, success }
 
@@ -220,6 +221,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
     final colors = context.componentColors;
     final message = widget.message;
     final messageColor = _messageColor(colors);
+    final messageIcon = _messageIcon(messageColor);
     final prefix = _buildPrefix();
     final suffix = _buildSuffix(colors);
     final suffixTap = _suffixTapHandler;
@@ -345,21 +347,26 @@ class _TextInputComponentState extends State<TextInputComponent> {
           ),
         ),
         if (message != null) ...[
-          const SizedBox(height: Spacing.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (_messageIcon(messageColor) != null) ...[
-                _messageIcon(messageColor)!,
-                const SizedBox(width: Spacing.sm),
-              ],
-              Expanded(
-                child: Text(
-                  message,
-                  style: TextStyles.mini.copyWith(color: messageColor),
+          const SizedBox(height: Spacing.xs),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: Spacing.lg),
+            child: Row(
+              children: [
+                if (messageIcon != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+                    child: messageIcon,
+                  ),
+                  const SizedBox(width: Spacing.xs),
+                ],
+                Expanded(
+                  child: Text(
+                    message,
+                    style: TextStyles.tiny.copyWith(color: messageColor),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ],
@@ -513,17 +520,17 @@ class _TextInputComponentState extends State<TextInputComponent> {
 
   Widget? _messageIcon(Color color) {
     if (widget.messageIcon != null) {
-      return Icon(widget.messageIcon, size: IconSizes.small, color: color);
+      return Icon(widget.messageIcon, size: IconSizes.tiny, color: color);
     }
     return switch (widget.messageType) {
-      TextInputComponentMessageType.alert => Icon(
-        Icons.warning_amber_rounded,
-        size: IconSizes.small,
+      TextInputComponentMessageType.alert => HugeIcon(
+        icon: HugeIcons.strokeRoundedAlert02,
+        size: IconSizes.tiny,
         color: color,
       ),
-      TextInputComponentMessageType.success => Icon(
-        Icons.check_circle_outline_rounded,
-        size: IconSizes.small,
+      TextInputComponentMessageType.success => HugeIcon(
+        icon: HugeIcons.strokeRoundedTick02,
+        size: IconSizes.tiny,
         color: color,
       ),
       TextInputComponentMessageType.error ||
