@@ -1993,9 +1993,6 @@ const Page: React.FC = () => {
                         {...{ isInSearchMode }}
                         onSidebar={showSidebar}
                         onUpload={openUploader}
-                        onShowSearchInput={() =>
-                            dispatch({ type: "enterSearchMode" })
-                        }
                         onSelectSearchOption={handleSelectSearchOption}
                         onSelectPeople={() => dispatch({ type: "showPeople" })}
                         onSelectPerson={handleSelectPerson}
