@@ -176,10 +176,6 @@ Jump to a category:
 - [Why are some photos not uploading?](/photos/faq/backup-and-sync#photos-not-uploading)
 - [Can I use the desktop app and mobile app at the same time?](/photos/faq/backup-and-sync#use-multiple-devices)
 
-### Exporting Your Data
-
-- [Is continuous export an independent backup?](/photos/faq/backup-and-sync#continuous-export-independent-backup)
-
 ### File Support & Upload Limits
 
 - [What file formats does Ente support?](/photos/faq/backup-and-sync#file-formats)
