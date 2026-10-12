@@ -355,7 +355,7 @@ const SearchInput: React.FC<
                     styles={styles}
                     loadOptions={loadOptions}
                     // Moving focus to a tab must not reload the current query.
-                    cacheOptions={open ? inputValue : undefined}
+                    cacheOptions={open}
                     filterOption={({ data }) =>
                         matchesSearchCategory(data, category)
                     }
