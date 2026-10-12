@@ -217,6 +217,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         barMode,
         isInSearchMode,
         collectionSummary,
+        hasOwnFiles: selectedOwnFileCount > 0,
         hasOnlyOwnFiles,
         showAddPerson: !!onShowAssignPersonDialog,
         showEditLocation: !!onEditLocation && hasOnlyOwnFiles,

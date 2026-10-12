@@ -1569,6 +1569,7 @@ const Page: React.FC = () => {
     const selectedOwnCount = selected.ownCount;
     const handleDeleteFiles = useCallback(
         (suppressSelectionBar = false) => {
+            if (selectedOwnCount === 0) return;
             setTrashFilesDialog({
                 count: selectedOwnCount,
                 onConfirm: createFileOpHandler("trash", {
