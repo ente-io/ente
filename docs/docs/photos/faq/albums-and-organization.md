@@ -444,7 +444,7 @@ Restored photos will be moved to an album of choice.
 
 No. You can restore several photos together, but Ente moves the selection to an album you choose. It does not automatically return each photo to its previous album.
 
-If the photos came from different albums, restore them in separate groups and choose the right album for each group. Photos in Ente Trash can be restored within 30 days.
+If the photos came from different albums, restore them in separate groups and choose the right album for each group. If a photo was in more than one album, add it back to the other albums after restoring it. Photos in Ente Trash can be restored within 30 days.
 
 ### How do I permanently delete photos or empty trash? {#empty-trash}
 

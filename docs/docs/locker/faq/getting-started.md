@@ -38,9 +38,9 @@ Public links to shared content can also be viewed in any web browser.
 
 ### Can I upload a whole folder to Ente Locker? {#locker-folder-upload}
 
-Yes. Folder upload is available in Locker on the web. Open [locker.ente.com](https://locker.ente.com) in a desktop browser and upload the folder there.
+Yes. Open [locker.ente.com](https://locker.ente.com) on a desktop and drag the folder onto the page. The file picker only selects files.
 
-Each file in the folder is saved as a separate Locker item. You can group those items in a collection, similar to a folder.
+Uploaded files are saved as separate Locker items. You can group them in a collection, similar to a folder. Empty files are skipped.
 
 The Locker mobile app's **File** option is for selecting files.
 
