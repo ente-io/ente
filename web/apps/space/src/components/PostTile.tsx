@@ -1,19 +1,17 @@
 import { Box } from "@mui/material";
-import { SpaceCaptionText } from "components/CaptionText";
+import { SpacePostAvatar } from "components/PostAvatar";
 import {
     SpacePostPhotosBadge,
     SpacePostVideoBadge,
 } from "components/PostPhotosBadge";
 import { viewerOriginKey } from "components/viewer-transition";
 import log from "ente-base/log";
+import { useDecodedImage } from "hooks/use-decoded-image";
 import React from "react";
 import type { SpacePostAsset, SpacePostPhoto } from "services/space";
 import { spaceSurface, spaceTextMuted } from "styles/colors";
-import {
-    minimumPostPhotoFrameAspectRatio,
-    spaceProfilePostRadius,
-} from "styles/tiles";
-import { formatSpaceDate } from "utils/display";
+import { spaceProfilePostRadius } from "styles/tiles";
+import { spaceTouchTargetSize } from "styles/touch-targets";
 import { thumbHashDataURLFromBase64 } from "utils/thumbhash";
 
 const green = "#08C225";
@@ -39,34 +37,48 @@ export interface SpacePostTileItem {
 
 interface SpacePostTileProps {
     displayName: string;
+    showAvatar?: boolean;
+    subtlePhotosBadge?: boolean;
+    onLoadAvatar?: () => Promise<string | null>;
     imageUrl?: string;
     index: number;
+    isAvatarPending?: boolean;
     isUnavailable: boolean;
     item: SpacePostTileItem;
     loadRootMargin: string;
     onImageDecodeError: () => void;
     onLoadImage: () => Promise<string | undefined>;
     onOpen: (imageUrl: string) => void;
+    onOpenProfile?: () => void;
     onRememberDimensions?: (itemID: string, image: HTMLImageElement) => void;
     photoIndex?: number;
 }
 
 export const SpacePostTile: React.FC<SpacePostTileProps> = ({
     displayName,
+    showAvatar = false,
+    subtlePhotosBadge,
+    onLoadAvatar,
     imageUrl,
     index,
+    isAvatarPending = false,
     isUnavailable: isPostUnavailable,
     item,
     loadRootMargin,
     onImageDecodeError,
     onLoadImage,
     onOpen,
+    onOpenProfile,
     onRememberDimensions,
     photoIndex = 0,
 }) => {
     const [shouldLoad, setShouldLoad] = React.useState(Boolean(imageUrl));
     const [readyImageUrl, setReadyImageUrl] = React.useState<string>();
     const [failedImageUrl, setFailedImageUrl] = React.useState<string>();
+    const decodedAvatar = useDecodedImage(
+        showAvatar ? item.avatarUrl : undefined,
+        true,
+    );
     const tileRef = React.useRef<HTMLButtonElement | null>(null);
     const shownPhoto = item.photos?.[photoIndex];
     const thumbHash = photoIndex > 0 ? shownPhoto?.thumbHash : item.thumbHash;
@@ -78,11 +90,6 @@ export const SpacePostTile: React.FC<SpacePostTileProps> = ({
     const isUnavailable =
         isPostUnavailable || Boolean(imageUrl && failedImageUrl == imageUrl);
     const photoCount = item.photos?.length ?? 1;
-    const caption = item.caption?.trim();
-    const aspectRatio = Math.max(
-        minimumPostPhotoFrameAspectRatio,
-        item.width && item.height ? item.width / item.height : 1,
-    );
 
     React.useEffect(() => {
         if (imageUrl) setShouldLoad(true);
@@ -122,17 +129,19 @@ export const SpacePostTile: React.FC<SpacePostTileProps> = ({
         });
     }, [imageUrl, isUnavailable, onLoadImage, shouldLoad]);
 
+    React.useEffect(() => {
+        if (shouldLoad && !isUnavailable) void onLoadAvatar?.();
+    }, [isUnavailable, onLoadAvatar, shouldLoad]);
+
     return (
         <Box
-            component="article"
             sx={{
-                aspectRatio,
                 bgcolor: spaceSurface,
                 borderRadius: `${spaceProfilePostRadius}px`,
+                height: "100%",
                 minWidth: 0,
                 overflow: "hidden",
                 position: "relative",
-                width: "100%",
             }}
         >
             <Box
@@ -248,74 +257,17 @@ export const SpacePostTile: React.FC<SpacePostTileProps> = ({
                 ) : null}
                 {!isUnavailable && (
                     <>
-                        <Box
-                            aria-hidden
-                            data-space-viewer-header-shade
-                            sx={{
-                                background:
-                                    "linear-gradient(180deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0))",
-                                filter: "blur(12px)",
-                                height: 100,
-                                left: -12,
-                                pointerEvents: "none",
-                                position: "absolute",
-                                right: -12,
-                                top: -12,
-                            }}
+                        <SpacePostPhotosBadge
+                            count={photoCount}
+                            inset={8}
+                            subtle={subtlePhotosBadge}
                         />
-                        <Box
-                            component="time"
-                            data-space-viewer-header
-                            dateTime={new Date(item.timestampMs).toISOString()}
-                            sx={{
-                                color: "#D9D9D9",
-                                fontFamily:
-                                    '"Inter Variable", Inter, sans-serif',
-                                fontSize: 12,
-                                fontWeight: 500,
-                                left: 16,
-                                lineHeight: "16px",
-                                pointerEvents: "none",
-                                position: "absolute",
-                                top: 16,
-                            }}
-                        >
-                            {formatSpaceDate(item.timestampMs)}
-                        </Box>
-                        <SpacePostPhotosBadge count={photoCount} inset={12} />
                         <SpacePostVideoBadge
                             durationMs={
                                 item.photos?.[photoIndex]?.video?.durationMs
                             }
                             size={18}
                         />
-                        {caption && (
-                            <Box
-                                title={caption}
-                                sx={{
-                                    bottom: 20,
-                                    color: "#E6E6E6",
-                                    fontFamily:
-                                        '"Inter Variable", Inter, sans-serif',
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    left: "50%",
-                                    lineHeight: "21px",
-                                    maxWidth: "78%",
-                                    pointerEvents: "none",
-                                    position: "absolute",
-                                    textAlign: "center",
-                                    textWrap: "balance",
-                                    transform: "translateX(-50%)",
-                                    width: "max-content",
-                                }}
-                            >
-                                <SpaceCaptionText
-                                    caption={caption}
-                                    lineClamp={2}
-                                />
-                            </Box>
-                        )}
                     </>
                 )}
                 {isUnavailable && (
@@ -335,6 +287,43 @@ export const SpacePostTile: React.FC<SpacePostTileProps> = ({
                     </Box>
                 )}
             </Box>
+            {showAvatar && (
+                <Box
+                    component="button"
+                    type="button"
+                    aria-label={`Open ${displayName}'s profile`}
+                    data-space-viewer-avatar
+                    disabled={!onOpenProfile}
+                    onClick={onOpenProfile}
+                    sx={{
+                        alignItems: "flex-end",
+                        appearance: "none",
+                        bgcolor: "transparent",
+                        border: 0,
+                        borderRadius: "50%",
+                        bottom: 0,
+                        cursor: onOpenProfile ? "pointer" : "default",
+                        display: "flex",
+                        height: spaceTouchTargetSize,
+                        left: 0,
+                        p: "0 0 8px 8px",
+                        position: "absolute",
+                        width: spaceTouchTargetSize,
+                        "&:focus-visible": {
+                            outline: `2px solid ${green}`,
+                            outlineOffset: -2,
+                        },
+                    }}
+                >
+                    <SpacePostAvatar
+                        ready={!isAvatarPending && decodedAvatar.ready}
+                        size={26}
+                        src={
+                            decodedAvatar.failed ? undefined : decodedAvatar.src
+                        }
+                    />
+                </Box>
+            )}
         </Box>
     );
 };

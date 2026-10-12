@@ -8,6 +8,8 @@ import {
     cacheCurrentSpaceFeedPage,
     loadCachedSpaceFeed,
     loadSpaceFeedSession,
+    rememberSpaceFeedSessionPosts,
+    spaceFeedSessionItems,
     type SpaceFeedSession,
 } from "services/feed-cache";
 import { consumeSentSpaceInviteFriend, spaceInviteURL } from "services/invite";
@@ -115,6 +117,7 @@ const Page: React.FC = () => {
         const isCancelled = () => request.cancelled;
         let loadedSpaceId: string | undefined;
         let cachedFeedSyncedAtMs: number | undefined;
+        let loadedFeedSession: SpaceFeedSession | undefined;
         setSpaceId(undefined);
         setFeedItems([]);
         setFeedSession(undefined);
@@ -129,9 +132,12 @@ const Page: React.FC = () => {
                 const session = await loadSpaceFeedSession(spaceId);
                 const cachedFeed = await loadCachedSpaceFeed(spaceId);
                 if (isCancelled()) return;
+                loadedFeedSession = session;
                 setFeedSession(session);
                 cachedFeedSyncedAtMs = cachedFeed?.syncedAtMs;
-                setFeedItems(cachedFeed?.items ?? []);
+                setFeedItems(
+                    spaceFeedSessionItems(session, cachedFeed?.items ?? []),
+                );
                 setFeedNextCursor(
                     cachedFeed?.dirty ? undefined : cachedFeed?.nextCursor,
                 );
@@ -151,12 +157,14 @@ const Page: React.FC = () => {
             }
             if (savedSpaceId != nextSpaceId) await loadCache(nextSpaceId);
             while (!isCancelled()) {
+                const feedRequestedAtMs = Date.now();
                 const feed = await loadCurrentFeedPage(nextSpaceId);
                 if (isCancelled()) return undefined;
                 const applied = await cacheCurrentSpaceFeedPage(
                     nextSpaceId,
                     feed,
                     { syncedAtMs: cachedFeedSyncedAtMs },
+                    feedRequestedAtMs,
                 );
                 if (applied) return feed;
                 cachedFeedSyncedAtMs = (await loadCachedSpaceFeed(nextSpaceId))
@@ -167,7 +175,9 @@ const Page: React.FC = () => {
             .then((feed) => {
                 if (isCancelled() || !loadedSpaceId || !feed) return;
 
-                setFeedItems(feed.items);
+                setFeedItems(
+                    spaceFeedSessionItems(loadedFeedSession, feed.items),
+                );
                 setFeedNextCursor(feed.nextCursor);
                 const refreshedPostIDs = new Set(
                     feed.items.map((item) => item.postId),
@@ -217,6 +227,7 @@ const Page: React.FC = () => {
         setIsFeedLoadingMore(true);
         try {
             const feed = await loadCurrentFeedPage(spaceId, feedNextCursor);
+            await rememberSpaceFeedSessionPosts(spaceId, feed.items);
             setFeedItems((currentItems) => {
                 const existingPostIds = new Set(
                     currentItems.map((item) => item.postId),
@@ -408,6 +419,7 @@ const Page: React.FC = () => {
                         try {
                             if (status == "friend") {
                                 clearSpaceFriendsCache();
+                                const feedRequestedAtMs = Date.now();
                                 const [requests, friends, feed] =
                                     await Promise.all([
                                         loadCurrentFriendRequests(actorSpaceId),
@@ -419,8 +431,15 @@ const Page: React.FC = () => {
                                 await cacheCurrentSpaceFeedPage(
                                     actorSpaceId,
                                     feed,
+                                    undefined,
+                                    feedRequestedAtMs,
                                 );
-                                setFeedItems(feed.items);
+                                setFeedItems(
+                                    spaceFeedSessionItems(
+                                        feedSession,
+                                        feed.items,
+                                    ),
+                                );
                                 setFeedNextCursor(feed.nextCursor);
                             } else {
                                 setFriendRequests(
