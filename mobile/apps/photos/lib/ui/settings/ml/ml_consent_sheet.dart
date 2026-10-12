@@ -3,6 +3,7 @@ import "dart:async";
 import "package:ente_components/ente_components.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/notification_event.dart";
 import "package:photos/service_locator.dart";
@@ -10,6 +11,8 @@ import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:styled_text/styled_text.dart";
+
+final _logger = Logger("MLConsentSheet");
 
 Future<bool> showMLConsentSheet(BuildContext context) async {
   Future<void>? enabling;
@@ -36,9 +39,13 @@ Future<void> enableMLConsent() async {
   await setMLConsent(true);
   memoriesCacheService.queueUpdateCache();
   Bus.instance.fire(NotificationEvent());
-  await MLService.instance.init();
-  await SemanticSearchService.instance.init();
-  unawaited(MLService.instance.runAllML(force: true));
+  try {
+    await MLService.instance.init();
+    await SemanticSearchService.instance.init();
+    unawaited(MLService.instance.runAllML(force: true));
+  } catch (e, s) {
+    _logger.severe("Could not start machine learning after consent", e, s);
+  }
 }
 
 Future<void> markMLConsentPromptSeen() async {

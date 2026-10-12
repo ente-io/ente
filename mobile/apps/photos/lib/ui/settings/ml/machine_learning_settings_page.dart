@@ -115,7 +115,7 @@ class _MachineLearningSettingsPageState
   Widget build(BuildContext context) {
     final hasEnabled = hasGrantedMLConsent;
 
-    if (!hasEnabled) {
+    if (!hasEnabled || _isEnabling) {
       return _buildDisabledMLScreen(context);
     }
 
