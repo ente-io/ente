@@ -692,9 +692,7 @@ class _InfoViewFieldState extends State<_InfoViewField> {
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
-    final hasValue = widget.isSecret
-        ? widget.value.isNotEmpty
-        : widget.value.trim().isNotEmpty;
+    final hasValue = widget.value.isNotEmpty;
     final onCopy = hasValue ? widget.onCopy : null;
 
     if (widget.isSecret) {

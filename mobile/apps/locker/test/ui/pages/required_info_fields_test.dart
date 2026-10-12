@@ -13,6 +13,7 @@ import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/files/sync/models/file_magic.dart';
 import 'package:locker/ui/pages/account_credentials_page.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
+import 'package:locker/ui/pages/emergency_contact_page.dart';
 import 'package:locker/ui/pages/personal_note_page.dart';
 import 'package:locker/ui/pages/physical_records_page.dart';
 
@@ -216,6 +217,55 @@ void main() {
     expect(find.text('Password'), findsNothing);
     expect(find.text('••••••••'), findsNothing);
   });
+
+  for (final name in ['   ', '']) {
+    testWidgets(
+      'shared view field uses exact emptiness for contact name "$name"',
+      (tester) async {
+        await showPage(
+          tester,
+          EmergencyContactPage(
+            mode: InfoPageMode.view,
+            existingFile: partialFile('emergencyContact', {
+              'name': name,
+              'contactDetails': '555-0100',
+            }),
+          ),
+        );
+
+        final fieldFinder = find.byType(TextInputComponent).first;
+        final field = tester.widget<TextInputComponent>(fieldFinder);
+        expect(field.initialValue, name);
+        if (name.isEmpty) {
+          expect(field.suffix, isNull);
+          expect(field.onSuffixTap, isNull);
+        } else {
+          expect(field.suffix, isNotNull);
+          String? copied;
+          tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            (call) async {
+              if (call.method == 'Clipboard.setData') {
+                copied = (call.arguments as Map)['text'] as String;
+              }
+              return null;
+            },
+          );
+          addTearDown(() {
+            tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+              SystemChannels.platform,
+              null,
+            );
+          });
+          await tester.tap(find.byWidget(field.suffix!));
+          await tester.pump();
+          expect(copied, name);
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump(const Duration(seconds: 3));
+        }
+      },
+    );
+  }
 
   testWidgets('partial Thing omits empty Location', (tester) async {
     await showPage(
