@@ -142,10 +142,25 @@ void main() {
     final editor = await _openEditor(tester);
     await _tap(tester, find.text('Done'));
 
+    final layer = editor.activeLayers.single as TextLayer;
+    layer
+      ..scale = 5
+      ..rotation = 0.02;
+    editor.setState(() {});
+    await tester.pumpAndSettle();
+    await _tap(tester, find.byTooltip('Edit'));
+    expect(find.byKey(layer.keyInternalSize), findsNothing);
+    await _tap(tester, find.text('Cancel'));
+    expect(find.byKey(layer.keyInternalSize), findsOneWidget);
+
+    await tester.tap(find.byKey(layer.keyInternalSize));
+    await tester.pumpAndSettle();
     await _tap(tester, find.byTooltip('Edit'));
     await tester.enterText(find.byType(TextField), 'Changed');
     await _tap(tester, find.text('Done'));
     expect((editor.activeLayers.single as TextLayer).text, 'Changed');
+    expect(editor.activeLayers.single.scale, 5);
+    expect(editor.activeLayers.single.rotation, 0.02);
 
     editor.undoAction();
     await tester.pumpAndSettle();

@@ -14,6 +14,7 @@ import {
     spacePostLikePopDurationMs,
     spacePostLikePopTiming,
 } from "components/post-like-animation";
+import { SpacePostLikeHeart } from "components/PostLikeHeart";
 import React from "react";
 import {
     spaceControlBackground,
@@ -60,6 +61,8 @@ interface SpacePostReplyControlsProps {
     isReplyMode: boolean;
     liked: boolean;
     likePopID: number;
+    likeToggleID: number;
+    postKey: string;
     onLike: () => void;
     onSendReply: () => void;
     replyActionPhase: SpaceActionPhase | null;
@@ -74,6 +77,8 @@ export const SpacePostReplyControls: React.FC<SpacePostReplyControlsProps> = ({
     isReplyMode,
     liked,
     likePopID,
+    likeToggleID,
+    postKey,
     onLike,
     onSendReply,
     replyActionPhase,
@@ -236,29 +241,41 @@ export const SpacePostReplyControls: React.FC<SpacePostReplyControlsProps> = ({
                             />
                         )
                     ) : (
-                        <Box
-                            key={isLikePopping ? `heart-${likePopID}` : "heart"}
-                            component="span"
-                            sx={{
-                                animation: isLikePopping
-                                    ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
-                                    : undefined,
-                                display: "flex",
-                                lineHeight: 0,
-                                transformOrigin: "50% 58%",
-                                "@media (prefers-reduced-motion: reduce)": {
-                                    animation: "none",
-                                },
-                            }}
-                        >
-                            <HugeiconsIcon
-                                fill={liked ? green : "none"}
-                                icon={FavouriteIcon}
-                                primaryColor={liked ? green : undefined}
-                                size={26}
-                                strokeWidth={1.8}
-                            />
-                        </Box>
+                        <SpacePostLikeHeart
+                            key={postKey}
+                            liked={liked}
+                            toggleID={likeToggleID}
+                            popID={likePopID}
+                            size={26}
+                            fallback={
+                                <Box
+                                    key={
+                                        isLikePopping
+                                            ? `heart-${likePopID}`
+                                            : "heart"
+                                    }
+                                    component="span"
+                                    sx={{
+                                        animation: isLikePopping
+                                            ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
+                                            : undefined,
+                                        display: "flex",
+                                        lineHeight: 0,
+                                        transformOrigin: "50% 58%",
+                                        "@media (prefers-reduced-motion: reduce)":
+                                            { animation: "none" },
+                                    }}
+                                >
+                                    <HugeiconsIcon
+                                        fill={liked ? green : "none"}
+                                        icon={FavouriteIcon}
+                                        primaryColor={liked ? green : undefined}
+                                        size={26}
+                                        strokeWidth={1.8}
+                                    />
+                                </Box>
+                            }
+                        />
                     )}
                 </Box>
             </Box>

@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/tab_changed_event.dart";
+import "package:photos/models/home_tab.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
@@ -67,7 +68,7 @@ class SearchWidgetState extends State<SearchWidget> {
       if (!mounted) {
         return;
       }
-      if (event.selectedIndex != 3) {
+      if (event.selectedIndex != searchTabIndex) {
         focusNode.unfocus();
       }
     });
@@ -75,7 +76,7 @@ class SearchWidgetState extends State<SearchWidget> {
       event,
     ) async {
       debugPrint("Firing now ${event.selectedIndex}");
-      if (mounted && event.selectedIndex == 3) {
+      if (mounted && event.selectedIndex == searchTabIndex) {
         focusNode.requestFocus();
       }
     });

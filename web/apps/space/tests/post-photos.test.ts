@@ -4,7 +4,7 @@ import {
     viewerPhotosFromPost,
 } from "../src/utils/post-photos";
 
-test("matching portrait videos use their full frame before and after publication", () => {
+test("matching tall portraits use a 3:4 preview before and after publication", () => {
     const drafts = [
         { width: 1440, height: 2560 },
         { width: 720, height: 1280 },
@@ -12,8 +12,8 @@ test("matching portrait videos use their full frame before and after publication
     ];
     const published = drafts.map(() => ({ width: 576, height: 1024 }));
 
-    expect(spacePostFrameAspectRatio(drafts)).toBe(9 / 16);
-    expect(spacePostFrameAspectRatio(published)).toBe(9 / 16);
+    expect(spacePostFrameAspectRatio(drafts)).toBe(3 / 4);
+    expect(spacePostFrameAspectRatio(published)).toBe(3 / 4);
 });
 
 test.each([0, 1, 2])(
@@ -41,6 +41,18 @@ test.each([0, 1, 2])(
 test("a single portrait keeps the feed height limit", () => {
     expect(spacePostFrameAspectRatio([{ width: 720, height: 1280 }])).toBe(
         3 / 4,
+    );
+});
+
+test.each([
+    { width: 900, height: 1200 },
+    { width: 960, height: 1200 },
+    { width: 1200, height: 1200 },
+    { width: 1600, height: 900 },
+])("previews preserve wider ratios $width × $height", (photo) => {
+    expect(spacePostFrameAspectRatio([photo])).toBe(photo.width / photo.height);
+    expect(spacePostFrameAspectRatio([photo, photo])).toBe(
+        photo.width / photo.height,
     );
 });
 
@@ -97,6 +109,7 @@ test("profile navigation groups photos under their post and resets each counter"
 });
 
 test.each([
+    { width: 720, height: 1280 },
     { width: 800, height: 1200 },
     { width: 800, height: 800 },
 ])("preserves measured cover dimensions $width × $height", (dimensions) => {

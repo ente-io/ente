@@ -236,7 +236,7 @@ Future<void> _editTextLayer(ProImageEditorState editor, TextLayer layer) async {
       key: editor.textEditor,
       layer: (LayerCopyManager().copyLayer(layer) as TextLayer)
         ..fontScale = layer.fontScale * displayScale,
-      heroTag: layer.rotation == 0 ? layer.id : null,
+      heroTag: layer.id,
       configs: editor.configs.copyWith(
         textEditor: editor.configs.textEditor.copyWith(
           enableImageBoundaryTextWrap: layer.maxTextWidth != null,

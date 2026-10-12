@@ -6,7 +6,6 @@ import {
 import { RowCard } from "ente-base/components/v2/RowCard";
 import type { SidebarActionID } from "ente-new/photos/services/search/types";
 import { t } from "i18next";
-import { useRouter } from "next/router";
 import React, { useCallback, useEffect } from "react";
 
 export type FreeUpSpaceAction = Extract<
@@ -15,6 +14,8 @@ export type FreeUpSpaceAction = Extract<
 >;
 
 type FreeUpSpaceProps = NestedSidebarDrawerVisibilityProps & {
+    onShowLargeFiles: () => void;
+    onShowDuplicates: () => void;
     pendingAction?: FreeUpSpaceAction;
     onActionHandled?: (action?: FreeUpSpaceAction) => void;
 };
@@ -25,9 +26,9 @@ export const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
     onRootClose,
     pendingAction,
     onActionHandled,
+    onShowLargeFiles,
+    onShowDuplicates,
 }) => {
-    const router = useRouter();
-
     const handleRootClose = useCallback(() => {
         onClose();
         onRootClose();
@@ -35,13 +36,13 @@ export const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
 
     const handleDeduplicate = useCallback(() => {
         onRootClose();
-        void router.push("/duplicates");
-    }, [onRootClose, router]);
+        onShowDuplicates();
+    }, [onRootClose, onShowDuplicates]);
 
     const handleLargeFiles = useCallback(() => {
         onRootClose();
-        void router.push("/large-files");
-    }, [onRootClose, router]);
+        onShowLargeFiles();
+    }, [onRootClose, onShowLargeFiles]);
 
     useEffect(() => {
         if (!open || !pendingAction) return;

@@ -196,6 +196,7 @@ export const WatchFolder: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         </span>
                         <span style={{ display: "flex", padding: "8px" }}>
                             <ChevronRightIcon
+                                className="ente-chevron-right"
                                 sx={{ fontSize: "20px", color: "text.muted" }}
                             />
                         </span>

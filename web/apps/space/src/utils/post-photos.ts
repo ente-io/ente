@@ -25,7 +25,7 @@ export const spacePostFrameAspectRatio = (
             photo.height &&
             Math.abs(photo.width / photo.height / aspectRatio - 1) < 0.01,
     )
-        ? aspectRatio
+        ? Math.max(minimumPostPhotoFrameAspectRatio, aspectRatio)
         : 1;
 };
 

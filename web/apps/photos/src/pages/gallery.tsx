@@ -22,7 +22,6 @@ import { FileListWithViewer } from "@/components/FileListWithViewer";
 import { FixCreationTime } from "@/components/FixCreationTime";
 import { PlanSelector } from "@/components/PlanSelector";
 import { QuickLinkCreatedNotification } from "@/components/QuickLinkCreatedNotification";
-import { SearchBar, type SearchBarProps } from "@/components/SearchBar";
 import {
     SelectedFileOptions,
     type CollectionOp,
@@ -36,6 +35,13 @@ import {
     SearchResultsHeader,
     type RemotePullOpts,
 } from "@/components/gallery";
+import { DuplicatesView } from "@/components/gallery/DuplicatesView";
+import { LargeFilesView } from "@/components/gallery/LargeFilesView";
+import {
+    NormalNavbarContents,
+    UploadButton,
+} from "@/components/gallery/NormalNavbarContents";
+import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 import {
     findCollectionCreatingIfNeeded,
     performCollectionOp,
@@ -53,11 +59,8 @@ import { useIsOffline } from "@/components/utils/use-is-offline";
 import { shouldShowWhatsNew } from "@/services/changelog";
 import exportService from "@/services/export";
 import { processPendingAlbumJoin } from "@/services/join-album";
-import { Upload01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Link, Stack, Typography } from "@mui/material";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import {
@@ -73,14 +76,12 @@ import { NavbarBase } from "ente-base/components/Navbar";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
-import type { ButtonishProps } from "ente-base/components/mui";
-import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { subscribeMainWindowFocus } from "ente-base/electron";
 import { isNamedError } from "ente-base/error";
+import { isHTTPErrorWithStatus } from "ente-base/http";
 import { hasPendingAlbumToJoin } from "ente-base/join-album";
 import log from "ente-base/log";
 import {
@@ -191,8 +192,20 @@ const Page: React.FC = () => {
     const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
 
+    const [cleanupView, setCleanupView] = useState<
+        "large-files" | "duplicates"
+    >();
+    const isCleanupViewOpen = cleanupView !== undefined;
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+    const [trashFilesDialog, setTrashFilesDialog] = useState<{
+        count: number;
+        onConfirm: () => void;
+    }>();
+    const {
+        show: showTrashFilesDialog,
+        props: trashFilesDialogVisibilityProps,
+    } = useModalVisibility();
     const [suppressContextSelectionBar, setSuppressContextSelectionBar] =
         useState(false);
     const [selected, setSelected] = useState<SelectedState>({
@@ -764,9 +777,7 @@ const Page: React.FC = () => {
                     ? { mode: "people", personID: activePersonID }
                     : {
                           mode: barMode as
-                              | "albums"
-                              | "hidden-albums"
-                              | "archive-albums",
+                              "albums" | "hidden-albums" | "archive-albums",
                           collectionID: activeCollectionID!,
                       },
         };
@@ -793,9 +804,7 @@ const Page: React.FC = () => {
                     ? { mode: "people", personID: activePersonID }
                     : {
                           mode: barMode as
-                              | "albums"
-                              | "hidden-albums"
-                              | "archive-albums",
+                              "albums" | "hidden-albums" | "archive-albums",
                           collectionID: activeCollectionID!,
                       },
         };
@@ -822,11 +831,19 @@ const Page: React.FC = () => {
         });
     };
 
-    const keyboardShortcutHandlerRef = useRef({ selectAll, clearSelection });
+    const keyboardShortcutHandlerRef = useRef({
+        selectAll,
+        clearSelection,
+        isCleanupViewOpen,
+    });
 
     useEffect(() => {
-        keyboardShortcutHandlerRef.current = { selectAll, clearSelection };
-    }, [selectAll, clearSelection]);
+        keyboardShortcutHandlerRef.current = {
+            selectAll,
+            clearSelection,
+            isCleanupViewOpen,
+        };
+    }, [selectAll, clearSelection, isCleanupViewOpen]);
 
     const showSessionExpiredDialog = useCallback(
         () => showMiniDialog(sessionExpiredDialogAttributes(logout)),
@@ -913,6 +930,7 @@ const Page: React.FC = () => {
 
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
+            if (keyboardShortcutHandlerRef.current.isCleanupViewOpen) return;
             switch (e.key) {
                 case "Escape":
                     keyboardShortcutHandlerRef.current.clearSelection();
@@ -1143,6 +1161,22 @@ const Page: React.FC = () => {
         }
     };
 
+    const onSendLinkError = useCallback(
+        (e: unknown) => {
+            if (isHTTPErrorWithStatus(e, 402)) {
+                log.error("Could not create share link", e);
+                showMiniDialog(
+                    errorDialogAttributes(
+                        t("share_link_subscription_required"),
+                    ),
+                );
+            } else {
+                onGenericError(e);
+            }
+        },
+        [showMiniDialog, onGenericError],
+    );
+
     const createFileOpHandler =
         (op: FileOp, options?: { suppressSelectionBar?: boolean }) => () => {
             void (async () => {
@@ -1250,7 +1284,11 @@ const Page: React.FC = () => {
                     clearSelection();
                     await remotePull({ silent: true, source: `file-op:${op}` });
                 } catch (e) {
-                    onGenericError(e);
+                    if (op == "sendLink") {
+                        onSendLinkError(e);
+                    } else {
+                        onGenericError(e);
+                    }
                 } finally {
                     if (options?.suppressSelectionBar) {
                         setSuppressContextSelectionBar(false);
@@ -1365,6 +1403,7 @@ const Page: React.FC = () => {
 
     const handleShowCollectionSummaryWithID = useCallback(
         (collectionSummaryID: number | undefined) => {
+            setCleanupView(undefined);
             // Museum deletes collection contents asynchronously; pull on entry.
             if (collectionSummaryID == PseudoCollectionID.trash) {
                 void remoteFilesPull();
@@ -1399,6 +1438,36 @@ const Page: React.FC = () => {
         },
         [authenticateUser, handleShowCollectionSummaryWithID, barMode],
     );
+
+    const handleShowCleanupView = useCallback(
+        (view: "large-files" | "duplicates") => {
+            setSelected({
+                ownCount: 0,
+                count: 0,
+                collectionID: 0,
+                context: undefined,
+            });
+            closeCollectionMap();
+            closeSlideshow();
+            dispatch({ type: "exitSearch", shouldExitSearchMode: true });
+            setCleanupView(view);
+        },
+        [closeCollectionMap, closeSlideshow],
+    );
+
+    const handleShowLargeFiles = useCallback(
+        () => handleShowCleanupView("large-files"),
+        [handleShowCleanupView],
+    );
+    const handleShowDuplicates = useCallback(
+        () => handleShowCleanupView("duplicates"),
+        [handleShowCleanupView],
+    );
+
+    const handleCloseCleanupView = useCallback(() => {
+        setCleanupView(undefined);
+        dispatch({ type: "showAll" });
+    }, []);
 
     const handleSidebarShowCollectionSummary = showCollectionSummary;
 
@@ -1494,7 +1563,7 @@ const Page: React.FC = () => {
                 setPublicLinkToast({ open: true, url: resolvedURL });
                 await remotePull({ silent: true, source: "viewer-send-link" });
             } catch (e) {
-                onGenericError(e);
+                onSendLinkError(e);
             } finally {
                 hideLoadingBar();
             }
@@ -1506,7 +1575,7 @@ const Page: React.FC = () => {
             customDomain,
             quickLinkVisibility,
             remotePull,
-            onGenericError,
+            onSendLinkError,
         ],
     );
 
@@ -1544,6 +1613,19 @@ const Page: React.FC = () => {
 
     const selectedCount = selected.count;
     const selectedOwnCount = selected.ownCount;
+    const handleDeleteFiles = useCallback(
+        (suppressSelectionBar = false) => {
+            if (selectedOwnCount === 0) return;
+            setTrashFilesDialog({
+                count: selectedOwnCount,
+                onConfirm: createFileOpHandler("trash", {
+                    suppressSelectionBar,
+                }),
+            });
+            showTrashFilesDialog();
+        },
+        [selectedOwnCount, createFileOpHandler, showTrashFilesDialog],
+    );
     const selectedFavoriteCount = useMemo(
         () => countSelectedFavorites(selected, favoriteFileIDs),
         [favoriteFileIDs, selected],
@@ -1621,17 +1703,7 @@ const Page: React.FC = () => {
                     createFileOpHandler("fixTime", { suppressSelectionBar })();
                     break;
                 case "trash":
-                    showMiniDialog({
-                        title: t("trash_files_title"),
-                        message: t("trash_files_message"),
-                        continue: {
-                            text: t("move_to_trash"),
-                            color: "critical",
-                            action: createFileOpHandler("trash", {
-                                suppressSelectionBar,
-                            }),
-                        },
-                    });
+                    handleDeleteFiles(suppressSelectionBar);
                     break;
                 case "deletePermanently":
                     showMiniDialog({
@@ -1759,6 +1831,7 @@ const Page: React.FC = () => {
             createOnSelectForCollectionOp,
             handleOpenCollectionSelector,
             handleRemoveFilesFromCollection,
+            handleDeleteFiles,
             showMiniDialog,
             showContextMenuAssignPerson,
             showEditLocation,
@@ -1872,7 +1945,7 @@ const Page: React.FC = () => {
             message={
                 watchFolderView ? t("watch_folder_dropzone_hint") : undefined
             }
-            disabled={shouldDisableDropzone || !!slideshow}
+            disabled={shouldDisableDropzone || !!slideshow || isCleanupViewOpen}
             onDrop={setDragAndDropFiles}
         >
             {blockingLoad && <TranslucentLoadingOverlay />}
@@ -1902,114 +1975,132 @@ const Page: React.FC = () => {
                 files={fixCreationTimeFiles}
                 onRemotePull={remotePull}
             />
-            <NavbarBase
-                sx={[
-                    {
-                        mb: "12px",
-                        px: "24px",
-                        "@media (width < 720px)": { px: "4px" },
-                    },
-                    showSelectionBar && { borderColor: "accent.main" },
-                ]}
-            >
-                {showSelectionBar ? (
-                    <SelectedFileOptions
-                        barMode={barMode}
-                        isInSearchMode={isInSearchMode}
-                        collection={
-                            isInSearchMode ? undefined : activeCollection
-                        }
-                        collectionSummary={
-                            isInSearchMode ? undefined : activeCollectionSummary
-                        }
-                        selectedFileCount={selected.count}
-                        selectedOwnFileCount={selected.ownCount}
-                        selectedFavoriteCount={selectedFavoriteCount}
-                        onClearSelection={clearSelection}
-                        onRemoveFilesFromCollection={
-                            handleRemoveFilesFromCollection
-                        }
-                        onOpenCollectionSelector={handleOpenCollectionSelector}
-                        onSelectAll={handleSelectAll}
-                        isAllSelected={isAllSelectedInView}
+            {trashFilesDialog && (
+                <TrashFilesDialog
+                    {...trashFilesDialogVisibilityProps}
+                    {...trashFilesDialog}
+                />
+            )}
+            {!isCleanupViewOpen && (
+                <>
+                    <NavbarBase
+                        sx={[
+                            {
+                                mb: "12px",
+                                px: "24px",
+                                "@media (width < 720px)": { px: "4px" },
+                            },
+                            showSelectionBar && { borderColor: "accent.main" },
+                        ]}
+                    >
+                        {showSelectionBar ? (
+                            <SelectedFileOptions
+                                barMode={barMode}
+                                isInSearchMode={isInSearchMode}
+                                collection={
+                                    isInSearchMode
+                                        ? undefined
+                                        : activeCollection
+                                }
+                                collectionSummary={
+                                    isInSearchMode
+                                        ? undefined
+                                        : activeCollectionSummary
+                                }
+                                selectedFileCount={selected.count}
+                                selectedOwnFileCount={selected.ownCount}
+                                selectedFavoriteCount={selectedFavoriteCount}
+                                onClearSelection={clearSelection}
+                                onDelete={() => handleDeleteFiles()}
+                                onRemoveFilesFromCollection={
+                                    handleRemoveFilesFromCollection
+                                }
+                                onOpenCollectionSelector={
+                                    handleOpenCollectionSelector
+                                }
+                                onSelectAll={handleSelectAll}
+                                isAllSelected={isAllSelectedInView}
+                                {...{
+                                    createOnCreateForCollectionOp,
+                                    createOnSelectForCollectionOp,
+                                    createFileOpHandler,
+                                    onShowAssignPersonDialog:
+                                        showAddPersonAction
+                                            ? showContextMenuAssignPerson
+                                            : undefined,
+                                }}
+                                onEditLocation={showEditLocation}
+                            />
+                        ) : barMode == "hidden-albums" ? (
+                            <SectionNavbarContents
+                                title={t("section_hidden")}
+                                onBack={() => dispatch({ type: "showAlbums" })}
+                                onUpload={openUploader}
+                            />
+                        ) : !isInSearchMode && isInArchiveSection ? (
+                            <SectionNavbarContents
+                                title={t("section_archive")}
+                                onBack={() => dispatch({ type: "showAlbums" })}
+                                onUpload={openUploader}
+                            />
+                        ) : (
+                            <NormalNavbarContents
+                                {...{ isInSearchMode }}
+                                onSidebar={showSidebar}
+                                onUpload={openUploader}
+                                onSelectSearchOption={handleSelectSearchOption}
+                                onSelectPeople={() =>
+                                    dispatch({ type: "showPeople" })
+                                }
+                                onSelectPerson={handleSelectPerson}
+                            />
+                        )}
+                    </NavbarBase>
+                    {isFirstLoad && <FirstLoadMessage />}
+                    {isOffline && <OfflineMessage />}
+
+                    <GalleryBarAndListHeader
                         {...{
-                            createOnCreateForCollectionOp,
-                            createOnSelectForCollectionOp,
-                            createFileOpHandler,
-                            onShowAssignPersonDialog: showAddPersonAction
-                                ? showContextMenuAssignPerson
-                                : undefined,
+                            user,
+                            // TODO: These are incorrect assertions, the types of the
+                            // component need to be updated.
+                            activeCollection: activeCollection!,
+                            activeCollectionID: activeCollectionID!,
+                            activePerson,
+                            setFileListHeader,
+                            saveGroups,
+                            canCreateAlbum: !isInArchiveSection,
+                            onAddSaveGroup,
+                            onEditAlbumDetails: showEditAlbumDetails,
+                            onShowMap: handleShowCollectionMap,
+                            onCollectionSlideshow: startSlideshow,
                         }}
-                        onEditLocation={showEditLocation}
-                    />
-                ) : barMode == "hidden-albums" ? (
-                    <SectionNavbarContents
-                        title={t("section_hidden")}
-                        onBack={() => dispatch({ type: "showAlbums" })}
-                        onUpload={openUploader}
-                    />
-                ) : !isInSearchMode && isInArchiveSection ? (
-                    <SectionNavbarContents
-                        title={t("section_archive")}
-                        onBack={() => dispatch({ type: "showAlbums" })}
-                        onUpload={openUploader}
-                    />
-                ) : (
-                    <NormalNavbarContents
-                        {...{ isInSearchMode }}
-                        onSidebar={showSidebar}
-                        onUpload={openUploader}
-                        onShowSearchInput={() =>
-                            dispatch({ type: "enterSearchMode" })
+                        mode={barMode}
+                        shouldHide={isInSearchMode}
+                        barCollectionSummaries={barCollectionSummaries}
+                        emailByUserID={state.emailByUserID}
+                        shareSuggestionEmails={state.shareSuggestionEmails}
+                        people={
+                            (state.view?.type == "people"
+                                ? state.view.visiblePeople
+                                : undefined) ?? []
                         }
-                        onSelectSearchOption={handleSelectSearchOption}
-                        onSelectPeople={() => dispatch({ type: "showPeople" })}
+                        allPeople={
+                            (state.view?.type == "people"
+                                ? state.view.people
+                                : undefined) ?? []
+                        }
+                        onChangeMode={handleChangeBarMode}
+                        setBlockingLoad={setBlockingLoad}
+                        setActiveCollectionID={
+                            handleShowCollectionSummaryWithID
+                        }
+                        hasActiveFileSelection={hasActiveFileSelection}
+                        onRemotePull={remotePull}
                         onSelectPerson={handleSelectPerson}
                     />
-                )}
-            </NavbarBase>
-            {isFirstLoad && <FirstLoadMessage />}
-            {isOffline && <OfflineMessage />}
-
-            <GalleryBarAndListHeader
-                {...{
-                    user,
-                    // TODO: These are incorrect assertions, the types of the
-                    // component need to be updated.
-                    activeCollection: activeCollection!,
-                    activeCollectionID: activeCollectionID!,
-                    activePerson,
-                    setFileListHeader,
-                    saveGroups,
-                    canCreateAlbum: !isInArchiveSection,
-                    onAddSaveGroup,
-                    onEditAlbumDetails: showEditAlbumDetails,
-                    onShowMap: handleShowCollectionMap,
-                    onCollectionSlideshow: startSlideshow,
-                }}
-                mode={barMode}
-                shouldHide={isInSearchMode}
-                barCollectionSummaries={barCollectionSummaries}
-                emailByUserID={state.emailByUserID}
-                shareSuggestionEmails={state.shareSuggestionEmails}
-                people={
-                    (state.view?.type == "people"
-                        ? state.view.visiblePeople
-                        : undefined) ?? []
-                }
-                allPeople={
-                    (state.view?.type == "people"
-                        ? state.view.people
-                        : undefined) ?? []
-                }
-                onChangeMode={handleChangeBarMode}
-                setBlockingLoad={setBlockingLoad}
-                setActiveCollectionID={handleShowCollectionSummaryWithID}
-                hasActiveFileSelection={hasActiveFileSelection}
-                onRemotePull={remotePull}
-                onSelectPerson={handleSelectPerson}
-            />
-
+                </>
+            )}
             <Upload
                 {...{
                     user,
@@ -2039,6 +2130,8 @@ const Page: React.FC = () => {
             <Sidebar
                 {...sidebarVisibilityProps}
                 onClose={handleSidebarClose}
+                onShowLargeFiles={handleShowLargeFiles}
+                onShowDuplicates={handleShowDuplicates}
                 normalCollectionSummaries={normalCollectionSummaries}
                 uncategorizedCollectionSummaryID={
                     state.uncategorizedCollectionSummaryID
@@ -2060,10 +2153,20 @@ const Page: React.FC = () => {
                 title={t("add_a_person")}
                 onSelectPerson={handleContextMenuSelectPerson}
             />
-            {!isInSearchMode &&
-            !isFirstLoad &&
-            !state.collectionFiles.length &&
-            activeCollectionID === PseudoCollectionID.all ? (
+            {cleanupView === "duplicates" ? (
+                <DuplicatesView
+                    onBack={handleCloseCleanupView}
+                    onRemoteFilesPull={remoteFilesPull}
+                />
+            ) : cleanupView === "large-files" ? (
+                <LargeFilesView
+                    onBack={handleCloseCleanupView}
+                    onRemoteFilesPull={remoteFilesPull}
+                />
+            ) : !isInSearchMode &&
+              !isFirstLoad &&
+              !state.collectionFiles.length &&
+              activeCollectionID === PseudoCollectionID.all ? (
                 <GalleryEmptyState
                     isUploadInProgress={uploadManager.isUploadInProgress()}
                     onUpload={openUploader}
@@ -2249,53 +2352,6 @@ const preloadImage = (imgBasePath: string) => {
     const srcset: string[] = [];
     for (let i = 1; i <= 3; i++) srcset.push(`${imgBasePath}/${i}x.png ${i}x`);
     new Image().srcset = srcset.join(",");
-};
-
-type NormalNavbarContentsProps = SearchBarProps & {
-    onSidebar: () => void;
-    onUpload: () => void;
-};
-
-const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
-    onSidebar,
-    onUpload,
-    ...props
-}) => (
-    <>
-        {!props.isInSearchMode && <SidebarButton onClick={onSidebar} />}
-        <SearchBar {...props} />
-        {!props.isInSearchMode && <UploadButton onClick={onUpload} />}
-    </>
-);
-
-const SidebarButton: React.FC<ButtonishProps> = ({ onClick }) => (
-    <IconButton {...{ onClick }}>
-        <MenuIcon />
-    </IconButton>
-);
-
-const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = uploadManager.isUploadInProgress();
-    const isSmallWidth = useIsSmallWidth();
-
-    const icon = <HugeiconsIcon icon={Upload01Icon} size={20} />;
-
-    return (
-        <>
-            {isSmallWidth ? (
-                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
-            ) : (
-                <FocusVisibleButton
-                    color="secondary"
-                    startIcon={icon}
-                    sx={{ borderRadius: "16px" }}
-                    {...{ onClick, disabled }}
-                >
-                    {t("upload")}
-                </FocusVisibleButton>
-            )}
-        </>
-    );
 };
 
 interface SectionNavbarContentsProps {

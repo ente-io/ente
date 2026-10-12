@@ -31,10 +31,15 @@ class MoreFromEnteSection extends StatelessWidget {
           const SizedBox(height: _sectionGap),
           Row(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _EnteAppLink(app: apps.first, onTap: onAppTap),
+              Flexible(
+                child: _EnteAppLink(app: apps.first, onTap: onAppTap),
+              ),
               const SizedBox(width: _appGap),
-              _EnteAppLink(app: apps.last, onTap: onAppTap),
+              Flexible(
+                child: _EnteAppLink(app: apps.last, onTap: onAppTap),
+              ),
             ],
           ),
         ],
@@ -52,38 +57,34 @@ class _MoreFromEnteBrand extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
 
-    return SizedBox(
+    return Column(
       key: const ValueKey('more-from-ente-brand'),
-      width: _brandWidth,
-      height: _brandHeight,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(
-            height: _moreFromLineHeight,
-            child: Text(
-              label,
-              maxLines: 1,
-              style: TextStyle(
-                color: colors.primary,
-                fontFamily: 'Gochi Hand',
-                package: 'ente_components',
-                fontFamilyFallback: const [TextStyles.fontFamily],
-                fontSize: 26.279,
-                height: 1.02,
-                letterSpacing: -1.0512,
-              ),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: _moreFromLineHeight),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: colors.primary,
+              fontFamily: 'Gochi Hand',
+              package: 'ente_components',
+              fontFamilyFallback: const [TextStyles.fontFamily],
+              fontSize: 26.279,
+              height: 1.02,
+              letterSpacing: -1.0512,
             ),
           ),
-          SvgPicture.asset(
-            'packages/ente_components/assets/ente_wordmark.svg',
-            width: _wordmarkWidth,
-            height: _wordmarkHeight,
-            fit: BoxFit.fill,
-            colorFilter: ColorFilter.mode(colors.textBase, BlendMode.srcIn),
-          ),
-        ],
-      ),
+        ),
+        SvgPicture.asset(
+          'packages/ente_components/assets/ente_wordmark.svg',
+          width: _wordmarkWidth,
+          height: _wordmarkHeight,
+          fit: BoxFit.fill,
+          colorFilter: ColorFilter.mode(colors.textBase, BlendMode.srcIn),
+        ),
+      ],
     );
   }
 }
@@ -102,8 +103,8 @@ class _EnteAppLink extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Ente $label',
-      child: SizedBox(
-        width: _appTileSize,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: _appTileSize),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -126,13 +127,10 @@ class _EnteAppLink extends StatelessWidget {
               ],
             ),
             const SizedBox(height: _appLabelGap),
-            SizedBox(
-              height: _appLabelHeight,
-              child: Text(
-                label,
-                maxLines: 1,
-                style: TextStyles.mini.copyWith(color: colors.textLight),
-              ),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyles.mini.copyWith(color: colors.textLight),
             ),
           ],
         ),
@@ -153,15 +151,12 @@ const _appLabels = <ComponentApp, String>{
   ComponentApp.locker: 'Locker',
 };
 
-const double _brandWidth = 103;
-const double _brandHeight = 45.43;
-const double _moreFromLineHeight = 27;
 const double _wordmarkWidth = 62;
 const double _wordmarkHeight = 18.43;
+const double _moreFromLineHeight = 27;
 const double _sectionGap = 16;
 const double _appTileSize = 52;
 const double _appIconSize = 31;
 const double _appRadius = 16.774;
 const double _appLabelGap = 8;
-const double _appLabelHeight = 16;
 const double _appGap = 39;

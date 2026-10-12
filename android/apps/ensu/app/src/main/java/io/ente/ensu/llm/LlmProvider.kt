@@ -44,6 +44,9 @@ internal class ModelMemoryDeferred : Exception()
 internal class ModelMemoryUnavailable :
     Exception("Not enough free memory. Close other apps and try again.")
 
+internal class ModelImagesUnsupported :
+    Exception("This model doesn't support images. Send a text-only message.")
+
 class RequiredModelValidationError(val modelId: String) :
     Exception("Downloaded model failed validation: $modelId")
 
@@ -224,6 +227,7 @@ class LlmProvider(
         val asset = chatAsset(selection)
         downloadAssets(listOf(asset), onProgress)
         if (!assetStore.isDownloaded(asset)) throw RequiredModelValidationError(selection.id)
+        assetStore.cleanupObsoleteChatModels(selection.id)
     }
 
     internal suspend fun prewarmChatModelIfDownloaded(
@@ -339,6 +343,9 @@ class LlmProvider(
         deviceCapabilityProvider.chatCapability().requireChatSupported()
         currentJobId = null
         val mmprojPath = assetStore.llmMmprojPath(chatAsset(selection))?.absolutePath
+        if (imageFiles.isNotEmpty() && mmprojPath == null) {
+            throw ModelImagesUnsupported()
+        }
         if (mmprojPath != null && !hasRequiredWorkReserve()) {
             throw ModelMemoryUnavailable()
         }
@@ -557,11 +564,12 @@ class LlmProvider(
         withModelContext {
             withResources {
                 val model = loadedModel ?: return@withResources
+                val key = currentModelKey ?: return@withResources
                 val contextParams =
                     LlmContextParams(
                         contextSize = currentContextLength,
                         nThreads = null,
-                        nBatch = null,
+                        nBatch = LlmModelSelection(key.id, key.requestedContextLength).batchSize,
                     )
                 loadedContext?.destroy()
                 loadedContext = model.newContext(contextParams)
@@ -625,6 +633,8 @@ class LlmProvider(
             downloadAssets(listOf(asset), onProgress)
         }
 
+        assetStore.cleanupObsoleteChatModels(selection.id)
+
         onProgress(DownloadProgress(100, "Loading model...", phase = DownloadPhase.Loading))
         try {
             loadWithFallbacks(
@@ -665,12 +675,13 @@ class LlmProvider(
 
     private fun chatAsset(selection: LlmModelSelection): Asset = llmAsset(selection.id)
 
+    fun supportsImages(selection: LlmModelSelection): Boolean =
+        assetStore.llmMmprojPath(chatAsset(selection)) != null
+
     private fun loadWithFallbacks(selection: LlmModelSelection, modelFile: File) {
-        val desiredCtx = selection.contextLength ?: 12000
-        val contexts =
-            listOf(desiredCtx, 12000, 8192, 4096, 2048, 1024).distinct().filter { it > 0 }
+        val contexts = selection.contextCandidates()
         val threads = max(1, Runtime.getRuntime().availableProcessors() - 1)
-        val batch = 512
+        val batch = selection.batchSize
 
         val modelParams =
             LlmModelLoadParams(

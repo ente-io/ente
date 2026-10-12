@@ -37,6 +37,7 @@ Jump to a category:
 - [Why is the latest version not available on F-Droid?](/photos/faq/account-creation#fdroid-delay)
 - [How can I manually setup Ente Photos installation with Obtainium?](/photos/faq/account-creation#manual-obtanium)
 - [How do I update to the latest version?](/photos/faq/account-creation#update-latest)
+- [Why is my language not an option in Ente?](/photos/faq/account-creation#language-not-available)
 
 ### Multi-Device Setup
 
@@ -107,6 +108,7 @@ Jump to a category:
 
 - [How do I delete photos in Ente?](/photos/faq/albums-and-organization#delete-photos)
 - [How do I restore deleted photos?](/photos/faq/albums-and-organization#restore-photos)
+- [If I restore several photos from Trash, will they return to their original albums?](/photos/faq/albums-and-organization#bulk-restore-original-albums)
 - [How do I permanently delete photos or empty trash?](/photos/faq/albums-and-organization#empty-trash)
 - [Can I recover files after 30 days in trash?](/photos/faq/albums-and-organization#recover-after-30-days)
 - [Does trash count against my storage?](/photos/faq/albums-and-organization#trash-storage)
@@ -140,6 +142,7 @@ Jump to a category:
 - [How can I check my backup status?](/photos/faq/backup-and-sync#check-backup-status)
 - [Will turning Optimize iPhone Storage back on upload my photos again?](/photos/faq/backup-and-sync#optimize-storage-reupload)
 - [Does Ente backup Live Photos from iPhone?](/photos/faq/backup-and-sync#live-photos-backup)
+- [Can I save just the still image from a Live Photo or remove its motion clip?](/photos/faq/backup-and-sync#live-photo-still-only)
 - [Can I pick photos from Ente in other apps?](/photos/faq/backup-and-sync#pick-photos-in-other-apps)
 - [Can I open photos from my camera app in Ente?](/photos/faq/backup-and-sync#open-camera-photos-in-ente)
 
@@ -222,6 +225,7 @@ Jump to a category:
 
 - [Do metadata edits sync across devices?](/photos/faq/metadata-and-editing#edits-sync)
 - [Can I edit metadata on all platforms?](/photos/faq/metadata-and-editing#platform-support)
+- [Why is GPS location missing when I share a photo to Ente on Android?](/photos/faq/metadata-and-editing#android-share-gps-missing)
 - [Does Ente modify any file metadata?](/photos/faq/metadata-and-editing#modify-file-metadata)
 
 ## Migration
@@ -272,9 +276,14 @@ Jump to a category:
 - [Does magic search require internet?](/photos/faq/search-and-discovery#magic-search-offline)
 - [Can I search for photos using the descriptions I've added?](/photos/faq/search-and-discovery#search-descriptions)
 
+### Memories
+
+- [How do I mute the music in Memories?](/photos/faq/search-and-discovery#mute-memories-music)
+
 ### General Search
 
 - [How do I search my photos?](/photos/faq/search-and-discovery#how-to-search)
+- [Why does searching for a month show photos from other years?](/photos/faq/search-and-discovery#month-search-other-years)
 - [Can I save my searches?](/photos/faq/search-and-discovery#save-searches)
 - [Does search include archived or hidden photos?](/photos/faq/search-and-discovery#search-archived-hidden)
 - [Indexing stuck at 100% but faces don't appear](/photos/faq/search-and-discovery#indexing-stuck-no-faces)
@@ -318,6 +327,7 @@ Jump to a category:
 ### Account Management
 
 - [How can I delete my account?](/photos/faq/security-and-privacy#delete-account)
+- [Will deleting my Ente Auth or Locker account also delete my Photos account?](/photos/faq/security-and-privacy#shared-account-deletion)
 
 ### Trust and Reliability
 
@@ -530,6 +540,7 @@ Jump to a category:
 - [Who can create collaborative albums or public links?](/photos/faq/sharing-and-collaboration#who-can-share)
 - [Can I change permissions for collaborators after sharing?](/photos/faq/sharing-and-collaboration#change-permissions)
 - [What happens to shared albums if I cancel my subscription?](/photos/faq/sharing-and-collaboration#cancel-subscription-impact)
+- [Why can't I create a public link after my subscription expires?](/photos/faq/sharing-and-collaboration#expired-subscription-public-links)
 
 ### Security and Privacy
 

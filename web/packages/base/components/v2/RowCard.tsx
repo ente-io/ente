@@ -16,7 +16,7 @@ export const RowCard: React.FC<RowCardProps> = ({
     title,
     subtitle,
     onClick,
-    endIcon = <ChevronRightIcon />,
+    endIcon = <ChevronRightIcon className="ente-chevron-right" />,
 }) => (
     <Box
         component={onClick ? FocusVisibleButton : "div"}
