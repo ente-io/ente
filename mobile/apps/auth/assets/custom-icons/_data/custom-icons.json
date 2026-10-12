@@ -1870,7 +1870,8 @@
     },
     {
       "title": "OpenSRS",
-      "slug": "opensrs"
+      "slug": "opensrs",
+      "darkSlug": "opensrs-dark"
     },
     {
       "title": "Opera",
