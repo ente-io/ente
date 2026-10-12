@@ -27,8 +27,10 @@ import {
     spacePostLikePopDurationMs,
     spacePostLikePopTiming,
 } from "components/post-like-animation";
+import { paintStretchingDot } from "components/post-photos-dots";
 import { SpacePostAvatar } from "components/PostAvatar";
 import { SpacePostGrid } from "components/PostGrid";
+import { SpacePostLikeHeart } from "components/PostLikeHeart";
 import { SpacePostPhotosCounter } from "components/PostPhotosCounter";
 import { SpacePostPhotosDots } from "components/PostPhotosDots";
 import { SpacePostTile } from "components/PostTile";
@@ -36,6 +38,7 @@ import { SpacePWAInstallPrompt } from "components/PWAInstallPrompt";
 import { SpaceLoadingSpinner } from "components/RouteFallback";
 import { SpaceShareInviteButton } from "components/ShareInviteButton";
 import { SpaceSkipLink } from "components/SkipLink";
+import { viewerOriginKey } from "components/viewer-transition";
 import log from "ente-base/log";
 import { useBrowserBackClose } from "hooks/use-browser-back-close";
 import { useDecodedImage } from "hooks/use-decoded-image";
@@ -510,12 +513,14 @@ interface FeedLikeButtonProps {
     isLiked: boolean;
     onClick: () => void;
     popID: number;
+    toggleID: number;
 }
 
 const FeedLikeButton: React.FC<FeedLikeButtonProps> = ({
     isLiked,
     onClick,
     popID,
+    toggleID,
 }) => {
     const isPopping = isLiked && popID > 0;
 
@@ -562,31 +567,41 @@ const FeedLikeButton: React.FC<FeedLikeButtonProps> = ({
                 },
             }}
         >
-            <Box
-                key={isPopping ? `heart-${popID}` : "heart"}
-                component="span"
-                sx={{
-                    animation: isPopping
-                        ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
-                        : undefined,
-                    display: "flex",
-                    lineHeight: 0,
-                    position: "relative",
-                    transformOrigin: "50% 58%",
-                    zIndex: 1,
-                    "@media (prefers-reduced-motion: reduce)": {
-                        animation: "none",
-                    },
-                }}
-            >
-                <HugeiconsIcon
-                    fill={isLiked ? green : "none"}
-                    icon={FavouriteIcon}
-                    primaryColor={isLiked ? green : feedActionForeground}
-                    size={feedActionIconSize}
-                    strokeWidth={2.2}
-                />
-            </Box>
+            <SpacePostLikeHeart
+                liked={isLiked}
+                toggleID={toggleID}
+                popID={popID}
+                size={feedActionIconSize}
+                fallback={
+                    <Box
+                        key={isPopping ? `heart-${popID}` : "heart"}
+                        component="span"
+                        sx={{
+                            animation: isPopping
+                                ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
+                                : undefined,
+                            display: "flex",
+                            lineHeight: 0,
+                            position: "relative",
+                            transformOrigin: "50% 58%",
+                            zIndex: 1,
+                            "@media (prefers-reduced-motion: reduce)": {
+                                animation: "none",
+                            },
+                        }}
+                    >
+                        <HugeiconsIcon
+                            fill={isLiked ? green : "none"}
+                            icon={FavouriteIcon}
+                            primaryColor={
+                                isLiked ? green : feedActionForeground
+                            }
+                            size={feedActionIconSize}
+                            strokeWidth={2.2}
+                        />
+                    </Box>
+                }
+            />
         </Box>
     );
 };
@@ -617,6 +632,7 @@ const FeedPhotoOverlay: React.FC<{
                 index={photoIndex}
                 count={photoCount}
                 activeColor={green}
+                stretches
             />
             {caption && (
                 <Box title={caption} sx={{ minWidth: 0, width: "100%" }}>
@@ -640,6 +656,7 @@ const FeedPhoto: React.FC<{
     shouldLoad: boolean;
     shouldPreloadVideo: boolean;
     thumbHash?: string;
+    viewerOrigin?: string;
 }> = ({
     imageUrl,
     isActive,
@@ -653,6 +670,7 @@ const FeedPhoto: React.FC<{
     shouldPreloadVideo,
     thumbHash,
     video,
+    viewerOrigin,
 }) => {
     const decodedPhoto = useDecodedImage(imageUrl, true);
     const isPostUnavailable = isUnavailable || Boolean(decodedPhoto.failed);
@@ -695,6 +713,7 @@ const FeedPhoto: React.FC<{
             }
             disabled={video ? undefined : !canOpenPhoto}
             tabIndex={!video && isActive ? 0 : -1}
+            data-space-viewer-origin={viewerOrigin}
             onClick={video ? undefined : onOpenPhoto}
             onFocus={(event: React.FocusEvent<HTMLElement>) => {
                 if (video && event.target == event.currentTarget)
@@ -706,6 +725,7 @@ const FeedPhoto: React.FC<{
                 appearance: "none",
                 bgcolor: "transparent",
                 border: 0,
+                borderRadius: "inherit",
                 cursor: canOpenPhoto ? "pointer" : "default",
                 display: "block",
                 height: "100%",
@@ -849,6 +869,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
     const [isLiked, setIsLiked] = useState(viewerLiked);
     const [muted, setMuted] = useState(true);
     const [likePopID, setLikePopID] = useState(0);
+    const [likeToggleID, setLikeToggleID] = useState(0);
     const [shouldLoadMedia, setShouldLoadMedia] = useState(
         !isUnavailable && Boolean(imageUrl) && !isAvatarPending,
     );
@@ -1071,6 +1092,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
 
         const nextLiked = !isLiked;
         setIsLiked(nextLiked);
+        setLikeToggleID((id) => id + 1);
         if (nextLiked) setLikePopID((id) => id + 1);
         void onSetPostLiked?.(postId, nextLiked).catch((error: unknown) => {
             log.error("Failed to update post like", error);
@@ -1347,6 +1369,11 @@ const FeedItem: React.FC<FeedItemProps> = ({
                     }}
                     onScroll={(event) => {
                         const carousel = event.currentTarget;
+                        paintStretchingDot(
+                            rootRef.current!,
+                            carousel.scrollLeft / carousel.clientWidth,
+                            photoCount,
+                        );
                         const index = Math.round(
                             carousel.scrollLeft / carousel.clientWidth,
                         );
@@ -1374,6 +1401,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                         scrollToPhoto(index);
                     }}
                     sx={{
+                        borderRadius: "inherit",
                         display: "flex",
                         height: "100%",
                         overflowX: "hidden",
@@ -1414,11 +1442,17 @@ const FeedItem: React.FC<FeedItemProps> = ({
                             shouldPreloadVideo={shouldPreloadVideo}
                             thumbHash={photo.thumbHash}
                             video={photo.video}
+                            viewerOrigin={
+                                index == photoIndex
+                                    ? viewerOriginKey(spaceId, postId)
+                                    : undefined
+                            }
                         />
                     ))}
                 </Box>
                 <Box
                     aria-hidden
+                    data-space-viewer-header-shade
                     sx={{
                         background:
                             "linear-gradient(180deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0))",
@@ -1433,6 +1467,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                     }}
                 />
                 <Box
+                    data-space-viewer-header
                     sx={{
                         alignItems: "center",
                         boxSizing: "border-box",
@@ -1713,6 +1748,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                         isLiked={isLiked}
                         onClick={handleLikeClick}
                         popID={likePopID}
+                        toggleID={likeToggleID}
                     />
                 </Box>
             )}
@@ -2313,11 +2349,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                     };
                                 })}
                                 renderTile={(item, index) => {
-                                    const photo = {
-                                        ...spacePostPhotos(item)[0]!,
+                                    const postPhotos = spacePostPhotos(item);
+                                    const photoAt = (index: number) => ({
+                                        ...postPhotos[index]!,
                                         postId: item.postId,
                                         spaceId: item.spaceId,
-                                    };
+                                    });
+                                    const remembered = Math.min(
+                                        feedPhotoIndices[item.postId] ?? 0,
+                                        postPhotos.length - 1,
+                                    );
+                                    const photoIndex =
+                                        remembered > 0 &&
+                                        unavailableFeedPostsByKey[
+                                            feedPostImageCacheKey(
+                                                photoAt(remembered),
+                                            )
+                                        ]
+                                            ? 0
+                                            : remembered;
+                                    const photo = photoAt(photoIndex);
                                     const imageUrl =
                                         loadedFeedImageURLFor(photo);
                                     const avatarUrl =
@@ -2335,6 +2386,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                         <SpacePostTile
                                             key={item.id}
                                             item={{ ...item, avatarUrl }}
+                                            photoIndex={photoIndex}
                                             displayName={item.name}
                                             showAvatar
                                             subtlePhotosBadge
@@ -2384,14 +2436,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                                 const post = {
                                                     ...item,
                                                     avatarUrl,
-                                                    imageUrl,
+                                                    imageUrl:
+                                                        photoIndex == 0
+                                                            ? imageUrl
+                                                            : item.imageUrl,
                                                 };
-                                                openFeedPhoto(
-                                                    post,
-                                                    viewerPhotosFromPost(
+                                                openFeedPhoto(post, {
+                                                    ...viewerPhotosFromPost(
                                                         post,
-                                                    )[0]!,
-                                                );
+                                                    )[photoIndex]!,
+                                                    imageUrl,
+                                                });
                                             }}
                                         />
                                     );
