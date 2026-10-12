@@ -8,6 +8,8 @@ import "package:flutter/services.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
+import "package:photos/service_locator.dart";
+import "package:photos/services/wake_lock_service.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_button.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
 import "package:photos/ui/viewer/file/video_control/gallery_video_controls.dart";
@@ -17,7 +19,6 @@ import "package:photos/ui/viewer/file/video_double_tap_seek.dart";
 import "package:photos/ui/viewer/file/video_seek_controller.dart";
 import "package:photos/ui/viewer/file/viewer_app_bar.dart";
 import "package:video_player/video_player.dart" as vp;
-import "package:wakelock_plus/wakelock_plus.dart";
 
 class ExternalVideoViewer extends StatefulWidget {
   final String uri;
@@ -147,10 +148,9 @@ class ExternalVideoViewerState extends State<ExternalVideoViewer>
         if (event.status != PlaybackStatus.playing) {
           setState(() => _showControls = true);
         }
-        unawaited(
-          WakelockPlus.toggle(
-            enable: _isForeground && event.status == PlaybackStatus.playing,
-          ),
+        wakeLockService.updateWakeLock(
+          enable: _isForeground && event.status == PlaybackStatus.playing,
+          wakeLockFor: WakeLockFor.externalVideoPlayback,
         );
         _scheduleHideControls();
       case VolumeChangedEvent():
@@ -210,7 +210,7 @@ class ExternalVideoViewerState extends State<ExternalVideoViewer>
     unawaited(_subscription?.cancel());
     _controller?.dispose();
     _controller = null;
-    unawaited(WakelockPlus.disable());
+    _releaseWakeLock();
     if (_isFullscreen) unawaited(exitFullscreen());
     setState(() => _hasError = true);
   }
@@ -226,7 +226,7 @@ class ExternalVideoViewerState extends State<ExternalVideoViewer>
       _isForeground = false;
       _stopLongPressSpeed();
       unawaited(_run(() async => _controller?.pause()));
-      unawaited(WakelockPlus.disable());
+      _releaseWakeLock();
     } else if (state == AppLifecycleState.resumed) {
       _isForeground = true;
       if (_resumePlayback && _isPlaybackReady) {
@@ -277,6 +277,13 @@ class ExternalVideoViewerState extends State<ExternalVideoViewer>
 
   Future<void> exitFullscreen() => _setFullscreen(false);
 
+  void _releaseWakeLock() {
+    wakeLockService.updateWakeLock(
+      enable: false,
+      wakeLockFor: WakeLockFor.externalVideoPlayback,
+    );
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -285,7 +292,7 @@ class ExternalVideoViewerState extends State<ExternalVideoViewer>
     unawaited(_subscription?.cancel());
     _controller?.dispose();
     _seekController.dispose();
-    unawaited(WakelockPlus.disable());
+    _releaseWakeLock();
     if (_isFullscreen) {
       unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
       unawaited(
