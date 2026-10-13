@@ -146,10 +146,12 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
                     disableRestoreFocus
                     fullWidth
                     maxWidth={false}
-                    slotProps={{
-                        backdrop: {
-                            sx: { backgroundColor: "rgba(0,0,0,0.4)" },
+                    sx={{
+                        "& .MuiBackdrop-root": {
+                            backgroundColor: "rgba(0,0,0,0.55)",
                         },
+                    }}
+                    slotProps={{
                         paper: {
                             "aria-label": t("search"),
                             sx: {
@@ -339,7 +341,7 @@ const SearchInput: React.FC<
                 tabSelectsValue={false}
                 aria-label={t("search")}
                 escapeClearsValue
-                menuIsOpen={open}
+                menuIsOpen={open && !!inputValue.trim()}
                 onFocus={handleFocus}
                 placeholder={t("search_hint")}
                 loadingMessage={() => null}
@@ -599,7 +601,13 @@ const createSelectStyles = (
         },
     }),
     groupHeading: (style) => ({ ...style, margin: 0, padding: 0 }),
-    noOptionsMessage: (style) => ({ ...style, padding: 0 }),
+    noOptionsMessage: (style) => ({
+        ...style,
+        padding: 0,
+        flex: 1,
+        display: "grid",
+        placeItems: "center",
+    }),
     option: (style, { isFocused }) => ({
         ...style,
         padding: 0,
@@ -719,13 +727,7 @@ const EmptyState: React.FC<
     }
 
     const hasPeople = people && people.length > 0;
-    if (!hasPeople && !label) {
-        return (
-            <Typography variant="small" sx={{ color: "text.muted", py: 1 }}>
-                {t("search_start_typing")}
-            </Typography>
-        );
-    }
+    if (!hasPeople && !label) return null;
 
     return (
         <Box sx={{ textAlign: "left" }}>
