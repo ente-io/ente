@@ -824,7 +824,10 @@ class GalleryState extends State<Gallery> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _boundariesProvider?.setScrollController(_scrollController);
+        _boundariesProvider?.setScrollController(
+          _scrollController,
+          swipeActiveNotifier: _swipeActiveNotifier,
+        );
       }
     });
 
