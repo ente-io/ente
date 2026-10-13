@@ -287,12 +287,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 minHeight: 0,
                 px: mobile ? "12px" : "16px",
                 py: mobile ? "14px" : 0,
-                borderLeft: mobile ? 0 : "1px solid",
-                borderColor: "#E0E0E0",
+                borderLeft: mobile ? 0 : "2px solid",
+                borderColor: "rgba(224, 224, 224, 0.5)",
                 gap: "16px",
+                letterSpacing: 0,
                 ...theme.applyStyles("dark", {
                     "--gallery-navigation-surface": "#212121",
-                    borderColor: "#3E3E3E",
+                    borderColor: "rgba(62, 62, 62, 0.5)",
                 }),
             })}
         >
@@ -376,6 +377,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         minHeight: 0,
                         gap: "2px",
                         overflowY: "auto",
+                        pb: "12px",
                     }}
                 >
                     {visibleAlbumFilters.map((filter) => (
@@ -426,7 +428,15 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             )}
             {mode != "people" && (
                 <Stack sx={{ flexShrink: 0, gap: "2px", pb: "8px" }}>
-                    <Divider sx={{ mb: "8px" }} />
+                    <Divider
+                        sx={{
+                            mb: "8px",
+                            height: "2px",
+                            border: 0,
+                            bgcolor: "divider",
+                            opacity: 0.5,
+                        }}
+                    />
                     {albumShortcuts.map(({ id, label, icon, active }) => (
                         <BarCard
                             key={id}

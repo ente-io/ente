@@ -138,7 +138,11 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
                             borderRadius: "12px",
                         }}
                     >
-                        <HugeiconsIcon icon={Search01Icon} size={20} />
+                        <HugeiconsIcon
+                            icon={Search01Icon}
+                            size={20}
+                            strokeWidth={1.8}
+                        />
                     </FocusVisibleButton>
                 </Tooltip>
             </Stack>
