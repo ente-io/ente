@@ -136,6 +136,7 @@ const FriendIdentity: React.FC<FriendIdentityProps> = ({
             type="button"
             onClick={onOpen}
             aria-label={`Open ${displayName}'s profile`}
+            aria-haspopup="dialog"
             sx={{
                 alignItems: "center",
                 bgcolor: "transparent",
@@ -353,7 +354,7 @@ export const FriendsScreen: React.FC<FriendsScreenProps> = ({
                         alignItems: "center",
                         display: "grid",
                         gridTemplateColumns: `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
-                        height: 56,
+                        height: 68,
                         maxWidth: 390,
                         mx: "auto",
                         px: 2,

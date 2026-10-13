@@ -19,7 +19,7 @@ const textLight = spaceTextMuted;
 const warning = "#F63A3A";
 
 export const spaceAppAvatarCropSize =
-    "min(calc(100vw - 48px), calc(100dvh - 308px), 342px)";
+    "min(calc(100vw - 48px), calc(100dvh - 320px), 342px)";
 export const spaceSetupAvatarCropSize =
     "min(calc(100vw - 48px), calc(100dvh - 294px), 342px)";
 export const spaceSetupAvatarCropFooterHeight = "130px";
@@ -195,7 +195,7 @@ export const SpaceAvatarCropPage: React.FC<SpaceAvatarCropPageProps> = ({
                     boxSizing: "border-box",
                     display: "grid",
                     gridTemplateRows: isAppHeader
-                        ? "56px minmax(0, 1fr) auto auto"
+                        ? "68px minmax(0, 1fr) auto auto"
                         : `42px minmax(0, 1fr) auto ${spaceSetupAvatarCropFooterHeight}`,
                     height: "100%",
                     minHeight: 0,
@@ -219,7 +219,7 @@ export const SpaceAvatarCropPage: React.FC<SpaceAvatarCropPageProps> = ({
                                   alignItems: "center",
                                   display: "grid",
                                   gridTemplateColumns: `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
-                                  height: 56,
+                                  height: 68,
                                   px: 2,
                                   width: "100%",
                               }

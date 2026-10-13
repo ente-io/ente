@@ -364,7 +364,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                         alignItems: "center",
                         display: "grid",
                         gridTemplateColumns: `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
-                        height: 56,
+                        height: 68,
                         px: 2,
                         width: "100%",
                     }}
@@ -586,7 +586,7 @@ export const ChangeNameSettingsScreen: React.FC<
                         alignItems: "center",
                         display: "grid",
                         gridTemplateColumns: `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
-                        height: 56,
+                        height: 68,
                         px: 2,
                         width: "100%",
                     }}

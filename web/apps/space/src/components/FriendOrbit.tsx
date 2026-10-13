@@ -228,7 +228,7 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
                 suppressClick.current = false;
             }}
             sx={{
-                height: "calc(var(--space-page-height, 100svh) - 56px)",
+                height: "calc(var(--space-page-height, 100svh) - 68px)",
                 listStyle: "none",
                 m: 0,
                 overflow: "hidden",

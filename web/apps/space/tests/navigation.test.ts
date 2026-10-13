@@ -11,7 +11,7 @@ describe("navigation destinations", () => {
         ["/app/messages/[spaceId]", "/app/messages"],
         ["/app/friends", "/app/friends"],
         ["/profile-link", "/app/friends"],
-        ["/app/profile/photo-edit", "/app/profile"],
+        ["/app/profile/photo-edit", "/app"],
         ["/login", undefined],
         ["/application", undefined],
     ])("keeps %s in its parent destination", (path, destination) => {

@@ -204,15 +204,18 @@ const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
         "[data-space-viewer-avatar]",
     );
     const avatar = button?.firstElementChild;
-    if (!button || !(avatar instanceof HTMLElement)) return undefined;
+    const badge = tile.querySelector<HTMLElement>(
+        "[data-space-viewer-photos-badge]",
+    );
+    const elements: HTMLElement[] = [];
+    if (button && avatar instanceof HTMLElement) elements.push(avatar);
+    if (badge) elements.push(badge);
+    if (!elements.length) return undefined;
+
     const tileRect = rectOf(tile);
-    const avatarRect = rectOf(avatar);
-    const left = avatarRect.x - tileRect.x;
-    const fromBottom = tileRect.y + tileRect.h - avatarRect.y;
-    const rider = avatar.cloneNode(true) as HTMLElement;
-    for (const element of [rider, ...rider.querySelectorAll("*")])
-        if (element instanceof HTMLElement) element.style.animation = "none";
+    const rider = document.createElement("div");
     rider.setAttribute("aria-hidden", "true");
+    rider.inert = true;
     Object.assign(rider.style, {
         left: "0",
         pointerEvents: "none",
@@ -220,20 +223,44 @@ const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
         top: "0",
         zIndex: "1",
     });
+    const drawElements = elements.map((element) => {
+        const bounds = rectOf(element);
+        const clone = element.cloneNode(true) as HTMLElement;
+        for (const child of [clone, ...clone.querySelectorAll("*")])
+            if (child instanceof HTMLElement) child.style.animation = "none";
+        Object.assign(clone.style, {
+            left: "0",
+            position: "absolute",
+            right: "auto",
+            top: "0",
+        });
+        rider.append(clone);
+        element.style.opacity = "0";
+        return (v: ViewerRect) => {
+            const x =
+                element == avatar
+                    ? v.x + bounds.x - tileRect.x
+                    : v.x + v.w - (tileRect.x + tileRect.w - bounds.x);
+            const y =
+                element == avatar
+                    ? v.y + v.h - (tileRect.y + tileRect.h - bounds.y)
+                    : v.y + bounds.y - tileRect.y;
+            clone.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        };
+    });
     flyer.after(rider);
-    button.style.opacity = "0";
 
     return {
         element: rider,
         draw: ({ visible: v }: ViewerPhotoState, t: number) => {
-            rider.style.transform = `translate3d(${v.x + left}px, ${v.y + v.h - fromBottom}px, 0)`;
+            for (const drawElement of drawElements) drawElement(v);
             rider.style.opacity = String(
                 1 - Math.min(1, Math.max(0, t / 0.35)),
             );
         },
         remove: () => rider.remove(),
         reveal: () => {
-            button.style.opacity = "";
+            for (const element of elements) element.style.opacity = "";
         },
     };
 };

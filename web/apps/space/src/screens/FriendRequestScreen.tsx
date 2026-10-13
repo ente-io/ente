@@ -64,7 +64,7 @@ export const FriendRequestScreen: React.FC<FriendRequestScreenProps> = ({
                         display: "grid",
                         flexShrink: 0,
                         gridTemplateColumns: "44px 1fr 44px",
-                        height: 56,
+                        height: 68,
                         px: 2,
                     }}
                 >

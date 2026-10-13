@@ -2298,7 +2298,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     "@media (min-width: 600px)": { maxWidth: 390 },
                 }}
             >
-                <SpaceHomeHeader />
+                <SpaceHomeHeader profile={profile} />
                 <Box
                     component="section"
                     id="space-main-content"

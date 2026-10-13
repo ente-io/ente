@@ -1053,7 +1053,7 @@ const Page: React.FC = () => {
                             display: "grid",
                             alignItems: "center",
                             gridTemplateColumns: "44px 1fr 44px",
-                            height: 56,
+                            height: 68,
                             px: 2,
                         }}
                     >

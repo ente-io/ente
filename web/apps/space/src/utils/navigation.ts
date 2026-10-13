@@ -4,11 +4,7 @@ export const spaceUnreadStatusChangedEvent = "space-unread-status-changed";
 
 export const spaceNavigationDestination = (pathname: string) => {
     if (pathname == spaceRoutes.friendPage) return spaceRoutes.friends;
-    for (const destination of [
-        spaceRoutes.friends,
-        spaceRoutes.messages,
-        spaceRoutes.profile,
-    ]) {
+    for (const destination of [spaceRoutes.friends, spaceRoutes.messages]) {
         if (pathname == destination || pathname.startsWith(`${destination}/`))
             return destination;
     }

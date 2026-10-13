@@ -1,7 +1,7 @@
 import log from "ente-base/log";
 import { useRouter, type NextRouter } from "next/router";
 import React from "react";
-import { spaceBackFallback } from "utils/routes";
+import { spaceBackFallback, spaceRoutes } from "utils/routes";
 
 type SpaceRouteURL = Parameters<NextRouter["push"]>[0];
 type SpaceRouteAs = Parameters<NextRouter["push"]>[1];
@@ -101,8 +101,14 @@ const initializeRouteHistory = (router: NextRouter) => {
 const prefersReducedMotion = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const startSpaceRouteTransition = async <T,>(updateRoute: () => Promise<T>) => {
+const startSpaceRouteTransition = async <T,>(
+    fromPath: string,
+    destination: SpaceRouteURL,
+    updateRoute: () => Promise<T>,
+    skipTransition = false,
+) => {
     if (
+        skipTransition ||
         typeof document == "undefined" ||
         typeof document.startViewTransition != "function" ||
         prefersReducedMotion()
@@ -114,7 +120,15 @@ const startSpaceRouteTransition = async <T,>(updateRoute: () => Promise<T>) => {
     const root = document.documentElement;
     let result: T;
 
-    root.dataset.spaceRouteMotion = "fade";
+    const toPath =
+        typeof destination == "string"
+            ? destination
+            : (destination.pathname ?? "");
+    root.dataset.spaceRouteMotion = [fromPath, toPath].some((path) =>
+        path.startsWith(`${spaceRoutes.messages}/`),
+    )
+        ? "fade-with-navigation"
+        : "fade";
 
     const transition = document.startViewTransition(async () => {
         result = await updateRoute();
@@ -144,8 +158,11 @@ const pushSpaceRoute = async (
     options?: SpaceRouteOptions,
 ) => {
     initializeRouteHistory(router);
-    const didNavigate = await startSpaceRouteTransition(() =>
-        router.push(url, as, options),
+    const didNavigate = await startSpaceRouteTransition(
+        router.asPath,
+        as ?? url,
+        () => router.push(url, as, options),
+        options?.shallow,
     );
     if (didNavigate) recordRoute("push");
     return didNavigate;
@@ -257,8 +274,11 @@ export const useSpaceRouteTransitionPopState = () => {
             )
                 return false;
 
-            void startSpaceRouteTransition(() =>
-                router.replace(state.url, state.as, state.options),
+            void startSpaceRouteTransition(
+                asPathRef.current,
+                state.as,
+                () => router.replace(state.url, state.as, state.options),
+                state.url.split("?")[0] == router.pathname,
             )
                 .then((didNavigate) => {
                     if (didNavigate) {

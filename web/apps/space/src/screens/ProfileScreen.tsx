@@ -3,6 +3,7 @@ import {
     ArrowLeft02Icon,
     BubbleChatIcon,
     HandPointingRightIcon,
+    Menu01Icon,
     Tick02Icon,
     UserRemove01Icon,
 } from "@hugeicons/core-free-icons";
@@ -63,11 +64,8 @@ const profileCoverBackground = spaceSurface;
 const profileCoverTopShadow =
     "linear-gradient(180deg, rgba(0, 0, 0, 0.26) 0%, rgba(0, 0, 0, 0.18) 36%, rgba(0, 0, 0, 0.08) 72%, rgba(0, 0, 0, 0) 100%)";
 const profileCoverSkeletonBackground = spaceSurface;
-const profileHeaderHeight = 56;
 const profileAvatarTopOffset = 54;
 const profileAvatarSize = 132;
-const profileCoverHeight =
-    profileHeaderHeight + profileAvatarTopOffset + profileAvatarSize / 2;
 const photoPlaceholderBackground = spaceSurface;
 const profileCoverRadius = "24px";
 const profilePostLoadRootMargin = "800px 0px";
@@ -189,7 +187,9 @@ const PublicProfileActionButton: React.FC<PublicProfileActionButtonProps> = ({
     </Box>
 );
 
-const ProfilePostLoadingIndicator: React.FC = () => (
+const ProfilePostLoadingIndicator: React.FC<{ coverHeight: number }> = ({
+    coverHeight,
+}) => (
     <Box
         sx={{
             alignItems: "center",
@@ -199,7 +199,7 @@ const ProfilePostLoadingIndicator: React.FC = () => (
             justifyContent: "center",
             pointerEvents: "none",
             position: "absolute",
-            top: `${profileCoverHeight}px`,
+            top: `var(--space-profile-post-loading-top, ${coverHeight}px)`,
             width: "100%",
         }}
     >
@@ -208,6 +208,7 @@ const ProfilePostLoadingIndicator: React.FC = () => (
 );
 
 interface ProfileScreenProps {
+    headerRef?: React.Ref<HTMLDivElement>;
     friendsCount?: number;
     headerVariant?: "friend" | "owner" | "public" | "public-anonymous";
     isAddingFriend?: boolean;
@@ -215,6 +216,7 @@ interface ProfileScreenProps {
     isCoverLoading?: boolean;
     isNameLoading?: boolean;
     isPostsLoading?: boolean;
+    isPreview?: boolean;
     isPostPhotoOpening?: boolean;
     isStatsLoading?: boolean;
     showPostLoadingIndicator?: boolean;
@@ -227,6 +229,7 @@ interface ProfileScreenProps {
     onOpenFriends?: () => void;
     onOpenProfileCover?: () => void;
     onOpenProfilePhoto?: () => void;
+    onOpenSettings?: () => void;
     onLoadPostImage?: (asset: SpacePostAsset) => Promise<string>;
     onMessageFriend?: () => void;
     onPokeFriend?: (requestID: string) => Promise<void>;
@@ -248,12 +251,14 @@ interface ProfileScreenProps {
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
+    headerRef,
     friendsCount = 0,
     headerVariant = "owner",
     isAddingFriend = false,
     isCoverLoading = false,
     isNameLoading = false,
     isPostsLoading = false,
+    isPreview = false,
     isPostPhotoOpening = false,
     isStatsLoading = false,
     onBack,
@@ -265,6 +270,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     onOpenFriends,
     onOpenProfileCover,
     onOpenProfilePhoto,
+    onOpenSettings,
     onLoadPostImage,
     onMessageFriend,
     onPokeFriend,
@@ -318,6 +324,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     const isAnonymousPublicProfile = headerVariant == "public-anonymous";
     const isPublicProfile =
         headerVariant == "public" || isAnonymousPublicProfile;
+    const profileHeaderHeight = isAnonymousPublicProfile ? 56 : 68;
+    const profileCoverHeight =
+        profileHeaderHeight + profileAvatarTopOffset + profileAvatarSize / 2;
     const isUnfriendActionRunning = unfriendActionPhase != null;
     const canManageFriend =
         isFriendProfile &&
@@ -643,6 +652,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         return (
             <Box
                 component="header"
+                inert={isPreview}
                 sx={{
                     alignItems: "center",
                     color: coverForeground,
@@ -655,12 +665,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                         ? "space-between"
                         : undefined,
                     mx: "auto",
+                    opacity: isPreview
+                        ? "clamp(0, calc((var(--space-friend-profile-reveal, 0) - 0.7) * 5), 1)"
+                        : 1,
                     position: "relative",
                     px: isPublicProfile ? 1 : 2,
                     py: 0,
                     width: "100%",
                     zIndex: 3,
-                    "@media (min-width: 600px)": { maxWidth: 390 },
+                    "@media (min-width: 600px)": {
+                        maxWidth: isPreview ? "none" : 390,
+                    },
                 }}
             >
                 {isPublicProfile ? (
@@ -754,7 +769,43 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                         >
                             {firstName}
                         </Box>
-                        <Box aria-hidden sx={{ width: spaceTouchTargetSize }} />
+                        {isOwnerProfile && onOpenSettings ? (
+                            <Box
+                                component="button"
+                                type="button"
+                                aria-label="Settings"
+                                onClick={onOpenSettings}
+                                sx={{
+                                    alignItems: "center",
+                                    bgcolor: "transparent",
+                                    border: 0,
+                                    color: "inherit",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    height: spaceTouchTargetSize,
+                                    justifyContent: "flex-end",
+                                    p: 0,
+                                    width: spaceTouchTargetSize,
+                                    "&:focus-visible": {
+                                        borderRadius: "50%",
+                                        outline: `2px solid ${green}`,
+                                        outlineOffset: 2,
+                                    },
+                                }}
+                            >
+                                <HugeiconsIcon
+                                    icon={Menu01Icon}
+                                    size={23}
+                                    strokeWidth={1.8}
+                                    absoluteStrokeWidth
+                                />
+                            </Box>
+                        ) : (
+                            <Box
+                                aria-hidden
+                                sx={{ width: spaceTouchTargetSize }}
+                            />
+                        )}
                     </>
                 )}
             </Box>
@@ -774,7 +825,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 position: "relative",
             }}
         >
-            {!isPublicProfile && <SpaceSkipLink />}
+            {!isPublicProfile && !isPreview && <SpaceSkipLink />}
             <Box
                 sx={{
                     bgcolor: "transparent",
@@ -786,7 +837,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     overflow: "hidden",
                     position: "relative",
                     width: "100%",
-                    "@media (min-width: 600px)": { maxWidth: 390 },
+                    "@media (min-width: 600px)": {
+                        maxWidth: isPreview ? "none" : 390,
+                    },
                 }}
             >
                 {isOwnerProfile && onPostPhotoSelect && (
@@ -881,8 +934,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 )}
                 {renderHeader()}
                 <Box
+                    ref={headerRef}
                     component={isPublicProfile ? "div" : "section"}
-                    id={isPublicProfile ? undefined : "space-main-content"}
+                    id={
+                        isPublicProfile || isPreview
+                            ? undefined
+                            : "space-main-content"
+                    }
                     aria-label={
                         isPublicProfile ? undefined : `${displayName}'s profile`
                     }
@@ -1331,10 +1389,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </Box>
                 <Box
                     component="section"
+                    inert={isPreview}
                     sx={{
                         alignItems: "stretch",
                         boxSizing: "border-box",
                         display: "flex",
+                        opacity: isPreview
+                            ? "var(--space-friend-profile-reveal, 0)"
+                            : 1,
                         flex: hasProfilePosts ? "0 0 auto" : "1 1 0",
                         flexDirection: "column",
                         minHeight: 0,
@@ -1365,7 +1427,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             />
                         </Box>
                     ) : shouldShowPostLoadingIndicator ? (
-                        <ProfilePostLoadingIndicator />
+                        <ProfilePostLoadingIndicator
+                            coverHeight={profileCoverHeight}
+                        />
                     ) : isPostsLoading ? null : (
                         <Box
                             sx={{
@@ -1446,6 +1510,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     <SpaceFileViewer
                         ref={viewerRef}
                         closeOnSwipePastEnd
+                        headerHeight={profileHeaderHeight}
                         photo={selectedPost.photo}
                         photos={profileViewerPhotos}
                         photoIndex={selectedPhotoIndex}

@@ -195,6 +195,7 @@ const Page: React.FC = () => {
                 onOpenProfilePhoto={() =>
                     void router.push(spaceRoutes.profilePhoto)
                 }
+                onOpenSettings={() => void router.push(spaceRoutes.settings)}
                 onLoadPostImage={loadCurrentSpacePostAssetURL}
                 onSetPostLiked={async (postId, liked) => {
                     await setCurrentPostLiked(actorSpaceId, postId, liked);

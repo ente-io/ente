@@ -15,6 +15,7 @@ import {
     markCurrentMessagesRead,
     replyToCurrentMessage,
     sendCurrentMessage,
+    sendCurrentPoke,
     setCurrentMessageReaction,
     shouldAutoReadMessageActivities,
     type SpaceMessage,
@@ -624,6 +625,9 @@ export const SpaceMessagesPage: React.FC<SpaceMessagesPageProps> = ({
                 onOpenThread={openConversation}
                 onLoadActivityPost={(post) =>
                     loadCurrentPostPreview(post, actorSpaceId)
+                }
+                onPokeFriend={(spaceId, requestID) =>
+                    sendCurrentPoke(actorSpaceId, spaceId, requestID)
                 }
                 onSendMessage={async (spaceId, text) => {
                     const sender = currentProfileMessageActor(profile);

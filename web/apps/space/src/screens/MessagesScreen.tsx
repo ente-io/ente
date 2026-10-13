@@ -22,6 +22,7 @@ import {
     SpaceActivityAvatar as Avatar,
     SpaceActivityIdentity,
 } from "components/ActivityList";
+import { SpaceConversationPokeButton } from "components/ConversationPokeButton";
 import { SpaceLiveStatus } from "components/LiveStatus";
 import {
     MessageQuickReactions,
@@ -38,6 +39,7 @@ import { SpaceShareInviteButton } from "components/ShareInviteButton";
 import { SpaceSkipLink } from "components/SkipLink";
 import { emojiName } from "data/emojis";
 import log from "ente-base/log";
+import { isSpaceIOS } from "hooks/use-pwa-install-prompt";
 import React from "react";
 import { flushSync } from "react-dom";
 import type { SetupProfile } from "screens/SetupProfileScreen";
@@ -90,7 +92,7 @@ const messageBubblePaddingX = "16px";
 const messageBubblePaddingY = "14px";
 const composerPadding = 14;
 const composerPaddingLeft = 18;
-const postQuoteThumbnailSize = 200;
+const postQuoteWidth = 264;
 const threadBottomThresholdPx = 96;
 const messageGroupTimeThresholdMs = 10 * 60 * 1000;
 const messageTimeSeparatorThresholdMs = 60 * 60 * 1000;
@@ -118,6 +120,7 @@ interface MessagesScreenProps {
     onLoadActivityPost?: (
         post: SpaceMessageActivityPost,
     ) => Promise<SpaceMessageActivityPost | undefined>;
+    onPokeFriend: (spaceId: string, requestID: string) => Promise<void>;
     onReplyToMessage: (
         spaceId: string,
         messageId: string,
@@ -859,19 +862,10 @@ const MessageReplyPreview: React.FC<{
 
 const PostQuotePreview: React.FC<{
     activityPost?: SpaceMessageActivityPost;
-    isOwn: boolean;
     message: SpaceMessage;
-    mb?: string;
     onLoadActivityPost?: (post: SpaceMessageActivityPost) => void;
     onOpenQuotePost: (quote: SpaceMessageQuote) => void;
-}> = ({
-    activityPost,
-    isOwn,
-    message,
-    mb,
-    onLoadActivityPost,
-    onOpenQuotePost,
-}) => {
+}> = ({ activityPost, message, onLoadActivityPost, onOpenQuotePost }) => {
     const quote = message.quote;
     const preview = activityPost ?? quote;
     const isUnavailable = !quote || Boolean(preview?.isUnavailable);
@@ -918,38 +912,51 @@ const PostQuotePreview: React.FC<{
     ]);
 
     return (
-        <QuoteFrame isOwn={isOwn} mb={mb}>
+        <Box
+            component={canOpen || canRetry ? "button" : "div"}
+            type={canOpen || canRetry ? "button" : undefined}
+            aria-label={
+                canOpen
+                    ? "Open quoted photo"
+                    : canRetry
+                      ? "Retry loading post"
+                      : undefined
+            }
+            onClick={(event: React.MouseEvent) => {
+                event.stopPropagation();
+                if (canRetry && quote) onLoadActivityPost?.(quote);
+                else if (loadedQuote) onOpenQuotePost(loadedQuote);
+            }}
+            sx={{
+                appearance: "none",
+                bgcolor: spaceSurface,
+                border: 0,
+                borderRadius: "inherit",
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 0,
+                color: "inherit",
+                cursor: canOpen || canRetry ? "pointer" : "default",
+                display: "flex",
+                flexDirection: "column",
+                font: "inherit",
+                overflow: "hidden",
+                p: 0,
+                position: "relative",
+                textAlign: "left",
+                width: "100%",
+                "&:focus-visible": {
+                    outline: `2px solid ${green}`,
+                    outlineOffset: 2,
+                },
+            }}
+        >
             <Box
-                component={canOpen || canRetry ? "button" : "div"}
-                type={canOpen || canRetry ? "button" : undefined}
-                aria-label={
-                    canOpen
-                        ? "Open quoted photo"
-                        : canRetry
-                          ? "Retry loading post"
-                          : undefined
-                }
-                onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    if (canRetry && quote) onLoadActivityPost?.(quote);
-                    else if (loadedQuote) onOpenQuotePost(loadedQuote);
-                }}
+                component="span"
                 sx={{
-                    appearance: "none",
-                    bgcolor: "transparent",
-                    border: 0,
-                    borderRadius: "28px",
-                    color: "inherit",
-                    cursor: canOpen || canRetry ? "pointer" : "default",
-                    display: "inline-flex",
-                    font: "inherit",
-                    overflow: "hidden",
-                    p: 0,
+                    aspectRatio: "1",
+                    display: "block",
                     position: "relative",
-                    "&:focus-visible": {
-                        outline: `2px solid ${green}`,
-                        outlineOffset: 2,
-                    },
+                    width: "100%",
                 }}
             >
                 {imageUrl ? (
@@ -959,14 +966,17 @@ const PostQuotePreview: React.FC<{
                         src={imageUrl}
                         sx={{
                             display: "block",
-                            height: postQuoteThumbnailSize,
+                            height: "100%",
+                            inset: 0,
                             objectFit: "cover",
                             objectPosition: "center",
-                            width: postQuoteThumbnailSize,
+                            position: "absolute",
+                            width: "100%",
                         }}
                     />
                 ) : (
                     <Box
+                        component="span"
                         role="img"
                         aria-label={
                             isLoading
@@ -987,12 +997,12 @@ const PostQuotePreview: React.FC<{
                             fontFamily: '"Inter Variable", Inter, sans-serif',
                             fontSize: 12,
                             fontWeight: 700,
-                            height: postQuoteThumbnailSize,
+                            height: "100%",
                             justifyContent: "center",
                             lineHeight: "16px",
                             textAlign: "center",
                             textWrap: "balance",
-                            width: postQuoteThumbnailSize,
+                            width: "100%",
                             px: "12px",
                         }}
                     >
@@ -1020,8 +1030,29 @@ const PostQuotePreview: React.FC<{
                 {canOpen && (
                     <SpacePostVideoBadge durationMs={loadedQuote?.durationMs} />
                 )}
+                <Box
+                    component="span"
+                    aria-hidden
+                    sx={{
+                        alignItems: "center",
+                        backdropFilter: "blur(12px)",
+                        bgcolor: alpha("#000000", 0.45),
+                        borderRadius: "999px",
+                        color: "#FFFFFF",
+                        display: "inline-flex",
+                        height: 32,
+                        justifyContent: "center",
+                        left: 12,
+                        position: "absolute",
+                        top: 12,
+                        width: 32,
+                        "& svg": { height: 12, width: 16 },
+                    }}
+                >
+                    <ReplyIcon />
+                </Box>
             </Box>
-        </QuoteFrame>
+        </Box>
     );
 };
 
@@ -1080,15 +1111,11 @@ const MessageBubble: React.FC<{
     const isPostReply = !isUnavailable && message.kind == "post_reply";
     const isSystemMessage = isFriendAdded;
     const hasMessageReply = !isUnavailable && Boolean(message.replyMessageId);
-    const actionLabel = isPostReply
+    const actionLabel = hasMessageReply
         ? isOwn
-            ? "You replied to a post"
-            : "Replied to your post"
-        : hasMessageReply
-          ? isOwn
-              ? "You replied"
-              : "Replied to you"
-          : undefined;
+            ? "You replied"
+            : "Replied to you"
+        : undefined;
     const hasBodyBubble = !isSystemMessage;
     const hasActionsTrigger = canOpenActions && !isUnavailable;
     const rowAlignItems = isFriendAdded
@@ -1360,16 +1387,6 @@ const MessageBubble: React.FC<{
                             profile={profile}
                         />
                     )}
-                    {isPostReply && (
-                        <PostQuotePreview
-                            activityPost={activityPost}
-                            isOwn={isOwn}
-                            mb={hasBodyBubble ? "8px" : "0"}
-                            message={message}
-                            onLoadActivityPost={onLoadActivityPost}
-                            onOpenQuotePost={onOpenQuotePost}
-                        />
-                    )}
                     {hasBodyBubble && (
                         <Box sx={{ maxWidth: "100%", position: "relative" }}>
                             {canReply && !isUnavailable && !isPoke && (
@@ -1423,7 +1440,9 @@ const MessageBubble: React.FC<{
                                     bgcolor: isOwn
                                         ? outgoingBubble
                                         : incomingBubble,
-                                    borderRadius: bubbleBorderRadius,
+                                    borderRadius: isPostReply
+                                        ? "24px"
+                                        : bubbleBorderRadius,
                                     "&:focus-visible": {
                                         outline: `2px solid ${green}`,
                                         outlineOffset: 2,
@@ -1440,8 +1459,8 @@ const MessageBubble: React.FC<{
                                     ml: 0,
                                     overflow: "visible",
                                     position: "relative",
-                                    px: messageBubblePaddingX,
-                                    py: messageBubblePaddingY,
+                                    px: isPostReply ? 0 : messageBubblePaddingX,
+                                    py: isPostReply ? 0 : messageBubblePaddingY,
                                     textAlign: "left",
                                     touchAction: "pan-y",
                                     transform: `translateX(${swipeOffset}px)`,
@@ -1455,7 +1474,9 @@ const MessageBubble: React.FC<{
                                     userSelect: "none",
                                     WebkitTouchCallout: "none",
                                     WebkitUserSelect: "none",
-                                    width: "fit-content",
+                                    width: isPostReply
+                                        ? postQuoteWidth
+                                        : "fit-content",
                                     "& *": {
                                         userSelect: "none",
                                         WebkitTouchCallout: "none",
@@ -1463,6 +1484,14 @@ const MessageBubble: React.FC<{
                                     },
                                 }}
                             >
+                                {isPostReply && (
+                                    <PostQuotePreview
+                                        activityPost={activityPost}
+                                        message={message}
+                                        onLoadActivityPost={onLoadActivityPost}
+                                        onOpenQuotePost={onOpenQuotePost}
+                                    />
+                                )}
                                 <Box
                                     sx={{
                                         color: isOwn
@@ -1478,6 +1507,12 @@ const MessageBubble: React.FC<{
                                         fontWeight: 600,
                                         lineHeight: "21px",
                                         overflowWrap: "anywhere",
+                                        px: isPostReply
+                                            ? messageBubblePaddingX
+                                            : undefined,
+                                        py: isPostReply
+                                            ? messageBubblePaddingY
+                                            : undefined,
                                         whiteSpace: "pre-wrap",
                                     }}
                                 >
@@ -1554,6 +1589,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
     onOpenQuotePost,
     onOpenThread,
     onLoadActivityPost,
+    onPokeFriend,
     onReplyToMessage,
     onSendMessage,
     onSetMessageReaction,
@@ -1825,7 +1861,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
             closeMessageActions();
             setReplyingTo(messageByID.get(message.id) ?? message);
         });
-        composerRef.current?.focus();
+        composerRef.current?.focus({ preventScroll: true });
     };
 
     const reactToMessage = (message: SpaceMessage, emoji: string) => {
@@ -1923,6 +1959,10 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
     };
 
     const handleComposerFocus = () => {
+        if (composerBlurResetTimeoutRef.current != undefined) {
+            window.clearTimeout(composerBlurResetTimeoutRef.current);
+            composerBlurResetTimeoutRef.current = undefined;
+        }
         const scroller = threadScrollRef.current;
         if (scroller && !isThreadNearBottom(scroller)) return;
         stickToThreadBottomRef.current = true;
@@ -2087,12 +2127,18 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                     height: isThreadOpen
                         ? "var(--space-page-height, 100dvh)"
                         : undefined,
+                    left: isThreadOpen ? 0 : undefined,
                     minHeight: isThreadOpen
                         ? 0
                         : "var(--space-page-height, 100svh)",
                     overflow: isThreadOpen ? "hidden" : undefined,
                     overflowX: "hidden",
                     placeItems: { xs: "stretch", sm: "start center" },
+                    position: isThreadOpen ? "fixed" : undefined,
+                    right: isThreadOpen ? 0 : undefined,
+                    top: isThreadOpen
+                        ? "var(--space-viewport-offset-top, 0px)"
+                        : undefined,
                 }}
             >
                 <SpaceSkipLink />
@@ -2103,8 +2149,8 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                         display: isThreadOpen ? "grid" : undefined,
                         gridTemplateRows: isThreadOpen
                             ? isThreadReadOnly
-                                ? "56px minmax(0, 1fr)"
-                                : "56px minmax(0, 1fr) auto"
+                                ? "68px minmax(0, 1fr)"
+                                : "68px minmax(0, 1fr) auto"
                             : undefined,
                         height: isThreadOpen ? "100%" : undefined,
                         minHeight: isThreadOpen
@@ -2122,8 +2168,10 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                         sx={{
                             alignItems: "center",
                             display: "grid",
-                            gridTemplateColumns: `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
-                            height: 56,
+                            gridTemplateColumns: isThreadOpen
+                                ? `${spaceTouchTargetSize}px minmax(0, 1fr) 76px`
+                                : `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
+                            height: 68,
                             px: 2,
                             width: "100%",
                         }}
@@ -2162,8 +2210,9 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                             <Box
                                 component="h1"
                                 sx={{
-                                    justifySelf: "center",
+                                    justifySelf: "start",
                                     m: 0,
+                                    maxWidth: "100%",
                                     minWidth: 0,
                                     overflow: "hidden",
                                     textOverflow: "ellipsis",
@@ -2201,10 +2250,12 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                                             '"Inter Variable", Inter, sans-serif',
                                         fontSize: 18,
                                         fontWeight: 700,
-                                        justifyContent: "center",
+                                        gap: "10px",
+                                        justifyContent: "flex-start",
                                         lineHeight: "24px",
                                         m: 0,
                                         maxWidth: "100%",
+                                        minHeight: spaceTouchTargetSize,
                                         minWidth: 0,
                                         overflow: "hidden",
                                         p: 0,
@@ -2216,6 +2267,11 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                                         },
                                     }}
                                 >
+                                    <Avatar
+                                        avatarUrl={selectedFriend.avatarUrl}
+                                        loading={isThreadRecipientLoading}
+                                        size={36}
+                                    />
                                     <Box
                                         component="span"
                                         sx={{
@@ -2249,7 +2305,18 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                                 Messages
                             </Box>
                         )}
-                        <Box aria-hidden />
+                        {isThreadOpen && selectedThreadID ? (
+                            <SpaceConversationPokeButton
+                                key={selectedThreadID}
+                                disabled={!canInteract}
+                                friendName={selectedName}
+                                onPokeFriend={(requestID) =>
+                                    onPokeFriend(selectedThreadID, requestID)
+                                }
+                            />
+                        ) : (
+                            <Box aria-hidden />
+                        )}
                     </Box>
 
                     {isThreadOpen && selectedFriend ? (
@@ -2634,6 +2701,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                                         display: "grid",
                                         gap: "8px",
                                         p: "10px 14px",
+                                        pb: "max(10px, calc(env(safe-area-inset-bottom) - var(--space-keyboard-inset, 0px)))",
                                         width: "100%",
                                     }}
                                 >
@@ -2780,6 +2848,18 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                                             }}
                                             onBlur={handleComposerBlur}
                                             onFocus={handleComposerFocus}
+                                            onMouseDown={(event) => {
+                                                if (
+                                                    !isSpaceIOS() ||
+                                                    document.activeElement ==
+                                                        event.currentTarget
+                                                )
+                                                    return;
+                                                event.preventDefault();
+                                                event.currentTarget.focus({
+                                                    preventScroll: true,
+                                                });
+                                            }}
                                             placeholder="Message..."
                                             disabled={isThreadRecipientLoading}
                                             rows={1}
