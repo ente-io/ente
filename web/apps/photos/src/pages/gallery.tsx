@@ -1360,6 +1360,7 @@ const Page: React.FC = () => {
         options?: { shouldExitSearchMode?: boolean },
     ) => {
         if (searchOption) {
+            setCleanupView(undefined);
             const type = searchOption.suggestion.type;
             if (type == "collection") {
                 dispatch({
@@ -1461,11 +1462,6 @@ const Page: React.FC = () => {
         () => handleShowCleanupView("duplicates"),
         [handleShowCleanupView],
     );
-
-    const handleCloseCleanupView = useCallback(() => {
-        setCleanupView(undefined);
-        dispatch({ type: "showAll" });
-    }, []);
 
     const handleSidebarShowCollectionSummary = showCollectionSummary;
 
@@ -1595,6 +1591,7 @@ const Page: React.FC = () => {
 
     const handleSelectPerson = useCallback(
         (personID: string) => {
+            setCleanupView(undefined);
             closeCollectionMap();
             dispatch({ type: "showPerson", personID });
         },
@@ -1938,7 +1935,7 @@ const Page: React.FC = () => {
         </>
     );
 
-    const showNormalNavigation = !isCleanupViewOpen && !showSelectionBar;
+    const showNormalNavigation = !showSelectionBar;
 
     return (
         <FullScreenDropZone
@@ -1982,7 +1979,7 @@ const Page: React.FC = () => {
                 />
             )}
             <PhotosNavigationShell
-                showRail={!isCleanupViewOpen}
+                showRail
                 showNormalNavigation={showNormalNavigation}
                 isInSearchMode={isInSearchMode}
                 onSidebar={showSidebar}
@@ -1991,7 +1988,10 @@ const Page: React.FC = () => {
                     handleShowCollectionSummaryWithID(PseudoCollectionID.all)
                 }
                 onSelectSearchOption={handleSelectSearchOption}
-                onSelectPeople={() => dispatch({ type: "showPeople" })}
+                onSelectPeople={() => {
+                    setCleanupView(undefined);
+                    dispatch({ type: "showPeople" });
+                }}
                 onSelectPerson={handleSelectPerson}
                 alternateHeader={
                     showSelectionBar ? (
@@ -2080,15 +2080,9 @@ const Page: React.FC = () => {
                     </>
                 )}
                 {cleanupView === "duplicates" ? (
-                    <DuplicatesView
-                        onBack={handleCloseCleanupView}
-                        onRemoteFilesPull={remoteFilesPull}
-                    />
+                    <DuplicatesView onRemoteFilesPull={remoteFilesPull} />
                 ) : cleanupView === "large-files" ? (
-                    <LargeFilesView
-                        onBack={handleCloseCleanupView}
-                        onRemoteFilesPull={remoteFilesPull}
-                    />
+                    <LargeFilesView onRemoteFilesPull={remoteFilesPull} />
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
                   !state.collectionFiles.length &&

@@ -6,13 +6,11 @@ import {
     type LargeFileFilter,
     type LargeFileItem,
 } from "@/services/large-files";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ImageIcon from "@mui/icons-material/Image";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import {
     Box,
     Chip,
-    IconButton,
     LinearProgress,
     Stack,
     styled,
@@ -52,14 +50,10 @@ import {
 } from "react-window";
 
 interface LargeFilesViewProps {
-    onBack: () => void;
     onRemoteFilesPull: () => Promise<void>;
 }
 
-export function LargeFilesView({
-    onBack,
-    onRemoteFilesPull,
-}: LargeFilesViewProps) {
+export function LargeFilesView({ onRemoteFilesPull }: LargeFilesViewProps) {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { setIsFileViewerOpen } = usePhotosAppContext();
 
@@ -179,7 +173,6 @@ export function LargeFilesView({
     return (
         <Stack sx={{ flex: 1, minHeight: 0 }}>
             <Navbar
-                onBack={onBack}
                 filter={state.filter}
                 onChangeFilter={(filter) =>
                     dispatch({ type: "changeFilter", filter })
@@ -200,12 +193,11 @@ export function LargeFilesView({
 }
 
 interface NavbarProps {
-    onBack: () => void;
     filter: LargeFileFilter;
     onChangeFilter: (filter: LargeFileFilter) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter, onBack }) => {
+const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter }) => {
     return (
         <Stack>
             <Stack
@@ -213,17 +205,12 @@ const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter, onBack }) => {
                 sx={(theme) => ({
                     alignItems: "center",
                     justifyContent: "space-between",
-                    padding: "8px 4px",
+                    padding: "8px 16px",
+                    minHeight: "56px",
                     borderBottom: `1px solid ${theme.vars.palette.divider}`,
                 })}
             >
-                <Box sx={{ minWidth: "100px" }}>
-                    <IconButton onClick={onBack} aria-label={t("go_back")}>
-                        <ArrowBackIcon />
-                    </IconButton>
-                </Box>
                 <Typography variant="h6">{t("large_files_title")}</Typography>
-                <Box sx={{ minWidth: "100px" }} />
             </Stack>
             <FilterChips {...{ filter, onChangeFilter }} />
         </Stack>
