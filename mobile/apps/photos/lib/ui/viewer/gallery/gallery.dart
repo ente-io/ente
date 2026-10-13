@@ -31,7 +31,6 @@ import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
-import "package:photos/ui/viewer/gallery/layout_settings.dart";
 import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
@@ -182,11 +181,6 @@ class GalleryState extends State<Gallery> {
   InheritedSearchFilterData? _inheritedSearchFilterData;
   InheritedGalleryBoundaries? _boundariesProvider;
   late String _automationScrollIdentifier;
-
-  bool get _showLayoutControls =>
-      widget.showGallerySettingsCTA &&
-      !widget.disableScroll &&
-      !widget.limitSelectionToOne;
 
   @override
   void initState() {
@@ -399,7 +393,7 @@ class GalleryState extends State<Gallery> {
       groupHeaderExtent: groupHeaderExtent!,
       showSelectAll: widget.showSelectAll,
       limitSelectionToOne: widget.limitSelectionToOne,
-      showGallerySettingsCTA: _showLayoutControls,
+      showGallerySettingsCTA: widget.showGallerySettingsCTA,
       groupHeaderAction: widget.groupHeaderAction,
       layoutTypeOverride: widget.layoutTypeOverride,
       justifiedLayoutAvailable: isJustifiedLayoutAvailable,
@@ -1081,13 +1075,11 @@ class GalleryState extends State<Gallery> {
                                   widget.showSelectAll &&
                                   !widget.limitSelectionToOne,
                               scrollbarInUseNotifier: scrollBarInUseNotifier,
-                              showGallerySettingsCTA: _showLayoutControls,
+                              showGallerySettingsCTA:
+                                  widget.showGallerySettingsCTA,
                               groupHeaderAction: widget.groupHeaderAction,
                             )
                           : const SizedBox.shrink(),
-                      if (_showLayoutControls &&
-                          !groups.groupType.showGroupHeader())
-                        _FloatingLayoutControl(topInset: appBarPinnedHeight),
                     ],
                   ),
                 ),
@@ -1121,21 +1113,6 @@ class _GalleryAppBarScrollBody extends StatelessWidget {
         appBarConfig.buildSliver(context),
         SliverFillRemaining(hasScrollBody: false, child: child),
       ],
-    );
-  }
-}
-
-class _FloatingLayoutControl extends StatelessWidget {
-  const _FloatingLayoutControl({this.topInset = 0});
-
-  final double topInset;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      right: 16,
-      top: topInset + 16,
-      child: const FloatingGalleryLayoutButton(),
     );
   }
 }

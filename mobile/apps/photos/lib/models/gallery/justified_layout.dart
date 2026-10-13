@@ -111,50 +111,6 @@ class JustifiedLayoutCalculator {
 
   const JustifiedLayoutCalculator._();
 
-  static List<JustifiedRowLayout> computePairedRows({
-    required Iterable<double> aspectRatios,
-    required double availableWidth,
-    required double spacing,
-  }) {
-    if (!availableWidth.isFinite || availableWidth <= 0) {
-      throw ArgumentError.value(availableWidth, "availableWidth");
-    }
-    if (!spacing.isFinite || spacing < 0 || spacing >= availableWidth) {
-      throw ArgumentError.value(spacing, "spacing");
-    }
-    final ratios = aspectRatios
-        .map((ratio) {
-          return ratio.isFinite && ratio > 0
-              ? ratio.clamp(_minimumAspectRatio, _maximumAspectRatio).toDouble()
-              : 1.0;
-        })
-        .toList(growable: false);
-    final rows = <JustifiedRowLayout>[];
-    var offset = 0.0;
-    for (var firstIndex = 0; firstIndex < ratios.length; firstIndex += 2) {
-      final lastIndex = math.min(firstIndex + 1, ratios.length - 1);
-      final rowRatios = ratios.sublist(firstIndex, lastIndex + 1);
-      final contentWidth = availableWidth - (rowRatios.length - 1) * spacing;
-      final ratioSum = rowRatios.fold(0.0, (sum, ratio) => sum + ratio);
-      final height = rowRatios.length == 1
-          ? math.min(contentWidth / ratioSum, availableWidth / 2)
-          : contentWidth / ratioSum;
-      rows.add(
-        JustifiedRowLayout(
-          firstIndex: firstIndex,
-          lastIndex: lastIndex,
-          minOffset: offset,
-          height: height,
-          itemWidths: rowRatios
-              .map((ratio) => ratio * height)
-              .toList(growable: false),
-        ),
-      );
-      offset += height + spacing;
-    }
-    return rows;
-  }
-
   static double aspectRatioForDimensions(int width, int height) {
     if (width <= 0 || height <= 0) return 1;
     return (width / height)

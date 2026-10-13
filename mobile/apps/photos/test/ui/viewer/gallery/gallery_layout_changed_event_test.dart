@@ -176,6 +176,7 @@ void main() {
         (_) => events++,
       );
       addTearDown(subscription.cancel);
+      await localSettings.setInternalUserDisabled(true);
       for (final quickMenu in [true, false]) {
         await localSettings.setGalleryLayoutType(GalleryLayoutType.grid);
         await localSettings.setPhotoGridSize(5);
@@ -257,140 +258,6 @@ void main() {
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pumpAndSettle();
       }
-    },
-  );
-
-  testWidgets(
-    "only opted-in galleries show a header CTA or floating Layout control",
-    (tester) async {
-      final files = List.generate(120, _justifiedTestFile);
-      for (final groupType in [GroupType.day, GroupType.none]) {
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: lightThemeData,
-            localizationsDelegates: StringsLocalizations.localizationsDelegates,
-            supportedLocales: StringsLocalizations.supportedLocales,
-            home: Scaffold(
-              body: _galleryHost(
-                Gallery(
-                  asyncLoader: (start, end, {limit, asc}) async =>
-                      FileLoadResult(files, false),
-                  initialFiles: files,
-                  tagPrefix: "default_layout_cta_",
-                  groupType: groupType,
-                  showSelectAll: false,
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-        await tester.pump(const Duration(milliseconds: 750));
-        await tester.pump();
-        if (groupType == GroupType.day) {
-          expect(find.byType(GroupHeaderWidget), findsWidgets);
-        }
-        expect(find.byType(FloatingGalleryLayoutButton), findsNothing);
-        expect(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is GroupHeaderWidget &&
-                widget.showGalleryLayoutSettingCTA,
-          ),
-          findsNothing,
-        );
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pumpAndSettle();
-      }
-      for (final pinnedDisabled in [false, true]) {
-        final galleryKey = GlobalKey<GalleryState>();
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: lightThemeData,
-            localizationsDelegates: StringsLocalizations.localizationsDelegates,
-            supportedLocales: StringsLocalizations.supportedLocales,
-            home: Scaffold(
-              body: _galleryHost(
-                Gallery(
-                  key: galleryKey,
-                  asyncLoader: (start, end, {limit, asc}) async =>
-                      FileLoadResult(files, false),
-                  initialFiles: files,
-                  tagPrefix: "layout_cta_",
-                  header: const SizedBox(height: 120),
-                  groupType: GroupType.day,
-                  disablePinnedGroupHeader: pinnedDisabled,
-                  showSelectAll: false,
-                  showGallerySettingsCTA: true,
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-        await tester.pump(const Duration(milliseconds: 750));
-        await tester.pump();
-        expect(find.byType(FloatingGalleryLayoutButton), findsNothing);
-        expect(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is GroupHeaderWidget &&
-                widget.showGalleryLayoutSettingCTA,
-          ),
-          findsWidgets,
-        );
-        if (!pinnedDisabled) {
-          final scrollable = find
-              .descendant(
-                of: find.byType(Gallery),
-                matching: find.byType(Scrollable),
-              )
-              .first;
-          tester.state<ScrollableState>(scrollable).position.jumpTo(300);
-          await tester.pumpAndSettle();
-          expect(find.byType(FloatingGalleryLayoutButton), findsNothing);
-          expect(
-            find.byWidgetPredicate(
-              (widget) =>
-                  widget is GroupHeaderWidget &&
-                  widget.isPinnedHeader &&
-                  widget.showGalleryLayoutSettingCTA,
-            ),
-            findsOneWidget,
-          );
-        }
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pumpAndSettle();
-      }
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: lightThemeData,
-          localizationsDelegates: StringsLocalizations.localizationsDelegates,
-          supportedLocales: StringsLocalizations.supportedLocales,
-          home: Scaffold(
-            body: _galleryHost(
-              Gallery(
-                asyncLoader: (start, end, {limit, asc}) async =>
-                    FileLoadResult(files, false),
-                initialFiles: files,
-                tagPrefix: "headerless_layout_cta_",
-                groupType: GroupType.none,
-                showSelectAll: false,
-                showGallerySettingsCTA: true,
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      final galleryRect = tester.getRect(find.byType(Gallery));
-      final buttonRect = tester.getRect(
-        find.byType(FloatingGalleryLayoutButton),
-      );
-      expect(buttonRect.top, closeTo(galleryRect.top + 16, 0.001));
-      expect(buttonRect.right, closeTo(galleryRect.right - 16, 0.001));
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpAndSettle();
     },
   );
 

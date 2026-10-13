@@ -1,14 +1,11 @@
-import "dart:async";
 import "dart:developer" as dev;
+import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/events/gallery_layout_changed_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
-import "package:photos/models/gallery/justified_layout.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
@@ -35,7 +32,7 @@ class DynamicLocationGalleryWidget extends StatefulWidget {
 class _DynamicLocationGalleryWidgetState
     extends State<DynamicLocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
-  late final StreamSubscription<GalleryLayoutChangedEvent> _layoutSubscription;
+  double heightOfGallery = 0;
 
   @override
   void initState() {
@@ -53,18 +50,7 @@ class _DynamicLocationGalleryWidgetState
           ),
         );
 
-    _layoutSubscription = Bus.instance.on<GalleryLayoutChangedEvent>().listen((
-      _,
-    ) {
-      if (mounted) setState(() {});
-    });
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _layoutSubscription.cancel();
-    super.dispose();
   }
 
   @override
@@ -102,7 +88,10 @@ class _DynamicLocationGalleryWidgetState
             builder: (context, constrains) {
               return SizedBox(
                 height: _galleryHeight(
-                  (snapshot.data as FileLoadResult).files,
+                  min(
+                    (widget.memoriesCountNotifier.value ?? 0),
+                    galleryFilesLimit,
+                  ),
                   constrains.maxWidth,
                 ),
                 child: GalleryFilesState(
@@ -120,6 +109,7 @@ class _DynamicLocationGalleryWidgetState
                         },
                     tagPrefix: widget.tagPrefix,
                     enableFileGrouping: false,
+                    layoutTypeOverride: GalleryLayoutType.grid,
                     showSelectAll: false,
                   ),
                 ),
@@ -134,20 +124,7 @@ class _DynamicLocationGalleryWidgetState
     );
   }
 
-  double _galleryHeight(List<EnteFile> files, double widthOfGrid) {
-    if (localSettings.getGalleryLayoutType() == GalleryLayoutType.justified) {
-      final rows = JustifiedLayoutCalculator.computePairedRows(
-        aspectRatios: files.map(
-          (file) => JustifiedLayoutCalculator.aspectRatioForDimensions(
-            file.width,
-            file.height,
-          ),
-        ),
-        availableWidth: widthOfGrid,
-        spacing: galleryGridSpacing,
-      );
-      return (rows.isEmpty ? 0 : rows.last.maxOffset) + 120;
-    }
+  double _galleryHeight(int fileCount, double widthOfGrid) {
     final photoGridSize = localSettings.getPhotoGridSize();
     final totalWhiteSpaceBetweenPhotos =
         galleryGridSpacing * (photoGridSize - 1);
@@ -155,7 +132,7 @@ class _DynamicLocationGalleryWidgetState
     final thumbnailHeight =
         ((widthOfGrid - totalWhiteSpaceBetweenPhotos) / photoGridSize);
 
-    final numberOfRows = (files.length / photoGridSize).ceil();
+    final numberOfRows = (fileCount / photoGridSize).ceil();
 
     final galleryHeight =
         (thumbnailHeight * numberOfRows) +
