@@ -101,6 +101,8 @@ export const GalleryBarAndListHeader: React.FC<
     onShowMap,
     onCollectionSlideshow,
     setFileListHeader,
+    collapsed,
+    mobileDrawerProps,
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
@@ -164,6 +166,22 @@ export const GalleryBarAndListHeader: React.FC<
     const albumDescription =
         activeCollection?.pubMagicMetadata?.data.caption?.trim();
     const [descriptionHeight, setDescriptionHeight] = useState(0);
+
+    const { onClose: closeMobileDrawer } = mobileDrawerProps;
+    const selectCollection = useCallback(
+        (id: number) => {
+            setActiveCollectionID(id);
+            closeMobileDrawer();
+        },
+        [setActiveCollectionID, closeMobileDrawer],
+    );
+    const selectPerson = useCallback(
+        (id: string) => {
+            onSelectPerson(id);
+            closeMobileDrawer();
+        },
+        [onSelectPerson, closeMobileDrawer],
+    );
 
     useEffect(() => {
         if (shouldHide) return;
@@ -253,11 +271,13 @@ export const GalleryBarAndListHeader: React.FC<
                     activeCollectionID,
                     people: sortedPeople,
                     activePerson,
-                    onSelectPerson,
                     collectionsSortBy,
                     peopleSortBy,
+                    collapsed,
+                    mobileDrawerProps,
                 }}
-                onSelectCollectionID={setActiveCollectionID}
+                onSelectCollectionID={selectCollection}
+                onSelectPerson={selectPerson}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onChangePeopleSortBy={setPeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
@@ -275,7 +295,7 @@ export const GalleryBarAndListHeader: React.FC<
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (cs) => !cs.attributes.has("system"),
                 )}
-                onSelectCollectionID={setActiveCollectionID}
+                onSelectCollectionID={selectCollection}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
@@ -286,7 +306,7 @@ export const GalleryBarAndListHeader: React.FC<
                 {...allPeopleVisibilityProps}
                 people={sortedPeople}
                 allPeople={allPeople}
-                onSelectPerson={onSelectPerson}
+                onSelectPerson={selectPerson}
                 peopleSortBy={peopleSortBy}
                 onChangePeopleSortBy={setPeopleSortBy}
             />
