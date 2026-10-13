@@ -119,29 +119,36 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Widget _buildSkipAction(BuildContext context) {
     final color = context.componentColors.primary;
-    return GestureDetector(
-      key: const ValueKey("skipForNowButton"),
-      behavior: HitTestBehavior.opaque,
-      onTap: _onTapSkip,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 48),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 12, right: 18),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                context.strings.skip,
-                style: TextStyles.body.copyWith(color: color),
-              ),
-              const SizedBox(width: Spacing.xs),
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowRight01,
-                size: IconSizes.small,
-                strokeWidth: 2,
-                color: color,
-              ),
-            ],
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.3,
+      child: GestureDetector(
+        key: const ValueKey("skipForNowButton"),
+        behavior: HitTestBehavior.opaque,
+        onTap: _onTapSkip,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 12, right: 18),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    context.strings.skip,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyles.body.copyWith(color: color),
+                  ),
+                ),
+                const SizedBox(width: Spacing.xs),
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowRight01,
+                  size: IconSizes.small,
+                  strokeWidth: 2,
+                  color: color,
+                ),
+              ],
+            ),
           ),
         ),
       ),
