@@ -65,6 +65,7 @@ export const PhotosNavigationShell: React.FC<
                         {
                             mb: { xs: "12px", sm: 0 },
                             px: { xs: "4px", sm: "16px" },
+                            flexBasis: { sm: "76px" },
                             borderBottom: { sm: "none" },
                         },
                         hasSelection && { borderColor: "accent.main" },
@@ -77,7 +78,15 @@ export const PhotosNavigationShell: React.FC<
                     )}
                 </NavbarBase>
             )}
-            <Stack direction="row" sx={{ flex: 1, minWidth: 0, minHeight: 0 }}>
+            <Stack
+                direction="row"
+                sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    minHeight: 0,
+                    p: showRail ? { xs: 0, sm: "0 11px 11px 0" } : 0,
+                }}
+            >
                 {showRail && (
                     <Box
                         component="nav"
@@ -87,7 +96,7 @@ export const PhotosNavigationShell: React.FC<
                             alignItems: "center",
                             flexShrink: 0,
                             width: "72px",
-                            py: "12px",
+                            px: "14px",
                             gap: "12px",
                         }}
                     >
@@ -106,6 +115,8 @@ export const PhotosNavigationShell: React.FC<
                             [theme.breakpoints.up("sm")]: {
                                 "--mui-palette-background-default": "#FFFFFF",
                                 bgcolor: "background.default",
+                                borderRadius: "20px",
+                                overflow: "hidden",
                                 ...theme.applyStyles("dark", {
                                     "--mui-palette-background-default":
                                         "#212121",
@@ -147,8 +158,8 @@ const NormalHeaderContents: React.FC<PhotosNavigationShellProps> = ({
                         onClick={onHome}
                         sx={{
                             minWidth: 0,
-                            width: 40,
-                            height: 40,
+                            width: 38,
+                            height: 38,
                             p: 0,
                             borderRadius: "12px",
                         }}
@@ -189,8 +200,8 @@ const NormalNavigationRail: React.FC<
                 onClick={onSidebar}
                 sx={{
                     minWidth: 0,
-                    width: 40,
-                    height: 40,
+                    width: 38,
+                    height: 38,
                     flexShrink: 0,
                     p: 0,
                     borderRadius: "12px",
@@ -222,7 +233,18 @@ export const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
                 <FocusVisibleButton
                     color="secondary"
                     startIcon={icon}
-                    sx={{ borderRadius: "16px" }}
+                    sx={{
+                        width: "140px",
+                        height: "52px",
+                        p: "18px 24px",
+                        borderRadius: "20px",
+                        border: 0,
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        lineHeight: "20px",
+                        gap: "8px",
+                        "& .MuiButton-startIcon": { m: 0 },
+                    }}
                     {...{ onClick, disabled }}
                 >
                     {t("upload")}

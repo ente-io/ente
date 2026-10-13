@@ -138,8 +138,8 @@ export const SearchBar: React.FC<
                         onClick={showSearch}
                         sx={{
                             minWidth: 0,
-                            width: isRail || isSmallWidth ? 40 : 48,
-                            height: isRail || isSmallWidth ? 40 : 48,
+                            width: isRail ? 38 : isSmallWidth ? 40 : 48,
+                            height: isRail ? 38 : isSmallWidth ? 40 : 48,
                             p: 0,
                             mr: isRail ? 0 : "8px",
                             borderRadius: isRail ? "12px" : "16px",
