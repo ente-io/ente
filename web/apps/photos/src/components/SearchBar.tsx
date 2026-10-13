@@ -138,7 +138,11 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
                             borderRadius: "12px",
                         }}
                     >
-                        <HugeiconsIcon icon={Search01Icon} size={20} />
+                        <HugeiconsIcon
+                            icon={Search01Icon}
+                            size={20}
+                            strokeWidth={1.8}
+                        />
                     </FocusVisibleButton>
                 </Tooltip>
             </Stack>
@@ -427,7 +431,7 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
                             label={
                                 <Stack
                                     direction="row"
-                                    sx={{ alignItems: "center", gap: 0.5 }}
+                                    sx={{ alignItems: "baseline", gap: 0.5 }}
                                 >
                                     {t(
                                         category === "places"

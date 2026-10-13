@@ -28,6 +28,7 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { ut } from "ente-base/i18n";
 import { thumbnailGridPadding } from "ente-new/photos/components/utils/thumbnail-grid-layout";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import { t } from "i18next";
 import { useEffect, useState, type ReactNode } from "react";
@@ -167,6 +168,12 @@ export const PhotosNavigationShell: React.FC<
                         {showNormalNavigation && (
                             <NormalNavigationRail
                                 {...props}
+                                isHome={
+                                    props.mode == "albums" &&
+                                    !props.isInSearchMode &&
+                                    galleryBarProps?.activeCollectionID ==
+                                        PseudoCollectionID.all
+                                }
                                 onChangeMode={handleChangeMode}
                                 opensDialog={mobile}
                                 navigationOpen={
@@ -287,6 +294,7 @@ const NormalHeaderContents: React.FC<
 
 const NormalNavigationRail: React.FC<
     Omit<PhotosNavigationShellProps, "onUpload"> & {
+        isHome: boolean;
         opensDialog: boolean;
         navigationOpen: boolean;
     }
@@ -295,12 +303,25 @@ const NormalNavigationRail: React.FC<
     onHome,
     mode,
     onChangeMode,
+    isHome,
     opensDialog,
     navigationOpen,
     ...props
 }) => (
     <>
-        <HomeButton onClick={onHome} />
+        <HomeButton onClick={onHome} selected={isHome} />
+        <SearchBar {...props} />
+        <Box
+            aria-hidden
+            sx={(theme) => ({
+                width: 38,
+                height: "2px",
+                flexShrink: 0,
+                opacity: 0.5,
+                bgcolor: "#E0E0E0",
+                ...theme.applyStyles("dark", { bgcolor: "#3E3E3E" }),
+            })}
+        />
         {(["albums", "people"] as const).map((item) =>
             item == "people" && !isMLSupported ? null : (
                 <Tooltip key={item} title={t(item)}>
@@ -309,6 +330,7 @@ const NormalNavigationRail: React.FC<
                         aria-label={t(item)}
                         aria-pressed={
                             navigationOpen &&
+                            !isHome &&
                             !props.isInSearchMode &&
                             (mode == item ||
                                 (item == "albums" &&
@@ -324,7 +346,7 @@ const NormalNavigationRail: React.FC<
                             flexShrink: 0,
                             p: 0,
                             borderRadius: "12px",
-                            color: "text.muted",
+                            color: "text.base",
                             '&[aria-pressed="true"]': {
                                 color: "#FFFFFF",
                                 bgcolor: "accent.main",
@@ -337,12 +359,12 @@ const NormalNavigationRail: React.FC<
                                 item == "albums" ? Album02Icon : UserGroupIcon
                             }
                             size={20}
+                            strokeWidth={1.8}
                         />
                     </FocusVisibleButton>
                 </Tooltip>
             ),
         )}
-        <SearchBar {...props} />
         <Box sx={{ flex: 1 }} />
         <Tooltip title={t("settings")}>
             <FocusVisibleButton
@@ -355,21 +377,30 @@ const NormalNavigationRail: React.FC<
                     width: 38,
                     height: 38,
                     flexShrink: 0,
+                    mb: "13px",
                     p: 0,
                     borderRadius: "12px",
                 }}
             >
-                <HugeiconsIcon icon={Settings01Icon} size={20} />
+                <HugeiconsIcon
+                    icon={Settings01Icon}
+                    size={20}
+                    strokeWidth={1.8}
+                />
             </FocusVisibleButton>
         </Tooltip>
     </>
 );
 
-const HomeButton: React.FC<ButtonishProps> = ({ onClick }) => (
+const HomeButton: React.FC<ButtonishProps & { selected: boolean }> = ({
+    onClick,
+    selected,
+}) => (
     <Tooltip title={ut("Home")}>
         <FocusVisibleButton
             color="secondary"
             aria-label={ut("Home")}
+            aria-pressed={selected}
             onClick={onClick}
             sx={{
                 minWidth: 0,
@@ -377,9 +408,15 @@ const HomeButton: React.FC<ButtonishProps> = ({ onClick }) => (
                 height: 38,
                 p: 0,
                 borderRadius: "12px",
+                color: "text.base",
+                '&[aria-pressed="true"]': {
+                    color: "#FFFFFF",
+                    bgcolor: "accent.main",
+                    "&:hover": { bgcolor: "accent.main" },
+                },
             }}
         >
-            <HugeiconsIcon icon={Home01Icon} size={20} />
+            <HugeiconsIcon icon={Home01Icon} size={20} strokeWidth={1.8} />
         </FocusVisibleButton>
     </Tooltip>
 );
@@ -388,7 +425,9 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <HugeiconsIcon icon={Upload01Icon} size={20} />;
+    const icon = (
+        <HugeiconsIcon icon={Upload01Icon} size={20} strokeWidth={1.8} />
+    );
 
     return (
         <>
