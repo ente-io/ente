@@ -282,11 +282,11 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangePeopleSortBy={setPeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
-                collectionSummaries={sortedCollectionSummaries.filter(
-                    (cs) =>
-                        !cs.attributes.has("hideFromCollectionBar") &&
-                        !cs.attributes.has("quickLink") &&
-                        (mode != "albums" || !cs.attributes.has("archived")),
+                collectionSummaries={sortedCollectionSummaries.filter((cs) =>
+                    mode == "albums"
+                        ? !cs.attributes.has("system")
+                        : !cs.attributes.has("hideFromCollectionBar") &&
+                          !cs.attributes.has("quickLink"),
                 )}
             />
 

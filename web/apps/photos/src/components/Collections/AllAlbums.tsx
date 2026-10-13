@@ -21,6 +21,12 @@ import {
 } from "@/components/CollectionDialog/styles";
 import { CollectionsSortOptions } from "@/components/CollectionsSortOptions";
 import type { RemotePullOpts } from "@/components/gallery";
+import {
+    albumFilters,
+    visibleAlbumFilters as getVisibleAlbumFilters,
+    matchesAlbumFilter,
+    type AlbumFilter,
+} from "@/utils/album-filters";
 import { Delete02Icon, StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveIcon from "@mui/icons-material/Archive";
@@ -77,59 +83,6 @@ import {
     FixedSizeList,
     type ListChildComponentProps,
 } from "react-window";
-
-type AlbumFilter = "all" | "shared" | "received" | "links" | "empty-albums";
-
-const albumFilters: {
-    value: AlbumFilter;
-    label: () => string;
-    title: () => string;
-}[] = [
-    { value: "all", label: () => t("all"), title: () => t("all_albums") },
-    {
-        value: "shared",
-        label: () => t("shared_albums_label"),
-        title: () => t("shared_albums_title"),
-    },
-    {
-        value: "received",
-        label: () => t("received_albums_label"),
-        title: () => t("received_albums_title"),
-    },
-    {
-        value: "links",
-        label: () => t("links_albums_label"),
-        title: () => t("links_albums_title"),
-    },
-    {
-        value: "empty-albums",
-        label: () => t("empty_albums"),
-        title: () => t("empty_albums_title"),
-    },
-];
-
-const matchesAlbumFilter = (
-    cs: CollectionSummary,
-    albumFilter: AlbumFilter,
-) => {
-    switch (albumFilter) {
-        case "all":
-            return true;
-        case "shared":
-            return (
-                !cs.attributes.has("sharedIncoming") &&
-                !cs.attributes.has("quickLink") &&
-                (cs.attributes.has("sharedOutgoing") ||
-                    cs.attributes.has("sharedViaLink"))
-            );
-        case "received":
-            return cs.attributes.has("sharedIncoming");
-        case "links":
-            return cs.attributes.has("quickLink");
-        case "empty-albums":
-            return isBulkDeletableEmptyAlbum(cs);
-    }
-};
 
 interface AllAlbums {
     open: boolean;
@@ -214,16 +167,8 @@ export const AllAlbums: React.FC<AllAlbums> = ({
         !searchTerm.trim();
 
     const visibleAlbumFilters = useMemo(
-        () =>
-            albumFilters.filter(({ value }) => {
-                if (value == "all") return true;
-                if (value == "empty-albums") return hasEnoughEmptyAlbums;
-
-                return collectionSummaries.some((cs) =>
-                    matchesAlbumFilter(cs, value),
-                );
-            }),
-        [collectionSummaries, hasEnoughEmptyAlbums],
+        () => getVisibleAlbumFilters(collectionSummaries),
+        [collectionSummaries],
     );
 
     const activeFilterTitle = (
