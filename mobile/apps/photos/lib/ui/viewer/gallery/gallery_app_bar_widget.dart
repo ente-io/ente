@@ -848,8 +848,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         _menuOption(
           AlbumPopupAction.editDetails,
           strings.editDetails,
-          const HugeIcon(
-            icon: HugeIcons.strokeRoundedEdit03,
+          HugeIcon(
+            icon: onCover
+                ? HugeIcons.strokeRoundedEdit02
+                : HugeIcons.strokeRoundedEdit03,
             size: IconSizes.small,
           ),
         ),
@@ -929,8 +931,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           isArchived ? strings.unarchive : strings.archive,
           HugeIcon(
             icon: isArchived
-                ? HugeIcons.strokeRoundedUnarchive03
-                : HugeIcons.strokeRoundedArchive03,
+                ? (onCover
+                      ? HugeIcons.strokeRoundedInboxUpload
+                      : HugeIcons.strokeRoundedUnarchive03)
+                : (onCover
+                      ? HugeIcons.strokeRoundedInboxDownload
+                      : HugeIcons.strokeRoundedArchive03),
             size: IconSizes.small,
           ),
         ),
@@ -941,7 +947,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           HugeIcon(
             icon: isHidden
                 ? HugeIcons.strokeRoundedView
-                : HugeIcons.strokeRoundedViewOffSlash,
+                : (onCover
+                      ? HugeIcons.strokeRoundedViewOff
+                      : HugeIcons.strokeRoundedViewOffSlash),
             size: IconSizes.small,
           ),
         ),
@@ -964,8 +972,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               : strings.archive,
           HugeIcon(
             icon: widget.collection!.hasShareeArchived()
-                ? HugeIcons.strokeRoundedUnarchive03
-                : HugeIcons.strokeRoundedArchive03,
+                ? (onCover
+                      ? HugeIcons.strokeRoundedInboxUpload
+                      : HugeIcons.strokeRoundedUnarchive03)
+                : (onCover
+                      ? HugeIcons.strokeRoundedInboxDownload
+                      : HugeIcons.strokeRoundedArchive03),
             size: IconSizes.small,
           ),
         ),
@@ -976,7 +988,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           HugeIcon(
             icon: widget.collection!.hasShareeHidden()
                 ? HugeIcons.strokeRoundedView
-                : HugeIcons.strokeRoundedViewOffSlash,
+                : (onCover
+                      ? HugeIcons.strokeRoundedViewOff
+                      : HugeIcons.strokeRoundedViewOffSlash),
             size: IconSizes.small,
           ),
         ),
@@ -998,7 +1012,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 !flagService.enableMultiCast &&
                     castService.getActiveSessions().isNotEmpty
                 ? HugeIcons.strokeRoundedTvSmart
-                : HugeIcons.strokeRoundedTv02,
+                : (onCover
+                      ? HugeIcons.strokeRoundedAirplayLine
+                      : HugeIcons.strokeRoundedTv02),
             size: IconSizes.small,
           ),
         ),
@@ -1059,8 +1075,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         _menuOption(
           AlbumPopupAction.downloadAlbum,
           strings.download,
-          const HugeIcon(
-            icon: HugeIcons.strokeRoundedDownload01,
+          HugeIcon(
+            icon: onCover
+                ? HugeIcons.strokeRoundedDownload04
+                : HugeIcons.strokeRoundedDownload01,
             size: IconSizes.small,
           ),
         ),

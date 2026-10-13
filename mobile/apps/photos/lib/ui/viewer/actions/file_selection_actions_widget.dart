@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:io";
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_strings/ente_strings.dart";
@@ -221,9 +220,7 @@ class _FileSelectionActionsWidgetState
           SelectionSheetAction(
             labelText: context.strings.share,
             gridOrder: 0,
-            hugeIcon: Platform.isIOS
-                ? HugeIcons.strokeRoundedShare03
-                : HugeIcons.strokeRoundedShare08,
+            hugeIcon: HugeIcons.strokeRoundedShare08,
             key: shareButtonKey,
             onTap: _shareSelectedFiles,
           ),
@@ -293,7 +290,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showMoveToAlbum()) {
         items.add(
           SelectionSheetAction(
-            hugeIcon: HugeIcons.strokeRoundedArrowRight01,
+            hugeIcon: HugeIcons.strokeRoundedImageUpload,
             labelText: context.strings.moveToAlbum,
             onTap: anyUploadedFiles ? _moveFiles : null,
             shouldShow: ownedFilesCount > 0,
@@ -304,7 +301,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showMovetoHiddenAlbum()) {
         items.add(
           SelectionSheetAction(
-            hugeIcon: HugeIcons.strokeRoundedArrowRight01,
+            hugeIcon: HugeIcons.strokeRoundedImageUpload,
             labelText: context.strings.moveToAlbum,
             onTap: _moveFilesToHiddenAlbum,
           ),
@@ -314,7 +311,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showRemoveFromAlbum()) {
         items.add(
           SelectionSheetAction(
-            hugeIcon: HugeIcons.strokeRoundedRemove01,
+            hugeIcon: HugeIcons.strokeRoundedImageDelete01,
             labelText: context.strings.removeFromAlbum,
             onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
             shouldShow: removeCount > 0,
@@ -325,7 +322,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showRemoveFromHiddenAlbum()) {
         items.add(
           SelectionSheetAction(
-            hugeIcon: HugeIcons.strokeRoundedRemove01,
+            hugeIcon: HugeIcons.strokeRoundedImageDelete01,
             labelText: context.strings.removeFromAlbum,
             onTap: _removeFilesFromHiddenAlbum,
           ),
@@ -381,7 +378,7 @@ class _FileSelectionActionsWidgetState
           SelectionSheetAction(
             labelText: context.strings.download,
             gridOrder: 7,
-            hugeIcon: HugeIcons.strokeRoundedDownload01,
+            hugeIcon: HugeIcons.strokeRoundedDownload04,
             onTap: () => _download(widget.selectedFiles.files.toList()),
           ),
         );

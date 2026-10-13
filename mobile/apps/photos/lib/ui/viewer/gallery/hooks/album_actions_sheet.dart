@@ -3,6 +3,7 @@ import "dart:math" as math;
 import "package:ente_components/ente_components.dart";
 import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 
 Future<T?> showAlbumActionsSheet<T>(
   BuildContext context,
@@ -35,8 +36,8 @@ Future<T?> showAlbumActionsSheet<T>(
               final gridWidth = constraints.maxWidth - Spacing.md * 2;
               final minTileWidth =
                   64 *
-                  media.textScaler.scale(TextStyles.mini.fontSize!) /
-                  TextStyles.mini.fontSize!;
+                  media.textScaler.scale(TextStyles.body.fontSize!) /
+                  TextStyles.body.fontSize!;
               final columns = gridWidth >= minTileWidth * 4 + Spacing.xs * 3
                   ? 4
                   : 2;
@@ -236,7 +237,7 @@ class _AlbumActionTile<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.componentColors;
-    final foreground = option.labelColor ?? colors.textLight;
+    final foreground = option.labelColor ?? colors.textBase;
     return Semantics(
       button: true,
       child: InkWell(
@@ -250,25 +251,14 @@ class _AlbumActionTile<T> extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox.square(
-                  dimension: 34,
-                  child: Center(
-                    child: IconTheme.merge(
-                      data: IconThemeData(
-                        color: foreground,
-                        size: IconSizes.small,
-                      ),
-                      child: option.leadingWidget ?? const SizedBox.shrink(),
-                    ),
-                  ),
-                ),
+                _buildActionIcon(option.leadingWidget, foreground),
                 const SizedBox(height: Spacing.xs),
                 Text(
                   option.label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: TextStyles.mini.copyWith(color: foreground),
+                  style: TextStyles.body.copyWith(color: foreground),
                 ),
               ],
             ),
@@ -301,24 +291,16 @@ class _AlbumActionRow<T> extends StatelessWidget {
             child: Row(
               spacing: Spacing.md,
               children: [
-                SizedBox.square(
-                  dimension: 34,
-                  child: Center(
-                    child: IconTheme.merge(
-                      data: IconThemeData(
-                        color: option.labelColor ?? colors.textLight,
-                        size: IconSizes.small,
-                      ),
-                      child: option.leadingWidget ?? const SizedBox.shrink(),
-                    ),
-                  ),
+                _buildActionIcon(
+                  option.leadingWidget,
+                  option.labelColor ?? colors.textBase,
                 ),
                 Expanded(
                   child: Text(
                     option.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyles.mini.copyWith(
+                    style: TextStyles.body.copyWith(
                       color: option.labelColor ?? colors.textBase,
                     ),
                   ),
@@ -330,6 +312,28 @@ class _AlbumActionRow<T> extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildActionIcon(Widget? icon, Color color) {
+  const iconSize = 22.0;
+  return SizedBox.square(
+    dimension: 34,
+    child: Center(
+      child: icon is HugeIcon
+          ? HugeIcon(
+              key: icon.key,
+              icon: icon.icon,
+              color: color,
+              secondaryColor: icon.secondaryColor,
+              size: iconSize,
+              strokeWidth: 1.5 * 24 / iconSize,
+            )
+          : IconTheme.merge(
+              data: IconThemeData(color: color, size: iconSize),
+              child: icon ?? const SizedBox.shrink(),
+            ),
+    ),
+  );
 }
 
 const _maxHeightFraction = 0.8;
