@@ -1380,7 +1380,7 @@ const getGoogleLikeMetadataFile = (
         },
     };
     const caption = file?.pubMagicMetadata?.data?.caption;
-    if (caption) result.caption = caption;
+    if (caption) result.description = caption;
     const geoData = fileLocation(file);
     if (geoData) result.geoData = geoData;
     return JSON.stringify(result, null, 2);
