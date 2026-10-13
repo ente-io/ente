@@ -431,7 +431,7 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
                             label={
                                 <Stack
                                     direction="row"
-                                    sx={{ alignItems: "center", gap: 0.5 }}
+                                    sx={{ alignItems: "baseline", gap: 0.5 }}
                                 >
                                     {t(
                                         category === "places"
