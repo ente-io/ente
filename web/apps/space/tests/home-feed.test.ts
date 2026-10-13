@@ -1,7 +1,10 @@
 import { expect, test } from "vitest";
 import type { SpacePost } from "../src/services/space";
 import type { LocalSpaceFeedPost } from "../src/state/app-state";
-import { homeFeedEntries } from "../src/utils/home-feed";
+import {
+    homeFeedEntries,
+    homeFeedSeparatorBefore,
+} from "../src/utils/home-feed";
 
 const post = (postId: number, timestampMs: number): SpacePost => ({
     friendID: "friend",
@@ -118,3 +121,103 @@ test("a post published in this session stays latest after the server replaces th
         history: [uploaded],
     });
 });
+
+test("the separator follows the latest/grid boundary even when older own posts sort first", () => {
+    const own = { ...post(4, 400), spaceId: "self", friendID: "self" };
+    const sections = homeFeedEntries(
+        [own, post(3, 300), post(1, 100)],
+        [],
+        200,
+        new Set(),
+        "self",
+    );
+    expect(sections.latest.map((entry) => entry.identity)).toEqual(["post:3"]);
+    expect(sections.history.map((item) => item.postId)).toEqual([4, 1]);
+    expect(homeFeedSeparatorBefore(sections.latest, sections.history)).toBe(
+        "post:4",
+    );
+});
+
+test("the separator includes own new posts and waits for older history", () => {
+    const uploaded = { ...post(4, 400), spaceId: "self", friendID: "self" };
+    const local: LocalSpaceFeedPost = {
+        id: "upload",
+        post: uploaded,
+        status: "ready",
+    };
+    const latestPostIDs = new Set([uploaded.postId]);
+    const localOnly = homeFeedEntries(
+        [post(1, 100)],
+        [local],
+        200,
+        latestPostIDs,
+        "self",
+    );
+    expect(homeFeedSeparatorBefore(localOnly.latest, localOnly.history)).toBe(
+        "post:1",
+    );
+    const confirmed = homeFeedEntries(
+        [uploaded, post(1, 100)],
+        [],
+        200,
+        latestPostIDs,
+        "self",
+    );
+    expect(homeFeedSeparatorBefore(confirmed.latest, confirmed.history)).toBe(
+        "post:1",
+    );
+    const firstPage = homeFeedEntries([post(3, 300)], [], 200);
+    expect(
+        homeFeedSeparatorBefore(firstPage.latest, firstPage.history),
+    ).toBeUndefined();
+    const nextPage = homeFeedEntries([post(3, 300), post(1, 100)], [], 200);
+    expect(homeFeedSeparatorBefore(nextPage.latest, nextPage.history)).toBe(
+        "post:1",
+    );
+    const nextVisit = homeFeedEntries([post(3, 300), post(1, 100)], [], 400);
+    expect(
+        homeFeedSeparatorBefore(nextVisit.latest, nextVisit.history),
+    ).toBeUndefined();
+});
+
+test("grid posts are newest first, with post IDs breaking timestamp ties", () => {
+    const sections = homeFeedEntries(
+        [post(1, 100), post(2, 200), post(3, 200)],
+        [],
+        400,
+    );
+    expect(sections.history.map((item) => item.postId)).toEqual([3, 2, 1]);
+});
+
+test.each(["pending", "failed"] as const)(
+    "%s uploads retain their render key when the server confirms the post",
+    (status) => {
+        const pending = {
+            frameAspectRatio: 1,
+            friendID: "self",
+            id: "upload",
+            imageUrl: "blob:preview",
+            name: "Me",
+            photoCount: 1,
+            spaceId: "self",
+            status,
+            timestampMs: 300,
+        } satisfies LocalSpaceFeedPost;
+        const before = homeFeedEntries([post(1, 100)], [pending], 200);
+        expect(homeFeedSeparatorBefore(before.latest, before.history)).toBe(
+            "post:1",
+        );
+        const confirmed = homeFeedEntries(
+            [post(3, 300), post(1, 100)],
+            [{ ...pending, postId: 3 }],
+            200,
+        );
+        expect(confirmed.latest.map((entry) => entry.identity)).toEqual([
+            "post:3",
+        ]);
+        expect(confirmed.latest[0]?.renderKey).toBe(
+            before.latest[0]?.renderKey,
+        );
+        expect(confirmed.history.map((item) => item.postId)).toEqual([1]);
+    },
+);

@@ -40,12 +40,7 @@ class AndroidDeviceCapabilityProvider(context: Context) {
                 ?: return ChatDeviceCapability.Unknown
         val memoryInfo = ActivityManager.MemoryInfo()
         activityManager.getMemoryInfo(memoryInfo)
-        val totalMemoryBytes = memoryInfo.totalMem
-        return if (totalMemoryBytes < CHAT_MIN_RAM_BYTES) {
-            ChatDeviceCapability.UnsupportedLowMemory(totalMemoryBytes)
-        } else {
-            ChatDeviceCapability.Supported(totalMemoryBytes)
-        }
+        return chatDeviceCapability(memoryInfo.totalMem)
     }
 }
 

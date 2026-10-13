@@ -15,6 +15,85 @@ fn login_and_photos_across_processes() -> TestResult {
     Museum::run_async(exercise)
 }
 
+#[test]
+fn auth_login_refresh_and_offline_export_across_processes() -> TestResult {
+    Museum::run_async(|origin| async move {
+        let email = format!("auth-export-{}@example.org", Uuid::new_v4());
+        let owner = create_account(&origin, &email).await;
+        let home = TestHome::new();
+        login(&home, "auth", &email, &["--host", &origin, "--no-input"]);
+        let mut state = home.read_vault();
+        state["selected"] = Value::Null;
+        home.write_vault(&state);
+        login(&home, "auth", &email, &[]);
+        let export = ["auth", "export", "--output", "-", "--plaintext"];
+        assert!(success(home.run(&export)).stdout.is_empty());
+        let key = Key::generate();
+        let wrapped = secretbox::encrypt(
+            key.as_bytes(),
+            &Key::try_from_slice(&owner.secrets.master_key).unwrap(),
+        );
+        let body = home.dir.path().join("request.json");
+        fs::write(&body, serde_json::to_vec(&json!({"encryptedKey": b64::encode(&wrapped.encrypted_data), "header": b64::encode(wrapped.nonce.as_bytes())})).unwrap()).unwrap();
+        success(home.run(&[
+            "auth",
+            "api",
+            "/authenticator/key",
+            "--method",
+            "POST",
+            "--body",
+            body.to_str().unwrap(),
+        ]));
+        let uri = "otpauth://hotp/Museum?secret=JBSWY3DPEHPK3PXP&counter=17";
+        let encrypted = blob::encrypt_json(&uri, &key).unwrap();
+        fs::write(&body, serde_json::to_vec(&json!({"encryptedData": b64::encode(&encrypted.encrypted_data), "header": b64::encode(encrypted.decryption_header.as_bytes())})).unwrap()).unwrap();
+        let created = home.json(&[
+            "auth",
+            "api",
+            "/authenticator/entity",
+            "--method",
+            "POST",
+            "--body",
+            body.to_str().unwrap(),
+        ]);
+        assert_eq!(
+            success(home.run(&export)).stdout,
+            format!("{uri}\n").as_bytes()
+        );
+        let changed = format!("{uri}&codeDisplay=%7B%22trashed%22%3Atrue%7D");
+        let encrypted = blob::encrypt_json(&changed, &key).unwrap();
+        fs::write(&body, serde_json::to_vec(&json!({"id": created["id"], "encryptedData": b64::encode(&encrypted.encrypted_data), "header": b64::encode(encrypted.decryption_header.as_bytes())})).unwrap()).unwrap();
+        success(home.run(&[
+            "auth",
+            "api",
+            "/authenticator/entity",
+            "--method",
+            "PUT",
+            "--body",
+            body.to_str().unwrap(),
+        ]));
+        assert_eq!(
+            success(home.run(&export)).stdout,
+            format!("{changed}\n").as_bytes()
+        );
+        assert_eq!(
+            success(home.command(&export).arg("--offline").output().unwrap()).stdout,
+            format!("{changed}\n").as_bytes()
+        );
+        success(home.run(&[
+            "auth",
+            "api",
+            "/authenticator/entity",
+            "--method",
+            "DELETE",
+            "--query",
+            &format!("id={}", created["id"].as_str().unwrap()),
+        ]));
+        assert!(success(home.run(&export)).stdout.is_empty());
+        Ok(())
+    })
+}
+
 #[cfg(unix)]
 #[test]
 fn login_save_failures_follow_the_vault_replacement() -> TestResult {
@@ -48,7 +127,8 @@ fn login_save_failures_follow_the_vault_replacement() -> TestResult {
             );
             let mut child = home
                 .command(&[
-                    "photos", "login", "--host", &origin, "--input", "-", "--json",
+                    "account", "login", "--app", "photos", "--host", &origin, "--input", "-",
+                    "--json",
                 ])
                 .stdin(Stdio::piped())
                 .spawn()
@@ -285,10 +365,19 @@ async fn exercise(origin: String) -> TestResult {
     let before = fs::read(home.dir.path().join("vault.json")).unwrap();
     assert!(
         failure(&home.with_input(
-            &["photos", "login", "--host", &alias_origin, "--input", "-"],
+            &[
+                "account",
+                "login",
+                "--app",
+                "photos",
+                "--host",
+                &alias_origin,
+                "--input",
+                "-"
+            ],
             &credentials(&alice_email),
         ))
-        .contains("already in use")
+        .contains("supply a new account name")
     );
     assert_eq!(
         fs::read(home.dir.path().join("vault.json")).unwrap(),
@@ -298,14 +387,16 @@ async fn exercise(origin: String) -> TestResult {
         &home,
         "photos",
         &alice_email,
-        &["--host", &alias_origin, "--name", "other-server"],
+        &["other-server", "--host", &alias_origin],
     );
     success(home.run(&["account", "rename", &alice_email, "work"]));
     assert_eq!(home.read_vault()["accounts"][0]["storage_id"], first_id);
 
-    login(&home, "auth", &bob_email, &["--host", &origin]);
-    assert!(failure(&home.run(&["photos", "album", "list"])).contains("no photos session"));
-    login(&home, "locker", &alice_email, &["--account", "work"]);
+    login(&home, "auth", &bob_email, &[&bob_email, "--host", &origin]);
+    assert!(
+        failure(&home.run(&["photos", "album", "list"])).contains("is not logged into Ente Photos")
+    );
+    login(&home, "locker", &alice_email, &["work"]);
     let accounts = home.json(&["account", "list"]);
     assert!(
         accounts
@@ -319,10 +410,10 @@ async fn exercise(origin: String) -> TestResult {
             .as_array()
             .unwrap()
             .iter()
-            .any(|a| a["name"] == "work" && a["products"] == json!(["photos", "locker"]))
+            .any(|a| a["name"] == "work" && a["apps"] == json!(["photos", "locker"]))
     );
 
-    login(&home, "photos", &bob_email, &["--account", &bob_email]);
+    login(&home, "photos", &bob_email, &[]);
     let albums = home.json(&["photos", "album", "list"]);
     let mut ids: Vec<_> = albums
         .as_array()
@@ -453,7 +544,8 @@ async fn exercise(origin: String) -> TestResult {
         0
     );
 
-    login(&home, "photos", &alice_email, &["--host", &origin]);
+    login(&home, "photos", &alice_email, &["work"]);
+    success(home.run(&["account", "switch", "work"]));
     let added_original = b"added after the first sync";
     let added_file = upload_file(&origin, &alice, album, &key, added_original, None)
         .await
@@ -519,22 +611,26 @@ async fn exercise(origin: String) -> TestResult {
     assert_eq!(state["accounts"][0]["name"], "work");
     assert!(!serde_json::to_string(&state).unwrap().contains(PASSWORD));
     let before = fs::read(home.dir.path().join("vault.json")).unwrap();
-    assert!(
-        failure(&home.with_input(
-            &["photos", "login", "--account", "work", "--input", "-"],
-            &credentials(&bob_email),
-        ))
-        .contains("identity does not match")
-    );
-    assert_eq!(
-        fs::read(home.dir.path().join("vault.json")).unwrap(),
-        before
-    );
+    for name in [Some("work"), None] {
+        let mut args = vec!["account", "login", "--app", "photos", "--input", "-"];
+        args.extend(name);
+        assert!(
+            failure(&home.with_input(&args, &credentials(&bob_email)))
+                .contains("identity does not match")
+        );
+        assert_eq!(
+            fs::read(home.dir.path().join("vault.json")).unwrap(),
+            before
+        );
+    }
 
     let token: Vec<u8> =
         serde_json::from_value(state["accounts"][0]["sessions"]["photos"]["token"].clone())
             .unwrap();
-    success(home.run(&["photos", "logout"]));
+    assert_eq!(
+        success(home.run(&["account", "logout", "--app", "photos"])).stdout,
+        b"Logged out of Ente Photos for \"work\".\n"
+    );
     let response = reqwest::Client::new()
         .get(format!("{origin}/collections/v2"))
         .header("x-auth-token", b64::encode_url_safe(&token))
@@ -545,7 +641,7 @@ async fn exercise(origin: String) -> TestResult {
     assert_eq!(response.status(), reqwest::StatusCode::UNAUTHORIZED);
     failure(&home.run(&["photos", "album", "list"]));
     assert_eq!(
-        home.json(&["account", "view", "work"])["products"],
+        home.json(&["account", "view", "work"])["apps"],
         json!(["locker"])
     );
     let account_dir = home
@@ -583,12 +679,20 @@ async fn exercise(origin: String) -> TestResult {
     Ok(())
 }
 
-fn login(home: &TestHome, product: &str, email: &str, options: &[&str]) {
-    let mut args = vec![product, "login", "--input", "-", "--json"];
+fn login(home: &TestHome, app: &str, email: &str, options: &[&str]) {
+    let mut args = vec!["account", "login", "--app", app, "--input", "-", "--json"];
     args.extend_from_slice(options);
     let output = success(home.with_input(&args, &credentials(email)));
     let result: Value = serde_json::from_slice(&output.stdout).unwrap();
-    assert_eq!(result["product"], product);
+    assert_eq!(result["app"], app);
+    assert_eq!(
+        result["account"],
+        home.json(&[
+            "account",
+            "view",
+            result["account"]["name"].as_str().unwrap()
+        ])
+    );
 }
 
 fn credentials(email: &str) -> Vec<u8> {

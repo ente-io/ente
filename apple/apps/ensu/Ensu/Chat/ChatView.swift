@@ -343,6 +343,7 @@ struct ChatView: View {
                     MessageInputView(
                         text: $viewModel.draftText,
                         attachments: $viewModel.draftAttachments,
+                        supportsImageAttachments: viewModel.supportsImageAttachments,
                         isGenerating: viewModel.isGenerating,
                         isSendPending: viewModel.isSendPending,
                         isDownloading: viewModel.isDownloading,

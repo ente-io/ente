@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use zeroize::{ZeroizeOnDrop, Zeroizing};
 
-use crate::{args::Product, home, parse_json};
+use crate::{args::App, home, parse_json};
 
 const SCHEMA_VERSION: u8 = 1;
 const VAULT_FILE: &str = "vault.json";
@@ -59,7 +59,7 @@ pub struct Account {
     pub origin: String,
     pub user_id: i64,
     pub identity: AccountKeys,
-    pub sessions: BTreeMap<Product, StoredSession>,
+    pub sessions: BTreeMap<App, StoredSession>,
 }
 
 #[derive(Serialize, Deserialize, ZeroizeOnDrop)]
@@ -104,15 +104,11 @@ impl Vault {
         self.state
     }
 
-    pub fn release(self) -> (State, VaultAccess) {
-        let Self {
-            state,
-            home,
-            key,
-            _lock,
-        } = self;
-        drop(_lock);
-        (state, VaultAccess { home, key })
+    pub fn release(self) -> VaultAccess {
+        VaultAccess {
+            home: self.home,
+            key: self.key,
+        }
     }
 
     pub fn save(&self) -> Result<()> {
@@ -175,7 +171,7 @@ impl State {
         self.accounts
             .iter()
             .position(|a| a.name == name)
-            .with_context(|| format!("no account named {name:?}; use accounts list"))
+            .with_context(|| format!("no account named {name:?}; use account list"))
     }
 
     pub fn resolve(&self, name: Option<&str>) -> Result<usize> {
@@ -190,9 +186,11 @@ impl State {
             return Ok(index);
         }
         match self.accounts.len() {
-            0 => bail!("no accounts; use photos login, locker login, or auth login"),
+            0 => bail!("no accounts; use account login --app <APP>"),
             1 => Ok(0),
-            _ => bail!("no account selected; use accounts switch <name> or --account <name>"),
+            _ => bail!(
+                "no account selected; use account switch <NAME> or name an account explicitly"
+            ),
         }
     }
 
@@ -200,24 +198,24 @@ impl State {
         ensure!(!name.trim().is_empty(), "account name cannot be empty");
         ensure!(
             !self.accounts.iter().any(|a| a.name == name),
-            "account name {name:?} is already in use; choose another --name"
+            "account name {name:?} is already in use; choose another name"
         );
         Ok(())
     }
 }
 
 impl Account {
-    pub fn token(&self, product: Product) -> Result<&[u8]> {
+    pub fn token(&self, app: App) -> Result<&[u8]> {
         self.sessions
-            .get(&product)
+            .get(&app)
             .map(|s| s.token.as_slice())
             .with_context(|| {
                 format!(
-                    "account {:?} has no {} session; use {} login --account {:?}",
+                    "account {:?} is not logged into {}; use account login {:?} --app {}",
                     self.name,
-                    product.name(),
-                    product.name(),
-                    self.name
+                    app.display_name(),
+                    self.name,
+                    app.name()
                 )
             })
     }

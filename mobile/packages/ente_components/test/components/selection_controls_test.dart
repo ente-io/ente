@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:ente_components/ente_components.dart";
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
 import "package:flutter_test/flutter_test.dart";
 
 void main() {
@@ -160,6 +161,77 @@ void main() {
     expect(
       tester.getSize(find.byKey(const ValueKey("filter-chip-surface"))).height,
       greaterThan(40),
+    );
+  });
+
+  testWidgets("FilterChipComponent truncates long labels inside a wrap", (
+    tester,
+  ) async {
+    const label =
+        "Summer vacation with family and friends in the mountains and by the sea";
+    var tapCount = 0;
+
+    for (final scale in [1.0, 2.0]) {
+      await tester.pumpWidget(
+        _wrap(
+          SizedBox(
+            width: 280,
+            child: Wrap(
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(top: 8, end: 8),
+                  child: FilterChipComponent(
+                    label: label,
+                    onChanged: (_) => tapCount++,
+                  ),
+                ),
+                const FilterChipComponent(label: "Favorites"),
+              ],
+            ),
+          ),
+          textScaler: TextScaler.linear(scale),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      final labelRect = tester.getRect(find.text(label));
+      final surfaceRect = tester.getRect(
+        find.byKey(const ValueKey("filter-chip-surface")).first,
+      );
+      expect(labelRect.right, lessThan(surfaceRect.right));
+      expect(surfaceRect.width, lessThanOrEqualTo(272));
+      expect(
+        tester
+            .renderObject<RenderParagraph>(find.text(label))
+            .didExceedMaxLines,
+        isTrue,
+      );
+      await tester.tap(find.text(label));
+      await tester.pump();
+    }
+
+    expect(tapCount, 2);
+  });
+
+  testWidgets("FilterChipComponent keeps short labels compact in a row", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FilterChipComponent(label: "Trips", onChanged: (_) {}),
+            const Text("More"),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.getSize(find.byKey(const ValueKey("filter-chip-surface"))).width,
+      lessThan(100),
     );
   });
 }

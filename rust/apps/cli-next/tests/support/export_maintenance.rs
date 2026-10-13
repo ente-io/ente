@@ -83,7 +83,7 @@ fn export_and_download_preserve_non_utf8_paths() {
         assert_eq!(result["complete"], true);
         assert_eq!(result["changes"]["exported"], exported);
         assert_eq!(
-            result["destination"],
+            result["output"],
             fs::canonicalize(&root).unwrap().to_string_lossy().as_ref()
         );
         assert_component(&root, "First", "Photo.jpg", b"original");
@@ -2527,7 +2527,7 @@ fn export_reports_progress_and_keeps_account_storage_while_workers_run() {
     for args in [
         vec!["account", "logout", "fixture", "--local"],
         vec!["account", "logout", "fixture"],
-        vec!["photos", "logout"],
+        vec!["account", "logout", "--app", "photos"],
     ] {
         let output = ExportChild::spawn(&mut home.command(&args))
             .unwrap()
@@ -2563,7 +2563,7 @@ fn export_reports_progress_and_keeps_account_storage_while_workers_run() {
     home.write_vault(&with_locker);
     let revoke = server.mock("POST", "/users/logout").expect(1).create();
     success(
-        ExportChild::spawn(&mut home.command(&["photos", "logout"]))
+        ExportChild::spawn(&mut home.command(&["account", "logout", "--app", "photos"]))
             .unwrap()
             .wait_with_output()
             .unwrap(),

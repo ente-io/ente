@@ -8,14 +8,34 @@ use std::{
 use anyhow::{Context, Result, bail, ensure};
 use uuid::Uuid;
 
-pub struct AccountHome {
+use crate::vault::{Account, State};
+
+pub struct LockedAccountHome {
     pub path: PathBuf,
     _lock: File,
 }
 
 pub struct RemovalGuard {
     _lock: File,
-    home: AccountHome,
+    home: LockedAccountHome,
+}
+
+pub fn open_account(selected: Option<&str>, create: bool) -> Result<(Account, LockedAccountHome)> {
+    let state = State::load()?;
+    let id = state.accounts[state.resolve(selected)?].storage_id;
+    let home = lock_account(id, create)?;
+    let Some(account) = State::load()?
+        .accounts
+        .into_iter()
+        .find(|account| account.storage_id == id)
+    else {
+        home.for_removal()?.remove()?;
+        bail!("account was removed while waiting for access");
+    };
+    if create {
+        self::create(&home.path)?;
+    }
+    Ok((account, home))
 }
 
 pub fn application_home() -> Result<PathBuf> {
@@ -42,19 +62,19 @@ pub fn create(path: &Path) -> io::Result<()> {
     Ok(())
 }
 
-pub fn lock_account(id: Uuid, create: bool) -> Result<AccountHome> {
+pub fn lock_account(id: Uuid, create: bool) -> Result<LockedAccountHome> {
     let home = account_home(id, create)?;
     home._lock.lock().context("cannot lock the account home")?;
     Ok(home)
 }
 
-pub fn try_lock_account(id: Uuid) -> Result<AccountHome> {
+pub fn try_lock_account(id: Uuid) -> Result<LockedAccountHome> {
     let home = account_home(id, true)?;
     try_lock(&home._lock)?;
     Ok(home)
 }
 
-fn account_home(id: Uuid, create: bool) -> Result<AccountHome> {
+fn account_home(id: Uuid, create: bool) -> Result<LockedAccountHome> {
     let accounts = application_home()?.join("accounts");
     let path = accounts.join(id.to_string());
     let lock_path = accounts.join(format!("{id}.lock"));
@@ -64,10 +84,10 @@ fn account_home(id: Uuid, create: bool) -> Result<AccountHome> {
         ensure!(path.is_dir(), "no local data; run the command online first");
     }
     let lock = open_lock(&lock_path).context("cannot open the account lock")?;
-    Ok(AccountHome { path, _lock: lock })
+    Ok(LockedAccountHome { path, _lock: lock })
 }
 
-impl AccountHome {
+impl LockedAccountHome {
     pub fn storage_use(&self) -> Result<File> {
         let lock = open_lock(&self.path.with_extension("use.lock"))
             .context("cannot open the account use lock")?;

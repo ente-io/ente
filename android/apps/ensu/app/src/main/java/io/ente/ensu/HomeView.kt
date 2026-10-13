@@ -267,8 +267,9 @@ fun HomeView(
         val handleAttachmentSelected: (AttachmentType) -> Unit = handle@{ type ->
             if (
                 type == AttachmentType.Image &&
-                    appState.chat.attachments.count { it.type == AttachmentType.Image } >=
-                        MaxImageAttachmentsPerMessage
+                    (!appState.chat.supportsImageAttachments ||
+                        appState.chat.attachments.count { it.type == AttachmentType.Image } >=
+                            MaxImageAttachmentsPerMessage)
             )
                 return@handle
             store.setPickerPending(true)

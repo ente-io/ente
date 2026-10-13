@@ -1,0 +1,1 @@
+- Fixed long album names overflowing in the file info sheet.
