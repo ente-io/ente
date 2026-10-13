@@ -284,7 +284,8 @@ export const GalleryBarAndListHeader: React.FC<
                 onShowAllPeople={showAllPeople}
                 collectionSummaries={sortedCollectionSummaries.filter((cs) =>
                     mode == "albums"
-                        ? !cs.attributes.has("system")
+                        ? !cs.attributes.has("system") ||
+                          (cs.id > 0 && cs.type == "uncategorized")
                         : !cs.attributes.has("hideFromCollectionBar") &&
                           !cs.attributes.has("quickLink"),
                 )}

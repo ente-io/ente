@@ -44,22 +44,25 @@ export const matchesAlbumFilter = (
             return true;
         case "ente":
             return (
-                cs.fileCount > 0 &&
                 !cs.attributes.has("system") &&
-                !cs.attributes.has("shared") &&
-                !matchesAlbumFilter(cs, "shared") &&
-                !matchesAlbumFilter(cs, "received") &&
-                !matchesAlbumFilter(cs, "links")
+                !cs.attributes.has("uncategorized") &&
+                !cs.attributes.has("quickLink") &&
+                !cs.attributes.has("archived") &&
+                !(cs.type == "userFavorites" && cs.fileCount == 0)
             );
         case "shared":
             return (
+                !cs.attributes.has("archived") &&
                 !cs.attributes.has("sharedIncoming") &&
                 !cs.attributes.has("quickLink") &&
                 (cs.attributes.has("sharedOutgoing") ||
                     cs.attributes.has("sharedViaLink"))
             );
         case "received":
-            return cs.attributes.has("sharedIncoming");
+            return (
+                !cs.attributes.has("archived") &&
+                cs.attributes.has("sharedIncoming")
+            );
         case "links":
             return cs.attributes.has("quickLink");
         case "empty-albums":

@@ -26,7 +26,7 @@ const album = (
 });
 
 describe("album filters shared by the dialog and sidebar", () => {
-    test("Ente contains non-empty local albums outside the other categories", () => {
+    test("Ente matches mobile membership, including shared, received, and empty albums", () => {
         const albums = [
             album(1),
             { ...album(2, ["userFavorites"]), type: "userFavorites" as const },
@@ -38,15 +38,38 @@ describe("album filters shared by the dialog and sidebar", () => {
             album(8, ["archived"], 0),
             album(9, ["system"]),
             album(10, ["shared"]),
+            {
+                ...album(11, ["userFavorites"], 0),
+                type: "userFavorites" as const,
+            },
+            {
+                ...album(12, ["sharedIncoming", "favorites"], 0),
+                type: "sharedIncoming" as const,
+            },
+            album(13, ["sharedIncoming", "uncategorized"]),
+            {
+                ...album(
+                    14,
+                    ["system", "uncategorized", "sharedOutgoing", "shared"],
+                    0,
+                ),
+                type: "uncategorized" as const,
+            },
+            album(15, ["sharedOutgoing", "shared", "archived"]),
+            album(16, ["sharedIncoming", "shared", "archived"]),
         ];
         expect(
             albums
                 .filter((cs) => matchesAlbumFilter(cs, "ente"))
                 .map(({ id }) => id),
-        ).toEqual([1, 2]);
+        ).toEqual([1, 2, 3, 4, 5, 7, 10, 12]);
+        expect(matchesAlbumFilter(albums[13]!, "shared")).toBe(true);
+        expect(matchesAlbumFilter(albums[12]!, "received")).toBe(true);
+        expect(matchesAlbumFilter(albums[14]!, "shared")).toBe(false);
+        expect(matchesAlbumFilter(albums[15]!, "received")).toBe(false);
         expect(
             albums.filter((cs) => matchesAlbumFilter(cs, "all")),
-        ).toHaveLength(10);
+        ).toHaveLength(16);
     });
 
     test("separates outgoing sharing, incoming sharing, and quick links", () => {
