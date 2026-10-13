@@ -188,7 +188,16 @@ void main() {
           .widget<GalleryAppBarWidget>(find.byType(GalleryAppBarWidget))
           .selectedFiles;
       expect(find.byType(AlbumCoverActionButton), findsNWidgets(2));
-      expect(find.byTooltip("Sort"), findsOneWidget);
+      expect(find.byTooltip("Sort"), findsNothing);
+      await tester.tap(find.byTooltip("More"));
+      await tester.pumpAndSettle();
+      expect(find.text("Newest first"), findsOneWidget);
+      await tester.tap(find.text("Sort"));
+      await tester.pumpAndSettle();
+      expect(find.text("Sort photos"), findsOneWidget);
+      await tester.tap(find.text("Newest first"));
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheetComponent), findsNothing);
       selectedFiles.toggleSelection(newest);
       await tester.pumpAndSettle();
       expect(find.byType(AlbumCoverActionButton), findsNothing);
@@ -237,7 +246,7 @@ void main() {
         MediaQuery.paddingOf(tester.element(find.byType(Gallery))).bottom,
       );
       expect(find.byType(AlbumCoverActionButton), findsNWidgets(2));
-      expect(find.byTooltip("Sort"), findsOneWidget);
+      expect(find.byTooltip("Sort"), findsNothing);
 
       collection.pubMagicMetadata = CollectionPubMagicMetadata(asc: true);
       Bus.instance.fire(
@@ -245,6 +254,11 @@ void main() {
       );
       await _expectCover(tester, oldest, count: 2);
       expect(find.text("1–3 JAN 2026"), findsOneWidget);
+      await tester.tap(find.byTooltip("More"));
+      await tester.pumpAndSettle();
+      expect(find.text("Oldest first"), findsOneWidget);
+      Navigator.of(tester.element(find.byType(CollectionPage))).pop();
+      await tester.pumpAndSettle();
 
       final middle = _file(2);
       await tester.runAsync(() => FilesDB.instance.insertMultiple([middle]));
@@ -393,6 +407,14 @@ void main() {
           AlbumPopupAction.albumSlideshow,
         ]),
       );
+      final sortSelection = Future.sync(
+        () => menu.onSelected(AlbumPopupAction.sort),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text("Sort photos"), findsOneWidget);
+      await tester.tap(find.text("Newest first"));
+      await tester.pumpAndSettle();
+      await sortSelection;
       await _disposeAlbum(tester);
       selectedFiles.dispose();
     },
