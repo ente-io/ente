@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/configuration.dart';
-import 'package:locker/ui/components/collection_selection_widget_v2.dart';
+import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/components/text_input_sheet.dart';
 import 'package:locker/ui/pages/file_upload_screen.dart';
 import 'package:locker/utils/bottom_sheet_illustration.dart';
@@ -109,23 +109,30 @@ class _FileUploadScreenV2State extends State<FileUploadScreenV2> {
                           child: AnimatedOpacity(
                             duration: Motion.standard,
                             opacity: hasFiles ? 1 : 0.5,
-                            child: CollectionSelectionWidgetV2(
-                              collections: _collections,
-                              selectedCollectionIds: _selectedIds,
-                              onToggleCollection: (id) => setState(() {
-                                if (!_selectedIds.remove(id)) {
-                                  _selectedIds.add(id);
-                                }
-                              }),
-                              onCollectionsUpdated: (collections) =>
-                                  setState(() => _collections = collections),
+                            child: LayoutBuilder(
+                              builder: (context, constraints) =>
+                                  CollectionSelectionWidget(
+                                    title: '',
+                                    maxHeight: constraints.maxHeight,
+                                    collections: _collections,
+                                    selectedCollectionIds: _selectedIds,
+                                    onToggleCollection: (id) => setState(() {
+                                      if (!_selectedIds.remove(id)) {
+                                        _selectedIds.add(id);
+                                      }
+                                    }),
+                                    onCollectionsUpdated: (collections) =>
+                                        setState(
+                                          () => _collections = collections,
+                                        ),
+                                  ),
                             ),
                           ),
                         );
                         final files = AnimatedSwitcher(
                           duration: Motion.standard,
                           child: hasFiles
-                              ? ScrollCard(
+                              ? _ScrollCard(
                                   itemCount: _files.length,
                                   itemBuilder: (context, index) {
                                     final file = _files[index];
@@ -422,6 +429,104 @@ class _EmptyItems extends StatelessWidget {
               onTap: onAdd,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScrollCard extends StatefulWidget {
+  final int itemCount;
+  final IndexedWidgetBuilder itemBuilder;
+
+  const _ScrollCard({required this.itemCount, required this.itemBuilder});
+
+  @override
+  State<_ScrollCard> createState() => _ScrollCardState();
+}
+
+class _ScrollCardState extends State<_ScrollCard> {
+  final _controller = ScrollController();
+  bool _hasMore = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  bool _onScroll(Notification notification) {
+    if (notification
+        case ScrollMetricsNotification(:final metrics) ||
+            ScrollUpdateNotification(:final metrics)) {
+      final hasMore = metrics.extentAfter > 0;
+      if (hasMore != _hasMore) setState(() => _hasMore = hasMore);
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.componentColors;
+    return DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        border: Border.all(color: colors.strokeFaint),
+        borderRadius: Radii.buttonBorder,
+      ),
+      child: ClipRRect(
+        borderRadius: Radii.buttonBorder,
+        child: NotificationListener<Notification>(
+          onNotification: _onScroll,
+          child: Stack(
+            children: [
+              Scrollbar(
+                controller: _controller,
+                child: ListView.separated(
+                  controller: _controller,
+                  physics: const ClampingScrollPhysics(),
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  itemCount: widget.itemCount,
+                  separatorBuilder: (_, _) => ColoredBox(
+                    color: colors.fillLight,
+                    child: const DividerComponent(),
+                  ),
+                  itemBuilder: (context, index) => MenuGroupComponent(
+                    borderRadius: MenuGroupComponent.itemBorderRadius(
+                      index: index,
+                      itemCount: widget.itemCount,
+                    ),
+                    items: [widget.itemBuilder(context, index)],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: Spacing.xxl,
+                child: IgnorePointer(
+                  child: AnimatedOpacity(
+                    opacity: _hasMore ? 1 : 0,
+                    duration: Motion.quick,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            colors.fillLight.withValues(alpha: 0),
+                            colors.fillLight,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
