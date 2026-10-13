@@ -1,4 +1,5 @@
 export const thumbnailGap = 4;
+export const thumbnailGridPadding = 24;
 const thumbnailMaxHeight = 180;
 const thumbnailMaxWidth = 180;
 const thumbnailLayoutMinColumns = 4;
@@ -20,7 +21,7 @@ export const computeThumbnailGridLayoutParams = (
         containerWidth >
         thumbnailLayoutMinColumns * thumbnailMaxWidth
     );
-    const paddingInline = getGapFromScreenEdge(containerWidth);
+    const paddingInline = thumbnailGridPadding;
     const fittableColumns = getFractionFittableColumns(containerWidth);
 
     let columns = Math.floor(fittableColumns);
@@ -45,12 +46,9 @@ export const computeThumbnailGridLayoutParams = (
 };
 
 const getFractionFittableColumns = (width: number): number =>
-    (width - 2 * getGapFromScreenEdge(width) + thumbnailGap) /
+    (width - 2 * thumbnailGridPadding + thumbnailGap) /
     (thumbnailMaxWidth + thumbnailGap);
 
-const getGapFromScreenEdge = (width: number) =>
-    width > thumbnailLayoutMinColumns * thumbnailMaxWidth ? 24 : 4;
-
 const getShrinkRatio = (width: number, columns: number) =>
-    (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * thumbnailGap) /
+    (width - 2 * thumbnailGridPadding - (columns - 1) * thumbnailGap) /
     (columns * thumbnailMaxWidth);
