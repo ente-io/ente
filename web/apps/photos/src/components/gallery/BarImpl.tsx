@@ -6,15 +6,25 @@ import {
     type AlbumFilter,
 } from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
-import { Link05Icon, PinIcon, StarIcon } from "@hugeicons/core-free-icons";
+import {
+    Delete02Icon,
+    Download05Icon,
+    GeometricShapes01Icon,
+    Link05Icon,
+    PinIcon,
+    StarIcon,
+    ViewOffSlashIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PeopleIcon from "@mui/icons-material/People";
 import {
     Box,
     ButtonBase,
+    Divider,
     Drawer,
     IconButton,
     Stack,
@@ -26,12 +36,15 @@ import {
 } from "@mui/material";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { ItemCard } from "ente-new/photos/components/Tiles";
-import type {
-    CollectionSummary,
-    CollectionSummaryAttribute,
-    CollectionsSortBy,
+import {
+    PseudoCollectionID,
+    type CollectionSummaries,
+    type CollectionSummary,
+    type CollectionSummaryAttribute,
+    type CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
+import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import React, {
     memo,
@@ -57,6 +70,12 @@ export interface GalleryBarPresentationProps {
 export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     mode: GalleryBarMode;
     collectionSummaries: CollectionSummary[];
+    normalCollectionSummaries: CollectionSummaries;
+    uncategorizedCollectionSummaryID: number;
+    onShowCollectionSummary: (
+        collectionSummaryID: number,
+        isHiddenCollectionSummary?: boolean,
+    ) => Promise<boolean>;
     activeCollectionID: number | undefined;
     onSelectCollectionID: (collectionID: number) => void;
     onShowAllAlbums: () => void;
@@ -73,6 +92,9 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     mode,
     collectionSummaries,
+    normalCollectionSummaries,
+    uncategorizedCollectionSummaryID,
+    onShowCollectionSummary,
     activeCollectionID,
     onSelectCollectionID,
     onShowAllAlbums,
@@ -195,7 +217,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     mode == "albums"
                         ? getItemCount(itemData) * (mobile ? 46 : 50)
                         : undefined,
-                minHeight: 0,
+                minHeight:
+                    mode == "albums" && getItemCount(itemData) > 0
+                        ? mobile
+                            ? 46
+                            : 50
+                        : 0,
                 minWidth: 0,
             }}
         >
@@ -318,7 +345,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 <Stack
                     role="group"
                     aria-label={t("filter_albums")}
-                    sx={{ flex: 1, minHeight: 0, gap: "2px" }}
+                    sx={{
+                        flex: 1,
+                        minHeight: 0,
+                        gap: "2px",
+                        overflowY: "auto",
+                    }}
                 >
                     {visibleAlbumFilters.map((filter) => (
                         <React.Fragment key={filter.value}>
@@ -365,6 +397,76 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 </Stack>
             ) : (
                 items
+            )}
+            {mode != "people" && (
+                <Stack sx={{ flexShrink: 0, gap: "2px", pb: "8px" }}>
+                    <Divider sx={{ mb: "8px" }} />
+                    {[
+                        {
+                            id: uncategorizedCollectionSummaryID,
+                            label: t("section_uncategorized"),
+                            icon: GeometricShapes01Icon,
+                            active:
+                                activeCollectionID ==
+                                uncategorizedCollectionSummaryID,
+                        },
+                        {
+                            id: PseudoCollectionID.hiddenItems,
+                            label: t("section_hidden"),
+                            icon: ViewOffSlashIcon,
+                            active: mode == "hidden-albums",
+                        },
+                        {
+                            id: PseudoCollectionID.archiveItems,
+                            label: t("section_archive"),
+                            icon: Download05Icon,
+                            active: mode == "archive-albums",
+                        },
+                        {
+                            id: PseudoCollectionID.trash,
+                            label: t("section_trash"),
+                            icon: Delete02Icon,
+                            active:
+                                activeCollectionID == PseudoCollectionID.trash,
+                        },
+                    ].map(({ id, label, icon, active }) => (
+                        <BarCard
+                            key={id}
+                            aria-label={label}
+                            aria-current={active ? "true" : undefined}
+                            onClick={() => {
+                                void onShowCollectionSummary(
+                                    id,
+                                    id == PseudoCollectionID.hiddenItems,
+                                ).then(async (success) => {
+                                    if (!success || !mobile) return;
+                                    if (id == PseudoCollectionID.hiddenItems)
+                                        await wait(10);
+                                    mobileDrawerProps.onClose();
+                                });
+                            }}
+                            sx={{ flexShrink: 0 }}
+                        >
+                            <HugeiconsIcon icon={icon} size={20} aria-hidden />
+                            <CardText>{label}</CardText>
+                            {id == PseudoCollectionID.hiddenItems ? (
+                                <LockOutlinedIcon
+                                    sx={{ color: "text.muted", fontSize: 19 }}
+                                />
+                            ) : (
+                                <Typography
+                                    variant="small"
+                                    sx={{ color: "text.muted" }}
+                                >
+                                    {
+                                        normalCollectionSummaries.get(id)
+                                            ?.fileCount
+                                    }
+                                </Typography>
+                            )}
+                        </BarCard>
+                    ))}
+                </Stack>
             )}
         </Stack>
     );

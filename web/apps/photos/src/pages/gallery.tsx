@@ -39,8 +39,10 @@ import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
 import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 import {
+    albumShortcutCollectionID,
     findCollectionCreatingIfNeeded,
     performCollectionOp,
+    showCollectionSummaryWithAuthentication,
 } from "@/components/gallery/helpers";
 import {
     useGalleryReducer,
@@ -1359,8 +1361,21 @@ const Page: React.FC = () => {
         options?: { shouldExitSearchMode?: boolean },
     ) => {
         if (searchOption) {
-            setCleanupView(undefined);
             const type = searchOption.suggestion.type;
+            if (type == "sidebarAction") {
+                const collectionID = albumShortcutCollectionID(
+                    searchOption.suggestion.actionID,
+                    state.uncategorizedCollectionSummaryID,
+                );
+                if (collectionID !== undefined) {
+                    void showCollectionSummary(
+                        collectionID,
+                        collectionID == PseudoCollectionID.hiddenItems,
+                    );
+                    return;
+                }
+            }
+            setCleanupView(undefined);
             if (type == "collection") {
                 dispatch({
                     type: "showCollectionSummary",
@@ -1413,27 +1428,17 @@ const Page: React.FC = () => {
     );
 
     const showCollectionSummary = useCallback(
-        async (
+        (
             collectionSummaryID: number | undefined,
-            isHiddenCollectionSummary: boolean | undefined,
-        ) => {
-            const lastAuthAt = lastAuthenticationForHiddenTimestamp.current;
-
-            if (
-                isHiddenCollectionSummary &&
-                barMode != "hidden-albums" &&
-                Date.now() - lastAuthAt > 5 * 60 * 1e3
-            ) {
-                try {
-                    if (!(await authenticateUser())) return;
-                    lastAuthenticationForHiddenTimestamp.current = Date.now();
-                } catch {
-                    return;
-                }
-            }
-
-            handleShowCollectionSummaryWithID(collectionSummaryID);
-        },
+            isHiddenCollectionSummary?: boolean,
+        ) =>
+            showCollectionSummaryWithAuthentication(
+                collectionSummaryID,
+                !!isHiddenCollectionSummary && barMode != "hidden-albums",
+                lastAuthenticationForHiddenTimestamp,
+                authenticateUser,
+                handleShowCollectionSummaryWithID,
+            ),
         [authenticateUser, handleShowCollectionSummaryWithID, barMode],
     );
 
@@ -1461,8 +1466,6 @@ const Page: React.FC = () => {
         () => handleShowCleanupView("duplicates"),
         [handleShowCleanupView],
     );
-
-    const handleSidebarShowCollectionSummary = showCollectionSummary;
 
     const handleDownloadStatusNotificationsShowCollectionSummary = useCallback(
         (
@@ -2014,6 +2017,10 @@ const Page: React.FC = () => {
                               mode: barMode,
                               shouldHide: isInSearchMode,
                               barCollectionSummaries,
+                              normalCollectionSummaries,
+                              uncategorizedCollectionSummaryID:
+                                  state.uncategorizedCollectionSummaryID,
+                              onShowCollectionSummary: showCollectionSummary,
                               emailByUserID: state.emailByUserID,
                               shareSuggestionEmails:
                                   state.shareSuggestionEmails,
@@ -2194,14 +2201,9 @@ const Page: React.FC = () => {
                 onClose={handleSidebarClose}
                 onShowLargeFiles={handleShowLargeFiles}
                 onShowDuplicates={handleShowDuplicates}
-                normalCollectionSummaries={normalCollectionSummaries}
-                uncategorizedCollectionSummaryID={
-                    state.uncategorizedCollectionSummaryID
-                }
                 pendingAction={pendingSidebarAction}
                 onActionHandled={handleSidebarActionHandled}
                 onShowPlanSelector={showPlanSelector}
-                onShowCollectionSummary={handleSidebarShowCollectionSummary}
                 collectionNameByID={collectionNameByID}
                 onCloseOverlays={closeSidebarOverlays}
                 onAuthenticateUser={authenticateUser}
