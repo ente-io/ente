@@ -43,20 +43,20 @@ import "package:photos/ui/viewer/gallery/swipe_to_select_helper.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 import "package:photos/utils/widget_util.dart";
 
-typedef GalleryLoader = Future<FileLoadResult> Function(
-  int creationStartTime,
-  int creationEndTime, {
-  int? limit,
-  bool? asc,
-});
+typedef GalleryLoader =
+    Future<FileLoadResult> Function(
+      int creationStartTime,
+      int creationEndTime, {
+      int? limit,
+      bool? asc,
+    });
 
 typedef _LayoutScrollAnchor = ({EnteFile file, bool inHeader, double progress});
 
 typedef SortAscFn = bool Function();
 
-typedef NewLocalFilesResolver = Future<List<EnteFile>?> Function(
-  LocalPhotosAddedEvent event,
-);
+typedef NewLocalFilesResolver =
+    Future<List<EnteFile>?> Function(LocalPhotosAddedEvent event);
 
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;

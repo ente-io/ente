@@ -14,7 +14,6 @@ import "package:photos/models/file/dummy_file.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file_load_result.dart";
-import "package:photos/models/gallery/gallery_layout_config.dart";
 import "package:photos/models/gallery/justified_layout_strategy.dart";
 import "package:photos/models/gallery/justified_layout_tuning.dart";
 import "package:photos/models/metadata/file_magic.dart";
