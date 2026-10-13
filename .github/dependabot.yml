@@ -97,8 +97,6 @@ updates:
       # Remove when crypto_secretbox also uses salsa20 0.11.
       - dependency-name: "salsa20"
         versions: ["=0.11.0"]
-      # Remove after migrating the chat-template API and all platform pins.
-      - dependency-name: "llama-cpp-2"
     groups:
       rust:
         applies-to: "version-updates"
