@@ -43,7 +43,9 @@ jobs:
                               ...repo, issue_number: pr.number, since: since || undefined, per_page: 100,
                           });
                           if (pr.created_at > since || runs.some(run => run.updated_at > since) ||
-                              comments.some(comment => comment.user.login !== "ente-agent[bot]" && comment.created_at > since)) {
+                              comments.some(comment => comment.user.login !== "ente-agent[bot]" && comment.created_at > since &&
+                                  (["OWNER", "MEMBER", "COLLABORATOR"].includes(comment.author_association) ||
+                                      comment.user.login === "github-actions[bot]"))) {
                               selected.push({ number: pr.number, head: pr.head.sha });
                           }
                       }
