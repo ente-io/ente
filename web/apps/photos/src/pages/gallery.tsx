@@ -37,10 +37,7 @@ import {
 } from "@/components/gallery";
 import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
-import {
-    PhotosNavigationShell,
-    UploadButton,
-} from "@/components/gallery/PhotosNavigationShell";
+import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
 import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 import {
     findCollectionCreatingIfNeeded,
@@ -59,9 +56,8 @@ import { useIsOffline } from "@/components/utils/use-is-offline";
 import { shouldShowWhatsNew } from "@/services/changelog";
 import exportService from "@/services/export";
 import { processPendingAlbumJoin } from "@/services/join-album";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { IconButton, Link, Stack, Typography } from "@mui/material";
+import { Link, Typography } from "@mui/material";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import {
     getAndClearIsFirstLogin,
@@ -1383,6 +1379,9 @@ const Page: React.FC = () => {
                     options?.shouldExitSearchMode ?? true;
                 dispatch({ type: "exitSearch", shouldExitSearchMode });
             } else {
+                if (barMode === "hidden-albums") {
+                    dispatch({ type: "showAlbums" });
+                }
                 dispatch({
                     type: "enterSearchMode",
                     searchSuggestion: searchOption.suggestion,
@@ -1939,11 +1938,7 @@ const Page: React.FC = () => {
         </>
     );
 
-    const showNormalNavigation =
-        !isCleanupViewOpen &&
-        !showSelectionBar &&
-        barMode !== "hidden-albums" &&
-        (isInSearchMode || !isInArchiveSection);
+    const showNormalNavigation = !isCleanupViewOpen && !showSelectionBar;
 
     return (
         <FullScreenDropZone
@@ -2033,18 +2028,6 @@ const Page: React.FC = () => {
                                     : undefined,
                             }}
                             onEditLocation={showEditLocation}
-                        />
-                    ) : barMode == "hidden-albums" ? (
-                        <SectionNavbarContents
-                            title={t("section_hidden")}
-                            onBack={() => dispatch({ type: "showAlbums" })}
-                            onUpload={openUploader}
-                        />
-                    ) : !isInSearchMode && isInArchiveSection ? (
-                        <SectionNavbarContents
-                            title={t("section_archive")}
-                            onBack={() => dispatch({ type: "showAlbums" })}
-                            onUpload={openUploader}
                         />
                     ) : null
                 }
@@ -2351,34 +2334,6 @@ const preloadImage = (imgBasePath: string) => {
     for (let i = 1; i <= 3; i++) srcset.push(`${imgBasePath}/${i}x.png ${i}x`);
     new Image().srcset = srcset.join(",");
 };
-
-interface SectionNavbarContentsProps {
-    title: string;
-    onBack: () => void;
-    onUpload: () => void;
-}
-
-const SectionNavbarContents: React.FC<SectionNavbarContentsProps> = ({
-    title,
-    onBack,
-    onUpload,
-}) => (
-    <Stack
-        direction="row"
-        sx={(theme) => ({
-            gap: "24px",
-            flex: 1,
-            alignItems: "center",
-            background: theme.vars.palette.background.default,
-        })}
-    >
-        <IconButton onClick={onBack}>
-            <ArrowBackIcon />
-        </IconButton>
-        <Typography sx={{ flex: 1 }}>{title}</Typography>
-        <UploadButton onClick={onUpload} />
-    </Stack>
-);
 
 const handleSubscriptionCompletionRedirectIfNeeded = async (
     showMiniDialog: (attributes: MiniDialogAttributes) => void,

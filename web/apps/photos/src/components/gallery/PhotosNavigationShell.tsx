@@ -240,7 +240,7 @@ const HomeButton: React.FC<ButtonishProps> = ({ onClick }) => (
     </Tooltip>
 );
 
-export const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
+const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
