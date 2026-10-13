@@ -6,6 +6,7 @@ import UIKit
 struct MessageInputView: View {
     @Binding var text: String
     @Binding var attachments: [ChatAttachment]
+    let supportsImageAttachments: Bool
     let isGenerating: Bool
     let isSendPending: Bool
     let isDownloading: Bool
@@ -158,7 +159,7 @@ struct MessageInputView: View {
                                 .frame(width: 0, height: 0)
                             )
 
-                        if editingMessage == nil {
+                        if editingMessage == nil && supportsImageAttachments {
                             let canUseAttachment =
                                 !isGenerating && !isDownloading && !isImageAttachmentLimitReached
                             PhotosPicker(selection: $selectedPhotoItem, matching: .images) {

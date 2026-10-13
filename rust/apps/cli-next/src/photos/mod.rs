@@ -1,3 +1,6 @@
+mod export;
+pub mod replica;
+
 use std::{io::Seek, path::Path};
 
 use anyhow::{Context, Result, bail, ensure};
@@ -7,27 +10,25 @@ use serde_json::json;
 
 use crate::{
     api,
-    args::{AlbumCommand, FileCommand, Options, PhotosLibraryCommand, Product},
+    args::{AlbumCommand, App, FileCommand, Options, PhotosCommand},
     db, home,
     output::{self, AlbumView, FileView},
-    replica::Replica,
 };
+use replica::Replica;
 
 const MAX_CANDIDATES: usize = 10;
 
-pub async fn run(
-    command: PhotosLibraryCommand,
-    selected: Option<&str>,
-    options: &Options,
-) -> Result<()> {
-    if let PhotosLibraryCommand::Export(args) = command {
-        return crate::export::run(args, selected, options).await;
+pub async fn run(command: PhotosCommand, selected: Option<&str>, options: &Options) -> Result<()> {
+    match command {
+        PhotosCommand::Api(args) => return api::run(App::Photos, args, selected, options).await,
+        PhotosCommand::Export(args) => return export::run(args, selected, options).await,
+        _ => {}
     }
     ensure!(
         !options.offline
             || !matches!(
                 &command,
-                PhotosLibraryCommand::File {
+                PhotosCommand::File {
                     command: FileCommand::Download { .. },
                     ..
                 }
@@ -35,7 +36,7 @@ pub async fn run(
         "original files are not stored locally; download requires network access"
     );
     let (account, home) = home::open_account(selected, !options.offline)?;
-    let session = api::session(&account, Product::Photos)?;
+    let session = api::session(&account, App::Photos)?;
     let mut db = db::open(&home.path, &account.db_key, !options.offline)?;
     let mut replica = Replica::new(&mut db, session.user_id);
     if !options.offline {
@@ -48,9 +49,9 @@ pub async fn run(
         );
     }
     match command {
-        PhotosLibraryCommand::Export(_) => unreachable!(),
-        PhotosLibraryCommand::Album { command } => album(command, &replica, options),
-        PhotosLibraryCommand::File { album, command } => {
+        PhotosCommand::Api(_) | PhotosCommand::Export(_) => unreachable!(),
+        PhotosCommand::Album { command } => album(command, &replica, options),
+        PhotosCommand::File { album, command } => {
             file(command, album.as_deref(), &session, &mut replica, options).await
         }
     }

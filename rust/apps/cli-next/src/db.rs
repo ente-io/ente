@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use rusqlite::{Connection, OpenFlags};
 use zeroize::Zeroizing;
 
-use crate::{auth, core_db::Db, replica, vault::DbKey};
+use crate::{auth, core_db::Db, photos::replica, vault::DbKey};
 
 const MIGRATIONS: &[&str] = &[replica::SCHEMA, auth::replica::SCHEMA];
 

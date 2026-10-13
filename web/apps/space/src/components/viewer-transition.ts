@@ -155,42 +155,48 @@ const createFlyer = (root: HTMLElement, src: string, base: ViewerRect) => {
 
 const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
     const card = tile.closest("article");
-    const header = card?.querySelector<HTMLElement>(
-        "[data-space-viewer-header]",
+    const overlays = card?.querySelectorAll<HTMLElement>(
+        "[data-space-viewer-header-shade], [data-space-viewer-header], [data-space-viewer-overlay]",
     );
-    const shade = card?.querySelector<HTMLElement>(
-        "[data-space-viewer-header-shade]",
-    );
-    if (header && shade) {
+    if (overlays?.length) {
         const bounds = rectOf(tile);
         const rider = document.createElement("div");
         rider.setAttribute("aria-hidden", "true");
         rider.inert = true;
-        rider.append(shade.cloneNode(true), header.cloneNode(true));
+        rider.append(
+            ...Array.from(overlays, (overlay) => overlay.cloneNode(true)),
+        );
         for (const element of rider.querySelectorAll("*"))
             if (element instanceof HTMLElement)
                 element.style.animation = "none";
         Object.assign(rider.style, {
-            borderRadius: getComputedStyle(tile).borderRadius,
             height: `${bounds.h}px`,
-            left: `${bounds.x}px`,
+            left: "0",
             overflow: "hidden",
             pointerEvents: "none",
             position: "absolute",
-            top: `${bounds.y}px`,
+            top: "0",
+            transformOrigin: "0 0",
             width: `${bounds.w}px`,
+            willChange: "transform",
             zIndex: "2",
         });
         flyer.after(rider);
-        header.style.opacity = "0";
+        for (const overlay of overlays) overlay.style.opacity = "0";
         return {
             element: rider,
-            draw: (_state: ViewerPhotoState, t: number) => {
-                rider.style.opacity = String(1 - viewerBackgroundOpacity(t));
+            draw: ({ visible: v, radii }: ViewerPhotoState, t: number) => {
+                const sx = v.w / bounds.w;
+                const sy = v.h / bounds.h;
+                rider.style.transform = `translate3d(${v.x}px, ${v.y}px, 0) scale(${sx}, ${sy})`;
+                rider.style.borderRadius = `${radii.map((radius) => `${radius / sx}px`).join(" ")} / ${radii.map((radius) => `${radius / sy}px`).join(" ")}`;
+                rider.style.opacity = String(
+                    1 - viewerBackgroundOpacity(t / 0.35),
+                );
             },
             remove: () => rider.remove(),
             reveal: () => {
-                header.style.opacity = "";
+                for (const overlay of overlays) overlay.style.opacity = "";
             },
         };
     }

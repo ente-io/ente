@@ -16,6 +16,7 @@ import {
 } from "components/feed-video-playback";
 import {
     SpaceFileViewer,
+    type SpaceFileViewerController,
     type SpaceViewerPhoto,
     type SpaceViewerPostActionMode,
 } from "components/FileViewer";
@@ -66,7 +67,11 @@ import {
 } from "styles/colors";
 import { spaceTouchTargetSize } from "styles/touch-targets";
 import { firstNameFrom, formatSpaceDate } from "utils/display";
-import { homeFeedEntries, type HomeFeedEntry } from "utils/home-feed";
+import {
+    homeFeedEntries,
+    homeFeedSeparatorBefore,
+    type HomeFeedEntry,
+} from "utils/home-feed";
 import {
     spacePostFrameAspectRatio,
     spacePostPhotos,
@@ -613,6 +618,7 @@ const FeedPhotoOverlay: React.FC<{
 }> = ({ caption, photoIndex, photoCount }) => {
     return (
         <Box
+            data-space-viewer-overlay
             sx={{
                 ...feedPhotoCaptionTextSx,
                 bottom: 20,
@@ -734,7 +740,7 @@ const FeedPhoto: React.FC<{
                 scrollSnapStop: "always",
                 maxWidth: "100%",
                 minWidth: 0,
-                overflow: "hidden",
+                clipPath: "inset(0)",
                 p: 0,
                 position: "relative",
                 width: "100%",
@@ -1225,6 +1231,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
             >
                 {(photoCount > 1 || showSoundControl) && (
                     <Box
+                        data-space-viewer-overlay
                         sx={{
                             alignItems: "center",
                             display: "flex",
@@ -1404,7 +1411,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                         borderRadius: "inherit",
                         display: "flex",
                         height: "100%",
-                        overflowX: "hidden",
+                        overflow: "hidden",
                         overscrollBehaviorX: "contain",
                         scrollSnapType: "x mandatory",
                         scrollbarWidth: "none",
@@ -1910,6 +1917,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 }) => {
     const [selectedViewer, setSelectedViewer] =
         useState<SelectedHomeViewer | null>(null);
+    const viewerRef = React.useRef<SpaceFileViewerController>(null);
     const [feedPhotoIndices, setFeedPhotoIndices] = useState<
         Record<number, number>
     >({});
@@ -1979,9 +1987,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     const { clearBrowserBackState: clearSelectedPhotoHistory } =
         useBrowserBackClose({
             open: Boolean(selectedViewer),
-            onClose: () => {
-                closeSelectedPhoto();
-            },
+            onClose: () => viewerRef.current?.close(),
             stateKey: "space-feed-viewer",
         });
     const deleteSelectedPost = async () => {
@@ -2313,25 +2319,61 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         width: "100%",
                     }}
                 >
-                    <Box
-                        component="section"
-                        aria-label="Latest"
-                        hidden={latestFeedEntries.length == 0}
-                    >
-                        <FeedMotionList
-                            entries={latestFeedEntries}
-                            presentedPostIdentities={
-                                feedSession?.presentedPostIdentities
-                            }
-                            renderEntry={(entry) =>
-                                entry.kind == "local"
-                                    ? localFeedItemFor(entry.item)
-                                    : feedItemFor(entry.item, entry.item.postId)
-                            }
-                        />
-                    </Box>
                     {hasFeedItems ? (
                         <>
+                            <Box
+                                component="section"
+                                aria-label="Latest"
+                                hidden={latestFeedEntries.length == 0}
+                            >
+                                <FeedMotionList
+                                    entries={latestFeedEntries}
+                                    presentedPostIdentities={
+                                        feedSession?.presentedPostIdentities
+                                    }
+                                    renderEntry={(entry) =>
+                                        entry.kind == "local"
+                                            ? localFeedItemFor(entry.item)
+                                            : feedItemFor(
+                                                  entry.item,
+                                                  entry.item.postId,
+                                              )
+                                    }
+                                />
+                            </Box>
+                            {homeFeedSeparatorBefore(
+                                latestFeedEntries,
+                                gridFeedItems,
+                            ) && (
+                                <Box
+                                    role="separator"
+                                    aria-label="Earlier posts"
+                                    sx={{
+                                        alignItems: "center",
+                                        color: spaceTextMuted,
+                                        display: "flex",
+                                        height: 36,
+                                        justifyContent: "center",
+                                        mb: "12px",
+                                    }}
+                                >
+                                    <svg
+                                        aria-hidden="true"
+                                        width="116"
+                                        height="12"
+                                        viewBox="0 0 116 12"
+                                        fill="none"
+                                    >
+                                        <path
+                                            d="M4 6 Q10 -2 16 6 T28 6 T40 6 T52 6 T64 6 T76 6 T88 6 T100 6 T112 6"
+                                            stroke="currentColor"
+                                            strokeOpacity="0.6"
+                                            strokeWidth="2.5"
+                                            strokeLinecap="round"
+                                        />
+                                    </svg>
+                                </Box>
+                            )}
                             <SpacePostGrid
                                 postCount={
                                     latestFeedEntries.length +
@@ -2630,6 +2672,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </Box>
                 {selectedViewer && (
                     <SpaceFileViewer
+                        ref={viewerRef}
                         closeOnSwipePastEnd
                         focusReplyOnOpen={selectedViewer.focusReplyOnOpen}
                         photo={selectedViewer.photo}

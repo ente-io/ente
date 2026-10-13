@@ -21,6 +21,7 @@ import { SpaceButtonSpinner } from "components/ButtonSpinner";
 import { ConfirmationActionSheet } from "components/ConfirmationActionSheet";
 import {
     SpaceFileViewer,
+    type SpaceFileViewerController,
     type SpaceViewerPhoto,
     type SpaceViewerPostActionMode,
 } from "components/FileViewer";
@@ -433,9 +434,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         if (!isPostPhotoOpening) postInputRef.current?.click();
     };
     const closeSelectedPost = () => setSelectedPost(null);
+    const viewerRef = React.useRef<SpaceFileViewerController>(null);
     useBrowserBackClose({
         open: Boolean(selectedPost),
-        onClose: closeSelectedPost,
+        onClose: () => viewerRef.current?.close(),
         stateKey: "space-profile-viewer",
     });
     const rememberLoadedPhotoDimensions = (
@@ -609,7 +611,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 imageUrl={imageUrl}
                 index={index}
                 isUnavailable={isUnavailable}
-                item={item}
+                item={{ ...item, ...dimensionsForPost(item) }}
                 photoIndex={photoIndex}
                 loadRootMargin={postImageLoadRootMargin}
                 onLoadImage={() => loadPostImage(shown)}
@@ -1354,7 +1356,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             }}
                         >
                             <SpacePostGrid
-                                items={visiblePostItems}
+                                items={visiblePostItems.map((item) => ({
+                                    ...item,
+                                    ...dimensionsForPost(item),
+                                }))}
                                 postCount={displayedPostsCount}
                                 renderTile={renderPostTile}
                             />
@@ -1439,6 +1444,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </Box>
                 {selectedPost && (
                     <SpaceFileViewer
+                        ref={viewerRef}
                         closeOnSwipePastEnd
                         photo={selectedPost.photo}
                         photos={profileViewerPhotos}

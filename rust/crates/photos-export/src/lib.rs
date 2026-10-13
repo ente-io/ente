@@ -816,7 +816,7 @@ fn summary(store: &Store, destination: &Path, prepared: bool) -> Result<Summary>
         .db
         .query_row("SELECT bound FROM export WHERE id=1", [], |r| r.get(0))?;
     let complete = bound && work_complete(store, prepared)?;
-    let result = json!({"destination":destination.to_string_lossy(),"complete":complete,"files":if unknown {None}else{Some(files)},"copies":if unknown {None}else{Some(json!({"expected":expected,"completed":completed,"pending":expected-completed}))},"changes":{"exported":exported,"metadataUpdated":metadata_updated,"renamed":renamed,"retained":retained},"failures":failures,"conflicts":conflicts});
+    let result = json!({"output":destination.to_string_lossy(),"complete":complete,"files":if unknown {None}else{Some(files)},"copies":if unknown {None}else{Some(json!({"expected":expected,"completed":completed,"pending":expected-completed}))},"changes":{"exported":exported,"metadataUpdated":metadata_updated,"renamed":renamed,"retained":retained},"failures":failures,"conflicts":conflicts});
     Ok(Summary {
         json: result,
         complete,

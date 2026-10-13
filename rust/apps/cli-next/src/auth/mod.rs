@@ -11,16 +11,14 @@ use zeroize::Zeroizing;
 
 use crate::{
     api,
-    args::{AuthCommand, AuthExportArgs, Options, Product},
+    args::{App, AuthCommand, AuthExportArgs, Options},
     db, home,
 };
 use output::Destination;
 
 pub async fn run(command: AuthCommand, selected: Option<&str>, options: &Options) -> Result<()> {
     match command {
-        AuthCommand::Session(command) => {
-            crate::session(Product::Auth, command, selected, options).await
-        }
+        AuthCommand::Api(args) => api::run(App::Auth, args, selected, options).await,
         AuthCommand::Export(args) => export(args, selected, options).await,
         AuthCommand::Decrypt { input, output } => {
             let destination = Destination::file(output.unwrap_or_else(|| PathBuf::from("-")));
@@ -62,7 +60,7 @@ async fn export(args: AuthExportArgs, selected: Option<&str>, options: &Options)
     };
     let payload = {
         let (account, home) = home::open_account(selected, !options.offline)?;
-        let session = api::session(&account, Product::Auth)?;
+        let session = api::session(&account, App::Auth)?;
         let mut db = db::open(&home.path, &account.db_key, !options.offline)?;
         if !options.offline {
             replica::refresh(&mut db, &session).await?;
@@ -74,15 +72,15 @@ async fn export(args: AuthExportArgs, selected: Option<&str>, options: &Options)
         if !matches!(destination, Destination::Stdout) {
             crate::output::action(
                 options.json,
-                &json!({"output": null, "records": 0, "failed": payload.failed}),
+                &json!({"output": null, "codes": 0, "failures": payload.failed}),
                 &format!(
-                    "{} unreadable Auth record{plural}; no new backup was written.",
+                    "{} unreadable Auth code{plural}; no new backup was written.",
                     payload.failed
                 ),
             )?;
         }
         bail!(
-            "{} unreadable Auth record{plural}; no new backup was written (record ID{plural}: {})",
+            "{} unreadable Auth code{plural}; no new backup was written (code ID{plural}: {})",
             payload.failed,
             payload.failed_ids.join(", ")
         );
@@ -94,7 +92,7 @@ async fn export(args: AuthExportArgs, selected: Option<&str>, options: &Options)
     if let Some(path) = destination.publish(&artifact)? {
         crate::output::action(
             options.json,
-            &json!({"output": path.to_string_lossy(), "records": payload.records, "failed": 0}),
+            &json!({"output": path.to_string_lossy(), "codes": payload.records, "failures": 0}),
             &format!(
                 "Exported {} code{} to {}.",
                 payload.records,

@@ -4,7 +4,7 @@ use ente_photos_export::{CollectionEntry, FileEntry, Source};
 
 use crate::{
     core_db::{Db, OptionalExtension, SqliteResult, params},
-    replica::{AlbumRecord, FileRecord, Replica, read_json},
+    photos::replica::{AlbumRecord, FileRecord, Replica, read_json},
 };
 
 pub struct ReplicaSource<'a> {

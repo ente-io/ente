@@ -42,6 +42,7 @@ class ThumbnailWidget extends StatefulWidget {
   final int thumbnailSize;
   final bool useRequestedThumbnailSizeForLocalCache;
   final bool useCachedThumbnailAsPlaceholder;
+  final bool gaplessPlayback;
   final bool shouldShowOwnerAvatar;
   final AvatarType ownerAvatarType;
   final bool shouldShowFavoriteIcon;
@@ -65,6 +66,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.thumbnailSize = thumbnailSmallSize,
     this.useRequestedThumbnailSizeForLocalCache = false,
     this.useCachedThumbnailAsPlaceholder = false,
+    this.gaplessPlayback = false,
     this.shouldShowFavoriteIcon = true,
     this.placeholderColor,
     this.shouldShowVideoDuration = false,
@@ -186,7 +188,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       image = Image(
         image: _imageProvider!,
         fit: widget.fit,
-        gaplessPlayback: widget.useCachedThumbnailAsPlaceholder,
+        gaplessPlayback:
+            widget.gaplessPlayback || widget.useCachedThumbnailAsPlaceholder,
       );
     }
     if (widget.rawThumbnail) {

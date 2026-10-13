@@ -6,19 +6,16 @@ import {
     type LargeFileFilter,
     type LargeFileItem,
 } from "@/services/large-files";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ImageIcon from "@mui/icons-material/Image";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import {
     Box,
     Chip,
-    IconButton,
     LinearProgress,
     Stack,
     styled,
     Typography,
 } from "@mui/material";
-import { useRedirectIfNeedsCredentials } from "ente-accounts/components/utils/use-redirect";
 import { CenteredFill, Overlay } from "ente-base/components/containers";
 import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -37,7 +34,6 @@ import {
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
-import { useRouter } from "next/router";
 import React, {
     memo,
     useCallback,
@@ -53,7 +49,11 @@ import {
     type ListChildComponentProps,
 } from "react-window";
 
-const Page: React.FC = () => {
+interface LargeFilesViewProps {
+    onRemoteFilesPull: () => Promise<void>;
+}
+
+export function LargeFilesView({ onRemoteFilesPull }: LargeFilesViewProps) {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { setIsFileViewerOpen } = usePhotosAppContext();
 
@@ -63,8 +63,6 @@ const Page: React.FC = () => {
     );
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-
-    useRedirectIfNeedsCredentials("/large-files");
 
     useEffect(() => {
         let isCurrent = true;
@@ -101,6 +99,7 @@ const Page: React.FC = () => {
                         state.largeFiles,
                         (progress: number) =>
                             dispatch({ type: "setDeleteProgress", progress }),
+                        onRemoteFilesPull,
                     )
                         .then((removedIDs) =>
                             dispatch({ type: "deleteCompleted", removedIDs }),
@@ -112,7 +111,7 @@ const Page: React.FC = () => {
                 },
             },
         });
-    }, [showMiniDialog, onGenericError, state.largeFiles]);
+    }, [showMiniDialog, onGenericError, state.largeFiles, onRemoteFilesPull]);
 
     const handleOpenViewer = useCallback(
         (index: number) => {
@@ -172,7 +171,7 @@ const Page: React.FC = () => {
     })();
 
     return (
-        <Stack sx={{ height: "100vh" }}>
+        <Stack sx={{ flex: 1, minHeight: 0 }}>
             <Navbar
                 filter={state.filter}
                 onChangeFilter={(filter) =>
@@ -191,9 +190,7 @@ const Page: React.FC = () => {
             />
         </Stack>
     );
-};
-
-export default Page;
+}
 
 interface NavbarProps {
     filter: LargeFileFilter;
@@ -201,8 +198,6 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter }) => {
-    const router = useRouter();
-
     return (
         <Stack>
             <Stack
@@ -210,17 +205,12 @@ const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter }) => {
                 sx={(theme) => ({
                     alignItems: "center",
                     justifyContent: "space-between",
-                    padding: "8px 4px",
+                    padding: "8px 24px",
+                    minHeight: "56px",
                     borderBottom: `1px solid ${theme.vars.palette.divider}`,
                 })}
             >
-                <Box sx={{ minWidth: "100px" }}>
-                    <IconButton onClick={router.back}>
-                        <ArrowBackIcon />
-                    </IconButton>
-                </Box>
                 <Typography variant="h6">{t("large_files_title")}</Typography>
-                <Box sx={{ minWidth: "100px" }} />
             </Stack>
             <FilterChips {...{ filter, onChangeFilter }} />
         </Stack>
@@ -245,10 +235,7 @@ const FilterChips: React.FC<FilterChipsProps> = ({
     filter,
     onChangeFilter,
 }) => (
-    <Stack
-        direction="row"
-        sx={{ gap: 1, pl: 3, pr: 2, py: 4, flexWrap: "wrap" }}
-    >
+    <Stack direction="row" sx={{ gap: 1, px: 3, py: 4, flexWrap: "wrap" }}>
         <Chip
             label={t("all")}
             variant={filter === "all" ? "filled" : "outlined"}

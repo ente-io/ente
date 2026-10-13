@@ -74,3 +74,9 @@ export const homeFeedEntries = (
     );
     return { latest, history };
 };
+
+export const homeFeedSeparatorBefore = (
+    latest: HomeFeedEntry[],
+    history: SpacePost[],
+) =>
+    history.length && latest.length ? `post:${history[0]!.postId}` : undefined;
