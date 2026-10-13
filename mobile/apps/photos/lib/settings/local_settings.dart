@@ -315,7 +315,7 @@ class LocalSettings {
         kGalleryLayoutType,
         GalleryLayoutType.justified.name,
       );
-      await _prefs.setInt(kPhotoGridSize, photoGridSizeDefault);
+      await _prefs.remove(kPhotoGridSize);
     } else if (!_prefs.containsKey(kPhotoGridSize) &&
         (isAppModeSet ||
             _prefs.containsKey(Configuration.userIDKey) ||

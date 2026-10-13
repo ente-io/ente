@@ -35,6 +35,10 @@ void main() {
           count == 2 ? GalleryLayoutType.justified : GalleryLayoutType.grid,
         );
         expect(settings.getPhotoGridSize(), count == 2 ? 3 : count);
+        expect(
+          preferences.containsKey(LocalSettings.kPhotoGridSize),
+          count != 2,
+        );
         expect(settings.getGalleryGroupType(), GroupType.month);
         expect(preferences.getString("album_sort_order"), "oldest_first");
         expect(
@@ -44,6 +48,7 @@ void main() {
         await settings.setGalleryLayoutType(GalleryLayoutType.grid);
         await settings.migrateGalleryLayoutPreferences();
         expect(settings.getGalleryLayoutType(), GalleryLayoutType.grid);
+        expect(settings.getPhotoGridSize(), count == 2 ? 3 : count);
       }
     },
   );
