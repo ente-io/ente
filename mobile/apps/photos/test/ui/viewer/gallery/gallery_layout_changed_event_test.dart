@@ -169,112 +169,229 @@ void main() {
     },
   );
 
-  testWidgets("Flex remains unavailable when internal features are disabled", (
-    tester,
-  ) async {
-    await localSettings.setGalleryLayoutType(GalleryLayoutType.justified);
-    await localSettings.setJustifiedLayoutStrategy(
-      JustifiedLayoutStrategy.flex,
-    );
-    await localSettings.setInternalUserDisabled(true);
-
-    expect(isJustifiedLayoutAvailable, isFalse);
-    expect(
-      resolveGalleryLayoutType(localSettings.getGalleryLayoutType()),
-      GalleryLayoutType.grid,
-    );
-    for (final settings in [
-      const Scaffold(body: GalleryLayoutSettings()),
-      const GallerySettingsScreen(fromGalleryLayoutSettingsCTA: true),
-    ]) {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: lightThemeData,
-          localizationsDelegates: StringsLocalizations.localizationsDelegates,
-          supportedLocales: StringsLocalizations.supportedLocales,
-          home: settings,
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text("Justified · Flex (i)"), findsNothing);
-      expect(find.text("Layout (i)"), findsNothing);
-    }
-  });
-
   testWidgets(
-    "selecting or reselecting Flex in either menu sets grid size 2 and notifies galleries",
+    "both entry points preserve grouping and the remembered Grid count",
     (tester) async {
       var events = 0;
       final subscription = Bus.instance.on<GalleryLayoutChangedEvent>().listen(
         (_) => events++,
       );
       addTearDown(subscription.cancel);
-      for (final (quickMenu, initialStrategy) in [
-        (true, JustifiedLayoutStrategy.comfortLarge),
-        (false, JustifiedLayoutStrategy.comfortLarge),
-        (true, JustifiedLayoutStrategy.flex),
-        (false, JustifiedLayoutStrategy.flex),
-      ]) {
-        await localSettings.setGalleryLayoutType(GalleryLayoutType.justified);
-        await localSettings.setJustifiedLayoutStrategy(initialStrategy);
-        await localSettings.setPhotoGridSize(4);
+      for (final quickMenu in [true, false]) {
+        await localSettings.setGalleryLayoutType(GalleryLayoutType.grid);
+        await localSettings.setPhotoGridSize(5);
+        await localSettings.setGalleryGroupType(GroupType.month);
         events = 0;
         await tester.pumpWidget(
           MaterialApp(
             theme: lightThemeData,
             localizationsDelegates: StringsLocalizations.localizationsDelegates,
             supportedLocales: StringsLocalizations.supportedLocales,
-            home: Scaffold(
-              body: Builder(
-                builder: (context) => TextButton(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => quickMenu
-                          ? const Scaffold(body: GalleryLayoutSettings())
-                          : const GallerySettingsScreen(
-                              fromGalleryLayoutSettingsCTA: true,
-                            ),
-                    ),
+            home: quickMenu
+                ? const Scaffold(body: GalleryLayoutSettings())
+                : const GallerySettingsScreen(
+                    fromGalleryLayoutSettingsCTA: true,
                   ),
-                  child: const Text("Open settings"),
-                ),
-              ),
-            ),
           ),
         );
-        await tester.tap(find.text("Open settings"));
         await tester.pumpAndSettle();
-        if (!quickMenu) {
-          await tester.tap(find.text("Layout (i)"));
-          await tester.pumpAndSettle();
+        expect(find.text("Photos per row"), findsOneWidget);
+        final cardTop = tester
+            .getTopLeft(find.byKey(const ValueKey(GalleryLayoutType.grid)))
+            .dy;
+        final groupingTop = tester.getTopLeft(find.text("Group by")).dy;
+        final sheetHeight = quickMenu
+            ? tester.getSize(find.byType(GalleryLayoutSettings)).height
+            : null;
+        expect(find.text("Grid"), findsNothing);
+        expect(find.text("Justified"), findsNothing);
+        await tester.tap(
+          find.byKey(const ValueKey(GalleryLayoutType.justified)),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 120));
+        if (quickMenu) {
+          expect(
+            tester.getSize(find.byType(GalleryLayoutSettings)).height,
+            sheetHeight,
+          );
+          expect(
+            tester
+                .getTopLeft(find.byKey(const ValueKey(GalleryLayoutType.grid)))
+                .dy,
+            cardTop,
+          );
         }
-        expect(find.text("Justified · Comfort"), findsNothing);
-        expect(find.text("Justified · Flex Full Rows"), findsNothing);
-        await tester.tap(find.text("Justified · Flex (i)").hitTestable());
         await tester.pumpAndSettle();
         expect(
           localSettings.getGalleryLayoutType(),
           GalleryLayoutType.justified,
         );
-        expect(
-          localSettings.getJustifiedLayoutStrategy(),
-          JustifiedLayoutStrategy.flex,
-        );
-        expect(localSettings.getPhotoGridSize(), 2);
+        expect(find.text("Photos per row").hitTestable(), findsNothing);
+        if (quickMenu) {
+          expect(
+            tester.getSize(find.byType(GalleryLayoutSettings)).height,
+            sheetHeight,
+          );
+          expect(
+            tester
+                .getTopLeft(find.byKey(const ValueKey(GalleryLayoutType.grid)))
+                .dy,
+            cardTop,
+          );
+          expect(
+            tester.getTopLeft(find.text("Group by")).dy,
+            lessThan(groupingTop),
+          );
+        }
+        expect(localSettings.getPhotoGridSize(), 5);
+        expect(localSettings.getGalleryGroupType(), GroupType.month);
         expect(events, 1);
-        if (!quickMenu) {
-          expect(find.text("2"), findsOneWidget);
-          await tester.tap(find.text("Layout (i)"));
+        await tester.tap(find.byKey(const ValueKey(GalleryLayoutType.grid)));
+        await tester.pumpAndSettle();
+        expect(find.text("5"), findsOneWidget);
+        await tester.tap(find.byKey(const ValueKey("more-photos-per-row")));
+        await tester.pumpAndSettle();
+        expect(localSettings.getPhotoGridSize(), 6);
+        expect(localSettings.getGalleryGroupType(), GroupType.month);
+        expect(events, 3);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+      }
+    },
+  );
+
+  testWidgets(
+    "only opted-in galleries show a header CTA or floating Layout control",
+    (tester) async {
+      final files = List.generate(120, _justifiedTestFile);
+      for (final groupType in [GroupType.day, GroupType.none]) {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: lightThemeData,
+            localizationsDelegates: StringsLocalizations.localizationsDelegates,
+            supportedLocales: StringsLocalizations.supportedLocales,
+            home: Scaffold(
+              body: _galleryHost(
+                Gallery(
+                  asyncLoader: (start, end, {limit, asc}) async =>
+                      FileLoadResult(files, false),
+                  initialFiles: files,
+                  tagPrefix: "default_layout_cta_",
+                  groupType: groupType,
+                  showSelectAll: false,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 750));
+        await tester.pump();
+        if (groupType == GroupType.day) {
+          expect(find.byType(GroupHeaderWidget), findsWidgets);
+        }
+        expect(find.byType(FloatingGalleryLayoutButton), findsNothing);
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is GroupHeaderWidget &&
+                widget.showGalleryLayoutSettingCTA,
+          ),
+          findsNothing,
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+      }
+      for (final pinnedDisabled in [false, true]) {
+        final galleryKey = GlobalKey<GalleryState>();
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: lightThemeData,
+            localizationsDelegates: StringsLocalizations.localizationsDelegates,
+            supportedLocales: StringsLocalizations.supportedLocales,
+            home: Scaffold(
+              body: _galleryHost(
+                Gallery(
+                  key: galleryKey,
+                  asyncLoader: (start, end, {limit, asc}) async =>
+                      FileLoadResult(files, false),
+                  initialFiles: files,
+                  tagPrefix: "layout_cta_",
+                  header: const SizedBox(height: 120),
+                  groupType: GroupType.day,
+                  disablePinnedGroupHeader: pinnedDisabled,
+                  showSelectAll: false,
+                  showGallerySettingsCTA: true,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 750));
+        await tester.pump();
+        expect(find.byType(FloatingGalleryLayoutButton), findsNothing);
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is GroupHeaderWidget &&
+                widget.showGalleryLayoutSettingCTA,
+          ),
+          findsWidgets,
+        );
+        if (!pinnedDisabled) {
+          final scrollable = find
+              .descendant(
+                of: find.byType(Gallery),
+                matching: find.byType(Scrollable),
+              )
+              .first;
+          tester.state<ScrollableState>(scrollable).position.jumpTo(300);
           await tester.pumpAndSettle();
-          await tester.tap(find.text("Grid"));
-          await tester.pumpAndSettle();
-          expect(localSettings.getGalleryLayoutType(), GalleryLayoutType.grid);
-          expect(localSettings.getPhotoGridSize(), 2);
-          expect(events, 2);
+          expect(find.byType(FloatingGalleryLayoutButton), findsNothing);
+          expect(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is GroupHeaderWidget &&
+                  widget.isPinnedHeader &&
+                  widget.showGalleryLayoutSettingCTA,
+            ),
+            findsOneWidget,
+          );
         }
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pumpAndSettle();
       }
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: lightThemeData,
+          localizationsDelegates: StringsLocalizations.localizationsDelegates,
+          supportedLocales: StringsLocalizations.supportedLocales,
+          home: Scaffold(
+            body: _galleryHost(
+              Gallery(
+                asyncLoader: (start, end, {limit, asc}) async =>
+                    FileLoadResult(files, false),
+                initialFiles: files,
+                tagPrefix: "headerless_layout_cta_",
+                groupType: GroupType.none,
+                showSelectAll: false,
+                showGallerySettingsCTA: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final galleryRect = tester.getRect(find.byType(Gallery));
+      final buttonRect = tester.getRect(
+        find.byType(FloatingGalleryLayoutButton),
+      );
+      expect(buttonRect.top, closeTo(galleryRect.top + 16, 0.001));
+      expect(buttonRect.right, closeTo(galleryRect.right - 16, 0.001));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
     },
   );
 
@@ -410,7 +527,7 @@ void main() {
     tester,
   ) async {
     await localSettings.setGalleryLayoutType(GalleryLayoutType.grid);
-    await localSettings.setPhotoGridSize(2);
+    await localSettings.setPhotoGridSize(3);
     final galleryKey = GlobalKey<GalleryState>();
     final files = List<EnteFile>.generate(1000, _justifiedTestFile);
 
@@ -437,7 +554,7 @@ void main() {
     await tester.pump();
 
     final oldGroups = galleryKey.currentState!.galleryGroups!;
-    final anchorFile = files[800];
+    final anchorFile = files[804];
     final oldGeometry = oldGroups.getGeometryOfFile(anchorFile)!;
     const rowProgress = 0.72;
     final oldAnchorOffset =
@@ -469,7 +586,7 @@ void main() {
     final justifiedGroups = galleryKey.currentState!.galleryGroups!;
     expect(justifiedGroups.layoutType, GalleryLayoutType.justified);
     final newGeometry = justifiedGroups.getGeometryOfFile(anchorFile)!;
-    expect(newGeometry.rowExtent, lessThan(oldGeometry.rowExtent));
+    expect(newGeometry.rowExtent, isNot(oldGeometry.rowExtent));
     final expectedAnchorOffset =
         newGeometry.rowOffset + newGeometry.rowExtent * rowProgress;
     expect(
@@ -591,7 +708,7 @@ void main() {
         same(anchorFile),
       );
 
-      await localSettings.setPhotoGridSize(2);
+      await localSettings.setPhotoGridSize(3);
       Bus.instance.fire(GalleryLayoutChangedEvent());
       await tester.pumpAndSettle();
 

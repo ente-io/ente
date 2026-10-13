@@ -28,7 +28,7 @@ class SettingsSearchRegistry {
     final hasLoggedIn = Configuration.instance.isLoggedIn();
     final isLocalGallery = isLocalGalleryMode;
     final showThemeControls = Platform.isAndroid || kDebugMode;
-    final showJustifiedLayout = isJustifiedLayoutAvailable;
+    const showJustifiedLayout = isJustifiedLayoutAvailable;
     final items = <SettingsSearchItem>[];
 
     if (hasLoggedIn && !isLocalGallery) {
@@ -329,7 +329,7 @@ class SettingsSearchRegistry {
     if (showJustifiedLayout) {
       items.add(
         SettingsSearchItem(
-          title: "${l10n.layout} (i)",
+          title: l10n.layout,
           subtitle: l10n.gallery,
           sectionPath: "${l10n.appearance} > ${l10n.gallery}",
           icon: HugeIcons.strokeRoundedDashboardSquare02,
@@ -343,7 +343,7 @@ class SettingsSearchRegistry {
 
     items.add(
       SettingsSearchItem(
-        title: l10n.photoGridSize,
+        title: l10n.photosPerRow,
         subtitle: l10n.gallery,
         sectionPath: "${l10n.appearance} > ${l10n.gallery}",
         icon: HugeIcons.strokeRoundedDashboardSquare02,

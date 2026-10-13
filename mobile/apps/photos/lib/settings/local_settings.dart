@@ -2,6 +2,7 @@ import "dart:io";
 
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:photos/app_mode.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/gallery/justified_layout_strategy.dart';
 import 'package:photos/models/gallery/justified_layout_tuning.dart';
@@ -292,6 +293,9 @@ class LocalSettings {
   }
 
   GalleryLayoutType getGalleryLayoutType() {
+    if (_prefs.getInt(kPhotoGridSize) == 2) {
+      return GalleryLayoutType.justified;
+    }
     return switch (_prefs.getString(kGalleryLayoutType)) {
       "justified" => GalleryLayoutType.justified,
       _ => GalleryLayoutType.grid,
@@ -299,7 +303,26 @@ class LocalSettings {
   }
 
   Future<void> setGalleryLayoutType(GalleryLayoutType layoutType) async {
+    await migrateGalleryLayoutPreferences();
     await _prefs.setString(kGalleryLayoutType, layoutType.name);
+  }
+
+  Future<void> migrateGalleryLayoutPreferences() async {
+    const migrationKey = "gallery_layout_controls_migrated";
+    if (_prefs.getBool(migrationKey) == true) return;
+    if (_prefs.getInt(kPhotoGridSize) == 2) {
+      await _prefs.setString(
+        kGalleryLayoutType,
+        GalleryLayoutType.justified.name,
+      );
+      await _prefs.setInt(kPhotoGridSize, photoGridSizeDefault);
+    } else if (!_prefs.containsKey(kPhotoGridSize) &&
+        (isAppModeSet ||
+            _prefs.containsKey(Configuration.userIDKey) ||
+            _prefs.containsKey(kGalleryGroupType))) {
+      await _prefs.setInt(kPhotoGridSize, 4);
+    }
+    await _prefs.setBool(migrationKey, true);
   }
 
   JustifiedLayoutStrategy getJustifiedLayoutStrategy() {
@@ -444,14 +467,20 @@ class LocalSettings {
   }
 
   int getPhotoGridSize() {
-    if (_prefs.containsKey(kPhotoGridSize)) {
-      return _prefs.getInt(kPhotoGridSize)!;
-    } else {
-      return photoGridSizeDefault;
-    }
+    final storedSize = _prefs.getInt(kPhotoGridSize);
+    if (storedSize == null || storedSize == 2) return photoGridSizeDefault;
+    return storedSize.clamp(photoGridSizeMin, photoGridSizeMax);
   }
 
   Future<void> setPhotoGridSize(int value) async {
+    if (value < photoGridSizeMin || value > photoGridSizeMax) {
+      throw ArgumentError.value(
+        value,
+        "value",
+        "Grid supports 3–6 photos per row",
+      );
+    }
+    await migrateGalleryLayoutPreferences();
     await _prefs.setInt(kPhotoGridSize, value);
   }
 

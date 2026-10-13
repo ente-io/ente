@@ -31,6 +31,7 @@ import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
+import "package:photos/ui/viewer/gallery/layout_settings.dart";
 import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
@@ -42,20 +43,20 @@ import "package:photos/ui/viewer/gallery/swipe_to_select_helper.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 import "package:photos/utils/widget_util.dart";
 
-typedef GalleryLoader =
-    Future<FileLoadResult> Function(
-      int creationStartTime,
-      int creationEndTime, {
-      int? limit,
-      bool? asc,
-    });
+typedef GalleryLoader = Future<FileLoadResult> Function(
+  int creationStartTime,
+  int creationEndTime, {
+  int? limit,
+  bool? asc,
+});
 
 typedef _LayoutScrollAnchor = ({EnteFile file, bool inHeader, double progress});
 
 typedef SortAscFn = bool Function();
 
-typedef NewLocalFilesResolver =
-    Future<List<EnteFile>?> Function(LocalPhotosAddedEvent event);
+typedef NewLocalFilesResolver = Future<List<EnteFile>?> Function(
+  LocalPhotosAddedEvent event,
+);
 
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
@@ -181,6 +182,11 @@ class GalleryState extends State<Gallery> {
   InheritedSearchFilterData? _inheritedSearchFilterData;
   InheritedGalleryBoundaries? _boundariesProvider;
   late String _automationScrollIdentifier;
+
+  bool get _showLayoutControls =>
+      widget.showGallerySettingsCTA &&
+      !widget.disableScroll &&
+      !widget.limitSelectionToOne;
 
   @override
   void initState() {
@@ -393,7 +399,7 @@ class GalleryState extends State<Gallery> {
       groupHeaderExtent: groupHeaderExtent!,
       showSelectAll: widget.showSelectAll,
       limitSelectionToOne: widget.limitSelectionToOne,
-      showGallerySettingsCTA: widget.showGallerySettingsCTA,
+      showGallerySettingsCTA: _showLayoutControls,
       groupHeaderAction: widget.groupHeaderAction,
       layoutTypeOverride: widget.layoutTypeOverride,
       justifiedLayoutAvailable: isJustifiedLayoutAvailable,
@@ -479,12 +485,18 @@ class GalleryState extends State<Gallery> {
         : 0;
   }
 
+  int get _photoGridSize =>
+      (widget.layoutTypeOverride ?? localSettings.getGalleryLayoutType()) ==
+          GalleryLayoutType.justified
+      ? 2
+      : localSettings.getPhotoGridSize();
+
   Future<double> _measureGroupHeaderExtent() async {
     if (!_groupType.showGroupHeader()) return GalleryGroups.spacing;
     final size = await getIntrinsicSizeOfWidget(
       GroupHeaderWidget(
         title: "Dummy title",
-        gridSize: localSettings.getPhotoGridSize(),
+        gridSize: _photoGridSize,
         filesInGroup: const [],
         selectedFiles: null,
         showSelectAll: false,
@@ -867,7 +879,7 @@ class GalleryState extends State<Gallery> {
     final shouldEnableSwipeSelection = widget.limitSelectionToOne == false;
 
     if (groupHeaderExtent == null) {
-      final photoGridSize = localSettings.getPhotoGridSize();
+      final photoGridSize = _photoGridSize;
       final tileHeight =
           (widthAvailable - (photoGridSize - 1) * GalleryGroups.spacing) /
           photoGridSize;
@@ -1069,11 +1081,13 @@ class GalleryState extends State<Gallery> {
                                   widget.showSelectAll &&
                                   !widget.limitSelectionToOne,
                               scrollbarInUseNotifier: scrollBarInUseNotifier,
-                              showGallerySettingsCTA:
-                                  widget.showGallerySettingsCTA,
+                              showGallerySettingsCTA: _showLayoutControls,
                               groupHeaderAction: widget.groupHeaderAction,
                             )
                           : const SizedBox.shrink(),
+                      if (_showLayoutControls &&
+                          !groups.groupType.showGroupHeader())
+                        _FloatingLayoutControl(topInset: appBarPinnedHeight),
                     ],
                   ),
                 ),
@@ -1107,6 +1121,21 @@ class _GalleryAppBarScrollBody extends StatelessWidget {
         appBarConfig.buildSliver(context),
         SliverFillRemaining(hasScrollBody: false, child: child),
       ],
+    );
+  }
+}
+
+class _FloatingLayoutControl extends StatelessWidget {
+  const _FloatingLayoutControl({this.topInset = 0});
+
+  final double topInset;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      right: 16,
+      top: topInset + 16,
+      child: const FloatingGalleryLayoutButton(),
     );
   }
 }

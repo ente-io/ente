@@ -126,9 +126,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         widget.file.fileType == FileType.livePhoto;
     final effectiveThumbnailSize =
         widget.thumbnailSize ??
-        (widget.photoGridSize < photoGridSizeDefault
-            ? thumbnailLargeSize
-            : thumbnailSmallSize);
+        (widget.photoGridSize <= 3 ? thumbnailLargeSize : thumbnailSmallSize);
     final Widget thumbnailWidget = ThumbnailWidget(
       widget.file,
       diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
