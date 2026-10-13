@@ -14,7 +14,6 @@ import {
     EditAlbumDetailsDialog,
     type AlbumDetails,
 } from "@/components/Collections/EditAlbumDetailsDialog";
-import { GalleryBarAndListHeader } from "@/components/Collections/GalleryBarAndListHeader";
 import { slideshowFiles } from "@/components/Collections/album-slideshow";
 import { FamilyManagement } from "@/components/FamilyManagement";
 import type { FileListHeaderOrFooter } from "@/components/FileList";
@@ -1995,57 +1994,44 @@ const Page: React.FC = () => {
                     dispatch({ type: "showPeople" });
                 }}
                 onSelectPerson={handleSelectPerson}
-                renderGalleryNavigation={
+                galleryBarProps={
                     isCleanupViewOpen
                         ? undefined
-                        : (presentationProps) => (
-                              <GalleryBarAndListHeader
-                                  {...presentationProps}
-                                  {...{
-                                      user,
-                                      // TODO: These are incorrect assertions, the types of the
-                                      // component need to be updated.
-                                      activeCollection: activeCollection!,
-                                      activeCollectionID: activeCollectionID!,
-                                      activePerson,
-                                      setFileListHeader,
-                                      saveGroups,
-                                      canCreateAlbum: !isInArchiveSection,
-                                      onAddSaveGroup,
-                                      onEditAlbumDetails: showEditAlbumDetails,
-                                      onShowMap: handleShowCollectionMap,
-                                      onCollectionSlideshow: startSlideshow,
-                                  }}
-                                  mode={barMode}
-                                  shouldHide={isInSearchMode}
-                                  barCollectionSummaries={
-                                      barCollectionSummaries
-                                  }
-                                  emailByUserID={state.emailByUserID}
-                                  shareSuggestionEmails={
-                                      state.shareSuggestionEmails
-                                  }
-                                  people={
-                                      (state.view?.type == "people"
-                                          ? state.view.visiblePeople
-                                          : undefined) ?? []
-                                  }
-                                  allPeople={
-                                      (state.view?.type == "people"
-                                          ? state.view.people
-                                          : undefined) ?? []
-                                  }
-                                  setBlockingLoad={setBlockingLoad}
-                                  setActiveCollectionID={
-                                      handleShowCollectionSummaryWithID
-                                  }
-                                  hasActiveFileSelection={
-                                      hasActiveFileSelection
-                                  }
-                                  onRemotePull={remotePull}
-                                  onSelectPerson={handleSelectPerson}
-                              />
-                          )
+                        : {
+                              user,
+                              // TODO: These are incorrect assertions, the types of the
+                              // component need to be updated.
+                              activeCollection: activeCollection!,
+                              activeCollectionID: activeCollectionID!,
+                              activePerson,
+                              setFileListHeader,
+                              saveGroups,
+                              canCreateAlbum: !isInArchiveSection,
+                              onAddSaveGroup,
+                              onEditAlbumDetails: showEditAlbumDetails,
+                              onShowMap: handleShowCollectionMap,
+                              onCollectionSlideshow: startSlideshow,
+                              mode: barMode,
+                              shouldHide: isInSearchMode,
+                              barCollectionSummaries,
+                              emailByUserID: state.emailByUserID,
+                              shareSuggestionEmails:
+                                  state.shareSuggestionEmails,
+                              people:
+                                  (state.view?.type == "people"
+                                      ? state.view.visiblePeople
+                                      : undefined) ?? [],
+                              allPeople:
+                                  (state.view?.type == "people"
+                                      ? state.view.people
+                                      : undefined) ?? [],
+                              setBlockingLoad,
+                              setActiveCollectionID:
+                                  handleShowCollectionSummaryWithID,
+                              hasActiveFileSelection,
+                              onRemotePull: remotePull,
+                              onSelectPerson: handleSelectPerson,
+                          }
                 }
                 alternateHeader={
                     showSelectionBar ? (

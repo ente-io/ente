@@ -1,3 +1,7 @@
+import {
+    GalleryBarAndListHeader,
+    type GalleryBarAndListHeaderProps,
+} from "@/components/Collections/GalleryBarAndListHeader";
 import { SearchBar, type SearchBarProps } from "@/components/SearchBar";
 import { uploadManager } from "@/services/upload-manager";
 import {
@@ -44,15 +48,19 @@ export const PhotosNavigationShell: React.FC<
             showRail: boolean;
             showNormalNavigation: boolean;
             alternateHeader: ReactNode;
-            renderGalleryNavigation:
-                ((props: GalleryBarPresentationProps) => ReactNode) | undefined;
+            galleryBarProps:
+                | Omit<
+                      GalleryBarAndListHeaderProps,
+                      keyof GalleryBarPresentationProps
+                  >
+                | undefined;
         }
     >
 > = ({
     showRail,
     showNormalNavigation,
     alternateHeader,
-    renderGalleryNavigation,
+    galleryBarProps,
     children,
     ...props
 }) => {
@@ -148,10 +156,13 @@ export const PhotosNavigationShell: React.FC<
                         flexDirection: { xs: "column", md: "row" },
                     }}
                 >
-                    {renderGalleryNavigation?.({
-                        collapsed: showRail && !railOpen,
-                        mobileDrawerProps,
-                    })}
+                    {galleryBarProps && (
+                        <GalleryBarAndListHeader
+                            {...galleryBarProps}
+                            collapsed={showRail && !railOpen}
+                            mobileDrawerProps={mobileDrawerProps}
+                        />
+                    )}
                     <Stack
                         sx={(theme) => ({
                             flex: 1,

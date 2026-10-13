@@ -41,7 +41,7 @@ import {
     type CollectionHeaderProps,
 } from "./CollectionHeader";
 
-type GalleryBarAndListHeaderProps = Omit<
+export type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
     | "onSelectCollectionID"
