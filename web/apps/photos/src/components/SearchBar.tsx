@@ -71,7 +71,10 @@ export interface SearchBarProps {
     onSelectPerson: (personID: string) => void;
 }
 
-export const SearchBar: React.FC<SearchBarProps> = (props) => {
+export const SearchBar: React.FC<
+    SearchBarProps & { placement?: "header" | "rail" }
+> = ({ placement = "header", ...props }) => {
+    const isRail = placement === "rail";
     const isSmallWidth = useIsSmallWidth();
     const [open, setOpen] = useState(false);
     const [searchResetKey, setSearchResetKey] = useState(0);
@@ -108,37 +111,44 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
         return () => document.removeEventListener("keydown", handleKeyDown);
     }, []);
 
+    const closeButton = !isRail && props.isInSearchMode && (
+        <Tooltip title={t("close")}>
+            <IconButton
+                aria-label={t("close")}
+                onClick={clearSearch}
+                sx={{ mr: "8px" }}
+            >
+                <CloseIcon />
+            </IconButton>
+        </Tooltip>
+    );
+
     return (
         <>
-            {props.isInSearchMode && (
-                <Tooltip title={t("close")}>
-                    <IconButton
-                        aria-label={t("close")}
-                        onClick={clearSearch}
-                        sx={{ mr: "8px" }}
+            <Stack
+                direction={isRail ? "column" : "row"}
+                sx={{ alignItems: "center", gap: isRail ? "12px" : 0 }}
+            >
+                {closeButton}
+                <Tooltip title={`Search (${shortcut})`}>
+                    <FocusVisibleButton
+                        color="secondary"
+                        aria-label={t("search")}
+                        aria-haspopup="dialog"
+                        onClick={showSearch}
+                        sx={{
+                            minWidth: 0,
+                            width: isRail || isSmallWidth ? 40 : 48,
+                            height: isRail || isSmallWidth ? 40 : 48,
+                            p: 0,
+                            mr: isRail ? 0 : "8px",
+                            borderRadius: isRail ? "12px" : "16px",
+                        }}
                     >
-                        <CloseIcon />
-                    </IconButton>
+                        <HugeiconsIcon icon={Search01Icon} size={20} />
+                    </FocusVisibleButton>
                 </Tooltip>
-            )}
-            <Tooltip title={`Search (${shortcut})`}>
-                <FocusVisibleButton
-                    color="secondary"
-                    aria-label={t("search")}
-                    aria-haspopup="dialog"
-                    onClick={showSearch}
-                    sx={{
-                        minWidth: 0,
-                        width: isSmallWidth ? 40 : 48,
-                        height: isSmallWidth ? 40 : 48,
-                        p: 0,
-                        mr: "8px",
-                        borderRadius: "16px",
-                    }}
-                >
-                    <HugeiconsIcon icon={Search01Icon} size={20} />
-                </FocusVisibleButton>
-            </Tooltip>
+            </Stack>
             <ThemeProvider theme={sidebarTheme}>
                 <Dialog
                     open={open}
