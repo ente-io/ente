@@ -294,7 +294,7 @@ const Navbar: React.FC<NavbarProps> = ({
             sx={(theme) => ({
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "8px 16px",
+                padding: "8px 24px",
                 minHeight: "56px",
                 borderBottom: `1px solid ${theme.vars.palette.divider}`,
             })}
@@ -487,7 +487,6 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
             >
                 <SpacedRow
                     sx={{
-                        mx: 1,
                         paddingInline: "var(--et-padding-inline)",
                         paddingBlock: "24px 0px",
                     }}
@@ -500,9 +499,11 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                     <Checkbox {...{ checked, onChange }} />
                 </SpacedRow>
                 <Divider
-                    variant="middle"
                     sx={[
-                        { marginBlock: "4px 20px" },
+                        {
+                            marginBlock: "4px 20px",
+                            marginInline: "var(--et-padding-inline)",
+                        },
                         hideDivider ? { opacity: 0 } : { opacity: 0.8 },
                     ]}
                 />

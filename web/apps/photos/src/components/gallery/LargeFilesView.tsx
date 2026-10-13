@@ -205,7 +205,7 @@ const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter }) => {
                 sx={(theme) => ({
                     alignItems: "center",
                     justifyContent: "space-between",
-                    padding: "8px 16px",
+                    padding: "8px 24px",
                     minHeight: "56px",
                     borderBottom: `1px solid ${theme.vars.palette.divider}`,
                 })}
@@ -235,10 +235,7 @@ const FilterChips: React.FC<FilterChipsProps> = ({
     filter,
     onChangeFilter,
 }) => (
-    <Stack
-        direction="row"
-        sx={{ gap: 1, pl: 3, pr: 2, py: 4, flexWrap: "wrap" }}
-    >
+    <Stack direction="row" sx={{ gap: 1, px: 3, py: 4, flexWrap: "wrap" }}>
         <Chip
             label={t("all")}
             variant={filter === "all" ? "filled" : "outlined"}
