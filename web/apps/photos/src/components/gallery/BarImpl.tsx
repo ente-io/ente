@@ -207,6 +207,33 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 ? t("section_archive")
                 : t("albums");
 
+    const albumShortcuts = [
+        {
+            id: uncategorizedCollectionSummaryID,
+            label: t("section_uncategorized"),
+            icon: GeometricShapes01Icon,
+            active: activeCollectionID == uncategorizedCollectionSummaryID,
+        },
+        {
+            id: PseudoCollectionID.hiddenItems,
+            label: t("section_hidden"),
+            icon: ViewOffSlashIcon,
+            active: mode == "hidden-albums",
+        },
+        {
+            id: PseudoCollectionID.archiveItems,
+            label: t("section_archive"),
+            icon: Download05Icon,
+            active: mode == "archive-albums",
+        },
+        {
+            id: PseudoCollectionID.trash,
+            label: t("section_trash"),
+            icon: Delete02Icon,
+            active: activeCollectionID == PseudoCollectionID.trash,
+        },
+    ];
+
     const albumListID = `${titleID}-albums`;
     const items = (
         <Box
@@ -401,35 +428,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             {mode != "people" && (
                 <Stack sx={{ flexShrink: 0, gap: "2px", pb: "8px" }}>
                     <Divider sx={{ mb: "8px" }} />
-                    {[
-                        {
-                            id: uncategorizedCollectionSummaryID,
-                            label: t("section_uncategorized"),
-                            icon: GeometricShapes01Icon,
-                            active:
-                                activeCollectionID ==
-                                uncategorizedCollectionSummaryID,
-                        },
-                        {
-                            id: PseudoCollectionID.hiddenItems,
-                            label: t("section_hidden"),
-                            icon: ViewOffSlashIcon,
-                            active: mode == "hidden-albums",
-                        },
-                        {
-                            id: PseudoCollectionID.archiveItems,
-                            label: t("section_archive"),
-                            icon: Download05Icon,
-                            active: mode == "archive-albums",
-                        },
-                        {
-                            id: PseudoCollectionID.trash,
-                            label: t("section_trash"),
-                            icon: Delete02Icon,
-                            active:
-                                activeCollectionID == PseudoCollectionID.trash,
-                        },
-                    ].map(({ id, label, icon, active }) => (
+                    {albumShortcuts.map(({ id, label, icon, active }) => (
                         <BarCard
                             key={id}
                             aria-label={label}
