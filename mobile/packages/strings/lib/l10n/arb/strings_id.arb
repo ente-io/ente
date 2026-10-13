@@ -323,10 +323,6 @@
   "@doNotSignOut": {
     "description": "Do not sign out button label"
   },
-  "doThisLater": "Lakukan lain kali",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Ketuk dua kali untuk memasukkan kode baru",
   "download": "Unduh",
   "downloadFailed": "Gagal mengunduh",
@@ -1068,7 +1064,6 @@
   },
   "selectExportFormat": "Pilih format pengeksporan",
   "selectFile": "Pilih file",
-  "selectFoldersForBackup": "Pilih folder yang perlu dicadangkan",
   "selectItemsToAdd": "Pilih item untuk ditambahkan",
   "selectLanguage": "Pilih bahasa",
   "selectMorePhotos": "Pilih lebih banyak foto",

@@ -124,10 +124,6 @@
   "details": "รายละเอียด",
   "disableDownloadWarningBody": "ผู้ชมยังคงสามรถถ่ายภาพหน้าจอ หรือบันทึกรูปภาพของคุณด้วยเครื่องมือภาพนอกได้อยู่",
   "done": "เสร็จ",
-  "doThisLater": "ทำในภายหลัง",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "downloading": "กำลังดาวน์โหลด...",
   "dropSupportEmail": "กรุณาส่งอีเมลไปที่ {supportEmail} จากที่อยู่อีเมลที่คุณลงทะเบียนไว้",
   "@dropSupportEmail": {

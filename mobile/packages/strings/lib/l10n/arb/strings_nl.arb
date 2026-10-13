@@ -713,10 +713,6 @@
   },
   "dontHaveAnAccount": "Heeft u geen account?",
   "dontSave": "Niet opslaan",
-  "doThisLater": "Doe dit later",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Je kunt dubbel klikken op een item om code te bekijken",
   "download": "Downloaden",
   "downloadFailed": "Download mislukt",
@@ -2391,7 +2387,6 @@
   "selectFile": "Bestand selecteren",
   "selectFolder": "Map selecteren",
   "selectFolders": "Mappen selecteren",
-  "selectFoldersForBackup": "Selecteer mappen voor back-up",
   "selectFolderToContinue": "Selecteer een map om door te gaan",
   "selectItemsToAdd": "Selecteer items om toe te voegen",
   "selectMailApp": "Selecteer mail app",
@@ -2573,7 +2568,6 @@
   "stargazing": "Sterrenhemel",
   "startBackup": "Back-up starten",
   "startRecovery": "Herstel starten",
-  "startWithLatestPhotos": "Start met nieuwste foto's",
   "stopCastingBody": "Wil je stoppen met casten?",
   "stopCastingTitle": "Casten stoppen",
   "storage": "Opslagruimte",

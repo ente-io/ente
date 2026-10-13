@@ -309,10 +309,6 @@
     "description": "Do not sign out button label"
   },
   "dontHaveAnAccount": "계정이 없으신가요?",
-  "doThisLater": "나중에 하기",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "코드를 보시려면 해당 란을 더블탭해주세요",
   "downloadFailed": "다운로드 실패",
   "downloading": "다운로드 중...",

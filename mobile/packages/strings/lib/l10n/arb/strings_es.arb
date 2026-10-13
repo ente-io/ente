@@ -2606,7 +2606,6 @@
   "selectFile": "Seleccionar archivo",
   "selectFolder": "Seleccionar carpeta",
   "selectFolders": "Seleccionar carpetas",
-  "selectFoldersForBackup": "Seleccionar carpetas para la copia de seguridad",
   "selectFolderToContinue": "Selecciona un archivo para continuar",
   "selectItemsToAdd": "Selecciona elementos para agregar",
   "selectMailApp": "Seleccionar app de correo",
@@ -2765,7 +2764,6 @@
       }
     }
   },
-  "startWithLatestPhotos": "Iniciar con las últimas fotos",
   "status": "Estado",
   "sticker": "Pegatina",
   "stopCastingBody": "¿Quieres dejar de transmitir?",

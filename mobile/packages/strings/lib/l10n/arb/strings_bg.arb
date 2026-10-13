@@ -1037,10 +1037,6 @@
   },
   "dontHaveAnAccount": "Нямате профил?",
   "dontSave": "Don't save",
-  "doThisLater": "Направете това по-късно",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Можете да докоснете два пъти върху запис, за да видите кода",
   "download": "Download",
   "downloadApplicationUpdate": "Download update",
@@ -3470,7 +3466,6 @@
   "selectFile": "Избор на файл",
   "selectFolder": "Изберете папка",
   "selectFolders": "Select folders",
-  "selectFoldersForBackup": "Select folders for backup",
   "selectFolderToContinue": "Изберете папка, за да продължите",
   "selectItemsToAdd": "Select items to add",
   "selectLanguage": "Изберете език",
@@ -3760,7 +3755,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "Start snapping, your photos will show up here",
   "startWithAddingPhotosOrFamiliarFaces": "Start with adding\nphotos or familiar faces",
-  "startWithLatestPhotos": "Start with latest photos",
   "status": "Status",
   "sticker": "Sticker",
   "stopCastingBody": "Do you want to stop casting?",

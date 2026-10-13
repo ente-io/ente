@@ -284,10 +284,6 @@
     "description": "Do not sign out button label"
   },
   "dontHaveAnAccount": "Har du ikke en konto?",
-  "doThisLater": "Gør det senere",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Du kan dobbelt-klikke på et felt for at se koden",
   "downloadFailed": "Download mislykkedes",
   "downloading": "Downloader...",
@@ -939,7 +935,6 @@
   },
   "selectExportFormat": "Vælg eksportformat",
   "selectFile": "Vælg fil",
-  "selectFoldersForBackup": "Vælg mapper til sikkerhedskopiering",
   "selectLanguage": "Vælg sprog",
   "selectTime": "Vælg tid",
   "sendInvite": "Send invitation",

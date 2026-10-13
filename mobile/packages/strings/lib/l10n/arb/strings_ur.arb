@@ -783,10 +783,6 @@
   },
   "dontHaveAnAccount": "اکاؤنٹ نہیں ہے؟",
   "dontSave": "محفوظ نہ کریں",
-  "doThisLater": "یہ بعد میں کریں",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "آپ کوڈ دیکھنے کے لیے کسی بھی اندراج پر ڈبل ٹیپ کر سکتے ہیں",
   "download": "ڈاؤن لوڈ",
   "downloadFailed": "ڈاؤن لوڈ ناکام",
@@ -2573,7 +2569,6 @@
   "selectFile": "فائل منتخب کریں",
   "selectFolder": "فولڈر منتخب کریں",
   "selectFolders": "فولڈرز منتخب کریں",
-  "selectFoldersForBackup": "بیک اپ کے لیے فولڈرز منتخب کریں",
   "selectFolderToContinue": "جاری رکھنے کے لیے فولڈر منتخب کریں",
   "selectItemsToAdd": "شامل کرنے کے لیے آئٹمز منتخب کریں",
   "selectLanguage": "زبان منتخب کریں",
@@ -2771,7 +2766,6 @@
       }
     }
   },
-  "startWithLatestPhotos": "تازہ ترین تصاویر کے ساتھ شروع کریں",
   "status": "اسٹیٹس",
   "sticker": "اسٹیکر",
   "stopCastingBody": "کیا آپ کاسٹنگ روکنا چاہتے ہیں؟",

@@ -1091,10 +1091,6 @@
   },
   "dontHaveAnAccount": "Kein Konto vorhanden?",
   "dontSave": "Nicht speichern",
-  "doThisLater": "Später erledigen",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Sie können auf einen Eintrag doppelt tippen, um den Code anzuzeigen",
   "download": "Herunterladen",
   "downloadApplicationUpdate": "Aktualisierung herunterladen",
@@ -3736,7 +3732,6 @@
   "selectFile": "Datei auswählen",
   "selectFolder": "Ordner auswählen",
   "selectFolders": "Ordner auswählen",
-  "selectFoldersForBackup": "Ordner für Sicherung auswählen",
   "selectFolderToContinue": "Wähle zum Fortfahren einen Ordner aus",
   "selectItemsToAdd": "Elemente zum Hinzufügen auswählen",
   "selectLanguage": "Sprache auswählen",
@@ -4045,7 +4040,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "Fang an zu knipsen, deine Fotos werden hier erscheinen",
   "startWithAddingPhotosOrFamiliarFaces": "Beginne mit dem Hinzufügen von\nFotos oder bekannten Gesichtern",
-  "startWithLatestPhotos": "Beginne mit den neuesten Fotos",
   "status": "Status",
   "sticker": "Aufkleber",
   "stopCastingBody": "Möchtest du die Übertragung beenden?",

@@ -812,10 +812,6 @@
   },
   "dontHaveAnAccount": "Ještě nemáte účet?",
   "dontSave": "Neukládat",
-  "doThisLater": "Udělat později",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Můžete dvakrát klepnout na položku pro zobrazení kódu",
   "download": "Stáhnout",
   "downloadApplicationUpdate": "Stáhnout aktualizaci",
@@ -2741,7 +2737,6 @@
   "selectFile": "Vybrat soubor",
   "selectFolder": "Vybrat složku",
   "selectFolders": "Vybrat složky",
-  "selectFoldersForBackup": "Vyberte složky pro zálohování",
   "selectFolderToContinue": "Pro pokračování vyberte složku",
   "selectItemsToAdd": "Vyberte položky, které chcete přidat",
   "selectLanguage": "Vybrat jazyk",
@@ -2927,7 +2922,6 @@
       }
     }
   },
-  "startWithLatestPhotos": "Začít s nejnovějšími fotografiemi",
   "status": "Stav",
   "sticker": "Nálepka",
   "stopCastingBody": "Chcete přestat odesílat?",
