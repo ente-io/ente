@@ -157,33 +157,35 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Widget _buildHeaderContent(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final availableWidth =
+        MediaQuery.sizeOf(context).width -
+        MediaQuery.paddingOf(context).horizontal;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 44),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 287),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 155,
-              height: 168,
-              child: _buildPermissionsAnimation(),
-            ),
-            const SizedBox(height: Spacing.xl),
-            Text(
-              context.strings.readyToBackupTitle,
-              textAlign: TextAlign.center,
-              style: TextStyles.display2.copyWith(color: colorScheme.content),
-            ),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              context.strings.readyToBackupSubtitle,
-              textAlign: TextAlign.center,
-              style: TextStyles.body.copyWith(color: colorScheme.contentLight),
-            ),
-          ],
-        ),
+      padding: EdgeInsets.symmetric(
+        horizontal: max(44.0, (availableWidth - 287) / 2),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 155,
+            height: 168,
+            child: _buildPermissionsAnimation(),
+          ),
+          const SizedBox(height: Spacing.xl),
+          Text(
+            context.strings.readyToBackupTitle,
+            textAlign: TextAlign.center,
+            style: TextStyles.display2.copyWith(color: colorScheme.content),
+          ),
+          const SizedBox(height: Spacing.sm),
+          Text(
+            context.strings.readyToBackupSubtitle,
+            textAlign: TextAlign.center,
+            style: TextStyles.body.copyWith(color: colorScheme.contentLight),
+          ),
+        ],
       ),
     );
   }
