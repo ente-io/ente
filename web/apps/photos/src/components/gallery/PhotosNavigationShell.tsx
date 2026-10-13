@@ -77,13 +77,7 @@ export const PhotosNavigationShell: React.FC<
     }, [props.mode, props.isInSearchMode]);
     useEffect(() => {
         if (!mobile) closeMobileNavigation();
-        else if (
-            props.mode == "hidden-albums" ||
-            props.mode == "archive-albums"
-        ) {
-            showMobileNavigation();
-        }
-    }, [mobile, props.mode, closeMobileNavigation, showMobileNavigation]);
+    }, [mobile, closeMobileNavigation]);
     const handleChangeMode = (mode: GalleryBarMode) => {
         const reopeningSection =
             mobile &&
@@ -316,7 +310,10 @@ const NormalNavigationRail: React.FC<
                         aria-pressed={
                             navigationOpen &&
                             !props.isInSearchMode &&
-                            mode == item
+                            (mode == item ||
+                                (item == "albums" &&
+                                    (mode == "hidden-albums" ||
+                                        mode == "archive-albums")))
                         }
                         aria-haspopup={opensDialog ? "dialog" : undefined}
                         onClick={() => onChangeMode(item)}

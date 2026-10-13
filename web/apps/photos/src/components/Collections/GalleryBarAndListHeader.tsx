@@ -26,7 +26,6 @@ import {
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
     collectionsSortBy,
-    haveOnlySystemCollections,
     PseudoCollectionID,
     sortCollectionSummaries,
     type CollectionsSortBy,
@@ -82,6 +81,9 @@ export const GalleryBarAndListHeader: React.FC<
     mode,
     user,
     barCollectionSummaries: toShowCollectionSummaries,
+    normalCollectionSummaries,
+    uncategorizedCollectionSummaryID,
+    onShowCollectionSummary,
     activeCollection,
     activeCollectionID,
     setActiveCollectionID,
@@ -134,14 +136,6 @@ export const GalleryBarAndListHeader: React.FC<
         useCollectionsSortByLocalState("updation-time-desc");
     const [peopleSortBy, setPeopleSortBy] =
         useState<PeopleSortBy>("count-desc");
-
-    const shouldBeHidden = useMemo(
-        () =>
-            shouldHide ||
-            (haveOnlySystemCollections(toShowCollectionSummaries) &&
-                activeCollectionID === PseudoCollectionID.all),
-        [shouldHide, toShowCollectionSummaries, activeCollectionID],
-    );
 
     const sortedCollectionSummaries = useMemo(
         () =>
@@ -259,7 +253,7 @@ export const GalleryBarAndListHeader: React.FC<
         // people,
     ]);
 
-    if (shouldBeHidden) {
+    if (shouldHide) {
         return <></>;
     }
 
@@ -275,6 +269,9 @@ export const GalleryBarAndListHeader: React.FC<
                     peopleSortBy,
                     collapsed,
                     mobileDrawerProps,
+                    normalCollectionSummaries,
+                    uncategorizedCollectionSummaryID,
+                    onShowCollectionSummary,
                 }}
                 onSelectCollectionID={selectCollection}
                 onSelectPerson={selectPerson}
@@ -282,12 +279,17 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangePeopleSortBy={setPeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
-                collectionSummaries={sortedCollectionSummaries.filter((cs) =>
-                    mode == "albums"
-                        ? !cs.attributes.has("system") ||
-                          (cs.id > 0 && cs.type == "uncategorized")
-                        : !cs.attributes.has("hideFromCollectionBar") &&
-                          !cs.attributes.has("quickLink"),
+                collectionSummaries={sortedCollectionSummaries.filter(
+                    (cs) =>
+                        cs.id !== uncategorizedCollectionSummaryID &&
+                        cs.id !== PseudoCollectionID.hiddenItems &&
+                        cs.id !== PseudoCollectionID.archiveItems &&
+                        cs.id !== PseudoCollectionID.trash &&
+                        (mode == "albums"
+                            ? !cs.attributes.has("system") ||
+                              (cs.id > 0 && cs.type == "uncategorized")
+                            : !cs.attributes.has("hideFromCollectionBar") &&
+                              !cs.attributes.has("quickLink")),
                 )}
             />
 
