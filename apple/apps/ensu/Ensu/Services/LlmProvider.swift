@@ -473,7 +473,8 @@ actor LlmProvider {
                 defer { generationControl.withLock { $0 = nil } }
                 let context = try model.newTitleContext(
                     chatContextSize: loadedContext.contextSize(),
-                    nThreads: Int32(max(1, ProcessInfo.processInfo.activeProcessorCount - 1))
+                    nThreads: Int32(max(1, ProcessInfo.processInfo.activeProcessorCount - 1)),
+                    nThreadsGeneration: nil
                 )
                 let outputTokens = 48
                 let inputTokens = max(0, min(2000, Int(context.contextSize()) - outputTokens))
@@ -706,7 +707,7 @@ actor LlmProvider {
             let selection = LlmModelSelection(id: key.id, contextLength: key.requestedContextLength)
             let contextParams = LlmContextParams(
                 contextSize: currentContextLength.map(Int32.init), nThreads: nil,
-                nBatch: Int32(selection.batchSize))
+                nThreadsGeneration: nil, nBatch: Int32(selection.batchSize))
             loadedContext = nil
             loadedContext = try? model.newContext(params: contextParams)
         }
@@ -755,6 +756,7 @@ actor LlmProvider {
             do {
                 let contextParams = LlmContextParams(
                     contextSize: Int32(contextSize), nThreads: Int32(threadCount),
+                    nThreadsGeneration: nil,
                     nBatch: Int32(selection.batchSize))
                 let context = try model.newContext(params: contextParams)
                 loadedContext = context
