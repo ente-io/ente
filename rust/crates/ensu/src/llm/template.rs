@@ -1,6 +1,29 @@
-use llama_cpp_2::model::LlamaModel;
+use llama_cpp_2::model::{LlamaChatMessage, LlamaChatTemplate, LlamaModel};
 
-use super::{ChatMessage, Error, chat_template_bridge, format_error};
+use super::{ChatMessage, Error, format_error};
+
+// Exact tokenizer.chat_template fingerprints from the GGUF revisions in config.rs.
+// A new or modified template requires a formatter review; never guess from token strings.
+// Source: Hugging Face ente-ai/LFM2.5-VL-1.6B-GGUF @ b2995f54e17fd7ec31e9cb399ade8fedfd51624d
+const LFM_SHA256: [u8; 32] = [
+    0x01, 0x3e, 0xed, 0x60, 0x54, 0x64, 0x34, 0xb6, 0x96, 0x7e, 0x34, 0x83, 0x15, 0x3d, 0x8c, 0x5c,
+    0x37, 0xab, 0xcb, 0x1d, 0x66, 0x7f, 0x8b, 0x1f, 0x91, 0x46, 0x83, 0xf2, 0xa9, 0x41, 0x15, 0x31,
+];
+// Sources: Hugging Face ente-ai GGUFs:
+// gemma-4-E4B-it-GGUF @ f0089e04ac8494e513619d18b44c829c6b815440
+// gemma-4-E2B-it-GGUF @ d9f70b02c9a2193b7263daee865dfa93276fd99a
+const GEMMA_SHA256: [u8; 32] = [
+    0x24, 0x1c, 0x50, 0xd8, 0x6b, 0xdf, 0xe5, 0xe4, 0x33, 0x07, 0xda, 0x87, 0xf5, 0x59, 0xcd, 0x24,
+    0x16, 0xaa, 0xcd, 0x67, 0xa8, 0xde, 0x46, 0xc1, 0x5a, 0xcc, 0x01, 0x05, 0xef, 0x22, 0x00, 0xb7,
+];
+// Sources: Hugging Face ente-ai GGUFs:
+// Qwen3.5-0.8B-GGUF @ f44fc9bf306e407078288aee9ff7a83b457d260a
+// Qwen3.5-2B-GGUF @ 4cd5d68754a443dc390533792bf345ad219c0b41
+// Qwen3.5-4B-GGUF @ 9b67f8db9bedc8c10f524ac08193b58fa9b20ac7
+const QWEN_SHA256: [u8; 32] = [
+    0x7f, 0x0e, 0x52, 0x90, 0x32, 0xc2, 0x51, 0x83, 0xbc, 0xd6, 0x6c, 0x7f, 0x23, 0x8d, 0xa2, 0xd3,
+    0x77, 0xf4, 0x3b, 0xe7, 0x54, 0xa9, 0x4e, 0x27, 0x25, 0xa5, 0x8c, 0x4e, 0x16, 0xd2, 0xed, 0x67,
+];
 
 pub(super) fn build_chat_prompt(
     model: &LlamaModel,
@@ -16,6 +39,25 @@ pub(super) fn build_chat_prompt(
             .and_then(|template| template.to_string().ok())
             .unwrap_or_else(|| "chatml".to_owned()),
     };
+    // Preserve llama.cpp's named legacy templates through its existing safe Rust
+    // API. Known model templates are rendered below in Rust without a Jinja engine.
+    if !source.is_empty()
+        && source != "chatml"
+        && source
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || b"-._".contains(&byte))
+    {
+        let template = LlamaChatTemplate::new(&source)
+            .map_err(|err| Error::InvalidInput(format_error("Invalid template", err)))?;
+        let chat = messages
+            .iter()
+            .map(|message| LlamaChatMessage::new(message.role.clone(), message.content.clone()))
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|err| Error::InvalidInput(format_error("Invalid chat message", err)))?;
+        if let Ok(prompt) = model.apply_chat_template(&template, &chat, add_assistant) {
+            return Ok(prompt);
+        }
+    }
     let vocab = model.vocab();
     let special_token = |token: llama_cpp_2::token::LlamaToken| {
         if token.0 < 0 {
@@ -33,6 +75,34 @@ pub(super) fn build_chat_prompt(
     )
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Template {
+    ChatMl,
+    Lfm,
+    Gemma,
+    Qwen,
+}
+
+impl Template {
+    fn identify(source: &str) -> Result<Self, Error> {
+        if source.is_empty() || source == "chatml" {
+            return Ok(Self::ChatMl);
+        }
+        match ente_ensu_crypto::sha256(source.as_bytes()) {
+            LFM_SHA256 => Ok(Self::Lfm),
+            GEMMA_SHA256 => Ok(Self::Gemma),
+            QWEN_SHA256 => Ok(Self::Qwen),
+            _ => Err(Error::Unsupported(
+                "This model's chat template is not supported by this version of Ensu",
+            )),
+        }
+    }
+}
+
+// ChatMessage currently contains only a role and string content. These formatters
+// reproduce that input surface with thinking disabled, including media markers
+// already inserted into content. Structured tool calls/content parts would need
+// their own implementation and reference cases before extending ChatMessage.
 fn render(
     source: &str,
     bos: &str,
@@ -40,221 +110,421 @@ fn render(
     messages: &[ChatMessage],
     add_assistant: bool,
 ) -> Result<String, Error> {
-    let messages = serde_json::to_string(messages)
-        .map_err(|err| Error::InvalidInput(format_error("Invalid chat messages", err)))?;
-    chat_template_bridge::render(source, bos, eos, &messages, add_assistant)
+    if [source, bos, eos].iter().any(|value| value.contains('\0')) {
+        return Err(Error::InvalidInput(
+            "Invalid template input: embedded NUL".to_owned(),
+        ));
+    }
+    match Template::identify(source)? {
+        Template::ChatMl => {
+            let mut prompt = String::new();
+            for message in messages {
+                chatml_turn(&mut prompt, role(message), &message.content);
+            }
+            if add_assistant {
+                prompt.push_str("<|im_start|>assistant\n");
+            }
+            Ok(prompt)
+        }
+        Template::Lfm => Ok(render_lfm(bos, messages, add_assistant)),
+        Template::Gemma => Ok(render_gemma(bos, messages, add_assistant)),
+        Template::Qwen => render_qwen(messages, add_assistant),
+    }
+}
+
+fn role(message: &ChatMessage) -> &str {
+    // The original llama.cpp common renderer normalizes developer to system for
+    // all three supported templates.
+    if message.role == "developer" {
+        "system"
+    } else {
+        &message.role
+    }
+}
+
+fn trim(text: &str) -> &str {
+    // Match the pinned llama.cpp Jinja runtime's ASCII isspace, including VT.
+    text.trim_matches([' ', '\t', '\n', '\r', '\u{b}', '\u{c}'])
+}
+
+fn chatml_turn(prompt: &mut String, role: &str, content: &str) {
+    prompt.push_str("<|im_start|>");
+    prompt.push_str(role);
+    prompt.push('\n');
+    prompt.push_str(content);
+    prompt.push_str("<|im_end|>\n");
+}
+
+fn template_error(message: &str) -> Error {
+    Error::Llama {
+        op: "Failed to apply chat template",
+        message: message.to_owned(),
+    }
+}
+
+fn render_lfm(bos: &str, mut messages: &[ChatMessage], add_assistant: bool) -> String {
+    let mut prompt = bos.to_owned();
+    if let Some(first) = messages.first()
+        && role(first) == "system"
+    {
+        if !first.content.is_empty() {
+            chatml_turn(&mut prompt, "system", &first.content);
+        }
+        messages = &messages[1..];
+    }
+    let last_assistant = messages
+        .iter()
+        .rposition(|message| role(message) == "assistant");
+    for (index, message) in messages.iter().enumerate() {
+        let content = if role(message) == "assistant" && Some(index) != last_assistant {
+            message
+                .content
+                .rsplit_once("</think>")
+                .map_or(message.content.as_str(), |(_, tail)| trim(tail))
+        } else {
+            &message.content
+        };
+        chatml_turn(&mut prompt, role(message), content);
+    }
+    if add_assistant {
+        prompt.push_str("<|im_start|>assistant\n");
+    }
+    prompt
+}
+
+fn render_gemma(bos: &str, mut messages: &[ChatMessage], add_assistant: bool) -> String {
+    let mut prompt = bos.to_owned();
+    if let Some(first) = messages.first()
+        && role(first) == "system"
+    {
+        prompt.push_str("<|turn>system\n");
+        prompt.push_str(trim(&first.content));
+        prompt.push_str("<turn|>\n");
+        messages = &messages[1..];
+    }
+    let mut previous_role = None;
+    let mut turns = messages
+        .iter()
+        .filter(|message| role(message) != "tool")
+        .peekable();
+    while let Some(message) = turns.next() {
+        let current_role = role(message);
+        let rendered_role = if current_role == "assistant" {
+            "model"
+        } else {
+            current_role
+        };
+        if rendered_role != "model" || previous_role != Some("assistant") {
+            prompt.push_str("<|turn>");
+            prompt.push_str(rendered_role);
+            prompt.push('\n');
+        }
+        if rendered_role == "model" {
+            // Gemma removes every inline thinking channel, including an unclosed
+            // final one. Consecutive assistant messages share a single turn.
+            let content: String = message
+                .content
+                .split("<channel|>")
+                .map(|part| part.split_once("<|channel>").map_or(part, |(text, _)| text))
+                .collect();
+            prompt.push_str(trim(&content));
+        } else {
+            prompt.push_str(trim(&message.content));
+        }
+        if rendered_role != "model" || turns.peek().is_none_or(|next| role(next) != "assistant") {
+            prompt.push_str("<turn|>\n");
+        }
+        previous_role = Some(current_role);
+    }
+    if add_assistant {
+        prompt.push_str("<|turn>model\n");
+    }
+    prompt
+}
+
+fn render_qwen(messages: &[ChatMessage], add_assistant: bool) -> Result<String, Error> {
+    if messages.is_empty() {
+        return Err(template_error("No messages provided."));
+    }
+    let last_query = messages
+        .iter()
+        .rposition(|message| {
+            let content = trim(&message.content);
+            role(message) == "user"
+                && !(content.starts_with("<tool_response>")
+                    && content.ends_with("</tool_response>"))
+        })
+        .ok_or_else(|| template_error("No user query found in messages."))?;
+    let mut prompt = String::new();
+    for (index, message) in messages.iter().enumerate() {
+        let content = trim(&message.content);
+        match role(message) {
+            "system" if index == 0 => chatml_turn(&mut prompt, "system", content),
+            "system" => return Err(template_error("System message must be at the beginning.")),
+            "user" => chatml_turn(&mut prompt, "user", content),
+            "assistant" => {
+                let (thinking, answer) = if let Some((before, _)) = content.split_once("</think>") {
+                    let before = before.trim_end_matches('\n');
+                    let thinking = before
+                        .rsplit_once("<think>")
+                        .map_or(before, |(_, text)| text)
+                        .trim_start_matches('\n');
+                    let answer = content
+                        .rsplit_once("</think>")
+                        .map_or(content, |(_, text)| text)
+                        .trim_start_matches('\n');
+                    (trim(thinking), answer)
+                } else {
+                    ("", content)
+                };
+                prompt.push_str("<|im_start|>assistant\n");
+                if index > last_query {
+                    prompt.push_str("<think>\n");
+                    prompt.push_str(thinking);
+                    prompt.push_str("\n</think>\n\n");
+                }
+                prompt.push_str(answer);
+                prompt.push_str("<|im_end|>\n");
+            }
+            "tool" => {
+                if index > 0 && role(&messages[index - 1]) != "tool" {
+                    prompt.push_str("<|im_start|>user");
+                }
+                prompt.push_str("\n<tool_response>\n");
+                prompt.push_str(content);
+                prompt.push_str("\n</tool_response>");
+                if messages
+                    .get(index + 1)
+                    .is_none_or(|next| role(next) != "tool")
+                {
+                    prompt.push_str("<|im_end|>\n");
+                }
+            }
+            _ => return Err(template_error("Unexpected message role.")),
+        }
+    }
+    if add_assistant {
+        prompt.push_str("<|im_start|>assistant\n<think>\n\n</think>\n\n");
+    }
+    Ok(prompt)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    struct Fixture {
-        model_id: &'static str,
-        template: &'static str,
-        bos: &'static str,
-        eos: &'static str,
+    fn messages(turns: &[(&str, &str)]) -> Vec<ChatMessage> {
+        turns
+            .iter()
+            .map(|(role, content)| ChatMessage {
+                role: (*role).to_owned(),
+                content: (*content).to_owned(),
+            })
+            .collect()
     }
 
-    fn message(role: &str, content: &str) -> ChatMessage {
-        ChatMessage {
-            role: role.to_owned(),
-            content: content.to_owned(),
-        }
-    }
-
+    // Selected compatibility expectations recorded from the original native renderer.
     #[test]
-    fn default_templates_preserve_turns_unicode_images_and_assistant_prefixes() {
-        for fixture in DEFAULT_TEMPLATES {
-            let messages = [
-                message("system", "Be concise."),
-                message("user", "नमस्ते 🐈\n<__media__>"),
-                message("assistant", "A cat."),
-                message("user", "What colour?"),
-            ];
-            let gemma = fixture.model_id.starts_with("gemma");
-            let (start, end, assistant) = if gemma {
-                ("<|turn>", "<turn|>", "model")
-            } else {
-                ("<|im_start|>", "<|im_end|>", "assistant")
-            };
-            let mut expected = fixture.bos.to_owned();
-            for msg in &messages {
-                let role = if msg.role == "assistant" {
-                    assistant
-                } else {
-                    &msg.role
-                };
-                expected.push_str(&format!("{start}{role}\n{}{end}\n", msg.content));
-            }
-            for add_assistant in [false, true] {
-                let prompt = render(
-                    fixture.template,
-                    fixture.bos,
-                    fixture.eos,
-                    &messages,
-                    add_assistant,
-                )
-                .unwrap();
-                let expected = if add_assistant {
-                    format!("{expected}{start}{assistant}\n")
-                } else {
-                    expected.clone()
-                };
-                assert_eq!(
-                    prompt, expected,
-                    "{}: add_assistant={add_assistant}",
-                    fixture.model_id
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn overrides_receive_a_boolean_false_and_special_tokens() {
-        assert_eq!(
-            render("llama2", "", "", &[message("user", "Hi")], true).unwrap(),
-            "[INST] Hi [/INST]"
+    fn message_boundaries_and_assistant_prefixes() {
+        let messages = messages(&[
+            ("system", "Be concise."),
+            ("user", "नमस्ते 🐈\n<__media__>"),
+            ("assistant", "A cat."),
+            ("user", "What colour?"),
+        ]);
+        let chatml = concat!(
+            "<|im_start|>system\nBe concise.<|im_end|>\n",
+            "<|im_start|>user\nनमस्ते 🐈\n<__media__><|im_end|>\n",
+            "<|im_start|>assistant\nA cat.<|im_end|>\n",
+            "<|im_start|>user\nWhat colour?<|im_end|>\n",
         );
-        let template = "{{ bos_token }}{% if enable_thinking is not defined or enable_thinking %}THINKING{% else %}DIRECT{% endif %}:{{ messages[0].content }}{{ eos_token }}{% if add_generation_prompt %}ASSISTANT{% endif %}";
-        let prompt = render(
-            template,
-            "<bos>",
-            "<eos>",
-            &[message("user", "你好\n<__media__>")],
-            true,
-        )
-        .unwrap();
-        assert_eq!(prompt, "<bos>DIRECT:你好\n<__media__><eos>ASSISTANT");
-    }
-
-    #[test]
-    fn template_errors_are_returned_and_subsequent_renders_recover() {
-        assert!(render("{% if %}", "", "", &[message("user", "Hi")], true).is_err());
-        assert!(render("bad\0template", "", "", &[], true).is_err());
-        assert!(render("llama2", "", "", &[message("user", "Hi\0there")], true).is_err());
-        let messages = [message("user", "Hello")];
-        for template in ["", "chatml"] {
+        let gemma = concat!(
+            "<bos><|turn>system\nBe concise.<turn|>\n",
+            "<|turn>user\nनमस्ते 🐈\n<__media__><turn|>\n",
+            "<|turn>model\nA cat.<turn|>\n",
+            "<|turn>user\nWhat colour?<turn|>\n",
+        );
+        for add_assistant in [false, true] {
+            let suffix = if add_assistant {
+                "<|im_start|>assistant\n"
+            } else {
+                ""
+            };
             assert_eq!(
-                render(template, "", "", &messages, true).unwrap(),
-                "<|im_start|>user\nHello<|im_end|>\n<|im_start|>assistant\n"
+                render("chatml", "<bos>", "<eos>", &messages, add_assistant).unwrap(),
+                format!("{chatml}{suffix}")
+            );
+            assert_eq!(
+                render_lfm("<|startoftext|>", &messages, add_assistant),
+                format!("<|startoftext|>{chatml}{suffix}")
+            );
+            let suffix = if add_assistant { "<|turn>model\n" } else { "" };
+            assert_eq!(
+                render_gemma("<bos>", &messages, add_assistant),
+                format!("{gemma}{suffix}")
+            );
+            let suffix = if add_assistant {
+                "<|im_start|>assistant\n<think>\n\n</think>\n\n"
+            } else {
+                ""
+            };
+            assert_eq!(
+                render_qwen(&messages, add_assistant).unwrap(),
+                format!("{chatml}{suffix}")
             );
         }
     }
 
-    const DEFAULT_TEMPLATES: &[Fixture] = &[
-        Fixture {
-            model_id: "lfm-vl-1.6b",
-            template: concat!(
-                "{{- bos_token -}}\n{%- set keep_past_thinking = keep_past_thinking | default(false) -%}\n{%- set ns = namespace(system_prompt=\"\") -%}\n{%- if messages[0][\"role\"] == \"system\" -%}\n    {%- set sys_content = ",
-                "messages[0][\"content\"] -%}\n    {%- if sys_content is not string -%}\n        {%- for item in sys_content -%}\n            {%- if item[\"type\"] == \"text\" -%}\n                {%- set ns.system_prompt = ns.system_prompt + ",
-                "item[\"text\"] -%}\n            {%- endif -%}\n        {%- endfor -%}\n    {%- else -%}\n        {%- set ns.system_prompt = sys_content -%}\n    {%- endif -%}\n    {%- set messages = messages[1:] -%}\n{%- endif -%}\n{%- if tools ",
-                "-%}\n    {%- set ns.system_prompt = ns.system_prompt + (\"\\n\" if ns.system_prompt else \"\") + \"List of tools: [\" -%}\n    {%- for tool in tools -%}\n        {%- if tool is not string -%}\n            {%- set tool = tool | ",
-                "tojson -%}\n        {%- endif -%}\n        {%- set ns.system_prompt = ns.system_prompt + tool -%}\n        {%- if not loop.last -%}\n            {%- set ns.system_prompt = ns.system_prompt + \", \" -%}\n        {%- endif -%}\n  ",
-                "  {%- endfor -%}\n    {%- set ns.system_prompt = ns.system_prompt + \"]\" -%}\n{%- endif -%}\n{%- if ns.system_prompt -%}\n    {{- \"<|im_start|>system\\n\" + ns.system_prompt + \"<|im_end|>\\n\" -}}\n{%- endif -%}\n{%- set ",
-                "ns.last_assistant_index = -1 -%}\n{%- for message in messages -%}\n    {%- if message[\"role\"] == \"assistant\" -%}\n        {%- set ns.last_assistant_index = loop.index0 -%}\n    {%- endif -%}\n{%- endfor -%}\n{%- for message ",
-                "in messages -%}\n    {{- \"<|im_start|>\" + message[\"role\"] + \"\\n\" -}}\n    {%- set content = message[\"content\"] -%}\n    {%- if content is not string -%}\n        {%- set ns.content = \"\" -%}\n        {%- for item in content ",
-                "-%}\n            {%- if item[\"type\"] == \"image\" -%}\n                {%- set ns.content = ns.content + \"<image>\" -%}\n            {%- elif item[\"type\"] == \"text\" -%}\n                {%- set ns.content = ns.content + ",
-                "item[\"text\"] -%}\n            {%- else -%}\n                {%- set ns.content = ns.content + item | tojson -%}\n            {%- endif -%}\n        {%- endfor -%}\n        {%- set content = ns.content -%}\n    {%- endif -%}\n  ",
-                "  {%- if message[\"role\"] == \"assistant\" and not keep_past_thinking and loop.index0 != ns.last_assistant_index -%}\n        {%- if \"</think>\" in content -%}\n            {%- set content = content.split(\"</think>\")[-1] | ",
-                "trim -%}\n        {%- endif -%}\n    {%- endif -%}\n    {{- content + \"<|im_end|>\\n\" -}}\n{%- endfor -%}\n{%- if add_generation_prompt -%}\n    {{- \"<|im_start|>assistant\\n\" -}}\n{%- endif -%}",
+    #[test]
+    fn lfm_and_qwen_preserve_their_thinking_history_rules() {
+        let messages = messages(&[
+            ("user", " First \n"),
+            ("assistant", "<think>private</think>\n  Answer  "),
+            ("user", "Next"),
+            ("assistant", "<think>recent</think>Visible"),
+            ("user", "Last"),
+        ]);
+        assert_eq!(
+            render_lfm("<|startoftext|>", &messages, false),
+            concat!(
+                "<|startoftext|><|im_start|>user\n First \n<|im_end|>\n",
+                "<|im_start|>assistant\nAnswer<|im_end|>\n",
+                "<|im_start|>user\nNext<|im_end|>\n",
+                "<|im_start|>assistant\n<think>recent</think>Visible<|im_end|>\n",
+                "<|im_start|>user\nLast<|im_end|>\n",
+            )
+        );
+        assert_eq!(
+            render_qwen(&messages, false).unwrap(),
+            concat!(
+                "<|im_start|>user\nFirst<|im_end|>\n",
+                "<|im_start|>assistant\n  Answer<|im_end|>\n",
+                "<|im_start|>user\nNext<|im_end|>\n",
+                "<|im_start|>assistant\nVisible<|im_end|>\n",
+                "<|im_start|>user\nLast<|im_end|>\n",
+            )
+        );
+    }
+
+    #[test]
+    fn qwen_preserves_thinking_after_the_last_query() {
+        let messages = messages(&[
+            ("user", "Hi"),
+            ("assistant", "<think> private </think>\n\n Answer "),
+        ]);
+        assert_eq!(
+            render_qwen(&messages, false).unwrap(),
+            concat!(
+                "<|im_start|>user\nHi<|im_end|>\n",
+                "<|im_start|>assistant\n<think>\nprivate\n</think>\n\n Answer<|im_end|>\n",
+            )
+        );
+    }
+
+    #[test]
+    fn gemma_removes_thinking_channels_and_merges_assistant_turns() {
+        let channels = messages(&[
+            ("user", "Hi"),
+            (
+                "assistant",
+                "before<|channel>thought\nhidden<channel|>after<|channel>thought\nsecret<channel|>end",
             ),
-            bos: "<|startoftext|>",
-            eos: "<|im_end|>",
-        },
-        Fixture {
-            model_id: "gemma-4-e2b-q4km",
-            template: concat!(
-                "{%- macro format_parameters(properties, required, filter_keys=false) -%}\n    {%- set standard_keys = ['description', 'type', 'properties', 'required', 'nullable'] -%}\n    {%- set ns = namespace(found_first=false) -%}\n   ",
-                " {%- for key, value in properties | dictsort -%}\n        {%- set add_comma = false -%}\n        {%- if not filter_keys or key not in standard_keys -%}\n            {%- if ns.found_first %},{% endif -%}\n            {%- set ",
-                "ns.found_first = true -%}\n            {{ key }}:{\n            {%- if value['description'] -%}\n                description:<|\"|>{{ value['description'] }}<|\"|>\n                {%- set add_comma = true -%}\n            {%- ",
-                "endif -%}\n            {%- if value['type'] | upper == 'STRING' -%}\n                {%- if value['enum'] -%}\n                    {%- if add_comma %},{%- else -%} {%- set add_comma = true -%} {% endif -%}\n                 ",
-                "   enum:{{ format_argument(value['enum']) }}\n                {%- endif -%}\n            {%- elif value['type'] | upper == 'ARRAY' -%}\n                {%- if value['items'] is mapping and value['items'] -%}\n               ",
-                "     {%- if add_comma %},{%- else -%} {%- set add_comma = true -%} {% endif -%}\n                    items:{\n                    {%- set ns_items = namespace(found_first=false) -%}\n                    {%- for item_key, ",
-                "item_value in value['items'] | dictsort -%}\n                        {%- if item_value is not none -%}\n                            {%- if ns_items.found_first %},{% endif -%}\n                            {%- set ",
-                "ns_items.found_first = true -%}\n                            {%- if item_key == 'properties' -%}\n                                properties:{\n                                {%- if item_value is mapping -%}\n              ",
-                "                      {{- format_parameters(item_value, value['items']['required'] | default([])) -}}\n                                {%- endif -%}\n                                }\n                            {%- elif ",
-                "item_key == 'required' -%}\n                                required:[\n                                {%- for req_item in item_value -%}\n                                    <|\"|>{{- req_item -}}<|\"|>\n                    ",
-                "                {%- if not loop.last %},{% endif -%}\n                                {%- endfor -%}\n                                ]\n                            {%- elif item_key == 'type' -%}\n                          ",
-                "      {%- if item_value is string -%}\n                                    type:{{ format_argument(item_value | upper) }}\n                                {%- else -%}\n                                    type:{{ ",
-                "format_argument(item_value | map('upper') | list) }}\n                                {%- endif -%}\n                            {%- else -%}\n                                {{ item_key }}:{{ format_argument(item_value) ",
-                "}}\n                            {%- endif -%}\n                        {%- endif -%}\n                    {%- endfor -%}\n                    }\n                {%- endif -%}\n            {%- endif -%}\n            {%- if ",
-                "value['nullable'] %}\n                {%- if add_comma %},{%- else -%} {%- set add_comma = true -%} {% endif -%}\n                nullable:true\n            {%- endif -%}\n            {%- if value['type'] | upper == ",
-                "'OBJECT' -%}\n                {%- if value['properties'] is defined and value['properties'] is mapping -%}\n                    {%- if add_comma %},{%- else -%} {%- set add_comma = true -%} {% endif -%}\n                   ",
-                " properties:{\n                    {{- format_parameters(value['properties'], value['required'] | default([])) -}}\n                    }\n                {%- elif value is mapping -%}\n                    {%- if add_comma ",
-                "%},{%- else -%} {%- set add_comma = true -%} {% endif -%}\n                    properties:{\n                    {{- format_parameters(value, value['required'] | default([]), filter_keys=true) -}}\n                    }\n   ",
-                "             {%- endif -%}\n                {%- if value['required'] -%}\n                    {%- if add_comma %},{%- else -%} {%- set add_comma = true -%} {% endif -%}\n                    required:[\n                    ",
-                "{%- for item in value['required'] | default([]) -%}\n                        <|\"|>{{- item -}}<|\"|>\n                        {%- if not loop.last %},{% endif -%}\n                    {%- endfor -%}\n                    ]\n   ",
-                "             {%- endif -%}\n            {%- endif -%}\n            {%- if add_comma %},{%- else -%} {%- set add_comma = true -%} {% endif -%}\n            type:<|\"|>{{ value['type'] | upper }}<|\"|>}\n        {%- endif -%}\n  ",
-                "  {%- endfor -%}\n{%- endmacro -%}\n{%- macro format_function_declaration(tool_data) -%}\n    declaration:{{- tool_data['function']['name'] -}}{description:<|\"|>{{- tool_data['function']['description'] -}}<|\"|>\n    {%- set ",
-                "params = tool_data['function']['parameters'] -%}\n    {%- if params -%}\n        ,parameters:{\n        {%- if params['properties'] -%}\n            properties:{ {{- format_parameters(params['properties'], ",
-                "params['required']) -}} },\n        {%- endif -%}\n        {%- if params['required'] -%}\n            required:[\n            {%- for item in params['required'] -%}\n                <|\"|>{{- item -}}<|\"|>\n                {{- ",
-                "',' if not loop.last -}}\n            {%- endfor -%}\n            ],\n        {%- endif -%}\n        {%- if params['type'] -%}\n            type:<|\"|>{{- params['type'] | upper -}}<|\"|>}\n        {%- endif -%}\n    {%- endif ",
-                "-%}\n    {%- if 'response' in tool_data['function'] -%}\n        {%- set response_declaration = tool_data['function']['response'] -%}\n        ,response:{\n        {%- if response_declaration['description'] -%}\n            ",
-                "description:<|\"|>{{- response_declaration['description'] -}}<|\"|>,\n        {%- endif -%}\n        {%- if response_declaration['type'] | upper == 'OBJECT' -%}\n            type:<|\"|>{{- response_declaration['type'] | upper ",
-                "-}}<|\"|>}\n        {%- endif -%}\n    {%- endif -%}\n    }\n{%- endmacro -%}\n{%- macro format_argument(argument, escape_keys=True) -%}\n    {%- if argument is none -%}\n        {{- 'null' -}}\n    {%- elif argument is string ",
-                "-%}\n        {{- '<|\"|>' + argument + '<|\"|>' -}}\n    {%- elif argument is boolean -%}\n        {{- 'true' if argument else 'false' -}}\n    {%- elif argument is mapping -%}\n        {{- '{' -}}\n        {%- set ns = ",
-                "namespace(found_first=false) -%}\n        {%- for key, value in argument | dictsort -%}\n            {%- if ns.found_first %},{% endif -%}\n            {%- set ns.found_first = true -%}\n            {%- if escape_keys -%}\n  ",
-                "              {{- '<|\"|>' + key + '<|\"|>' -}}\n            {%- else -%}\n                {{- key -}}\n            {%- endif -%}\n            :{{- format_argument(value, escape_keys=escape_keys) -}}\n        {%- endfor -%}\n   ",
-                "     {{- '}' -}}\n    {%- elif argument is sequence -%}\n        {{- '[' -}}\n        {%- for item in argument -%}\n            {{- format_argument(item, escape_keys=escape_keys) -}}\n            {%- if not loop.last %},{% ",
-                "endif -%}\n        {%- endfor -%}\n        {{- ']' -}}\n    {%- else -%}\n        {{- argument -}}\n    {%- endif -%}\n{%- endmacro -%}\n{%- macro strip_thinking(text) -%}\n    {%- set ns = namespace(result='') -%}\n    {%- for ",
-                "part in text.split('<channel|>') -%}\n        {%- if '<|channel>' in part -%}\n            {%- set ns.result = ns.result + part.split('<|channel>')[0] -%}\n        {%- else -%}\n            {%- set ns.result = ns.result + ",
-                "part -%}\n        {%- endif -%}\n    {%- endfor -%}\n    {{- ns.result | trim -}}\n{%- endmacro -%}\n\n{%- macro format_tool_response_block(tool_name, response) -%}\n    {{- '<|tool_response>' -}}\n    {%- if response is ",
-                "mapping -%}\n        {{- 'response:' + tool_name + '{' -}}\n        {%- for key, value in response | dictsort -%}\n            {{- key -}}:{{- format_argument(value, escape_keys=False) -}}\n            {%- if not loop.last ",
-                "%},{% endif -%}\n        {%- endfor -%}\n        {{- '}' -}}\n    {%- else -%}\n        {{- 'response:' + tool_name + '{value:' + format_argument(response, escape_keys=False) + '}' -}}\n    {%- endif -%}\n    {{- ",
-                "'<tool_response|>' -}}\n{%- endmacro -%}\n\n{#- ===== SETUP ===== -#}\n{%- set ns = namespace(prev_message_type=None, prev_non_tool_role=None) -%}\n{%- set loop_messages = messages -%}\n{%- set enable_thinking = ",
-                "enable_thinking | default(false) -%}\n{%- set preserve_thinking = preserve_thinking | default(false) -%}\n{{- bos_token -}}\n{#- Handle System/Tool Definitions Block -#}\n{%- if enable_thinking or tools or (messages and ",
-                "messages[0]['role'] in ['system', 'developer']) -%}\n    {{- '<|turn>system\\n' -}}\n    {#- Inject Thinking token at the very top of the FIRST system turn -#}\n    {%- if enable_thinking -%}\n        {{- '<|think|>\\n' -}}\n  ",
-                "      {%- set ns.prev_message_type = 'think' -%}\n    {%- endif -%}\n    {%- if messages and messages[0]['role'] in ['system', 'developer'] -%}\n        {%- if messages[0]['content'] is string -%}\n            {{- ",
-                "messages[0]['content'] | trim -}}\n        {%- elif messages[0]['content'] is sequence -%}\n            {%- for item in messages[0]['content'] -%}\n                {{- item['text'] | trim + ' '-}}\n            {%- endfor ",
-                "-%}\n        {%- endif -%}\n        {%- set loop_messages = messages[1:] -%}\n    {%- endif -%}\n    {%- if tools -%}\n        {%- for tool in tools %}\n            {{- '<|tool>' -}}\n            {{- ",
-                "format_function_declaration(tool) | trim -}}\n            {{- '<tool|>' -}}\n        {%- endfor %}\n        {%- set ns.prev_message_type = 'tool' -%}\n    {%- endif -%}\n    {{- '<turn|>\\n' -}}\n{%- endif %}\n\n{#- Pre-scan: ",
-                "find last user message index for reasoning guard -#}\n{%- set ns_turn = namespace(last_user_idx=-1) -%}\n{%- for i in range(loop_messages | length) -%}\n    {%- if loop_messages[i]['role'] == 'user' -%}\n        {%- set ",
-                "ns_turn.last_user_idx = i -%}\n    {%- endif -%}\n{%- endfor -%}\n\n{#- Loop through messages -#}\n{%- for message in loop_messages -%}\n    {%- if message['role'] != 'tool' -%}\n    {%- set ns.prev_message_type = None -%}\n    ",
-                "{%- set role = 'model' if message['role'] == 'assistant' else message['role'] -%}\n    {#- Detect continuation using tracked state — O(1) instead of O(n) backward scan -#}\n    {%- set continue_same_model_turn = (role == ",
-                "'model' and ns.prev_non_tool_role == 'assistant') -%}\n    {%- if not continue_same_model_turn -%}\n        {{- '<|turn>' + role + '\\n' }}\n    {%- endif -%}\n\n    {#- Render reasoning/reasoning_content as thinking channel ",
-                "-#}\n    {%- set thinking_text = message.get('reasoning') or message.get('reasoning_content') -%}\n    {%- set thinking_gate = (loop.index0 > ns_turn.last_user_idx) or (preserve_thinking and message.get('tool_calls')) -%}\n",
-                "    {%- if thinking_text and thinking_gate -%}\n        {{- '<|channel>thought\\n' + thinking_text + '\\n<channel|>' -}}\n    {%- endif -%}\n\n            {%- if message.get('tool_calls') -%}\n                {%- for tool_call ",
-                "in message.get('tool_calls') -%}\n                    {%- set function = tool_call['function'] -%}\n                    {{- '<|tool_call>call:' + function['name'] + '{' -}}\n                    {%- if function['arguments'] ",
-                "is mapping -%}\n                        {%- set ns_args = namespace(found_first=false) -%}\n                        {%- for key, value in function['arguments'] | dictsort -%}\n                            {%- if ",
-                "ns_args.found_first %},{% endif -%}\n                            {%- set ns_args.found_first = true -%}\n                            {{- key -}}:{{- format_argument(value, escape_keys=False) -}}\n                        ",
-                "{%- endfor -%}\n                    {%- elif function['arguments'] is none -%}\n                    {%- elif function['arguments'] is string -%}\n                        {#- Pre-serialized args (e.g. an OpenAI JSON ",
-                "string). We cannot JSON-parse\n                            portably in-template, so render non-fatally instead of erroring. Strip an\n                            outer {...} so it composes with the DSL braces rather than ",
-                "double-wrapping.\n                            Prefer passing arguments as a mapping for exact Gemma DSL. -#}\n                        {%- set argstr = function['arguments'] | trim -%}\n                        {%- if ",
-                "argstr[:1] == '{' and argstr[-1:] == '}' -%}\n                            {{- argstr[1:-1] -}}\n                        {%- else -%}\n                            {{- function['arguments'] -}}\n                        {%- ",
-                "endif -%}\n                    {%- endif -%}\n                    {{- '}<tool_call|>' -}}\n                {%- endfor -%}\n                {%- set ns.prev_message_type = 'tool_call' -%}\n            {%- endif -%}\n\n           ",
-                " {%- set ns_tr_out = namespace(flag=false) -%}\n            {%- if message.get('tool_responses') -%}\n                {#- Legacy: tool_responses embedded on the assistant message (Google/Gemma native) -#}\n                ",
-                "{%- for tool_response in message.get('tool_responses') -%}\n                    {{- format_tool_response_block(tool_response['name'] | default('unknown', true), tool_response['response']) -}}\n                    {%- set ",
-                "ns_tr_out.flag = true -%}\n                    {%- set ns.prev_message_type = 'tool_response' -%}\n                {%- endfor -%}\n            {%- elif message.get('tool_calls') -%}\n                {#- OpenAI Chat ",
-                "Completions: forward-scan consecutive role:tool messages -#}\n                {%- set ns_tool_scan = namespace(stopped=false) -%}\n                {%- for k in range(loop.index0 + 1, loop_messages | length) -%}\n           ",
-                "         {%- if ns_tool_scan.stopped -%}\n                    {%- elif loop_messages[k]['role'] != 'tool' -%}\n                        {%- set ns_tool_scan.stopped = true -%}\n                    {%- else -%}\n              ",
-                "          {%- set follow = loop_messages[k] -%}\n                        {#- Resolve tool_call_id to function name -#}\n                        {%- set ns_tname = namespace(name=follow.get('name') or 'unknown') -%}\n       ",
-                "                 {%- for tc in message.get('tool_calls') -%}\n                            {%- if tc.get('id') == follow.get('tool_call_id') -%}\n                                {%- set ns_tname.name = ",
-                "tc['function']['name'] -%}\n                            {%- endif -%}\n                        {%- endfor -%}\n                        {#- Handle content as string or content-parts array -#}\n                        {%- set ",
-                "tool_body = follow.get('content') -%}\n                        {%- if tool_body is string -%}\n                            {{- format_tool_response_block(ns_tname.name, tool_body) -}}\n                        {%- elif ",
-                "tool_body is sequence and tool_body is not string -%}\n                            {%- set ns_txt = namespace(s='') -%}\n                            {%- for part in tool_body -%}\n                                {%- if ",
-                "part.get('type') == 'text' -%}\n                                    {%- set ns_txt.s = ns_txt.s + (part.get('text') | default('')) -%}\n                                {%- endif -%}\n                            {%- endfor ",
-                "-%}\n                            {{- format_tool_response_block(ns_tname.name, ns_txt.s) -}}\n                            {%- for part in tool_body -%}\n                                {%- if part.get('type') in ['image', ",
-                "'image_url'] -%}\n                                    {{- '<|image|>' -}}\n                                {%- elif part.get('type') in ['audio', 'input_audio'] -%}\n                                    {{- '<|audio|>' -}}\n ",
-                "                               {%- elif part.get('type') == 'video' -%}\n                                    {{- '<|video|>' -}}\n                                {%- endif -%}\n                            {%- endfor -%}\n   ",
-                "                     {%- else -%}\n                            {{- format_tool_response_block(ns_tname.name, tool_body) -}}\n                        {%- endif -%}\n                        {%- set ns_tr_out.flag = true -%}\n ",
-                "                       {%- set ns.prev_message_type = 'tool_response' -%}\n                    {%- endif -%}\n                {%- endfor -%}\n            {%- endif -%}\n\n            {%- set captured_content -%}\n            ",
-                "{%- if message.get('content') is string -%}\n                {%- if role == 'model' -%}\n                    {{- strip_thinking(message['content']) -}}\n                {%- else -%}\n                    {{- ",
-                "message['content'] | trim -}}\n                {%- endif -%}\n            {%- elif message.get('content') is sequence -%}\n                {%- for item in message['content'] -%}\n                    {%- if item.get('type') ",
-                "== 'text' -%}\n                        {%- if role == 'model' -%}\n                            {{- strip_thinking(item['text']) -}}\n                        {%- else -%}\n                            {{- item['text'] | trim ",
-                "-}}\n                        {%- endif -%}\n                    {%- elif item.get('type') in ['image', 'image_url'] -%}\n                        {{- '<|image|>' -}}\n                    {%- elif item.get('type') in ",
-                "['audio', 'input_audio'] -%}\n                        {{- '<|audio|>' -}}\n                    {%- elif item.get('type') == 'video' -%}\n                        {{- '<|video|>' -}}\n                    {%- endif -%}\n        ",
-                "        {%- endfor -%}\n            {%- endif -%}\n            {%- endset -%}\n\n            {{- captured_content -}}\n            {%- set has_content = captured_content | trim | length > 0 -%}\n\n        {#- Forward-scan: ",
-                "find next non-tool message role for continuation detection -#}\n        {%- set next_nt = namespace(role=None, found=false) -%}\n        {%- for j in range(loop.index0 + 1, loop_messages | length) -%}\n            {%- if ",
-                "not next_nt.found -%}\n                {%- if loop_messages[j]['role'] != 'tool' -%}\n                    {%- set next_nt.role = loop_messages[j]['role'] -%}\n                    {%- set next_nt.found = true -%}\n           ",
-                "     {%- endif -%}\n            {%- endif -%}\n        {%- endfor -%}\n\n        {%- set continues_into_next = (\n            role == 'model'\n            and next_nt.role == 'assistant'\n            and (not ",
-                "message.get('tool_calls') or ns_tr_out.flag)\n        ) -%}\n\n        {%- if ns.prev_message_type == 'tool_call' and not ns_tr_out.flag -%}\n            {{- '<|tool_response>' -}}\n        {%- elif continues_into_next -%}\n  ",
-                "      {%- elif not (ns_tr_out.flag and not has_content and not next_nt.found) -%}\n            {{- '<turn|>\\n' -}}\n        {%- endif -%}\n\n    {#- Track previous non-tool role for next iteration (avoids O(n) backward ",
-                "scan) -#}\n    {%- set ns.prev_non_tool_role = message['role'] -%}\n    {%- endif -%}\n{%- endfor -%}\n\n{%- if add_generation_prompt -%}\n    {%- if ns.prev_message_type != 'tool_response' and ns.prev_message_type != ",
-                "'tool_call' -%}\n        {{- '<|turn>model\\n' -}}\n    {%- elif ns.prev_message_type == 'tool_response' and enable_thinking -%}\n        {{- '<|channel>thought\\n' -}}\n    {%- endif -%}\n{%- endif -%}\n",
-            ),
-            bos: "<bos>",
-            eos: "<turn|>",
-        },
-    ];
+            ("user", "Next"),
+            ("assistant", "<|channel>thought\nhidden"),
+        ]);
+        assert_eq!(
+            render_gemma("<bos>", &channels, false),
+            concat!(
+                "<bos><|turn>user\nHi<turn|>\n",
+                "<|turn>model\nbeforeafterend<turn|>\n",
+                "<|turn>user\nNext<turn|>\n",
+                "<|turn>model\n<turn|>\n",
+            )
+        );
+        let consecutive = messages(&[
+            ("user", "Hi"),
+            ("assistant", " First "),
+            ("assistant", " Second "),
+            ("assistant", " Third "),
+        ]);
+        assert_eq!(
+            render_gemma("<bos>", &consecutive, false),
+            "<bos><|turn>user\nHi<turn|>\n<|turn>model\nFirstSecondThird<turn|>\n"
+        );
+    }
+
+    #[test]
+    fn qwen_rejects_invalid_histories() {
+        for turns in [
+            vec![],
+            vec![("system", "Be concise.")],
+            vec![("user", "Hello"), ("system", "Late")],
+            vec![("user", "Hello"), ("unknown", "Invalid")],
+        ] {
+            assert!(render_qwen(&messages(&turns), true).is_err(), "{turns:?}");
+        }
+    }
+
+    #[test]
+    fn unknown_templates_fail_explicitly() {
+        for source in [
+            "{{ messages[0].content }}",
+            "qwen-new",
+            "{% if %}",
+            "chatml\n",
+        ] {
+            assert!(matches!(
+                Template::identify(source),
+                Err(Error::Unsupported(_))
+            ));
+        }
+        assert!(render("bad\0template", "", "", &[], true).is_err());
+        assert!(render("chatml", "bad\0bos", "", &[], true).is_err());
+        assert!(render("chatml", "", "bad\0eos", &[], true).is_err());
+        for source in ["", "chatml"] {
+            assert_eq!(
+                render(source, "", "", &[], true).unwrap(),
+                "<|im_start|>assistant\n"
+            );
+        }
+    }
+
+    #[test]
+    #[ignore = "requires ENSU_TEST_MODEL"]
+    fn named_templates_still_use_the_safe_llama_api() {
+        let model = LlamaModel::load_from_file(
+            crate::llm::backend().unwrap(),
+            std::env::var("ENSU_TEST_MODEL").unwrap(),
+            &llama_cpp_2::model::params::LlamaModelParams::default().with_n_gpu_layers(0),
+        )
+        .unwrap();
+        let messages = |content: &str| {
+            vec![ChatMessage {
+                role: "user".to_owned(),
+                content: content.to_owned(),
+            }]
+        };
+        assert_eq!(
+            build_chat_prompt(&model, messages("Hi"), Some("llama2".to_owned()), true).unwrap(),
+            "[INST] Hi [/INST]"
+        );
+        assert!(
+            build_chat_prompt(
+                &model,
+                messages("Hi\0there"),
+                Some("llama2".to_owned()),
+                true
+            )
+            .is_err()
+        );
+        assert!(
+            build_chat_prompt(
+                &model,
+                messages("Hi"),
+                Some("new-template".to_owned()),
+                true
+            )
+            .is_err()
+        );
+    }
 }

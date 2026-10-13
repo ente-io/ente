@@ -43,6 +43,7 @@ pub struct LlmModelLoadParams {
 pub struct LlmContextParams {
     pub context_size: Option<i32>,
     pub n_threads: Option<i32>,
+    pub n_threads_generation: Option<i32>,
     pub n_batch: Option<i32>,
 }
 
@@ -114,9 +115,15 @@ impl LlmModel {
         &self,
         chat_context_size: u32,
         n_threads: Option<i32>,
+        n_threads_generation: Option<i32>,
     ) -> Result<Arc<LlmContext>, LlmError> {
-        let handle = llm::Context::new_title(&self.handle, chat_context_size, n_threads)
-            .map_err(LlmError::from)?;
+        let handle = llm::Context::new_title(
+            &self.handle,
+            chat_context_size,
+            n_threads,
+            n_threads_generation,
+        )
+        .map_err(LlmError::from)?;
         Ok(Arc::new(LlmContext { handle }))
     }
 
@@ -255,6 +262,7 @@ impl From<LlmContextParams> for llm::ContextParams {
         Self {
             context_size: value.context_size,
             n_threads: value.n_threads,
+            n_threads_generation: value.n_threads_generation,
             n_batch: value.n_batch,
         }
     }

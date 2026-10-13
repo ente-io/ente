@@ -1,4 +1,3 @@
-mod chat_template_bridge;
 mod context;
 mod embed;
 mod event;

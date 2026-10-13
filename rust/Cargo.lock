@@ -2620,13 +2620,11 @@ dependencies = [
 name = "ente-ensu"
 version = "0.0.0"
 dependencies = [
- "cc",
  "ente-assets",
  "ente-core",
  "ente-ensu-crypto",
  "ente-image",
  "llama-cpp-2",
- "llama-cpp-sys-2",
  "ort",
  "ort-sys",
  "regex",

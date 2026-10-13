@@ -395,7 +395,8 @@ class LlmProvider(
             model
                 .newTitleContext(
                     chatContextSize = checkNotNull(currentContextLength).toUInt(),
-                    nThreads = generationThreads(),
+                    nThreads = max(1, Runtime.getRuntime().availableProcessors() - 1),
+                    nThreadsGeneration = generationThreads(),
                 )
                 .use { context ->
                     coroutine.ensureActive()
@@ -569,7 +570,8 @@ class LlmProvider(
                 val contextParams =
                     LlmContextParams(
                         contextSize = currentContextLength,
-                        nThreads = generationThreads(),
+                        nThreads = null,
+                        nThreadsGeneration = generationThreads(),
                         nBatch = LlmModelSelection(key.id, key.requestedContextLength).batchSize,
                     )
                 loadedContext?.destroy()
@@ -684,7 +686,7 @@ class LlmProvider(
 
     private fun loadWithFallbacks(selection: LlmModelSelection, modelFile: File) {
         val contexts = selection.contextCandidates()
-        val threads = generationThreads()
+        val threads = max(1, Runtime.getRuntime().availableProcessors() - 1)
         val batch = selection.batchSize
 
         val modelParams =
@@ -705,6 +707,7 @@ class LlmProvider(
                     LlmContextParams(
                         contextSize = ctx,
                         nThreads = threads,
+                        nThreadsGeneration = generationThreads(),
                         nBatch = batch,
                     )
                 loadedContext = model.newContext(contextParams)

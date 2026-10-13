@@ -31,6 +31,7 @@ fn context() -> llm::ContextRef {
         ContextParams {
             context_size: Some(512),
             n_threads: Some(4),
+            n_threads_generation: None,
             n_batch: Some(256),
         },
     )
@@ -130,6 +131,7 @@ fn concurrent_generations_preserve_output_and_can_drop_caller_model() {
         ContextParams {
             context_size: Some(512),
             n_threads: Some(4),
+            n_threads_generation: None,
             n_batch: Some(256),
         },
     )
@@ -238,6 +240,7 @@ fn default_model_reuses_multi_turn_cache_and_reloads() {
     let params = ContextParams {
         context_size: Some(512),
         n_threads: Some(4),
+        n_threads_generation: None,
         n_batch: Some(256),
     };
     let warm = Context::new(&owner, params.clone()).unwrap();
@@ -271,6 +274,7 @@ fn default_model_handles_wide_and_tall_images_and_projector_reloads() {
         ContextParams {
             context_size: Some(4096),
             n_threads: Some(4),
+            n_threads_generation: None,
             n_batch: Some(256),
         },
     )
