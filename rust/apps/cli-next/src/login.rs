@@ -167,7 +167,7 @@ struct Credentials {
 
 impl Credentials {
     fn read(path: &Path) -> Result<Self> {
-        parse_json(&read_input(path)?)
+        parse_json(&read_input(path, u64::MAX)?)
             .context("login input must contain email and password, with optional otp and totp")
     }
 

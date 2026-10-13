@@ -277,15 +277,17 @@ fn output_account(state: State, index: usize, json_output: bool) -> Result<()> {
     }
 }
 
-fn read_input(path: &Path) -> Result<Zeroizing<Vec<u8>>> {
+fn read_input(path: &Path, limit: u64) -> Result<Zeroizing<Vec<u8>>> {
     let mut bytes = Zeroizing::new(Vec::new());
     if path == Path::new("-") {
         std::io::stdin()
+            .take(limit)
             .read_to_end(&mut bytes)
             .context("cannot read stdin")?;
     } else {
         std::fs::File::open(path)
             .with_context(|| format!("cannot open {}", path.display()))?
+            .take(limit)
             .read_to_end(&mut bytes)
             .with_context(|| format!("cannot read {}", path.display()))?;
     }

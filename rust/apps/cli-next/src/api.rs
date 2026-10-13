@@ -119,8 +119,8 @@ pub async fn run(app: App, args: ApiArgs, selected: Option<&str>, options: &Opti
     }
     let mut headers = HeaderMap::new();
     if let Some(path) = args.headers {
-        let values: BTreeMap<String, String> =
-            parse_json(&read_input(&path)?).context("headers must be a JSON object of strings")?;
+        let values: BTreeMap<String, String> = parse_json(&read_input(&path, u64::MAX)?)
+            .context("headers must be a JSON object of strings")?;
         for (name, value) in values {
             let mut value = HeaderValue::from_str(&Zeroizing::new(value))?;
             value.set_sensitive(true);
@@ -148,7 +148,7 @@ pub async fn run(app: App, args: ApiArgs, selected: Option<&str>, options: &Opti
     let method = Method::from_bytes(args.method.to_ascii_uppercase().as_bytes())?;
     let mut request = http()?.request(method, url).headers(headers);
     if let Some(path) = args.body {
-        request = request.body(read_input(&path)?.to_vec());
+        request = request.body(read_input(&path, u64::MAX)?.to_vec());
     }
     let mut response = request.send().await.map_err(ente_core::http::Error::from)?;
     let status = response.status();

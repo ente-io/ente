@@ -32,10 +32,13 @@ pub async fn run(command: PasteCommand, options: &Options) -> Result<()> {
                         input.is_some() || !std::io::stdin().is_terminal(),
                         "provide TEXT, --input PATH|-, or piped stdin"
                     );
-                    String::from_utf8(
-                        read_input(input.as_deref().unwrap_or(Path::new("-")))?.to_vec(),
-                    )
-                    .context("paste input must be UTF-8")?
+                    let max_bytes = ente_paste::MAX_PASTE_CHARS * 4;
+                    let bytes = read_input(
+                        input.as_deref().unwrap_or(Path::new("-")),
+                        (max_bytes + 1) as u64,
+                    )?;
+                    ensure!(bytes.len() <= max_bytes, ente_paste::Error::TextTooLong);
+                    String::from_utf8(bytes.to_vec()).context("paste input must be UTF-8")?
                 }
             });
             ente_paste::validate_text(&text)?;
