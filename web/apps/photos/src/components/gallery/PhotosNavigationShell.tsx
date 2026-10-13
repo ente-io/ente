@@ -8,29 +8,17 @@ import {
     UserGroupIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-    Box,
-    Stack,
-    SvgIcon,
-    Tooltip,
-    useMediaQuery,
-    useTheme,
-} from "@mui/material";
+import { Box, Stack, SvgIcon, Tooltip } from "@mui/material";
 import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
-import { useModalVisibility } from "ente-base/components/utils/modal";
 import { ut } from "ente-base/i18n";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import { t } from "i18next";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
-import {
-    AlbumsNavigationSidebar,
-    type AlbumsNavigationSidebarProps,
-} from "./AlbumsNavigationSidebar";
 import type { GalleryBarMode } from "./reducer";
 
 type PhotosNavigationShellProps = SearchBarProps & {
@@ -47,44 +35,17 @@ export const PhotosNavigationShell: React.FC<
             showRail: boolean;
             showNormalNavigation: boolean;
             alternateHeader: ReactNode;
-            albumNavigation:
-                | Omit<
-                      AlbumsNavigationSidebarProps,
-                      "mode" | "collapsed" | "mobileDrawerProps"
-                  >
-                | undefined;
         }
     >
 > = ({
     showRail,
     showNormalNavigation,
     alternateHeader,
-    albumNavigation,
     children,
     ...props
 }) => {
     const [railOpen, setRailOpen] = useState(true);
     const toggleRail = () => setRailOpen((open) => !open);
-    const mobile = useMediaQuery(useTheme().breakpoints.down("md"));
-    const { show: showMobileNavigation, props: mobileDrawerProps } =
-        useModalVisibility();
-    const { onClose: closeMobileNavigation } = mobileDrawerProps;
-    useEffect(() => {
-        if (!mobile) closeMobileNavigation();
-    }, [mobile, closeMobileNavigation]);
-    const railMode = mobile && props.mode != "people" ? "albums" : props.mode;
-    const handleChangeMode = (mode: GalleryBarMode) => {
-        if (
-            mode == "people" ||
-            !mobile ||
-            railMode != mode ||
-            props.isInSearchMode ||
-            !albumNavigation
-        )
-            props.onChangeMode(mode);
-        if (mobile && mode == "albums") showMobileNavigation();
-        else closeMobileNavigation();
-    };
     return (
         <Stack
             sx={(theme) => ({
@@ -148,51 +109,28 @@ export const PhotosNavigationShell: React.FC<
                         }}
                     >
                         {showNormalNavigation && (
-                            <NormalNavigationRail
-                                {...props}
-                                mode={railMode}
-                                onChangeMode={handleChangeMode}
-                                opensDialog={mobile}
-                            />
+                            <NormalNavigationRail {...props} />
                         )}
                     </Box>
                 )}
                 <Stack
-                    sx={{
+                    sx={(theme) => ({
                         flex: 1,
                         minWidth: 0,
                         minHeight: 0,
-                        flexDirection: { xs: "column", md: "row" },
-                    }}
-                >
-                    {albumNavigation && props.mode != "people" && (
-                        <AlbumsNavigationSidebar
-                            {...albumNavigation}
-                            mode={props.mode}
-                            collapsed={showRail && !railOpen}
-                            mobileDrawerProps={mobileDrawerProps}
-                        />
-                    )}
-                    <Stack
-                        sx={(theme) => ({
-                            flex: 1,
-                            minWidth: 0,
-                            minHeight: 0,
-                            pt: showRail ? { xs: 0, sm: "36px" } : 0,
-                            ...(showRail && {
-                                "--mui-palette-background-default": "#FFFFFF",
-                                bgcolor: "background.default",
-                                borderRadius: "20px",
-                                overflow: "hidden",
-                                ...theme.applyStyles("dark", {
-                                    "--mui-palette-background-default":
-                                        "#212121",
-                                }),
+                        pt: showRail ? { xs: 0, sm: "36px" } : 0,
+                        ...(showRail && {
+                            "--mui-palette-background-default": "#FFFFFF",
+                            bgcolor: "background.default",
+                            borderRadius: "20px",
+                            overflow: "hidden",
+                            ...theme.applyStyles("dark", {
+                                "--mui-palette-background-default": "#212121",
                             }),
-                        })}
-                    >
-                        {children}
-                    </Stack>
+                        }),
+                    })}
+                >
+                    {children}
                 </Stack>
             </Stack>
         </Stack>
@@ -263,8 +201,8 @@ const NormalHeaderContents: React.FC<
 };
 
 const NormalNavigationRail: React.FC<
-    Omit<PhotosNavigationShellProps, "onUpload"> & { opensDialog: boolean }
-> = ({ onSidebar, onHome, mode, onChangeMode, opensDialog, ...props }) => (
+    Omit<PhotosNavigationShellProps, "onUpload">
+> = ({ onSidebar, onHome, mode, onChangeMode, ...props }) => (
     <>
         <HomeButton onClick={onHome} />
         {(["albums", "people"] as const).map((item) =>
@@ -274,11 +212,6 @@ const NormalNavigationRail: React.FC<
                         color="secondary"
                         aria-label={t(item)}
                         aria-pressed={!props.isInSearchMode && mode == item}
-                        aria-haspopup={
-                            opensDialog && item == "albums"
-                                ? "dialog"
-                                : undefined
-                        }
                         onClick={() => onChangeMode(item)}
                         sx={{
                             minWidth: 0,

@@ -1995,19 +1995,6 @@ const Page: React.FC = () => {
                     dispatch({ type: "showPeople" });
                 }}
                 onSelectPerson={handleSelectPerson}
-                albumNavigation={
-                    isCleanupViewOpen || barMode == "people"
-                        ? undefined
-                        : {
-                              shouldHide: isInSearchMode,
-                              collectionSummaries: barCollectionSummaries,
-                              activeCollectionID,
-                              onSelectCollectionID:
-                                  handleShowCollectionSummaryWithID,
-                              canCreateAlbum: !isInArchiveSection,
-                              onRemotePull: remotePull,
-                          }
-                }
                 alternateHeader={
                     showSelectionBar ? (
                         <SelectedFileOptions

@@ -247,29 +247,28 @@ export const GalleryBarAndListHeader: React.FC<
 
     return (
         <>
-            {mode == "people" && (
-                <GalleryBarImpl
-                    {...{
-                        mode,
-                        activeCollectionID,
-                        people: sortedPeople,
-                        activePerson,
-                        onSelectPerson,
-                        collectionsSortBy,
-                        peopleSortBy,
-                    }}
-                    onSelectCollectionID={setActiveCollectionID}
-                    onChangeCollectionsSortBy={setCollectionsSortBy}
-                    onChangePeopleSortBy={setPeopleSortBy}
-                    onShowAllAlbums={showAllAlbums}
-                    onShowAllPeople={showAllPeople}
-                    collectionSummaries={sortedCollectionSummaries.filter(
-                        (cs) =>
-                            !cs.attributes.has("hideFromCollectionBar") &&
-                            !cs.attributes.has("quickLink"),
-                    )}
-                />
-            )}
+            <GalleryBarImpl
+                {...{
+                    mode,
+                    activeCollectionID,
+                    people: sortedPeople,
+                    activePerson,
+                    onSelectPerson,
+                    collectionsSortBy,
+                    peopleSortBy,
+                }}
+                onSelectCollectionID={setActiveCollectionID}
+                onChangeCollectionsSortBy={setCollectionsSortBy}
+                onChangePeopleSortBy={setPeopleSortBy}
+                onShowAllAlbums={showAllAlbums}
+                onShowAllPeople={showAllPeople}
+                collectionSummaries={sortedCollectionSummaries.filter(
+                    (cs) =>
+                        !cs.attributes.has("hideFromCollectionBar") &&
+                        !cs.attributes.has("quickLink") &&
+                        (mode != "albums" || !cs.attributes.has("archived")),
+                )}
+            />
 
             <AllAlbums
                 {...allAlbumsVisibilityProps}
