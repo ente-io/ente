@@ -33,6 +33,7 @@ class PersonFaceWidget extends StatefulWidget {
   final bool useFullFile;
   final VoidCallback? onErrorCallback;
   final bool keepAlive;
+  final Object? retryKey;
 
   // Physical pixels; null or non-positive decodes at full resolution.
   final int? cachedPixelWidth;
@@ -44,6 +45,7 @@ class PersonFaceWidget extends StatefulWidget {
     this.onErrorCallback,
     this.keepAlive = false,
     this.cachedPixelWidth,
+    this.retryKey,
     super.key,
   }) : assert(
          personId != null || clusterID != null,
@@ -60,6 +62,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   int? _faceCropFileId;
   AvatarIdentity? _personIdentity;
   bool _showingFallback = false;
+  bool _faceCropFailed = false;
   bool _fallbackEverUsed = false;
   bool _personHasContactLink = false;
   int? _linkedContactUserId;
@@ -97,6 +100,10 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       _personHasContactLink = false;
       _linkedContactUserId = null;
       _personIdentity = null;
+      faceCropFuture = _startFaceCropLoad();
+    } else if (_faceCropFailed &&
+        widget.retryKey != null &&
+        oldWidget.retryKey != widget.retryKey) {
       faceCropFuture = _startFaceCropLoad();
     }
   }
@@ -206,9 +213,17 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     );
   }
 
-  Future<Uint8List?> _startFaceCropLoad() {
+  Future<Uint8List?> _startFaceCropLoad() async {
+    _faceCropFailed = false;
     final generation = ++_loadGeneration;
-    return _loadFaceCrop(generation);
+    try {
+      final crop = await _loadFaceCrop(generation);
+      if (_isCurrentLoad(generation)) _faceCropFailed = crop == null;
+      return crop;
+    } catch (_) {
+      if (_isCurrentLoad(generation)) _faceCropFailed = true;
+      rethrow;
+    }
   }
 
   Future<Uint8List?> _loadFaceCrop(int generation) async {

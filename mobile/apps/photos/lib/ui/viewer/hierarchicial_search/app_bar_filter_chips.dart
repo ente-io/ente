@@ -33,7 +33,8 @@ class AppBarFilterChips extends StatefulWidget {
 }
 
 class _AppBarFilterChipsState extends State<AppBarFilterChips> {
-  final _filterChipKeys = <HierarchicalSearchFilter, GlobalKey>{};
+  var _filterChipKeys = <HierarchicalSearchFilter, GlobalKey>{};
+  List<HierarchicalSearchFilter> _previousRecommendations = const [];
   SearchFilterDataProvider? _searchFilterDataProvider;
   HierarchicalSearchFilter? _filterToRevealAfterApply;
 
@@ -89,6 +90,23 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
     final recommendations = getRecommendedFiltersForAppBar(
       searchFilterDataProvider,
     );
+    final oldKeys = _filterChipKeys;
+    _filterChipKeys = {
+      for (final filter in [...appliedFilters, ...recommendations])
+        filter:
+            oldKeys.remove(filter) ??
+            oldKeys.remove(
+              _previousRecommendations
+                  .where(
+                    (previous) =>
+                        oldKeys.containsKey(previous) &&
+                        filter.isSameFilter(previous),
+                  )
+                  .firstOrNull,
+            ) ??
+            GlobalKey(),
+    };
+    _previousRecommendations = recommendations;
     final hasFilters = appliedFilters.isNotEmpty || recommendations.isNotEmpty;
     if (!hasFilters && !widget.animateRecommendations) {
       return const SizedBox.shrink();
@@ -168,19 +186,14 @@ class _AppBarFilterChipsState extends State<AppBarFilterChips> {
   }
 
   Widget _buildFilterChip(HierarchicalSearchFilter filter) {
-    final chipKey = _keyForFilter(filter);
     return KeyedSubtree(
-      key: chipKey,
+      key: _filterChipKeys[filter]!,
       child: HierarchicalFilterChip(
         filter: filter,
         apply: () => _applyFilter(filter),
         remove: () => _removeFilter(filter),
       ),
     );
-  }
-
-  GlobalKey _keyForFilter(HierarchicalSearchFilter filter) {
-    return _filterChipKeys[filter] ??= GlobalKey();
   }
 
   void _applyFilter(HierarchicalSearchFilter filter) {

@@ -85,6 +85,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   }) {
     assert(cover == null || collection != null);
     return GalleryAppBarConfig(
+      extendBodyForCollapse: cover != null && bottom == null,
       sliverBuilder: (_) => GalleryAppBarWidget._(
         type,
         title,
