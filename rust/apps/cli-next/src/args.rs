@@ -9,12 +9,12 @@ use serde::{Deserialize, Serialize};
     about = "Use Ente from the command line",
     override_usage = "ente-cli-next [OPTIONS] <COMMAND>",
     after_help = "Photos:
-  ente-cli-next photos login
+  ente-cli-next account login --app photos
   ente-cli-next photos album list
   ente-cli-next photos file list --album <ID>
   ente-cli-next photos export <DIR>
 Auth backups:
-  ente-cli-next auth login
+  ente-cli-next account login --app auth
   ente-cli-next auth export <DIR>"
 )]
 pub struct Cli {
@@ -86,7 +86,7 @@ pub enum Command {
         #[command(flatten)]
         selector: AccountSelector,
         #[command(subcommand)]
-        command: AppCommand,
+        command: LockerCommand,
     },
     #[command(about = "Manage Ente Auth")]
     Auth {
@@ -116,8 +116,8 @@ Keep the same home and key across unattended invocations."
 
 #[derive(Subcommand)]
 pub enum AuthCommand {
-    #[command(flatten)]
-    App(AppCommand),
+    #[command(about = "Make an authenticated API request", after_help = API_HELP)]
+    Api(ApiArgs),
     #[command(about = "Export your Auth codes; encrypted by default")]
     #[command(
         after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
@@ -164,14 +164,8 @@ pub struct AuthExportArgs {
 
 #[derive(Subcommand)]
 pub enum PhotosCommand {
-    #[command(flatten)]
-    App(AppCommand),
-    #[command(flatten)]
-    Library(PhotosLibraryCommand),
-}
-
-#[derive(Subcommand)]
-pub enum PhotosLibraryCommand {
+    #[command(about = "Make an authenticated API request", after_help = API_HELP)]
+    Api(ApiArgs),
     #[command(about = "Maintain an independent copy of your Photos library")]
     #[command(
         after_long_help = "Refreshes metadata and downloads originals to DESTINATION; requires network access.
@@ -225,46 +219,30 @@ pub struct PhotosExportArgs {
 }
 
 #[derive(Subcommand)]
-pub enum AppCommand {
-    #[command(
-        about = "Log in",
-        after_help = "Non-interactive login reads JSON from --input:
-  {\"email\": \"...\", \"password\": \"...\", \"otp\": \"123456\", \"totp\": \"654321\"}
-
-All fields are strings. otp is the email code; totp is the authenticator code. Supply them when required.
-With --no-input, supply email and password through --input PATH or --input -.
-For unattended vault access, set ENTE_CLI_VAULT_KEY (see vault --help)."
-    )]
-    Login(LoginArgs),
-    #[command(about = "Log out")]
-    Logout,
-    #[command(
-        about = "Make an authenticated API request",
-        after_help = "The response body is written unchanged, including when --json is set."
-    )]
+pub enum LockerCommand {
+    #[command(about = "Make an authenticated API request", after_help = API_HELP)]
     Api(ApiArgs),
 }
 
 #[derive(Args)]
 pub struct LoginArgs {
+    #[arg(help = "Local account name; creates an entry if it does not exist")]
+    pub name: Option<String>,
+    #[arg(long, value_enum, help = "App to log in to")]
+    pub app: App,
     #[arg(
         long,
-        conflicts_with = "account",
-        help = "Ente server to log in to; defaults to api.ente.com"
+        help = "Ente server; defaults to the saved account's server or api.ente.com"
     )]
     pub host: Option<String>,
-    #[arg(
-        long,
-        conflicts_with = "account",
-        help = "Name for a new account on this device; defaults to the account's email"
-    )]
-    pub name: Option<String>,
     #[arg(
         long,
         help = "Read login credentials as JSON from this file, or from stdin with -"
     )]
     pub input: Option<PathBuf>,
 }
+
+const API_HELP: &str = "The response body is written unchanged, including when --json is set.";
 
 #[derive(Args)]
 pub struct ApiArgs {
@@ -344,19 +322,35 @@ Fields: id, name, email, host (strings); apps (string array); selected (boolean)
 
 #[derive(Subcommand)]
 pub enum AccountCommand {
+    #[command(
+        about = "Log an account into an app",
+        after_long_help = "An existing name requires matching credentials; a new name creates a local entry.
+Omit NAME to use the selected account, or the only saved account.
+With no saved accounts, creates an entry named after the authenticated email.
+With several accounts and none selected, supply NAME or use account switch.
+A new entry becomes selected; logging into an existing entry keeps the selection.
+
+Non-interactive login reads JSON from --input:
+  {\"email\": \"...\", \"password\": \"...\", \"otp\": \"123456\", \"totp\": \"654321\"}
+
+All fields are strings. otp is the email code; totp is the authenticator code. Supply them when required.
+With --no-input, supply email and password through --input PATH or --input -.
+For unattended vault access, set ENTE_CLI_VAULT_KEY (see vault --help)."
+    )]
+    Login(LoginArgs),
     #[command(about = "List accounts on this device")]
     #[command(after_long_help = ACCOUNT_HELP)]
     List,
     #[command(about = "Show an account")]
     #[command(after_long_help = ACCOUNT_HELP)]
     View {
-        #[arg(help = "Account name")]
-        name: String,
+        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        name: Option<String>,
     },
     #[command(about = "Print the saved API token for an account")]
     #[command(
-        after_long_help = "Uses --account NAME, otherwise the selected account, otherwise the only saved account.
-With several accounts and none selected, use --account NAME or account switch.
+        after_long_help = "Uses NAME, otherwise the selected account, otherwise the only saved account.
+With several accounts and none selected, supply NAME or use account switch.
 --app is required and selects that account's saved login.
 Reads the saved token from the local vault without contacting the server or refreshing it.
 This prints a secret and does not check whether the server still accepts it.
@@ -364,8 +358,8 @@ Plain output is padded URL-safe Base64 followed by a newline.
 With --json, returns {\"token\":\"...\"}."
     )]
     Token {
-        #[command(flatten)]
-        selector: AccountSelector,
+        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        name: Option<String>,
         #[arg(long, value_enum, help = "App whose token to print")]
         app: App,
     },
@@ -376,17 +370,29 @@ With --json, returns {\"token\":\"...\"}."
     },
     #[command(about = "Change an account's local name")]
     Rename {
-        #[arg(help = "Account name")]
+        #[arg(value_name = "OLD_NAME", help = "Current local name")]
         name: String,
-        #[arg(help = "New local name")]
+        #[arg(value_name = "NEW_NAME", help = "New local name")]
         new_name: String,
     },
-    #[command(about = "Log out of every app and remove the account from this device")]
+    #[command(
+        about = "Log out of an app, or every app when --app is omitted",
+        after_long_help = "Removes the local account and its cached data after its last app login is removed.
+Without --app, logs out of all this account's saved app logins on this device.
+--local removes the account and its cached data without contacting the server."
+    )]
     Logout {
-        #[arg(help = "Account name")]
-        name: String,
+        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        name: Option<String>,
         #[arg(
             long,
+            value_enum,
+            help = "App to log out of; defaults to every saved app"
+        )]
+        app: Option<App>,
+        #[arg(
+            long,
+            conflicts_with = "app",
             help = "Forget the account on this device without logging out on the server"
         )]
         local: bool,

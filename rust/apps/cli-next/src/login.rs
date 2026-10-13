@@ -14,28 +14,14 @@ use zeroize::{ZeroizeOnDrop, Zeroizing};
 
 use crate::{
     api,
-    args::{App, LoginArgs, Options},
+    args::{LoginArgs, Options},
     parse_json, read_input,
     vault::{Account, AccountKeys, DbKey, State, StoredSession, Vault},
 };
 
-pub async fn login(
-    app: App,
-    args: LoginArgs,
-    selected: Option<&str>,
-    options: &Options,
-) -> Result<(State, usize)> {
-    enum Target<'a> {
-        Existing(&'a str),
-        New(String),
-    }
-
-    let target = match selected {
-        Some(name) => Target::Existing(name),
-        None => Target::New(normalize_host(
-            args.host.as_deref().unwrap_or(DEFAULT_API_ORIGIN),
-        )?),
-    };
+pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)> {
+    let app = args.app;
+    let host = args.host.as_deref().map(normalize_host).transpose()?;
     let credentials = args.input.as_deref().map(Credentials::read).transpose()?;
     let interactive = credentials.is_none() && options.can_prompt();
     ensure!(
@@ -43,17 +29,33 @@ pub async fn login(
         "login requires email and password; supply --input <file> or --input -"
     );
     let vault = Vault::open()?;
-    if let Some(name) = args.name.as_deref() {
-        vault.state.check_name(name)?;
-    }
-    let (expected, origin) = match target {
-        Target::Existing(name) => {
-            let account = &vault.state.accounts[vault.state.named(name)?];
-            (Some(account.storage_id), account.origin.clone())
-        }
-        Target::New(origin) => (None, origin),
+    let index = if let Some(name) = args.name.as_deref() {
+        vault
+            .state
+            .accounts
+            .iter()
+            .position(|account| account.name == name)
+    } else if vault.state.accounts.is_empty() {
+        None
+    } else {
+        Some(vault.state.resolve(None)?)
     };
-    let (snapshot, access) = vault.release();
+    let (expected, origin) = if let Some(index) = index {
+        let account = &vault.state.accounts[index];
+        ensure!(
+            host.as_ref().is_none_or(|host| *host == account.origin),
+            "account {:?} uses {}; supply a new account name to log in to another server",
+            account.name,
+            account.origin,
+        );
+        (Some(account.storage_id), account.origin.clone())
+    } else {
+        if let Some(name) = args.name.as_deref() {
+            vault.state.check_name(name)?;
+        }
+        (None, host.unwrap_or_else(|| DEFAULT_API_ORIGIN.to_owned()))
+    };
+    let access = vault.release();
     let mut config = ApiConfig::new(origin.clone());
     config.user_agent = Some(api::USER_AGENT.into());
     Api::new(Http::new()?, config)
@@ -70,35 +72,9 @@ pub async fn login(
         &authenticated.secrets.token,
     )));
 
-    let supplied_name = args.name.is_some();
-    let requested_name = args.name;
     let mut previous_session = None;
     let result = async {
         let email = client.email().await?;
-        let snapshot_existing = snapshot.accounts.iter().position(|account| {
-            account.origin == origin && account.user_id == authenticated.user_id
-        });
-        if let Some(expected) = expected {
-            ensure!(
-                snapshot_existing
-                    .is_some_and(|index| snapshot.accounts[index].storage_id == expected),
-                "authenticated identity does not match --account"
-            );
-        }
-        let mut new_name = requested_name.unwrap_or_else(|| email.clone());
-        if snapshot_existing.is_none() {
-            while let Err(error) = snapshot.check_name(&new_name) {
-                if !interactive {
-                    return Err(error.context("supply a different local account name with --name"));
-                }
-                eprintln!("{error}");
-                new_name = Input::new()
-                    .with_prompt("Local account name")
-                    .interact_on(&Term::stderr())?;
-            }
-        }
-        drop(snapshot);
-
         let mut vault = access.open()?;
         let existing = vault
             .state
@@ -114,7 +90,7 @@ pub async fn login(
                 .context("selected account was removed during login")?;
             ensure!(
                 existing == Some(current),
-                "authenticated identity does not match --account"
+                "authenticated identity does not match the saved account"
             );
         }
         let recovery_key = Zeroizing::new(
@@ -133,7 +109,7 @@ pub async fn login(
         };
         let index = if let Some(index) = existing {
             ensure!(
-                !supplied_name,
+                expected.is_some() || args.name.is_none(),
                 "account already exists; use account rename to change its local name"
             );
             let account = &mut vault.state.accounts[index];
@@ -142,6 +118,7 @@ pub async fn login(
             previous_session = account.sessions.insert(app, session);
             index
         } else {
+            let new_name = args.name.unwrap_or_else(|| email.clone());
             vault.state.check_name(&new_name)?;
             let index = vault.state.accounts.len();
             vault.state.accounts.push(Account {
@@ -154,11 +131,9 @@ pub async fn login(
                 identity,
                 sessions: BTreeMap::from([(app, session)]),
             });
+            vault.state.selected = Some(vault.state.accounts[index].storage_id);
             index
         };
-        if expected.is_none() {
-            vault.state.selected = Some(vault.state.accounts[index].storage_id);
-        }
         vault.save()?;
         Ok((vault.into_state(), index))
     }

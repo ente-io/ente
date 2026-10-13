@@ -16,9 +16,9 @@ use url::Url;
 use zeroize::Zeroizing;
 
 use crate::{
-    args::{ApiArgs, App},
+    args::{ApiArgs, App, Options},
     parse_json, read_input,
-    vault::Account,
+    vault::{Account, State},
 };
 
 pub(crate) const USER_AGENT: &str = concat!("ente-cli-next/", env!("CARGO_PKG_VERSION"));
@@ -65,7 +65,10 @@ pub fn session(account: &Account, app: App) -> Result<Session> {
     .map_err(Into::into)
 }
 
-pub async fn raw(account: &Account, app: App, args: ApiArgs) -> Result<()> {
+pub async fn run(app: App, args: ApiArgs, selected: Option<&str>, options: &Options) -> Result<()> {
+    ensure!(!options.offline, "this command requires network access");
+    let state = State::load()?;
+    let account = &state.accounts[state.resolve(selected)?];
     ensure!(
         !(args.headers.as_deref() == Some(Path::new("-"))
             && args.body.as_deref() == Some(Path::new("-"))),
