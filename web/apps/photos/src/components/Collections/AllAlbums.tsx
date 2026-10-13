@@ -92,6 +92,7 @@ interface AllAlbums {
     collectionsSortBy: CollectionsSortBy;
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     isInHiddenSection: boolean;
+    isInArchiveSection: boolean;
     canCreateAlbum: boolean;
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
 }
@@ -104,12 +105,14 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     collectionsSortBy,
     onChangeCollectionsSortBy,
     isInHiddenSection,
+    isInArchiveSection,
     canCreateAlbum,
     onRemotePull,
 }) => {
     const fullScreen = useMediaQuery(collectionDialogFullScreenQuery);
     const [searchTerm, setSearchTerm] = useState("");
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
+    const showAlbumFilters = !isInHiddenSection && !isInArchiveSection;
     const { showMiniDialog } = useBaseContext();
     const { showNotification } = usePhotosAppContext();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
@@ -161,7 +164,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     const hasEnoughEmptyAlbums = emptyAlbumCandidates.length >= 3;
 
     const showDeleteEmptyAlbums =
-        !isInHiddenSection &&
+        showAlbumFilters &&
         hasEnoughEmptyAlbums &&
         albumFilter == "empty-albums" &&
         !searchTerm.trim();
@@ -268,7 +271,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     };
 
     const filteredCollectionSummaries = useMemo(() => {
-        const albumFilteredCollectionSummaries = isInHiddenSection
+        const albumFilteredCollectionSummaries = !showAlbumFilters
             ? collectionSummaries
             : collectionSummaries.filter((cs) =>
                   matchesAlbumFilter(cs, albumFilter),
@@ -281,18 +284,18 @@ export const AllAlbums: React.FC<AllAlbums> = ({
         return albumFilteredCollectionSummaries.filter((cs) =>
             cs.name.toLowerCase().includes(searchLower),
         );
-    }, [albumFilter, collectionSummaries, isInHiddenSection, searchTerm]);
+    }, [albumFilter, collectionSummaries, showAlbumFilters, searchTerm]);
 
     const showCreateButton = useMemo(() => {
         if (!canCreateAlbum) return false;
-        if (!isInHiddenSection && albumFilter != "ente") return false;
+        if (showAlbumFilters && albumFilter != "ente") return false;
         if (!searchTerm.trim()) {
             return true;
         }
         const searchLower = searchTerm.toLowerCase();
         const createText = t("new_album").toLowerCase();
         return createText.includes(searchLower);
-    }, [albumFilter, canCreateAlbum, isInHiddenSection, searchTerm]);
+    }, [albumFilter, canCreateAlbum, showAlbumFilters, searchTerm]);
 
     return (
         <>
@@ -313,7 +316,9 @@ export const AllAlbums: React.FC<AllAlbums> = ({
                             <Typography sx={titleSx}>
                                 {isInHiddenSection
                                     ? t("all_hidden_albums")
-                                    : activeFilterTitle}
+                                    : isInArchiveSection
+                                      ? t("section_archive")
+                                      : activeFilterTitle}
                             </Typography>
                             <Typography sx={bodyMutedSx}>
                                 {t("albums_count", {
@@ -337,7 +342,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
                             </IconButton>
                         </Stack>
                     </Stack>
-                    {!isInHiddenSection && visibleAlbumFilters.length > 1 && (
+                    {showAlbumFilters && visibleAlbumFilters.length > 1 && (
                         <ToggleButtonGroup
                             exclusive
                             value={albumFilter}

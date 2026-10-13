@@ -300,6 +300,7 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
+                isInArchiveSection={mode == "archive-albums"}
                 canCreateAlbum={canCreateAlbum}
                 onRemotePull={onRemotePull}
             />
