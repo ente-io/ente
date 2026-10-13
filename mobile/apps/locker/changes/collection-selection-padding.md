@@ -1,0 +1,1 @@
+- Fixed the missing selection check mark for Important and reduced padding inside file and collection cards.
