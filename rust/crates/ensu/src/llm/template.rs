@@ -2,24 +2,14 @@ use llama_cpp_2::model::{LlamaChatMessage, LlamaChatTemplate, LlamaModel};
 
 use super::{ChatMessage, Error, format_error};
 
-// Exact tokenizer.chat_template fingerprints from the GGUF revisions in config.rs.
-// A new or modified template requires a formatter review; never guess from token strings.
-// Source: Hugging Face ente-ai/LFM2.5-VL-1.6B-GGUF @ b2995f54e17fd7ec31e9cb399ade8fedfd51624d
 const LFM_SHA256: [u8; 32] = [
     0x01, 0x3e, 0xed, 0x60, 0x54, 0x64, 0x34, 0xb6, 0x96, 0x7e, 0x34, 0x83, 0x15, 0x3d, 0x8c, 0x5c,
     0x37, 0xab, 0xcb, 0x1d, 0x66, 0x7f, 0x8b, 0x1f, 0x91, 0x46, 0x83, 0xf2, 0xa9, 0x41, 0x15, 0x31,
 ];
-// Sources: Hugging Face ente-ai GGUFs:
-// gemma-4-E4B-it-GGUF @ f0089e04ac8494e513619d18b44c829c6b815440
-// gemma-4-E2B-it-GGUF @ d9f70b02c9a2193b7263daee865dfa93276fd99a
 const GEMMA_SHA256: [u8; 32] = [
     0x24, 0x1c, 0x50, 0xd8, 0x6b, 0xdf, 0xe5, 0xe4, 0x33, 0x07, 0xda, 0x87, 0xf5, 0x59, 0xcd, 0x24,
     0x16, 0xaa, 0xcd, 0x67, 0xa8, 0xde, 0x46, 0xc1, 0x5a, 0xcc, 0x01, 0x05, 0xef, 0x22, 0x00, 0xb7,
 ];
-// Sources: Hugging Face ente-ai GGUFs:
-// Qwen3.5-0.8B-GGUF @ f44fc9bf306e407078288aee9ff7a83b457d260a
-// Qwen3.5-2B-GGUF @ 4cd5d68754a443dc390533792bf345ad219c0b41
-// Qwen3.5-4B-GGUF @ 9b67f8db9bedc8c10f524ac08193b58fa9b20ac7
 const QWEN_SHA256: [u8; 32] = [
     0x7f, 0x0e, 0x52, 0x90, 0x32, 0xc2, 0x51, 0x83, 0xbc, 0xd6, 0x6c, 0x7f, 0x23, 0x8d, 0xa2, 0xd3,
     0x77, 0xf4, 0x3b, 0xe7, 0x54, 0xa9, 0x4e, 0x27, 0x25, 0xa5, 0x8c, 0x4e, 0x16, 0xd2, 0xed, 0x67,
@@ -39,8 +29,6 @@ pub(super) fn build_chat_prompt(
             .and_then(|template| template.to_string().ok())
             .unwrap_or_else(|| "chatml".to_owned()),
     };
-    // Preserve llama.cpp's named legacy templates through its existing safe Rust
-    // API. Known model templates are rendered below in Rust without a Jinja engine.
     if !source.is_empty()
         && source != "chatml"
         && source
@@ -99,10 +87,6 @@ impl Template {
     }
 }
 
-// ChatMessage currently contains only a role and string content. These formatters
-// reproduce that input surface with thinking disabled, including media markers
-// already inserted into content. Structured tool calls/content parts would need
-// their own implementation and reference cases before extending ChatMessage.
 fn render(
     source: &str,
     bos: &str,
@@ -133,8 +117,6 @@ fn render(
 }
 
 fn role(message: &ChatMessage) -> &str {
-    // The original llama.cpp common renderer normalizes developer to system for
-    // all three supported templates.
     if message.role == "developer" {
         "system"
     } else {
@@ -143,7 +125,6 @@ fn role(message: &ChatMessage) -> &str {
 }
 
 fn trim(text: &str) -> &str {
-    // Match the pinned llama.cpp Jinja runtime's ASCII isspace, including VT.
     text.trim_matches([' ', '\t', '\n', '\r', '\u{b}', '\u{c}'])
 }
 
@@ -220,8 +201,6 @@ fn render_gemma(bos: &str, mut messages: &[ChatMessage], add_assistant: bool) ->
             prompt.push('\n');
         }
         if rendered_role == "model" {
-            // Gemma removes every inline thinking channel, including an unclosed
-            // final one. Consecutive assistant messages share a single turn.
             let content: String = message
                 .content
                 .split("<channel|>")
@@ -323,7 +302,6 @@ mod tests {
             .collect()
     }
 
-    // Selected compatibility expectations recorded from the original native renderer.
     #[test]
     fn message_boundaries_and_assistant_prefixes() {
         let messages = messages(&[

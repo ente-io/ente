@@ -177,7 +177,6 @@ impl Context {
 pub struct ContextParams {
     pub context_size: Option<i32>,
     pub n_threads: Option<i32>,
-    /// Override generation threads without changing prompt-processing threads.
     #[serde(default)]
     pub n_threads_generation: Option<i32>,
     pub n_batch: Option<i32>,

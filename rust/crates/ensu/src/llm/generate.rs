@@ -250,7 +250,6 @@ impl GenerationJob<'_> {
         for sample_index in 0..self.max_tokens {
             check_cancelled(self.cancel_flag)?;
 
-            // Sampling also accepts the token into the sampler's history.
             let token = sampler.sample(ctx, logits_index);
             check_cancelled(self.cancel_flag)?;
 
