@@ -109,7 +109,6 @@
 		274DC65025920DD100F526A4 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		2772189F270F596900FFE3CC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
-		523F8F9497C31EC338B13587 /* Generated.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		53DBFBDBE805FC6E13E3F31E /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		54D121EC2F02675C00B8CC69 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		57EEDBC4E19D917C19BF4545 /* ForegroundHeartbeat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForegroundHeartbeat.swift; sourceTree = "<group>"; };
@@ -308,7 +307,6 @@
 				9740EEB21CF90195004384FC /* Debug.xcconfig */,
 				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
 				9740EEB31CF90195004384FC /* Generated.xcconfig */,
-				523F8F9497C31EC338B13587 /* Generated.xcconfig */,
 			);
 			name = Flutter;
 			sourceTree = "<group>";
@@ -1039,7 +1037,7 @@
 /* Begin XCBuildConfiguration section */
 		0717332A30777BC500530EAD /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 523F8F9497C31EC338B13587 /* Generated.xcconfig */;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -1093,7 +1091,7 @@
 		};
 		0717332B30777BC500530EAD /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 523F8F9497C31EC338B13587 /* Generated.xcconfig */;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -1146,7 +1144,7 @@
 		};
 		0717332C30777BC500530EAD /* Profile */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 523F8F9497C31EC338B13587 /* Generated.xcconfig */;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
