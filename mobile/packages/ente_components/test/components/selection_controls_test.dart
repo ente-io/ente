@@ -6,6 +6,102 @@ import "package:flutter/rendering.dart";
 import "package:flutter_test/flutter_test.dart";
 
 void main() {
+  testWidgets("CheckboxComponent exposes state and accessible activation", (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    var selected = false;
+    final changes = <bool>[];
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) => CheckboxComponent(
+            selected: selected,
+            onChanged: (value) {
+              changes.add(value);
+              setState(() => selected = value);
+            },
+          ),
+        ),
+      ),
+    );
+
+    final checkbox = find.byType(CheckboxComponent);
+    for (final expectedSelected in [false, true, false]) {
+      final node = tester.getSemantics(checkbox);
+      expect(
+        node,
+        matchesSemantics(
+          hasCheckedState: true,
+          isChecked: expectedSelected,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasFocusAction: true,
+          hasTapAction: true,
+        ),
+      );
+      if (changes.length < 2) {
+        tester.binding.performSemanticsAction(
+          SemanticsActionEvent(
+            type: SemanticsAction.tap,
+            nodeId: node.id,
+            viewId: tester.view.viewId,
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+    }
+    expect(changes, [true, false]);
+    semantics.dispose();
+  });
+
+  for (final selected in [false, true]) {
+    testWidgets(
+      "CheckboxComponent exposes disabled ${selected ? 'checked' : 'unchecked'} state",
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        var changeCount = 0;
+
+        await tester.pumpWidget(
+          _wrap(
+            CheckboxComponent(
+              selected: selected,
+              onChanged: (_) => changeCount++,
+            ),
+          ),
+        );
+        await tester.pumpWidget(
+          _wrap(CheckboxComponent(selected: selected, onChanged: null)),
+        );
+        await tester.pumpAndSettle();
+
+        final checkbox = find.byType(CheckboxComponent);
+        final node = tester.getSemantics(checkbox);
+        expect(
+          node,
+          matchesSemantics(
+            hasCheckedState: true,
+            isChecked: selected,
+            hasEnabledState: true,
+          ),
+        );
+        tester.binding.performSemanticsAction(
+          SemanticsActionEvent(
+            type: SemanticsAction.tap,
+            nodeId: node.id,
+            viewId: tester.view.viewId,
+          ),
+        );
+        await tester.tap(checkbox);
+        await tester.pumpAndSettle();
+        expect(changeCount, 0);
+        semantics.dispose();
+      },
+    );
+  }
+
   testWidgets("ToggleSwitchComponent shows async loading and success", (
     tester,
   ) async {
