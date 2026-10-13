@@ -390,7 +390,7 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
 
   Widget _buildPdf(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      // Keep the same point on the visible page when lazy page sizes change.
+      // Keep the same page position when page sizes or the viewport change.
       final anchor = _pdfTransformation.toScene(
         _pdfViewport.center(Offset.zero),
       );
@@ -401,6 +401,12 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
                 (_pdfPageOffsets[anchorPage + 1] -
                     _pdfPageOffsets[anchorPage] -
                     Spacing.md);
+      final viewportShift = (constraints.maxHeight - _pdfViewport.height) / 2;
+      if (_pdfViewport != constraints.biggest) {
+        _pdfInteraction?.complete();
+        _pdfInteraction = null;
+        _pdfLayoutRevision++;
+      }
       _pdfViewport = constraints.biggest;
       final width = constraints.maxWidth - Spacing.lg * 2;
       _pdfPageOffsets = [_toolbarHeight + Spacing.lg];
@@ -430,8 +436,11 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
         math.min(0.0, constraints.maxWidth * (1 - scale)),
         0.0,
       );
-      final y = (translation.y == 0 ? 0.0 : translation.y - anchorShift * scale)
-          .clamp(constraints.maxHeight - height * scale, 0.0);
+      final y =
+          (translation.y == 0
+                  ? 0.0
+                  : translation.y + viewportShift - anchorShift * scale)
+              .clamp(constraints.maxHeight - height * scale, 0.0);
       if (x != translation.x || y != translation.y) {
         matrix.setTranslationRaw(x.toDouble(), y.toDouble(), 0);
         _pdfTransformation.value = matrix;
