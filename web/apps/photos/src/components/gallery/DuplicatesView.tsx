@@ -3,7 +3,6 @@ import {
     removeSelectedDuplicateGroups,
     type DuplicateGroup,
 } from "@/services/dedup";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DoneIcon from "@mui/icons-material/Done";
 import RemoveCircleOutlinedIcon from "@mui/icons-material/RemoveCircleOutlined";
 import SortIcon from "@mui/icons-material/Sort";
@@ -11,7 +10,6 @@ import {
     Box,
     Checkbox,
     Divider,
-    IconButton,
     LinearProgress,
     Stack,
     styled,
@@ -55,14 +53,10 @@ import {
 } from "react-window";
 
 interface DuplicatesViewProps {
-    onBack: () => void;
     onRemoteFilesPull: () => Promise<void>;
 }
 
-export function DuplicatesView({
-    onBack,
-    onRemoteFilesPull,
-}: DuplicatesViewProps) {
+export function DuplicatesView({ onRemoteFilesPull }: DuplicatesViewProps) {
     const { onGenericError } = useBaseContext();
 
     const [state, dispatch] = useReducer(dedupReducer, initialDedupState);
@@ -135,7 +129,6 @@ export function DuplicatesView({
     return (
         <Stack sx={{ flex: 1, minHeight: 0 }}>
             <Navbar
-                onBack={onBack}
                 sortOrder={state.sortOrder}
                 onChangeSortOrder={(sortOrder) =>
                     dispatch({ type: "changeSortOrder", sortOrder })
@@ -285,14 +278,12 @@ const deducePrunableCountAndSize = (duplicateGroups: DuplicateGroup[]) => {
 };
 
 interface NavbarProps {
-    onBack: () => void;
     sortOrder: SortOrder;
     onChangeSortOrder: (sortOrder: SortOrder) => void;
     onDeselectAll: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({
-    onBack,
     sortOrder,
     onChangeSortOrder,
     onDeselectAll,
@@ -303,20 +294,11 @@ const Navbar: React.FC<NavbarProps> = ({
             sx={(theme) => ({
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "8px 4px",
+                padding: "8px 24px",
+                minHeight: "56px",
                 borderBottom: `1px solid ${theme.vars.palette.divider}`,
             })}
         >
-            <Box
-                sx={{
-                    // Match the two right-side icons and their gap.
-                    minWidth: "100px",
-                }}
-            >
-                <IconButton onClick={onBack} aria-label={t("go_back")}>
-                    <ArrowBackIcon />
-                </IconButton>
-            </Box>
             <Typography variant="h6">{t("remove_duplicates")}</Typography>
             <Stack direction="row" sx={{ gap: "4px" }}>
                 <SortMenu {...{ sortOrder, onChangeSortOrder }} />
@@ -505,7 +487,6 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
             >
                 <SpacedRow
                     sx={{
-                        mx: 1,
                         paddingInline: "var(--et-padding-inline)",
                         paddingBlock: "24px 0px",
                     }}
@@ -518,9 +499,11 @@ const ListItem: React.FC<ListChildComponentProps<DuplicatesListItemData>> =
                     <Checkbox {...{ checked, onChange }} />
                 </SpacedRow>
                 <Divider
-                    variant="middle"
                     sx={[
-                        { marginBlock: "4px 20px" },
+                        {
+                            marginBlock: "4px 20px",
+                            marginInline: "var(--et-padding-inline)",
+                        },
                         hideDivider ? { opacity: 0 } : { opacity: 0.8 },
                     ]}
                 />
