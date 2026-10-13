@@ -1978,7 +1978,6 @@
   "selectFile": "ファイルを選択",
   "selectFolder": "フォルダを選択",
   "selectFolders": "フォルダーを選択",
-  "selectFoldersForBackup": "バックアップするフォルダを選択",
   "selectItemsToAdd": "追加するアイテムを選んでください",
   "selectMailApp": "メールアプリを選択",
   "selectMorePhotos": "さらに写真を選択",
@@ -2119,7 +2118,6 @@
       }
     }
   },
-  "startWithLatestPhotos": "最新の写真で開始",
   "status": "ステータス",
   "sticker": "ステッカー",
   "stopCastingBody": "キャストを停止しますか？",

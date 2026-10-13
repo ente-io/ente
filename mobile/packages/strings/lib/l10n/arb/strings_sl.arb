@@ -187,10 +187,6 @@
   "@doNotSignOut": {
     "description": "Do not sign out button label"
   },
-  "doThisLater": "Stori to kasneje",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Dvakrat kliknite vnos, da si ogledate kodo.",
   "download": "Prenesi",
   "downloadUpdate": "Prenesi",

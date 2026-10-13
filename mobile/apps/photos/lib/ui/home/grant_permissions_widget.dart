@@ -78,26 +78,36 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
+        toolbarHeight: 48,
         centerTitle: true,
         title: SvgPicture.asset(
-          "assets/ente-branding.svg",
-          height: 15,
+          "packages/ente_components/assets/ente_wordmark.svg",
+          width: 50,
           colorFilter: ColorFilter.mode(colorScheme.content, BlendMode.srcIn),
         ),
+        actions: [_buildSkipAction(context)],
       ),
       body: SafeArea(
         top: false,
         child: CustomScrollView(
           slivers: [
-            const SliverPadding(padding: EdgeInsets.only(top: 24)),
-            SliverToBoxAdapter(child: _buildHeaderContent(context)),
             SliverFillRemaining(
               hasScrollBody: false,
               child: Padding(
-                padding: const EdgeInsets.only(top: 36, bottom: 20),
+                padding: const EdgeInsets.only(bottom: 27),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [_buildNewFeatureActionArea(context)],
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: Spacing.xl,
+                          bottom: Spacing.xxl,
+                        ),
+                        child: Center(child: _buildHeaderContent(context)),
+                      ),
+                    ),
+                    _buildNewFeatureActionArea(context),
+                  ],
                 ),
               ),
             ),
@@ -107,59 +117,79 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
     );
   }
 
-  Widget _buildHeaderContent(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-
-    return Column(
-      children: [
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 28),
-            child: _buildPermissionsAnimation(context),
+  Widget _buildSkipAction(BuildContext context) {
+    final color = context.componentColors.primary;
+    return GestureDetector(
+      key: const ValueKey("skipForNowButton"),
+      behavior: HitTestBehavior.opaque,
+      onTap: _onTapSkip,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 12, right: 18),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                context.strings.skip,
+                style: TextStyles.body.copyWith(color: color),
+              ),
+              const SizedBox(width: Spacing.xs),
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowRight01,
+                size: IconSizes.small,
+                strokeWidth: 2,
+                color: color,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 22),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            context.strings.readyToBackupTitle,
-            textAlign: TextAlign.center,
-            style: TextStyles.display1.copyWith(color: colorScheme.content),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            context.strings.readyToBackupSubtitle,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-              fontWeight: FontWeight.w500,
-              color: colorScheme.contentLight,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildPermissionsAnimation(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.2,
+  Widget _buildHeaderContent(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 44),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 155,
+            height: 168,
+            child: _buildPermissionsAnimation(),
+          ),
+          const SizedBox(height: Spacing.xl),
+          Text(
+            context.strings.readyToBackupTitle,
+            textAlign: TextAlign.center,
+            style: TextStyles.display2.copyWith(color: colorScheme.content),
+          ),
+          const SizedBox(height: Spacing.sm),
+          Text(
+            context.strings.readyToBackupSubtitle,
+            textAlign: TextAlign.center,
+            style: TextStyles.body.copyWith(color: colorScheme.contentLight),
+          ),
+        ],
       ),
-      child: rive.RiveWidgetBuilder(
-        fileLoader: _permissionsAnimationLoader,
-        builder: (BuildContext context, rive.RiveState state) {
-          if (state is rive.RiveLoaded) {
-            return rive.RiveWidget(
-              controller: state.controller,
-              fit: rive.Fit.contain,
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
+    );
+  }
+
+  Widget _buildPermissionsAnimation() {
+    return rive.RiveWidgetBuilder(
+      fileLoader: _permissionsAnimationLoader,
+      builder: (BuildContext context, rive.RiveState state) {
+        if (state is rive.RiveLoaded) {
+          return rive.RiveWidget(
+            controller: state.controller,
+            fit: rive.Fit.contain,
+          );
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 
@@ -278,34 +308,27 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Widget _buildNewFeatureActionArea(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.xxl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ButtonWidgetV2(
+          ButtonComponent(
             key: const ValueKey("selectFoldersButton"),
-            buttonType: ButtonTypeV2.primary,
-            labelText: context.strings.selectFoldersForBackup,
+            density: ButtonComponentDensity.compact,
+            label: context.strings.chooseAlbumsToBackup,
             onTap: _onTapSelectFolders,
           ),
-          const SizedBox(height: 12),
-          ButtonWidgetV2(
+          const SizedBox(height: Spacing.md),
+          ButtonComponent(
             key: const ValueKey("onlyNewPhotosButton"),
-            buttonType: ButtonTypeV2.secondary,
-            labelText: context.strings.startWithLatestPhotos,
+            variant: ButtonComponentVariant.secondary,
+            density: ButtonComponentDensity.compact,
+            label: context.strings.backupLatestPhotos,
             onTap: () async {
               _onlyNewActionDebouncer.run(() async {
                 await _onTapOnlyNewPhotos();
               });
             },
-            shouldSurfaceExecutionStates: false,
-          ),
-          const SizedBox(height: 12),
-          ButtonWidgetV2(
-            key: const ValueKey("skipForNowButton"),
-            buttonType: ButtonTypeV2.link,
-            labelText: context.strings.doThisLater,
-            onTap: _onTapSkip,
             shouldSurfaceExecutionStates: false,
           ),
         ],
@@ -349,7 +372,12 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 32),
-                        _buildPermissionsAnimation(context),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.sizeOf(context).height * 0.2,
+                          ),
+                          child: _buildPermissionsAnimation(),
+                        ),
                         const Flexible(child: SizedBox(height: 22)),
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 297),

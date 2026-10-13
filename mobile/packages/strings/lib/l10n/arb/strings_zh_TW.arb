@@ -813,10 +813,6 @@
   },
   "dontHaveAnAccount": "還沒有帳號？",
   "dontSave": "不要儲存",
-  "doThisLater": "稍後再做",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "您可以連按兩下項目來查看驗證碼",
   "download": "下載",
   "downloadFailed": "下載失敗",
@@ -2637,7 +2633,6 @@
   "selectFile": "選擇檔案",
   "selectFolder": "選擇資料夾",
   "selectFolders": "選擇資料夾",
-  "selectFoldersForBackup": "選擇要備份的資料夾",
   "selectFolderToContinue": "選擇一個資料夾以繼續",
   "selectItemsToAdd": "選擇要新增的項目",
   "selectLanguage": "選擇語言",
@@ -2883,7 +2878,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "開始拍照，您的照片會顯示在這裡",
   "startWithAddingPhotosOrFamiliarFaces": "先新增照片或熟悉的臉孔",
-  "startWithLatestPhotos": "從最新照片開始",
   "status": "狀態",
   "sticker": "表情符號",
   "stopCastingBody": "您要停止投放嗎？",

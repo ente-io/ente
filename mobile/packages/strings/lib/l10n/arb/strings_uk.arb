@@ -759,10 +759,6 @@
   },
   "dontHaveAnAccount": "Немає облікового запису?",
   "dontSave": "Не зберігати",
-  "doThisLater": "Зробити це пізніше",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Ви можете двічі натиснути на запис для перегляду коду",
   "download": "Завантажити",
   "downloadApplicationUpdate": "Завантажити оновлення",
@@ -2489,7 +2485,6 @@
   "selectFile": "Вибрати файл",
   "selectFolder": "Вибрати теку",
   "selectFolders": "Оберіть теки",
-  "selectFoldersForBackup": "Оберіть теки для резервного копіювання",
   "selectFolderToContinue": "Оберіть теку, щоб продовжити",
   "selectItemsToAdd": "Виберіть елементи для додавання",
   "selectLanguage": "Оберіть мову",

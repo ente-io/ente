@@ -1091,10 +1091,6 @@
   },
   "dontHaveAnAccount": "Нет аккаунта?",
   "dontSave": "Не сохранять",
-  "doThisLater": "Сделать позже",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Вы можете нажать дважды на запись для просмотра кода",
   "download": "Скачать",
   "downloadApplicationUpdate": "Скачать обновление",
@@ -3698,7 +3694,6 @@
   "selectFile": "Выбрать файл",
   "selectFolder": "Выберите папку",
   "selectFolders": "Выберите папки",
-  "selectFoldersForBackup": "Выберите папки для резервного копирования",
   "selectFolderToContinue": "Выберите папку, чтобы продолжить",
   "selectItemsToAdd": "Выберите элементы для добавления",
   "selectLanguage": "Выберите язык",
@@ -3996,7 +3991,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "Начните снимать, и ваши фотографии появятся здесь",
   "startWithAddingPhotosOrFamiliarFaces": "Начните с добавления фотографий или знакомых лиц",
-  "startWithLatestPhotos": "Начните с последних фотографий",
   "status": "Статус",
   "sticker": "Стикер",
   "stopCastingBody": "Хотите остановить трансляцию?",

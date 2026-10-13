@@ -437,6 +437,10 @@
   "backupFailed": "Backup failed",
   "backupFile": "Backup file",
   "backupFolderLabel": "Backup folder:",
+  "backupLatestPhotos": "Backup latest photos",
+  "@backupLatestPhotos": {
+    "description": "Button on the photo permission screen that backs up only recent photos"
+  },
   "backupLocationChoiceDescription": "Where do you want to save your backups?",
   "backupMode": "Backup mode",
   "backupModeBackingUpItems": "{count, plural, one{Backing up {formattedCount} item} other{Backing up {formattedCount} items}}",
@@ -597,6 +601,10 @@
   "checkStatus": "Check status",
   "@checkStatus": {
     "description": "Check status button label"
+  },
+  "chooseAlbumsToBackup": "Choose albums to backup",
+  "@chooseAlbumsToBackup": {
+    "description": "Button on the photo permission screen that opens album selection for backup"
   },
   "chooseARecoveryTime": "Choose a recovery time",
   "chooseBackupLocation": "Choose a backup location",
@@ -1124,10 +1132,6 @@
   },
   "dontHaveAnAccount": "Don't have an account?",
   "dontSave": "Don't save",
-  "doThisLater": "Do this later",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "You can double tap on an entry to view code",
   "download": "Download",
   "downloadApplicationUpdate": "Download update",
@@ -3965,7 +3969,6 @@
   "selectFile": "Select file",
   "selectFolder": "Select folder",
   "selectFolders": "Select folders",
-  "selectFoldersForBackup": "Select folders for backup",
   "selectFolderToContinue": "Select a folder to continue",
   "selectItemsToAdd": "Select items to add",
   "selectLanguage": "Select language",
@@ -4284,7 +4287,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "Start snapping, your photos will show up here.",
   "startWithAddingPhotosOrFamiliarFaces": "Start with adding\nphotos or familiar faces",
-  "startWithLatestPhotos": "Start with latest photos",
   "status": "Status",
   "sticker": "Sticker",
   "stopCastingBody": "Do you want to stop casting?",

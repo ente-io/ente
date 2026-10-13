@@ -552,10 +552,6 @@
   "doesGroupContainMultiplePeople": "Aquest agrupament conté múltiples persones?",
   "done": "Fet",
   "dontSave": "No guardis",
-  "doThisLater": "Fes-ho més tard",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Pots tocar dues vegades en una entrada per veure el codi",
   "download": "Descarrega",
   "downloadFailed": "Descàrrega fallida",
@@ -1900,7 +1896,6 @@
   "selectFile": "Selecciona fitxer",
   "selectFolder": "Seleccioneu una carpeta",
   "selectFolders": "Selecciona les carpetes",
-  "selectFoldersForBackup": "Selecciona carpetes per a còpia de seguretat",
   "selectFolderToContinue": "Seleccioneu una carpeta per continuar",
   "selectItemsToAdd": "Selecciona elements per afegir",
   "selectMailApp": "Selecciona aplicació de correu",
@@ -2030,7 +2025,6 @@
   "stargazing": "Sota les estrelles",
   "startBackup": "Inicia còpia de seguretat",
   "startRecovery": "Inicia recuperació",
-  "startWithLatestPhotos": "Comença amb les fotos més recents",
   "status": "Estat",
   "sticker": "Adhesiu",
   "stopCastingBody": "Vols aturar la transmissió?",

@@ -1041,10 +1041,6 @@
   },
   "dontHaveAnAccount": "Não possui uma conta?",
   "dontSave": "Não salvar",
-  "doThisLater": "Mais tarde",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Você pode tocar duas vezes em uma entrada para ver o código",
   "download": "Baixar",
   "downloadApplicationUpdate": "Baixar atualização",
@@ -3106,7 +3102,6 @@
   "selectFile": "Selecionar arquivo",
   "selectFolder": "Selecionar pasta",
   "selectFolders": "Selecionar pastas",
-  "selectFoldersForBackup": "Selecione as pastas para backup",
   "selectFolderToContinue": "Selecione uma pasta para continuar",
   "selectItemsToAdd": "Selecionar itens para adicionar",
   "selectMailApp": "Selecionar aplicativo de e-mail",
@@ -3358,7 +3353,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "Comece a arrastar, suas fotos aparecerão aqui",
   "startWithAddingPhotosOrFamiliarFaces": "Comece adicionando\nfotos ou rostos familiares",
-  "startWithLatestPhotos": "Iniciar pelas últimas fotos",
   "status": "Estado",
   "sticker": "Figurinha",
   "stopCastingBody": "Deseja parar a transmissão?",

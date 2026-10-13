@@ -280,10 +280,6 @@
     "description": "Unit for distance in km"
   },
   "done": "Valmis",
-  "doThisLater": "Tee seda hiljem",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Koodi nähemiseks topeltklõpsa kirjel",
   "downloadUpdate": "Laadi alla",
   "edit": "Muuda",

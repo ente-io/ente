@@ -265,10 +265,6 @@
   "@doNotSignOut": {
     "description": "Do not sign out button label"
   },
-  "doThisLater": "بعداً انجام شود",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "شما میتونید با دوبار فشردن یه گزینه تا کد آنرا ببینید",
   "downloading": "در حال دانلود...",
   "downloadUpdate": "دانلود",
@@ -811,7 +807,6 @@
   "selectExportFormat": "انتخاب فرمت استخراج",
   "selectFile": "انتخاب فایل",
   "selectFolder": "انتخاب پوشه",
-  "selectFoldersForBackup": "پوشه‌ها را برای پشتیبان گیری انتخاب کنید",
   "selectFolderToContinue": "برای ادامه، یک پوشه انتخاب کنید",
   "selectLanguage": "انتخاب زبان",
   "send": "ارسال",

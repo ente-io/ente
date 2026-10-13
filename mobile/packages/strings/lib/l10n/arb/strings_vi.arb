@@ -1078,10 +1078,6 @@
   },
   "dontHaveAnAccount": "Chưa có tài khoản?",
   "dontSave": "Không lưu",
-  "doThisLater": "Để sau",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Bạn có thể nhấn đúp vào một mục để xem mã",
   "download": "Tải xuống",
   "downloadApplicationUpdate": "Tải xuống bản cập nhật",
@@ -3555,7 +3551,6 @@
   "selectFile": "Chọn tệp",
   "selectFolder": "Chọn thư mục",
   "selectFolders": "Chọn nhiều thư mục",
-  "selectFoldersForBackup": "Chọn thư mục để sao lưu",
   "selectFolderToContinue": "Chọn một thư mục để tiếp tục",
   "selectItemsToAdd": "Chọn mục để thêm",
   "selectLanguage": "Chọn ngôn ngữ",
@@ -3828,7 +3823,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "Bắt đầu chụp, ảnh của bạn sẽ hiển thị ở đây",
   "startWithAddingPhotosOrFamiliarFaces": "Bắt đầu bằng cách thêm\nảnh hoặc gương mặt gia đình",
-  "startWithLatestPhotos": "Bắt đầu với những ảnh mới nhất",
   "status": "Trạng thái",
   "stopCastingBody": "Bạn có muốn dừng phát không?",
   "stopCastingTitle": "Dừng phát",

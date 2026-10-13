@@ -922,10 +922,6 @@
   },
   "dontHaveAnAccount": "Pas encore de compte ?",
   "dontSave": "Ne pas enregistrer",
-  "doThisLater": "Plus tard",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Vous pouvez appuyer deux fois sur une entrée pour afficher le code",
   "download": "Télécharger",
   "downloadApplicationUpdate": "Télécharger la mise à jour",
@@ -2863,7 +2859,6 @@
   "selectFile": "Sélectionner le fichier",
   "selectFolder": "Sélectionner un dossier",
   "selectFolders": "Sélectionnez les dossiers",
-  "selectFoldersForBackup": "Dossiers à sauvegarder",
   "selectFolderToContinue": "Sélectionner un dossier pour continuer",
   "selectItemsToAdd": "Sélectionner les éléments à ajouter",
   "selectMailApp": "Sélectionnez l'application mail",
@@ -3103,7 +3098,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "Commencez à prendre des photos, vos photos apparaîtront ici",
   "startWithAddingPhotosOrFamiliarFaces": "Commencez par ajouter\ndes photos ou des visages familiers",
-  "startWithLatestPhotos": "Commencer par les dernières photos",
   "status": "État",
   "sticker": "Autocollant",
   "stopCastingBody": "Voulez-vous arrêter la diffusion ?",

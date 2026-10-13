@@ -1341,7 +1341,6 @@
   "selectFile": "Fájl kiválasztása",
   "selectFolder": "Válassz mappát",
   "selectFolders": "Mappák kiválasztása",
-  "selectFoldersForBackup": "Mappák kiválasztása biztonsági mentéshez",
   "selectFolderToContinue": "Válassz ki egy mappát a folytatáshoz",
   "selectLanguage": "Nyelv kiválasztása",
   "selectTime": "Ido kivalasztasa",
@@ -1464,7 +1463,6 @@
     "description": "Detailed error message when code is incorrect"
   },
   "startBackup": "Mentés elkezdése",
-  "startWithLatestPhotos": "Kezdés a legújabb fotókkal",
   "status": "Állapot",
   "storageAndPlans": "Tárhely és csomagok",
   "storageAndPlansDesc": "Csomagok, számlázás és tárhelyhasználat",

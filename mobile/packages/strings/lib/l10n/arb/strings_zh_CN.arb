@@ -605,10 +605,6 @@
     "description": "Do not sign out button label"
   },
   "dontSave": "不保存",
-  "doThisLater": "稍后再做",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "您可以双击条目来查看代码",
   "download": "下载",
   "downloadApplicationUpdate": "下载更新",
@@ -2094,7 +2090,6 @@
   "selectFile": "选择文件",
   "selectFolder": "选择文件夹",
   "selectFolders": "选择文件夹",
-  "selectFoldersForBackup": "选择要备份的文件夹",
   "selectFolderToContinue": "选择文件夹以继续",
   "selectItemsToAdd": "选择要添加的项目",
   "selectLanguage": "选择语言",
@@ -2278,7 +2273,6 @@
   "stargazing": "星空之下",
   "startBackup": "开始备份",
   "startRecovery": "开始恢复",
-  "startWithLatestPhotos": "从最新照片开始",
   "status": "状态",
   "sticker": "贴纸",
   "stopCastingBody": "您想停止投放吗？",

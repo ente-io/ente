@@ -58,10 +58,6 @@
   "@deleteAccount": {
     "description": "Delete account button label"
   },
-  "doThisLater": "ଏହା ପରେ କରିବେ",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "dropSupportEmail": "ଦୟାକରି ଆପଣଙ୍କ ପଞ୍ଜିକରଣ ହୋଇଥିବା ଇମେଲ୍ ଠିକଣାରୁ {supportEmail} କୁ ଏକ ଇମେଲ୍ ପ୍ରେରଣ କରନ୍ତୁ।",
   "@dropSupportEmail": {
     "placeholders": {
