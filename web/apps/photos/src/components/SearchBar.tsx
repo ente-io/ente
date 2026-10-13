@@ -601,7 +601,13 @@ const createSelectStyles = (
         },
     }),
     groupHeading: (style) => ({ ...style, margin: 0, padding: 0 }),
-    noOptionsMessage: (style) => ({ ...style, padding: 0 }),
+    noOptionsMessage: (style) => ({
+        ...style,
+        padding: 0,
+        flex: 1,
+        display: "grid",
+        placeItems: "center",
+    }),
     option: (style, { isFocused }) => ({
         ...style,
         padding: 0,
