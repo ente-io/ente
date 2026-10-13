@@ -80,7 +80,6 @@ export const GalleryBarAndListHeader: React.FC<
 > = ({
     shouldHide,
     mode,
-    onChangeMode,
     user,
     barCollectionSummaries: toShowCollectionSummaries,
     activeCollection,
@@ -251,7 +250,6 @@ export const GalleryBarAndListHeader: React.FC<
             <GalleryBarImpl
                 {...{
                     mode,
-                    onChangeMode,
                     activeCollectionID,
                     people: sortedPeople,
                     activePerson,

@@ -1982,6 +1982,8 @@ const Page: React.FC = () => {
                 showRail
                 showNormalNavigation={showNormalNavigation}
                 isInSearchMode={isInSearchMode}
+                mode={barMode}
+                onChangeMode={handleChangeBarMode}
                 onSidebar={showSidebar}
                 onUpload={openUploader}
                 onHome={() =>
@@ -2068,7 +2070,6 @@ const Page: React.FC = () => {
                                     ? state.view.people
                                     : undefined) ?? []
                             }
-                            onChangeMode={handleChangeBarMode}
                             setBlockingLoad={setBlockingLoad}
                             setActiveCollectionID={
                                 handleShowCollectionSummaryWithID
