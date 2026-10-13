@@ -1,9 +1,12 @@
 import { CollectionsSortOptions } from "@/components/CollectionsSortOptions";
 import { PeopleSortOptions } from "@/components/PeopleSortOptions";
 import {
+    albumFilters,
     visibleAlbumFilters as getVisibleAlbumFilters,
     matchesAlbumFilter,
+    searchAlbumRows,
     type AlbumFilter,
+    type AlbumSearchRow,
 } from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
 import { Link05Icon, PinIcon, StarIcon } from "@hugeicons/core-free-icons";
@@ -12,11 +15,13 @@ import ArchiveIcon from "@mui/icons-material/Archive";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PeopleIcon from "@mui/icons-material/People";
+import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
     ButtonBase,
     Drawer,
     IconButton,
+    InputBase,
     Stack,
     Tooltip,
     Typography,
@@ -90,6 +95,16 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const mobile = useMediaQuery(useTheme().breakpoints.down("md"));
     const titleID = useId();
     const listRef = useRef<FixedSizeList | null>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const isSearching = mode == "albums" && !!searchQuery.trim();
+    const searchRows = useMemo(
+        () =>
+            isSearching
+                ? searchAlbumRows(collectionSummaries, searchQuery)
+                : [],
+        [collectionSummaries, searchQuery, isSearching],
+    );
     const [viewportHeight, setViewportHeight] = useState(0);
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter | undefined>(
         "ente",
@@ -120,7 +135,20 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     }, [albumFilter, activeAlbumFilter]);
 
     useEffect(() => {
-        if (!listRef.current) return;
+        if (
+            mode != "albums" ||
+            (mobile ? !mobileDrawerProps.open : collapsed)
+        ) {
+            setSearchQuery("");
+        }
+    }, [mode, mobile, mobileDrawerProps.open, collapsed]);
+
+    useEffect(() => {
+        if (isSearching) listRef.current?.scrollTo(0);
+    }, [searchQuery, isSearching]);
+
+    useEffect(() => {
+        if (!listRef.current || isSearching) return;
         let i = -1;
         switch (mode) {
             case "albums":
@@ -145,28 +173,38 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         mobile,
         mobileDrawerProps.open,
         viewportHeight,
+        isSearching,
     ]);
 
     const itemData = useMemo<ItemData>(
         () =>
-            mode == "albums" ||
-            mode == "hidden-albums" ||
-            mode == "archive-albums"
+            isSearching
                 ? {
-                      type: "collections",
-                      collectionSummaries: visibleCollectionSummaries,
-                      indented: mode == "albums",
+                      type: "album-search",
+                      rows: searchRows,
                       activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
                   }
-                : {
-                      type: "people" as const,
-                      people,
-                      activePerson,
-                      onSelectPerson,
-                  },
+                : mode == "albums" ||
+                    mode == "hidden-albums" ||
+                    mode == "archive-albums"
+                  ? {
+                        type: "collections",
+                        collectionSummaries: visibleCollectionSummaries,
+                        indented: mode == "albums",
+                        activeCollectionID: activeCollectionID!,
+                        onSelectCollectionID,
+                    }
+                  : {
+                        type: "people" as const,
+                        people,
+                        activePerson,
+                        onSelectPerson,
+                    },
         [
             mode,
+            isSearching,
+            searchRows,
             visibleCollectionSummaries,
             activeCollectionID,
             onSelectCollectionID,
@@ -190,9 +228,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         <Box
             id={mode == "albums" ? albumListID : undefined}
             sx={{
-                flex: mode == "albums" ? "0 1 auto" : 1,
+                flex: mode == "albums" && !isSearching ? "0 1 auto" : 1,
                 height:
-                    mode == "albums"
+                    mode == "albums" && !isSearching
                         ? getItemCount(itemData) * (mobile ? 46 : 50)
                         : undefined,
                 minHeight: 0,
@@ -223,6 +261,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         <Stack
             component="nav"
             aria-labelledby={titleID}
+            onKeyDown={(event) => {
+                if (event.key == "Escape" && mode == "albums" && searchQuery) {
+                    event.stopPropagation();
+                    setSearchQuery("");
+                }
+            }}
             sx={(theme) => ({
                 "--gallery-navigation-surface": "#FFFFFF",
                 "--gallery-navigation-hover":
@@ -314,7 +358,70 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 )}
             </Stack>
-            {mode == "albums" ? (
+            {mode == "albums" && (
+                <Stack
+                    direction="row"
+                    sx={{
+                        alignItems: "center",
+                        flexShrink: 0,
+                        height: 52,
+                        gap: "10px",
+                        px: "16px",
+                        borderRadius: "12px",
+                        bgcolor: "var(--gallery-navigation-surface)",
+                        border: "1px solid",
+                        borderColor: "stroke.faint",
+                        "&:focus-within": {
+                            outline: "2px solid",
+                            outlineColor: "stroke.base",
+                            outlineOffset: -2,
+                        },
+                    }}
+                >
+                    <SearchIcon sx={{ fontSize: 18, color: "text.muted" }} />
+                    <InputBase
+                        inputRef={searchInputRef}
+                        fullWidth
+                        placeholder={t("search_in_albums")}
+                        inputProps={{ "aria-label": t("search_in_albums") }}
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        sx={{
+                            fontSize: mobile ? 13 : 14,
+                            fontWeight: 500,
+                            color: "text.base",
+                            "& input::placeholder": {
+                                color: "text.muted",
+                                opacity: 1,
+                            },
+                        }}
+                    />
+                    {searchQuery && (
+                        <IconButton
+                            aria-label={t("clear_search")}
+                            onClick={() => {
+                                setSearchQuery("");
+                                searchInputRef.current?.focus();
+                            }}
+                            size="small"
+                        >
+                            <CloseIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                    )}
+                </Stack>
+            )}
+            {isSearching ? (
+                searchRows.length ? (
+                    items
+                ) : (
+                    <Typography
+                        role="status"
+                        sx={{ px: "16px", color: "text.muted" }}
+                    >
+                        {t("no_results")}
+                    </Typography>
+                )
+            ) : mode == "albums" ? (
                 <Stack
                     role="group"
                     aria-label={t("filter_albums")}
@@ -425,6 +532,12 @@ const BarScrollContainer = styled("div")({
 
 type ItemData =
     | {
+          type: "album-search";
+          rows: AlbumSearchRow[];
+          activeCollectionID: number;
+          onSelectCollectionID: (id: number) => void;
+      }
+    | {
           type: "collections";
           collectionSummaries: CollectionSummary[];
           indented: boolean;
@@ -440,6 +553,8 @@ type ItemData =
 
 const getItemCount = (data: ItemData) => {
     switch (data.type) {
+        case "album-search":
+            return data.rows.length;
         case "collections": {
             return data.collectionSummaries.length;
         }
@@ -451,6 +566,12 @@ const getItemCount = (data: ItemData) => {
 
 const getItemKey = (index: number, data: ItemData) => {
     switch (data.type) {
+        case "album-search": {
+            const row = data.rows[index]!;
+            return row.type == "group"
+                ? `group-${row.filter}`
+                : `${row.filter}-${row.collectionSummary.id}-${row.collectionSummary.coverFile?.id}`;
+        }
         case "collections": {
             const collectionSummary = data.collectionSummaries[index]!;
             return `${data.type}-${collectionSummary.id}-${collectionSummary.coverFile?.id}`;
@@ -468,6 +589,41 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
     let card: React.ReactNode;
 
     switch (data.type) {
+        case "album-search": {
+            const row = data.rows[index]!;
+            card =
+                row.type == "group" ? (
+                    <Stack
+                        direction="row"
+                        role="heading"
+                        aria-level={3}
+                        sx={{
+                            height: "100%",
+                            alignItems: "center",
+                            px: "16px",
+                            gap: "12px",
+                        }}
+                    >
+                        <CardText>
+                            {albumFilters
+                                .find(({ value }) => value == row.filter)!
+                                .label()}
+                        </CardText>
+                        <ExpandMoreIcon
+                            aria-hidden
+                            sx={{ fontSize: 16, color: "text.muted" }}
+                        />
+                    </Stack>
+                ) : (
+                    <CollectionBarCard
+                        collectionSummary={row.collectionSummary}
+                        activeCollectionID={data.activeCollectionID}
+                        onSelectCollectionID={data.onSelectCollectionID}
+                        indented
+                    />
+                );
+            break;
+        }
         case "collections": {
             const {
                 collectionSummaries,
