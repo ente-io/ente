@@ -11,7 +11,7 @@ use serde::Serialize;
 use uuid::Uuid;
 
 use crate::{
-    args::{DEFAULT_LIST_LIMIT, ListArgs, Product},
+    args::{App, DEFAULT_LIST_LIMIT, ListArgs},
     vault::Account,
 };
 
@@ -21,7 +21,7 @@ pub struct AccountView<'a> {
     name: &'a str,
     email: &'a str,
     host: &'a str,
-    products: Vec<Product>,
+    apps: Vec<App>,
     selected: bool,
 }
 
@@ -32,7 +32,7 @@ impl<'a> AccountView<'a> {
             name: &account.name,
             email: &account.email,
             host: &account.origin,
-            products: account.sessions.keys().copied().collect(),
+            apps: account.sessions.keys().copied().collect(),
             selected: selected == Some(account.storage_id),
         }
     }
@@ -150,7 +150,7 @@ pub fn accounts(accounts: &[AccountView<'_>]) -> Result<()> {
                 escape_controls(account.name),
                 escape_controls(account.email),
                 escape_controls(account.host),
-                products(account),
+                apps(account),
                 account.id.clone(),
             ]
         })
@@ -168,7 +168,7 @@ pub fn account(account: &AccountView<'_>) -> Result<()> {
         ("Name", escape_controls(account.name)),
         ("Email", escape_controls(account.email)),
         ("Host", escape_controls(account.host)),
-        ("Logged in", products(account)),
+        ("Logged in", apps(account)),
         (
             "Selected",
             if account.selected { "yes" } else { "no" }.to_owned(),
@@ -281,17 +281,17 @@ fn timestamp(micros: i64) -> Result<String> {
         .to_rfc3339_opts(SecondsFormat::Micros, true))
 }
 
-fn products(account: &AccountView<'_>) -> String {
-    let products = account
-        .products
+fn apps(account: &AccountView<'_>) -> String {
+    let apps = account
+        .apps
         .iter()
-        .map(|product| product.name())
+        .map(|app| app.name())
         .collect::<Vec<_>>()
         .join(",");
-    if products.is_empty() {
+    if apps.is_empty() {
         "none".to_owned()
     } else {
-        products
+        apps
     }
 }
 
