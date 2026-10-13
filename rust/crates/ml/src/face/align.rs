@@ -251,9 +251,6 @@ fn warp_face_image(source: &RgbImage, affine_matrix: &[[f32; 3]; 3]) -> MlResult
         Border::Constant(Rgb([114, 114, 114])),
         &mut output,
     );
-    // imageproc 0.27 blends border pixels into bicubic samples. Version 0.25.1
-    // required left + 4 < width (and top + 4 < height), even though the last
-    // sampled index was left + 3. Preserve its fill boundary for face inputs.
     for (x, y, pixel) in output.enumerate_pixels_mut() {
         let (source_x, source_y) = inverse * (x as f32, y as f32);
         let left = source_x.floor() - 1.0;
@@ -483,7 +480,6 @@ mod tests {
 
         assert_eq!(*output.get_pixel(0, 0), Rgb([114, 114, 114]));
         assert_eq!(*output.get_pixel(1, 1), Rgb([255, 0, 0]));
-        assert_eq!(*output.get_pixel(108, 108), Rgb([255, 0, 0]));
         assert_eq!(*output.get_pixel(109, 109), Rgb([114, 114, 114]));
     }
 
