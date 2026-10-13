@@ -1,5 +1,10 @@
 import { CollectionsSortOptions } from "@/components/CollectionsSortOptions";
 import { PeopleSortOptions } from "@/components/PeopleSortOptions";
+import {
+    visibleAlbumFilters as getVisibleAlbumFilters,
+    matchesAlbumFilter,
+    type AlbumFilter,
+} from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
 import { Link05Icon, PinIcon, StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -86,6 +91,33 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const titleID = useId();
     const listRef = useRef<FixedSizeList | null>(null);
     const [viewportHeight, setViewportHeight] = useState(0);
+    const [albumFilter, setAlbumFilter] = useState<AlbumFilter | undefined>(
+        "ente",
+    );
+    const visibleAlbumFilters = useMemo(
+        () => getVisibleAlbumFilters(collectionSummaries),
+        [collectionSummaries],
+    );
+    const activeAlbumFilter =
+        albumFilter === undefined ||
+        visibleAlbumFilters.some(({ value }) => value == albumFilter)
+            ? albumFilter
+            : "ente";
+    const visibleCollectionSummaries = useMemo(
+        () =>
+            mode != "albums"
+                ? collectionSummaries
+                : collectionSummaries.filter(
+                      (cs) =>
+                          activeAlbumFilter !== undefined &&
+                          matchesAlbumFilter(cs, activeAlbumFilter),
+                  ),
+        [mode, collectionSummaries, activeAlbumFilter],
+    );
+
+    useEffect(() => {
+        if (albumFilter != activeAlbumFilter) setAlbumFilter(activeAlbumFilter);
+    }, [albumFilter, activeAlbumFilter]);
 
     useEffect(() => {
         if (!listRef.current) return;
@@ -94,7 +126,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             case "albums":
             case "hidden-albums":
             case "archive-albums":
-                i = collectionSummaries.findIndex(
+                i = visibleCollectionSummaries.findIndex(
                     ({ id }) => id == activeCollectionID,
                 );
                 break;
@@ -105,7 +137,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         if (i != -1) listRef.current.scrollToItem(i, "smart");
     }, [
         mode,
-        collectionSummaries,
+        visibleCollectionSummaries,
         activeCollectionID,
         people,
         activePerson,
@@ -122,7 +154,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             mode == "archive-albums"
                 ? {
                       type: "collections",
-                      collectionSummaries,
+                      collectionSummaries: visibleCollectionSummaries,
+                      indented: mode == "albums",
                       activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
                   }
@@ -134,7 +167,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                   },
         [
             mode,
-            collectionSummaries,
+            visibleCollectionSummaries,
             activeCollectionID,
             onSelectCollectionID,
             people,
@@ -151,6 +184,40 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
               : mode == "archive-albums"
                 ? t("section_archive")
                 : t("albums");
+
+    const albumListID = `${titleID}-albums`;
+    const items = (
+        <Box
+            id={mode == "albums" ? albumListID : undefined}
+            sx={{
+                flex: mode == "albums" ? "0 1 auto" : 1,
+                height:
+                    mode == "albums"
+                        ? getItemCount(itemData) * (mobile ? 46 : 50)
+                        : undefined,
+                minHeight: 0,
+                minWidth: 0,
+            }}
+        >
+            <AutoSizer onResize={({ height }) => setViewportHeight(height)}>
+                {({ width, height }) => (
+                    <FixedSizeList
+                        ref={listRef}
+                        outerElementType={BarScrollContainer}
+                        width={width}
+                        height={height}
+                        itemData={itemData}
+                        itemKey={getItemKey}
+                        itemCount={getItemCount(itemData)}
+                        itemSize={mobile ? 46 : 50}
+                        style={{ overflowX: "hidden" }}
+                    >
+                        {ListItem}
+                    </FixedSizeList>
+                )}
+            </AutoSizer>
+        </Box>
+    );
 
     const navigation = (
         <Stack
@@ -247,25 +314,58 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 )}
             </Stack>
-            <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
-                <AutoSizer onResize={({ height }) => setViewportHeight(height)}>
-                    {({ width, height }) => (
-                        <FixedSizeList
-                            ref={listRef}
-                            outerElementType={BarScrollContainer}
-                            width={width}
-                            height={height}
-                            itemData={itemData}
-                            itemKey={getItemKey}
-                            itemCount={getItemCount(itemData)}
-                            itemSize={mobile ? 46 : 50}
-                            style={{ overflowX: "hidden" }}
-                        >
-                            {ListItem}
-                        </FixedSizeList>
-                    )}
-                </AutoSizer>
-            </Box>
+            {mode == "albums" ? (
+                <Stack
+                    role="group"
+                    aria-label={t("filter_albums")}
+                    sx={{ flex: 1, minHeight: 0, gap: "2px" }}
+                >
+                    {visibleAlbumFilters.map((filter) => (
+                        <React.Fragment key={filter.value}>
+                            <BarCard
+                                aria-label={filter.title()}
+                                aria-expanded={
+                                    activeAlbumFilter == filter.value
+                                }
+                                aria-controls={
+                                    activeAlbumFilter == filter.value
+                                        ? albumListID
+                                        : undefined
+                                }
+                                onClick={() =>
+                                    setAlbumFilter((current) =>
+                                        current == filter.value
+                                            ? undefined
+                                            : filter.value,
+                                    )
+                                }
+                                sx={{
+                                    flexShrink: 0,
+                                    bgcolor:
+                                        activeAlbumFilter == filter.value
+                                            ? "var(--gallery-navigation-surface)"
+                                            : undefined,
+                                }}
+                            >
+                                <CardText>{filter.label()}</CardText>
+                                <ExpandMoreIcon
+                                    sx={{
+                                        fontSize: 16,
+                                        color: "text.muted",
+                                        transform:
+                                            activeAlbumFilter == filter.value
+                                                ? undefined
+                                                : "rotate(-90deg)",
+                                    }}
+                                />
+                            </BarCard>
+                            {activeAlbumFilter == filter.value && items}
+                        </React.Fragment>
+                    ))}
+                </Stack>
+            ) : (
+                items
+            )}
         </Stack>
     );
 
@@ -327,6 +427,7 @@ type ItemData =
     | {
           type: "collections";
           collectionSummaries: CollectionSummary[];
+          indented: boolean;
           activeCollectionID: number;
           onSelectCollectionID: (id: number) => void;
       }
@@ -382,6 +483,10 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
                         activeCollectionID,
                         onSelectCollectionID,
                     }}
+                    indented={
+                        data.indented &&
+                        !collectionSummary.attributes.has("system")
+                    }
                 />
             );
             break;
@@ -405,12 +510,14 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
 
 interface CollectionBarCardProps {
     collectionSummary: CollectionSummary;
+    indented: boolean;
     activeCollectionID: number;
     onSelectCollectionID: (collectionID: number) => void;
 }
 
 const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
     collectionSummary,
+    indented,
     activeCollectionID,
     onSelectCollectionID,
 }: CollectionBarCardProps) => (
@@ -421,6 +528,11 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
         }
         title={collectionSummary.name}
         onClick={() => onSelectCollectionID(collectionSummary.id)}
+        sx={
+            indented
+                ? { marginInlineStart: "20px", width: "calc(100% - 20px)" }
+                : undefined
+        }
     >
         <Box aria-hidden sx={{ flexShrink: 0 }}>
             <ItemCard

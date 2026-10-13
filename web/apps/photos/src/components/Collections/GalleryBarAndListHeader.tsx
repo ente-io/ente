@@ -282,11 +282,12 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangePeopleSortBy={setPeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
-                collectionSummaries={sortedCollectionSummaries.filter(
-                    (cs) =>
-                        !cs.attributes.has("hideFromCollectionBar") &&
-                        !cs.attributes.has("quickLink") &&
-                        (mode != "albums" || !cs.attributes.has("archived")),
+                collectionSummaries={sortedCollectionSummaries.filter((cs) =>
+                    mode == "albums"
+                        ? !cs.attributes.has("system") ||
+                          (cs.id > 0 && cs.type == "uncategorized")
+                        : !cs.attributes.has("hideFromCollectionBar") &&
+                          !cs.attributes.has("quickLink"),
                 )}
             />
 
@@ -299,6 +300,7 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
+                isInArchiveSection={mode == "archive-albums"}
                 canCreateAlbum={canCreateAlbum}
                 onRemotePull={onRemotePull}
             />
