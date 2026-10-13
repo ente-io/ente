@@ -1,0 +1,1 @@
+- Improved screen reader support for checkboxes.
