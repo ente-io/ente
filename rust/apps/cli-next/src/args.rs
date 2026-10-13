@@ -39,7 +39,9 @@ pub struct Options {
 
 impl Options {
     pub fn can_prompt(&self) -> bool {
-        !self.no_input && std::io::stdin().is_terminal() && std::io::stderr().is_terminal()
+        !self.no_input
+            && std::io::stderr().is_terminal()
+            && (cfg!(unix) || std::io::stdin().is_terminal())
     }
 }
 
