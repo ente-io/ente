@@ -12,7 +12,6 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { appName } from "ente-base/app";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import {
@@ -1151,7 +1150,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     </CloseButton>
                 </Header>
 
-                <CommentsContainer ref={commentsContainerRef}>
+                <CommentsContainer
+                    ref={commentsContainerRef}
+                    data-custom-scrollbar
+                >
                     {loading ? (
                         <LoadingContainer>
                             <CircularProgress size={32} />
@@ -1457,7 +1459,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             </ReplyingToContent>
                         </ReplyingToBar>
                     )}
-                    <InputWrapper>
+                    <InputWrapper data-custom-scrollbar>
                         <StyledTextField
                             fullWidth
                             multiline
@@ -1658,21 +1660,19 @@ const CommentsContainer = styled(Box)(({ theme }) => ({
     position: "relative",
     display: "flex",
     flexDirection: "column-reverse",
-    ...(appName !== "photos" && {
-        "&::-webkit-scrollbar": { width: "6px" },
-        "&::-webkit-scrollbar-track": { background: "transparent" },
+    "&::-webkit-scrollbar": { width: "6px" },
+    "&::-webkit-scrollbar-track": { background: "transparent" },
+    "&::-webkit-scrollbar-thumb": {
+        background: "rgba(0, 0, 0, 0.2)",
+        borderRadius: "3px",
+    },
+    scrollbarWidth: "thin",
+    scrollbarColor: "rgba(0, 0, 0, 0.2) transparent",
+    ...theme.applyStyles("dark", {
         "&::-webkit-scrollbar-thumb": {
-            background: "rgba(0, 0, 0, 0.2)",
-            borderRadius: "3px",
+            background: "rgba(255, 255, 255, 0.2)",
         },
-        scrollbarWidth: "thin",
-        scrollbarColor: "rgba(0, 0, 0, 0.2) transparent",
-        ...theme.applyStyles("dark", {
-            "&::-webkit-scrollbar-thumb": {
-                background: "rgba(255, 255, 255, 0.2)",
-            },
-            scrollbarColor: "rgba(255, 255, 255, 0.2) transparent",
-        }),
+        scrollbarColor: "rgba(255, 255, 255, 0.2) transparent",
     }),
 }));
 
@@ -1802,27 +1802,23 @@ const InputWrapper = styled(Box)(({ theme }) => ({
     padding: "8px 48px 8px 16px",
     maxHeight: "300px",
     overflow: "auto",
-    ...(appName !== "photos" && {
-        "&::-webkit-scrollbar": { width: "8px" },
-        "&::-webkit-scrollbar-track": { background: "transparent" },
+    "&::-webkit-scrollbar": { width: "8px" },
+    "&::-webkit-scrollbar-track": { background: "transparent" },
+    "&::-webkit-scrollbar-thumb": {
+        background: "rgba(0, 0, 0, 0.3)",
+        borderRadius: "4px",
+    },
+    "&::-webkit-scrollbar-thumb:hover": { background: "rgba(0, 0, 0, 0.5)" },
+    scrollbarWidth: "thin",
+    scrollbarColor: "rgba(0, 0, 0, 0.3) transparent",
+    ...theme.applyStyles("dark", {
         "&::-webkit-scrollbar-thumb": {
-            background: "rgba(0, 0, 0, 0.3)",
-            borderRadius: "4px",
+            background: "rgba(255, 255, 255, 0.3)",
         },
         "&::-webkit-scrollbar-thumb:hover": {
-            background: "rgba(0, 0, 0, 0.5)",
+            background: "rgba(255, 255, 255, 0.5)",
         },
-        scrollbarWidth: "thin",
-        scrollbarColor: "rgba(0, 0, 0, 0.3) transparent",
-        ...theme.applyStyles("dark", {
-            "&::-webkit-scrollbar-thumb": {
-                background: "rgba(255, 255, 255, 0.3)",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-                background: "rgba(255, 255, 255, 0.5)",
-            },
-            scrollbarColor: "rgba(255, 255, 255, 0.3) transparent",
-        }),
+        scrollbarColor: "rgba(255, 255, 255, 0.3) transparent",
     }),
 }));
 

@@ -1,6 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Dialog, IconButton, styled, Typography } from "@mui/material";
-import { appName } from "ente-base/app";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { t } from "i18next";
 import React from "react";
@@ -193,7 +192,7 @@ export const LikeAlbumSelectorModal: React.FC<LikeAlbumSelectorModalProps> = ({
                             </LikeAllButton>
                         </AlbumsHeader>
 
-                        <AlbumsList>
+                        <AlbumsList data-custom-scrollbar>
                             {albums.map((album) => {
                                 const isLiked = likedAlbumIDs.has(album.id);
                                 return (
@@ -353,18 +352,16 @@ const AlbumsList = styled(Box)(({ theme }) => ({
     padding: "0 12px 12px 12px",
     overflowY: "auto",
     maxHeight: 241,
-    ...(appName !== "photos" && {
-        "&::-webkit-scrollbar": { width: 6 },
-        "&::-webkit-scrollbar-track": { background: "transparent" },
+    "&::-webkit-scrollbar": { width: 6 },
+    "&::-webkit-scrollbar-track": { background: "transparent" },
+    "&::-webkit-scrollbar-thumb": {
+        background: "rgba(0, 0, 0, 0.2)",
+        borderRadius: 3,
+    },
+    ...theme.applyStyles("dark", {
         "&::-webkit-scrollbar-thumb": {
-            background: "rgba(0, 0, 0, 0.2)",
-            borderRadius: 3,
+            background: "rgba(255, 255, 255, 0.2)",
         },
-        ...theme.applyStyles("dark", {
-            "&::-webkit-scrollbar-thumb": {
-                background: "rgba(255, 255, 255, 0.2)",
-            },
-        }),
     }),
 }));
 
