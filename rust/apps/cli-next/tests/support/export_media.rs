@@ -442,6 +442,30 @@ fn engine_consolidates_copies_and_keeps_linked_history() {
     readonly.set_readonly(true);
     fs::set_permissions(&first, readonly).unwrap();
     engine.hardlinks = true;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let directory = root.join("Second");
+        let permissions = fs::metadata(&directory).unwrap().permissions();
+        fs::set_permissions(&directory, fs::Permissions::from_mode(0o500)).unwrap();
+        let probe = directory.join("permission-probe");
+        let result = fs::hard_link(&first, &probe)
+            .is_err()
+            .then(|| engine.run(false, &["First", "Second"]));
+        fs::set_permissions(&directory, permissions).unwrap();
+        if let Some(result) = result {
+            let result = result.unwrap();
+            assert!(!result.complete);
+            assert_eq!(result.json["copies"]["completed"], 2);
+            assert_eq!(fs::read(&second).unwrap(), b"old");
+            assert!(!same_file::is_same_file(&first, &second).unwrap());
+        } else {
+            fs::remove_file(probe).unwrap();
+            eprintln!(
+                "skipping permission failure: directory permissions do not prevent hard links"
+            );
+        }
+    }
     assert_eq!(run(&mut engine, true)["changes"]["exported"], 2);
     assert!(same_file::is_same_file(&first, &second).unwrap());
     assert!(!same_file::is_same_file(&first, root.join("Second/Other.jpg")).unwrap());
@@ -587,50 +611,7 @@ fn engine_recovers_interrupted_link_publication() {
 }
 
 #[test]
-#[cfg(unix)]
-fn engine_link_failure_preserves_existing_copy() {
-    use std::os::unix::fs::PermissionsExt;
-    let mut server = mockito::Server::new();
-    let key = Key::generate();
-    let (record, bytes) = original_fixture(&key, b"original", false, true, 10);
-    let fetched = download(&mut server, 10, &bytes, 1);
-    let mut engine = new_engine(&server, key, record);
-    run(&mut engine, true);
-    engine.hardlinks = true;
-    let directory = engine.root().join("Second");
-    let permissions = fs::metadata(&directory).unwrap().permissions();
-    fs::set_permissions(&directory, fs::Permissions::from_mode(0o500)).unwrap();
-    let probe = directory.join("permission-probe");
-    if fs::hard_link(directory.join("Photo.jpg"), &probe).is_ok() {
-        fs::set_permissions(&directory, permissions).unwrap();
-        fs::remove_file(probe).unwrap();
-        eprintln!("skipping: directory permissions do not prevent hard links");
-        return;
-    }
-    let result = engine.run(false, &[]);
-    fs::set_permissions(&directory, permissions).unwrap();
-    let result = result.unwrap();
-    assert!(!result.complete);
-    assert_eq!(result.json["copies"]["completed"], 1);
-    assert_eq!(fs::read(directory.join("Photo.jpg")).unwrap(), b"original");
-    assert!(!linked(
-        &engine.root(),
-        "First/Photo.jpg",
-        "Second/Photo.jpg"
-    ));
-    run(&mut engine, true);
-    assert!(linked(
-        &engine.root(),
-        "First/Photo.jpg",
-        "Second/Photo.jpg"
-    ));
-    fetched.assert();
-}
-
-#[test]
-#[cfg(unix)]
-fn engine_rechecks_link_source_before_resetting_timestamp() {
-    use std::os::unix::fs::PermissionsExt;
+fn engine_rechecks_link_source_before_completion() {
     use std::time::{Duration, UNIX_EPOCH};
     let mut server = mockito::Server::new();
     let key = Key::generate();
@@ -658,20 +639,14 @@ fn engine_rechecks_link_source_before_resetting_timestamp() {
     let modified = UNIX_EPOCH + Duration::from_secs(1_700_000_100);
     engine.hardlinks = true;
     let export = engine.prepare(engine.options(false, &[])).unwrap();
-    let directory = root.join("Third");
-    let permissions = fs::metadata(&directory).unwrap().permissions();
-    fs::set_permissions(&directory, fs::Permissions::from_mode(0o500)).unwrap();
-    let probe = directory.join("permission-probe");
-    if fs::hard_link(&first, &probe).is_ok() {
-        fs::set_permissions(&directory, permissions).unwrap();
-        fs::remove_file(probe).unwrap();
-        eprintln!("skipping: directory permissions do not prevent hard links");
-        return;
-    }
+    let blocked = root.join("Third/metadata/Photo.jpg.json");
+    fs::remove_file(&blocked).unwrap();
+    fs::create_dir(&blocked).unwrap();
     let result = engine.execute_with_report(export, &|line| {
         eprintln!("{line}");
-        if line.starts_with("file:3:10:") && line.contains("cannot link") {
+        if line.starts_with("file:3:10:") && line.contains("expected a regular file") {
             assert!(linked(&root, "First/Photo.jpg", "Second/Photo.jpg"));
+            assert_eq!(fs::metadata(&first).unwrap().modified().unwrap(), modified);
             fs::write(&first, b"modified").unwrap();
             fs::File::options()
                 .write(true)
@@ -681,10 +656,9 @@ fn engine_rechecks_link_source_before_resetting_timestamp() {
                 .unwrap();
         }
     });
-    fs::set_permissions(&directory, permissions).unwrap();
     let result = result.unwrap();
     assert!(!result.complete);
-    assert_eq!(result.json["conflicts"], 1);
+    assert_eq!(result.json["conflicts"], 2);
     assert_eq!(result.json["copies"]["completed"], 2);
     assert_eq!(fs::read(&first).unwrap(), b"modified");
     assert_eq!(

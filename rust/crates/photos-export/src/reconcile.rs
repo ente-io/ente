@@ -1262,20 +1262,16 @@ impl Run<'_> {
                 }
             }
             let path = self.path(&destination)?;
-            let same_source = self.hardlinks
+            let mut source = prepared
+                .components
+                .iter_mut()
+                .find(|source| source.role == component.role);
+            let consolidate = self.hardlinks
                 && valid
-                && same_file::is_same_file(
-                    self.path(
-                        &prepared
-                            .components
-                            .iter()
-                            .find(|source| source.role == component.role)
-                            .context("no original is available for linking")?
-                            .location,
-                    )?,
+                && !same_file::is_same_file(
+                    self.path(&source.as_ref().context("missing original")?.location)?,
                     &path,
                 )?;
-            let consolidate = self.hardlinks && valid && !same_source;
             if consolidate {
                 let previous = previous.context("missing completed original")?;
                 ensure!(
@@ -1284,11 +1280,7 @@ impl Run<'_> {
                 );
             }
             if !valid || consolidate {
-                let source = prepared
-                    .components
-                    .iter_mut()
-                    .find(|source| source.role == component.role)
-                    .context("no verified original is available")?;
+                let source = source.as_deref_mut().context("missing original")?;
                 let temporary = if source.temporary {
                     source.location.clone()
                 } else if self.hardlinks {
@@ -1298,17 +1290,7 @@ impl Run<'_> {
                     disk::hard_link(&from, &to).with_context(|| {
                         format!("cannot link {} to {}", from.display(), path.display())
                     })?;
-                    let properties = Properties::read(&to)?;
-                    if source.verified_properties.as_ref() != Some(&properties) {
-                        ensure!(
-                            fs::matches(&to, source.size, &source.hash, self.cancel)?,
-                            super::Conflict(format!(
-                                "at {}: locally changed media",
-                                from.display()
-                            ))
-                        );
-                        source.verified_properties = Some(properties);
-                    }
+                    source.verify(self, &to)?;
                     temporary
                 } else {
                     let (temporary, file) = self.temporary(&album.key, album_id, Some(file.id))?;
@@ -1351,32 +1333,11 @@ impl Run<'_> {
                 || observed != published.properties.as_ref()
                 || renamed
             {
-                let verified = if self.hardlinks {
-                    let properties = Properties::read(&path)?;
-                    let source = prepared
-                        .components
-                        .iter_mut()
-                        .find(|source| source.role == component.role)
-                        .context("no original is available for verification")?;
-                    if source.verified_properties.as_ref().or(observed) != Some(&properties) {
-                        ensure!(
-                            fs::matches(&path, published.size, &published.hash, self.cancel)?,
-                            super::Conflict(format!(
-                                "at {}: locally changed media",
-                                path.display()
-                            ))
-                        );
-                        source.verified_properties = Some(properties);
-                    }
-                    source.verified_properties.as_mut()
+                published.properties = Some(if self.hardlinks {
+                    source.context("missing original")?.verify(self, &path)?
                 } else {
-                    None
-                };
-                let updated = fs::set_time(&path, intended_time)?;
-                if let Some(verified) = verified {
-                    verified.modified = updated.modified;
-                }
-                published.properties = Some(updated);
+                    fs::set_time(&path, intended_time)?
+                });
             }
             published.intended_time = Some(intended_time);
             published.signature = Some(prepared.signature.clone());
