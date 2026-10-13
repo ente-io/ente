@@ -73,7 +73,6 @@ export const SpaceConversationPokeButton = ({
                     fontWeight: 600,
                     height: spaceTouchTargetSize,
                     justifyContent: "flex-end",
-                    opacity: disabled ? 0.5 : 1,
                     p: 0,
                     pr: "4px",
                     width: "100%",

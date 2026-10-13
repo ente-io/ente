@@ -325,6 +325,7 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
                                                     }}
                                                     sx={{
                                                         alignItems: "center",
+                                                        appearance: "none",
                                                         bgcolor: selected
                                                             ? "rgba(255, 255, 255, 0.14)"
                                                             : "transparent",

@@ -2269,7 +2269,10 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                                 >
                                     <Avatar
                                         avatarUrl={selectedFriend.avatarUrl}
-                                        loading={isThreadRecipientLoading}
+                                        loading={
+                                            isThreadRecipientLoading &&
+                                            !selectedFriend.avatarUrl
+                                        }
                                         size={36}
                                     />
                                     <Box
