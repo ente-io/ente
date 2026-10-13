@@ -79,10 +79,10 @@ import type {
 } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
-import type { GalleryBarImplProps } from "./BarImpl";
+import type { GalleryNavigationSidebarProps } from "./GalleryNavigationSidebar";
 
 type PeopleHeaderProps = Pick<
-    GalleryBarImplProps,
+    GalleryNavigationSidebarProps,
     "people" | "onSelectPerson"
 > & { person: Person };
 

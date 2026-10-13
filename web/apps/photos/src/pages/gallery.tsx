@@ -14,7 +14,7 @@ import {
     EditAlbumDetailsDialog,
     type AlbumDetails,
 } from "@/components/Collections/EditAlbumDetailsDialog";
-import { GalleryBarAndListHeader } from "@/components/Collections/GalleryBarAndListHeader";
+import { GalleryListHeader } from "@/components/Collections/GalleryListHeader";
 import { slideshowFiles } from "@/components/Collections/album-slideshow";
 import { FamilyManagement } from "@/components/FamilyManagement";
 import type { FileListHeaderOrFooter } from "@/components/FileList";
@@ -1995,6 +1995,28 @@ const Page: React.FC = () => {
                     dispatch({ type: "showPeople" });
                 }}
                 onSelectPerson={handleSelectPerson}
+                galleryNavigation={
+                    isCleanupViewOpen
+                        ? undefined
+                        : {
+                              shouldHide: isInSearchMode,
+                              collectionSummaries: barCollectionSummaries,
+                              activeCollectionID,
+                              onSelectCollectionID:
+                                  handleShowCollectionSummaryWithID,
+                              people:
+                                  state.view?.type == "people"
+                                      ? state.view.visiblePeople
+                                      : [],
+                              allPeople:
+                                  state.view?.type == "people"
+                                      ? state.view.people
+                                      : [],
+                              activePerson,
+                              canCreateAlbum: !isInArchiveSection,
+                              onRemotePull: remotePull,
+                          }
+                }
                 alternateHeader={
                     showSelectionBar ? (
                         <SelectedFileOptions
@@ -2039,7 +2061,7 @@ const Page: React.FC = () => {
                         {isFirstLoad && <FirstLoadMessage />}
                         {isOffline && <OfflineMessage />}
 
-                        <GalleryBarAndListHeader
+                        <GalleryListHeader
                             {...{
                                 user,
                                 // TODO: These are incorrect assertions, the types of the
@@ -2049,7 +2071,6 @@ const Page: React.FC = () => {
                                 activePerson,
                                 setFileListHeader,
                                 saveGroups,
-                                canCreateAlbum: !isInArchiveSection,
                                 onAddSaveGroup,
                                 onEditAlbumDetails: showEditAlbumDetails,
                                 onShowMap: handleShowCollectionMap,
@@ -2063,11 +2084,6 @@ const Page: React.FC = () => {
                             people={
                                 (state.view?.type == "people"
                                     ? state.view.visiblePeople
-                                    : undefined) ?? []
-                            }
-                            allPeople={
-                                (state.view?.type == "people"
-                                    ? state.view.people
                                     : undefined) ?? []
                             }
                             setBlockingLoad={setBlockingLoad}
