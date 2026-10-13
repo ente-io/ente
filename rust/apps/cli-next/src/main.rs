@@ -188,12 +188,8 @@ async fn account_command(command: AccountCommand, options: &Options) -> Result<(
         }
         AccountCommand::View { name } => {
             let state = State::load()?;
-            let account = AccountView::new(&state.accounts[state.named(&name)?], state.selected);
-            if options.json {
-                output::json(&account)
-            } else {
-                output::account(&account)
-            }
+            let index = state.named(&name)?;
+            output_account(state, index, options.json)
         }
         AccountCommand::Token { selector, app } => {
             let state = State::load()?;

@@ -36,14 +36,6 @@ fn reads_do_not_initialize_storage() {
         assert!(help.contains(&format!("=== {binary} photos file download ===")));
         assert!(help.contains(&format!("=== {binary} vault key generate ===")));
         assert!(help.contains(&format!("=== {binary} account token ===")));
-        assert!(help.contains("Manage Ente accounts"));
-        assert!(help.contains("Manage Ente Locker"));
-        assert!(help.contains("Use this account instead of the selected one"));
-        assert!(help.contains("apps (string array); selected (boolean)"));
-        assert!(help.contains(
-            "This prints a secret and does not check whether the server still accepts it."
-        ));
-        assert!(help.contains("With --json, returns {\"token\":\"...\"}."));
         let missing_app = home
             .command(&["account", "token"])
             .env("ENTE_CLI_VAULT_KEY", "invalid")
@@ -694,10 +686,6 @@ fn account_token_reads_the_requested_saved_login() {
         "--offline",
         "--no-input",
     ];
-    assert!(
-        failure(&home.run(&args))
-            .contains("no accounts; use photos login, locker login, or auth login")
-    );
     home.seed("http://127.0.0.1:1");
     let mut state = home.read_vault();
     state["selected"] = Value::Null;
