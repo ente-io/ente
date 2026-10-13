@@ -71,10 +71,7 @@ export interface SearchBarProps {
     onSelectPerson: (personID: string) => void;
 }
 
-export const SearchBar: React.FC<
-    SearchBarProps & { placement?: "header" | "rail" }
-> = ({ placement = "header", ...props }) => {
-    const isRail = placement === "rail";
+export const SearchBar: React.FC<SearchBarProps> = (props) => {
     const isSmallWidth = useIsSmallWidth();
     const [open, setOpen] = useState(false);
     const [searchResetKey, setSearchResetKey] = useState(0);
@@ -111,13 +108,9 @@ export const SearchBar: React.FC<
         return () => document.removeEventListener("keydown", handleKeyDown);
     }, []);
 
-    const closeButton = (!isRail || isSmallWidth) && props.isInSearchMode && (
+    const closeButton = isSmallWidth && props.isInSearchMode && (
         <Tooltip title={t("close")}>
-            <IconButton
-                aria-label={t("close")}
-                onClick={clearSearch}
-                sx={{ mr: isRail ? 0 : "8px" }}
-            >
+            <IconButton aria-label={t("close")} onClick={clearSearch}>
                 <CloseIcon />
             </IconButton>
         </Tooltip>
@@ -125,10 +118,7 @@ export const SearchBar: React.FC<
 
     return (
         <>
-            <Stack
-                direction={isRail ? "column" : "row"}
-                sx={{ alignItems: "center", gap: isRail ? "12px" : 0 }}
-            >
+            <Stack sx={{ alignItems: "center", gap: "12px" }}>
                 {closeButton}
                 <Tooltip title={`Search (${shortcut})`}>
                     <FocusVisibleButton
@@ -138,11 +128,10 @@ export const SearchBar: React.FC<
                         onClick={showSearch}
                         sx={{
                             minWidth: 0,
-                            width: isRail ? 38 : isSmallWidth ? 40 : 48,
-                            height: isRail ? 38 : isSmallWidth ? 40 : 48,
+                            width: 38,
+                            height: 38,
                             p: 0,
-                            mr: isRail ? 0 : "8px",
-                            borderRadius: isRail ? "12px" : "16px",
+                            borderRadius: "12px",
                         }}
                     >
                         <HugeiconsIcon icon={Search01Icon} size={20} />

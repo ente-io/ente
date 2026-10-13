@@ -27,14 +27,12 @@ export const PhotosNavigationShell: React.FC<
         PhotosNavigationShellProps & {
             showRail: boolean;
             showNormalNavigation: boolean;
-            hasSelection: boolean;
             alternateHeader: ReactNode;
         }
     >
 > = ({
     showRail,
     showNormalNavigation,
-    hasSelection,
     alternateHeader,
     children,
     ...props
@@ -59,15 +57,12 @@ export const PhotosNavigationShell: React.FC<
         >
             {showRail && (
                 <NavbarBase
-                    sx={[
-                        {
-                            pl: { xs: "9px", sm: "16px" },
-                            pr: { xs: "12px", sm: "16px" },
-                            flexBasis: { xs: "60px", sm: "76px" },
-                            borderBottom: "none",
-                        },
-                        hasSelection && { borderColor: "accent.main" },
-                    ]}
+                    sx={{
+                        pl: { xs: "9px", sm: "16px" },
+                        pr: { xs: "12px", sm: "16px" },
+                        flexBasis: { xs: "60px", sm: "76px" },
+                        borderBottom: "none",
+                    }}
                 >
                     {showNormalNavigation ? (
                         <NormalHeaderContents
@@ -203,7 +198,7 @@ const NormalNavigationRail: React.FC<
 > = ({ onSidebar, onHome, ...props }) => (
     <>
         <HomeButton onClick={onHome} />
-        <SearchBar {...props} placement="rail" />
+        <SearchBar {...props} />
         <Box sx={{ flex: 1 }} />
         <Tooltip title={t("settings")}>
             <FocusVisibleButton
