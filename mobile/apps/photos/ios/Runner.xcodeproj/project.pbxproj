@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ABB487F057701138D27F550A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB627F0726BF9EB1E87E584 /* SceneDelegate.swift */; };
 		0717332930777BC500530EAD /* NotificationServiceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0717332230777BC500530EAD /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		0856877A9F80F9E052DBFDB4 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F82DAEEB9A7D9FD00E0FFA1E /* Pods_Runner.framework */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
@@ -21,7 +22,6 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		ABB487F057701138D27F550A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB627F0726BF9EB1E87E584 /* SceneDelegate.swift */; };
 		CEE166242DD5E7820012CF61 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83C2B755B0600BA9516 /* WidgetKit.framework */; };
 		CEE166252DD5E7820012CF61 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83E2B755B0600BA9516 /* SwiftUI.framework */; };
 		CEE166302DD5E7830012CF61 /* EnteAlbumWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE166232DD5E7820012CF61 /* EnteAlbumWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -102,6 +102,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6DB627F0726BF9EB1E87E584 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		0717332230777BC500530EAD /* NotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
@@ -116,7 +117,6 @@
 		6A1E2DBA51995DADEC1ED952 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		6DACD83C2B755B0600BA9516 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		6DACD83E2B755B0600BA9516 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		6DB627F0726BF9EB1E87E584 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -538,7 +538,7 @@
 		97C146E61CF9000F007C117D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 2700;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 1510;
 				TargetAttributes = {
 					0717332130777BC500530EAD = {
