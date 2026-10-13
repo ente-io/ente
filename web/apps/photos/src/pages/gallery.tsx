@@ -1379,6 +1379,9 @@ const Page: React.FC = () => {
                     options?.shouldExitSearchMode ?? true;
                 dispatch({ type: "exitSearch", shouldExitSearchMode });
             } else {
+                if (barMode === "hidden-albums") {
+                    dispatch({ type: "showAlbums" });
+                }
                 dispatch({
                     type: "enterSearchMode",
                     searchSuggestion: searchOption.suggestion,
