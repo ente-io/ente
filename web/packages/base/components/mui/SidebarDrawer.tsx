@@ -9,7 +9,7 @@ import {
     Typography,
     type DrawerProps,
 } from "@mui/material";
-import { isDesktop } from "ente-base/app";
+import { appName, isDesktop } from "ente-base/app";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import React, { useContext } from "react";
 import {
@@ -58,7 +58,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                             boxShadow: "none",
                             border: 0,
                         }),
-                        scrollbarWidth: "thin",
+                        ...(appName !== "photos" && { scrollbarWidth: "thin" }),
                         // Extra specificity overrides inherited padding.
                         "&&": { padding: 0 },
                     },

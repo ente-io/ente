@@ -203,7 +203,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 {({ width, height }) => (
                     <FixedSizeList
                         ref={listRef}
-                        outerElementType={BarScrollContainer}
                         width={width}
                         height={height}
                         itemData={itemData}
@@ -396,32 +395,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         navigation
     );
 };
-
-const BarScrollContainer = styled("div")({
-    scrollbarWidth: "thin",
-    scrollbarColor: "transparent transparent",
-    "&:hover, &:focus-within": {
-        scrollbarColor:
-            "color-mix(in srgb, var(--mui-palette-text-base) 20%, transparent) transparent",
-    },
-    "@supports selector(::-webkit-scrollbar)": {
-        scrollbarWidth: "auto",
-        scrollbarColor: "auto",
-        "&:hover, &:focus-within": { scrollbarColor: "auto" },
-        "&::-webkit-scrollbar": { width: "4px" },
-        "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
-        "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "transparent",
-            borderRadius: "4px",
-        },
-        "&:hover::-webkit-scrollbar-thumb, &:focus-within::-webkit-scrollbar-thumb":
-            {
-                backgroundColor:
-                    "color-mix(in srgb, var(--mui-palette-text-base) 20%, transparent)",
-            },
-        "&::-webkit-scrollbar-button": { display: "none" },
-    },
-});
 
 type ItemData =
     | {

@@ -571,22 +571,6 @@ const createSelectStyles = (
         flexDirection: "column",
         gap: "8px",
         padding: 0,
-        scrollbarWidth: "thin",
-        scrollbarColor: `${theme.vars.palette.stroke.muted} transparent`,
-        "@supports selector(::-webkit-scrollbar)": {
-            scrollbarWidth: "auto",
-            scrollbarColor: "auto",
-            "&::-webkit-scrollbar": { width: "4px" },
-            "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
-            "&::-webkit-scrollbar-thumb": {
-                backgroundColor: theme.vars.palette.stroke.muted,
-                borderRadius: "4px",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-                backgroundColor: theme.vars.palette.text.muted,
-            },
-            "&::-webkit-scrollbar-button": { display: "none" },
-        },
     }),
     group: (style) => ({
         ...style,

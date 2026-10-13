@@ -565,35 +565,6 @@ function RootSidebarContents({
                         <Box
                             sx={{
                                 overflowY: "auto",
-                                scrollbarWidth: "thin",
-                                scrollbarColor: "transparent transparent",
-                                "&:hover, &:focus-within": {
-                                    scrollbarColor:
-                                        "color-mix(in srgb, var(--mui-palette-text-base) 20%, transparent) transparent",
-                                },
-                                "@supports selector(::-webkit-scrollbar)": {
-                                    scrollbarWidth: "auto",
-                                    scrollbarColor: "auto",
-                                    "&:hover, &:focus-within": {
-                                        scrollbarColor: "auto",
-                                    },
-                                    "&::-webkit-scrollbar": { width: "4px" },
-                                    "&::-webkit-scrollbar-track": {
-                                        bgcolor: "transparent",
-                                    },
-                                    "&::-webkit-scrollbar-thumb": {
-                                        bgcolor: "transparent",
-                                        borderRadius: "4px",
-                                    },
-                                    "&:hover::-webkit-scrollbar-thumb, &:focus-within::-webkit-scrollbar-thumb":
-                                        {
-                                            bgcolor:
-                                                "color-mix(in srgb, var(--mui-palette-text-base) 20%, transparent)",
-                                        },
-                                    "&::-webkit-scrollbar-button": {
-                                        display: "none",
-                                    },
-                                },
                                 "& .MuiDivider-root": {
                                     borderColor: "stroke.muted",
                                 },
