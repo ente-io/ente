@@ -323,7 +323,6 @@ Future<void> _runMinimally(
       NetworkClient.instance.downloadDio,
       packageInfo,
     );
-    await localSettings.migrateGalleryLayoutPreferences();
     MLDataDB.initialize(
       preferRust: flagService.rustMlDb || localSettings.rustMlDbOverride,
     );
@@ -495,7 +494,9 @@ Future<void> _init(
       packageInfo,
     );
 
-    await localSettings.migrateGalleryLayoutPreferences();
+    if (!isBackground) {
+      await localSettings.migrateGalleryLayoutPreferences();
+    }
     MLDataDB.initialize(
       preferRust: flagService.rustMlDb || localSettings.rustMlDbOverride,
     );
