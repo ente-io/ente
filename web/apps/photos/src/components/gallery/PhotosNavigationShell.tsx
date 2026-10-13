@@ -6,8 +6,7 @@ import {
     Upload01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import MenuIcon from "@mui/icons-material/Menu";
-import { Box, IconButton, Stack, Tooltip } from "@mui/material";
+import { Box, Stack, SvgIcon, Tooltip } from "@mui/material";
 import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
@@ -15,7 +14,7 @@ import { NavbarBase } from "ente-base/components/Navbar";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { ut } from "ente-base/i18n";
 import { t } from "i18next";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 type PhotosNavigationShellProps = SearchBarProps & {
     onSidebar: () => void;
@@ -40,7 +39,8 @@ export const PhotosNavigationShell: React.FC<
     children,
     ...props
 }) => {
-    const isSmallWidth = useIsSmallWidth();
+    const [railOpen, setRailOpen] = useState(true);
+    const toggleRail = () => setRailOpen((open) => !open);
     return (
         <Stack
             sx={(theme) => ({
@@ -48,14 +48,12 @@ export const PhotosNavigationShell: React.FC<
                 minWidth: 0,
                 minHeight: 0,
                 ...(showRail && {
-                    [theme.breakpoints.up("sm")]: {
-                        bgcolor: "#F4F4F4",
-                        ...theme.applyStyles("light", {
-                            "& > :first-child .MuiButton-colorSecondary, & > :last-child > nav .MuiButton-colorSecondary":
-                                { "--mui-palette-secondary-main": "#FFFFFF" },
-                        }),
-                        ...theme.applyStyles("dark", { bgcolor: "#161616" }),
-                    },
+                    bgcolor: "#F4F4F4",
+                    ...theme.applyStyles("light", {
+                        "& > :first-child .MuiButton-colorSecondary, & > :last-child > nav .MuiButton-colorSecondary":
+                            { "--mui-palette-secondary-main": "#FFFFFF" },
+                    }),
+                    ...theme.applyStyles("dark", { bgcolor: "#161616" }),
                 }),
             })}
         >
@@ -63,16 +61,19 @@ export const PhotosNavigationShell: React.FC<
                 <NavbarBase
                     sx={[
                         {
-                            mb: { xs: "12px", sm: 0 },
-                            px: { xs: "4px", sm: "16px" },
-                            flexBasis: { sm: "76px" },
-                            borderBottom: { sm: "none" },
+                            pl: { xs: "9px", sm: "16px" },
+                            pr: { xs: "12px", sm: "16px" },
+                            flexBasis: { xs: "60px", sm: "76px" },
+                            borderBottom: "none",
                         },
                         hasSelection && { borderColor: "accent.main" },
                     ]}
                 >
                     {showNormalNavigation ? (
-                        <NormalHeaderContents {...props} />
+                        <NormalHeaderContents
+                            {...props}
+                            {...{ railOpen, toggleRail }}
+                        />
                     ) : (
                         alternateHeader
                     )}
@@ -84,23 +85,28 @@ export const PhotosNavigationShell: React.FC<
                     flex: 1,
                     minWidth: 0,
                     minHeight: 0,
-                    p: showRail ? { xs: 0, sm: "0 11px 11px 0" } : 0,
+                    p: showRail
+                        ? {
+                              xs: railOpen ? "0 8px 8px 0" : "0 8px 8px",
+                              sm: railOpen ? "0 11px 11px 0" : "0 11px 11px",
+                          }
+                        : 0,
                 }}
             >
                 {showRail && (
                     <Box
                         component="nav"
                         sx={{
-                            display: { xs: "none", sm: "flex" },
+                            display: railOpen ? "flex" : "none",
                             flexDirection: "column",
                             alignItems: "center",
                             flexShrink: 0,
-                            width: "72px",
-                            px: "14px",
+                            width: { xs: "56px", sm: "72px" },
+                            px: { xs: "9px", sm: "14px" },
                             gap: "12px",
                         }}
                     >
-                        {!isSmallWidth && showNormalNavigation && (
+                        {showNormalNavigation && (
                             <NormalNavigationRail {...props} />
                         )}
                     </Box>
@@ -112,16 +118,13 @@ export const PhotosNavigationShell: React.FC<
                         minHeight: 0,
                         pt: showRail ? { xs: 0, sm: "12px" } : 0,
                         ...(showRail && {
-                            [theme.breakpoints.up("sm")]: {
-                                "--mui-palette-background-default": "#FFFFFF",
-                                bgcolor: "background.default",
-                                borderRadius: "20px",
-                                overflow: "hidden",
-                                ...theme.applyStyles("dark", {
-                                    "--mui-palette-background-default":
-                                        "#212121",
-                                }),
-                            },
+                            "--mui-palette-background-default": "#FFFFFF",
+                            bgcolor: "background.default",
+                            borderRadius: "20px",
+                            overflow: "hidden",
+                            ...theme.applyStyles("dark", {
+                                "--mui-palette-background-default": "#212121",
+                            }),
                         }),
                     })}
                 >
@@ -132,14 +135,9 @@ export const PhotosNavigationShell: React.FC<
     );
 };
 
-const NormalHeaderContents: React.FC<PhotosNavigationShellProps> = ({
-    onSidebar,
-    onUpload,
-    onHome,
-    ...props
-}) => {
-    const isSmallWidth = useIsSmallWidth();
-
+const NormalHeaderContents: React.FC<
+    PhotosNavigationShellProps & { railOpen: boolean; toggleRail: () => void }
+> = ({ onUpload, railOpen, toggleRail }) => {
     return (
         <Box
             sx={{
@@ -149,47 +147,62 @@ const NormalHeaderContents: React.FC<PhotosNavigationShellProps> = ({
                 flex: 1,
             }}
         >
-            {isSmallWidth && <SidebarButton onClick={onSidebar} />}
-            {!isSmallWidth && (
-                <Tooltip title={ut("Home")}>
-                    <FocusVisibleButton
-                        color="secondary"
-                        aria-label={ut("Home")}
-                        onClick={onHome}
-                        sx={{
-                            minWidth: 0,
-                            width: 38,
-                            height: 38,
-                            p: 0,
-                            borderRadius: "12px",
-                        }}
+            <Tooltip title={railOpen ? ut("Hide sidebar") : ut("Show sidebar")}>
+                <FocusVisibleButton
+                    color="secondary"
+                    aria-label={
+                        railOpen ? ut("Hide sidebar") : ut("Show sidebar")
+                    }
+                    aria-expanded={railOpen}
+                    onClick={toggleRail}
+                    sx={{
+                        minWidth: 0,
+                        width: 38,
+                        height: 38,
+                        p: 0,
+                        borderRadius: "12px",
+                    }}
+                >
+                    <SvgIcon
+                        sx={{ fontSize: 20, fill: "none" }}
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                     >
-                        <HugeiconsIcon icon={Home01Icon} size={20} />
-                    </FocusVisibleButton>
-                </Tooltip>
-            )}
+                        <rect x="3" y="4" width="18" height="16" rx="3" />
+                        <path
+                            d={
+                                railOpen
+                                    ? "M9 4v16M15 10l-2 2 2 2"
+                                    : "M9 4v16M13 10l2 2-2 2"
+                            }
+                        />
+                    </SvgIcon>
+                </FocusVisibleButton>
+            </Tooltip>
             <EnteLogoBox
                 sx={{
                     position: "absolute",
                     left: "50%",
                     transform: "translateX(-50%)",
                     pointerEvents: "none",
-                    "& svg": { height: { xs: "15px", sm: "20px" } },
+                    "& svg": { height: { xs: "18px", sm: "20px" } },
                 }}
             >
                 <EnteLogo height={15} />
             </EnteLogoBox>
             <Box sx={{ flex: 1 }} />
-            {isSmallWidth && <SearchBar {...props} />}
             <UploadButton onClick={onUpload} />
         </Box>
     );
 };
 
 const NormalNavigationRail: React.FC<
-    SearchBarProps & { onSidebar: () => void }
-> = ({ onSidebar, ...props }) => (
+    SearchBarProps & { onSidebar: () => void; onHome: () => void }
+> = ({ onSidebar, onHome, ...props }) => (
     <>
+        <HomeButton onClick={onHome} />
         <SearchBar {...props} placement="rail" />
         <Box sx={{ flex: 1 }} />
         <Tooltip title={t("settings")}>
@@ -213,10 +226,23 @@ const NormalNavigationRail: React.FC<
     </>
 );
 
-const SidebarButton: React.FC<ButtonishProps> = ({ onClick }) => (
-    <IconButton {...{ onClick }}>
-        <MenuIcon />
-    </IconButton>
+const HomeButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={ut("Home")}>
+        <FocusVisibleButton
+            color="secondary"
+            aria-label={ut("Home")}
+            onClick={onClick}
+            sx={{
+                minWidth: 0,
+                width: 38,
+                height: 38,
+                p: 0,
+                borderRadius: "12px",
+            }}
+        >
+            <HugeiconsIcon icon={Home01Icon} size={20} />
+        </FocusVisibleButton>
+    </Tooltip>
 );
 
 export const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
@@ -228,13 +254,28 @@ export const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     return (
         <>
             {isSmallWidth ? (
-                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
+                <FocusVisibleButton
+                    color="secondary"
+                    aria-label={t("upload")}
+                    sx={{
+                        minWidth: 0,
+                        width: 38,
+                        height: 38,
+                        p: 0,
+                        borderRadius: "12px",
+                    }}
+                    {...{ onClick, disabled }}
+                >
+                    {icon}
+                </FocusVisibleButton>
             ) : (
                 <FocusVisibleButton
                     color="secondary"
                     startIcon={icon}
                     sx={{
-                        width: "140px",
+                        minWidth: "140px",
+                        flexShrink: 0,
+                        whiteSpace: "nowrap",
                         height: "52px",
                         p: "18px 24px",
                         borderRadius: "20px",

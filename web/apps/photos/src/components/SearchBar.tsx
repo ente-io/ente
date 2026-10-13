@@ -111,12 +111,12 @@ export const SearchBar: React.FC<
         return () => document.removeEventListener("keydown", handleKeyDown);
     }, []);
 
-    const closeButton = !isRail && props.isInSearchMode && (
+    const closeButton = (!isRail || isSmallWidth) && props.isInSearchMode && (
         <Tooltip title={t("close")}>
             <IconButton
                 aria-label={t("close")}
                 onClick={clearSearch}
-                sx={{ mr: "8px" }}
+                sx={{ mr: isRail ? 0 : "8px" }}
             >
                 <CloseIcon />
             </IconButton>
