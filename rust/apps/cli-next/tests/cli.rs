@@ -37,6 +37,8 @@ fn reads_do_not_initialize_storage() {
         assert!(help.contains(&format!("=== {binary} vault key generate ===")));
         assert!(help.contains("--hardlinks"));
         assert!(help.contains("Linked files share contents, timestamps and permissions."));
+        assert!(help.contains(&format!("=== {binary} paste create ===")));
+        assert!(help.contains(&format!("=== {binary} paste consume ===")));
         assert!(help.contains(&format!("=== {binary} account token ===")));
         for command in ["login", "token"] {
             let missing_app = home
@@ -964,6 +966,9 @@ mod files;
 
 #[path = "support/auth.rs"]
 mod auth;
+
+#[path = "support/paste.rs"]
+mod paste;
 
 #[cfg(feature = "museum")]
 #[path = "support/museum.rs"]

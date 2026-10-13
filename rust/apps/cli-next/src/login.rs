@@ -8,7 +8,6 @@ use ente_accounts::{
 };
 use ente_core::http::{Api, ApiConfig, Http};
 use serde::Deserialize;
-use url::Url;
 use uuid::Uuid;
 use zeroize::{ZeroizeOnDrop, Zeroizing};
 
@@ -21,7 +20,7 @@ use crate::{
 
 pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)> {
     let app = args.app;
-    let host = args.host.as_deref().map(normalize_host).transpose()?;
+    let host = args.host.as_deref().map(api::normalize_host).transpose()?;
     let credentials = args.input.as_deref().map(Credentials::read).transpose()?;
     let interactive = credentials.is_none() && options.can_prompt();
     ensure!(
@@ -155,37 +154,6 @@ pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)>
         eprintln!("Could not end the {session} login: {error}");
     }
     result
-}
-
-fn normalize_host(host: &str) -> Result<String> {
-    let input = if host.contains("://") {
-        host.to_owned()
-    } else {
-        format!("https://{host}")
-    };
-    let mut url = Url::parse(&input).context("invalid API host")?;
-    if !host.contains("://")
-        && url.host_str().is_some_and(|h| {
-            h == "localhost"
-                || h.trim_matches(['[', ']'])
-                    .parse::<std::net::IpAddr>()
-                    .is_ok_and(|ip| ip.is_loopback())
-        })
-    {
-        ensure!(
-            url.set_scheme("http").is_ok(),
-            "host must be an HTTP or HTTPS origin"
-        );
-    }
-    ensure!(
-        matches!(url.scheme(), "http" | "https") && url.host_str().is_some(),
-        "host must be an HTTP or HTTPS origin"
-    );
-    ensure!(
-        url.username().is_empty() && url.password().is_none(),
-        "host must not contain credentials"
-    );
-    Ok(url.origin().ascii_serialization())
 }
 
 #[derive(Deserialize, ZeroizeOnDrop)]

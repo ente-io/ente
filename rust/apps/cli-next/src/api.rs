@@ -23,6 +23,37 @@ use crate::{
 
 pub(crate) const USER_AGENT: &str = concat!("ente-cli-next/", env!("CARGO_PKG_VERSION"));
 
+pub fn normalize_host(host: &str) -> Result<String> {
+    let input = if host.contains("://") {
+        host.to_owned()
+    } else {
+        format!("https://{host}")
+    };
+    let mut url = Url::parse(&input).context("invalid API host")?;
+    if !host.contains("://")
+        && url.host_str().is_some_and(|h| {
+            h == "localhost"
+                || h.trim_matches(['[', ']'])
+                    .parse::<std::net::IpAddr>()
+                    .is_ok_and(|ip| ip.is_loopback())
+        })
+    {
+        ensure!(
+            url.set_scheme("http").is_ok(),
+            "host must be an HTTP or HTTPS origin"
+        );
+    }
+    ensure!(
+        matches!(url.scheme(), "http" | "https") && url.host_str().is_some(),
+        "host must be an HTTP or HTTPS origin"
+    );
+    ensure!(
+        url.username().is_empty() && url.password().is_none(),
+        "host must not contain credentials"
+    );
+    Ok(url.origin().ascii_serialization())
+}
+
 pub fn http() -> Result<Client> {
     Ok(Client::builder()
         .user_agent(USER_AGENT)
