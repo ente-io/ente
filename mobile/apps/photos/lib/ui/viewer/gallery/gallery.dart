@@ -19,7 +19,6 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import "package:photos/models/gallery/gallery_groups.dart";
-import "package:photos/models/gallery/gallery_layout_config.dart";
 import "package:photos/models/gallery_type.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart" show localSettings;
@@ -396,7 +395,6 @@ class GalleryState extends State<Gallery> {
       showGallerySettingsCTA: widget.showGallerySettingsCTA,
       groupHeaderAction: widget.groupHeaderAction,
       layoutTypeOverride: widget.layoutTypeOverride,
-      justifiedLayoutAvailable: isJustifiedLayoutAvailable,
     );
     galleryGroups = groups;
 
