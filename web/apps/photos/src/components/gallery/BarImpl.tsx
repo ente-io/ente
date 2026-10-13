@@ -4,23 +4,23 @@ import type { PeopleSortBy } from "@/utils/people-sort";
 import { Link05Icon, PinIcon, StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveIcon from "@mui/icons-material/Archive";
+import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
-import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
-import { Overlay } from "ente-base/components/containers";
-import { FilledIconButton } from "ente-base/components/mui";
-import { Ellipsized2LineTypography } from "ente-base/components/Typography";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import {
-    BarItemTile,
-    ItemCard,
-    TileTextOverlay,
-} from "ente-new/photos/components/Tiles";
-import {
-    thumbnailLayoutMinColumns,
-    thumbnailMaxWidth,
-} from "ente-new/photos/components/utils/thumbnail-grid-layout";
+    Box,
+    ButtonBase,
+    Drawer,
+    IconButton,
+    Stack,
+    Tooltip,
+    Typography,
+    styled,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { ItemCard } from "ente-new/photos/components/Tiles";
 import type {
     CollectionSummary,
     CollectionSummaryAttribute,
@@ -30,8 +30,8 @@ import type { Person } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import React, {
     memo,
-    useCallback,
     useEffect,
+    useId,
     useMemo,
     useRef,
     useState,
@@ -44,7 +44,12 @@ import {
 } from "react-window";
 import type { GalleryBarMode } from "./reducer";
 
-export interface GalleryBarImplProps {
+export interface GalleryBarPresentationProps {
+    collapsed: boolean;
+    mobileDrawerProps: ModalVisibilityProps;
+}
+
+export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     mode: GalleryBarMode;
     collectionSummaries: CollectionSummary[];
     activeCollectionID: number | undefined;
@@ -74,54 +79,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     people,
     activePerson,
     onSelectPerson,
+    collapsed,
+    mobileDrawerProps,
 }) => {
-    const isSmallWidth = useIsSmallWidth();
-
-    const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [canScrollRight, setCanScrollRight] = useState(false);
-
-    const listContainerRef = useRef<HTMLDivElement | null>(null);
+    const mobile = useMediaQuery(useTheme().breakpoints.down("md"));
+    const titleID = useId();
     const listRef = useRef<FixedSizeList | null>(null);
-
-    const updateScrollState = useCallback(() => {
-        if (!listContainerRef.current) return;
-
-        const { scrollLeft, scrollWidth, clientWidth } =
-            listContainerRef.current;
-
-        setCanScrollLeft(scrollLeft > 0);
-        setCanScrollRight(scrollLeft + clientWidth < scrollWidth);
-    }, []);
-
-    // react-window supplies the DOM node after the first render.
-    // The callback ref initializes listeners; the regular ref handles later changes.
-    const listContainerCallbackRef = useCallback<
-        (ref: HTMLDivElement | null) => void
-    >(
-        (ref) => {
-            listContainerRef.current = ref;
-            if (!ref) return undefined;
-
-            ref.addEventListener("scroll", updateScrollState);
-            const observer = new ResizeObserver(updateScrollState);
-            observer.observe(ref);
-
-            updateScrollState();
-
-            return () => {
-                ref.removeEventListener("scroll", updateScrollState);
-                observer.unobserve(ref);
-            };
-        },
-        [updateScrollState],
-    );
-
-    useEffect(() => {
-        updateScrollState();
-    }, [updateScrollState, mode, collectionSummaries, people]);
-
-    const scroll = (direction: number) => () =>
-        listContainerRef.current?.scrollBy(250 * direction, 0);
+    const [viewportHeight, setViewportHeight] = useState(0);
 
     useEffect(() => {
         if (!listRef.current) return;
@@ -139,7 +103,17 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 break;
         }
         if (i != -1) listRef.current.scrollToItem(i, "smart");
-    }, [mode, collectionSummaries, activeCollectionID, people, activePerson]);
+    }, [
+        mode,
+        collectionSummaries,
+        activeCollectionID,
+        people,
+        activePerson,
+        collapsed,
+        mobile,
+        mobileDrawerProps.open,
+        viewportHeight,
+    ]);
 
     const itemData = useMemo<ItemData>(
         () =>
@@ -169,177 +143,185 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         ],
     );
 
-    const controls1 = isSmallWidth && (
-        <Stack
-            direction="row"
-            sx={{ alignItems: "center", gap: 1, minHeight: "64px" }}
-        >
-            {mode != "people" ? (
-                <CollectionsSortOptions
-                    activeSortBy={collectionsSortBy}
-                    onChangeSortBy={onChangeCollectionsSortBy}
-                    transparentTriggerButtonBackground
-                />
-            ) : (
-                <PeopleSortOptions
-                    activeSortBy={peopleSortBy}
-                    onChangeSortBy={onChangePeopleSortBy}
-                    transparentTriggerButtonBackground
-                />
-            )}
-            <IconButton
-                onClick={mode == "people" ? onShowAllPeople : onShowAllAlbums}
-            >
-                <ExpandMoreIcon />
-            </IconButton>
-        </Stack>
-    );
+    const title =
+        mode == "people"
+            ? t("people")
+            : mode == "hidden-albums"
+              ? t("hidden_albums")
+              : mode == "archive-albums"
+                ? t("section_archive")
+                : t("albums");
 
-    const controls2 = !isSmallWidth && (
+    const navigation = (
         <Stack
-            direction="row"
-            sx={{ alignItems: "center", gap: 1, height: "64px" }}
+            component="nav"
+            aria-labelledby={titleID}
+            sx={(theme) => ({
+                "--gallery-navigation-surface": "#FFFFFF",
+                "--gallery-navigation-hover":
+                    "color-mix(in srgb, var(--mui-palette-text-base) 8%, var(--gallery-navigation-surface))",
+                display: collapsed && !mobile ? "none" : "flex",
+                flexShrink: 0,
+                width: mobile ? "100%" : 328,
+                height: "100%",
+                minHeight: 0,
+                px: mobile ? "12px" : "16px",
+                py: mobile ? "14px" : 0,
+                borderLeft: mobile ? 0 : "1px solid",
+                borderColor: "#E0E0E0",
+                gap: "16px",
+                ...theme.applyStyles("dark", {
+                    "--gallery-navigation-surface": "#212121",
+                    borderColor: "#3E3E3E",
+                }),
+            })}
         >
-            {mode != "people" ? (
-                <CollectionsSortOptions
-                    activeSortBy={collectionsSortBy}
-                    onChangeSortBy={onChangeCollectionsSortBy}
-                />
-            ) : (
-                <PeopleSortOptions
-                    activeSortBy={peopleSortBy}
-                    onChangeSortBy={onChangePeopleSortBy}
-                />
-            )}
-            <FilledIconButton
-                onClick={mode == "people" ? onShowAllPeople : onShowAllAlbums}
+            <Stack
+                direction="row"
+                sx={{
+                    alignItems: "center",
+                    flexShrink: 0,
+                    height: 38,
+                    gap: 0.5,
+                    "& .MuiIconButton-root": {
+                        width: 38,
+                        height: 38,
+                        borderRadius: "12px",
+                        bgcolor: "var(--gallery-navigation-surface)",
+                        "&:hover": {
+                            bgcolor: "var(--gallery-navigation-hover)",
+                        },
+                    },
+                }}
             >
-                <ExpandMoreIcon />
-            </FilledIconButton>
-        </Stack>
-    );
-
-    return (
-        <BarWrapper
-            style={
-                {
-                    "--et-bar-bottom-border-color":
-                        mode == "people" && people.length == 0
-                            ? "transparent"
-                            : "var(--mui-palette-divider)",
-                } as React.CSSProperties
-            }
-        >
-            {(mode == "hidden-albums" ||
-                mode == "archive-albums" ||
-                isSmallWidth) && (
-                <Row1>
-                    {mode == "hidden-albums" ? (
-                        <Typography>{t("hidden_albums")}</Typography>
-                    ) : mode == "archive-albums" ? (
-                        <Typography>{t("section_archive")}</Typography>
-                    ) : null}
-                    {controls1}
-                </Row1>
-            )}
-            <Row2>
-                <ListWrapper>
-                    {canScrollLeft && <ScrollButtonLeft onClick={scroll(-1)} />}
-                    <AutoSizer disableHeight>
-                        {({ width }) => (
-                            <FixedSizeList
-                                ref={listRef}
-                                outerRef={listContainerCallbackRef}
-                                layout="horizontal"
-                                width={width}
-                                height={110}
-                                itemData={itemData}
-                                itemKey={getItemKey}
-                                itemCount={getItemCount(itemData)}
-                                itemSize={94}
-                            >
-                                {ListItem}
-                            </FixedSizeList>
-                        )}
-                    </AutoSizer>
-                    {canScrollRight && (
-                        <ScrollButtonRight onClick={scroll(1)} />
+                <Typography
+                    component="h2"
+                    id={titleID}
+                    sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        fontFamily: '"Outfit Variable", Outfit, sans-serif',
+                        fontSize: mobile ? 20 : 24,
+                        fontWeight: 600,
+                        lineHeight: mobile ? "26px" : "32px",
+                    }}
+                >
+                    {title}
+                </Typography>
+                {mode != "people" ? (
+                    <CollectionsSortOptions
+                        variant="v2"
+                        activeSortBy={collectionsSortBy}
+                        onChangeSortBy={onChangeCollectionsSortBy}
+                    />
+                ) : (
+                    <PeopleSortOptions
+                        variant="v2"
+                        activeSortBy={peopleSortBy}
+                        onChangeSortBy={onChangePeopleSortBy}
+                    />
+                )}
+                <Tooltip
+                    title={mode == "people" ? t("people") : t("all_albums")}
+                >
+                    <IconButton
+                        aria-label={
+                            mode == "people" ? t("people") : t("all_albums")
+                        }
+                        aria-haspopup="dialog"
+                        onClick={() => {
+                            mobileDrawerProps.onClose();
+                            if (mode == "people") onShowAllPeople();
+                            else onShowAllAlbums();
+                        }}
+                    >
+                        <ExpandMoreIcon sx={{ fontSize: 20 }} />
+                    </IconButton>
+                </Tooltip>
+                {mobile && (
+                    <IconButton
+                        aria-label={t("close")}
+                        onClick={mobileDrawerProps.onClose}
+                    >
+                        <CloseIcon sx={{ fontSize: 20 }} />
+                    </IconButton>
+                )}
+            </Stack>
+            <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
+                <AutoSizer onResize={({ height }) => setViewportHeight(height)}>
+                    {({ width, height }) => (
+                        <FixedSizeList
+                            ref={listRef}
+                            outerElementType={BarScrollContainer}
+                            width={width}
+                            height={height}
+                            itemData={itemData}
+                            itemKey={getItemKey}
+                            itemCount={getItemCount(itemData)}
+                            itemSize={mobile ? 46 : 50}
+                            style={{ overflowX: "hidden" }}
+                        >
+                            {ListItem}
+                        </FixedSizeList>
                     )}
-                </ListWrapper>
-                {controls2}
-            </Row2>
-        </BarWrapper>
+                </AutoSizer>
+            </Box>
+        </Stack>
+    );
+
+    return mobile ? (
+        <Drawer
+            {...mobileDrawerProps}
+            anchor="left"
+            slotProps={{
+                backdrop: { sx: { bgcolor: "rgba(0,0,0,0.4)" } },
+                paper: {
+                    role: "dialog",
+                    "aria-modal": true,
+                    "aria-labelledby": titleID,
+                    inert: !mobileDrawerProps.open,
+                    sx: (theme) => ({
+                        width: "min(328px, 94vw)",
+                        borderRadius: "0 20px 20px 0",
+                        boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
+                        bgcolor: "#F4F4F4",
+                        ...theme.applyStyles("dark", { bgcolor: "#161616" }),
+                    }),
+                },
+            }}
+        >
+            {navigation}
+        </Drawer>
+    ) : (
+        navigation
     );
 };
 
-const BarWrapper = styled("div")`
-    padding-inline: 24px;
-    @media (max-width: ${thumbnailMaxWidth * thumbnailLayoutMinColumns}px) {
-        padding-inline: 4px;
-    }
-    margin-block-end: 16px;
-`;
-
-const Row1 = styled("div")`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-block-end: 12px;
-`;
-
-const Row2 = styled("div")`
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    border-block-end: 1px solid var(--et-bar-bottom-border-color);
-`;
-
-const ScrollButtonBase: React.FC<
-    React.ButtonHTMLAttributes<HTMLButtonElement>
-> = (props) => (
-    <ScrollButtonBase_ {...props}>
-        <NavigateNextIcon />
-    </ScrollButtonBase_>
-);
-
-const ScrollButtonBase_ = styled("button")(({ theme }) => ({
-    position: "absolute",
-    zIndex: 2,
-    top: "7px",
-    height: "50px",
-    width: "50px",
-    border: "none",
-    padding: 0,
-    margin: 0,
-    borderRadius: "50%",
-    backgroundColor: theme.vars.palette.backdrop.muted,
-    color: theme.vars.palette.stroke.base,
-    cursor: "pointer",
-    "& > svg": { borderRadius: "50%", height: "30px", width: "30px" },
-}));
-
-const ScrollButtonLeft = styled(ScrollButtonBase)`
-    left: 0;
-    text-align: right;
-    transform: translate(-50%, 0%);
-    & > svg {
-        transform: rotate(180deg);
-    }
-`;
-
-const ScrollButtonRight = styled(ScrollButtonBase)`
-    right: 0;
-    text-align: left;
-    transform: translate(50%, 0%);
-`;
-
-const ListWrapper = styled("div")`
-    position: relative;
-    overflow: hidden;
-    height: 86px;
-    width: 100%;
-`;
+const BarScrollContainer = styled("div")({
+    scrollbarWidth: "thin",
+    scrollbarColor: "transparent transparent",
+    "&:hover, &:focus-within": {
+        scrollbarColor:
+            "color-mix(in srgb, var(--mui-palette-text-base) 20%, transparent) transparent",
+    },
+    "@supports selector(::-webkit-scrollbar)": {
+        scrollbarWidth: "auto",
+        scrollbarColor: "auto",
+        "&:hover, &:focus-within": { scrollbarColor: "auto" },
+        "&::-webkit-scrollbar": { width: "4px" },
+        "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
+        "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "transparent",
+            borderRadius: "4px",
+        },
+        "&:hover::-webkit-scrollbar-thumb, &:focus-within::-webkit-scrollbar-thumb":
+            {
+                backgroundColor:
+                    "color-mix(in srgb, var(--mui-palette-text-base) 20%, transparent)",
+            },
+        "&::-webkit-scrollbar-button": { display: "none" },
+    },
+});
 
 type ItemData =
     | {
@@ -432,27 +414,40 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
     activeCollectionID,
     onSelectCollectionID,
 }: CollectionBarCardProps) => (
-    <div>
-        <ItemCard
-            TileComponent={BarItemTile}
-            coverFile={collectionSummary.coverFile}
-            onClick={() => onSelectCollectionID(collectionSummary.id)}
-        >
-            <CardText>{collectionSummary.name}</CardText>
-            <CollectionBarCardIcon attributes={collectionSummary.attributes} />
-        </ItemCard>
-        {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
-    </div>
+    <BarCard
+        aria-label={collectionSummary.name}
+        aria-current={
+            activeCollectionID === collectionSummary.id ? "true" : undefined
+        }
+        title={collectionSummary.name}
+        onClick={() => onSelectCollectionID(collectionSummary.id)}
+    >
+        <Box aria-hidden sx={{ flexShrink: 0 }}>
+            <ItemCard
+                TileComponent={BarThumbnail}
+                coverFile={collectionSummary.coverFile}
+            />
+        </Box>
+        <CardText>{collectionSummary.name}</CardText>
+        <CollectionBarCardIcon attributes={collectionSummary.attributes} />
+    </BarCard>
 );
 
 const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <TileTextOverlay>
-        <Box sx={{ height: "2.1em" }}>
-            <Ellipsized2LineTypography variant="small">
-                {children}
-            </Ellipsized2LineTypography>
-        </Box>
-    </TileTextOverlay>
+    <Typography
+        noWrap
+        sx={(theme) => ({
+            flex: 1,
+            minWidth: 0,
+            fontFamily: '"Inter Variable", Inter, sans-serif',
+            fontSize: 14,
+            fontWeight: 500,
+            lineHeight: "20px",
+            [theme.breakpoints.down("md")]: { fontSize: 13 },
+        })}
+    >
+        {children}
+    </Typography>
 );
 
 interface CollectionBarCardIconProps {
@@ -463,59 +458,76 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     attributes,
 }) => (
     // A collection can show all four status icons at once.
-    <CollectionBarCardIcon_>
+    <CollectionBarCardIcon_ aria-hidden>
         {attributes.has("userFavorites") && (
             <HugeiconsIcon
                 icon={StarIcon}
-                size={20}
+                size={16}
                 fill="currentColor"
                 aria-hidden
             />
         )}
         {(attributes.has("pinned") || attributes.has("shareePinned")) && (
-            <HugeiconsIcon icon={PinIcon} size={18} />
+            <HugeiconsIcon icon={PinIcon} size={14} />
         )}
         {attributes.has("shared") && !attributes.has("sharedOnlyViaLink") && (
             <PeopleIcon />
         )}
         {attributes.has("sharedViaLink") && (
-            <HugeiconsIcon icon={Link05Icon} size={20} />
+            <HugeiconsIcon icon={Link05Icon} size={16} />
         )}
         {attributes.has("archived") && <ArchiveIcon sx={{ opacity: 0.48 }} />}
     </CollectionBarCardIcon_>
 );
 
-const CollectionBarCardIcon_ = styled(Overlay)`
-    padding: 3px;
+const CollectionBarCardIcon_ = styled("span")`
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
-    gap: 2px;
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    align-items: center;
+    gap: 4px;
+    color: #969696;
     & > .MuiSvgIcon-root {
-        font-size: 20px;
+        font-size: 16px;
     }
 `;
 
-const PersonPinnedIcon = styled(Overlay)`
-    padding: 4px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
-    color: white;
-    z-index: 1;
-    & > .MuiSvgIcon-root {
-        font-size: 20px;
-    }
-`;
+const BarCard = styled(ButtonBase)(({ theme }) => ({
+    display: "flex",
+    justifyContent: "flex-start",
+    gap: "12px",
+    width: "100%",
+    height: 48,
+    paddingInline: "16px 12px",
+    borderRadius: "12px",
+    color: theme.vars.palette.text.base,
+    textAlign: "left",
+    '&[aria-current="true"]': {
+        backgroundColor: "var(--gallery-navigation-surface)",
+    },
+    "&:hover": { backgroundColor: "var(--gallery-navigation-hover)" },
+    "&.Mui-focusVisible": {
+        outline: "2px solid",
+        outlineColor: theme.vars.palette.stroke.base,
+        outlineOffset: -2,
+    },
+    [theme.breakpoints.down("md")]: { height: 44 },
+}));
 
-const ActiveIndicator = styled("div")(
-    ({ theme }) => `
-    height: 3px;
-    background-color: ${theme.vars.palette.stroke.base};
-    margin-top: 19px;
-    border-radius: 2px;
-`,
-);
+const BarThumbnail = styled("div")({
+    width: 24,
+    height: 24,
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: "6px",
+    "& > img": {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        display: "block",
+    },
+    "& .MuiSvgIcon-root": { fontSize: 18 },
+});
 
 interface PersonCardProps {
     person: Person;
@@ -528,20 +540,27 @@ const PersonCard: React.FC<PersonCardProps> = ({
     activePerson,
     onSelectPerson,
 }) => (
-    <div>
-        <ItemCard
-            TileComponent={BarItemTile}
-            coverFile={person.displayFaceFile}
-            coverFaceID={person.displayFaceID}
-            onClick={() => onSelectPerson(person.id)}
+    <BarCard
+        aria-label={person.name || t("unnamed_person")}
+        aria-current={activePerson?.id === person.id ? "true" : undefined}
+        title={person.name || t("unnamed_person")}
+        onClick={() => onSelectPerson(person.id)}
+    >
+        <Box
+            aria-hidden
+            sx={{ flexShrink: 0, borderRadius: "50%", overflow: "hidden" }}
         >
-            {person.name && <CardText>{person.name}</CardText>}
-            {person.isPinned && (
-                <PersonPinnedIcon>
-                    <HugeiconsIcon icon={PinIcon} size={18} color="white" />
-                </PersonPinnedIcon>
-            )}
-        </ItemCard>
-        {activePerson?.id === person.id && <ActiveIndicator />}
-    </div>
+            <ItemCard
+                TileComponent={BarThumbnail}
+                coverFile={person.displayFaceFile}
+                coverFaceID={person.displayFaceID}
+            />
+        </Box>
+        {person.name && <CardText>{person.name}</CardText>}
+        {person.isPinned && (
+            <CollectionBarCardIcon_ aria-hidden>
+                <HugeiconsIcon icon={PinIcon} size={14} />
+            </CollectionBarCardIcon_>
+        )}
+    </BarCard>
 );
