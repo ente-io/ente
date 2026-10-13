@@ -293,9 +293,6 @@ class LocalSettings {
   }
 
   GalleryLayoutType getGalleryLayoutType() {
-    if (_prefs.getInt(kPhotoGridSize) == 2) {
-      return GalleryLayoutType.justified;
-    }
     return switch (_prefs.getString(kGalleryLayoutType)) {
       "justified" => GalleryLayoutType.justified,
       _ => GalleryLayoutType.grid,
