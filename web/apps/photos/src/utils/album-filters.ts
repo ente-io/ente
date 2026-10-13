@@ -5,14 +5,14 @@ import {
 import { t } from "i18next";
 
 export type AlbumFilter =
-    "all" | "ente" | "shared" | "received" | "links" | "empty-albums";
+    "ente" | "shared" | "received" | "links" | "empty-albums";
 
 export const albumFilters: {
     value: AlbumFilter;
     label: () => string;
     title: () => string;
 }[] = [
-    { value: "all", label: () => t("all"), title: () => t("all_albums") },
+    { value: "ente", label: () => "Ente", title: () => "Ente" },
     {
         value: "shared",
         label: () => t("shared_albums_label"),
@@ -40,8 +40,6 @@ export const matchesAlbumFilter = (
     albumFilter: AlbumFilter,
 ): boolean => {
     switch (albumFilter) {
-        case "all":
-            return true;
         case "ente":
             return (
                 !cs.attributes.has("system") &&
@@ -72,7 +70,7 @@ export const matchesAlbumFilter = (
 
 export const visibleAlbumFilters = (collectionSummaries: CollectionSummary[]) =>
     albumFilters.filter(({ value }) => {
-        if (value == "all") return true;
+        if (value == "ente") return true;
         if (value == "empty-albums") {
             return (
                 collectionSummaries.filter(isBulkDeletableEmptyAlbum).length >=

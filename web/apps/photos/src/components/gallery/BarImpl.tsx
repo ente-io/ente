@@ -95,16 +95,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         "ente",
     );
     const visibleAlbumFilters = useMemo(
-        () =>
-            getVisibleAlbumFilters(collectionSummaries).map((filter) =>
-                filter.value == "all"
-                    ? {
-                          value: "ente" as const,
-                          label: () => "Ente",
-                          title: () => "Ente",
-                      }
-                    : filter,
-            ),
+        () => getVisibleAlbumFilters(collectionSummaries),
         [collectionSummaries],
     );
     const activeAlbumFilter =

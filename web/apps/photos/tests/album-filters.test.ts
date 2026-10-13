@@ -67,9 +67,6 @@ describe("album filters shared by the dialog and sidebar", () => {
         expect(matchesAlbumFilter(albums[12]!, "received")).toBe(true);
         expect(matchesAlbumFilter(albums[14]!, "shared")).toBe(false);
         expect(matchesAlbumFilter(albums[15]!, "received")).toBe(false);
-        expect(
-            albums.filter((cs) => matchesAlbumFilter(cs, "all")),
-        ).toHaveLength(16);
     });
 
     test("separates outgoing sharing, incoming sharing, and quick links", () => {
@@ -84,7 +81,7 @@ describe("album filters shared by the dialog and sidebar", () => {
             albums
                 .filter((cs) => matchesAlbumFilter(cs, filter))
                 .map(({ id }) => id);
-        expect(ids("all")).toEqual([1, 2, 3, 4, 5]);
+        expect(ids("ente")).toEqual([1, 2, 3, 4]);
         expect(ids("shared")).toEqual([2, 4]);
         expect(ids("received")).toEqual([3]);
         expect(ids("links")).toEqual([5]);
@@ -120,7 +117,7 @@ describe("album filters shared by the dialog and sidebar", () => {
             album(3, ["shared"], 0),
         ];
         expect(visibleAlbumFilters(albums).map(({ value }) => value)).toEqual([
-            "all",
+            "ente",
         ]);
         albums.push(
             album(4, [], 0),
@@ -129,14 +126,14 @@ describe("album filters shared by the dialog and sidebar", () => {
             album(7, ["quickLink"]),
         );
         expect(visibleAlbumFilters(albums).map(({ value }) => value)).toEqual([
-            "all",
+            "ente",
             "shared",
             "received",
             "links",
             "empty-albums",
         ]);
         expect(visibleAlbumFilters([]).map(({ value }) => value)).toEqual([
-            "all",
+            "ente",
         ]);
     });
 });

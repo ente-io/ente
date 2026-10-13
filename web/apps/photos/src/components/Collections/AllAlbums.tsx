@@ -109,7 +109,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
 }) => {
     const fullScreen = useMediaQuery(collectionDialogFullScreenQuery);
     const [searchTerm, setSearchTerm] = useState("");
-    const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("all");
+    const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
     const { showMiniDialog } = useBaseContext();
     const { showNotification } = usePhotosAppContext();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
@@ -122,7 +122,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
 
     const handleExited = () => {
         setSearchTerm("");
-        setAlbumFilter("all");
+        setAlbumFilter("ente");
     };
 
     const onCollectionClick = (collectionID: number) => {
@@ -178,7 +178,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
 
     useEffect(() => {
         if (!visibleAlbumFilters.some(({ value }) => value == albumFilter)) {
-            setAlbumFilter("all");
+            setAlbumFilter("ente");
         }
     }, [albumFilter, visibleAlbumFilters]);
 
@@ -268,12 +268,11 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     };
 
     const filteredCollectionSummaries = useMemo(() => {
-        const albumFilteredCollectionSummaries =
-            isInHiddenSection || albumFilter == "all"
-                ? collectionSummaries
-                : collectionSummaries.filter((cs) =>
-                      matchesAlbumFilter(cs, albumFilter),
-                  );
+        const albumFilteredCollectionSummaries = isInHiddenSection
+            ? collectionSummaries
+            : collectionSummaries.filter((cs) =>
+                  matchesAlbumFilter(cs, albumFilter),
+              );
 
         if (!searchTerm.trim()) {
             return albumFilteredCollectionSummaries;
@@ -286,7 +285,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
 
     const showCreateButton = useMemo(() => {
         if (!canCreateAlbum) return false;
-        if (!isInHiddenSection && albumFilter != "all") return false;
+        if (!isInHiddenSection && albumFilter != "ente") return false;
         if (!searchTerm.trim()) {
             return true;
         }
