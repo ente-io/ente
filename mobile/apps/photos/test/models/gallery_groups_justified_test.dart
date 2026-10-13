@@ -146,7 +146,7 @@ void main() {
         height: 16,
       ),
     );
-    await localSettings.setPhotoGridSize(2);
+    await localSettings.setPhotoGridSize(3);
     await localSettings.setComfortLargeLayoutTuningValue(
       ComfortLargeLayoutTuningField.targetHeightScale,
       1,
@@ -181,7 +181,7 @@ void main() {
         height: 9,
       ),
     );
-    await localSettings.setPhotoGridSize(2);
+    await localSettings.setPhotoGridSize(3);
     await localSettings.setJustifiedLayoutStrategy(
       JustifiedLayoutStrategy.flex,
     );
@@ -211,7 +211,7 @@ void main() {
       width: 1,
       height: 1,
     );
-    await localSettings.setPhotoGridSize(2);
+    await localSettings.setPhotoGridSize(3);
     double rowHeight() {
       final section =
           _galleryGroups(
@@ -263,8 +263,8 @@ void main() {
         (index) => _file(
           index: index,
           creationTime: DateTime(2026, 8, 19).microsecondsSinceEpoch,
-          width: 3,
-          height: 2,
+          width: 2,
+          height: 3,
         ),
         growable: false,
       );
@@ -290,10 +290,10 @@ void main() {
       _expectRowsCoverFiles(section, fileCount);
 
       final rowAcrossLegacyBoundary = section.rows.singleWhere(
-        (row) => row.firstIndex <= 39 && row.lastIndex >= 40,
+        (row) => row.firstIndex <= 19 && row.lastIndex >= 20,
       );
-      expect(rowAcrossLegacyBoundary.firstIndex, 39);
-      expect(rowAcrossLegacyBoundary.lastIndex, 41);
+      expect(rowAcrossLegacyBoundary.firstIndex, 18);
+      expect(rowAcrossLegacyBoundary.lastIndex, 20);
 
       for (final row in section.rows) {
         final firstFileInRow = files[row.firstIndex];
@@ -309,7 +309,7 @@ void main() {
   );
 
   test(
-    "caps the target height only when the grid-derived target is taller",
+    "caps the Justified target independently of the remembered Grid count",
     () async {
       final file = _file(
         index: 0,
@@ -329,7 +329,7 @@ void main() {
         return section.rows.single.height;
       }
 
-      await localSettings.setPhotoGridSize(2);
+      await localSettings.setPhotoGridSize(3);
       await localSettings.setComfortLargeLayoutTuningValue(
         ComfortLargeLayoutTuningField.targetHeightScale,
         1,
@@ -337,7 +337,7 @@ void main() {
       expect(rowHeight(), 320);
 
       await localSettings.setPhotoGridSize(4);
-      expect(rowHeight(), (1024 - 3 * GalleryGroups.spacing) / 4);
+      expect(rowHeight(), 320);
     },
   );
 

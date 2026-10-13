@@ -479,12 +479,18 @@ class GalleryState extends State<Gallery> {
         : 0;
   }
 
+  int get _photoGridSize =>
+      (widget.layoutTypeOverride ?? localSettings.getGalleryLayoutType()) ==
+          GalleryLayoutType.justified
+      ? 2
+      : localSettings.getPhotoGridSize();
+
   Future<double> _measureGroupHeaderExtent() async {
     if (!_groupType.showGroupHeader()) return GalleryGroups.spacing;
     final size = await getIntrinsicSizeOfWidget(
       GroupHeaderWidget(
         title: "Dummy title",
-        gridSize: localSettings.getPhotoGridSize(),
+        gridSize: _photoGridSize,
         filesInGroup: const [],
         selectedFiles: null,
         showSelectAll: false,
@@ -867,7 +873,7 @@ class GalleryState extends State<Gallery> {
     final shouldEnableSwipeSelection = widget.limitSelectionToOne == false;
 
     if (groupHeaderExtent == null) {
-      final photoGridSize = localSettings.getPhotoGridSize();
+      final photoGridSize = _photoGridSize;
       final tileHeight =
           (widthAvailable - (photoGridSize - 1) * GalleryGroups.spacing) /
           photoGridSize;

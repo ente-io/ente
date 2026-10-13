@@ -271,11 +271,13 @@ class GalleryGroups {
   }
 
   void init() {
-    crossAxisCount = localSettings.getPhotoGridSize();
     layoutType = resolveGalleryLayoutType(
       layoutTypeOverride ?? localSettings.getGalleryLayoutType(),
       justifiedLayoutAvailable: justifiedLayoutAvailable,
     );
+    crossAxisCount = layoutType == GalleryLayoutType.justified
+        ? 2
+        : localSettings.getPhotoGridSize();
     _buildGroups();
 
     _groupLayouts = switch (layoutType) {
