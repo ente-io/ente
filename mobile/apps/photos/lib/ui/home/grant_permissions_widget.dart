@@ -43,6 +43,8 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   );
   late final rive.FileLoader _permissionsAnimationLoader;
 
+  static const double _logoWidth = 50;
+
   @override
   void initState() {
     super.initState();
@@ -70,6 +72,9 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Widget _buildOnlinePermissionScreen(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final skipLabelHeight =
+        MediaQuery.textScalerOf(context).scale(TextStyles.body.fontSize!) *
+        TextStyles.body.height!;
     return Scaffold(
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
@@ -78,11 +83,11 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
-        toolbarHeight: 48,
+        toolbarHeight: max(kMinInteractiveDimension, skipLabelHeight),
         centerTitle: true,
         title: SvgPicture.asset(
           "packages/ente_components/assets/ente_wordmark.svg",
-          width: 50,
+          width: _logoWidth,
           colorFilter: ColorFilter.mode(colorScheme.content, BlendMode.srcIn),
         ),
         actions: [_buildSkipAction(context)],
@@ -119,14 +124,23 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Widget _buildSkipAction(BuildContext context) {
     final color = context.componentColors.primary;
-    return MediaQuery.withClampedTextScaling(
-      maxScaleFactor: 1.3,
+    final toolbarWidth =
+        MediaQuery.sizeOf(context).width -
+        MediaQuery.paddingOf(context).horizontal;
+    return Semantics(
+      button: true,
       child: GestureDetector(
         key: const ValueKey("skipForNowButton"),
         behavior: HitTestBehavior.opaque,
         onTap: _onTapSkip,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
+          constraints: BoxConstraints(
+            minHeight: kMinInteractiveDimension,
+            maxWidth:
+                toolbarWidth -
+                _logoWidth -
+                2 * NavigationToolbar.kMiddleSpacing,
+          ),
           child: Padding(
             padding: const EdgeInsets.only(left: 12, right: 18),
             child: Row(
@@ -141,11 +155,13 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                   ),
                 ),
                 const SizedBox(width: Spacing.xs),
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedArrowRight01,
-                  size: IconSizes.small,
-                  strokeWidth: 2,
-                  color: color,
+                ExcludeSemantics(
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowRight01,
+                    size: IconSizes.small,
+                    strokeWidth: 2,
+                    color: color,
+                  ),
                 ),
               ],
             ),
