@@ -1,9 +1,6 @@
 import "dart:async";
 
-import "package:ente_components/ente_components.dart";
-import "package:ente_strings/ente_strings.dart";
 import 'package:flutter/material.dart';
-import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -11,7 +8,6 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
-import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -32,7 +28,6 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/utils/magic_util.dart";
 
 class CollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
@@ -193,15 +188,6 @@ class _CollectionPageState extends State<CollectionPage> {
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
       addHeaderOrFooterEmptyState: false,
       showSelectAll: true,
-      groupHeaderAction: galleryType.canSort()
-          ? ListenableBuilder(
-              listenable: _selectedFiles,
-              builder: (context, child) => _selectedFiles.files.isEmpty
-                  ? child!
-                  : const SizedBox.shrink(),
-              child: _SortButton(c.collection),
-            )
-          : null,
       emptyState: galleryType == GalleryType.ownedCollection
           ? EmptyAlbumState(
               c.collection,
@@ -258,37 +244,6 @@ class _CollectionPageState extends State<CollectionPage> {
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SortButton extends StatelessWidget {
-  const _SortButton(this.collection);
-
-  final Collection collection;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = context.strings;
-    return EntePopupMenuButton<bool>(
-      optionsBuilder: () => [
-        EntePopupMenuOption(value: false, label: strings.sortNewestFirst),
-        EntePopupMenuOption(value: true, label: strings.sortOldestFirst),
-      ],
-      onSelected: (sortByAsc) {
-        unawaited(changeSortOrder(context, collection, sortByAsc));
-      },
-      child: Tooltip(
-        message: strings.sort,
-        child: Padding(
-          padding: const EdgeInsets.all(Spacing.xs),
-          child: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowUpDown,
-            size: IconSizes.small,
-            color: context.componentColors.textLighter,
           ),
         ),
       ),
