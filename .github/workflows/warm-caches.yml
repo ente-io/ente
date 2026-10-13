@@ -37,7 +37,7 @@ jobs:
             - name: Install Linux dependencies
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libvulkan-dev glslc libdbus-1-dev
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libvulkan-dev glslc spirv-headers libdbus-1-dev
 
             - name: Setup Rust cache
               uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
@@ -286,7 +286,7 @@ jobs:
             - name: Install Vulkan build dependencies
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y libvulkan-dev glslc
+                  sudo apt-get install -y libvulkan-dev glslc spirv-headers
 
             - run: cargo codegen native
               working-directory: rust

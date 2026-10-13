@@ -77,10 +77,12 @@ pub fn memory_budget(
 pub(super) fn title_context_params(
     chat_context_size: u32,
     n_threads: Option<i32>,
+    n_threads_generation: Option<i32>,
 ) -> ContextParams {
     ContextParams {
         context_size: Some(chat_context_size.min(1024) as i32),
         n_threads,
+        n_threads_generation,
         n_batch: Some(128),
     }
 }
@@ -101,9 +103,11 @@ mod tests {
     #[test]
     fn title_context_caps_memory_without_raising_the_chat_limit() {
         for (chat_context_size, expected) in [(512, 512), (4096, 1024)] {
-            let params = title_context_params(chat_context_size, Some(2));
+            let params = title_context_params(chat_context_size, Some(7), Some(3));
             assert_eq!(params.context_size, Some(expected));
             assert_eq!(params.n_batch, Some(128));
+            assert_eq!(params.n_threads, Some(7));
+            assert_eq!(params.n_threads_generation, Some(3));
         }
     }
 

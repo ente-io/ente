@@ -1,0 +1,1 @@
+- Fixed an error when viewing photo details with invalid exposure times.

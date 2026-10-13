@@ -7,16 +7,16 @@ class PushGateway {
 
   Future<void> registerToken({
     required String fcmToken,
-    String? apnsToken,
     required String platform,
+    String? apnsToken,
     required Map<String, Object>? notification,
   }) async {
     await _enteDio.post(
       "/push/token",
       data: {
         "fcmToken": fcmToken,
-        "apnsToken": apnsToken,
         "platform": platform,
+        "apnsToken": apnsToken,
         if (platform == 'ios') "notification": notification,
       },
     );

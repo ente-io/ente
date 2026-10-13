@@ -69,6 +69,16 @@ fn export_selection_reuses_independent_album_copies() -> TestResult {
                     fs::metadata(root.join("Family/A.jpg"))?.ino()
                 );
             }
+            export(
+                &home,
+                &root,
+                &["--album", "Family", "--album", "Travel", "--hardlinks"],
+            );
+            assert!(same_file::is_same_file(
+                root.join("Travel/A.jpg"),
+                root.join("Family/A.jpg")
+            )?);
+            assert_eq!(objects.reads(), initial_reads + 1);
             let travel_time = fs::metadata(root.join("Travel/A.jpg"))?.modified()?;
             export(&home, &root, &["--album", "Family"]);
             assert_eq!(
@@ -1775,7 +1785,7 @@ fn export_adopts_go_and_desktop_fixtures_with_a_real_source_account() -> TestRes
                 let output = home.run(&["photos", "export", root.to_str().unwrap()]);
                 assert_eq!(
                     failure(&output),
-                    "Error: This folder contains an export from the old CLI or Ente Desktop. Use --adopt if you want to take it over.\n"
+                    format!("Error: cannot open Photos export {}: This folder contains an export from the old CLI or Ente Desktop. Use --adopt if you want to take it over.\n", root.display())
                 );
                 let result = export(&home, &root, &["--adopt", "--album", "Family"]);
                 assert_eq!(result["copies"]["completed"], 1);

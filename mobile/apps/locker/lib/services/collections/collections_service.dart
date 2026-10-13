@@ -254,10 +254,8 @@ class CollectionService {
     }
   }
 
-  Future<int> getFileCount(Collection collection) async {
-    final files = await getFilesInCollection(collection);
-    return files.length;
-  }
+  Future<int> getFileCount(Collection collection) async =>
+      _db.getFileCount(collection);
 
   Future<int> getFileSize(EnteFile file) async {
     int fileSize;

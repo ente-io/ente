@@ -80,7 +80,6 @@ export const GalleryBarAndListHeader: React.FC<
 > = ({
     shouldHide,
     mode,
-    onChangeMode,
     user,
     barCollectionSummaries: toShowCollectionSummaries,
     activeCollection,
@@ -251,7 +250,6 @@ export const GalleryBarAndListHeader: React.FC<
             <GalleryBarImpl
                 {...{
                     mode,
-                    onChangeMode,
                     activeCollectionID,
                     people: sortedPeople,
                     activePerson,
@@ -297,9 +295,9 @@ export const GalleryBarAndListHeader: React.FC<
                     <CollectionShare
                         {...collectionShareVisibilityProps}
                         onClose={closeCollectionShare}
-                        collectionSummary={
-                            toShowCollectionSummaries.get(activeCollectionID!)!
-                        }
+                        collectionSummary={toShowCollectionSummaries.get(
+                            activeCollectionID!,
+                        )!}
                         collection={activeCollection}
                         intent={collectionShareIntent}
                         {...{

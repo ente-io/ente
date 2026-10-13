@@ -15,11 +15,39 @@ use tempfile::TempDir;
 
 #[test]
 fn reads_do_not_initialize_storage() {
+    let binary = format!("ente-cli-next{}", std::env::consts::EXE_SUFFIX);
     for existing_home in [false, true] {
         let home = TestHome::new();
         let path = home.dir.path().join("unused");
         if existing_home {
             fs::create_dir(&path).unwrap();
+        }
+        let help = success(
+            home.command(&["--help-all"])
+                .env("ENTE_CLI_HOME", &path)
+                .env("ENTE_CLI_VAULT_KEY", "invalid")
+                .output()
+                .unwrap(),
+        );
+        assert!(help.stderr.is_empty());
+        let help = String::from_utf8(help.stdout).unwrap();
+        assert!(help.contains(&format!("=== {binary} ===")));
+        assert!(help.contains("Usage: ente-cli-next [OPTIONS] <COMMAND>"));
+        assert!(help.contains(&format!("=== {binary} photos file download ===")));
+        assert!(help.contains(&format!("=== {binary} vault key generate ===")));
+        assert!(help.contains("--hardlinks"));
+        assert!(help.contains("Linked files share contents, timestamps and permissions."));
+        assert!(help.contains(&format!("=== {binary} paste create ===")));
+        assert!(help.contains(&format!("=== {binary} paste consume ===")));
+        assert!(help.contains(&format!("=== {binary} account token ===")));
+        for command in ["login", "token"] {
+            let missing_app = home
+                .command(&["account", command])
+                .env("ENTE_CLI_VAULT_KEY", "invalid")
+                .output()
+                .unwrap();
+            assert!(failure(&missing_app).contains("--app <APP>"));
+            assert!(missing_app.stdout.is_empty());
         }
         let output = home
             .command(&["accounts", "list"])
@@ -30,6 +58,7 @@ fn reads_do_not_initialize_storage() {
         for args in [
             vec!["accounts", "list", "--json"],
             vec!["accounts", "view", "missing"],
+            vec!["account", "token", "--app", "photos"],
             vec!["photos", "album", "list"],
             vec!["photos", "album", "view", "missing"],
             vec!["photos", "file", "list"],
@@ -81,12 +110,42 @@ fn invalid_login_host_does_not_initialize_storage() {
     let home = TestHome::new();
     let path = home.dir.path().join("unused");
     let output = home
-        .command(&["photos", "login", "--host", "https://["])
+        .command(&["account", "login", "--app", "photos", "--host", "https://["])
         .env("ENTE_CLI_HOME", &path)
         .output()
         .unwrap();
     assert!(failure(&output).contains("invalid API host"));
     assert!(!path.exists());
+}
+
+#[test]
+fn login_requires_input_before_storage_or_network() {
+    let home = TestHome::new();
+    let mut server = mockito::Server::new();
+    let ping = server
+        .mock("GET", "/ping")
+        .with_status(503)
+        .expect(1)
+        .create();
+    let origin = server.url();
+    let mut args = vec![
+        "account",
+        "login",
+        "--app",
+        "photos",
+        "--host",
+        &origin,
+        "--no-input",
+    ];
+    assert!(failure(&home.run(&args)).contains("supply --input"));
+    assert_eq!(fs::read_dir(home.dir.path()).unwrap().count(), 0);
+    args.extend(["--input", "-"]);
+    let output = home.with_input(
+        &args,
+        br#"{"email":"fixture@example.org","password":"secret"}"#,
+    );
+    assert!(failure(&output).contains("cannot reach the selected Ente server"));
+    ping.assert();
 }
 
 #[test]
@@ -133,10 +192,10 @@ fn reading_an_existing_vault_does_not_change_its_directory() {
     let home = TestHome::new();
     home.seed("http://localhost:8080");
     fs::set_permissions(home.dir.path(), fs::Permissions::from_mode(0o500)).unwrap();
-    let result = home.run(&["account", "list"]);
+    let result = home.run(&["account", "token", "--app", "photos"]);
     let mode = fs::metadata(home.dir.path()).unwrap().permissions().mode() & 0o777;
     fs::set_permissions(home.dir.path(), fs::Permissions::from_mode(0o700)).unwrap();
-    success(result);
+    assert_eq!(success(result).stdout, b"--8=\n");
     assert_eq!(mode, 0o500, "read changed the CLI home permissions");
     assert_eq!(fs::read_dir(home.dir.path()).unwrap().count(), 1);
 }
@@ -198,7 +257,7 @@ fn keys_and_invalid_vaults_have_no_destructive_fallback() {
     }
     let wrong_key = failure(
         &home
-            .command(&["account", "list"])
+            .command(&["account", "token", "--app", "photos"])
             .env(
                 "ENTE_CLI_VAULT_KEY",
                 b64::encode(Key::generate().as_bytes()),
@@ -354,7 +413,16 @@ fn private_json_errors_do_not_echo_values() {
         json!("private-987654321"),
     ] {
         let output = home.with_input(
-            &["photos", "login", "--host", &server.url(), "--input", "-"],
+            &[
+                "account",
+                "login",
+                "--app",
+                "photos",
+                "--host",
+                &server.url(),
+                "--input",
+                "-",
+            ],
             &serde_json::to_vec(&input).unwrap(),
         );
         assert!(output.stdout.is_empty());
@@ -416,12 +484,15 @@ fn logout_reconciles_remote_and_local_session_state() {
         .match_header("x-auth-token", "--8=")
         .match_header("x-client-package", "io.ente.photos")
         .with_status(401)
+        .expect(3)
         .create();
     let home = TestHome::new();
     home.seed(&server.url());
+    let mut state = home.read_vault();
+    let mut account = home.json(&["account", "view", "fixture"]);
     assert_eq!(
-        success(home.run(&["photos", "logout"])).stdout,
-        b"Logged out of Ente Photos for \"fixture\".\n"
+        success(home.run(&["account", "logout", "--app", "photos"])).stdout,
+        b"Logged out of Ente Photos. Removed account \"fixture\" from this device.\n"
     );
     assert_eq!(home.json(&["account", "list"]), json!([]));
     assert_eq!(home.read_vault(), json!({"accounts": [], "selected": null}));
@@ -431,6 +502,26 @@ fn logout_reconciles_remote_and_local_session_state() {
             .count(),
         0
     );
+    state["accounts"][0]["sessions"]["auth"] = json!({"token": [2]});
+    home.write_vault(&state);
+    account["apps"] = json!(["auth"]);
+    assert_eq!(
+        home.json(&["account", "logout", "--app", "photos"]),
+        json!({"account": account, "app": "photos", "remoteLogout": true})
+    );
+    assert_eq!(home.json(&["account", "view", "fixture"]), account);
+    state["accounts"][0]["sessions"]
+        .as_object_mut()
+        .unwrap()
+        .remove("auth");
+    home.write_vault(&state);
+    account["apps"] = json!([]);
+    account["selected"] = json!(false);
+    assert_eq!(
+        home.json(&["account", "logout", "--app", "photos"]),
+        json!({"account": account, "app": "photos", "remoteLogout": true})
+    );
+    assert_eq!(home.read_vault(), json!({"accounts": [], "selected": null}));
     revoked.assert();
 
     let unavailable = server
@@ -441,7 +532,7 @@ fn logout_reconciles_remote_and_local_session_state() {
     let home = TestHome::new();
     home.seed(&server.url());
     let before = fs::read(home.dir.path().join("vault.json")).unwrap();
-    failure(&home.run(&["photos", "logout"]));
+    failure(&home.run(&["account", "logout", "--app", "photos"]));
     assert_eq!(
         fs::read(home.dir.path().join("vault.json")).unwrap(),
         before
@@ -450,7 +541,7 @@ fn logout_reconciles_remote_and_local_session_state() {
 }
 
 #[test]
-fn account_logout_revokes_every_product_before_removing_the_account() {
+fn account_logout_revokes_every_app_before_removing_the_account() {
     let mut server = mockito::Server::new();
     let home = TestHome::new();
     home.seed(&server.url());
@@ -458,27 +549,55 @@ fn account_logout_revokes_every_product_before_removing_the_account() {
     state["accounts"][0]["sessions"]["locker"] = json!({"token": [1]});
     state["accounts"][0]["sessions"]["auth"] = json!({"token": [2]});
     home.write_vault(&state);
+    let mut account = home.json(&["account", "view", "fixture"]);
+    account["apps"] = json!([]);
+    account["selected"] = json!(false);
     let photos = server
         .mock("POST", "/users/logout")
         .match_header("x-auth-token", "--8=")
         .match_header("x-client-package", "io.ente.photos")
+        .expect(2)
         .create();
     let locker_token = b64::encode_url_safe(&[1]);
     let locker = server
         .mock("POST", "/users/logout")
         .match_header("x-auth-token", locker_token.as_str())
         .match_header("x-client-package", "io.ente.locker")
+        .expect(2)
         .create();
     let auth_token = b64::encode_url_safe(&[2]);
     let auth = server
         .mock("POST", "/users/logout")
         .match_header("x-auth-token", auth_token.as_str())
         .match_header("x-client-package", "io.ente.auth")
+        .expect(2)
         .create();
 
     assert_eq!(
         success(home.run(&["account", "logout", "fixture"])).stdout,
-        b"Logged out of Ente Photos, Ente Locker, and Ente Auth for \"fixture\".\n"
+        b"Logged out of Ente Photos, Ente Locker, and Ente Auth. Removed account \"fixture\" from this device.\n"
+    );
+    assert_eq!(home.read_vault(), json!({"accounts": [], "selected": null}));
+    home.write_vault(&state);
+    assert_eq!(
+        home.json(&["account", "logout", "fixture"]),
+        json!({"account": account, "apps": ["photos", "locker", "auth"], "remoteLogout": true})
+    );
+    home.write_vault(&state);
+    assert_eq!(
+        home.json(&["account", "logout", "fixture", "--local", "--offline"]),
+        json!({"account": account, "apps": ["photos", "locker", "auth"], "remoteLogout": false})
+    );
+    state["accounts"][0]["sessions"] = json!({});
+    home.write_vault(&state);
+    assert_eq!(
+        home.json(&["account", "logout", "fixture"]),
+        json!({"account": account, "apps": [], "remoteLogout": true})
+    );
+    home.write_vault(&state);
+    assert_eq!(
+        success(home.run(&["account", "logout", "fixture", "--local"])).stdout,
+        b"Removed account \"fixture\" from this device.\n"
     );
     assert_eq!(home.read_vault(), json!({"accounts": [], "selected": null}));
     photos.assert();
@@ -523,7 +642,7 @@ fn account_logout_preserves_sessions_that_it_could_not_revoke() {
 
     assert_eq!(
         success(home.run(&["account", "logout", "fixture", "--local"])).stdout,
-        b"Logged out of \"fixture\" on this device only. Still logged in on the server: Ente Locker and Ente Auth.\n"
+        b"Removed account \"fixture\" from this device. Server logout was skipped.\n"
     );
     assert_eq!(home.read_vault(), json!({"accounts": [], "selected": null}));
     photos.assert();
@@ -539,13 +658,13 @@ fn account_updates_preserve_identity_and_selection() {
         success(home.run(&["account", "view", "fixture"])).stdout,
         b"Name       fixture\nEmail      fixture@example.org\nHost       http://localhost:8080\nLogged in  photos\nSelected   yes\nID         9007199254740993\n"
     );
-    assert_eq!(
-        home.json(&["account", "list"]),
-        json!([{
-            "id": "9007199254740993", "name": "fixture", "email": "fixture@example.org",
-            "host": "http://localhost:8080", "products": ["photos"], "selected": true
-        }])
-    );
+    let account = json!({
+        "id": "9007199254740993", "name": "fixture", "email": "fixture@example.org",
+        "host": "http://localhost:8080", "apps": ["photos"], "selected": true
+    });
+    assert_eq!(home.json(&["account", "list"]), json!([account]));
+    assert_eq!(home.json(&["accounts", "view", "fixture"]), account);
+    assert_eq!(home.json(&["account", "view"]), account);
     let mut state = home.read_vault();
     let mut second = state["accounts"][0].clone();
     second["storage_id"] = json!("f6579aae-83ef-4f28-965e-8d34883d3fe5");
@@ -578,6 +697,93 @@ fn account_updates_preserve_identity_and_selection() {
     );
     success(home.run(&["account", "switch", "other"]));
     assert_eq!(home.read_encrypted_vault(), after);
+    state["selected"] = Value::Null;
+    home.write_vault(&state);
+    let before = home.read_encrypted_vault();
+    let output = home.with_input(
+        &["account", "login", "--app", "auth", "--input", "-"],
+        br#"{"email":"fixture@example.org","password":"password"}"#,
+    );
+    assert!(failure(&output).contains("no account selected"));
+    assert_eq!(home.read_encrypted_vault(), before);
+}
+
+#[test]
+fn account_token_reads_the_requested_saved_login() {
+    let home = TestHome::new();
+    let args = [
+        "account",
+        "token",
+        "--app",
+        "photos",
+        "--offline",
+        "--no-input",
+    ];
+    home.seed("http://127.0.0.1:1");
+    let mut state = home.read_vault();
+    state["selected"] = Value::Null;
+    home.write_vault(&state);
+    let vault = home.dir.path().join("vault.json");
+    let before = fs::read(&vault).unwrap();
+    let output = success(home.run(&args));
+    assert_eq!(output.stdout, b"--8=\n");
+    assert!(output.stderr.is_empty());
+    assert_eq!(home.json(&args), json!({"token": "--8="}));
+    assert_eq!(fs::read(&vault).unwrap(), before);
+
+    let mut other = state["accounts"][0].clone();
+    other["storage_id"] = json!("f6579aae-83ef-4f28-965e-8d34883d3fe5");
+    other["name"] = json!("other");
+    other["sessions"] = json!({"locker": {"token": [1]}});
+    state["selected"] = other["storage_id"].clone();
+    state["accounts"][0]["sessions"]["auth"] = json!({"token": [255]});
+    state["accounts"].as_array_mut().unwrap().push(other);
+    home.write_vault(&state);
+    let before = fs::read(&vault).unwrap();
+    assert_eq!(
+        home.json(&["account", "token", "--app", "locker"]),
+        json!({"token": "AQ=="})
+    );
+    assert_eq!(
+        home.json(&["account", "token", "fixture", "--app", "auth"]),
+        json!({"token": "_w=="})
+    );
+    let missing_login = home.run(&args);
+    assert!(failure(&missing_login).contains(
+        "account \"other\" is not logged into Ente Photos; use account login \"other\" --app photos"
+    ));
+    assert!(missing_login.stdout.is_empty());
+    let explicit_login = home.run(&["account", "token", "--app", "locker", "fixture"]);
+    assert!(failure(&explicit_login).contains(
+        "account \"fixture\" is not logged into Ente Locker; use account login \"fixture\" --app locker"
+    ));
+    assert!(explicit_login.stdout.is_empty());
+    let missing_account = home.command(&args).arg("missing").output().unwrap();
+    assert!(failure(&missing_account).contains("no account named \"missing\"; use account list"));
+    assert!(missing_account.stdout.is_empty());
+    assert_eq!(fs::read(&vault).unwrap(), before);
+
+    state["selected"] = Value::Null;
+    home.write_vault(&state);
+    let before = fs::read(&vault).unwrap();
+    let ambiguous = home.run(&args);
+    assert!(
+        failure(&ambiguous).contains(
+            "no account selected; use account switch <NAME> or name an account explicitly"
+        )
+    );
+    assert!(ambiguous.stdout.is_empty());
+    let (reader, writer) = std::io::pipe().unwrap();
+    drop(reader);
+    let write_failure = home
+        .command(&args)
+        .arg("fixture")
+        .stdout(writer)
+        .output()
+        .unwrap();
+    let error = failure(&write_failure);
+    assert!(!error.contains("--8="));
+    assert_eq!(fs::read(&vault).unwrap(), before);
 }
 
 struct TestHome {
@@ -603,8 +809,22 @@ fn native_keyring_survives_separate_processes() {
         assert_eq!(fs::read_dir(home.dir.path()).unwrap().count(), 0);
         let mut server = mockito::Server::new();
         let ping = server.mock("GET", "/ping").with_status(503).create();
+        let input = home.dir.path().join("login.json");
+        fs::write(
+            &input,
+            br#"{"email":"fixture@example.org","password":"secret"}"#,
+        )
+        .unwrap();
         let output = home
-            .command(&["photos", "login", "--host", &server.url()])
+            .command(&[
+                "account",
+                "login",
+                "--app",
+                "photos",
+                "--host",
+                &server.url(),
+            ])
+            .args(["--input", input.to_str().unwrap()])
             .env_remove("ENTE_CLI_VAULT_KEY")
             .output()
             .unwrap();
@@ -743,6 +963,12 @@ fn failure(output: &Output) -> String {
 
 #[path = "support/files.rs"]
 mod files;
+
+#[path = "support/auth.rs"]
+mod auth;
+
+#[path = "support/paste.rs"]
+mod paste;
 
 #[cfg(feature = "museum")]
 #[path = "support/museum.rs"]

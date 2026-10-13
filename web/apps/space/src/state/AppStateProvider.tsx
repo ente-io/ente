@@ -184,11 +184,7 @@ export const SpaceAppStateProvider: React.FC<React.PropsWithChildren> = ({
                 },
             };
             const prepared: PreparedSpacePostMedia[] = [];
-            const videoCount = images.filter((image) => image.video).length;
-            const mediaCounts = {
-                photo: images.length - videoCount,
-                video: videoCount,
-            };
+            const hasVideo = images.some((image) => image.video);
             const session: SpacePostUploadSession = {
                 requestId: crypto.randomUUID(),
                 uploads: [],
@@ -220,23 +216,18 @@ export const SpaceAppStateProvider: React.FC<React.PropsWithChildren> = ({
                 );
                 pending = (async () => {
                     try {
-                        const processingCounts = { photo: 0, video: 0 };
                         for (const [index, image] of images.entries()) {
                             signal.throwIfAborted();
-                            const mediaType = image.video ? "video" : "photo";
-                            const mediaIndex = ++processingCounts[mediaType];
                             if (prepared[index]) continue;
-                            if (videoCount > 0 || images.length >= 3) {
-                                const count = mediaCounts[mediaType];
-                                const processing =
-                                    images.length == 1
-                                        ? "Processing"
-                                        : `Processing ${mediaType}${count > 1 ? ` ${mediaIndex}/${count}` : ""}`;
+                            if (hasVideo) {
                                 setLocalFeedPosts((current) =>
                                     current.map((item) =>
                                         item.id == localPostId &&
                                         item.status == "pending"
-                                            ? { ...item, processing }
+                                            ? {
+                                                  ...item,
+                                                  processing: "Processing",
+                                              }
                                             : item,
                                     ),
                                 );

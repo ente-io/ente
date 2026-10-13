@@ -31,10 +31,15 @@ class MoreFromEnteSection extends StatelessWidget {
           const SizedBox(height: _sectionGap),
           Row(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _EnteAppLink(app: apps.first, onTap: onAppTap),
+              Flexible(
+                child: _EnteAppLink(app: apps.first, onTap: onAppTap),
+              ),
               const SizedBox(width: _appGap),
-              _EnteAppLink(app: apps.last, onTap: onAppTap),
+              Flexible(
+                child: _EnteAppLink(app: apps.last, onTap: onAppTap),
+              ),
             ],
           ),
         ],
@@ -98,8 +103,8 @@ class _EnteAppLink extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Ente $label',
-      child: SizedBox(
-        width: _appTileSize,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: _appTileSize),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -122,13 +127,10 @@ class _EnteAppLink extends StatelessWidget {
               ],
             ),
             const SizedBox(height: _appLabelGap),
-            SizedBox(
-              height: _appLabelHeight,
-              child: Text(
-                label,
-                maxLines: 1,
-                style: TextStyles.mini.copyWith(color: colors.textLight),
-              ),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyles.mini.copyWith(color: colors.textLight),
             ),
           ],
         ),
@@ -157,5 +159,4 @@ const double _appTileSize = 52;
 const double _appIconSize = 31;
 const double _appRadius = 16.774;
 const double _appLabelGap = 8;
-const double _appLabelHeight = 16;
 const double _appGap = 39;

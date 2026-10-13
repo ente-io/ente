@@ -332,7 +332,7 @@ jobs:
             - name: Install Vulkan build dependencies
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y libvulkan-dev glslc
+                  sudo apt-get install -y libvulkan-dev glslc spirv-headers
 
             - run: cargo codegen native
               working-directory: rust

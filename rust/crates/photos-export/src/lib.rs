@@ -43,6 +43,7 @@ pub struct Options {
     pub albums: Vec<String>,
     pub exclude_albums: Vec<String>,
     pub adopt: bool,
+    pub hardlinks: bool,
     pub jobs: NonZeroUsize,
 }
 
@@ -57,11 +58,19 @@ pub struct Summary {
     pub expected: i64,
 }
 
+struct RootLock(File);
+
+impl Drop for RootLock {
+    fn drop(&mut self) {
+        let _ = self.0.unlock();
+    }
+}
+
 pub struct Export {
     destination: PathBuf,
     expected_root: Root,
     prepared: Option<(Store, Result<()>)>,
-    root_lock: Option<File>,
+    root_lock: Option<RootLock>,
     options: Options,
     adopting: bool,
 }
@@ -285,20 +294,13 @@ impl Export {
             store: &shared,
             cancel,
             report,
+            hardlinks: self.options.hardlinks,
         };
         let result = (|| {
             refreshed?;
             run.recover()?;
             run.albums()?;
-            transfers(
-                &self.destination,
-                &shared,
-                session,
-                cancel_send,
-                cancel,
-                self.options.jobs.get(),
-                report,
-            )?;
+            transfers(&run, session, cancel_send, self.options.jobs.get())?;
             run.check_cancel()?;
             run.retain_removed()
         })();
@@ -353,7 +355,7 @@ fn destination(path: &Path) -> Result<PathBuf> {
     Ok(resolved)
 }
 
-fn open_root(destination: &Path, expected: &Root) -> Result<Option<File>> {
+fn open_root(destination: &Path, expected: &Root) -> Result<Option<RootLock>> {
     if !destination.try_exists()? {
         return Ok(None);
     }
@@ -368,7 +370,8 @@ fn open_root(destination: &Path, expected: &Root) -> Result<Option<File>> {
     let file = OpenOptions::new().read(true).write(true).open(&path)?;
     file.try_lock()
         .context("another writer is maintaining this export")?;
-    let record: Root = serde_json::from_reader(&file).context("invalid export.json")?;
+    let lock = RootLock(file);
+    let record: Root = serde_json::from_reader(&lock.0).context("invalid export.json")?;
     ensure!(
         record.format == expected.format && record.version == expected.version,
         "unsupported export format"
@@ -377,30 +380,31 @@ fn open_root(destination: &Path, expected: &Root) -> Result<Option<File>> {
         record.source_verifier == expected.source_verifier,
         "this export belongs to another source account"
     );
-    Ok(Some(file))
+    Ok(Some(lock))
 }
 
-fn initialize(destination: &Path, root: &Root, legacy: bool) -> Result<File> {
+fn initialize(destination: &Path, root: &Root, legacy: bool) -> Result<RootLock> {
     fs::create_directory(destination)?;
     let path = names::check(destination, "export.json")?;
-    let mut file = OpenOptions::new()
+    let file = OpenOptions::new()
         .read(true)
         .write(true)
         .create_new(true)
         .open(&path)
         .context("destination was initialized by another writer; retry")?;
     file.lock().context("cannot lock the new export")?;
+    let mut lock = RootLock(file);
     ensure!(
         legacy
             || std::fs::read_dir(destination)?
                 .all(|entry| entry.is_ok_and(|entry| entry.file_name() == "export.json")),
         "destination became nonempty during initialization"
     );
-    serde_json::to_writer_pretty(&mut file, root)?;
-    file.write_all(b"\n")?;
-    file.sync_all()?;
+    serde_json::to_writer_pretty(&mut lock.0, root)?;
+    lock.0.write_all(b"\n")?;
+    lock.0.sync_all()?;
     fs::sync_parent(&path)?;
-    Ok(file)
+    Ok(lock)
 }
 
 fn select(store: &Store, options: &Options) -> Result<()> {
@@ -632,14 +636,12 @@ impl Drop for CancelWorkers<'_> {
 }
 
 fn transfers(
-    root: &Path,
-    store: &Mutex<Store>,
+    run: &reconcile::Run<'_>,
     session: &ente_core::Session,
     cancel_send: &watch::Sender<bool>,
-    cancel: &watch::Receiver<bool>,
     jobs: usize,
-    report: &(dyn Fn(&str) + Sync),
 ) -> Result<()> {
+    let (store, cancel, report) = (run.store, run.cancel, run.report);
     let (expected, files): (i64, i64) = store::lock(store)?.db.query_row(
         "SELECT count(*),count(DISTINCT file) FROM desired_files WHERE failure IS NULL",
         [],
@@ -655,7 +657,6 @@ fn transfers(
             let last_report = &last_report;
             workers.push(scope.spawn(move || {
                 let _cancel_on_panic = CancelWorkers(cancel_send);
-                let run = reconcile::Run { root, store, cancel, report };
                 let result = (|| {
                     loop {
                         if *cancel.borrow() {
@@ -815,7 +816,7 @@ fn summary(store: &Store, destination: &Path, prepared: bool) -> Result<Summary>
         .db
         .query_row("SELECT bound FROM export WHERE id=1", [], |r| r.get(0))?;
     let complete = bound && work_complete(store, prepared)?;
-    let result = json!({"destination":destination.to_string_lossy(),"complete":complete,"files":if unknown {None}else{Some(files)},"copies":if unknown {None}else{Some(json!({"expected":expected,"completed":completed,"pending":expected-completed}))},"changes":{"exported":exported,"metadataUpdated":metadata_updated,"renamed":renamed,"retained":retained},"failures":failures,"conflicts":conflicts});
+    let result = json!({"output":destination.to_string_lossy(),"complete":complete,"files":if unknown {None}else{Some(files)},"copies":if unknown {None}else{Some(json!({"expected":expected,"completed":completed,"pending":expected-completed}))},"changes":{"exported":exported,"metadataUpdated":metadata_updated,"renamed":renamed,"retained":retained},"failures":failures,"conflicts":conflicts});
     Ok(Summary {
         json: result,
         complete,
