@@ -42,6 +42,7 @@ async fn run_locked(args: PhotosExportArgs, selected: Option<&str>, as_json: boo
             albums: args.album,
             exclude_albums: args.exclude_album,
             adopt: args.adopt,
+            hardlinks: args.hardlinks,
             jobs: args.jobs,
         },
     )

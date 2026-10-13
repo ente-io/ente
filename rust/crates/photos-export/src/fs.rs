@@ -101,6 +101,10 @@ pub fn create_directory(path: &Path) -> Result<()> {
 }
 
 pub fn set_time(path: &Path, micros: i64) -> Result<Properties> {
+    let properties = Properties::read(path)?;
+    if properties.modified == i128::from(micros) * 1000 {
+        return Ok(properties);
+    }
     let duration = Duration::from_micros(micros.unsigned_abs());
     let time = if micros >= 0 {
         UNIX_EPOCH.checked_add(duration)

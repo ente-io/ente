@@ -35,6 +35,8 @@ fn reads_do_not_initialize_storage() {
         assert!(help.contains("Usage: ente-cli-next [OPTIONS] <COMMAND>"));
         assert!(help.contains(&format!("=== {binary} photos file download ===")));
         assert!(help.contains(&format!("=== {binary} vault key generate ===")));
+        assert!(help.contains("--hardlinks"));
+        assert!(help.contains("Linked files share contents, timestamps and permissions."));
         assert!(help.contains(&format!("=== {binary} account token ===")));
         for command in ["login", "token"] {
             let missing_app = home

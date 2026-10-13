@@ -208,6 +208,12 @@ pub struct PhotosExportArgs {
     pub adopt: bool,
     #[arg(
         long,
+        help = "Share originals across albums using hard links",
+        long_help = "Share originals across albums using hard links. Replace unchanged copies in selected albums with links, reusing originals elsewhere in this export, including unselected albums and Trash. Linked files share contents, timestamps and permissions. Later runs without this flag keep existing links. Requires a filesystem that supports hard links. Otherwise, omit this flag to use copies."
+    )]
+    pub hardlinks: bool,
+    #[arg(
+        long,
         short = 'j',
         value_name = "N",
         default_value = "16",
