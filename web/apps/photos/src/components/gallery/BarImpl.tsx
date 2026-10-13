@@ -17,7 +17,6 @@ import {
     ItemCard,
     TileTextOverlay,
 } from "ente-new/photos/components/Tiles";
-import { FocusVisibleUnstyledButton } from "ente-new/photos/components/UnstyledButton";
 import {
     thumbnailLayoutMinColumns,
     thumbnailMaxWidth,
@@ -27,7 +26,6 @@ import type {
     CollectionSummaryAttribute,
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
-import { isMLSupported } from "ente-new/photos/services/ml";
 import type { Person } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import React, {
@@ -48,7 +46,6 @@ import type { GalleryBarMode } from "./reducer";
 
 export interface GalleryBarImplProps {
     mode: GalleryBarMode;
-    onChangeMode: (mode: GalleryBarMode) => void;
     collectionSummaries: CollectionSummary[];
     activeCollectionID: number | undefined;
     onSelectCollectionID: (collectionID: number) => void;
@@ -65,7 +62,6 @@ export interface GalleryBarImplProps {
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     mode,
-    onChangeMode,
     collectionSummaries,
     activeCollectionID,
     onSelectCollectionID,
@@ -234,10 +230,18 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 } as React.CSSProperties
             }
         >
-            <Row1>
-                <ModeIndicator {...{ mode, onChangeMode }} />
-                {controls1}
-            </Row1>
+            {(mode == "hidden-albums" ||
+                mode == "archive-albums" ||
+                isSmallWidth) && (
+                <Row1>
+                    {mode == "hidden-albums" ? (
+                        <Typography>{t("hidden_albums")}</Typography>
+                    ) : mode == "archive-albums" ? (
+                        <Typography>{t("section_archive")}</Typography>
+                    ) : null}
+                    {controls1}
+                </Row1>
+            )}
             <Row2>
                 <ListWrapper>
                     {canScrollLeft && <ScrollButtonLeft onClick={scroll(-1)} />}
@@ -290,51 +294,6 @@ const Row2 = styled("div")`
     gap: 16px;
     border-block-end: 1px solid var(--et-bar-bottom-border-color);
 `;
-
-const ModeIndicator: React.FC<
-    Pick<GalleryBarImplProps, "mode" | "onChangeMode">
-> = ({ mode, onChangeMode }) => {
-    if (mode == "hidden-albums") {
-        return <Typography>{t("hidden_albums")}</Typography>;
-    }
-    if (mode == "archive-albums") {
-        return <Typography>{t("section_archive")}</Typography>;
-    }
-
-    if (!isMLSupported) {
-        return <Typography>{t("albums")}</Typography>;
-    }
-
-    return (
-        <Stack direction="row" sx={{ gap: "10px" }}>
-            <ModeButton
-                active={mode == "albums"}
-                onClick={() => onChangeMode("albums")}
-            >
-                <Typography>{t("albums")}</Typography>
-            </ModeButton>
-            <ModeButton
-                active={mode == "people"}
-                onClick={() => onChangeMode("people")}
-            >
-                <Typography>{t("people")}</Typography>
-            </ModeButton>
-        </Stack>
-    );
-};
-
-const ModeButton = styled(FocusVisibleUnstyledButton, {
-    shouldForwardProp: (propName) => propName != "active",
-})<{ active: boolean }>(
-    ({ theme, active }) => `
-p {
-    color: ${active ? theme.vars.palette.text.base : theme.vars.palette.text.muted}
-}
-p:hover {
-    color: ${theme.vars.palette.text.base}
-}
-`,
-);
 
 const ScrollButtonBase: React.FC<
     React.ButtonHTMLAttributes<HTMLButtonElement>

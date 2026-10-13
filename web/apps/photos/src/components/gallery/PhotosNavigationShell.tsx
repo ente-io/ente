@@ -1,9 +1,11 @@
 import { SearchBar, type SearchBarProps } from "@/components/SearchBar";
 import { uploadManager } from "@/services/upload-manager";
 import {
+    Album02Icon,
     Home01Icon,
     Settings01Icon,
     Upload01Icon,
+    UserGroupIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Box, Stack, SvgIcon, Tooltip } from "@mui/material";
@@ -13,13 +15,18 @@ import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton"
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { ut } from "ente-base/i18n";
+import { isMLSupported } from "ente-new/photos/services/ml";
 import { t } from "i18next";
 import { useState, type ReactNode } from "react";
+
+import type { GalleryBarMode } from "./reducer";
 
 type PhotosNavigationShellProps = SearchBarProps & {
     onSidebar: () => void;
     onUpload: () => void;
     onHome: () => void;
+    mode: GalleryBarMode;
+    onChangeMode: (mode: GalleryBarMode) => void;
 };
 
 export const PhotosNavigationShell: React.FC<
@@ -111,7 +118,7 @@ export const PhotosNavigationShell: React.FC<
                         flex: 1,
                         minWidth: 0,
                         minHeight: 0,
-                        pt: showRail ? { xs: 0, sm: "12px" } : 0,
+                        pt: showRail ? { xs: 0, sm: "36px" } : 0,
                         ...(showRail && {
                             "--mui-palette-background-default": "#FFFFFF",
                             bgcolor: "background.default",
@@ -194,10 +201,45 @@ const NormalHeaderContents: React.FC<
 };
 
 const NormalNavigationRail: React.FC<
-    SearchBarProps & { onSidebar: () => void; onHome: () => void }
-> = ({ onSidebar, onHome, ...props }) => (
+    Omit<PhotosNavigationShellProps, "onUpload">
+> = ({ onSidebar, onHome, mode, onChangeMode, ...props }) => (
     <>
         <HomeButton onClick={onHome} />
+        {(["albums", "people"] as const).map((item) =>
+            item == "people" && !isMLSupported ? null : (
+                <Tooltip key={item} title={t(item)}>
+                    <FocusVisibleButton
+                        color="secondary"
+                        aria-label={t(item)}
+                        aria-pressed={!props.isInSearchMode && mode == item}
+                        onClick={() => onChangeMode(item)}
+                        sx={{
+                            minWidth: 0,
+                            width: 38,
+                            height: 38,
+                            flexShrink: 0,
+                            p: 0,
+                            borderRadius: "12px",
+                            color:
+                                !props.isInSearchMode && mode == item
+                                    ? "#FFFFFF"
+                                    : "text.muted",
+                            '&[aria-pressed="true"]': {
+                                bgcolor: "accent.main",
+                                "&:hover": { bgcolor: "accent.main" },
+                            },
+                        }}
+                    >
+                        <HugeiconsIcon
+                            icon={
+                                item == "albums" ? Album02Icon : UserGroupIcon
+                            }
+                            size={20}
+                        />
+                    </FocusVisibleButton>
+                </Tooltip>
+            ),
+        )}
         <SearchBar {...props} />
         <Box sx={{ flex: 1 }} />
         <Tooltip title={t("settings")}>
