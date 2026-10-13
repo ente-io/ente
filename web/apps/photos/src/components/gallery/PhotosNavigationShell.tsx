@@ -27,6 +27,7 @@ import { NavbarBase } from "ente-base/components/Navbar";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { ut } from "ente-base/i18n";
+import { thumbnailGridPadding } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import { t } from "i18next";
 import { useEffect, useState, type ReactNode } from "react";
@@ -206,7 +207,7 @@ export const PhotosNavigationShell: React.FC<
                             flex: 1,
                             minWidth: 0,
                             minHeight: 0,
-                            pt: showRail ? { xs: 0, sm: "36px" } : 0,
+                            pt: showRail ? `${thumbnailGridPadding}px` : 0,
                             ...(showRail && {
                                 "--mui-palette-background-default": "#FFFFFF",
                                 bgcolor: "background.default",
