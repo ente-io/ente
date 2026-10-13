@@ -1,7 +1,7 @@
 export const thumbnailGap = 4;
 const thumbnailMaxHeight = 180;
-export const thumbnailMaxWidth = 180;
-export const thumbnailLayoutMinColumns = 4;
+const thumbnailMaxWidth = 180;
+const thumbnailLayoutMinColumns = 4;
 
 export interface ThumbnailGridLayoutParams {
     containerWidth: number;
