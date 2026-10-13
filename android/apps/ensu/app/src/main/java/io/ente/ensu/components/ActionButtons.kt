@@ -93,9 +93,10 @@ fun TextActionButton(
 }
 
 @Composable
-fun CompactButton(label: String, onClick: () -> Unit) {
+fun CompactButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(containerColor = EnsuColor.accent()),
         contentPadding =
             PaddingValues(

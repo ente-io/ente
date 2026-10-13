@@ -41,7 +41,13 @@ final class ChatViewModel: ObservableObject {
     private let logger = EnsuLogging.shared.logger("ChatViewModel")
 
     @Published var sessions: [ChatSession]
-    @Published var currentSessionId: UUID?
+    @Published var currentSessionId: UUID? {
+        didSet { loadSourceSelection() }
+    }
+    @Published private(set) var sourceSelection = ChatSourceSelection()
+    @Published private(set) var isSourceSelectionReady = false
+    @Published private(set) var sourceSelectionError: String?
+    private let sourceSelections = ChatSourceSelectionStore()
     @Published var messages: [RenderedChatMessage]
     @Published var streamingResponse: String = ""
     @Published var streamingParentId: UUID? = nil
@@ -230,6 +236,7 @@ final class ChatViewModel: ObservableObject {
         }
         refreshDeviceCapability()
         refreshModelDownloadInfo()
+        loadSourceSelection()
         Task {
             async let knowledge: Void = knowledgeStore.bootstrap()
             async let notes: Void = notesStore.bootstrap()
@@ -388,6 +395,103 @@ final class ChatViewModel: ObservableObject {
         return sessions.first { $0.id == currentSessionId }
     }
 
+    var canChangeSources: Bool { isSourceSelectionReady && !isGenerating && !isSendPending }
+
+    var sourceDestination: ChatSourceDestination {
+        sourceSelections.destination(for: currentSessionId)
+    }
+
+    private func initialSourceSelection() -> ChatSourceSelection {
+        ChatSourceSelection(
+            selectedPackIDs: Set(
+                knowledgeStore.packs.filter { $0.activeIdentity != nil }.map(\.id)),
+            selectedCollectionIDs: Set(notesStore.collections.map(\.id)))
+    }
+
+    private func initializeSourceSelection(for sessionID: UUID?) -> ChatSourceSelection? {
+        sourceSelections.initialize(
+            for: sessionID, available: initialSourceSelection(),
+            inventoryReady: knowledgeStore.inventoryReady && notesStore.inventoryReady)
+    }
+
+    private func loadSourceSelection() {
+        sourceSelectionError = nil
+        let saved = sourceSelections.selection(for: currentSessionId)
+        sourceSelection = saved ?? ChatSourceSelection()
+        isSourceSelectionReady = saved != nil
+        let destination = sourceDestination
+        Task { [weak self] in
+            guard let self else { return }
+            await knowledgeStore.bootstrap()
+            await notesStore.bootstrap()
+            guard sourceDestination == destination else { return }
+            if let selection = initializeSourceSelection(for: currentSessionId) {
+                sourceSelection = selection
+                isSourceSelectionReady = true
+            }
+            if !knowledgeStore.inventoryReady || !notesStore.inventoryReady {
+                sourceSelectionError = "Couldn’t load sources for this chat. Try again."
+            }
+        }
+    }
+
+    func retryLoadingSources() {
+        guard !isGenerating && !isSendPending else { return }
+        sourceSelectionError = nil
+        Task {
+            await knowledgeStore.retryBootstrap()
+            await notesStore.retryBootstrap()
+            loadSourceSelection()
+        }
+    }
+
+    func downloadPackForChat(_ id: String) {
+        guard canChangeSources else { return }
+        let destination = sourceDestination
+        let isNew = knowledgeStore.packs.first(where: { $0.id == id })?.activeIdentity == nil
+        knowledgeStore.downloadOrUpdate(stableId: id) { [weak self] in
+            guard isNew else { return }
+            self?.updateAddedSource(destination) { $0.setPack(id, enabled: true) }
+        }
+    }
+
+    func addNotesFolderForChat(_ url: URL, destination: ChatSourceDestination) {
+        notesStore.add(url) { [weak self] id in
+            self?.updateAddedSource(destination) { $0.setCollection(id, enabled: true) }
+        }
+    }
+
+    private func updateAddedSource(
+        _ destination: ChatSourceDestination, update: (inout ChatSourceSelection) -> Void
+    ) {
+        guard let destination = sourceSelections.resolve(destination) else { return }
+        let sessionID: UUID?
+        switch destination {
+        case .session(let id):
+            guard sessions.contains(where: { $0.id == id }) else { return }
+            sessionID = id
+        case .draft:
+            sessionID = nil
+        }
+        // The picker cannot start additions until this destination has a saved selection.
+        guard var selected = sourceSelections.selection(for: sessionID) else { return }
+        update(&selected)
+        sourceSelections.save(selected, for: sessionID)
+        if currentSessionId == sessionID { sourceSelection = selected }
+    }
+
+    func setPackEnabled(_ id: String, enabled: Bool) {
+        guard canChangeSources else { return }
+        sourceSelection.setPack(id, enabled: enabled)
+        sourceSelections.save(sourceSelection, for: currentSessionId)
+    }
+
+    func setNotesFolderEnabled(_ id: String, enabled: Bool) {
+        guard canChangeSources else { return }
+        sourceSelection.setCollection(id, enabled: enabled)
+        sourceSelections.save(sourceSelection, for: currentSessionId)
+    }
+
     var modelDownloadSizeText: String {
         guard let bytes = modelDownloadSizeBytes else { return "Approx. size varies by model" }
         return "Approx. \(bytes.formattedFileSize)"
@@ -425,6 +529,7 @@ final class ChatViewModel: ObservableObject {
         draftAttachments = []
         editingMessageId = nil
 
+        sourceSelections.remove(nil)
         currentSessionId = nil
         messages = []
     }
@@ -462,6 +567,7 @@ final class ChatViewModel: ObservableObject {
             try? FileManager.default.removeItem(at: attachmentsDir.appendingPathComponent(id))
         }
         sessionSummaries.removeValue(forKey: sessionSummaryKey(session.id))
+        sourceSelections.remove(session.id)
         persistSessionSummaries()
 
         sessions.removeAll { $0.id == session.id }
@@ -744,6 +850,17 @@ final class ChatViewModel: ObservableObject {
             }
             guard !Task.isCancelled, self.pendingSendId == sendId else { return }
             self.hasRequestedModelDownload = true
+
+            await knowledgeStore.bootstrap()
+            await notesStore.bootstrap()
+            guard !Task.isCancelled, self.pendingSendId == sendId,
+                currentSessionId == sessionId
+            else { return }
+            // A failed inventory must not become a permanent empty selection.
+            // Chat can still proceed with the sources currently available.
+            let selectedSources = initializeSourceSelection(for: sessionId)
+            sourceSelection = selectedSources ?? initialSourceSelection()
+            isSourceSelectionReady = selectedSources != nil
 
             do {
                 try await self.ensureChatModelReady(
@@ -1177,6 +1294,7 @@ final class ChatViewModel: ObservableObject {
             id: sessionId, title: created?.title ?? "New chat", lastMessage: "",
             updatedAt: updatedAt)
         sessions.insert(session, at: 0)
+        sourceSelections.commitDraft(to: session.id)
         currentSessionId = session.id
         messageStore[session.id] = []
         branchSelections[session.id] = [:]
@@ -1222,6 +1340,8 @@ final class ChatViewModel: ObservableObject {
         rebuildMessages(for: userNode.sessionId)
 
         let notesScope = notesStore.suspendMaintenance()
+        // Keep this turn's sources stable across async preparation and chat switches.
+        let sourceSnapshot = sourceSelections.selection(for: userNode.sessionId)
         generationTask = Task { [self] in
             defer {
                 notesScope.close()
@@ -1235,9 +1355,18 @@ final class ChatViewModel: ObservableObject {
             await knowledgeStore.bootstrap()
             await notesStore.bootstrap()
             guard !Task.isCancelled, activeGenerationId == generationId else { return }
+            let sources =
+                sourceSnapshot ?? initializeSourceSelection(for: userNode.sessionId)
+                ?? initialSourceSelection()
             var embeddingAssetInvalid = false
             var knowledgeHits: [GroundedExcerpt] = []
-            let enabledDatasets = knowledgeStore.enabledReadyDatasets
+            let enabledDatasets = knowledgeStore.readyDatasets.filter {
+                sources.includesPack($0.stableId)
+            }
+            let enabledCollectionIDs = Set(
+                notesStore.collections.filter {
+                    $0.eligible && sources.includesCollection($0.id)
+                }.map(\.id))
             var followup: ConversationFollowup?
             var reloaded: [GroundedExcerpt] = []
             defer { followup?.cancel() }
@@ -1275,7 +1404,7 @@ final class ChatViewModel: ObservableObject {
             let queryText = userNode.text.trimmingCharacters(in: .whitespacesAndNewlines)
             if !queryText.isEmpty,
                 (!enabledDatasets.isEmpty
-                    || notesStore.collections.contains(where: { $0.eligible }))
+                    || !enabledCollectionIDs.isEmpty)
             {
                 do {
                     let hits = try await provider.withRetrievalContext(
@@ -1288,7 +1417,8 @@ final class ChatViewModel: ObservableObject {
                             datasets: enabledDatasets, query: query,
                             maxHits: knowledgeEmbedding.maxHits
                         )
-                        let notes = try await notesStore.retrieve(query: query)
+                        let notes = try await notesStore.retrieve(
+                            query: query, collectionIDs: enabledCollectionIDs)
                         let candidates = try selectMixedGroundingCandidates(
                             packHits: packs.map {
                                 KnowledgePromptHit(datasetId: $0.dataset.stableId, hit: $0.hit)
@@ -1320,7 +1450,10 @@ final class ChatViewModel: ObservableObject {
                     try Task.checkCancellation()
                     guard activeGenerationId == generationId else { return }
                     for locator in locators {
-                        if let hit = try await reloadPassage(locator) {
+                        if let hit = try await reloadPassage(
+                            locator, datasets: enabledDatasets,
+                            collectionIDs: enabledCollectionIDs)
+                        {
                             reloaded.append(hit)
                         }
                     }
@@ -1668,14 +1801,17 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
-    private func reloadPassage(_ locator: PassageLocator) async throws -> GroundedExcerpt? {
+    private func reloadPassage(
+        _ locator: PassageLocator, datasets: [KnowledgeDatasetConfig],
+        collectionIDs: Set<String>
+    ) async throws -> GroundedExcerpt? {
         do {
             switch locator {
             case .ensuPack:
                 return try await knowledgeProvider.reload(
-                    locator, datasets: knowledgeStore.enabledReadyDatasets)
+                    locator, datasets: datasets)
             case .localNote(let note):
-                return try await notesStore.reload(note)
+                return try await notesStore.reload(note, collectionIDs: collectionIDs)
             }
         } catch {
             if isCancellation(error) { throw error }

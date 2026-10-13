@@ -1,8 +1,5 @@
 import { tauriCommandError } from "@/services/tauri-error";
 import { isTauriRuntime } from "@/services/tauri-runtime";
-import log from "ente-base/log";
-
-const ENABLED_PACKS_STORAGE_KEY = "ensu.desktop.enabledKnowledgePacks";
 
 type KnowledgePackStatus = "download" | "ready" | "updateAvailable";
 
@@ -100,47 +97,17 @@ export const cancelKnowledgePackDownload = (stableId: string) =>
 export const retrieveKnowledge = (
     query: string,
     enabledStableIds: string[],
+    enabledNoteCollectionIds: string[],
     maxContextUtf8Bytes: number,
     retrievalEpoch: number,
 ) =>
     invokeKnowledge<KnowledgePromptContext | null>("knowledge_retrieve", {
         query,
         enabledStableIds,
+        enabledNoteCollectionIds,
         maxContextUtf8Bytes,
         retrievalEpoch,
     });
-
-export const loadEnabledKnowledgePacks = () => {
-    if (typeof window === "undefined" || !isTauriRuntime()) {
-        return new Set<string>();
-    }
-    try {
-        const raw = window.localStorage.getItem(ENABLED_PACKS_STORAGE_KEY);
-        const parsed = raw ? (JSON.parse(raw) as unknown) : [];
-        return new Set(
-            Array.isArray(parsed)
-                ? parsed.filter((value): value is string =>
-                      Boolean(typeof value === "string" && value),
-                  )
-                : [],
-        );
-    } catch (error) {
-        log.warn("Failed to load enabled Ensu Packs", error);
-        return new Set<string>();
-    }
-};
-
-export const saveEnabledKnowledgePacks = (stableIds: Set<string>) => {
-    if (typeof window === "undefined") return;
-    try {
-        window.localStorage.setItem(
-            ENABLED_PACKS_STORAGE_KEY,
-            JSON.stringify([...stableIds].sort()),
-        );
-    } catch (error) {
-        log.warn("Failed to save enabled Ensu Packs", error);
-    }
-};
 
 export const knowledgeErrorMessage = (error: unknown) => {
     const { name } = tauriCommandError(error);

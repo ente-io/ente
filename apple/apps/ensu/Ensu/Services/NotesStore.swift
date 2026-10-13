@@ -58,6 +58,17 @@ final class NotesStore: ObservableObject, ModelMaintenance {
         self.provider = notesProvider
     }
 
+    var inventoryReady: Bool { loaded }
+
+    func retryBootstrap() async {
+        await bootstrapTask?.value
+        guard !loaded else { return }
+        disabled = false
+        operationError = nil
+        bootstrapTask = nil
+        await bootstrap()
+    }
+
     func bootstrap() async {
         if let bootstrapTask {
             await bootstrapTask.value
@@ -126,7 +137,7 @@ final class NotesStore: ObservableObject, ModelMaintenance {
         await active?.task.value
     }
 
-    func add(_ url: URL) {
+    func add(_ url: URL, onAdded: ((String) -> Void)? = nil) {
         Task {
             await bootstrap()
             guard !disabled else { return }
@@ -136,6 +147,7 @@ final class NotesStore: ObservableObject, ModelMaintenance {
                     collections.append(NoteCollectionState(id: record.id, label: record.label))
                     operationError = nil
                     enqueue(record.id, due: .distantPast)
+                    onAdded?(record.id)
                 }
             } catch {
                 operationError = Self.message(error)
@@ -181,9 +193,10 @@ final class NotesStore: ObservableObject, ModelMaintenance {
         pump()
     }
 
-    func retrieve(query: [Float]) async throws -> [NotesHit] {
+    func retrieve(query: [Float], collectionIDs: Set<String>) async throws -> [NotesHit] {
         var hits: [NotesHit] = []
-        for collection in collections where collection.eligible {
+        for collection in collections
+        where collection.eligible && collectionIDs.contains(collection.id) {
             try Task.checkCancellation()
             do {
                 hits += try await provider.search(collection.id, query: query)
@@ -198,8 +211,11 @@ final class NotesStore: ObservableObject, ModelMaintenance {
         return hits
     }
 
-    func reload(_ locator: NotePassageLocator) async throws -> GroundedExcerpt? {
-        guard collections.contains(where: { $0.id == locator.collectionId && $0.eligible })
+    func reload(_ locator: NotePassageLocator, collectionIDs: Set<String>) async throws
+        -> GroundedExcerpt?
+    {
+        guard collectionIDs.contains(locator.collectionId),
+            collections.contains(where: { $0.id == locator.collectionId && $0.eligible })
         else { return nil }
         do {
             guard let hit = try await provider.reload(locator) else { return nil }

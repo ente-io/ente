@@ -91,6 +91,7 @@ export const resolveDesktopSourceFollowup = (input: {
     path: string[];
     question: string;
     enabledStableIds: string[];
+    enabledNoteCollectionIds: string[];
     cancellationEpoch: number;
     candidates?: unknown;
 }): Promise<string> =>

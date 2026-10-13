@@ -25,6 +25,32 @@ pub struct State {
     pack_lifecycles: Mutex<HashMap<String, Arc<async_runtime::Mutex<()>>>>,
 }
 
+/// The sources allowed for one response, captured from the chat's selection.
+pub(crate) struct SourceSelection {
+    pack_ids: HashSet<String>,
+    note_collection_ids: HashSet<String>,
+}
+
+impl SourceSelection {
+    pub(super) fn new(pack_ids: Vec<String>, note_collection_ids: Vec<String>) -> Self {
+        Self {
+            pack_ids: pack_ids.into_iter().collect(),
+            note_collection_ids: note_collection_ids.into_iter().collect(),
+        }
+    }
+
+    pub(super) fn allows(&self, locator: &retrieval::PassageLocator) -> bool {
+        match locator {
+            retrieval::PassageLocator::EnsuPack { dataset_id, .. } => {
+                self.pack_ids.contains(dataset_id)
+            }
+            retrieval::PassageLocator::LocalNote(locator) => {
+                self.note_collection_ids.contains(&locator.collection_id)
+            }
+        }
+    }
+}
+
 impl State {
     fn pack_lifecycle(&self, stable_id: &str) -> Arc<async_runtime::Mutex<()>> {
         Arc::clone(
@@ -544,34 +570,39 @@ pub async fn knowledge_retrieve(
     llm_state: TauriState<'_, crate::commands::llm::State>,
     query: String,
     enabled_stable_ids: Vec<String>,
+    enabled_note_collection_ids: Vec<String>,
     max_context_utf8_bytes: u32,
     retrieval_epoch: u64,
 ) -> Result<Option<GroundedPromptContextDto>, ApiError> {
     let knowledge_state = app.state::<State>();
+    let selection = SourceSelection::new(enabled_stable_ids, enabled_note_collection_ids);
     let (note_collection_ids, notes) = app
         .try_state::<crate::commands::notes::State>()
         .map_or_else(
             || (Vec::new(), None),
             |state| {
                 (
-                    state.available_index_collection_ids(),
+                    state
+                        .available_index_collection_ids()
+                        .into_iter()
+                        .filter(|id| selection.note_collection_ids.contains(id))
+                        .collect::<Vec<_>>(),
                     Some(state.retrieval_handle()),
                 )
             },
         );
     if query.trim().is_empty()
-        || (enabled_stable_ids.is_empty() && note_collection_ids.is_empty())
+        || (selection.pack_ids.is_empty() && note_collection_ids.is_empty())
         || max_context_utf8_bytes == 0
     {
         return Ok(None);
     }
 
     let defaults = ente_ensu::config::defaults();
-    let enabled = enabled_stable_ids.into_iter().collect::<HashSet<_>>();
     let datasets = defaults
         .knowledge_datasets
         .into_iter()
-        .filter(|dataset| enabled.contains(&dataset.stable_id))
+        .filter(|dataset| selection.pack_ids.contains(&dataset.stable_id))
         .collect::<Vec<_>>();
 
     let embedding = defaults.knowledge_embedding;
@@ -687,9 +718,12 @@ pub async fn knowledge_retrieve(
 pub(crate) async fn reload_for_followup(
     app: &AppHandle,
     reference: retrieval::IncludedPassage,
-    enabled_stable_ids: Vec<String>,
+    selection: &SourceSelection,
     retrieval_epoch: u64,
 ) -> Result<Option<retrieval::ReferencedPassage>, ApiError> {
+    if !selection.allows(&reference.locator) {
+        return Ok(None);
+    }
     let app = app.clone();
     let indexes = Arc::clone(&app.state::<State>().indexes);
     let (collection_ids, notes) = app
@@ -717,9 +751,6 @@ pub(crate) async fn reload_for_followup(
         let mut note_hits = Vec::new();
         match &reference.locator {
             retrieval::PassageLocator::EnsuPack { dataset_id, .. } => {
-                if !enabled_stable_ids.contains(dataset_id) {
-                    return Ok(None);
-                }
                 let indexes = indexes.lock().unwrap_or_else(PoisonError::into_inner);
                 let Some(open) = indexes.get(dataset_id) else {
                     return Ok(None);
@@ -801,6 +832,64 @@ mod tests {
     use ente_ensu::notes::NotesSearchHit;
 
     const COLLECTION_ID: &str = "123e4567-e89b-12d3-a456-426614174000";
+
+    #[test]
+    fn response_source_selection_is_explicit_and_independent_for_packs_and_folders() {
+        let pack = retrieval::PassageLocator::EnsuPack {
+            dataset_id: "selected-pack".into(),
+            revision_sha256: "a".repeat(64),
+            row: 0,
+        };
+        let note = retrieval::PassageLocator::LocalNote(note(0).locator);
+        let new_pack = retrieval::PassageLocator::EnsuPack {
+            dataset_id: "new-pack".into(),
+            revision_sha256: "b".repeat(64),
+            row: 0,
+        };
+        let mut new_folder_note = note.clone();
+        if let retrieval::PassageLocator::LocalNote(locator) = &mut new_folder_note {
+            locator.collection_id = "another-folder".into();
+        }
+
+        for (packs_enabled, notes_enabled) in
+            [(false, false), (true, false), (false, true), (true, true)]
+        {
+            let selection = SourceSelection::new(
+                if packs_enabled {
+                    vec!["selected-pack".into()]
+                } else {
+                    vec![]
+                },
+                if notes_enabled {
+                    vec![COLLECTION_ID.into()]
+                } else {
+                    vec![]
+                },
+            );
+            assert_eq!(selection.allows(&pack), packs_enabled);
+            assert_eq!(selection.allows(&note), notes_enabled);
+            assert!(!selection.allows(&new_pack));
+            assert!(!selection.allows(&new_folder_note));
+        }
+    }
+
+    #[test]
+    fn selected_sources_cover_new_content_without_enabling_new_sources() {
+        let selection = SourceSelection::new(vec!["pack".into()], vec![COLLECTION_ID.into()]);
+        for revision in ["a", "b"] {
+            let pack = retrieval::PassageLocator::EnsuPack {
+                dataset_id: "pack".into(),
+                revision_sha256: revision.repeat(64),
+                row: 123,
+            };
+            assert!(selection.allows(&pack));
+        }
+        for index in 0..3 {
+            let mut locator = note(index).locator;
+            locator.indexed_revision = "c".repeat(64);
+            assert!(selection.allows(&retrieval::PassageLocator::LocalNote(locator)));
+        }
+    }
 
     fn note(index: usize) -> NotesSearchHit {
         NotesSearchHit {

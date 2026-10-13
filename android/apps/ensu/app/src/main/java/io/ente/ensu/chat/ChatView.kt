@@ -46,16 +46,20 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import io.ente.ensu.AppStore
 import io.ente.ensu.assets.AssetStore
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.device.ChatDeviceCapability
+import io.ente.ensu.knowledge.KnowledgeState
 import io.ente.ensu.llm.LlmProvider
 import kotlinx.coroutines.Job
 
 @Composable
 fun ChatView(
     chatState: ChatState,
+    knowledgeState: KnowledgeState,
+    store: AppStore,
     assetStore: AssetStore,
     llmProvider: LlmProvider,
     isDrawerOpen: Boolean,
@@ -82,6 +86,7 @@ fun ChatView(
     val latestMessageText by rememberUpdatedState(chatState.messageText)
     val latestOnMessageChange by rememberUpdatedState(onMessageChange)
     val sessionKey = chatState.currentSessionId ?: "new-session"
+    var showSources by remember(sessionKey) { mutableStateOf(false) }
     val latestSessionKey by rememberUpdatedState(sessionKey)
     val unsupportedCapability =
         chatState.deviceCapability as? ChatDeviceCapability.UnsupportedLowMemory
@@ -191,6 +196,14 @@ fun ChatView(
         voiceController.cancelActiveVoiceInput()
     }
 
+    ChatSourcesSheet(
+        visible = showSources,
+        chatState = chatState,
+        knowledgeState = knowledgeState,
+        store = store,
+        onDismiss = { showSources = false },
+    )
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().imePadding()) {
             AnimatedContent(
@@ -288,6 +301,10 @@ fun ChatView(
                     onAttachmentSelected = onAttachmentSelected,
                     onRemoveAttachment = onRemoveAttachment,
                     onCancelEdit = onCancelEdit,
+                    onOpenSources = {
+                        focusManager.clearFocus()
+                        showSources = true
+                    },
                     voiceInputState = voiceController.state,
                     onVoiceInput = {
                         if (voiceController.state.isRecording) {

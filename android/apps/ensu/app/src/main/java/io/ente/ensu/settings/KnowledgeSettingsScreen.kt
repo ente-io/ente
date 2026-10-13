@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.bindings.KnowledgeDatasetConfig
 import io.ente.ensu.bindings.KnowledgeReconciliationStatus
@@ -49,7 +51,6 @@ fun KnowledgeSettingsScreen(
     packDownloadsAllowed: Boolean,
     onDownloadOrUpdate: (String) -> Unit,
     onCancel: (String) -> Unit,
-    onSetEnabled: (String, Boolean) -> Unit,
 ) {
     var attributionConfig by remember { mutableStateOf<KnowledgeDatasetConfig?>(null) }
 
@@ -63,7 +64,6 @@ fun KnowledgeSettingsScreen(
                 packDownloadsAllowed = packDownloadsAllowed,
                 onDownloadOrUpdate = { onDownloadOrUpdate(pack.config.stableId) },
                 onCancel = { onCancel(pack.config.stableId) },
-                onSetEnabled = { enabled -> onSetEnabled(pack.config.stableId, enabled) },
                 onOpenAttribution = { attributionConfig = pack.config },
             )
         }
@@ -78,13 +78,15 @@ fun KnowledgeSettingsScreen(
 }
 
 @Composable
-private fun KnowledgePackCard(
+internal fun KnowledgePackCard(
     pack: KnowledgePackState,
     packDownloadsAllowed: Boolean,
     onDownloadOrUpdate: () -> Unit,
     onCancel: () -> Unit,
-    onSetEnabled: (Boolean) -> Unit,
     onOpenAttribution: () -> Unit,
+    selected: Boolean? = null,
+    controlsEnabled: Boolean = true,
+    onSetEnabled: (Boolean) -> Unit = {},
 ) {
     KnowledgeCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -99,14 +101,26 @@ private fun KnowledgePackCard(
                 )
                 PackMetadataLine(pack = pack, onOpenAttribution = onOpenAttribution)
             }
-            if (pack.activeIdentity != null && !pack.isMutating) {
-                Switch(checked = pack.enabled, onCheckedChange = onSetEnabled)
+            if (selected != null && pack.activeIdentity != null) {
+                Switch(
+                    checked = selected,
+                    onCheckedChange = onSetEnabled,
+                    enabled = controlsEnabled,
+                    modifier =
+                        Modifier.semantics {
+                            contentDescription = "Use ${pack.config.label} in this chat"
+                        },
+                )
             } else if (
                 packDownloadsAllowed &&
                     pack.status == KnowledgeReconciliationStatus.DOWNLOAD &&
                     !pack.isMutating
             ) {
-                CompactButton(label = "Download", onClick = onDownloadOrUpdate)
+                CompactButton(
+                    label = "Download",
+                    onClick = onDownloadOrUpdate,
+                    enabled = controlsEnabled,
+                )
             }
         }
 
@@ -142,7 +156,7 @@ private fun KnowledgePackCard(
             packDownloadsAllowed && pack.status == KnowledgeReconciliationStatus.UPDATE_AVAILABLE
         ) {
             Spacer(Modifier.height(EnsuSpacing.md.dp))
-            CompactButton(label = "Update", onClick = onDownloadOrUpdate)
+            CompactButton(label = "Update", onClick = onDownloadOrUpdate, enabled = controlsEnabled)
         }
 
         pack.errorMessage?.let { Text(it, style = EnsuTypography.small, color = EnsuColor.error) }
@@ -186,7 +200,7 @@ private fun PackMetadataLine(
 }
 
 @Composable
-private fun PackAttributionDialog(
+internal fun PackAttributionDialog(
     config: KnowledgeDatasetConfig,
     onDismiss: () -> Unit,
 ) {

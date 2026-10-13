@@ -70,6 +70,8 @@ data class NoteCollectionState(
 data class NotesState(
     val collections: List<NoteCollectionState> = emptyList(),
     val error: String? = null,
+    val inventoryReady: Boolean = false,
+    val inventoryLoading: Boolean = true,
 )
 
 val LocalNotesStore = staticCompositionLocalOf<NotesStore?> { null }
@@ -141,7 +143,7 @@ class NotesStore(
                         )
                     }
                 }
-                _state.value = NotesState(states)
+                _state.value = NotesState(states, inventoryReady = true, inventoryLoading = false)
                 loaded = true
                 scans.addAll(registrations.keys)
             } catch (e: CancellationException) {
@@ -156,7 +158,8 @@ class NotesStore(
                 disabled = true
                 _state.value =
                     NotesState(
-                        error = "Could not load Your Notes. Existing indexes have been preserved."
+                        error = "Could not load Your Notes. Existing indexes have been preserved.",
+                        inventoryLoading = false,
                     )
             }
             pump()
@@ -165,6 +168,15 @@ class NotesStore(
 
     suspend fun awaitReady() {
         bootstrapJob?.join()
+    }
+
+    fun retryInventory() {
+        val ownerScope = scope ?: return
+        if (bootstrapJob?.isActive == true || loaded) return
+        disabled = false
+        bootstrapJob = null
+        _state.update { it.copy(inventoryLoading = true, error = null) }
+        bootstrap(ownerScope)
     }
 
     fun setForeground(value: Boolean) {
@@ -199,7 +211,7 @@ class NotesStore(
         active?.job?.join()
     }
 
-    fun add(tree: Uri) {
+    fun add(tree: Uri, onAdded: ((String) -> Unit)? = null) {
         scope?.launch {
             awaitReady()
             if (disabled) return@launch
@@ -214,6 +226,7 @@ class NotesStore(
                             error = null,
                         )
                     }
+                    onAdded?.invoke(record.id)
                     enqueue(record.id, immediate = true)
                 } catch (error: CancellationException) {
                     throw error
@@ -262,10 +275,12 @@ class NotesStore(
         _state.update { it.copy(error = null) }
     }
 
-    suspend fun retrieve(query: List<Float>): List<NotesHit> =
+    suspend fun retrieve(query: List<Float>, enabledFolderIds: Set<String>): List<NotesHit> =
         withContext(Dispatchers.Main.immediate) {
             val records =
-                _state.value.collections.filter { it.eligible }.mapNotNull { registrations[it.id] }
+                _state.value.collections
+                    .filter { it.eligible && it.id in enabledFolderIds }
+                    .mapNotNull { registrations[it.id] }
             val hits = mutableListOf<NotesHit>()
             for (record in records) {
                 currentCoroutineContext().ensureActive()

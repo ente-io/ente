@@ -97,6 +97,16 @@ interface ModelSettingsDraft {
 }
 
 export interface ChatDialogsProps {
+    showSources: boolean;
+    closeSources: () => void;
+    sourceSelectionDisabled: boolean;
+    handleDownloadChatKnowledgePack: (stableId: string) => void;
+    handleAddChatNotesFolder: () => void;
+    enabledNoteCollectionIds: Set<string>;
+    handleSetNotesCollectionEnabled: (
+        collectionId: string,
+        enabled: boolean,
+    ) => void;
     showSettingsModal: boolean;
     openSettingsModal: () => void;
     closeSettingsModal: () => void;
@@ -168,6 +178,13 @@ export interface ChatDialogsProps {
 
 export const ChatDialogs = memo(
     ({
+        showSources,
+        closeSources,
+        sourceSelectionDisabled,
+        handleDownloadChatKnowledgePack,
+        handleAddChatNotesFolder,
+        enabledNoteCollectionIds,
+        handleSetNotesCollectionEnabled,
         showSettingsModal,
         openSettingsModal,
         closeSettingsModal,
@@ -339,8 +356,462 @@ export const ChatDialogs = memo(
             return !contextErrorValue;
         }, [draftContextLength, isTauriRuntime]);
 
+        const renderNotesContent = (inChat: boolean) => (
+            <Stack sx={{ gap: 2 }}>
+                {notesCollectionsError && (
+                    <Stack
+                        direction="row"
+                        sx={{ alignItems: "center", gap: 1 }}
+                    >
+                        <Typography
+                            variant="small"
+                            sx={{ flex: 1, color: "critical.main" }}
+                        >
+                            {notesCollectionsError}
+                        </Typography>
+                        <Button size="small" onClick={retryNotesCollections}>
+                            Retry
+                        </Button>
+                    </Stack>
+                )}
+                {notesCollectionsLoading && <LinearProgress />}
+                {!notesCollectionsLoading && notesCollections.length === 0 && (
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
+                        Add a folder to use your notes in this chat.
+                    </Typography>
+                )}
+                {notesCollections.map((collection) => {
+                    const indexing =
+                        collection.status === "indexing" ||
+                        collection.status === "updating";
+                    const starting = collection.activity === "starting";
+                    const progress = collection.indexingProgress;
+                    const canRetry =
+                        collection.status === "error" ||
+                        collection.status === "unavailable" ||
+                        collection.activity === "failed";
+                    const waitingMessage =
+                        collection.activity === "waitingForGeneration"
+                            ? "Indexing will resume after the current response."
+                            : collection.activity === "waitingForModel"
+                              ? "Indexing will start when the model is ready."
+                              : null;
+                    return (
+                        <Stack
+                            key={collection.id}
+                            sx={{
+                                gap: 1.25,
+                                p: 2,
+                                borderRadius: 2,
+                                bgcolor: "fill.faint",
+                            }}
+                        >
+                            <Stack
+                                direction="row"
+                                sx={{ alignItems: "center", gap: 1 }}
+                            >
+                                <Stack sx={{ flex: 1, minWidth: 0 }}>
+                                    <Typography variant="h6" noWrap>
+                                        {collection.label}
+                                    </Typography>
+                                    <Typography
+                                        variant="mini"
+                                        noWrap
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        {starting &&
+                                        collection.indexedDocumentCount === 0
+                                            ? "Preparing notes…"
+                                            : `${collection.indexedDocumentCount} ${collection.indexedDocumentCount === 1 ? "note indexed" : "notes indexed"}`}
+                                        {collection.lastUpdatedAtMs != null && (
+                                            <>
+                                                {" · Updated at "}
+                                                {formatNotesUpdatedAt(
+                                                    collection.lastUpdatedAtMs,
+                                                )}
+                                            </>
+                                        )}
+                                    </Typography>
+                                </Stack>
+                                {inChat && (
+                                    <Switch
+                                        checked={enabledNoteCollectionIds.has(
+                                            collection.id,
+                                        )}
+                                        disabled={sourceSelectionDisabled}
+                                        onChange={(_, checked) =>
+                                            handleSetNotesCollectionEnabled(
+                                                collection.id,
+                                                checked,
+                                            )
+                                        }
+                                        slotProps={{
+                                            input: {
+                                                "aria-label": `Use ${collection.label} in this chat`,
+                                            },
+                                        }}
+                                    />
+                                )}
+                                {!inChat && (
+                                    <IconButton
+                                        aria-label={`Remove ${collection.label}`}
+                                        disabled={indexing || starting}
+                                        onClick={() =>
+                                            handleRemoveNotesCollection(
+                                                collection.id,
+                                                collection.label,
+                                            )
+                                        }
+                                        sx={actionButtonSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Delete01Icon}
+                                            {...compactIconProps}
+                                        />
+                                    </IconButton>
+                                )}
+                            </Stack>
+                            {indexing && (
+                                <Stack
+                                    direction="row"
+                                    sx={{ alignItems: "center", gap: 1 }}
+                                >
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={progress ?? 0}
+                                        sx={{ flex: 1 }}
+                                    />
+                                    <Typography
+                                        variant="mini"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        {progress ?? 0}%
+                                    </Typography>
+                                </Stack>
+                            )}
+                            {starting && <LinearProgress />}
+                            {waitingMessage && (
+                                <Typography
+                                    variant="small"
+                                    sx={{ color: "text.muted" }}
+                                >
+                                    {waitingMessage}
+                                </Typography>
+                            )}
+                            {collection.lastError && (
+                                <Typography
+                                    variant="small"
+                                    sx={{ color: "critical.main" }}
+                                >
+                                    {collection.lastError}
+                                </Typography>
+                            )}
+                            {collection.watcherError && (
+                                <Typography
+                                    variant="small"
+                                    sx={{ color: "text.muted" }}
+                                >
+                                    {collection.watcherError}
+                                </Typography>
+                            )}
+                            {collection.status === "unavailable" &&
+                                !collection.lastError && (
+                                    <Typography
+                                        variant="small"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Folder unavailable
+                                    </Typography>
+                                )}
+                            {(canRetry || collection.watcherError) && (
+                                <Button
+                                    size="small"
+                                    onClick={() =>
+                                        handleIndexNotesCollection(
+                                            collection.id,
+                                            true,
+                                        )
+                                    }
+                                    sx={{ alignSelf: "flex-start" }}
+                                >
+                                    {canRetry ? "Try again" : "Refresh"}
+                                </Button>
+                            )}
+                        </Stack>
+                    );
+                })}
+                <ListItemButton
+                    disabled={
+                        notesCollectionsLoading ||
+                        (inChat && sourceSelectionDisabled)
+                    }
+                    onClick={
+                        inChat ? handleAddChatNotesFolder : handleAddNotesFolder
+                    }
+                    sx={settingsItemSx}
+                >
+                    <HugeiconsIcon icon={Folder01Icon} {...compactIconProps} />
+                    <Typography variant="small" sx={{ flex: 1 }}>
+                        Add notes folder
+                    </Typography>
+                </ListItemButton>
+                <Typography variant="small" sx={{ px: 2, color: "text.muted" }}>
+                    Ensu reads and indexes markdown files in the selected
+                    folder. Source files are never modified.
+                </Typography>
+            </Stack>
+        );
+        const renderKnowledgeContent = (inChat: boolean) => (
+            <Stack sx={{ gap: 2 }}>
+                {knowledgeCatalogError && (
+                    <Stack
+                        direction="row"
+                        sx={{ alignItems: "center", gap: 1 }}
+                    >
+                        <Typography
+                            variant="small"
+                            sx={{ flex: 1, color: "critical.main" }}
+                        >
+                            {knowledgeCatalogError}
+                        </Typography>
+                        <Button size="small" onClick={retryKnowledgeCatalog}>
+                            Retry
+                        </Button>
+                    </Stack>
+                )}
+                {knowledgeCatalogLoading && <LinearProgress />}
+                {knowledgePacks.map((pack) => {
+                    const progress = knowledgeDownloadProgress[pack.stableId];
+                    const installed =
+                        pack.status === "ready" ||
+                        pack.status === "updateAvailable";
+                    const isMutating = progress !== undefined;
+                    const enabled =
+                        enabledKnowledgePackIds.has(pack.stableId) && installed;
+                    return (
+                        <Stack
+                            key={pack.stableId}
+                            sx={{
+                                gap: 1.5,
+                                p: 2,
+                                borderRadius: 2,
+                                bgcolor: "fill.faint",
+                            }}
+                        >
+                            <Stack
+                                direction="row"
+                                sx={{ alignItems: "center", gap: 1.5 }}
+                            >
+                                <Stack sx={{ flex: 1, gap: 0.5 }}>
+                                    <Typography variant="h6">
+                                        {pack.label}
+                                    </Typography>
+                                    <Stack
+                                        direction="row"
+                                        sx={{ alignItems: "center", gap: 0.75 }}
+                                    >
+                                        <Typography
+                                            variant="mini"
+                                            sx={{ color: "text.muted" }}
+                                        >
+                                            {formatBytes(
+                                                pack.downloadSizeBytes,
+                                            )}
+                                        </Typography>
+                                        <Typography
+                                            variant="mini"
+                                            sx={{ color: "text.muted" }}
+                                        >
+                                            ·
+                                        </Typography>
+                                        <Link
+                                            component="button"
+                                            type="button"
+                                            underline="hover"
+                                            onClick={() =>
+                                                setAttributionPack(pack)
+                                            }
+                                            sx={compactInlineLinkSx}
+                                        >
+                                            {pack.attribution.licenseLabel}
+                                        </Link>
+                                    </Stack>
+                                </Stack>
+                                {installed && !isMutating && inChat ? (
+                                    <Switch
+                                        checked={enabled}
+                                        disabled={
+                                            knowledgeCatalogLoading ||
+                                            sourceSelectionDisabled
+                                        }
+                                        onChange={(_, checked) =>
+                                            handleSetKnowledgePackEnabled(
+                                                pack.stableId,
+                                                checked,
+                                            )
+                                        }
+                                        slotProps={{
+                                            input: {
+                                                "aria-label": `Use ${pack.label} in this chat`,
+                                            },
+                                        }}
+                                    />
+                                ) : pack.status === "download" &&
+                                  !isMutating ? (
+                                    <Button
+                                        variant="contained"
+                                        color="accent"
+                                        size="small"
+                                        disabled={
+                                            knowledgeCatalogLoading ||
+                                            (inChat && sourceSelectionDisabled)
+                                        }
+                                        onClick={() =>
+                                            (inChat
+                                                ? handleDownloadChatKnowledgePack
+                                                : handleDownloadKnowledgePack)(
+                                                pack.stableId,
+                                            )
+                                        }
+                                    >
+                                        Download
+                                    </Button>
+                                ) : !inChat && installed && !isMutating ? (
+                                    <Typography
+                                        variant="small"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Downloaded
+                                    </Typography>
+                                ) : pack.status == null && !isMutating ? (
+                                    <Typography
+                                        variant="small"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Checking availability…
+                                    </Typography>
+                                ) : null}
+                            </Stack>
+
+                            {isMutating && (
+                                <Stack
+                                    direction="row"
+                                    sx={{ alignItems: "center", gap: 1 }}
+                                >
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={Math.max(
+                                            0,
+                                            Math.min(100, progress),
+                                        )}
+                                        sx={{ flex: 1 }}
+                                    />
+                                    <IconButton
+                                        aria-label={`Cancel ${pack.label} download`}
+                                        onClick={() =>
+                                            handleCancelKnowledgePackDownload(
+                                                pack.stableId,
+                                            )
+                                        }
+                                        sx={actionButtonSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Cancel01Icon}
+                                            {...compactIconProps}
+                                        />
+                                    </IconButton>
+                                </Stack>
+                            )}
+
+                            {!isMutating &&
+                                pack.status === "updateAvailable" && (
+                                    <Button
+                                        variant="contained"
+                                        color="accent"
+                                        size="small"
+                                        disabled={
+                                            knowledgeCatalogLoading ||
+                                            (inChat && sourceSelectionDisabled)
+                                        }
+                                        sx={{ alignSelf: "flex-start" }}
+                                        onClick={() =>
+                                            (inChat
+                                                ? handleDownloadChatKnowledgePack
+                                                : handleDownloadKnowledgePack)(
+                                                pack.stableId,
+                                            )
+                                        }
+                                    >
+                                        Update
+                                    </Button>
+                                )}
+
+                            {knowledgeErrors[pack.stableId] && (
+                                <Typography
+                                    variant="small"
+                                    sx={{ color: "critical.main" }}
+                                >
+                                    {knowledgeErrors[pack.stableId]}
+                                </Typography>
+                            )}
+                        </Stack>
+                    );
+                })}
+            </Stack>
+        );
+
         return (
             <>
+                <Dialog
+                    open={showSources}
+                    onClose={closeSources}
+                    fullScreen={isSmall}
+                    maxWidth="sm"
+                    fullWidth
+                    aria-labelledby="chat-sources-title"
+                    slotProps={{ paper: { sx: dialogPaperSx } }}
+                >
+                    <DialogTitle
+                        sx={[
+                            dialogTitleSx,
+                            {
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                            },
+                        ]}
+                    >
+                        <span id="chat-sources-title">Sources</span>
+                        <IconButton
+                            aria-label="Close sources"
+                            onClick={closeSources}
+                            sx={drawerIconButtonSx}
+                        >
+                            <HugeiconsIcon
+                                icon={Cancel01Icon}
+                                {...tinyIconProps}
+                            />
+                        </IconButton>
+                    </DialogTitle>
+                    <DialogContent>
+                        <Stack sx={{ gap: 2 }}>
+                            <Typography
+                                variant="small"
+                                sx={{ color: "text.muted" }}
+                            >
+                                Choose the packs and notes Ensu can use in this
+                                chat. Changes apply to the next response.
+                                Information already in the conversation remains
+                                available.
+                            </Typography>
+                            <Typography variant="h6">Ensu Packs</Typography>
+                            {renderKnowledgeContent(true)}
+                            <Divider />
+                            <Typography variant="h6">Your Notes</Typography>
+                            {renderNotesContent(true)}
+                        </Stack>
+                    </DialogContent>
+                </Dialog>
                 <Dialog
                     open={!!imagePreview}
                     onClose={closeImagePreview}
@@ -775,197 +1246,7 @@ export const ChatDialogs = memo(
                             Your Notes
                         </Box>
                     </DialogTitle>
-                    <DialogContent>
-                        <Stack sx={{ gap: 2 }}>
-                            {notesCollectionsError && (
-                                <Stack
-                                    direction="row"
-                                    sx={{ alignItems: "center", gap: 1 }}
-                                >
-                                    <Typography
-                                        variant="small"
-                                        sx={{ flex: 1, color: "critical.main" }}
-                                    >
-                                        {notesCollectionsError}
-                                    </Typography>
-                                    <Button
-                                        size="small"
-                                        onClick={retryNotesCollections}
-                                    >
-                                        Retry
-                                    </Button>
-                                </Stack>
-                            )}
-                            {notesCollectionsLoading && <LinearProgress />}
-                            {notesCollections.map((collection) => {
-                                const indexing =
-                                    collection.status === "indexing" ||
-                                    collection.status === "updating";
-                                const starting =
-                                    collection.activity === "starting";
-                                const progress = collection.indexingProgress;
-                                const canRetry =
-                                    collection.status === "error" ||
-                                    collection.status === "unavailable" ||
-                                    collection.activity === "failed";
-                                const waitingMessage =
-                                    collection.activity ===
-                                    "waitingForGeneration"
-                                        ? "Indexing will resume after the current response."
-                                        : collection.activity ===
-                                            "waitingForModel"
-                                          ? "Indexing will start when the model is ready."
-                                          : null;
-                                return (
-                                    <Stack
-                                        key={collection.id}
-                                        sx={{
-                                            gap: 1.25,
-                                            p: 2,
-                                            borderRadius: 2,
-                                            bgcolor: "fill.faint",
-                                        }}
-                                    >
-                                        <Stack
-                                            direction="row"
-                                            sx={{
-                                                alignItems: "center",
-                                                gap: 1,
-                                            }}
-                                        >
-                                            <Stack
-                                                sx={{ flex: 1, minWidth: 0 }}
-                                            >
-                                                <Typography variant="h6" noWrap>
-                                                    {collection.label}
-                                                </Typography>
-                                                <Typography
-                                                    variant="mini"
-                                                    noWrap
-                                                    sx={{ color: "text.muted" }}
-                                                >
-                                                    {starting &&
-                                                    collection.indexedDocumentCount ===
-                                                        0
-                                                        ? "Preparing notes…"
-                                                        : `${collection.indexedDocumentCount} ${collection.indexedDocumentCount === 1 ? "note indexed" : "notes indexed"}`}
-                                                    {collection.lastUpdatedAtMs !=
-                                                        null && (
-                                                        <>
-                                                            {" · Updated at "}
-                                                            {formatNotesUpdatedAt(
-                                                                collection.lastUpdatedAtMs,
-                                                            )}
-                                                        </>
-                                                    )}
-                                                </Typography>
-                                            </Stack>
-                                            <IconButton
-                                                aria-label={`Remove ${collection.label}`}
-                                                disabled={indexing || starting}
-                                                onClick={() =>
-                                                    handleRemoveNotesCollection(
-                                                        collection.id,
-                                                        collection.label,
-                                                    )
-                                                }
-                                                sx={actionButtonSx}
-                                            >
-                                                <HugeiconsIcon
-                                                    icon={Delete01Icon}
-                                                    {...compactIconProps}
-                                                />
-                                            </IconButton>
-                                        </Stack>
-                                        {indexing && (
-                                            <Stack
-                                                direction="row"
-                                                sx={{
-                                                    alignItems: "center",
-                                                    gap: 1,
-                                                }}
-                                            >
-                                                <LinearProgress
-                                                    variant="determinate"
-                                                    value={progress ?? 0}
-                                                    sx={{ flex: 1 }}
-                                                />
-                                                <Typography
-                                                    variant="mini"
-                                                    sx={{ color: "text.muted" }}
-                                                >
-                                                    {progress ?? 0}%
-                                                </Typography>
-                                            </Stack>
-                                        )}
-                                        {starting && <LinearProgress />}
-                                        {waitingMessage && (
-                                            <Typography
-                                                variant="small"
-                                                sx={{ color: "text.muted" }}
-                                            >
-                                                {waitingMessage}
-                                            </Typography>
-                                        )}
-                                        {collection.lastError && (
-                                            <Typography
-                                                variant="small"
-                                                sx={{ color: "critical.main" }}
-                                            >
-                                                {collection.lastError}
-                                            </Typography>
-                                        )}
-                                        {collection.watcherError && (
-                                            <Typography
-                                                variant="small"
-                                                sx={{ color: "text.muted" }}
-                                            >
-                                                {collection.watcherError}
-                                            </Typography>
-                                        )}
-                                        {(canRetry ||
-                                            collection.watcherError) && (
-                                            <Button
-                                                size="small"
-                                                onClick={() =>
-                                                    handleIndexNotesCollection(
-                                                        collection.id,
-                                                        true,
-                                                    )
-                                                }
-                                                sx={{ alignSelf: "flex-start" }}
-                                            >
-                                                {canRetry
-                                                    ? "Try again"
-                                                    : "Refresh"}
-                                            </Button>
-                                        )}
-                                    </Stack>
-                                );
-                            })}
-                            <ListItemButton
-                                disabled={notesCollectionsLoading}
-                                onClick={handleAddNotesFolder}
-                                sx={settingsItemSx}
-                            >
-                                <HugeiconsIcon
-                                    icon={Folder01Icon}
-                                    {...compactIconProps}
-                                />
-                                <Typography variant="small" sx={{ flex: 1 }}>
-                                    Add notes folder
-                                </Typography>
-                            </ListItemButton>
-                            <Typography
-                                variant="small"
-                                sx={{ px: 2, color: "text.muted" }}
-                            >
-                                Ensu reads and indexes markdown files in the
-                                selected folder. Source files are never
-                                modified.
-                            </Typography>
-                        </Stack>
-                    </DialogContent>
+                    <DialogContent>{renderNotesContent(false)}</DialogContent>
                 </Dialog>
 
                 <Dialog
@@ -1000,208 +1281,7 @@ export const ChatDialogs = memo(
                         <Box component="span">Ensu Packs</Box>
                     </DialogTitle>
                     <DialogContent>
-                        <Stack sx={{ gap: 2 }}>
-                            {knowledgeCatalogError && (
-                                <Stack
-                                    direction="row"
-                                    sx={{ alignItems: "center", gap: 1 }}
-                                >
-                                    <Typography
-                                        variant="small"
-                                        sx={{ flex: 1, color: "critical.main" }}
-                                    >
-                                        {knowledgeCatalogError}
-                                    </Typography>
-                                    <Button
-                                        size="small"
-                                        onClick={retryKnowledgeCatalog}
-                                    >
-                                        Retry
-                                    </Button>
-                                </Stack>
-                            )}
-                            {knowledgeCatalogLoading && <LinearProgress />}
-                            {knowledgePacks.map((pack) => {
-                                const progress =
-                                    knowledgeDownloadProgress[pack.stableId];
-                                const installed =
-                                    pack.status === "ready" ||
-                                    pack.status === "updateAvailable";
-                                const isMutating = progress !== undefined;
-                                const enabled =
-                                    enabledKnowledgePackIds.has(
-                                        pack.stableId,
-                                    ) && installed;
-                                return (
-                                    <Stack
-                                        key={pack.stableId}
-                                        sx={{
-                                            gap: 1.5,
-                                            p: 2,
-                                            borderRadius: 2,
-                                            bgcolor: "fill.faint",
-                                        }}
-                                    >
-                                        <Stack
-                                            direction="row"
-                                            sx={{
-                                                alignItems: "center",
-                                                gap: 1.5,
-                                            }}
-                                        >
-                                            <Stack sx={{ flex: 1, gap: 0.5 }}>
-                                                <Typography variant="h6">
-                                                    {pack.label}
-                                                </Typography>
-                                                <Stack
-                                                    direction="row"
-                                                    sx={{
-                                                        alignItems: "center",
-                                                        gap: 0.75,
-                                                    }}
-                                                >
-                                                    <Typography
-                                                        variant="mini"
-                                                        sx={{
-                                                            color: "text.muted",
-                                                        }}
-                                                    >
-                                                        {formatBytes(
-                                                            pack.downloadSizeBytes,
-                                                        )}
-                                                    </Typography>
-                                                    <Typography
-                                                        variant="mini"
-                                                        sx={{
-                                                            color: "text.muted",
-                                                        }}
-                                                    >
-                                                        ·
-                                                    </Typography>
-                                                    <Link
-                                                        component="button"
-                                                        type="button"
-                                                        underline="hover"
-                                                        onClick={() =>
-                                                            setAttributionPack(
-                                                                pack,
-                                                            )
-                                                        }
-                                                        sx={compactInlineLinkSx}
-                                                    >
-                                                        {
-                                                            pack.attribution
-                                                                .licenseLabel
-                                                        }
-                                                    </Link>
-                                                </Stack>
-                                            </Stack>
-                                            {installed && !isMutating ? (
-                                                <Switch
-                                                    checked={enabled}
-                                                    disabled={
-                                                        knowledgeCatalogLoading
-                                                    }
-                                                    onChange={(_, checked) =>
-                                                        handleSetKnowledgePackEnabled(
-                                                            pack.stableId,
-                                                            checked,
-                                                        )
-                                                    }
-                                                    slotProps={{
-                                                        input: {
-                                                            "aria-label": `Enable ${pack.label}`,
-                                                        },
-                                                    }}
-                                                />
-                                            ) : pack.status === "download" &&
-                                              !isMutating ? (
-                                                <Button
-                                                    variant="contained"
-                                                    color="accent"
-                                                    size="small"
-                                                    disabled={
-                                                        knowledgeCatalogLoading
-                                                    }
-                                                    onClick={() =>
-                                                        handleDownloadKnowledgePack(
-                                                            pack.stableId,
-                                                        )
-                                                    }
-                                                >
-                                                    Download
-                                                </Button>
-                                            ) : null}
-                                        </Stack>
-
-                                        {isMutating && (
-                                            <Stack
-                                                direction="row"
-                                                sx={{
-                                                    alignItems: "center",
-                                                    gap: 1,
-                                                }}
-                                            >
-                                                <LinearProgress
-                                                    variant="determinate"
-                                                    value={Math.max(
-                                                        0,
-                                                        Math.min(100, progress),
-                                                    )}
-                                                    sx={{ flex: 1 }}
-                                                />
-                                                <IconButton
-                                                    aria-label={`Cancel ${pack.label} download`}
-                                                    onClick={() =>
-                                                        handleCancelKnowledgePackDownload(
-                                                            pack.stableId,
-                                                        )
-                                                    }
-                                                    sx={actionButtonSx}
-                                                >
-                                                    <HugeiconsIcon
-                                                        icon={Cancel01Icon}
-                                                        {...compactIconProps}
-                                                    />
-                                                </IconButton>
-                                            </Stack>
-                                        )}
-
-                                        {!isMutating &&
-                                            pack.status ===
-                                                "updateAvailable" && (
-                                                <Button
-                                                    variant="contained"
-                                                    color="accent"
-                                                    size="small"
-                                                    disabled={
-                                                        knowledgeCatalogLoading
-                                                    }
-                                                    sx={{
-                                                        alignSelf: "flex-start",
-                                                    }}
-                                                    onClick={() =>
-                                                        handleDownloadKnowledgePack(
-                                                            pack.stableId,
-                                                        )
-                                                    }
-                                                >
-                                                    Update
-                                                </Button>
-                                            )}
-
-                                        {knowledgeErrors[pack.stableId] && (
-                                            <Typography
-                                                variant="small"
-                                                sx={{ color: "critical.main" }}
-                                            >
-                                                {knowledgeErrors[pack.stableId]}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                );
-                            })}
-                        </Stack>
+                        {renderKnowledgeContent(false)}
                     </DialogContent>
                 </Dialog>
 

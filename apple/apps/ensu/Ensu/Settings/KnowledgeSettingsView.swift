@@ -2,27 +2,34 @@ import SwiftUI
 
 struct KnowledgeSettingsView: View {
     @ObservedObject var store: KnowledgeStore
-    @State private var attributionPack: KnowledgePackState?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: EnsuSpacing.md) {
                 ForEach(store.packs) { pack in
-                    packCard(pack)
+                    KnowledgePackCard(store: store, pack: pack)
                 }
+                Text("Choose sources for each chat using Sources in the message composer.")
+                    .font(EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.textMuted)
             }
             .padding(EnsuSpacing.lg)
         }
         .background(EnsuColor.backgroundBase)
         .navigationTitle("Ensu Packs")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(item: $attributionPack) { pack in
-            PackAttributionSheet(config: pack.config)
-        }
     }
+}
 
-    @ViewBuilder
-    private func packCard(_ pack: KnowledgePackState) -> some View {
+struct KnowledgePackCard: View {
+    @ObservedObject var store: KnowledgeStore
+    let pack: KnowledgePackState
+    var selection: Binding<Bool>? = nil
+    var controlsDisabled = false
+    var onDownload: (() -> Void)? = nil
+    @State private var showAttribution = false
+
+    var body: some View {
         let attribution = pack.config.attribution
         EnsuCard {
             HStack {
@@ -38,7 +45,7 @@ struct KnowledgeSettingsView: View {
                             .font(EnsuTypography.mini)
                             .foregroundStyle(EnsuColor.textMuted)
                         Button {
-                            attributionPack = pack
+                            showAttribution = true
                         } label: {
                             HStack(spacing: EnsuSpacing.xs) {
                                 Text(attribution.licenseLabel)
@@ -53,21 +60,18 @@ struct KnowledgeSettingsView: View {
                     }
                 }
                 Spacer()
-                if pack.activeIdentity != nil && !pack.isMutating {
-                    Toggle(
-                        "",
-                        isOn: Binding(
-                            get: { pack.enabled },
-                            set: { store.setEnabled(stableId: pack.id, enabled: $0) }
-                        )
-                    )
-                    .labelsHidden()
-                    .tint(EnsuColor.accent)
+                if pack.activeIdentity != nil, let selection {
+                    Toggle("Use \(pack.config.label) in this chat", isOn: selection)
+                        .labelsHidden()
+                        .tint(EnsuColor.accent)
+                        .disabled(controlsDisabled || pack.isMutating)
                 } else if store.downloadsAllowed && pack.status == .download && !pack.isMutating {
                     CompactButton(text: "Download") {
-                        store.downloadOrUpdate(stableId: pack.id)
+                        download()
                     }
+                    .disabled(controlsDisabled)
                 }
+
             }
 
             if pack.isMutating {
@@ -89,9 +93,18 @@ struct KnowledgeSettingsView: View {
                     .accessibilityLabel("Cancel download")
                 }
             } else if store.downloadsAllowed && pack.status == .updateAvailable {
-                CompactButton(text: "Update") {
-                    store.downloadOrUpdate(stableId: pack.id)
-                }
+                CompactButton(text: "Update") { download() }
+                    .disabled(controlsDisabled)
+            } else if pack.activeIdentity != nil && selection == nil {
+                Text("Downloaded")
+                    .font(EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.textMuted)
+            }
+
+            if pack.isMutating, let progress = pack.progressLabel {
+                Text(progress)
+                    .font(EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.textMuted)
             }
 
             if let error = pack.errorMessage {
@@ -100,6 +113,13 @@ struct KnowledgeSettingsView: View {
                     .foregroundStyle(EnsuColor.error)
             }
         }
+        .sheet(isPresented: $showAttribution) {
+            PackAttributionSheet(config: pack.config)
+        }
+    }
+
+    private func download() {
+        if let onDownload { onDownload() } else { store.downloadOrUpdate(stableId: pack.id) }
     }
 }
 

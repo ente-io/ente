@@ -8,6 +8,7 @@ struct ChatView: View {
 
     @StateObject private var viewState = ChatViewState()
     @StateObject private var keyboard = KeyboardObserver()
+    @State private var showSources = false
     @State private var isInputFocused = false
 
     private var editingMessage: RenderedChatMessage? {
@@ -30,6 +31,7 @@ struct ChatView: View {
             && !viewState.isDrawerOpen
             && !viewState.didDismissKeyboard
             && !viewState.showSettings
+            && !showSources
     }
 
     private var overflowDialogPresented: Binding<Bool> {
@@ -175,6 +177,9 @@ struct ChatView: View {
                     viewState.showSettings = false
                 }
             )
+        }
+        .sheet(isPresented: $showSources) {
+            ChatSourcesView(viewModel: viewModel)
         }
         .onChange(of: viewState.showSettings) { isPresented in
             viewModel.setChatActive(!isPresented && scenePhase == .active)
@@ -362,6 +367,7 @@ struct ChatView: View {
                         onCancelEdit: {
                             viewModel.cancelEditing()
                         },
+                        onSources: { showSources = true },
                         onVoiceInput: {
                             viewState.didDismissKeyboard = true
                             isInputFocused = false

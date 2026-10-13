@@ -67,6 +67,12 @@ export interface ChatComposerProps {
     isGenerating: boolean;
     handleSend: (input: string) => void | Promise<void>;
     handleStopGeneration: () => void;
+    showSourcePicker: boolean;
+    openSources: () => void;
+    sourcesDisabled: boolean;
+    sourcesLoading: boolean;
+    isPreparingMessage: boolean;
+    sourcesStatus?: string;
     showAttachmentPicker: boolean;
     openAttachmentMenu: (event: React.MouseEvent<HTMLElement>) => void;
     attachmentAnchor: HTMLElement | null;
@@ -108,6 +114,12 @@ export const ChatComposer = memo(
             isGenerating,
             handleSend,
             handleStopGeneration,
+            showSourcePicker,
+            openSources,
+            sourcesDisabled,
+            sourcesLoading,
+            isPreparingMessage,
+            sourcesStatus,
             showAttachmentPicker,
             openAttachmentMenu,
             attachmentAnchor,
@@ -146,6 +158,7 @@ export const ChatComposer = memo(
             modelGateStatus === "preloading" ||
             modelGateStatus === "downloading";
         const disableAttachmentButton =
+            isPreparingMessage ||
             isGenerating ||
             isAttachingImages ||
             isModelPreparationActive ||
@@ -540,7 +553,39 @@ export const ChatComposer = memo(
                                         </Box>
                                     )}
 
+                                    {sourcesStatus && (
+                                        <Stack
+                                            direction="row"
+                                            sx={{
+                                                alignItems: "center",
+                                                px: 1.5,
+                                                gap: 1,
+                                            }}
+                                            role="status"
+                                        >
+                                            <Typography
+                                                variant="small"
+                                                sx={{
+                                                    flex: 1,
+                                                    color: "text.muted",
+                                                }}
+                                            >
+                                                {sourcesStatus}
+                                            </Typography>
+                                            <Button
+                                                size="small"
+                                                onClick={openSources}
+                                            >
+                                                Sources
+                                            </Button>
+                                        </Stack>
+                                    )}
                                     <ChatInput
+                                        showSourcePicker={showSourcePicker}
+                                        openSources={openSources}
+                                        sourcesDisabled={sourcesDisabled}
+                                        sourcesLoading={sourcesLoading}
+                                        isPreparingMessage={isPreparingMessage}
                                         ref={inputRef}
                                         actionIconProps={actionIconProps}
                                         disableAttachmentButton={

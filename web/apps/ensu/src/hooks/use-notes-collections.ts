@@ -43,6 +43,7 @@ export const useNotesCollections = ({
 }: UseNotesCollectionsOptions) => {
     const [collections, setCollections] = useState<NotesCollection[]>([]);
     const [loading, setLoading] = useState(false);
+    const [loaded, setLoaded] = useState(false);
     const [operationError, setOperationError] = useState<string | null>(null);
     const [listError, setListError] = useState<string | null>(null);
     const [subscriptionError, setSubscriptionError] = useState<string | null>(
@@ -82,6 +83,7 @@ export const useNotesCollections = ({
                         continue;
                     }
                     setCollections(next);
+                    setLoaded(true);
                     setListError(null);
                     return;
                 } catch (error) {
@@ -351,10 +353,12 @@ export const useNotesCollections = ({
             const collection = await addNotesCollection(sourceRoot);
             replaceCollection(collection);
             runIndex(collection.id);
+            return collection;
         } catch (error) {
             setOperationError(notesErrorMessage(error));
             log.error("Failed to add Notes folder", error);
         }
+        return undefined;
     }, [replaceCollection, runIndex]);
 
     const removeCollection = useCallback(
@@ -435,6 +439,7 @@ export const useNotesCollections = ({
     return {
         collections: collectionViews,
         loading,
+        loaded,
         error: subscriptionError ?? listError ?? operationError,
         retry,
         addFolder,

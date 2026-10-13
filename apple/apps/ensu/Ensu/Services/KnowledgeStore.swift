@@ -5,26 +5,23 @@ import SwiftUI
 final class KnowledgeStore: ObservableObject {
     @Published private(set) var packs: [KnowledgePackState]
     @Published var downloadsAllowed = false
+    private(set) var inventoryReady = false
 
     private let provider: KnowledgeProvider
-    private let preferences: KnowledgePreferences
     private var bootstrapTask: Task<Void, Never>?
     private var mutationTasks: [String: Task<Void, Never>] = [:]
 
     init(
         datasets: [KnowledgeDatasetConfig],
-        provider: KnowledgeProvider,
-        defaults: UserDefaults = .standard
+        provider: KnowledgeProvider
     ) {
         packs = datasets.map { KnowledgePackState(config: $0) }
         self.provider = provider
-        preferences = KnowledgePreferences(defaults: defaults)
     }
 
-    var enabledReadyDatasets: [KnowledgeDatasetConfig] {
+    var readyDatasets: [KnowledgeDatasetConfig] {
         packs.compactMap { pack in
-            guard pack.enabled,
-                pack.status == .ready || pack.status == .updateAvailable
+            guard pack.status == .ready || pack.status == .updateAvailable
             else {
                 return nil
             }
@@ -40,48 +37,37 @@ final class KnowledgeStore: ObservableObject {
 
         let task = Task { @MainActor [weak self] in
             guard let self else { return }
-            await bootstrapEnabledDatasets()
+            await bootstrapDatasets()
         }
         bootstrapTask = task
         await task.value
     }
 
-    private func bootstrapEnabledDatasets() async {
-        let requestedEnabled = preferences.enabledDatasetIds
-        let datasets = packs.map(\.config)
-        for dataset in datasets where requestedEnabled.contains(dataset.stableId) {
-            await reconcileForBootstrap(dataset, enabled: true)
-        }
-
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            for dataset in datasets where !requestedEnabled.contains(dataset.stableId) {
-                await reconcileForBootstrap(dataset, enabled: false)
+    private func bootstrapDatasets() async {
+        var failed = false
+        for dataset in packs.map(\.config) {
+            do {
+                let result = try await provider.reconcile(dataset: dataset)
+                applyReconciliation(result, stableId: dataset.stableId)
+            } catch {
+                failed = true
+                updatePack(dataset.stableId) { pack in
+                    pack.status = .download
+                    pack.errorMessage = userFacingKnowledgeError(error)
+                }
             }
         }
+        inventoryReady = !failed
     }
 
-    private func reconcileForBootstrap(
-        _ dataset: KnowledgeDatasetConfig,
-        enabled: Bool
-    ) async {
-        do {
-            let result = try await provider.reconcile(dataset: dataset)
-            applyReconciliation(
-                result,
-                stableId: dataset.stableId,
-                enabled: enabled
-            )
-        } catch {
-            updatePack(dataset.stableId) { pack in
-                pack.status = .download
-                pack.enabled = false
-                pack.errorMessage = userFacingKnowledgeError(error)
-            }
-        }
+    func retryBootstrap() async {
+        await bootstrapTask?.value
+        guard !inventoryReady else { return }
+        bootstrapTask = nil
+        await bootstrap()
     }
 
-    func downloadOrUpdate(stableId: String) {
+    func downloadOrUpdate(stableId: String, onInstalled: (() -> Void)? = nil) {
         guard downloadsAllowed,
             mutationTasks[stableId] == nil,
             let index = packs.firstIndex(where: { $0.id == stableId })
@@ -89,7 +75,6 @@ final class KnowledgeStore: ObservableObject {
             return
         }
         let dataset = packs[index].config
-        let wasInstalled = packs[index].activeIdentity != nil
         updatePack(stableId) { pack in
             pack.isMutating = true
             pack.progressPercent = 0
@@ -108,28 +93,11 @@ final class KnowledgeStore: ObservableObject {
                         }
                     }
                 }
-                let shouldEnable = !wasInstalled && result.status == .ready
-                if shouldEnable {
-                    preferences.setDatasetEnabled(id: stableId, enabled: true)
-                }
-                let preservedEnablement =
-                    packs
-                    .first(where: { $0.id == stableId })?.enabled == true
-                applyReconciliation(
-                    result,
-                    stableId: stableId,
-                    enabled: wasInstalled ? preservedEnablement : shouldEnable
-                )
+                applyReconciliation(result, stableId: stableId)
+                if result.activeIdentity != nil { onInstalled?() }
             } catch {
                 if let result = try? await provider.reconcile(dataset: dataset) {
-                    let enabled =
-                        packs
-                        .first(where: { $0.id == stableId })?.enabled == true
-                    applyReconciliation(
-                        result,
-                        stableId: stableId,
-                        enabled: enabled
-                    )
+                    applyReconciliation(result, stableId: stableId)
                 }
                 updatePack(stableId) { pack in
                     pack.errorMessage = userFacingKnowledgeError(error)
@@ -157,10 +125,7 @@ final class KnowledgeStore: ObservableObject {
                 return
             }
             if let result {
-                let enabled =
-                    packs
-                    .first(where: { $0.id == stableId })?.enabled == true
-                applyReconciliation(result, stableId: stableId, enabled: enabled)
+                applyReconciliation(result, stableId: stableId)
             }
             updatePack(stableId) { pack in
                 pack.isMutating = false
@@ -170,28 +135,13 @@ final class KnowledgeStore: ObservableObject {
         }
     }
 
-    func setEnabled(stableId: String, enabled: Bool) {
-        guard let index = packs.firstIndex(where: { $0.id == stableId }),
-            packs[index].activeIdentity != nil,
-            !packs[index].isMutating
-        else {
-            return
-        }
-        updatePack(stableId) { pack in
-            pack.enabled = enabled
-        }
-        preferences.setDatasetEnabled(id: stableId, enabled: enabled)
-    }
-
     private func applyReconciliation(
         _ result: KnowledgeReconciliation,
-        stableId: String,
-        enabled: Bool
+        stableId: String
     ) {
         updatePack(stableId) { pack in
             pack.status = result.status
             pack.activeIdentity = result.activeIdentity
-            pack.enabled = enabled && result.activeIdentity != nil
             pack.errorMessage = nil
         }
     }
@@ -234,35 +184,8 @@ struct KnowledgePackState: Identifiable, Sendable {
     let config: KnowledgeDatasetConfig
     var status: KnowledgeReconciliationStatus?
     var activeIdentity: String?
-    var enabled = false
     var isMutating = false
     var progressPercent: Int?
     var progressLabel: String?
     var errorMessage: String?
-}
-
-private final class KnowledgePreferences {
-    private enum Keys {
-        static let enabledDatasetIds = "ensu.knowledge.enabled_dataset_ids"
-    }
-
-    private let defaults: UserDefaults
-
-    init(defaults: UserDefaults) {
-        self.defaults = defaults
-    }
-
-    var enabledDatasetIds: Set<String> {
-        Set(defaults.stringArray(forKey: Keys.enabledDatasetIds) ?? [])
-    }
-
-    func setDatasetEnabled(id: String, enabled: Bool) {
-        var ids = enabledDatasetIds
-        if enabled {
-            ids.insert(id)
-        } else {
-            ids.remove(id)
-        }
-        defaults.set(ids.sorted(), forKey: Keys.enabledDatasetIds)
-    }
 }

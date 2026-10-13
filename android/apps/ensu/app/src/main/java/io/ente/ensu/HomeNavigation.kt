@@ -113,6 +113,8 @@ internal fun HomeNavigation(
                     ChatView(
                         onVoiceInputJob = store::trackVoiceInput,
                         chatState = appState.chat,
+                        knowledgeState = appState.knowledge,
+                        store = store,
                         assetStore = store.assetStore,
                         llmProvider = store.llmProvider,
                         isDrawerOpen = drawerState.currentValue == DrawerValue.Open,
@@ -180,7 +182,6 @@ internal fun HomeNavigation(
                         packDownloadsAllowed = appState.chat.deviceCapability.isChatSupported(),
                         onDownloadOrUpdate = store::downloadOrUpdateKnowledgePack,
                         onCancel = store::cancelKnowledgePackDownload,
-                        onSetEnabled = store::setKnowledgePackEnabled,
                     )
                 }
                 composable(

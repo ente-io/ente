@@ -74,6 +74,7 @@ internal fun MessageInput(
     onAttachmentSelected: (AttachmentType) -> Unit,
     onRemoveAttachment: (Attachment) -> Unit,
     onCancelEdit: () -> Unit,
+    onOpenSources: () -> Unit,
     voiceInputState: VoiceInputState,
     onVoiceInput: () -> Unit,
     focusRequestId: Int,
@@ -242,6 +243,41 @@ internal fun MessageInput(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                if (editingMessage == null && supportsImageAttachments) {
+                    val canAddImageAttachment =
+                        !isGenerating && !isDownloading && !isImageAttachmentLimitReached
+                    IconButton(
+                        onClick = {
+                            haptic.perform(HapticFeedbackType.TextHandleMove)
+                            onAttachmentSelected(AttachmentType.Image)
+                        },
+                        enabled = canAddImageAttachment,
+                        modifier = Modifier.size(36.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(HugeIcons.Upload01Icon),
+                            contentDescription = "Attach",
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = {
+                        haptic.perform(HapticFeedbackType.TextHandleMove)
+                        onOpenSources()
+                    },
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(HugeIcons.PackageIcon),
+                        contentDescription = "Sources for this chat",
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
+
                 BasicTextField(
                     value = fieldValue,
                     onValueChange = { newValue ->
@@ -269,27 +305,6 @@ internal fun MessageInput(
                             )
                         }
                         innerTextField()
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
-
-                if (editingMessage == null && supportsImageAttachments) {
-                    val canAddImageAttachment =
-                        !isGenerating && !isDownloading && !isImageAttachmentLimitReached
-                    IconButton(
-                        onClick = {
-                            haptic.perform(HapticFeedbackType.TextHandleMove)
-                            onAttachmentSelected(AttachmentType.Image)
-                        },
-                        enabled = canAddImageAttachment,
-                        modifier = Modifier.size(36.dp),
-                    ) {
-                        Icon(
-                            painter = painterResource(HugeIcons.Upload01Icon),
-                            contentDescription = "Attach",
-                            modifier = Modifier.size(18.dp),
-                        )
                     }
                 }
 

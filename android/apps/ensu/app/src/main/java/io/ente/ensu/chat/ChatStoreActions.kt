@@ -10,6 +10,7 @@ import io.ente.ensu.bindings.ConversationRequest
 import io.ente.ensu.bindings.DbException
 import io.ente.ensu.bindings.GroundedExcerpt
 import io.ente.ensu.bindings.GroundedSource
+import io.ente.ensu.bindings.KnowledgeDatasetConfig
 import io.ente.ensu.bindings.LlmException
 import io.ente.ensu.bindings.PassageLocator
 import io.ente.ensu.bindings.buildGroundedPromptContext
@@ -46,7 +47,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -54,6 +58,7 @@ import kotlinx.coroutines.withContext
 
 internal class ChatStoreActions(
     private val state: MutableStateFlow<AppState>,
+    private val sourcePreferences: ChatSourceSelectionPreferences,
     private val sessionPreferences: SessionPreferencesDataStore,
     private val chatRepository: ChatRepository,
     private val llmProvider: LlmProvider,
@@ -67,6 +72,10 @@ internal class ChatStoreActions(
     private val notesStore: NotesStore,
     private val awaitKnowledgeReady: suspend () -> Unit,
 ) {
+    private val sourceInventoryReady: Boolean
+        get() = state.value.knowledge.inventoryReady && notesStore.state.value.inventoryReady
+
+    private val sourceSelections = ChatSourceSelections(sourcePreferences)
     private val branchSelections = mutableMapOf<String, MutableMap<String, String>>()
     private val sessionSummaries = mutableMapOf<String, String>()
     private val sessionAccessTimes = mutableMapOf<String, Long>()
@@ -91,6 +100,24 @@ internal class ChatStoreActions(
     fun bootstrap(scope: CoroutineScope) {
         this.scope = scope
 
+        refreshSourceSelectionInventory()
+        scope.launch {
+            combine(
+                    state.map { it.knowledge.inventoryReady },
+                    notesStore.state.map { it.inventoryReady },
+                ) { packsReady, notesReady ->
+                    packsReady && notesReady
+                }
+                .distinctUntilChanged()
+                .collectLatest { ready ->
+                    if (ready) {
+                        refreshSourceSelectionInventory()
+                    } else {
+                        state.update { it.copy(chat = it.chat.copy(sourceSelectionReady = false)) }
+                    }
+                }
+        }
+
         sessionSummaries.clear()
         scope.launch {
             val summaries = sessionPreferences.sessionSummaries.first()
@@ -112,10 +139,83 @@ internal class ChatStoreActions(
         }
     }
 
+    fun refreshSourceSelectionInventory() {
+        scope?.launch {
+            awaitKnowledgeReady()
+            notesStore.awaitReady()
+            state.update { appState ->
+                appState.copy(
+                    chat =
+                        appState.chat.copy(
+                            sourceSelection = readSourceSelection(sourceSelectionTarget()),
+                            sourceSelectionReady = sourceInventoryReady,
+                        )
+                )
+            }
+        }
+    }
+
+    fun sourceSelectionTarget(): String =
+        state.value.chat.currentSessionId ?: sourcePreferences.draftKey
+
+    private fun initialSourceSelection(): ChatSourceSelection =
+        ChatSourceSelection(
+            selectedPackIds =
+                state.value.knowledge.packs.values
+                    .filter { it.activeIdentity != null }
+                    .map { it.config.stableId }
+                    .toSet(),
+            selectedFolderIds = notesStore.state.value.collections.map { it.id }.toSet(),
+        )
+
+    private fun readSourceSelection(target: String): ChatSourceSelection =
+        sourceSelections.initialize(target, sourceInventoryReady, ::initialSourceSelection)
+
+    fun selectAddedPack(target: String, id: String) =
+        selectAddedSource(target) { it.withPackEnabled(id, true) }
+
+    fun selectAddedFolder(target: String, id: String) =
+        selectAddedSource(target) { it.withFolderEnabled(id, true) }
+
+    private fun selectAddedSource(
+        target: String,
+        transform: (ChatSourceSelection) -> ChatSourceSelection,
+    ) {
+        val (destination, updated) = sourceSelections.selectAdded(target, transform) ?: return
+        if (destination == sourceSelectionTarget()) {
+            state.update { it.copy(chat = it.chat.copy(sourceSelection = updated)) }
+        }
+    }
+
+    fun setPackEnabled(id: String, enabled: Boolean) {
+        updateSourceSelection { it.withPackEnabled(id, enabled) }
+    }
+
+    fun setFolderEnabled(id: String, enabled: Boolean) {
+        updateSourceSelection { it.withFolderEnabled(id, enabled) }
+    }
+
+    private fun updateSourceSelection(transform: (ChatSourceSelection) -> ChatSourceSelection) {
+        val chat = state.value.chat
+        if (!sourceInventoryReady || chat.isGenerating || chat.preparationStatus != null) return
+        val selection = transform(chat.sourceSelection)
+        sourcePreferences.write(sourceSelectionTarget(), selection)
+        state.update { it.copy(chat = it.chat.copy(sourceSelection = selection)) }
+    }
+
     fun createNewSession(): String {
         resetGenerationState()
 
+        val selection =
+            if (state.value.chat.currentSessionId == null)
+                readSourceSelection(sourcePreferences.draftKey)
+            else initialSourceSelection()
         val session = chatRepository.createSession("New Chat")
+        if (sourceInventoryReady) sourcePreferences.write(session.id, selection)
+        if (state.value.chat.currentSessionId == null) {
+            sourceSelections.promote(sourcePreferences.draftKey, session.id)
+        }
+        sourcePreferences.resetDraft()
         messageStore[session.id] = mutableListOf()
         branchSelections[session.id] = mutableMapOf()
 
@@ -126,6 +226,7 @@ internal class ChatStoreActions(
                     appState.chat.copy(
                         sessions = updatedSessions,
                         currentSessionId = session.id,
+                        sourceSelection = selection,
                         messageText = "",
                         attachments = emptyList(),
                         editingMessageId = null,
@@ -144,11 +245,13 @@ internal class ChatStoreActions(
 
         resetGenerationState()
         attachmentActions.discardAttachments(state.value.chat.attachments)
+        sourcePreferences.resetDraft()
         state.update { appState ->
             appState.copy(
                 chat =
                     appState.chat.copy(
                         currentSessionId = null,
+                        sourceSelection = readSourceSelection(sourcePreferences.draftKey),
                         messages = emptyList(),
                         branchSelections = emptyMap(),
                         messageText = "",
@@ -162,7 +265,13 @@ internal class ChatStoreActions(
     fun selectSession(sessionId: String) {
         resetGenerationState()
         state.update { appState ->
-            appState.copy(chat = appState.chat.copy(currentSessionId = sessionId))
+            appState.copy(
+                chat =
+                    appState.chat.copy(
+                        currentSessionId = sessionId,
+                        sourceSelection = readSourceSelection(sessionId),
+                    )
+            )
         }
         val scope = scope ?: return
         scope.launch(Dispatchers.IO) {
@@ -180,6 +289,7 @@ internal class ChatStoreActions(
         }
 
         chatRepository.deleteSession(sessionId)
+        sourcePreferences.remove(sessionId)
         if (isCurrent) attachmentActions.discardAttachments(currentState.chat.attachments)
         removeSessionCaches(sessionId)
         sessionSummaries.remove(sessionKey(sessionId))
@@ -202,6 +312,8 @@ internal class ChatStoreActions(
                     appState.chat.copy(
                         sessions = sessions,
                         currentSessionId = newCurrent,
+                        sourceSelection =
+                            readSourceSelection(newCurrent ?: sourcePreferences.draftKey),
                         isGenerating = if (resetCurrent) false else appState.chat.isGenerating,
                         preparationStatus =
                             if (resetCurrent) null else appState.chat.preparationStatus,
@@ -489,6 +601,11 @@ internal class ChatStoreActions(
                         appState.chat.copy(
                             sessions = sessions,
                             currentSessionId = if (sessionStillExists) currentSessionId else null,
+                            sourceSelection =
+                                readSourceSelection(
+                                    if (sessionStillExists) currentSessionId
+                                    else sourcePreferences.draftKey
+                                ),
                         )
                 )
             }
@@ -556,6 +673,7 @@ internal class ChatStoreActions(
         }
         rebuildChatState(sessionId)
 
+        val requestedSourceSelection = sourcePreferences.read(sessionId)
         val notesScope = notesStore.suspendMaintenance()
         var followup: ConversationFollowup? = null
         val activeJob = scope.launch {
@@ -573,7 +691,27 @@ internal class ChatStoreActions(
             if (!isActive()) return@launch
             val progressTracker = DownloadProgressTracker()
             var embeddingAssetInvalid = false
-            val enabledDatasets = state.value.knowledge.enabledReadyDatasets
+            val sourceSelection = requestedSourceSelection ?: readSourceSelection(sessionId)
+            if (!state.value.chat.sourceSelectionReady) {
+                state.update {
+                    it.copy(
+                        chat =
+                            it.chat.copy(
+                                sourceSelection = sourceSelection,
+                                sourceSelectionReady = sourceInventoryReady,
+                            )
+                    )
+                }
+            }
+            val enabledDatasets =
+                state.value.knowledge.readyDatasets.filter {
+                    sourceSelection.isPackEnabled(it.stableId)
+                }
+            val enabledFolderIds =
+                notesStore.state.value.collections
+                    .filter { it.eligible && sourceSelection.isFolderEnabled(it.id) }
+                    .map { it.id }
+                    .toSet()
             try {
                 if (prompt.imageFiles.isEmpty()) {
                     val messages = messageStore[sessionId].orEmpty()
@@ -619,8 +757,7 @@ internal class ChatStoreActions(
             val knowledgeHits =
                 if (
                     retrievalQuery.isNotBlank() &&
-                        (enabledDatasets.isNotEmpty() ||
-                            notesStore.state.value.collections.any { it.eligible })
+                        (enabledDatasets.isNotEmpty() || enabledFolderIds.isNotEmpty())
                 ) {
                     try {
                         val hits =
@@ -636,7 +773,7 @@ internal class ChatStoreActions(
                                         query = query,
                                         maxHits = configDefaults.knowledgeEmbedding.maxHits,
                                     )
-                                val notes = notesStore.retrieve(query)
+                                val notes = notesStore.retrieve(query, enabledFolderIds)
                                 notesStore.verify(
                                     selectMixedGroundingCandidates(
                                         packs,
@@ -693,7 +830,9 @@ internal class ChatStoreActions(
                                     turn.searchWithHistory(knowledgeHits)
                                 }
                             if (!isActive() || stopRequested) return@launch
-                            locators.mapNotNull { reloadPassage(it) }
+                            locators.mapNotNull {
+                                reloadPassage(it, enabledDatasets, enabledFolderIds)
+                            }
                         }
                         .orEmpty()
                 } catch (error: kotlinx.coroutines.CancellationException) {
@@ -1075,12 +1214,18 @@ internal class ChatStoreActions(
         return true
     }
 
-    private suspend fun reloadPassage(locator: PassageLocator): GroundedExcerpt? =
+    private suspend fun reloadPassage(
+        locator: PassageLocator,
+        enabledDatasets: List<KnowledgeDatasetConfig>,
+        enabledFolderIds: Set<String>,
+    ): GroundedExcerpt? =
         try {
             when (locator) {
-                is PassageLocator.EnsuPack ->
-                    knowledgeProvider.reload(locator, state.value.knowledge.enabledReadyDatasets)
-                is PassageLocator.LocalNote -> notesStore.reload(locator.locator)
+                is PassageLocator.EnsuPack -> knowledgeProvider.reload(locator, enabledDatasets)
+                is PassageLocator.LocalNote ->
+                    if (locator.locator.collectionId in enabledFolderIds)
+                        notesStore.reload(locator.locator)
+                    else null
             }
         } catch (error: kotlinx.coroutines.CancellationException) {
             throw error

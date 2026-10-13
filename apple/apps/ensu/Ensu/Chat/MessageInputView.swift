@@ -17,6 +17,7 @@ struct MessageInputView: View {
     let onSend: () -> Void
     let onStop: () -> Void
     let onCancelEdit: () -> Void
+    let onSources: () -> Void
     let onVoiceInput: () -> Void
     let onAddImage: (Data, String?) -> Void
     let onAddDocument: (URL) -> Void
@@ -121,36 +122,6 @@ struct MessageInputView: View {
                     }
 
                     HStack(alignment: .bottom, spacing: EnsuSpacing.sm) {
-                        MessageTextView(
-                            text: $text,
-                            isFocused: $isFocused,
-                            moveCursorToEndToken: moveCursorToEndToken,
-                            onSubmit: {
-                                if canSend {
-                                    onSend()
-                                    isFocused = false
-                                    hideKeyboard()
-                                    onDismissKeyboard()
-                                }
-                            }
-                        )
-                        .padding(.vertical, 6)
-                        .overlay(alignment: .topLeading) {
-                            if text.isEmpty {
-                                Text(placeholder)
-                                    .font(EnsuTypography.message)
-                                    .foregroundStyle(Color(uiColor: .placeholderText))
-                                    .padding(.vertical, 6)
-                                    .allowsHitTesting(false)
-                                    .accessibilityHidden(true)
-                            }
-                        }
-                        .onChange(of: isFocused) { focused in
-                            if focused {
-                                onUserFocus()
-                            }
-                        }
-
                         if editingMessage == nil && supportsImageAttachments {
                             let canUseAttachment =
                                 !isGenerating && !isDownloading && !isImageAttachmentLimitReached
@@ -187,6 +158,52 @@ struct MessageInputView: View {
                                         selectedPhotoItem = nil
                                     }
                                 }
+                            }
+                        }
+
+                        Button {
+                            hapticTap()
+                            isFocused = false
+                            hideKeyboard()
+                            onDismissKeyboard()
+                            onSources()
+                        } label: {
+                            Image("PackageIcon")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: attachmentIconSize, height: attachmentIconSize)
+                                .foregroundStyle(EnsuColor.textPrimary)
+                                .frame(width: 32, height: 32)
+                        }
+                        .accessibilityLabel("Sources for this chat")
+
+                        MessageTextView(
+                            text: $text,
+                            isFocused: $isFocused,
+                            moveCursorToEndToken: moveCursorToEndToken,
+                            onSubmit: {
+                                if canSend {
+                                    onSend()
+                                    isFocused = false
+                                    hideKeyboard()
+                                    onDismissKeyboard()
+                                }
+                            }
+                        )
+                        .padding(.vertical, 6)
+                        .overlay(alignment: .topLeading) {
+                            if text.isEmpty {
+                                Text(placeholder)
+                                    .font(EnsuTypography.message)
+                                    .foregroundStyle(Color(uiColor: .placeholderText))
+                                    .padding(.vertical, 6)
+                                    .allowsHitTesting(false)
+                                    .accessibilityHidden(true)
+                            }
+                        }
+                        .onChange(of: isFocused) { focused in
+                            if focused {
+                                onUserFocus()
                             }
                         }
 

@@ -41,7 +41,7 @@ fun NotesSettingsScreen(store: NotesStore, onPickerPending: (Boolean) -> Unit) {
     val picker =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
             onPickerPending(false)
-            uri?.let(store::add)
+            uri?.let { store.add(it) }
         }
     LazyColumn(
         modifier = Modifier.padding(horizontal = EnsuSpacing.pageHorizontal.dp),

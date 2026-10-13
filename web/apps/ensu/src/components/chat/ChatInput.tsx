@@ -1,6 +1,10 @@
-import { Navigation06Icon, Upload01Icon } from "@hugeicons/core-free-icons";
+import {
+    Navigation06Icon,
+    PackageIcon,
+    Upload01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Box, IconButton, InputBase } from "@mui/material";
+import { Box, IconButton, InputBase, Tooltip } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import React, {
     forwardRef,
@@ -35,6 +39,11 @@ interface ChatInputProps {
     isModelPreparationActive: boolean;
     openAttachmentMenu: (event: React.MouseEvent<HTMLElement>) => void;
     onTextChange: (text: string) => void;
+    showSourcePicker: boolean;
+    openSources: () => void;
+    sourcesDisabled: boolean;
+    sourcesLoading: boolean;
+    isPreparingMessage: boolean;
     showAttachmentPicker: boolean;
     stopButtonColor: string;
 }
@@ -55,6 +64,11 @@ export const ChatInput = memo(
             isModelPreparationActive,
             openAttachmentMenu,
             onTextChange,
+            showSourcePicker,
+            openSources,
+            sourcesDisabled,
+            sourcesLoading,
+            isPreparingMessage,
             showAttachmentPicker,
             stopButtonColor,
         },
@@ -78,7 +92,9 @@ export const ChatInput = memo(
 
         const send = () => void handleSend(input);
         const disableSend =
+            (isPreparingMessage && !isGenerating) ||
             isModelPreparationActive ||
+            sourcesLoading ||
             isDownloading ||
             (!isGenerating &&
                 (isAttachingImages ||
@@ -97,6 +113,37 @@ export const ChatInput = memo(
                         "color-mix(in srgb, var(--mui-palette-background-default) 45%, var(--mui-palette-background-paper) 55%)",
                 }}
             >
+                {showAttachmentPicker && (
+                    <IconButton
+                        aria-label="Add attachment"
+                        sx={drawerIconButtonSx}
+                        disabled={disableAttachmentButton}
+                        onClick={openAttachmentMenu}
+                    >
+                        <HugeiconsIcon
+                            icon={Upload01Icon}
+                            {...actionIconProps}
+                        />
+                    </IconButton>
+                )}
+                {showSourcePicker && (
+                    <Tooltip title="Sources for this chat">
+                        <span>
+                            <IconButton
+                                aria-label="Sources for this chat"
+                                aria-haspopup="dialog"
+                                sx={drawerIconButtonSx}
+                                disabled={sourcesDisabled && !sourcesLoading}
+                                onClick={openSources}
+                            >
+                                <HugeiconsIcon
+                                    icon={PackageIcon}
+                                    {...actionIconProps}
+                                />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                )}
                 <InputBase
                     multiline
                     inputComponent="textarea"
@@ -161,19 +208,6 @@ export const ChatInput = memo(
                         },
                     }}
                 />
-                {showAttachmentPicker && (
-                    <IconButton
-                        aria-label="Add attachment"
-                        sx={drawerIconButtonSx}
-                        disabled={disableAttachmentButton}
-                        onClick={openAttachmentMenu}
-                    >
-                        <HugeiconsIcon
-                            icon={Upload01Icon}
-                            {...actionIconProps}
-                        />
-                    </IconButton>
-                )}
                 <IconButton
                     aria-label={isGenerating ? "Stop" : "Send message"}
                     onClick={isGenerating ? handleStopGeneration : send}

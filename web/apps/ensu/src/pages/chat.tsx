@@ -6,6 +6,7 @@ import { ChatDialogs } from "@/components/chat/ChatDialogs";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatSidebar } from "@/components/chat/ChatSidebar";
 import { useFileInput } from "@/components/utils/use-file-input";
+import { useChatSources } from "@/hooks/use-chat-sources";
 import { useNotesCollections } from "@/hooks/use-notes-collections";
 import { handleManualAppUpdateCheck } from "@/services/app-update";
 import {
@@ -42,10 +43,8 @@ import {
     cancelKnowledgePackDownload,
     downloadKnowledgePack,
     knowledgeErrorMessage,
-    loadEnabledKnowledgePacks,
     loadKnowledgeCatalog,
     retrieveKnowledge,
-    saveEnabledKnowledgePacks,
     type GroundedSource,
     type KnowledgePack,
 } from "@/services/knowledge";
@@ -559,9 +558,10 @@ const Page: React.FC = () => {
     const [knowledgeCatalogError, setKnowledgeCatalogError] = useState<
         string | null
     >(null);
-    const [enabledKnowledgePackIds, setEnabledKnowledgePackIds] = useState(
-        loadEnabledKnowledgePacks,
-    );
+    const [knowledgeCatalogLoaded, setKnowledgeCatalogLoaded] = useState(false);
+    const [showSources, setShowSources] = useState(false);
+    const [isPreparingMessage, setIsPreparingMessage] = useState(false);
+    const pendingSendRef = useRef(false);
     const [knowledgeDownloadProgress, setKnowledgeDownloadProgress] = useState<
         Record<string, number | undefined>
     >({});
@@ -640,9 +640,7 @@ const Page: React.FC = () => {
     const knowledgeCatalogPromiseRef = useRef<Promise<KnowledgePack[]> | null>(
         null,
     );
-    const knowledgeBootstrapPromiseRef = useRef<Promise<
-        KnowledgePack[]
-    > | null>(null);
+
     const generationStartingRef = useRef(false);
     const generationActiveRef = useRef(false);
     const preparedReplyRef = useRef<PreparedReply | undefined>(undefined);
@@ -739,21 +737,13 @@ const Page: React.FC = () => {
         return knowledgeCatalogPromiseRef.current;
     }, []);
 
-    const loadEnabledKnowledgeCatalogOnce = useCallback(() => {
-        if (!knowledgeBootstrapPromiseRef.current) {
-            knowledgeBootstrapPromiseRef.current = loadKnowledgeCatalog([
-                ...loadEnabledKnowledgePacks(),
-            ]);
-        }
-        return knowledgeBootstrapPromiseRef.current;
-    }, []);
-
     const refreshKnowledgeCatalog = useCallback(async () => {
         if (!isTauriRuntime) return;
         setKnowledgeCatalogLoading(true);
         setKnowledgeCatalogError(null);
         try {
             setKnowledgePacks(await loadKnowledgeCatalogOnce());
+            setKnowledgeCatalogLoaded(true);
         } catch (error) {
             setKnowledgeCatalogError(knowledgeErrorMessage(error));
             log.error("Failed to refresh Ensu Packs", error);
@@ -949,46 +939,8 @@ const Page: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (!isTauriRuntime) return;
-        setKnowledgeCatalogLoading(true);
-        setKnowledgeCatalogError(null);
-        void loadEnabledKnowledgeCatalogOnce()
-            .then((packs) => {
-                setKnowledgePacks(packs);
-                const enabled = loadEnabledKnowledgePacks();
-                const disabledStableIds = packs
-                    .filter((pack) => !enabled.has(pack.stableId))
-                    .map((pack) => pack.stableId);
-                if (disabledStableIds.length === 0) return;
-                return loadKnowledgeCatalog(disabledStableIds)
-                    .then((updates) => {
-                        setKnowledgePacks((current) => {
-                            const currentById = new Map(
-                                current.map((pack) => [pack.stableId, pack]),
-                            );
-                            return updates.map((pack) =>
-                                pack.status
-                                    ? pack
-                                    : (currentById.get(pack.stableId) ?? pack),
-                            );
-                        });
-                    })
-                    .catch((error: unknown) => {
-                        setKnowledgeCatalogError(knowledgeErrorMessage(error));
-                        log.error(
-                            "Failed to refresh disabled Ensu Packs",
-                            error,
-                        );
-                    });
-            })
-            .catch((error: unknown) => {
-                setKnowledgeCatalogError(knowledgeErrorMessage(error));
-                log.error("Failed to bootstrap enabled Ensu Packs", error);
-            })
-            .finally(() => {
-                setKnowledgeCatalogLoading(false);
-            });
-    }, [isTauriRuntime, loadEnabledKnowledgeCatalogOnce]);
+        if (isTauriRuntime) void refreshKnowledgeCatalog();
+    }, [isTauriRuntime, refreshKnowledgeCatalog]);
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -1814,7 +1766,10 @@ const Page: React.FC = () => {
     }, []);
 
     const isNotesGenerationActive = useCallback(
-        () => generationActiveRef.current || sessionSummaryActiveRef.current,
+        () =>
+            pendingSendRef.current ||
+            generationActiveRef.current ||
+            sessionSummaryActiveRef.current,
         [],
     );
     const cancelNotesIndexing = useCallback(() => {
@@ -1842,6 +1797,7 @@ const Page: React.FC = () => {
     const {
         collections: notesCollections,
         loading: notesCollectionsLoading,
+        loaded: notesCollectionsLoaded,
         error: notesCollectionsError,
         retry: retryNotesCollections,
         addFolder: handleAddNotesFolder,
@@ -1849,13 +1805,106 @@ const Page: React.FC = () => {
         runIndex: runNotesIndex,
     } = useNotesCollections({
         isTauriRuntime,
-        isGenerating: isGenerating || isSessionSummaryGenerating,
+        isGenerating:
+            isPreparingMessage || isGenerating || isSessionSummaryGenerating,
         isGenerationActive: isNotesGenerationActive,
         modelReady: modelGateStatus === "ready",
         ensureProvider,
         cancelIndexing: cancelNotesIndexing,
         confirmRemoval: confirmNotesRemoval,
     });
+
+    const sourceDefaults = useMemo(
+        () => ({
+            packIds: knowledgePacks
+                .filter(
+                    (pack) =>
+                        pack.status === "ready" ||
+                        pack.status === "updateAvailable",
+                )
+                .map((pack) => pack.stableId),
+            noteCollectionIds: notesCollections.map(
+                (collection) => collection.id,
+            ),
+        }),
+        [knowledgePacks, notesCollections],
+    );
+    const {
+        selection: sourceSelection,
+        targetId: sourceSelectionTarget,
+        setEnabled: setChatSourceEnabled,
+        transferDraft: transferDraftSources,
+        resetDraft: resetDraftSources,
+        removeSelection: removeChatSources,
+    } = useChatSources(
+        currentSessionId,
+        sourceDefaults,
+        isTauriRuntime && knowledgeCatalogLoaded && notesCollectionsLoaded,
+    );
+    const enabledKnowledgePackIds = useMemo(
+        () => new Set(sourceSelection?.packIds ?? []),
+        [sourceSelection],
+    );
+    const enabledNoteCollectionIds = useMemo(
+        () => new Set(sourceSelection?.noteCollectionIds ?? []),
+        [sourceSelection],
+    );
+    const sourcesReady =
+        Boolean(sourceSelection) &&
+        knowledgeCatalogLoaded &&
+        notesCollectionsLoaded;
+    const sourceSelectionDisabled =
+        isPreparingMessage ||
+        isGenerating ||
+        isSessionSummaryGenerating ||
+        !sourcesReady;
+    const openSources = useCallback(() => setShowSources(true), []);
+    const closeSources = useCallback(() => setShowSources(false), []);
+    const handleSetKnowledgePackEnabled = useCallback(
+        (stableId: string, enabled: boolean) => {
+            if (isNotesGenerationActive() || !sourceSelection) return;
+            setChatSourceEnabled(
+                sourceSelectionTarget,
+                "packIds",
+                stableId,
+                enabled,
+            );
+        },
+        [
+            isNotesGenerationActive,
+            setChatSourceEnabled,
+            sourceSelection,
+            sourceSelectionTarget,
+        ],
+    );
+    const handleSetNotesCollectionEnabled = useCallback(
+        (collectionId: string, enabled: boolean) => {
+            if (isNotesGenerationActive() || !sourceSelection) return;
+            setChatSourceEnabled(
+                sourceSelectionTarget,
+                "noteCollectionIds",
+                collectionId,
+                enabled,
+            );
+        },
+        [
+            isNotesGenerationActive,
+            setChatSourceEnabled,
+            sourceSelection,
+            sourceSelectionTarget,
+        ],
+    );
+    const handleAddChatNotesFolder = useCallback(async () => {
+        const target = sourceSelectionTarget;
+        const collection = await handleAddNotesFolder();
+        if (collection)
+            setChatSourceEnabled(
+                target,
+                "noteCollectionIds",
+                collection.id,
+                true,
+            );
+    }, [handleAddNotesFolder, setChatSourceEnabled, sourceSelectionTarget]);
 
     const getModelSettings = useCallback((): ModelSettings => {
         return {
@@ -2441,6 +2490,8 @@ const Page: React.FC = () => {
 
     const handleNewChat = useCallback(() => {
         cancelActiveGenerationForNavigation();
+        resetDraftSources();
+        setShowSources(false);
         setCurrentSessionId(undefined);
         currentSessionIdRef.current = undefined;
         setAllMessages([]);
@@ -2465,12 +2516,14 @@ const Page: React.FC = () => {
         focusInput,
         isSmall,
         resetPendingImages,
+        resetDraftSources,
         updateRouteSession,
     ]);
 
     const handleSelectSession = useCallback(
         (sessionId: string) => {
             cancelActiveGenerationForNavigation();
+            setShowSources(false);
             setCurrentSessionId(sessionId);
             currentSessionIdRef.current = sessionId;
             setIsDraftSession(false);
@@ -2490,6 +2543,7 @@ const Page: React.FC = () => {
     const removeSessionFromState = useCallback(
         (sessionId: string) => {
             manuallyRenamedSessionIdsRef.current.delete(sessionId);
+            removeChatSources(sessionId);
             setSessions((prev) =>
                 prev.filter((session) => session.sessionUuid !== sessionId),
             );
@@ -2498,6 +2552,8 @@ const Page: React.FC = () => {
             );
 
             if (currentSessionIdRef.current === sessionId) {
+                resetDraftSources();
+                setShowSources(false);
                 setCurrentSessionId(undefined);
                 currentSessionIdRef.current = undefined;
                 setIsDraftSession(true);
@@ -2505,7 +2561,7 @@ const Page: React.FC = () => {
                 updateRouteSession(undefined, true);
             }
         },
-        [updateRouteSession],
+        [removeChatSources, resetDraftSources, updateRouteSession],
     );
 
     const handleDeleteSession = useCallback(
@@ -2953,6 +3009,9 @@ const Page: React.FC = () => {
             ) {
                 return;
             }
+            if (isTauriRuntime && !sourcesReady) return;
+            const selectedPackIds = new Set(sourceSelection?.packIds);
+            const selectedNoteIds = new Set(sourceSelection?.noteCollectionIds);
             generationStartingRef.current = true;
             generationActiveRef.current = true;
             setIsGenerating(true);
@@ -3064,31 +3123,23 @@ const Page: React.FC = () => {
                 let knowledgeContext: Awaited<
                     ReturnType<typeof retrieveKnowledge>
                 > = null;
-                let readyPacks = knowledgePacks;
-                if (
-                    isTauriRuntime &&
-                    enabledKnowledgePackIds.size > 0 &&
-                    readyPacks.length === 0
-                ) {
-                    try {
-                        readyPacks = await loadEnabledKnowledgeCatalogOnce();
-                        if (!isActiveGeneration()) return;
-                        setKnowledgePacks(readyPacks);
-                    } catch (error) {
-                        log.warn(
-                            "Ensu Pack bootstrap failed; continuing without pack context",
-                            error,
-                        );
-                    }
-                }
-                const enabledReadyPackIds = readyPacks
+                const enabledReadyPackIds = knowledgePacks
                     .filter(
                         (pack) =>
                             (pack.status === "ready" ||
                                 pack.status === "updateAvailable") &&
-                            enabledKnowledgePackIds.has(pack.stableId),
+                            selectedPackIds.has(pack.stableId),
                     )
                     .map((pack) => pack.stableId);
+                const enabledReadyNoteIds = notesCollections
+                    .filter(
+                        (collection) =>
+                            selectedNoteIds.has(collection.id) &&
+                            collection.indexedDocumentCount > 0 &&
+                            collection.status !== "unavailable" &&
+                            collection.status !== "error",
+                    )
+                    .map((collection) => collection.id);
                 const knowledgeQuery = parseDocumentBlocks(promptText)
                     .text.replaceAll(MEDIA_MARKER, "")
                     .replace(/\[\d+ image attachments? provided\]/gi, "")
@@ -3106,7 +3157,9 @@ const Page: React.FC = () => {
                 if (
                     isTauriRuntime &&
                     knowledgeQuery &&
-                    remainingKnowledgeBytes > 0
+                    remainingKnowledgeBytes > 0 &&
+                    (enabledReadyPackIds.length > 0 ||
+                        enabledReadyNoteIds.length > 0)
                 ) {
                     setConversationStatus("Finding sources");
                     try {
@@ -3116,6 +3169,7 @@ const Page: React.FC = () => {
                                     retrieveKnowledge(
                                         knowledgeQuery,
                                         enabledReadyPackIds,
+                                        enabledReadyNoteIds,
                                         remainingKnowledgeBytes,
                                         retrievalEpoch,
                                     ),
@@ -3156,6 +3210,8 @@ const Page: React.FC = () => {
                                     path: conversationPath,
                                     question: knowledgeQuery,
                                     enabledStableIds: enabledReadyPackIds,
+                                    enabledNoteCollectionIds:
+                                        enabledReadyNoteIds,
                                     cancellationEpoch,
                                     candidates: knowledgeContext?.candidates,
                                 }),
@@ -3472,9 +3528,10 @@ const Page: React.FC = () => {
             scheduleSessionTitle,
             systemPrompt,
             isTauriRuntime,
-            enabledKnowledgePackIds,
+            sourceSelection,
+            sourcesReady,
             knowledgePacks,
-            loadEnabledKnowledgeCatalogOnce,
+            notesCollections,
         ],
     );
 
@@ -3715,16 +3772,10 @@ const Page: React.FC = () => {
         [],
     );
     const handleDownloadKnowledgePack = useCallback(
-        (stableId: string) => {
+        (stableId: string, selectForChat?: string) => {
             if (activeKnowledgeDownloadsRef.current.has(stableId)) return;
             activeKnowledgeDownloadsRef.current.add(stableId);
 
-            const previousPack = knowledgePacks.find(
-                (pack) => pack.stableId === stableId,
-            );
-            const wasInstalled = Boolean(
-                previousPack && previousPack.status !== "download",
-            );
             setKnowledgeErrors((current) => ({
                 ...current,
                 [stableId]: undefined,
@@ -3745,13 +3796,13 @@ const Page: React.FC = () => {
                             item.stableId === stableId ? pack : item,
                         ),
                     );
-                    if (!wasInstalled) {
-                        setEnabledKnowledgePackIds((current) => {
-                            const next = new Set(current).add(stableId);
-                            saveEnabledKnowledgePacks(next);
-                            return next;
-                        });
-                    }
+                    if (selectForChat)
+                        setChatSourceEnabled(
+                            selectForChat,
+                            "packIds",
+                            stableId,
+                            true,
+                        );
                 })
                 .catch((error: unknown) => {
                     const { name } = tauriCommandError(error);
@@ -3771,7 +3822,7 @@ const Page: React.FC = () => {
                     }));
                 });
         },
-        [knowledgePacks, refreshKnowledgeCatalog],
+        [refreshKnowledgeCatalog, setChatSourceEnabled],
     );
     const handleCancelKnowledgePackDownload = useCallback(
         (stableId: string) => {
@@ -3783,17 +3834,20 @@ const Page: React.FC = () => {
         },
         [],
     );
-    const handleSetKnowledgePackEnabled = useCallback(
-        (stableId: string, enabled: boolean) => {
-            setEnabledKnowledgePackIds((current) => {
-                const next = new Set(current);
-                if (enabled) next.add(stableId);
-                else next.delete(stableId);
-                saveEnabledKnowledgePacks(next);
-                return next;
-            });
+    const handleDownloadChatKnowledgePack = useCallback(
+        (stableId: string) => {
+            const installed = knowledgePacks.some(
+                (pack) =>
+                    pack.stableId === stableId &&
+                    (pack.status === "ready" ||
+                        pack.status === "updateAvailable"),
+            );
+            handleDownloadKnowledgePack(
+                stableId,
+                installed ? undefined : sourceSelectionTarget,
+            );
         },
-        [],
+        [handleDownloadKnowledgePack, knowledgePacks, sourceSelectionTarget],
     );
 
     const handleBuildVersionTap = useCallback(() => {
@@ -4259,7 +4313,7 @@ const Page: React.FC = () => {
     }, []);
 
     const handleSend = async (input: string) => {
-        if (isAttachingImages) return;
+        if (isAttachingImages || pendingSendRef.current) return;
         const trimmed = input.trim();
         const hasDocuments = pendingDocuments.length > 0;
         const hasImages = pendingImages.length > 0;
@@ -4274,7 +4328,12 @@ const Page: React.FC = () => {
         if (!trimmed && !hasDocuments && !hasImages) {
             return;
         }
-        if (showModelGate || isModelPreparationActive) return;
+        if (
+            showModelGate ||
+            isModelPreparationActive ||
+            (isTauriRuntime && !sourcesReady)
+        )
+            return;
         if (generationStartingRef.current || generationStoppingRef.current) {
             return;
         }
@@ -4293,143 +4352,186 @@ const Page: React.FC = () => {
             return;
         }
 
-        setStickToBottom(true);
-
-        let activeSessionId = currentSessionId;
-        if (!activeSessionId) {
-            try {
-                activeSessionId = await createSession(chatKey);
-            } catch (error) {
-                onGenericError(error);
-                return;
-            }
-            setCurrentSessionId(activeSessionId);
-            currentSessionIdRef.current = activeSessionId;
-            setIsDraftSession(false);
-            isDraftSessionRef.current = false;
-            updateRouteSession(activeSessionId, true);
-            await refreshSessions();
-        }
-
-        const messageText = buildPromptWithDocuments(
-            trimmed.replaceAll("\0", ""),
-            pendingDocuments,
-        );
-        const persistedAttachmentIds = new Set(
-            (editingMessage?.attachments ?? []).map(({ id }) => id),
-        );
-        const newAttachmentIds = [
-            ...pendingDocuments.map(({ id }) => id),
-            ...pendingImages.map(({ id }) => id),
-        ].filter((id) => !persistedAttachmentIds.has(id));
-        const cleanupUnstoredAttachments = async () => {
-            await Promise.all(
-                newAttachmentIds.map(async (id) => {
-                    try {
-                        await deleteAttachmentBytes(id);
-                    } catch (error) {
-                        log.warn(
-                            `Failed to clean up attachment payload ${id}`,
-                            error,
-                        );
-                    }
-                }),
-            );
-        };
-        let inferenceImagePaths: string[] = [];
-
-        let attachments: ChatAttachment[] = [];
-        if (pendingDocuments.length > 0 || pendingImages.length > 0) {
-            try {
-                const encoder = new TextEncoder();
-                const documentAttachments = await Promise.all(
-                    pendingDocuments.map(async (doc) => {
-                        const bytes = encoder.encode(doc.text);
-                        await storeEncryptedAttachmentBytes(
-                            doc.id,
-                            bytes,
-                            chatKey,
-                            activeSessionId,
-                        );
-                        return {
-                            id: doc.id,
-                            kind: "document",
-                            name: doc.name.replace(/\0/g, ""),
-                            size: bytes.length,
-                        } satisfies ChatAttachment;
-                    }),
-                );
-                const imageAttachments = await Promise.all(
-                    pendingImages.map(async (img) => {
-                        const bytes = new Uint8Array(
-                            await img.file.arrayBuffer(),
-                        );
-                        await storeEncryptedAttachmentBytes(
-                            img.id,
-                            bytes,
-                            chatKey,
-                            activeSessionId,
-                        );
-                        const previewUrl = URL.createObjectURL(
-                            new Blob([toSafeBlobPart(bytes)]),
-                        );
-                        attachmentPreviewUrlsRef.current[img.id] = previewUrl;
-                        setAttachmentPreviews((prev) => ({
-                            ...prev,
-                            [img.id]: previewUrl,
-                        }));
-                        return {
-                            id: img.id,
-                            kind: "image",
-                            name: img.name.replace(/\0/g, ""),
-                            size: img.size,
-                        } satisfies ChatAttachment;
-                    }),
-                );
-                attachments = [...documentAttachments, ...imageAttachments];
-            } catch (error) {
-                await cleanupUnstoredAttachments();
-                log.error("Failed to store attachments", error);
-                showMiniDialog({
-                    title: "Attachment error",
-                    message: "We could not attach the files. Please try again.",
-                });
-                return;
-            }
-        }
-
-        if (pendingImages.length > 0) {
-            try {
-                inferenceImagePaths = await writeInferenceImages(pendingImages);
-            } catch (error) {
-                await cleanupUnstoredAttachments();
-                log.error("Failed to prepare images for inference", error);
-                showMiniDialog({
-                    title: "Attachment error",
-                    message:
-                        "We could not prepare the images for inference. Please try again.",
-                });
-                return;
-            }
-        }
-
-        const promptText = buildPromptWithImages(
-            messageText,
-            inferenceImagePaths.length,
-        );
-
-        composerRef.current?.setText("");
-
-        let messageStored = false;
+        pendingSendRef.current = true;
+        setIsPreparingMessage(true);
         try {
-            if (editingMessage) {
-                const parentUuid = editingMessage.parentMessageUuid;
-                const selectionKey = parentUuid ?? ROOT_SELECTION_KEY;
-                const historyPath = parentUuid
-                    ? slicePathUntil(messageState.path, parentUuid)
-                    : [];
+            setStickToBottom(true);
 
-                const newUserMessage = await addMessage(
+            let activeSessionId = currentSessionId;
+            if (!activeSessionId) {
+                try {
+                    activeSessionId = await createSession(chatKey);
+                } catch (error) {
+                    onGenericError(error);
+                    return;
+                }
+                transferDraftSources(activeSessionId);
+                setCurrentSessionId(activeSessionId);
+                currentSessionIdRef.current = activeSessionId;
+                setIsDraftSession(false);
+                isDraftSessionRef.current = false;
+                updateRouteSession(activeSessionId, true);
+                await refreshSessions();
+            }
+
+            const messageText = buildPromptWithDocuments(
+                trimmed.replaceAll("\0", ""),
+                pendingDocuments,
+            );
+            const persistedAttachmentIds = new Set(
+                (editingMessage?.attachments ?? []).map(({ id }) => id),
+            );
+            const newAttachmentIds = [
+                ...pendingDocuments.map(({ id }) => id),
+                ...pendingImages.map(({ id }) => id),
+            ].filter((id) => !persistedAttachmentIds.has(id));
+            const cleanupUnstoredAttachments = async () => {
+                await Promise.all(
+                    newAttachmentIds.map(async (id) => {
+                        try {
+                            await deleteAttachmentBytes(id);
+                        } catch (error) {
+                            log.warn(
+                                `Failed to clean up attachment payload ${id}`,
+                                error,
+                            );
+                        }
+                    }),
+                );
+            };
+            let inferenceImagePaths: string[] = [];
+
+            let attachments: ChatAttachment[] = [];
+            if (pendingDocuments.length > 0 || pendingImages.length > 0) {
+                try {
+                    const encoder = new TextEncoder();
+                    const documentAttachments = await Promise.all(
+                        pendingDocuments.map(async (doc) => {
+                            const bytes = encoder.encode(doc.text);
+                            await storeEncryptedAttachmentBytes(
+                                doc.id,
+                                bytes,
+                                chatKey,
+                                activeSessionId,
+                            );
+                            return {
+                                id: doc.id,
+                                kind: "document",
+                                name: doc.name.replace(/\0/g, ""),
+                                size: bytes.length,
+                            } satisfies ChatAttachment;
+                        }),
+                    );
+                    const imageAttachments = await Promise.all(
+                        pendingImages.map(async (img) => {
+                            const bytes = new Uint8Array(
+                                await img.file.arrayBuffer(),
+                            );
+                            await storeEncryptedAttachmentBytes(
+                                img.id,
+                                bytes,
+                                chatKey,
+                                activeSessionId,
+                            );
+                            const previewUrl = URL.createObjectURL(
+                                new Blob([toSafeBlobPart(bytes)]),
+                            );
+                            attachmentPreviewUrlsRef.current[img.id] =
+                                previewUrl;
+                            setAttachmentPreviews((prev) => ({
+                                ...prev,
+                                [img.id]: previewUrl,
+                            }));
+                            return {
+                                id: img.id,
+                                kind: "image",
+                                name: img.name.replace(/\0/g, ""),
+                                size: img.size,
+                            } satisfies ChatAttachment;
+                        }),
+                    );
+                    attachments = [...documentAttachments, ...imageAttachments];
+                } catch (error) {
+                    await cleanupUnstoredAttachments();
+                    log.error("Failed to store attachments", error);
+                    showMiniDialog({
+                        title: "Attachment error",
+                        message:
+                            "We could not attach the files. Please try again.",
+                    });
+                    return;
+                }
+            }
+
+            if (pendingImages.length > 0) {
+                try {
+                    inferenceImagePaths =
+                        await writeInferenceImages(pendingImages);
+                } catch (error) {
+                    await cleanupUnstoredAttachments();
+                    log.error("Failed to prepare images for inference", error);
+                    showMiniDialog({
+                        title: "Attachment error",
+                        message:
+                            "We could not prepare the images for inference. Please try again.",
+                    });
+                    return;
+                }
+            }
+
+            const promptText = buildPromptWithImages(
+                messageText,
+                inferenceImagePaths.length,
+            );
+
+            composerRef.current?.setText("");
+
+            let messageStored = false;
+            try {
+                if (editingMessage) {
+                    const parentUuid = editingMessage.parentMessageUuid;
+                    const selectionKey = parentUuid ?? ROOT_SELECTION_KEY;
+                    const historyPath = parentUuid
+                        ? slicePathUntil(messageState.path, parentUuid)
+                        : [];
+
+                    const newUserMessage = await addMessage(
+                        activeSessionId,
+                        "self",
+                        messageText,
+                        chatKey,
+                        parentUuid,
+                        attachments,
+                    );
+                    messageStored = true;
+
+                    void updateBranchSelectionState(
+                        selectionKey,
+                        newUserMessage.messageUuid,
+                    );
+                    appendMessageToState(newUserMessage);
+                    updateSessionAfterMessage(newUserMessage);
+                    setEditingMessage(null);
+                    setPendingDocuments([]);
+                    setPendingImages([]);
+
+                    await startGeneration({
+                        promptText,
+                        parentMessage: newUserMessage,
+                        historyPath,
+                        sessionUuid: activeSessionId,
+                        imagePaths: inferenceImagePaths,
+                        mediaMarker: MEDIA_MARKER,
+                    });
+                    return;
+                }
+
+                const basePath = messageState.path;
+                const leaf = basePath[basePath.length - 1];
+                const parentUuid = leaf?.messageUuid;
+                const selectionKey = parentUuid ?? ROOT_SELECTION_KEY;
+
+                const userMessage = await addMessage(
                     activeSessionId,
                     "self",
                     messageText,
@@ -4441,62 +4543,30 @@ const Page: React.FC = () => {
 
                 void updateBranchSelectionState(
                     selectionKey,
-                    newUserMessage.messageUuid,
+                    userMessage.messageUuid,
                 );
-                appendMessageToState(newUserMessage);
-                updateSessionAfterMessage(newUserMessage);
-                setEditingMessage(null);
+                appendMessageToState(userMessage);
+                updateSessionAfterMessage(userMessage);
                 setPendingDocuments([]);
                 setPendingImages([]);
 
                 await startGeneration({
                     promptText,
-                    parentMessage: newUserMessage,
-                    historyPath,
+                    parentMessage: userMessage,
+                    historyPath: basePath,
                     sessionUuid: activeSessionId,
                     imagePaths: inferenceImagePaths,
                     mediaMarker: MEDIA_MARKER,
                 });
-                return;
+            } catch (error) {
+                if (!messageStored) await cleanupUnstoredAttachments();
+                log.error("Failed to store chat message", error);
+            } finally {
+                await cleanupInferenceImages(inferenceImagePaths);
             }
-
-            const basePath = messageState.path;
-            const leaf = basePath[basePath.length - 1];
-            const parentUuid = leaf?.messageUuid;
-            const selectionKey = parentUuid ?? ROOT_SELECTION_KEY;
-
-            const userMessage = await addMessage(
-                activeSessionId,
-                "self",
-                messageText,
-                chatKey,
-                parentUuid,
-                attachments,
-            );
-            messageStored = true;
-
-            void updateBranchSelectionState(
-                selectionKey,
-                userMessage.messageUuid,
-            );
-            appendMessageToState(userMessage);
-            updateSessionAfterMessage(userMessage);
-            setPendingDocuments([]);
-            setPendingImages([]);
-
-            await startGeneration({
-                promptText,
-                parentMessage: userMessage,
-                historyPath: basePath,
-                sessionUuid: activeSessionId,
-                imagePaths: inferenceImagePaths,
-                mediaMarker: MEDIA_MARKER,
-            });
-        } catch (error) {
-            if (!messageStored) await cleanupUnstoredAttachments();
-            log.error("Failed to store chat message", error);
         } finally {
-            await cleanupInferenceImages(inferenceImagePaths);
+            pendingSendRef.current = false;
+            setIsPreparingMessage(false);
         }
     };
 
@@ -4740,6 +4810,18 @@ const Page: React.FC = () => {
                         isGenerating={isGenerating}
                         handleSend={handleSend}
                         handleStopGeneration={handleStopGeneration}
+                        showSourcePicker={isTauriRuntime}
+                        openSources={openSources}
+                        isPreparingMessage={isPreparingMessage}
+                        sourcesDisabled={sourceSelectionDisabled}
+                        sourcesLoading={isTauriRuntime && !sourcesReady}
+                        sourcesStatus={
+                            isTauriRuntime && !sourcesReady
+                                ? knowledgeCatalogError || notesCollectionsError
+                                    ? "Couldn’t load sources. Open Sources to retry."
+                                    : "Loading sources for this chat…"
+                                : undefined
+                        }
                         showAttachmentPicker={isTauriRuntime}
                         openAttachmentMenu={openAttachmentMenu}
                         attachmentAnchor={attachmentAnchor}
@@ -4806,6 +4888,17 @@ const Page: React.FC = () => {
             </Box>
 
             <ChatDialogs
+                showSources={showSources}
+                closeSources={closeSources}
+                sourceSelectionDisabled={sourceSelectionDisabled}
+                handleDownloadChatKnowledgePack={
+                    handleDownloadChatKnowledgePack
+                }
+                handleAddChatNotesFolder={handleAddChatNotesFolder}
+                enabledNoteCollectionIds={enabledNoteCollectionIds}
+                handleSetNotesCollectionEnabled={
+                    handleSetNotesCollectionEnabled
+                }
                 showSettingsModal={showSettingsModal}
                 openSettingsModal={openSettingsModal}
                 closeSettingsModal={closeSettingsModal}

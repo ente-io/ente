@@ -1,9 +1,5 @@
 package io.ente.ensu.knowledge
 
-import android.content.Context
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringSetPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import io.ente.ensu.AppState
 import io.ente.ensu.bindings.AssetDownloadException
 import io.ente.ensu.bindings.KnowledgeDatasetConfig
@@ -17,20 +13,15 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-private val Context.knowledgePreferences by preferencesDataStore("ensu_knowledge_preferences")
 
 data class KnowledgePackState(
     val config: KnowledgeDatasetConfig,
     val status: KnowledgeReconciliationStatus? = null,
     val activeIdentity: String? = null,
-    val enabled: Boolean = false,
+    val inventoryLoaded: Boolean = false,
     val mutationProgress: KnowledgeDownloadProgress? = null,
     val errorMessage: String? = null,
 ) {
@@ -38,31 +29,34 @@ data class KnowledgePackState(
         get() = mutationProgress != null
 }
 
-data class KnowledgeState(val packs: Map<String, KnowledgePackState> = emptyMap()) {
-    val enabledReadyDatasets: List<KnowledgeDatasetConfig>
+data class KnowledgeState(
+    val packs: Map<String, KnowledgePackState> = emptyMap(),
+    val inventoryLoading: Boolean = true,
+) {
+    val inventoryReady: Boolean
+        get() = !inventoryLoading && packs.values.all { it.inventoryLoaded }
+
+    val readyDatasets: List<KnowledgeDatasetConfig>
         get() =
             packs.values
                 .filter { pack ->
-                    pack.enabled &&
-                        (pack.status == KnowledgeReconciliationStatus.READY ||
-                            pack.status == KnowledgeReconciliationStatus.UPDATE_AVAILABLE)
+                    pack.status == KnowledgeReconciliationStatus.READY ||
+                        pack.status == KnowledgeReconciliationStatus.UPDATE_AVAILABLE
                 }
                 .map { it.config }
 }
 
 class KnowledgeStore(
-    context: Context,
     private val state: MutableStateFlow<AppState>,
     private val provider: KnowledgeProvider,
     datasets: List<KnowledgeDatasetConfig>,
     private val logRepository: FileLogRepository,
 ) {
-    private val preferences = KnowledgePreferences(context)
     private val catalog = datasets.associateBy { it.stableId }
     private val jobs = mutableMapOf<String, Job>()
     private var scope: CoroutineScope? = null
     private var bootstrapJob: Job? = null
-    private val enabledPacksReady = CompletableDeferred<Unit>()
+    private val packsReady = CompletableDeferred<Unit>()
 
     fun bootstrap(scope: CoroutineScope) {
         this.scope = scope
@@ -76,30 +70,38 @@ class KnowledgeStore(
             )
         }
         bootstrapJob = scope.launch {
-            val requestedEnabled = runCatchingCancellable {
-                preferences.enabledDatasetIds.first()
-            }
-                .getOrDefault(emptySet())
-            val (enabled, disabled) = catalog.values.partition { it.stableId in requestedEnabled }
             try {
-                enabled.forEach { dataset -> reconcileAndUpdate(dataset, enabled = true) }
+                catalog.values.forEach { dataset -> reconcileAndUpdate(dataset) }
             } finally {
-                enabledPacksReady.complete(Unit)
+                state.update { it.copy(knowledge = it.knowledge.copy(inventoryLoading = false)) }
+                packsReady.complete(Unit)
             }
-            disabled.forEach { dataset -> reconcileAndUpdate(dataset, enabled = false) }
         }
     }
 
-    suspend fun awaitEnabledPacksReady() {
-        enabledPacksReady.await()
+    suspend fun awaitReady() {
+        packsReady.await()
+        bootstrapJob?.join()
     }
 
-    fun downloadOrUpdate(stableId: String) {
+    fun retryInventory() {
+        val ownerScope = scope ?: return
+        if (bootstrapJob?.isActive == true || state.value.knowledge.inventoryReady) return
+        state.update { it.copy(knowledge = it.knowledge.copy(inventoryLoading = true)) }
+        bootstrapJob = ownerScope.launch {
+            try {
+                catalog.values.forEach { dataset -> reconcileAndUpdate(dataset) }
+            } finally {
+                state.update { it.copy(knowledge = it.knowledge.copy(inventoryLoading = false)) }
+            }
+        }
+    }
+
+    fun downloadOrUpdate(stableId: String, onInstalled: (() -> Unit)? = null) {
         if (!state.value.chat.deviceCapability.isChatSupported()) return
         val dataset = catalog[stableId] ?: return
         val ownerScope = scope ?: return
         if (jobs[stableId]?.isActive == true) return
-        val wasInstalled = state.value.knowledge.packs[stableId]?.activeIdentity != null
         updatePack(stableId) {
             it.copy(
                 mutationProgress = KnowledgeDownloadProgress("Starting download...", 0.0),
@@ -114,30 +116,19 @@ class KnowledgeStore(
                             current.copy(mutationProgress = progress)
                         }
                     }
-                val shouldEnable =
-                    !wasInstalled && reconciliation.status == KnowledgeReconciliationStatus.READY
-                if (shouldEnable) {
-                    preferences.setDatasetEnabled(stableId, true)
-                }
-                val enabled =
-                    if (wasInstalled) {
-                        state.value.knowledge.packs[stableId]?.enabled == true
-                    } else {
-                        shouldEnable
-                    }
                 updatePack(stableId) {
-                    it.fromReconciliation(reconciliation, enabled).copy(mutationProgress = null)
+                    it.fromReconciliation(reconciliation).copy(mutationProgress = null)
                 }
+                if (reconciliation.activeIdentity != null) onInstalled?.invoke()
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Throwable) {
                 val reconciled = runCatchingCancellable { provider.reconcile(dataset) }.getOrNull()
                 updatePack(stableId) { current ->
-                    (reconciled?.let { current.fromReconciliation(it, current.enabled) } ?: current)
-                        .copy(
-                            mutationProgress = null,
-                            errorMessage = userFacingKnowledgeError(error),
-                        )
+                    (reconciled?.let { current.fromReconciliation(it) } ?: current).copy(
+                        mutationProgress = null,
+                        errorMessage = userFacingKnowledgeError(error),
+                    )
                 }
                 logRepository.log(
                     LogLevel.Error,
@@ -160,19 +151,11 @@ class KnowledgeStore(
             ownerJob?.join()
             if (jobs[stableId]?.isActive == true) return@launch
             updatePack(stableId) { current ->
-                (result?.let { current.fromReconciliation(it, current.enabled) } ?: current).copy(
+                (result?.let { current.fromReconciliation(it) } ?: current).copy(
                     mutationProgress = null
                 )
             }
         }
-    }
-
-    fun setEnabled(stableId: String, enabled: Boolean) {
-        val pack = state.value.knowledge.packs[stableId] ?: return
-        if (pack.activeIdentity == null || pack.isMutating) return
-        val ownerScope = scope ?: return
-        updatePack(stableId) { it.copy(enabled = enabled) }
-        ownerScope.launch { preferences.setDatasetEnabled(stableId, enabled) }
     }
 
     private fun updatePack(
@@ -190,20 +173,14 @@ class KnowledgeStore(
         }
     }
 
-    private suspend fun reconcileAndUpdate(
-        dataset: KnowledgeDatasetConfig,
-        enabled: Boolean,
-    ) {
+    private suspend fun reconcileAndUpdate(dataset: KnowledgeDatasetConfig) {
         val result = runCatchingCancellable { provider.reconcile(dataset) }
         updatePack(dataset.stableId) { current ->
             result.fold(
-                onSuccess = { reconciliation ->
-                    current.fromReconciliation(reconciliation, enabled)
-                },
+                onSuccess = { reconciliation -> current.fromReconciliation(reconciliation) },
                 onFailure = { error ->
                     current.copy(
                         status = KnowledgeReconciliationStatus.DOWNLOAD,
-                        enabled = false,
                         errorMessage = userFacingKnowledgeError(error),
                     )
                 },
@@ -212,13 +189,12 @@ class KnowledgeStore(
     }
 
     private fun KnowledgePackState.fromReconciliation(
-        result: KnowledgeReconciliation,
-        enabled: Boolean,
+        result: KnowledgeReconciliation
     ): KnowledgePackState =
         copy(
             status = result.status,
             activeIdentity = result.activeIdentity,
-            enabled = enabled && result.activeIdentity != null,
+            inventoryLoaded = true,
             errorMessage = null,
         )
 
@@ -237,23 +213,5 @@ class KnowledgeStore(
             is AssetDownloadException.Io -> "Couldn't save the knowledge pack. Please try again."
             else -> "Knowledge pack setup failed. Please try again."
         }
-    }
-}
-
-private class KnowledgePreferences(context: Context) {
-    private val preferences = context.applicationContext.knowledgePreferences
-
-    val enabledDatasetIds: Flow<Set<String>> =
-        preferences.data.map { values -> values[Keys.enabledDatasetIds].orEmpty() }
-
-    suspend fun setDatasetEnabled(stableId: String, enabled: Boolean) {
-        preferences.edit { values ->
-            val ids = values[Keys.enabledDatasetIds].orEmpty()
-            values[Keys.enabledDatasetIds] = if (enabled) ids + stableId else ids - stableId
-        }
-    }
-
-    private object Keys {
-        val enabledDatasetIds = stringSetPreferencesKey("enabled_dataset_ids")
     }
 }
