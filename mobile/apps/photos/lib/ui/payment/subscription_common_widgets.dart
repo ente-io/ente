@@ -165,7 +165,7 @@ class SubscriptionToggle extends StatefulWidget {
 
 class _SubscriptionToggleState extends State<SubscriptionToggle> {
   static const double _padding = Spacing.xs;
-  static const double _segmentHeight = 41;
+  static const double _minSegmentHeight = 41;
   static const double _radius = 35;
 
   late bool _isYearly;
@@ -189,7 +189,6 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
     final colors = context.componentColors;
     final labelStyle = TextStyles.body.copyWith(color: colors.textLight);
     return Container(
-      height: _segmentHeight + _padding * 2,
       padding: const EdgeInsets.all(_padding),
       decoration: BoxDecoration(
         color: colors.strokeFaint,
@@ -197,26 +196,33 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
       ),
       child: Stack(
         children: [
-          AnimatedAlign(
-            duration: Motion.slow,
-            curve: Curves.easeInOutCubic,
-            alignment: _isYearly ? Alignment.centerLeft : Alignment.centerRight,
-            child: FractionallySizedBox(
-              widthFactor: 0.5,
-              heightFactor: 1,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colors.fillLight,
-                  borderRadius: BorderRadius.circular(_radius),
+          Positioned.fill(
+            child: AnimatedAlign(
+              duration: Motion.slow,
+              curve: Curves.easeInOutCubic,
+              alignment: _isYearly
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
+              child: FractionallySizedBox(
+                widthFactor: 0.5,
+                heightFactor: 1,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colors.fillLight,
+                    borderRadius: BorderRadius.circular(_radius),
+                  ),
                 ),
               ),
             ),
           ),
-          Row(
-            children: [
-              _segment(context.strings.yearly, true, labelStyle),
-              _segment(context.strings.monthly, false, labelStyle),
-            ],
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _segment(context.strings.yearly, true, labelStyle),
+                _segment(context.strings.monthly, false, labelStyle),
+              ],
+            ),
           ),
         ],
       ),
@@ -228,8 +234,8 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => setIsYearly(isYearly),
-        child: SizedBox(
-          height: _segmentHeight,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: _minSegmentHeight),
           child: Center(
             child: Text(label, style: style, textAlign: TextAlign.center),
           ),
