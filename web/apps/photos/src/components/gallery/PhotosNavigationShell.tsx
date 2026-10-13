@@ -72,9 +72,21 @@ export const PhotosNavigationShell: React.FC<
     const { onClose: closeMobileNavigation } = mobileDrawerProps;
     useEffect(() => {
         if (!mobile) closeMobileNavigation();
-    }, [mobile, closeMobileNavigation]);
+        else if (
+            props.mode == "hidden-albums" ||
+            props.mode == "archive-albums"
+        ) {
+            showMobileNavigation();
+        }
+    }, [mobile, props.mode, closeMobileNavigation, showMobileNavigation]);
     const handleChangeMode = (mode: GalleryBarMode) => {
-        props.onChangeMode(mode);
+        const reopeningSection =
+            mobile &&
+            mode == "albums" &&
+            galleryBarProps &&
+            !props.isInSearchMode &&
+            (props.mode == "hidden-albums" || props.mode == "archive-albums");
+        if (!reopeningSection) props.onChangeMode(mode);
         if (mobile) showMobileNavigation();
     };
     return (
