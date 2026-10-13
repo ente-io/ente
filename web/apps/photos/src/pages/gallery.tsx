@@ -1989,7 +1989,6 @@ const Page: React.FC = () => {
             <PhotosNavigationShell
                 showRail={!isCleanupViewOpen}
                 showNormalNavigation={showNormalNavigation}
-                hasSelection={showSelectionBar}
                 isInSearchMode={isInSearchMode}
                 onSidebar={showSidebar}
                 onUpload={openUploader}
