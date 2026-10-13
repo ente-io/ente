@@ -63,6 +63,7 @@ import AsyncSelect from "react-select/async";
 
 export interface SearchBarProps {
     isInSearchMode: boolean;
+    isSettingsOpen: boolean;
     onSelectSearchOption: (
         o: SearchOption | undefined,
         options?: { shouldExitSearchMode?: boolean },
@@ -97,6 +98,8 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
     };
 
     useEffect(() => {
+        if (props.isSettingsOpen) return;
+
         const handleKeyDown = (event: KeyboardEvent) => {
             if ((event.metaKey || event.ctrlKey) && event.key === "k") {
                 event.preventDefault();
@@ -106,7 +109,7 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
 
         document.addEventListener("keydown", handleKeyDown);
         return () => document.removeEventListener("keydown", handleKeyDown);
-    }, []);
+    }, [props.isSettingsOpen]);
 
     const closeButton = isSmallWidth && props.isInSearchMode && (
         <Tooltip title={t("close")}>
@@ -125,6 +128,7 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
                         color="secondary"
                         aria-label={t("search")}
                         aria-haspopup="dialog"
+                        disabled={props.isSettingsOpen}
                         onClick={showSearch}
                         sx={{
                             minWidth: 0,

@@ -1984,6 +1984,7 @@ const Page: React.FC = () => {
                 showRail
                 showNormalNavigation={showNormalNavigation}
                 isInSearchMode={isInSearchMode}
+                isSettingsOpen={sidebarVisibilityProps.open}
                 mode={barMode}
                 onChangeMode={handleChangeBarMode}
                 onSidebar={showSidebar}
