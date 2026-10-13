@@ -65,11 +65,15 @@ export const PhotosNavigationShell: React.FC<
     ...props
 }) => {
     const [railOpen, setRailOpen] = useState(true);
+    const [navigationCollapsed, setNavigationCollapsed] = useState(false);
     const toggleRail = () => setRailOpen((open) => !open);
     const mobile = useMediaQuery(useTheme().breakpoints.down("md"));
     const { show: showMobileNavigation, props: mobileDrawerProps } =
         useModalVisibility();
     const { onClose: closeMobileNavigation } = mobileDrawerProps;
+    useEffect(() => {
+        setNavigationCollapsed(false);
+    }, [props.mode, props.isInSearchMode]);
     useEffect(() => {
         if (!mobile) closeMobileNavigation();
         else if (
@@ -86,7 +90,21 @@ export const PhotosNavigationShell: React.FC<
             galleryBarProps &&
             !props.isInSearchMode &&
             (props.mode == "hidden-albums" || props.mode == "archive-albums");
-        if (!reopeningSection) props.onChangeMode(mode);
+        if (
+            galleryBarProps &&
+            !props.isInSearchMode &&
+            (props.mode == mode || reopeningSection)
+        ) {
+            if (mobile) {
+                if (mobileDrawerProps.open) closeMobileNavigation();
+                else showMobileNavigation();
+            } else {
+                setNavigationCollapsed((collapsed) => !collapsed);
+            }
+            return;
+        }
+        setNavigationCollapsed(false);
+        props.onChangeMode(mode);
         if (mobile) showMobileNavigation();
     };
     return (
@@ -156,6 +174,12 @@ export const PhotosNavigationShell: React.FC<
                                 {...props}
                                 onChangeMode={handleChangeMode}
                                 opensDialog={mobile}
+                                navigationOpen={
+                                    !!galleryBarProps &&
+                                    (mobile
+                                        ? mobileDrawerProps.open
+                                        : !navigationCollapsed)
+                                }
                             />
                         )}
                     </Box>
@@ -171,7 +195,9 @@ export const PhotosNavigationShell: React.FC<
                     {galleryBarProps && (
                         <GalleryBarAndListHeader
                             {...galleryBarProps}
-                            collapsed={showRail && !railOpen}
+                            collapsed={
+                                showRail && (!railOpen || navigationCollapsed)
+                            }
                             mobileDrawerProps={mobileDrawerProps}
                         />
                     )}
@@ -265,8 +291,19 @@ const NormalHeaderContents: React.FC<
 };
 
 const NormalNavigationRail: React.FC<
-    Omit<PhotosNavigationShellProps, "onUpload"> & { opensDialog: boolean }
-> = ({ onSidebar, onHome, mode, onChangeMode, opensDialog, ...props }) => (
+    Omit<PhotosNavigationShellProps, "onUpload"> & {
+        opensDialog: boolean;
+        navigationOpen: boolean;
+    }
+> = ({
+    onSidebar,
+    onHome,
+    mode,
+    onChangeMode,
+    opensDialog,
+    navigationOpen,
+    ...props
+}) => (
     <>
         <HomeButton onClick={onHome} />
         {(["albums", "people"] as const).map((item) =>
@@ -275,7 +312,11 @@ const NormalNavigationRail: React.FC<
                     <FocusVisibleButton
                         color="secondary"
                         aria-label={t(item)}
-                        aria-pressed={!props.isInSearchMode && mode == item}
+                        aria-pressed={
+                            navigationOpen &&
+                            !props.isInSearchMode &&
+                            mode == item
+                        }
                         aria-haspopup={opensDialog ? "dialog" : undefined}
                         onClick={() => onChangeMode(item)}
                         sx={{
@@ -285,11 +326,9 @@ const NormalNavigationRail: React.FC<
                             flexShrink: 0,
                             p: 0,
                             borderRadius: "12px",
-                            color:
-                                !props.isInSearchMode && mode == item
-                                    ? "#FFFFFF"
-                                    : "text.muted",
+                            color: "text.muted",
                             '&[aria-pressed="true"]': {
+                                color: "#FFFFFF",
                                 bgcolor: "accent.main",
                                 "&:hover": { bgcolor: "accent.main" },
                             },
