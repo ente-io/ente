@@ -372,9 +372,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         border: "1px solid",
                         borderColor: "stroke.faint",
                         "&:focus-within": {
-                            outline: "2px solid",
-                            outlineColor: "stroke.base",
-                            outlineOffset: -2,
+                            outline: "1px solid",
+                            outlineColor: "stroke.muted",
+                            outlineOffset: -1,
                         },
                     }}
                 >
