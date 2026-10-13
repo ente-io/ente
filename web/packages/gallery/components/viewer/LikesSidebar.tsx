@@ -9,6 +9,7 @@ import {
     styled,
     Typography,
 } from "@mui/material";
+import { appName } from "ente-base/app";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { useResolvedContactAvatar } from "ente-contacts";
@@ -549,7 +550,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                     </CloseButton>
                 </Header>
 
-                <LikersContainer data-custom-scrollbar>
+                <LikersContainer>
                     {loading ? (
                         <LoadingContainer>
                             <CircularProgress size={32} />
@@ -713,19 +714,21 @@ const LikersContainer = styled(Box)(({ theme }) => ({
     overflow: "auto",
     marginRight: -24,
     paddingRight: 24,
-    "&::-webkit-scrollbar": { width: "6px" },
-    "&::-webkit-scrollbar-track": { background: "transparent" },
-    "&::-webkit-scrollbar-thumb": {
-        background: "rgba(0, 0, 0, 0.2)",
-        borderRadius: "3px",
-    },
-    scrollbarWidth: "thin",
-    scrollbarColor: "rgba(0, 0, 0, 0.2) transparent",
-    ...theme.applyStyles("dark", {
+    ...(appName !== "photos" && {
+        "&::-webkit-scrollbar": { width: "6px" },
+        "&::-webkit-scrollbar-track": { background: "transparent" },
         "&::-webkit-scrollbar-thumb": {
-            background: "rgba(255, 255, 255, 0.2)",
+            background: "rgba(0, 0, 0, 0.2)",
+            borderRadius: "3px",
         },
-        scrollbarColor: "rgba(255, 255, 255, 0.2) transparent",
+        scrollbarWidth: "thin",
+        scrollbarColor: "rgba(0, 0, 0, 0.2) transparent",
+        ...theme.applyStyles("dark", {
+            "&::-webkit-scrollbar-thumb": {
+                background: "rgba(255, 255, 255, 0.2)",
+            },
+            scrollbarColor: "rgba(255, 255, 255, 0.2) transparent",
+        }),
     }),
 }));
 

@@ -1,5 +1,6 @@
 import { Box, Button, Stack, Typography, type Theme } from "@mui/material";
 import type { SystemStyleObject } from "@mui/system";
+import { appName } from "ente-base/app";
 import { basename } from "ente-base/file-name";
 import { t } from "i18next";
 import { useState } from "react";
@@ -160,7 +161,7 @@ export function UploadProgressDetails() {
                         {t("failed_uploads_hint")}
                     </Typography>
                 )}
-                <Box sx={uploadRowsSx(isDone)} data-custom-scrollbar>
+                <Box sx={uploadRowsSx(isDone)}>
                     {activeStat == "inProgress" ? (
                         inProgressUploads.length ? (
                             inProgressUploads.map(
@@ -375,23 +376,25 @@ const uploadRowsSx =
         minHeight: minRowsListHeight,
         maxHeight: isDone ? doneRowsListHeight : maxRowsListHeight,
         overflowY: "auto",
-        "&, & .upload-file-list": {
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(0 0 0 / 0.2) transparent",
-        },
-        "&::-webkit-scrollbar, & .upload-file-list::-webkit-scrollbar": {
-            width: 6,
-        },
-        "&::-webkit-scrollbar-track, & .upload-file-list::-webkit-scrollbar-track":
-            { background: "transparent" },
-        "&::-webkit-scrollbar-thumb, & .upload-file-list::-webkit-scrollbar-thumb":
-            { borderRadius: "8px", backgroundColor: "rgba(0 0 0 / 0.2)" },
-        ...theme.applyStyles("dark", {
+        ...(appName !== "photos" && {
             "&, & .upload-file-list": {
-                scrollbarColor: "rgba(255 255 255 / 0.2) transparent",
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(0 0 0 / 0.2) transparent",
             },
+            "&::-webkit-scrollbar, & .upload-file-list::-webkit-scrollbar": {
+                width: 6,
+            },
+            "&::-webkit-scrollbar-track, & .upload-file-list::-webkit-scrollbar-track":
+                { background: "transparent" },
             "&::-webkit-scrollbar-thumb, & .upload-file-list::-webkit-scrollbar-thumb":
-                { backgroundColor: "rgba(255 255 255 / 0.2)" },
+                { borderRadius: "8px", backgroundColor: "rgba(0 0 0 / 0.2)" },
+            ...theme.applyStyles("dark", {
+                "&, & .upload-file-list": {
+                    scrollbarColor: "rgba(255 255 255 / 0.2) transparent",
+                },
+                "&::-webkit-scrollbar-thumb, & .upload-file-list::-webkit-scrollbar-thumb":
+                    { backgroundColor: "rgba(255 255 255 / 0.2)" },
+            }),
         }),
     });
 const failedUploadsHintSx = { mt: 2, px: 1.5, ...mutedCaptionSx };
