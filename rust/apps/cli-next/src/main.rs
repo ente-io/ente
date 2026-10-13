@@ -6,6 +6,8 @@ mod db;
 mod home;
 mod login;
 mod output;
+mod password;
+mod paste;
 mod photos;
 mod vault;
 
@@ -81,6 +83,7 @@ async fn run(cli: Cli) -> Result<()> {
         Command::Auth { selector, command } => {
             auth::run(command, selector.account.as_deref(), &options).await
         }
+        Command::Paste { command } => paste::run(command, &options).await,
         Command::Account { command } => account_command(command, &options).await,
         Command::Vault {
             command:

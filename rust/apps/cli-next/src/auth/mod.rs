@@ -1,10 +1,9 @@
 mod output;
 pub mod replica;
 
-use std::{env, fs, path::PathBuf};
+use std::{fs, path::PathBuf};
 
-use anyhow::{Context, Result, bail, ensure};
-use dialoguer::{Password, console::Term};
+use anyhow::{Context, Result, bail};
 use ente_auth::backup;
 use serde_json::json;
 use zeroize::Zeroizing;
@@ -12,7 +11,7 @@ use zeroize::Zeroizing;
 use crate::{
     api,
     args::{App, AuthCommand, AuthExportArgs, Options},
-    db, home,
+    db, home, password,
 };
 use output::Destination;
 
@@ -25,7 +24,7 @@ pub async fn run(command: AuthCommand, selected: Option<&str>, options: &Options
             destination.prepare()?;
             let encrypted =
                 fs::read(&input).with_context(|| format!("cannot read {}", input.display()))?;
-            let password = export_password(false, options)?;
+            let password = password::read("Export password", false, options)?;
             let plaintext = backup::decrypt(&encrypted, &password)
                 .with_context(|| format!("cannot decrypt {}", input.display()))?;
             if let Some(path) = destination.publish(&plaintext)? {
@@ -56,7 +55,7 @@ async fn export(args: AuthExportArgs, selected: Option<&str>, options: &Options)
     let password = if args.plaintext {
         None
     } else {
-        Some(export_password(true, options)?)
+        Some(password::read("Export password", true, options)?)
     };
     let payload = {
         let (account, home) = home::open_account(selected, !options.offline)?;
@@ -102,28 +101,4 @@ async fn export(args: AuthExportArgs, selected: Option<&str>, options: &Options)
         )?;
     }
     Ok(())
-}
-
-fn export_password(confirm: bool, options: &Options) -> Result<Zeroizing<String>> {
-    let password = match env::var("ENTE_CLI_EXPORT_PASSWORD") {
-        Ok(password) => Zeroizing::new(password),
-        Err(env::VarError::NotUnicode(_)) => bail!("ENTE_CLI_EXPORT_PASSWORD must be UTF-8"),
-        Err(env::VarError::NotPresent) => {
-            ensure!(
-                options.can_prompt(),
-                "set ENTE_CLI_EXPORT_PASSWORD for noninteractive encrypted export or decryption"
-            );
-            let mut prompt = Password::new().with_prompt("Export password");
-            if confirm {
-                prompt =
-                    prompt.with_confirmation("Confirm export password", "Passwords do not match");
-            }
-            Zeroizing::new(prompt.interact_on(&Term::stderr())?)
-        }
-    };
-    ensure!(
-        !password.is_empty(),
-        "export password cannot be empty; set ENTE_CLI_EXPORT_PASSWORD to a nonempty value"
-    );
-    Ok(password)
 }

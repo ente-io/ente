@@ -15,7 +15,10 @@ use serde::{Deserialize, Serialize};
   ente-cli-next photos export <DIR>
 Auth backups:
   ente-cli-next account login --app auth
-  ente-cli-next auth export <DIR>"
+  ente-cli-next auth export <DIR>
+Paste:
+  ente-cli-next paste create --input <PATH>
+  ente-cli-next paste consume <URL>"
 )]
 pub struct Cli {
     #[command(flatten)]
@@ -95,6 +98,11 @@ pub enum Command {
         #[command(subcommand)]
         command: AuthCommand,
     },
+    #[command(about = "Share and consume one-time encrypted text without an account")]
+    Paste {
+        #[command(subcommand)]
+        command: PasteCommand,
+    },
     #[command(about = "Manage Ente accounts", alias = "accounts")]
     Account {
         #[command(subcommand)]
@@ -115,22 +123,80 @@ Keep the same home and key across unattended invocations."
 }
 
 #[derive(Subcommand)]
+pub enum PasteCommand {
+    #[command(
+        about = "Create a one-time encrypted paste",
+        after_long_help = "Supply TEXT or --input PATH; --input - reads stdin verbatim.
+With neither, reads piped stdin.
+Text must be nonblank and at most 4,000 Unicode scalar values.
+Pastes expire after 24 hours.
+With --password, uses ENTE_CLI_PASSWORD when set; otherwise prompts for a paste password and confirmation.
+With --password --no-input, ENTE_CLI_PASSWORD is required.
+Prints the paste URL. With --json: {\"url\": \"...\"}. Requires network access."
+    )]
+    Create {
+        #[arg(
+            conflicts_with = "input",
+            help = "Literal paste text; defaults to piped stdin"
+        )]
+        text: Option<String>,
+        #[arg(
+            long,
+            value_name = "PATH|-",
+            help = "Read plain UTF-8 text from a file, or stdin with -"
+        )]
+        input: Option<PathBuf>,
+        #[arg(long, help = "Require a password to decrypt the paste")]
+        password: bool,
+        #[arg(long, help = "Ente API server; defaults to api.ente.com")]
+        host: Option<String>,
+        #[arg(
+            long,
+            default_value = "https://paste.ente.com",
+            value_name = "URL",
+            help = "Website used in the returned link"
+        )]
+        paste_origin: url::Url,
+    },
+    #[command(
+        about = "Consume a paste and permanently remove its server copy",
+        after_long_help = "Supply a URL including its #key fragment, or TOKEN --key KEY.
+Protected pastes use ENTE_CLI_PASSWORD when set; otherwise prompt for the paste password.
+Consumes the paste before decryption, even with a wrong password or key.
+A wrong ENTE_CLI_PASSWORD fails immediately; prompted retries work only while this command stays running.
+Prints the text without adding a newline. Terminal controls are escaped except tabs and newlines.
+With --json: {\"text\": \"...\"}. --raw affects plain terminal output only. Requires network access."
+    )]
+    Consume {
+        #[arg(value_name = "URL|TOKEN", help = "Paste URL or access token")]
+        link_or_token: String,
+        #[arg(long, help = "Decryption key when passing an access token")]
+        key: Option<String>,
+        #[arg(long, help = "Print text verbatim even on a terminal")]
+        raw: bool,
+        #[arg(long, help = "Ente API server; defaults to api.ente.com")]
+        host: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
 pub enum AuthCommand {
     #[command(about = "Make an authenticated API request", after_help = API_HELP)]
     Api(ApiArgs),
     #[command(about = "Export your Auth codes; encrypted by default")]
     #[command(
         after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
-Set ENTE_CLI_EXPORT_PASSWORD for encrypted export with --no-input.
+Encrypted export uses ENTE_CLI_PASSWORD when set; otherwise prompts for an export password.
+With --no-input, encrypted export requires ENTE_CLI_PASSWORD.
 DIR receives dated backups. --output writes a new file, or backup bytes to stdout with -.
 --json formats file/directory summaries; stdout backups contain only the artifact."
     )]
     Export(AuthExportArgs),
     #[command(about = "Decrypt an Auth export without an account")]
-    #[command(
-        after_long_help = "Reads a backup without network access. Set ENTE_CLI_EXPORT_PASSWORD with --no-input.
-Writes readable URI lines to stdout, or a new --output file. --json only formats the file summary."
-    )]
+    #[command(after_long_help = "Reads a backup without network access.
+Uses ENTE_CLI_PASSWORD as the export password when set; otherwise prompts.
+With --no-input, ENTE_CLI_PASSWORD is required.
+Writes readable URI lines to stdout, or a new --output file. --json only formats the file summary.")]
     Decrypt {
         #[arg(value_name = "PATH", help = "Encrypted Auth backup to decrypt")]
         input: PathBuf,

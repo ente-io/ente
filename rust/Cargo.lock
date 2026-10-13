@@ -2543,6 +2543,7 @@ dependencies = [
  "ente-auth",
  "ente-collections",
  "ente-core",
+ "ente-paste",
  "ente-photos",
  "ente-photos-export",
  "ente-test-support",
