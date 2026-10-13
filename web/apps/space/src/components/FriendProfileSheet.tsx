@@ -191,7 +191,7 @@ export const FriendProfileSheet: React.FC<FriendProfileSheetProps> = ({
         <Box
             ref={rootRef}
             sx={{
-                "--space-profile-post-loading-top": "70%",
+                "--space-profile-post-loading-top": "50%",
                 ...(expanded
                     ? { position: "relative" }
                     : { inset: 0, position: "fixed", zIndex: 1300 }),

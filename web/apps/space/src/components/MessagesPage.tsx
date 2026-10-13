@@ -103,6 +103,7 @@ export const SpaceMessagesPage: React.FC<SpaceMessagesPageProps> = ({
 }) => {
     const router = useSpaceRouter();
     const {
+        friends,
         postPublication,
         profile,
         profileLoadError,
@@ -151,11 +152,11 @@ export const SpaceMessagesPage: React.FC<SpaceMessagesPageProps> = ({
     const selectedFriendFromFriends = React.useMemo(
         () =>
             selectedSpaceId
-                ? conversationFriends.find(
+                ? friends.find(
                       (friend) => friendSpaceId(friend) == selectedSpaceId,
                   )
                 : undefined,
-        [conversationFriends, selectedSpaceId],
+        [friends, selectedSpaceId],
     );
     const selectedLoadedFriendProfile =
         selectedFriendProfile &&

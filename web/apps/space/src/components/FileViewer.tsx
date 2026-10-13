@@ -243,7 +243,6 @@ interface ViewerMotion {
     landed: boolean;
     flight?: ReturnType<typeof playViewerOpen>;
     reveal?: () => void;
-    stopClose?: () => void;
 }
 
 const endOpenFlight = (motion: ViewerMotion, root: HTMLElement) => {
@@ -778,36 +777,24 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             delete root.dataset.spaceViewerFlying;
             delete root.dataset.spaceViewerWaiting;
         }
-        const stop =
-            root && item && origin && from && src
-                ? playViewerClose(
-                      root,
-                      {
-                          origin,
-                          src,
-                          photo: {
-                              width: item.width ?? defaultPhotoWidth,
-                              height: item.height ?? defaultPhotoHeight,
-                          },
-                      },
-                      from,
-                      throwVelocity,
-                      (t) =>
-                          setViewerBackground(
-                              root,
-                              startBackground * viewerBackgroundOpacity(t),
-                          ),
-                      () => onCloseRef.current(),
-                  )
-                : undefined;
-        if (!stop || !root) {
-            onCloseRef.current();
-            return;
+        if (root && item && origin && from && src) {
+            playViewerClose(
+                root,
+                {
+                    origin,
+                    src,
+                    photo: {
+                        width: item.width ?? defaultPhotoWidth,
+                        height: item.height ?? defaultPhotoHeight,
+                    },
+                },
+                from,
+                throwVelocity,
+                startBackground,
+            );
         }
         motion.closing = true;
-        motion.stopClose = stop;
-        root.dataset.spaceViewerFlying = "true";
-        root.dataset.spaceViewerLeaving = "true";
+        onCloseRef.current();
     };
 
     React.useImperativeHandle(
@@ -1368,8 +1355,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         const stopMotion = () => {
             motion.flight?.stop();
             motion.flight = undefined;
-            motion.stopClose?.();
-            motion.stopClose = undefined;
             motion.reveal?.();
             motion.reveal = undefined;
             if (root) {
@@ -1822,8 +1807,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                         opacity:
                             "calc((var(--space-viewer-bg-opacity, 1) - 0.5) * 2)",
                     },
-                "&[data-space-viewer-leaving='true'] :is([data-space-viewer-chrome='true'], [data-space-viewer-bottom='true'], [data-space-viewer-close])":
-                    { opacity: 0, transition: "opacity 140ms ease" },
                 // PhotoSwipe sets an inline opacity, so hide it with visibility.
                 "&[data-space-viewer-flying='true'] .pswp": {
                     visibility: "hidden !important",
