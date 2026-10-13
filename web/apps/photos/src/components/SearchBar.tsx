@@ -452,6 +452,18 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
             >
                 {props.children}
             </div>
+            <Typography
+                variant="mini"
+                sx={{
+                    mt: 2,
+                    pt: "12px",
+                    borderTop: "1px solid",
+                    borderColor: "stroke.faint",
+                    color: "text.muted",
+                }}
+            >
+                {t("search_navigate_hint")}
+            </Typography>
         </SelectComponents.Menu>
     );
 }
