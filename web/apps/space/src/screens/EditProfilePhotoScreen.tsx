@@ -74,7 +74,7 @@ const EditProfilePhotoShell: React.FC<
                     alignItems: "center",
                     display: "grid",
                     gridTemplateColumns: `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
-                    height: 56,
+                    height: 68,
                     px: 2,
                     width: "100%",
                 }}

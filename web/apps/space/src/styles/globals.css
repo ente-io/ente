@@ -9,12 +9,16 @@
 
 .space-app-layout {
     --space-bottom-nav-padding: env(safe-area-inset-bottom);
-    --space-bottom-nav-height: calc(60px + var(--space-bottom-nav-padding));
+    --space-bottom-nav-height: calc(72px + var(--space-bottom-nav-padding));
     --space-page-height: calc(
         var(--space-viewport-height, 100svh) - var(--space-bottom-nav-height)
     );
     min-height: 100svh;
     padding-bottom: var(--space-bottom-nav-height);
+}
+
+.space-app-layout[data-space-conversation] {
+    --space-bottom-nav-height: 0px;
 }
 
 .space-unread-indicator {
@@ -47,16 +51,29 @@
     }
 }
 
-::view-transition-group(space-bottom-nav) {
-    z-index: 1;
-    animation: none;
+html[data-space-route-motion="fade-with-navigation"]
+    [data-space-bottom-nav-pill] {
+    view-transition-name: none;
 }
 
-::view-transition-old(space-bottom-nav) {
+::view-transition-group(space-bottom-nav-space),
+::view-transition-group(space-bottom-nav-messages),
+::view-transition-group(space-bottom-nav-post) {
+    z-index: 1;
+    animation: none;
+    border-radius: 999px;
+    overflow: clip;
+}
+
+::view-transition-old(space-bottom-nav-space),
+::view-transition-old(space-bottom-nav-messages),
+::view-transition-old(space-bottom-nav-post) {
     display: none;
 }
 
-::view-transition-new(space-bottom-nav) {
+::view-transition-new(space-bottom-nav-space),
+::view-transition-new(space-bottom-nav-messages),
+::view-transition-new(space-bottom-nav-post) {
     animation: none;
 }
 

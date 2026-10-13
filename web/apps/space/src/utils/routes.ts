@@ -76,7 +76,7 @@ export const spaceBackFallback = (asPath: string, page = asPath) => {
             [spaceRoutes.messages]: spaceRoutes.home,
             [spaceRoutes.notifications]: spaceRoutes.home,
             [spaceRoutes.profile]: spaceRoutes.home,
-            [spaceRoutes.settings]: spaceRoutes.home,
+            [spaceRoutes.settings]: spaceRoutes.profile,
             [spaceRoutes.settingsProfileName]: spaceRoutes.settings,
             "/app/post": spaceRoutes.home,
         } as Record<string, string | undefined>
