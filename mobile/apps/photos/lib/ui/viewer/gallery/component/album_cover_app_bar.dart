@@ -48,24 +48,6 @@ class AlbumCoverAppBar extends StatefulWidget {
     required double collapsedHeight,
     required double bottomHeight,
   }) {
-    final geometry = _resolveCoverGeometry(
-      context,
-      collapsedHeight: collapsedHeight,
-      bottomHeight: bottomHeight,
-    );
-    return HeaderAppBarGeometry(
-      minExtent: geometry.minExtent,
-      maxExtent:
-          geometry.minExtent +
-          math.min(_coverCollapseScrollExtent, geometry.collapseExtent),
-    );
-  }
-
-  static HeaderAppBarGeometry _resolveCoverGeometry(
-    BuildContext context, {
-    required double collapsedHeight,
-    required double bottomHeight,
-  }) {
     final topPadding = MediaQuery.paddingOf(context).top;
     return HeaderAppBarGeometry(
       minExtent: topPadding + collapsedHeight + bottomHeight,
@@ -123,138 +105,77 @@ class _AlbumCoverAppBarState extends State<AlbumCoverAppBar> with RouteAware {
     final colors = context.componentColors;
     final bottomHeight = widget.bottom?.preferredSize.height ?? 0;
     final description = widget.collection.displayDescription;
-    final geometry = AlbumCoverAppBar._resolveCoverGeometry(
+    final geometry = AlbumCoverAppBar.resolveGeometry(
       context,
       collapsedHeight: widget.collapsedHeight,
       bottomHeight: bottomHeight,
     );
 
-    return _CoverCollapseSliver(
-      expandedCollapseExtent: geometry.collapseExtent,
-      child: SliverPersistentHeader(
-        pinned: true,
-        delegate: _AlbumCoverDelegate(
-          geometry: geometry,
-          topPadding: MediaQuery.paddingOf(context).top,
-          collapsedHeight: widget.collapsedHeight,
-          bottomHeight: bottomHeight,
-          colors: colors,
+    return SliverPersistentHeader(
+      pinned: true,
+      delegate: _AlbumCoverDelegate(
+        geometry: geometry,
+        topPadding: MediaQuery.paddingOf(context).top,
+        collapsedHeight: widget.collapsedHeight,
+        bottomHeight: bottomHeight,
+        colors: colors,
+        backgroundColor: widget.backgroundColor,
+        pinnedOverlayStyle: _pinnedOverlayStyle,
+        isCovered: _isCovered,
+        title: widget.title,
+        actionsBuilder: widget.actionsBuilder,
+        bottom: widget.bottom,
+        foregroundKey: _coverForegroundKey,
+        photoBuilder: (foreground, collapseOffset) => _CoverPhoto(
+          photoKey: _coverPhotoKey,
+          foreground: foreground,
+          foregroundNotifier: _coverForegroundNotifier,
+          collapseOffset: collapseOffset,
+          imageBottomInset: _coverBottomInset(bottomHeight) - 1,
+          cover: widget.cover,
           backgroundColor: widget.backgroundColor,
-          pinnedOverlayStyle: _pinnedOverlayStyle,
-          isCovered: _isCovered,
-          title: widget.title,
-          actionsBuilder: widget.actionsBuilder,
-          bottom: widget.bottom,
-          foregroundKey: _coverForegroundKey,
-          photoBuilder: (foreground, collapseOffset) => _CoverPhoto(
-            photoKey: _coverPhotoKey,
-            foreground: foreground,
-            foregroundNotifier: _coverForegroundNotifier,
-            collapseOffset: collapseOffset,
-            imageBottomInset: _coverBottomInset(bottomHeight) - 1,
-            cover: widget.cover,
-            backgroundColor: widget.backgroundColor,
-            heroTag: widget.heroTag,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _CoverCaption(
-                GalleryFilesState.maybeOf(context)?.captureDateRange,
+          heroTag: widget.heroTag,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _CoverCaption(GalleryFilesState.maybeOf(context)?.captureDateRange),
+            Semantics(
+              header: true,
+              child: Text(
+                widget.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyles.display1.copyWith(color: colors.specialWhite),
               ),
-              Semantics(
-                header: true,
+            ),
+            if (description != null) ...[
+              const SizedBox(height: Spacing.sm),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Text(
-                  widget.title,
-                  maxLines: 2,
+                  description,
+                  maxLines: _descriptionMaxLines,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: TextStyles.display1.copyWith(
-                    color: colors.specialWhite,
+                  style: TextStyles.mini.copyWith(
+                    color: colors.specialWhite.withValues(alpha: 0.92),
                   ),
                 ),
               ),
-              if (description != null) ...[
-                const SizedBox(height: Spacing.sm),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  child: Text(
-                    description,
-                    maxLines: _descriptionMaxLines,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyles.mini.copyWith(
-                      color: colors.specialWhite.withValues(alpha: 0.92),
-                    ),
-                  ),
-                ),
-              ],
-              if (widget.coverActions.isNotEmpty) ...[
-                const SizedBox(height: _contentSpacing),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: Spacing.md,
-                  children: widget.coverActions,
-                ),
-              ],
             ],
-          ),
+            if (widget.coverActions.isNotEmpty) ...[
+              const SizedBox(height: _contentSpacing),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: Spacing.md,
+                children: widget.coverActions,
+              ),
+            ],
+          ],
         ),
       ),
-    );
-  }
-}
-
-class _CoverCollapseSliver extends SingleChildRenderObjectWidget {
-  const _CoverCollapseSliver({
-    required this.expandedCollapseExtent,
-    required super.child,
-  });
-
-  final double expandedCollapseExtent;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderCoverCollapseSliver(expandedCollapseExtent);
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    covariant _RenderCoverCollapseSliver renderObject,
-  ) {
-    renderObject.expandedCollapseExtent = expandedCollapseExtent;
-  }
-}
-
-class _RenderCoverCollapseSliver extends RenderProxySliver {
-  _RenderCoverCollapseSliver(this._expandedCollapseExtent);
-
-  double _expandedCollapseExtent;
-
-  set expandedCollapseExtent(double value) {
-    if (_expandedCollapseExtent == value) return;
-    _expandedCollapseExtent = value;
-    markNeedsLayout();
-  }
-
-  @override
-  void performLayout() {
-    final scrollExtent = math.min(
-      _coverCollapseScrollExtent,
-      _expandedCollapseExtent,
-    );
-    final offset = constraints.scrollOffset;
-    final coverOffset = offset < scrollExtent
-        ? offset * _expandedCollapseExtent / scrollExtent
-        : offset + _expandedCollapseExtent - scrollExtent;
-    child!.layout(
-      constraints.copyWith(scrollOffset: coverOffset),
-      parentUsesSize: true,
-    );
-    final childGeometry = child!.geometry!;
-    geometry = childGeometry.copyWith(
-      scrollExtent:
-          childGeometry.scrollExtent - _expandedCollapseExtent + scrollExtent,
     );
   }
 }
@@ -1031,7 +952,6 @@ double _coverBottomInset(double bottomHeight) {
 }
 
 const _coverHeight = 441.0;
-const _coverCollapseScrollExtent = 120.0;
 const _coverDissolveHeight = 100.0;
 const _topScrimHeight = 31.0;
 const _bottomOverlap = 25.0;

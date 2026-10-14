@@ -232,64 +232,94 @@ void main() {
     await _disposeAlbum(tester);
   });
 
-  testWidgets("lets a short album fully collapse its cover", (tester) async {
-    tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(402, 874);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(tester.view.resetPhysicalSize);
-    final previousLayout = localSettings.getGalleryLayoutType();
-    final previousGridSize = localSettings.getPhotoGridSize();
-    addTearDown(() async {
-      await localSettings.setGalleryLayoutType(previousLayout);
-      await localSettings.setPhotoGridSize(previousGridSize);
+  for (final fileCount in [1, 30]) {
+    testWidgets("anchors $fileCount photos through album cover collapse", (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(402, 874);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      final previousLayout = localSettings.getGalleryLayoutType();
+      final previousGridSize = localSettings.getPhotoGridSize();
+      addTearDown(() async {
+        await localSettings.setGalleryLayoutType(previousLayout);
+        await localSettings.setPhotoGridSize(previousGridSize);
+      });
+      await localSettings.setGalleryLayoutType(GalleryLayoutType.justified);
+      await localSettings.setPhotoGridSize(5);
+      final collection = _collection();
+      final files = List.generate(
+        fileCount,
+        (index) => _file(index + 1)..pubMmdEncodedJson = '{"w":400,"h":600}',
+      );
+      await tester.runAsync(() async {
+        await FilesDB.instance.insertMultiple(files);
+        await CollectionsService.instance.getCover(collection);
+      });
+      await _pumpAlbum(tester, collection);
+      await _expectCover(tester, files.last, count: fileCount);
+      final boundaries = tester.state<GalleryBoundariesProviderState>(
+        find.byType(GalleryBoundariesProvider),
+      );
+      final position = boundaries.scrollControllerNotifier.value!.position;
+      final header = tester.widget<AlbumCoverAppBar>(
+        find.byType(AlbumCoverAppBar),
+      );
+      final geometry = AlbumCoverAppBar.resolveGeometry(
+        tester.element(find.byType(AlbumCoverAppBar)),
+        collapsedHeight: header.collapsedHeight,
+        bottomHeight: header.bottom?.preferredSize.height ?? 0,
+      );
+      if (fileCount == 1) {
+        expect(
+          position.maxScrollExtent,
+          closeTo(geometry.collapseExtent, 0.01),
+        );
+      }
+      for (final fraction in [0.0, 0.5, 1.0]) {
+        final offset = geometry.collapseExtent * fraction;
+        position.jumpTo(offset);
+        await tester.pumpAndSettle();
+        final tileRect = tester.getRect(find.byType(GalleryFileWidget).first);
+        final viewport = tester.getRect(find.byType(CustomScrollView));
+        final focalPoint = tileRect.intersect(viewport).center;
+        final first = await tester.startGesture(
+          focalPoint - const Offset(30, 0),
+          pointer: 1,
+        );
+        final second = await tester.startGesture(
+          focalPoint + const Offset(30, 0),
+          pointer: 2,
+        );
+        await tester.pump();
+        final overlayTile = find.byKey(
+          const ValueKey(("gallery-grid-zoom-tile", 0)),
+        );
+        expect(overlayTile, findsOneWidget);
+        expect(
+          tester.getRect(overlayTile),
+          rectMoreOrLessEquals(tileRect, epsilon: 0.01),
+        );
+        await second.up();
+        await first.up();
+        await tester.pumpAndSettle();
+        expect(position.pixels, closeTo(offset, 0.01));
+      }
+      if (fileCount == 1) {
+        position.jumpTo(0);
+        await tester.pump();
+        await tester.drag(
+          find.byType(CustomScrollView),
+          Offset(0, -geometry.collapseExtent * 1.5),
+        );
+        await tester.pumpAndSettle();
+        expect(position.pixels, closeTo(geometry.collapseExtent, 0.01));
+      }
+      expect(tester.takeException(), isNull);
+      await _disposeAlbum(tester);
     });
-    await localSettings.setGalleryLayoutType(GalleryLayoutType.justified);
-    await localSettings.setPhotoGridSize(5);
-    final collection = _collection();
-    final cover = _file(1)..pubMmdEncodedJson = '{"w":400,"h":600}';
-    await tester.runAsync(() async {
-      await FilesDB.instance.insertMultiple([cover]);
-      await CollectionsService.instance.getCover(collection);
-    });
-    await _pumpAlbum(tester, collection);
-    await _expectCover(tester, cover, count: 1);
-    final boundaries = tester.state<GalleryBoundariesProviderState>(
-      find.byType(GalleryBoundariesProvider),
-    );
-    final position = boundaries.scrollControllerNotifier.value!.position;
-    final header = tester.widget<AlbumCoverAppBar>(
-      find.byType(AlbumCoverAppBar),
-    );
-    final geometry = AlbumCoverAppBar.resolveGeometry(
-      tester.element(find.byType(AlbumCoverAppBar)),
-      collapsedHeight: header.collapsedHeight,
-      bottomHeight: header.bottom?.preferredSize.height ?? 0,
-    );
-    expect(position.maxScrollExtent, closeTo(geometry.collapseExtent, 0.01));
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -160));
-    await tester.pumpAndSettle();
-    expect(position.pixels, closeTo(geometry.collapseExtent, 0.01));
-    final tileRect = tester.getRect(find.byType(GalleryFileWidget));
-    final first = await tester.startGesture(
-      tileRect.center - const Offset(30, 0),
-      pointer: 1,
-    );
-    final second = await tester.startGesture(
-      tileRect.center + const Offset(30, 0),
-      pointer: 2,
-    );
-    await tester.pump();
-    expect(
-      tester.getRect(find.byKey(const ValueKey(("gallery-grid-zoom-tile", 0)))),
-      tileRect,
-    );
-    await second.up();
-    await first.up();
-    await tester.pumpAndSettle();
-    expect(position.pixels, closeTo(geometry.collapseExtent, 0.01));
-    expect(tester.takeException(), isNull);
-    await _disposeAlbum(tester);
-  });
+  }
 
   testWidgets("uses a pending local photo and excludes ignored photos", (
     tester,
@@ -767,7 +797,7 @@ void main() {
           )
           .scrollControllerNotifier
           .value!;
-      for (final offset in [120.0, 0.0]) {
+      for (final offset in [galleryScroll.position.maxScrollExtent, 0.0]) {
         galleryScroll.jumpTo(offset);
         await tester.pump();
         expect(tester.element(face), same(faceElement));

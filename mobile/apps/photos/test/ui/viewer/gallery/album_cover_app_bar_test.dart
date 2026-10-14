@@ -224,7 +224,12 @@ void main() {
     final gesture = await tester.startGesture(
       tester.getCenter(find.byType(CustomScrollView)),
     );
-    await gesture.moveBy(const Offset(0, -100));
+    final collapseExtent = AlbumCoverAppBar.resolveGeometry(
+      tester.element(find.byType(AlbumCoverAppBar)),
+      collapsedHeight: kToolbarHeight,
+      bottomHeight: 0,
+    ).collapseExtent;
+    await gesture.moveBy(Offset(0, -collapseExtent * 0.7));
     await tester.pump(const Duration(seconds: 1));
     final compactTitle = find.byWidgetPredicate(
       (widget) =>
