@@ -24,10 +24,9 @@ struct MessageInputView: View {
     let onUserFocus: () -> Void
     let onDismissKeyboard: () -> Void
 
-    @FocusState.Binding var isFocused: Bool
+    @Binding var isFocused: Bool
 
     @State private var selectedPhotoItem: PhotosPickerItem?
-    @State private var inputResetToken = UUID()
 
     private let placeholder = "Write a message..."
 
@@ -53,7 +52,6 @@ struct MessageInputView: View {
                 }
 
                 let inputVerticalPadding: CGFloat = 10
-                let textFieldPadding: CGFloat = 6
 
                 let bottomPadding: CGFloat = EnsuSpacing.md
 
@@ -123,20 +121,11 @@ struct MessageInputView: View {
                     }
 
                     HStack(alignment: .bottom, spacing: EnsuSpacing.sm) {
-                        TextField(placeholder, text: $text, axis: .vertical)
-                            .id(inputResetToken)
-                            .focused($isFocused)
-                            .onChange(of: isFocused) { focused in
-                                if focused {
-                                    onUserFocus()
-                                }
-                            }
-                            .lineLimit(1...5)
-                            .font(EnsuTypography.message)
-                            .foregroundStyle(EnsuColor.textPrimary)
-                            .textInputAutocapitalization(.sentences)
-                            .padding(.vertical, textFieldPadding)
-                            .onSubmit {
+                        MessageTextView(
+                            text: $text,
+                            isFocused: $isFocused,
+                            moveCursorToEndToken: moveCursorToEndToken,
+                            onSubmit: {
                                 if canSend {
                                     onSend()
                                     isFocused = false
@@ -144,20 +133,23 @@ struct MessageInputView: View {
                                     onDismissKeyboard()
                                 }
                             }
-                            .onChange(of: text) { newValue in
-                                if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                    && !isFocused
-                                {
-                                    inputResetToken = UUID()
-                                }
+                        )
+                        .padding(.vertical, 6)
+                        .overlay(alignment: .topLeading) {
+                            if text.isEmpty {
+                                Text(placeholder)
+                                    .font(EnsuTypography.message)
+                                    .foregroundStyle(Color(uiColor: .placeholderText))
+                                    .padding(.vertical, 6)
+                                    .allowsHitTesting(false)
+                                    .accessibilityHidden(true)
                             }
-                            .background(
-                                CursorEndSynchronizer(
-                                    token: moveCursorToEndToken,
-                                    text: text
-                                )
-                                .frame(width: 0, height: 0)
-                            )
+                        }
+                        .onChange(of: isFocused) { focused in
+                            if focused {
+                                onUserFocus()
+                            }
+                        }
 
                         if editingMessage == nil && supportsImageAttachments {
                             let canUseAttachment =
@@ -286,6 +278,7 @@ struct MessageInputView: View {
                                     .frame(width: 32, height: 32)
                             }
                         }
+                        .accessibilityLabel(isGenerating ? "Stop response" : "Send message")
                         .disabled(isDownloading || (!canSend && !isGenerating))
                     }
                     .padding(.horizontal, EnsuSpacing.inputHorizontal)
@@ -433,92 +426,5 @@ struct InputBarHeightKey: PreferenceKey {
 
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
-    }
-}
-
-private struct CursorEndSynchronizer: UIViewRepresentable {
-    let token: UUID
-    let text: String
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView(frame: .zero)
-        view.isUserInteractionEnabled = false
-        return view
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {
-        guard context.coordinator.lastToken != token else { return }
-        context.coordinator.lastToken = token
-
-        DispatchQueue.main.async {
-            Self.moveCursorToEnd(from: uiView, text: text)
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            Self.moveCursorToEnd(from: uiView, text: text)
-        }
-    }
-
-    private static func moveCursorToEnd(from view: UIView, text: String) {
-        var currentView: UIView? = view
-        while let candidate = currentView {
-            let inputs = candidate.cursorEndTextInputs()
-            let target =
-                inputs.first(where: { $0.isFirstResponder })
-                ?? inputs.first(where: { $0.cursorText == text })
-            if let target {
-                target.moveCursorToEnd()
-                return
-            }
-            currentView = candidate.superview
-        }
-    }
-
-    final class Coordinator {
-        var lastToken: UUID?
-    }
-}
-
-@MainActor
-private protocol CursorEndTextInput: AnyObject {
-    var cursorText: String { get }
-    var isFirstResponder: Bool { get }
-    func moveCursorToEnd()
-}
-
-extension UITextField: CursorEndTextInput {
-    var cursorText: String {
-        text ?? ""
-    }
-
-    func moveCursorToEnd() {
-        let end = endOfDocument
-        selectedTextRange = textRange(from: end, to: end)
-    }
-}
-
-extension UITextView: CursorEndTextInput {
-    var cursorText: String {
-        text ?? ""
-    }
-
-    func moveCursorToEnd() {
-        selectedRange = NSRange(location: (text as NSString).length, length: 0)
-    }
-}
-
-private extension UIView {
-    func cursorEndTextInputs() -> [CursorEndTextInput] {
-        var inputs: [CursorEndTextInput] = []
-        if let input = self as? CursorEndTextInput {
-            inputs.append(input)
-        }
-        for subview in subviews {
-            inputs.append(contentsOf: subview.cursorEndTextInputs())
-        }
-        return inputs
     }
 }
