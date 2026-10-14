@@ -79,38 +79,3 @@ export const visibleAlbumFilters = (collectionSummaries: CollectionSummary[]) =>
         }
         return collectionSummaries.some((cs) => matchesAlbumFilter(cs, value));
     });
-
-export type AlbumSearchRow =
-    | { type: "group"; filter: AlbumFilter }
-    | {
-          type: "collection";
-          filter: AlbumFilter;
-          collectionSummary: CollectionSummary;
-      };
-
-export const searchAlbumRows = (
-    collectionSummaries: CollectionSummary[],
-    query: string,
-): AlbumSearchRow[] => {
-    const search = query.trim().toLowerCase();
-    const matches = collectionSummaries.filter((cs) =>
-        cs.name.toLowerCase().includes(search),
-    );
-    return visibleAlbumFilters(collectionSummaries).flatMap<AlbumSearchRow>(
-        ({ value }) => {
-            const albums = matches.filter((cs) =>
-                matchesAlbumFilter(cs, value),
-            );
-            return albums.length
-                ? [
-                      { type: "group", filter: value },
-                      ...albums.map((collectionSummary): AlbumSearchRow => ({
-                          type: "collection",
-                          filter: value,
-                          collectionSummary,
-                      })),
-                  ]
-                : [];
-        },
-    );
-};

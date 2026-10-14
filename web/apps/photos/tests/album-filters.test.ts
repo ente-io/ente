@@ -5,7 +5,6 @@ import type {
 import { describe, expect, test } from "vitest";
 import {
     matchesAlbumFilter,
-    searchAlbumRows,
     visibleAlbumFilters,
     type AlbumFilter,
 } from "../src/utils/album-filters";
@@ -27,96 +26,6 @@ const album = (
 });
 
 describe("album filters shared by the dialog and sidebar", () => {
-    test("sidebar search trims its query and matches album names rather than group labels", () => {
-        const albums = [
-            { ...album(1), name: "Wedding favourites" },
-            { ...album(2), name: "Music" },
-        ];
-        expect(searchAlbumRows(albums, "  WEDDING  ")).toEqual([
-            { type: "group", filter: "ente" },
-            {
-                type: "collection",
-                filter: "ente",
-                collectionSummary: albums[0],
-            },
-        ]);
-        expect(searchAlbumRows(albums, "Shared")).toEqual([]);
-        expect(searchAlbumRows(albums, "missing")).toEqual([]);
-        expect(searchAlbumRows(albums, "   ")).toEqual(
-            searchAlbumRows(albums, ""),
-        );
-    });
-
-    test("sidebar search preserves group order, album order, and overlapping memberships", () => {
-        const albums = [
-            album(4, ["quickLink"]),
-            album(3, ["sharedIncoming"]),
-            album(2, ["sharedOutgoing"]),
-            album(1),
-        ];
-        const rows = searchAlbumRows(albums, "Album");
-        expect(
-            rows.map((row) =>
-                row.type == "group"
-                    ? row.filter
-                    : `${row.filter}:${row.collectionSummary.id}`,
-            ),
-        ).toEqual([
-            "ente",
-            "ente:3",
-            "ente:2",
-            "ente:1",
-            "shared",
-            "shared:2",
-            "received",
-            "received:3",
-            "links",
-            "links:4",
-        ]);
-        expect(albums.map(({ id }) => id)).toEqual([4, 3, 2, 1]);
-        expect(searchAlbumRows(albums, "4")).toEqual([
-            { type: "group", filter: "links" },
-            {
-                type: "collection",
-                filter: "links",
-                collectionSummary: albums[0],
-            },
-        ]);
-    });
-
-    test("sidebar search keeps full-list empty-album thresholds and collection eligibility", () => {
-        const albums = [album(1, [], 0), album(2, [], 0)];
-        expect(
-            searchAlbumRows(albums, "1").filter((row) => row.type == "group"),
-        ).toEqual([{ type: "group", filter: "ente" }]);
-        albums.push(
-            album(3, [], 0),
-            album(4, ["archived"]),
-            album(5, ["system"]),
-        );
-        expect(
-            searchAlbumRows(albums, "1").filter((row) => row.type == "group"),
-        ).toEqual([
-            { type: "group", filter: "ente" },
-            { type: "group", filter: "empty-albums" },
-        ]);
-        expect(searchAlbumRows(albums, "4")).toEqual([]);
-        expect(searchAlbumRows(albums, "5")).toEqual([]);
-    });
-
-    test("sidebar search reflects updated summaries and upstream sorting", () => {
-        const albums = [album(1), album(2)];
-        const ids = (summaries: CollectionSummary[]) =>
-            searchAlbumRows(summaries, "Album").flatMap((row) =>
-                row.type == "collection" ? [row.collectionSummary.id] : [],
-            );
-        expect(ids(albums)).toEqual([1, 2]);
-        expect(ids([...albums].reverse())).toEqual([2, 1]);
-        expect(ids([{ ...albums[0]!, name: "Renamed" }, albums[1]!])).toEqual([
-            2,
-        ]);
-    });
-
     test("Ente matches mobile membership, including shared, received, and empty albums", () => {
         const albums = [
             album(1),
