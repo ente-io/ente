@@ -14,12 +14,11 @@ enum _ViewerAction { download, openExternally }
 
 typedef _RenderedPdfPage = ({MemoryImage image, double aspectRatio});
 
-class DocumentViewerPage extends StatefulWidget {
-  const DocumentViewerPage({
+class PdfViewerPage extends StatefulWidget {
+  const PdfViewerPage({
     super.key,
     required this.localFile,
     required this.fileName,
-    required this.isPdf,
     required this.onOpenExternally,
     this.openPdf = pdf.PdfDocument.openFile,
     this.onDownload,
@@ -28,20 +27,18 @@ class DocumentViewerPage extends StatefulWidget {
 
   final File localFile;
   final String fileName;
-  final bool isPdf;
   final Future<void> Function(BuildContext) onOpenExternally;
   final Future<pdf.PdfDocument> Function(String) openPdf;
   final Future<void> Function(BuildContext)? onDownload;
   final Future<void> Function(BuildContext)? onShare;
 
   @override
-  State<DocumentViewerPage> createState() => _DocumentViewerPageState();
+  State<PdfViewerPage> createState() => _PdfViewerPageState();
 }
 
-class _DocumentViewerPageState extends State<DocumentViewerPage> {
-  static final _logger = Logger('DocumentViewerPage');
+class _PdfViewerPageState extends State<PdfViewerPage> {
+  static final _logger = Logger('PdfViewerPage');
   static const _maxImageDimension = 3072;
-  final _transformation = TransformationController();
   final _pdfTransformation = TransformationController();
   final _pdfContentKey = GlobalKey();
   final _pdfPage = ValueNotifier(1);
@@ -50,7 +47,6 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
   Size _pdfViewport = Size.zero;
   pdf.PdfDocument? _document;
   Future<void>? _pendingRender;
-  ImageProvider? _image;
   bool _loading = false;
   bool _failed = false;
   Completer<void>? _pdfInteraction;
@@ -108,18 +104,9 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.isPdf) {
-      _pdfTransformation.addListener(_updatePdfPage);
-      _loading = true;
-      _pendingRender = _openDocument();
-    } else {
-      _image = ResizeImage(
-        FileImage(widget.localFile),
-        width: _maxImageDimension,
-        height: _maxImageDimension,
-        policy: ResizeImagePolicy.fit,
-      );
-    }
+    _pdfTransformation.addListener(_updatePdfPage);
+    _loading = true;
+    _pendingRender = _openDocument();
   }
 
   Future<void> _openDocument() async {
@@ -213,8 +200,6 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
     _pdfInteraction?.complete();
     _pdfInteraction = null;
     unawaited(_closeDocument());
-    _image?.evict();
-    _transformation.dispose();
     _pdfTransformation.dispose();
     _pdfPage.dispose();
     super.dispose();
@@ -305,36 +290,7 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
                 ? const Center(child: CircularProgressIndicator())
                 : _failed
                 ? _buildError(context)
-                : widget.isPdf
-                ? _buildPdf(context)
-                : InteractiveViewer(
-                    transformationController: _transformation,
-                    minScale: 1,
-                    maxScale: 4,
-                    onInteractionUpdate: _onZoom,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        Spacing.lg,
-                        _toolbarHeight + Spacing.lg,
-                        Spacing.lg,
-                        Spacing.lg,
-                      ),
-                      child: SizedBox.expand(
-                        child: Image(
-                          image: _image!,
-                          fit: BoxFit.contain,
-                          frameBuilder: (_, child, frame, synchronous) =>
-                              synchronous || frame != null
-                              ? child
-                              : const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                          errorBuilder: (_, error, stack) =>
-                              _buildError(context),
-                        ),
-                      ),
-                    ),
-                  ),
+                : _buildPdf(context),
           ),
         ),
       ),

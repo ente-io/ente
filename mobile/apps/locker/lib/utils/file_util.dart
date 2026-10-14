@@ -19,8 +19,8 @@ import "package:locker/services/trash/models/trash_file.dart";
 import 'package:locker/ui/components/locker_progress_dialog.dart';
 import "package:locker/ui/pages/account_credentials_page.dart";
 import "package:locker/ui/pages/base_info_page.dart";
-import "package:locker/ui/pages/document_viewer_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
+import "package:locker/ui/pages/pdf_viewer_page.dart";
 import "package:locker/ui/pages/personal_note_page.dart";
 import "package:locker/ui/pages/physical_records_page.dart";
 import "package:locker/utils/bottom_sheet_illustration.dart";
@@ -408,18 +408,15 @@ class FileUtil {
       file,
       fallbackPath: localFile.path,
     ).toLowerCase();
-    final isPdf = extension == '.pdf';
-    final canPreview = isPdf
-        ? Platform.isAndroid || Platform.isIOS
-        : {'.png', '.jpg', '.jpeg'}.contains(extension);
-    if (!canPreview) return openExternally(context);
+    if (extension != '.pdf' || !(Platform.isAndroid || Platform.isIOS)) {
+      return openExternally(context);
+    }
 
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => DocumentViewerPage(
+        builder: (_) => PdfViewerPage(
           localFile: localFile,
           fileName: file.displayName,
-          isPdf: isPdf,
           onOpenExternally: openExternally,
           onDownload: (viewerContext) async {
             await downloadFile(viewerContext, file);
