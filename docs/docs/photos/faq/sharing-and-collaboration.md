@@ -407,22 +407,24 @@ Make sure you have sufficient storage available if you're expecting many people 
 
 ### Can I let others view a shared album without allowing download of the photos? {#disable-downloads-public-link}
 
-Yes. When creating or managing a public link, you can turn off downloads.
+You can hide Ente's download option for a public link. In the link settings, turn off **Download photos** on mobile or **Allow downloads** on web/desktop.
 
-Open the album, create or manage the public link, and disable **Allow downloads**.
+This is a viewer control, not copy protection. Anyone who can view the photos or videos may still save copies using browser features or external tools, take screenshots, or record their screen. Do not rely on this setting to prevent copying of the original files or their metadata.
 
-This lets people view the album through the link without showing them a download option.
+For a quick link on mobile, open **Albums**, tap the down-arrow, choose **Links**, open the link album, and tap the **link icon**. This opens **Link settings**, where you can turn off **Download photos**.
+
+See [Edit link settings](/photos/features/sharing-and-collaboration/public-links#edit-link-settings) for the other link types and platforms.
 
 ### Can I set limits on public links? {#link-limits}
 
-Yes! Public links (including collect links) support several protective features:
+Yes! Public links (including collect links) support these controls:
 
-- **Link expiry**: Set the link to automatically expire after a duration you define
-- **Device limits**: Limit how many devices can access the link (a "device" is identified by the combination of IP address and browser/app, so the same browser on a different network counts as a separate device)
-- **Password protection**: Add an additional password that users must enter to access the link
-- **Prevent downloads**: Disable the option to download original photos (though screenshots can't be prevented)
+- **Link expiry**: Set when the link stops working
+- **Device limits**: Limit access through the link. Different browsers or app access contexts can be counted separately, and using a phone that opened the link before does not guarantee continued access. See [device limits](/photos/features/sharing-and-collaboration/public-links#device-limits)
+- **Password protection**: Require a password before viewers can access the link
+- **Download control**: Hide Ente's download option. Viewers may still save copies with browser features or external tools, take screenshots, or record their screen
 
-These options help you maintain control over who can access and contribute to your shared albums.
+These settings help manage access to the link, but they cannot prevent someone who can view the content from copying it. See [download-control limitations](#disable-downloads-public-link).
 
 ### Can I stop people from adding more photos to a collect link? {#disable-collect-link}
 

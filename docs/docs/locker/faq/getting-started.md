@@ -44,6 +44,8 @@ Uploaded files are saved as separate Locker items. You can group them in a colle
 
 The Locker mobile app's **File** option is for selecting files.
 
+Uploading the same files again can create separate items. Locker does not currently detect duplicate uploads; see [how to handle duplicate files](/locker/faq/organization#locker-duplicate-uploads).
+
 ## Account
 
 ### How do I create a new Ente account? {#locker-create-account}
