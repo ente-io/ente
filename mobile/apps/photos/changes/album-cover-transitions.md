@@ -1,1 +1,1 @@
-- Fixed album cover transitions, header layout shifts, and flickering people filters.
+- Fixed album cover transitions, header layout shifts, and flickering people filters, with more room for the collapsed title.
