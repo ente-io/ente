@@ -2,6 +2,12 @@
     "name": "ensu",
     "version": "0.0.0",
     "private": true,
+    "browserslist": [
+        "chrome >= 111",
+        "edge >= 111",
+        "firefox >= 111",
+        "safari >= 15"
+    ],
     "dependencies": {
         "@hugeicons/core-free-icons": "4.3.5",
         "@hugeicons/react": "1.1.10",

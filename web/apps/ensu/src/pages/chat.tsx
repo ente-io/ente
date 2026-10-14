@@ -83,6 +83,7 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
+import { LoadingIndicator } from "ente-base/components/loaders";
 import { NavbarBase } from "ente-base/components/Navbar";
 import type { NotificationAttributes } from "ente-base/components/Notification";
 import { useBaseContext } from "ente-base/context";
@@ -1037,13 +1038,6 @@ const Page: React.FC = () => {
     useEffect(() => {
         if (typeof window === "undefined") return;
         let cancelled = false;
-        const isUnlocked =
-            window.localStorage.getItem(ADVANCED_SETTINGS_UNLOCK_KEY) === "1";
-        setAdvancedUnlocked(isUnlocked);
-        setSystemPrompt(
-            window.localStorage.getItem(SYSTEM_PROMPT_STORAGE_KEY)?.trim() ||
-                DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
-        );
 
         const applySettings = (parsed: {
             modelId?: string;
@@ -1072,6 +1066,17 @@ const Page: React.FC = () => {
         // Older builds persisted a model URL selection; llm_migrate_models
         // converts it to a model id once.
         const loadSettings = async () => {
+            // Storage access can throw (for example when WebKit denies it).
+            // Keep these reads inside the startup promise's error handler.
+            setAdvancedUnlocked(
+                window.localStorage.getItem(ADVANCED_SETTINGS_UNLOCK_KEY) ===
+                    "1",
+            );
+            setSystemPrompt(
+                window.localStorage
+                    .getItem(SYSTEM_PROMPT_STORAGE_KEY)
+                    ?.trim() || DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
+            );
             let raw = window.localStorage.getItem(MODEL_SETTINGS_STORAGE_KEY);
             if (!raw) {
                 // Settings from even older builds live in IndexedDB.
@@ -4539,7 +4544,7 @@ const Page: React.FC = () => {
         />
     );
 
-    if (loading || !modelSettingsLoaded) return <></>;
+    if (loading || !modelSettingsLoaded) return <LoadingIndicator />;
 
     return (
         <>
