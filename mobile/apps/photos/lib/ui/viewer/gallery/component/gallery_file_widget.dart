@@ -24,9 +24,27 @@ import "package:photos/ui/viewer/file/gallery_photo_page_route.dart";
 import "package:photos/ui/viewer/file/hero_image.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
+import "package:photos/ui/viewer/gallery/gallery_thumbnail_snapshot.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart";
+
+Color galleryFileSelectionColor(
+  BuildContext context,
+  EnteFile file,
+  int? currentUserID,
+) {
+  if (file.isUploaded &&
+      file.ownerID != null &&
+      file.ownerID != currentUserID) {
+    final owner = CollectionsService.instance.resolveUserIdentity(
+      file.ownerID!,
+      file.collectionID,
+    );
+    return getUserAvatarColor(context, owner);
+  }
+  return Colors.white;
+}
 
 class GalleryFileWidget extends StatefulWidget {
   final EnteFile file;
@@ -59,6 +77,27 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   int? _currentPointerId;
   bool _isPointerInside = false;
   late final StreamSubscription<FileUploadedEvent> _fileUploadedSubscription;
+  GalleryThumbnailSnapshots? _snapshots;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final snapshots = GalleryThumbnailSnapshotScope.of(context);
+    if (_snapshots != snapshots) {
+      _snapshots?.unregister(widget.file, context);
+      _snapshots = snapshots;
+      _snapshots?.register(widget.file, context);
+    }
+  }
+
+  @override
+  void didUpdateWidget(GalleryFileWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.file, widget.file)) {
+      _snapshots?.unregister(oldWidget.file, context);
+      _snapshots?.register(widget.file, context);
+    }
+  }
 
   @override
   void initState() {
@@ -79,6 +118,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   @override
   void dispose() {
+    _snapshots?.unregister(widget.file, context);
     _fileUploadedSubscription.cancel();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
@@ -109,17 +149,6 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   Widget _buildFileContent(BuildContext context) {
     final disableSelection =
         GalleryContextState.of(context)?.disableSelection ?? false;
-    Color selectionColor = Colors.white;
-    if (_isFileSelected &&
-        widget.file.isUploaded &&
-        widget.file.ownerID != null &&
-        widget.file.ownerID != widget.currentUserID) {
-      final owner = CollectionsService.instance.resolveUserIdentity(
-        widget.file.ownerID!,
-        widget.file.collectionID,
-      );
-      selectionColor = getUserAvatarColor(context, owner);
-    }
     final String heroTag = widget.tag + widget.file.tag;
     final isPhoto =
         widget.file.fileType == FileType.image ||
@@ -202,7 +231,11 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                   child: SelectAllStatusIcon(
                     isSelected: true,
                     size: 16,
-                    selectedFillColor: selectionColor,
+                    selectedFillColor: galleryFileSelectionColor(
+                      context,
+                      widget.file,
+                      widget.currentUserID,
+                    ),
                     selectedTickCutsOut: true,
                   ),
                 ),

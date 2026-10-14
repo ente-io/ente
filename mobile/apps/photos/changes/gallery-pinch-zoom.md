@@ -1,0 +1,1 @@
+- Added pinch gestures to switch between Justified and different grid sizes, including photo pickers.
