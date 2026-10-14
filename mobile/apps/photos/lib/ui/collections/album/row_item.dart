@@ -124,6 +124,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                               );
                               return Hero(
                                 tag: tagPrefix,
+                                createRectTween: (begin, end) =>
+                                    RectTween(begin: begin, end: end),
                                 transitionOnUserGestures: true,
                                 child: ClipSmoothRect(
                                   radius: SmoothBorderRadius(

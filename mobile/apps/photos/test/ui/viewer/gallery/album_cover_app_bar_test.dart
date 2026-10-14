@@ -128,7 +128,7 @@ void main() {
         );
       }
       final backIcon = tester.getRect(find.byIcon(Icons.arrow_back));
-      expect(backIcon.left, size.width >= 1024 ? padding.left + 28 : 28);
+      expect(backIcon.left, size.width >= 1024 ? padding.left + 24 : 24);
       final lastAction = tester.getRect(find.byType(IconButton).last);
       expect(
         lastAction.right,
@@ -142,6 +142,47 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(seconds: 1));
     }
+  });
+  testWidgets("keeps the title still when capture dates arrive", (
+    tester,
+  ) async {
+    final cover = EnteFile()..generatedID = 5;
+    ThumbnailInMemoryLruCache.put(cover, base64Decode(_onePixelPng));
+    final files = ValueNotifier<List<EnteFile>>([]);
+    addTearDown(files.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightThemeData,
+        home: ValueListenableBuilder<List<EnteFile>>(
+          valueListenable: files,
+          builder: (_, files, _) {
+            final header = _coverHeader(cover);
+            header.collection.pubMagicMetadata = CollectionPubMagicMetadata(
+              description:
+                  "An album description that wraps onto several lines.",
+            );
+            return GalleryFilesState(
+              child: Scaffold(body: CustomScrollView(slivers: [header])),
+            )..setGalleryFiles = files;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final title = find.byWidgetPredicate(
+      (widget) =>
+          widget is Text && widget.data == "Album" && widget.maxLines == 2,
+    );
+    final initialRect = tester.getRect(title);
+    files.value = [
+      EnteFile()..creationTime = DateTime(2024).microsecondsSinceEpoch,
+      EnteFile()..creationTime = DateTime(2026).microsecondsSinceEpoch,
+    ];
+    await tester.pumpAndSettle();
+    expect(find.text("2024 – 2026"), findsOneWidget);
+    expect(tester.getRect(title), initialRect);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
   });
   testWidgets("keeps one accessible title and restores status bar styles", (
     tester,
@@ -180,14 +221,32 @@ void main() {
     );
     await tester.pump();
     expect(iconBrightness.last, "Brightness.light");
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(CustomScrollView)),
+    );
+    final collapseExtent = AlbumCoverAppBar.resolveGeometry(
+      tester.element(find.byType(AlbumCoverAppBar)),
+      collapsedHeight: kToolbarHeight,
+      bottomHeight: 0,
+    ).collapseExtent;
+    await gesture.moveBy(Offset(0, -collapseExtent * 0.7));
+    await tester.pump(const Duration(seconds: 1));
+    final compactTitle = find.byWidgetPredicate(
+      (widget) =>
+          widget is Text && widget.data == "Album" && widget.maxLines == 1,
+    );
+    final titleOpacity = find
+        .ancestor(of: compactTitle, matching: find.byType(Opacity))
+        .first;
+    expect(tester.widget<Opacity>(titleOpacity).opacity, 1);
+    await gesture.up();
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel(RegExp(r"^Album$")), findsOneWidget);
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel(RegExp(r"^Album$")), findsOneWidget);
     expect(iconBrightness.last, "Brightness.dark");
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, 500));
+    tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0);
     await tester.pumpAndSettle();
 
     final context = tester.element(find.byType(Scaffold));

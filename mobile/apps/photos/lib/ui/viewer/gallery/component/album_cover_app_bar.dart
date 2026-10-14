@@ -3,6 +3,7 @@ import "dart:ui" as ui;
 
 import "package:ente_components/ente_components.dart";
 import "package:figma_squircle/figma_squircle.dart";
+import "package:flutter/foundation.dart" show ValueListenable;
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
@@ -16,6 +17,7 @@ import "package:photos/services/app_navigation_service.dart";
 import "package:photos/ui/viewer/file/file_icons_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 
 class AlbumCoverAppBar extends StatefulWidget {
   const AlbumCoverAppBar({
@@ -58,6 +60,9 @@ class AlbumCoverAppBar extends StatefulWidget {
 }
 
 class _AlbumCoverAppBarState extends State<AlbumCoverAppBar> with RouteAware {
+  final _coverPhotoKey = GlobalKey();
+  final _coverForegroundKey = GlobalKey();
+  final _coverForegroundNotifier = _CoverForegroundNotifier();
   late SystemUiOverlayStyle _pinnedOverlayStyle;
   bool _isCovered = false;
 
@@ -89,6 +94,7 @@ class _AlbumCoverAppBarState extends State<AlbumCoverAppBar> with RouteAware {
   @override
   void dispose() {
     AppNavigationService.instance.routeObserver.unsubscribe(this);
+    _coverForegroundNotifier.dispose();
     SystemChrome.setSystemUIOverlayStyle(_pinnedOverlayStyle);
     WidgetsBinding.instance.scheduleFrame();
     super.dispose();
@@ -99,18 +105,16 @@ class _AlbumCoverAppBarState extends State<AlbumCoverAppBar> with RouteAware {
     final colors = context.componentColors;
     final bottomHeight = widget.bottom?.preferredSize.height ?? 0;
     final description = widget.collection.displayDescription;
-    final animation = MediaQuery.disableAnimationsOf(context)
-        ? kAlwaysCompleteAnimation
-        : ModalRoute.of(context)?.animation ?? kAlwaysCompleteAnimation;
+    final geometry = AlbumCoverAppBar.resolveGeometry(
+      context,
+      collapsedHeight: widget.collapsedHeight,
+      bottomHeight: bottomHeight,
+    );
 
     return SliverPersistentHeader(
       pinned: true,
       delegate: _AlbumCoverDelegate(
-        geometry: AlbumCoverAppBar.resolveGeometry(
-          context,
-          collapsedHeight: widget.collapsedHeight,
-          bottomHeight: bottomHeight,
-        ),
+        geometry: geometry,
         topPadding: MediaQuery.paddingOf(context).top,
         collapsedHeight: widget.collapsedHeight,
         bottomHeight: bottomHeight,
@@ -121,11 +125,16 @@ class _AlbumCoverAppBarState extends State<AlbumCoverAppBar> with RouteAware {
         title: widget.title,
         actionsBuilder: widget.actionsBuilder,
         bottom: widget.bottom,
-        photo: _CoverPhoto(
+        foregroundKey: _coverForegroundKey,
+        photoBuilder: (foreground, collapseOffset) => _CoverPhoto(
+          photoKey: _coverPhotoKey,
+          foreground: foreground,
+          foregroundNotifier: _coverForegroundNotifier,
+          collapseOffset: collapseOffset,
+          imageBottomInset: _coverBottomInset(bottomHeight) - 1,
           cover: widget.cover,
           backgroundColor: widget.backgroundColor,
           heroTag: widget.heroTag,
-          contentOpacity: animation,
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -214,21 +223,52 @@ class AlbumCoverActionButton extends StatelessWidget {
   }
 }
 
+class _CoverForegroundNotifier extends ValueNotifier<Widget> {
+  _CoverForegroundNotifier() : super(const SizedBox.shrink());
+
+  void update(Widget foreground, BuildContext context) {
+    if (hasListeners) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) value = foreground;
+      });
+    } else {
+      value = foreground;
+    }
+  }
+}
+
 class _CoverPhoto extends StatelessWidget {
   const _CoverPhoto({
+    required this.photoKey,
+    required this.foreground,
+    required this.foregroundNotifier,
+    required this.collapseOffset,
+    required this.imageBottomInset,
     required this.cover,
     required this.backgroundColor,
     this.heroTag,
-    required this.contentOpacity,
   });
 
-  final Animation<double> contentOpacity;
+  final GlobalKey photoKey;
+  final Widget foreground;
+  final _CoverForegroundNotifier foregroundNotifier;
+  final double collapseOffset;
+  final double imageBottomInset;
   final EnteFile cover;
   final Color backgroundColor;
   final String? heroTag;
 
   @override
   Widget build(BuildContext context) {
+    final filterData = InheritedSearchFilterData.maybeOf(context);
+    final contextualForeground = MediaQuery(
+      data: MediaQuery.of(context),
+      child: InheritedSearchFilterData(
+        searchFilterDataProvider: filterData?.searchFilterDataProvider,
+        child: foreground,
+      ),
+    );
+    foregroundNotifier.update(contextualForeground, context);
     final thumbnail = ThumbnailWidget(
       cover,
       rawThumbnail: true,
@@ -236,25 +276,46 @@ class _CoverPhoto extends StatelessWidget {
       useRequestedThumbnailSizeForLocalCache: true,
       useCachedThumbnailAsPlaceholder: true,
     );
-    final photo = Stack(
+    final background = Stack(
+      key: photoKey,
       fit: StackFit.expand,
       clipBehavior: Clip.none,
       children: [
-        thumbnail,
-        _CoverPhotoScrims(backgroundColor: backgroundColor),
+        Positioned(
+          top: -collapseOffset,
+          left: 0,
+          right: 0,
+          bottom: imageBottomInset,
+          child: Stack(
+            fit: StackFit.expand,
+            clipBehavior: Clip.none,
+            children: [
+              thumbnail,
+              _CoverPhotoScrims(backgroundColor: backgroundColor),
+            ],
+          ),
+        ),
       ],
     );
-    if (heroTag == null) {
+    final photo = Stack(
+      fit: StackFit.expand,
+      clipBehavior: Clip.none,
+      children: [background, contextualForeground],
+    );
+    if (heroTag == null || MediaQuery.disableAnimationsOf(context)) {
       return photo;
     }
     const motionCurve = Curves.easeInOut;
     return Hero(
       tag: heroTag!,
+      createRectTween: (begin, end) => RectTween(begin: begin, end: end),
       curve: motionCurve,
       reverseCurve: motionCurve,
       transitionOnUserGestures: true,
-      placeholderBuilder: (context, size, child) =>
-          SizedBox.fromSize(size: size, child: child),
+      placeholderBuilder: (context, size, child) => SizedBox.fromSize(
+        size: size,
+        child: Offstage(child: background),
+      ),
       flightShuttleBuilder:
           (
             flightContext,
@@ -303,13 +364,17 @@ class _CoverPhoto extends StatelessWidget {
             } else {
               cardRadius = SmoothBorderRadius.zero;
             }
-            final image =
-                _heroImage(fromHeroContext) ?? _heroImage(cardContext);
+            final image = flightDirection == HeroFlightDirection.push
+                ? _heroImage(cardContext) ?? _heroImage(photoKey.currentContext)
+                : _heroImage(photoKey.currentContext) ??
+                      _heroImage(cardContext);
             return _CoverHeroFlight(
               animation: (ModalRoute.of(coverContext)! as PageRoute).animation!
                   .drive(CurveTween(curve: motionCurve)),
               image: image?.image,
-              contentOpacity: contentOpacity,
+              foreground: foregroundNotifier,
+              coverSize: (coverContext.findRenderObject()! as RenderBox).size,
+              imageBottomInset: imageBottomInset,
               card: card,
               showVideoIcon: cover.fileType == FileType.video,
               cardRadius: cardRadius,
@@ -321,7 +386,7 @@ class _CoverPhoto extends StatelessWidget {
   }
 }
 
-RenderImage? _heroImage(BuildContext context) {
+RenderImage? _heroImage(BuildContext? context) {
   RenderImage? image;
   void visit(RenderObject renderObject) {
     if (renderObject is RenderImage && renderObject.image != null) {
@@ -331,7 +396,7 @@ RenderImage? _heroImage(BuildContext context) {
     }
   }
 
-  final renderObject = context.findRenderObject();
+  final renderObject = context?.findRenderObject();
   if (renderObject != null) {
     visit(renderObject);
   }
@@ -341,8 +406,10 @@ RenderImage? _heroImage(BuildContext context) {
 class _CoverHeroFlight extends StatefulWidget {
   const _CoverHeroFlight({
     required this.animation,
-    required this.contentOpacity,
     required this.image,
+    required this.foreground,
+    required this.coverSize,
+    required this.imageBottomInset,
     required this.card,
     required this.showVideoIcon,
     required this.cardRadius,
@@ -350,8 +417,10 @@ class _CoverHeroFlight extends StatefulWidget {
   });
 
   final Animation<double> animation;
-  final Animation<double> contentOpacity;
   final ui.Image? image;
+  final ValueListenable<Widget> foreground;
+  final Size coverSize;
+  final double imageBottomInset;
   final Widget card;
   final bool showVideoIcon;
   final SmoothBorderRadius cardRadius;
@@ -372,35 +441,73 @@ class _CoverHeroFlightState extends State<_CoverHeroFlight> {
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: ReverseAnimation(widget.contentOpacity),
-      child: AnimatedBuilder(
-        animation: widget.animation,
+    final foreground = FadeTransition(
+      opacity: widget.animation.drive(
+        CurveTween(curve: const Interval(0.35, 1, curve: Curves.easeOut)),
+      ),
+      child: FittedBox(
+        fit: BoxFit.fill,
+        child: SizedBox.fromSize(
+          size: widget.coverSize,
+          child: RepaintBoundary(
+            child: Material(
+              type: MaterialType.transparency,
+              child: ValueListenableBuilder<Widget>(
+                valueListenable: widget.foreground,
+                builder: (_, foreground, _) => foreground,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    return AnimatedBuilder(
+      animation: widget.animation,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (_image != null)
+            RawImage(image: _image, fit: BoxFit.cover)
+          else
+            widget.card,
+          if (_image != null && widget.showVideoIcon)
+            FadeTransition(
+              opacity: ReverseAnimation(widget.animation),
+              child: const VideoOverlayIcon(),
+            ),
+          FadeTransition(
+            opacity: widget.animation,
+            child: _CoverPhotoScrims(backgroundColor: widget.backgroundColor),
+          ),
+        ],
+      ),
+      builder: (context, child) => ClipSmoothRect(
+        radius: SmoothBorderRadius.lerp(
+          widget.cardRadius,
+          SmoothBorderRadius.zero,
+          widget.animation.value,
+        )!,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (_image != null)
-              RawImage(image: _image, fit: BoxFit.cover)
-            else
-              widget.card,
-            if (_image != null && widget.showVideoIcon)
-              FadeTransition(
-                opacity: ReverseAnimation(widget.animation),
-                child: const VideoOverlayIcon(),
-              ),
-            FadeTransition(
-              opacity: widget.animation,
-              child: _CoverPhotoScrims(backgroundColor: widget.backgroundColor),
+            Positioned.fill(
+              bottom: widget.imageBottomInset * widget.animation.value,
+              child: child!,
             ),
+            if (widget.imageBottomInset > 0)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: widget.imageBottomInset * widget.animation.value,
+                child: ColoredBox(
+                  color: widget.backgroundColor.withValues(
+                    alpha: widget.animation.value,
+                  ),
+                ),
+              ),
+            foreground,
           ],
-        ),
-        builder: (context, child) => ClipSmoothRect(
-          radius: SmoothBorderRadius.lerp(
-            widget.cardRadius,
-            SmoothBorderRadius.zero,
-            widget.animation.value,
-          )!,
-          child: child!,
         ),
       ),
     );
@@ -530,8 +637,19 @@ class _CoverCaption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateRange = this.dateRange;
+    final style = TextStyles.tiny.copyWith(
+      color: context.componentColors.specialWhite.withValues(alpha: 0.82),
+    );
     if (dateRange == null) {
-      return const SizedBox.shrink();
+      return ExcludeSemantics(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: _contentSpacing),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
+            child: Text(" ", style: style),
+          ),
+        ),
+      );
     }
     final start = DateTime.fromMicrosecondsSinceEpoch(dateRange.oldest);
     final end = DateTime.fromMicrosecondsSinceEpoch(dateRange.newest);
@@ -572,9 +690,6 @@ class _CoverCaption extends StatelessWidget {
     final captions = end.year - start.year >= 2
         ? [yearRange]
         : [dayRange, monthRange, yearRange];
-    final style = TextStyles.tiny.copyWith(
-      color: context.componentColors.specialWhite.withValues(alpha: 0.82),
-    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -625,7 +740,8 @@ class _AlbumCoverDelegate extends SliverPersistentHeaderDelegate {
     required this.title,
     required this.actionsBuilder,
     required this.bottom,
-    required this.photo,
+    required this.foregroundKey,
+    required this.photoBuilder,
     required this.content,
   });
 
@@ -640,7 +756,8 @@ class _AlbumCoverDelegate extends SliverPersistentHeaderDelegate {
   final String title;
   final List<Widget> Function(Color foregroundColor) actionsBuilder;
   final PreferredSizeWidget? bottom;
-  final Widget photo;
+  final GlobalKey foregroundKey;
+  final Widget Function(Widget foreground, double collapseOffset) photoBuilder;
   final Widget content;
 
   @override
@@ -660,15 +777,22 @@ class _AlbumCoverDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     final collapseOffset = math.min(shrinkOffset, geometry.collapseExtent);
+    final collapseProgress = collapseOffset / geometry.collapseExtent;
+    final toolbarInset = ui.lerpDouble(
+      Spacing.md,
+      Spacing.xs,
+      collapseProgress,
+    )!;
     final pinnedProgress =
-        ((collapseOffset / geometry.collapseExtent - _pinnedFadeStart) /
-                (1 - _pinnedFadeStart))
-            .clamp(0.0, 1.0);
-    final contentOpacity = (1 - collapseOffset / _contentFadeExtent).clamp(
+        ((collapseProgress - _pinnedFadeStart) / (1 - _pinnedFadeStart)).clamp(
+          0.0,
+          1.0,
+        );
+    final contentOpacity = (1 - collapseProgress / _pinnedFadeStart).clamp(
       0.0,
       1.0,
     );
-    final titleOpacity = (1 - contentOpacity * 2).clamp(0.0, 1.0);
+    final titleOpacity = contentOpacity == 0 ? 1.0 : 0.0;
     final foregroundColor = Color.lerp(
       colors.specialWhite,
       colors.textBase,
@@ -679,6 +803,128 @@ class _AlbumCoverDelegate extends SliverPersistentHeaderDelegate {
     final coverBottomInset = _coverBottomInset(bottomHeight);
     final respectRightInset = Theme.of(context).platform != TargetPlatform.iOS;
 
+    final foreground = Stack(
+      key: foregroundKey,
+      fit: StackFit.expand,
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: topPadding + _topScrimHeight,
+          child: const IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [_scrimColor, _transparentScrimColor],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (contentOpacity > 0)
+          Positioned(
+            top: topPadding + collapsedHeight,
+            left: Spacing.lg,
+            right: Spacing.lg,
+            bottom: coverBottomInset + collapsedHeight,
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              child: LayoutBuilder(
+                builder: (context, constraints) => Opacity(
+                  opacity: contentOpacity,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: constraints.maxWidth,
+                      child: content,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (pinnedProgress > 0)
+          Positioned.fill(
+            child: ColoredBox(
+              color: backgroundColor.withValues(alpha: pinnedProgress),
+            ),
+          ),
+        Positioned(
+          top:
+              topPadding +
+              (Spacing.lg - (collapsedHeight - _compactHeaderControlSize) / 2) *
+                  (1 - pinnedProgress),
+          left: toolbarInset,
+          right: toolbarInset,
+          height: collapsedHeight,
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            left: false,
+            right: respectRightInset,
+            child: Row(
+              spacing: Spacing.md,
+              children: [
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                  icon: const Icon(Icons.arrow_back),
+                  color: foregroundColor,
+                  iconSize: IconSizes.medium,
+                  onPressed: () => Navigator.maybePop(context),
+                ),
+                Expanded(
+                  child: ExcludeSemantics(
+                    excluding: contentOpacity > 0,
+                    child: Opacity(
+                      opacity: titleOpacity,
+                      alwaysIncludeSemantics: true,
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyles.display3.copyWith(
+                          color: foregroundColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: ui.lerpDouble(
+                    _headerActionSpacing,
+                    2.0,
+                    collapseProgress,
+                  )!,
+                  children: actionsBuilder(foregroundColor),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (bottom != null)
+          Positioned(
+            key: const ValueKey("album_cover_bottom"),
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: bottomHeight,
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              left: false,
+              right: respectRightInset,
+              child: bottom!,
+            ),
+          ),
+      ],
+    );
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: pinnedProgress < 0.5 && !isCovered
           ? _coverOverlayStyle
@@ -686,125 +932,12 @@ class _AlbumCoverDelegate extends SliverPersistentHeaderDelegate {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Positioned(
-            top: -collapseOffset,
-            left: 0,
-            right: 0,
-            bottom: coverBottomInset - 1,
-            child: HeroMode(enabled: collapseOffset == 0, child: photo),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: topPadding + _topScrimHeight,
-            child: const IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [_scrimColor, _transparentScrimColor],
-                  ),
-                ),
-              ),
+          Positioned.fill(
+            child: HeroMode(
+              enabled: collapseOffset == 0,
+              child: photoBuilder(foreground, collapseOffset),
             ),
           ),
-          if (contentOpacity > 0)
-            Positioned(
-              top: topPadding + collapsedHeight,
-              left: Spacing.lg,
-              right: Spacing.lg,
-              bottom: coverBottomInset + collapsedHeight,
-              child: SafeArea(
-                top: false,
-                bottom: false,
-                child: LayoutBuilder(
-                  builder: (context, constraints) => Opacity(
-                    opacity: contentOpacity,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        width: constraints.maxWidth,
-                        child: content,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          if (pinnedProgress > 0)
-            Positioned.fill(
-              child: ColoredBox(
-                color: backgroundColor.withValues(alpha: pinnedProgress),
-              ),
-            ),
-          Positioned(
-            top:
-                topPadding +
-                (Spacing.lg -
-                        (collapsedHeight - _compactHeaderControlSize) / 2) *
-                    (1 - pinnedProgress),
-            left: Spacing.lg,
-            right: Spacing.lg,
-            height: collapsedHeight,
-            child: SafeArea(
-              top: false,
-              bottom: false,
-              left: false,
-              right: respectRightInset,
-              child: Row(
-                spacing: Spacing.md,
-                children: [
-                  IconButton(
-                    tooltip: MaterialLocalizations.of(
-                      context,
-                    ).backButtonTooltip,
-                    icon: const Icon(Icons.arrow_back),
-                    color: foregroundColor,
-                    iconSize: IconSizes.medium,
-                    onPressed: () => Navigator.maybePop(context),
-                  ),
-                  Expanded(
-                    child: ExcludeSemantics(
-                      excluding: contentOpacity > 0,
-                      child: Opacity(
-                        opacity: titleOpacity,
-                        child: Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyles.display3.copyWith(
-                            color: foregroundColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: _headerActionSpacing,
-                    children: actionsBuilder(foregroundColor),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (bottom != null)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: bottomHeight,
-              child: SafeArea(
-                top: false,
-                bottom: false,
-                left: false,
-                right: respectRightInset,
-                child: bottom!,
-              ),
-            ),
         ],
       ),
     );
@@ -829,7 +962,6 @@ const _contentScrimHeight = 157.0;
 const _contentScrimBlur = 54.25;
 const _compactHeaderControlSize = 38.0;
 const _headerActionSpacing = 6.0;
-const _contentFadeExtent = 120.0;
 const _pinnedFadeStart = 0.6;
 const _foregroundSwitchStart = 0.4;
 const _foregroundSwitchEnd = 0.6;

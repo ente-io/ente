@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:io";
 
+import "package:ente_components/ente_components.dart" show AppBarCollapseSpacer;
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:ente_ui/components/loading_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -1006,6 +1007,9 @@ class GalleryState extends State<Gallery> {
         return box is RenderBox && box.hasSize ? box.size.height : 0;
       },
       appBarHeight: appBarPinnedHeight,
+      minimumScrollRange: (widget.appBar?.extendBodyForCollapse ?? false)
+          ? appBarCollapseExtent
+          : 0,
       pinHeaders: !widget.disablePinnedGroupHeader,
       enabled:
           !widget.disableScroll &&
@@ -1120,6 +1124,11 @@ class GalleryState extends State<Gallery> {
                                       child: widget.footer,
                                     ),
                                   ),
+                                  if (widget.appBar?.extendBodyForCollapse ??
+                                      false)
+                                    AppBarCollapseSpacer(
+                                      collapseExtent: appBarCollapseExtent,
+                                    ),
                                 ],
                               ),
                             );
@@ -1176,6 +1185,12 @@ class _GalleryAppBarScrollBody extends StatelessWidget {
       slivers: [
         appBarConfig.buildSliver(context),
         SliverFillRemaining(hasScrollBody: false, child: child),
+        if (appBarConfig.extendBodyForCollapse)
+          AppBarCollapseSpacer(
+            collapseExtent: appBarConfig
+                .resolveGeometry(context)
+                .collapseExtent,
+          ),
       ],
     );
   }
