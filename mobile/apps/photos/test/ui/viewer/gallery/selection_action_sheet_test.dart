@@ -282,6 +282,7 @@ Future<void> _pumpSheet(
                       ],
                     ),
                   SelectionActionSheet(
+                    backgroundScrollController: gallery,
                     selectionControls: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Row(

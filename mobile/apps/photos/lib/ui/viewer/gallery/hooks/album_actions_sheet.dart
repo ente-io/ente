@@ -36,8 +36,8 @@ Future<T?> showAlbumActionsSheet<T>(
               final gridWidth = constraints.maxWidth - Spacing.md * 2;
               final minTileWidth =
                   64 *
-                  media.textScaler.scale(TextStyles.body.fontSize!) /
-                  TextStyles.body.fontSize!;
+                  media.textScaler.scale(TextStyles.mini.fontSize!) /
+                  TextStyles.mini.fontSize!;
               final columns = gridWidth >= minTileWidth * 4 + Spacing.xs * 3
                   ? 4
                   : 2;
@@ -263,7 +263,7 @@ class _AlbumActionTile<T> extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: TextStyles.body.copyWith(color: foreground),
+                  style: TextStyles.mini.copyWith(color: foreground),
                 ),
               ],
             ),
@@ -305,7 +305,7 @@ class _AlbumActionRow<T> extends StatelessWidget {
                     option.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyles.body.copyWith(
+                    style: TextStyles.mini.copyWith(
                       color: option.labelColor ?? colors.textBase,
                     ),
                   ),

@@ -1,0 +1,1 @@
+- Refreshed album selection with the shared expandable sheet and consistent action labels.
