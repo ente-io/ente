@@ -394,8 +394,16 @@ const ConversationListItem: React.FC<{
                     <Box
                         component="button"
                         type="button"
-                        aria-label={`Open ${name}'s profile`}
-                        onClick={() => onOpenFriendProfile(conversation.friend)}
+                        aria-label={
+                            showPostThumbnailSlot
+                                ? `Open conversation with ${name}`
+                                : `Open ${name}'s profile`
+                        }
+                        onClick={() =>
+                            showPostThumbnailSlot
+                                ? onOpenThread(conversation)
+                                : onOpenFriendProfile(conversation.friend)
+                        }
                         sx={{
                             appearance: "none",
                             bgcolor: "transparent",
@@ -413,29 +421,10 @@ const ConversationListItem: React.FC<{
                         }}
                     >
                         {showPostThumbnailSlot ? (
-                            <>
-                                <SpacePostPreviewThumbnail
-                                    borderRadius="28%"
-                                    post={activityPost ?? post}
-                                />
-                                <Box
-                                    sx={{
-                                        bgcolor: spaceAppBackgroundColor,
-                                        borderRadius: "50%",
-                                        bottom: -2,
-                                        boxShadow: `0 0 0 2px ${spaceAppBackgroundColor}`,
-                                        position: "absolute",
-                                        right: -2,
-                                    }}
-                                >
-                                    <Avatar
-                                        avatarUrl={
-                                            conversation.friend.avatarUrl
-                                        }
-                                        size={20}
-                                    />
-                                </Box>
-                            </>
+                            <SpacePostPreviewThumbnail
+                                borderRadius="28%"
+                                post={activityPost ?? post}
+                            />
                         ) : (
                             <Avatar
                                 avatarUrl={conversation.friend.avatarUrl}
@@ -443,6 +432,37 @@ const ConversationListItem: React.FC<{
                             />
                         )}
                     </Box>
+                    {showPostThumbnailSlot && (
+                        <Box
+                            component="button"
+                            type="button"
+                            aria-label={`Open ${name}'s profile`}
+                            onClick={() =>
+                                onOpenFriendProfile(conversation.friend)
+                            }
+                            sx={{
+                                appearance: "none",
+                                bgcolor: spaceAppBackgroundColor,
+                                border: 0,
+                                borderRadius: "50%",
+                                bottom: -4,
+                                cursor: "pointer",
+                                display: "block",
+                                p: "2px",
+                                position: "absolute",
+                                right: -4,
+                                "&:focus-visible": {
+                                    outline: `2px solid ${green}`,
+                                    outlineOffset: 2,
+                                },
+                            }}
+                        >
+                            <Avatar
+                                avatarUrl={conversation.friend.avatarUrl}
+                                size={20}
+                            />
+                        </Box>
+                    )}
                 </Box>
                 <Box
                     component="button"
