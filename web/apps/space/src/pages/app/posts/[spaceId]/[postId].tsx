@@ -166,6 +166,7 @@ const Page: React.FC = () => {
             <SpaceRouteFallback
                 background={spaceAppBackgroundColor}
                 message={postLoadError || profileLoadError}
+                onBack={closePost}
             />
         );
     }
@@ -175,6 +176,7 @@ const Page: React.FC = () => {
             <SpaceRouteFallback
                 background={spaceAppBackgroundColor}
                 message={postLoadError || profileLoadError}
+                onBack={closePost}
             />
         );
     }
@@ -194,6 +196,7 @@ const Page: React.FC = () => {
             <SpaceRouteFallback
                 background={spaceAppBackgroundColor}
                 message="Photo unavailable."
+                onBack={closePost}
             />
         );
     }

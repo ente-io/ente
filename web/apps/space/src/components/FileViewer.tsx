@@ -124,10 +124,7 @@ const postButtonSpin = keyframes`
 `;
 
 export type SpaceViewerPostActionMode =
-    | "draft-post"
-    | "hidden"
-    | "like-only"
-    | "likes";
+    "draft-post" | "hidden" | "like-only" | "likes";
 
 interface SpaceViewerPostActionConfig {
     showLikeButton: boolean;
@@ -1427,8 +1424,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         if (document.documentElement.hasAttribute("data-space-ios-pwa"))
             headerObserver.observe(viewerHeaderRef.current!);
         let swipeStart:
-            | { x: number; y: number; photoIndex: number }
-            | undefined;
+            { x: number; y: number; photoIndex: number } | undefined;
 
         const loadPhotoSwipe = import("photoswipe");
         void loadPhotoSwipe.catch((error: unknown) => {

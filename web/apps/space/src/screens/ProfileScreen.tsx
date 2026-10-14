@@ -578,9 +578,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 setIsInviteLinkCopied(true);
             }
         } catch (error) {
-            if (
-                !(error instanceof DOMException && error.name == "AbortError")
-            ) {
+            if (!(
+                error instanceof DOMException && error.name == "AbortError"
+            )) {
                 log.warn("Failed to share Space invite link", error);
             }
         }

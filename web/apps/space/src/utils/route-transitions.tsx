@@ -56,8 +56,7 @@ const initializeRouteHistory = (router: NextRouter) => {
         __N: boolean;
     };
     const navigation = performance.getEntriesByType("navigation")[0] as
-        | PerformanceNavigationTiming
-        | undefined;
+        PerformanceNavigationTiming | undefined;
     if (navigation?.type == "reload") {
         try {
             const saved = JSON.parse(
