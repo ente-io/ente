@@ -1508,14 +1508,22 @@
       }
     }
   },
-  "memoryLaneCaptionNow": "{name} now",
+  "memoryLaneCaptionNow": "{name} {now}",
   "@memoryLaneCaptionNow": {
-    "description": "Memory Lane caption for a photo taken less than a year ago, without a number.",
+    "description": "Memory Lane caption for a photo taken less than a year ago, without a number. Keep both placeholders in the natural word order for your language.",
     "placeholders": {
       "name": {
         "type": "String"
+      },
+      "now": {
+        "type": "String",
+        "description": "The localized word for now, rendered in a handwritten style. Keep this placeholder rather than writing the word directly."
       }
     }
+  },
+  "memoryLaneNow": "now",
+  "@memoryLaneNow": {
+    "description": "The current moment in a Memory Lane caption, such as Ashil now. This word is styled separately from the person's name."
   },
   "facesTimelinePlaybackPause": "Pause",
   "@facesTimelinePlaybackPause": {

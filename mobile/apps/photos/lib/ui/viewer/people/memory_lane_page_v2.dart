@@ -9,7 +9,7 @@ import "package:ente_strings/ente_strings.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart" show SystemUiOverlayStyle;
 import "package:hugeicons/hugeicons.dart";
-import "package:intl/intl.dart" show DateFormat, NumberFormat;
+import "package:intl/intl.dart" show DateFormat;
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/models/file/file.dart";
@@ -25,6 +25,7 @@ import "package:photos/ui/home/memories/memory_music_session.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/home/memories/memory_viewer_constants.dart";
 import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
+import "package:photos/ui/viewer/people/memory_lane_caption.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 import "package:photos/utils/share_util.dart";
@@ -391,7 +392,10 @@ class _MemoryLanePageV2State extends State<MemoryLanePageV2> {
         final creationDate = creationTime == null
             ? null
             : DateTime.fromMicrosecondsSinceEpoch(creationTime);
-        const captionPlaceholder = "\uFFFC";
+        const captionPlaceholder = MemoryLaneCaption.timePlaceholder;
+        final captionName = name == null || name.isEmpty
+            ? ""
+            : MemoryLaneCaption.namePlaceholder;
         int? captionValue;
         String? caption;
         if (creationDate != null) {
@@ -413,17 +417,18 @@ class _MemoryLanePageV2State extends State<MemoryLanePageV2> {
           if (months >= 12) {
             captionValue = months ~/ 12;
             caption = context.strings.memoryLaneCaptionYearsAgo(
-              name: name ?? "",
+              name: captionName,
               count: captionValue,
               number: captionPlaceholder,
             );
           } else {
-            caption = context.strings.memoryLaneCaptionNow(name: name ?? "");
+            caption = context.strings.memoryLaneCaptionNow(
+              name: captionName,
+              now: captionPlaceholder,
+            );
           }
           caption = caption.trim();
         }
-        final captionParts =
-            caption?.split(captionPlaceholder) ?? const <String>[];
         return Stack(
           children: [
             Positioned.fill(
@@ -758,34 +763,10 @@ class _MemoryLanePageV2State extends State<MemoryLanePageV2> {
                               constraints: const BoxConstraints(minHeight: 48),
                               child: Align(
                                 alignment: Alignment.bottomCenter,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.baseline,
-                                  textBaseline: TextBaseline.alphabetic,
-                                  spacing: screenSize.width * 0.02,
-                                  children: [
-                                    for (
-                                      var index = 0;
-                                      index < captionParts.length;
-                                      index++
-                                    ) ...[
-                                      if (index > 0 && captionValue != null)
-                                        _MemoryLaneAnimatedDigit(
-                                          value: captionValue,
-                                        ),
-                                      Flexible(
-                                        child: Text(
-                                          captionParts[index],
-                                          style: darkTheme.textTheme.bodyMuted,
-                                          textAlign: TextAlign.center,
-                                          softWrap: false,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
+                                child: MemoryLaneCaption(
+                                  caption: caption,
+                                  name: name ?? "",
+                                  value: captionValue,
                                 ),
                               ),
                             ),
@@ -985,125 +966,6 @@ class _MemoryLanePageV2State extends State<MemoryLanePageV2> {
   Future<void> _onDateTap(EnteFile file) async {
     await _runWithViewerPaused(
       () => routeToPage(context, JumpToDateGallery(fileToJumpTo: file)),
-    );
-  }
-}
-
-class _MemoryLaneAnimatedDigit extends StatefulWidget {
-  const _MemoryLaneAnimatedDigit({required this.value}) : assert(value >= 0);
-
-  final int value;
-
-  @override
-  State<_MemoryLaneAnimatedDigit> createState() =>
-      _MemoryLaneAnimatedDigitState();
-}
-
-class _MemoryLaneAnimatedDigitState extends State<_MemoryLaneAnimatedDigit>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late int _previousValue;
-
-  @override
-  void initState() {
-    super.initState();
-    _previousValue = widget.value;
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 320),
-      value: 1,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_MemoryLaneAnimatedDigit oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.value != oldWidget.value) {
-      _previousValue = oldWidget.value;
-      _controller.forward(from: 0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final direction = widget.value >= _previousValue ? 1 : -1;
-    final formatter = NumberFormat.decimalPattern(context.strings.localeName);
-    final current = formatter.format(widget.value);
-    final previous = formatter.format(_previousValue);
-    final disableAnimations =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    return Semantics(
-      label: current,
-      excludeSemantics: true,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          final progress = disableAnimations
-              ? 1.0
-              : Curves.easeOutCubic.transform(_controller.value);
-          final length = progress == 1
-              ? current.length
-              : math.max(current.length, previous.length);
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            textDirection: TextDirection.ltr,
-            children: [
-              for (var place = length - 1; place >= 0; place--)
-                Builder(
-                  key: ValueKey(place),
-                  builder: (context) {
-                    final nextDigit = place < current.length
-                        ? current[current.length - place - 1]
-                        : null;
-                    final oldDigit = place < previous.length
-                        ? previous[previous.length - place - 1]
-                        : null;
-                    if (progress == 1 || oldDigit == nextDigit) {
-                      return Text(
-                        nextDigit ?? "",
-                        style: darkTheme.textTheme.h2Bold,
-                      );
-                    }
-                    return ClipRect(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          if (oldDigit != null)
-                            FractionalTranslation(
-                              translation: Offset(0, -direction * progress),
-                              child: Text(
-                                oldDigit,
-                                style: darkTheme.textTheme.h2Bold,
-                              ),
-                            ),
-                          if (nextDigit != null)
-                            FractionalTranslation(
-                              translation: Offset(
-                                0,
-                                direction * (1 - progress),
-                              ),
-                              child: Text(
-                                nextDigit,
-                                style: darkTheme.textTheme.h2Bold,
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-            ],
-          );
-        },
-      ),
     );
   }
 }
