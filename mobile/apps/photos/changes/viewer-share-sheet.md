@@ -1,0 +1,1 @@
+- Choose between sending a copy and sending a link from the Share sheet in the file viewer.
