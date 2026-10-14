@@ -132,7 +132,27 @@ Keep the same home and key across unattended invocations."
         #[command(subcommand)]
         command: VaultCommand,
     },
-    #[command(about = "Print a shell completion script")]
+    #[command(
+        about = "Print a shell completion script",
+        after_help = format!(
+            "Enable completion in the current shell, or add the commands to its startup file:
+  Bash (~/.bashrc):
+    source <({bin} completion bash)
+  Zsh (~/.zshrc):
+    autoload -Uz compinit; compinit
+    source <({bin} completion zsh)
+  Fish (~/.config/fish/config.fish):
+    {bin} completion fish | source
+  PowerShell ($PROFILE):
+    {bin} completion powershell | Out-String | Invoke-Expression
+  Elvish (~/.config/elvish/rc.elv):
+    eval ({bin} completion elvish | slurp)
+
+Regenerate saved scripts after upgrading the CLI.
+Prints the script to stdout, including when --json is set.",
+            bin = env!("CARGO_PKG_NAME")
+        )
+    )]
     Completion { shell: Shell },
 }
 
