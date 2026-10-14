@@ -38,6 +38,7 @@ class PdfViewerPage extends StatefulWidget {
 class _PdfViewerPageState extends State<PdfViewerPage> {
   static final _logger = Logger('PdfViewerPage');
   static const _maxImageDimension = 3072;
+  static const _maxRenderPixels = 4 * 1024 * 1024;
   final _pdfTransformation = TransformationController();
   final _pdfContentKey = GlobalKey();
   final _pdfPage = ValueNotifier(1);
@@ -50,6 +51,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   bool _loading = false;
   bool _failed = false;
   bool _pdfInteracting = false;
+  double _pdfRenderScale = 1;
   int _pdfLayoutRevision = 0;
   bool _toolbarVisible = true;
 
@@ -170,17 +172,30 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     }
   }
 
-  Future<MemoryImage?> _renderPage(int number, bool Function() isActive) {
+  Future<MemoryImage?> _renderPage(
+    int number,
+    double renderWidth,
+    bool Function() isActive,
+  ) {
     // Android permits only one open native page per document at a time.
     final result = _pendingRender!.then<MemoryImage?>((_) async {
       if (!mounted || !isActive()) return null;
       final page = await _document!.getPage(number);
       try {
         if (!mounted || !isActive()) return null;
-        final scale = _maxImageDimension / math.max(page.width, page.height);
+        final visualWidth = _pageAspectRatios[number]! > 1
+            ? math.max(page.width, page.height)
+            : math.min(page.width, page.height);
+        final scale = math.min(
+          renderWidth / visualWidth,
+          math.min(
+            _maxImageDimension / math.max(page.width, page.height),
+            math.sqrt(_maxRenderPixels / (page.width * page.height)),
+          ),
+        );
         final rendered = await page.render(
-          width: page.width * scale,
-          height: page.height * scale,
+          width: math.max(1.0, page.width * scale),
+          height: math.max(1.0, page.height * scale),
           format: pdf.PdfPageImageFormat.png,
           backgroundColor: '#ffffff',
         );
@@ -359,6 +374,17 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     _pdfTransformation.value = matrix;
   }
 
+  double _renderWidth(int index, double pixelWidth, bool visible) {
+    final ratio = _pageAspectRatios[index + 1]!;
+    return math.min(
+      (pixelWidth * (visible ? _pdfRenderScale : 1)).ceilToDouble(),
+      math.min(
+        _maxImageDimension * math.min(1.0, ratio),
+        math.sqrt(_maxRenderPixels * ratio),
+      ),
+    );
+  }
+
   Widget _buildPdf(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       // Keep the reading position when the viewport or toolbar size changes.
@@ -375,6 +401,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       final viewportShift = (constraints.maxHeight - _pdfViewport.height) / 2;
       if (_pdfViewport != constraints.biggest) {
         _pdfInteracting = false;
+        _pdfRenderScale = _pdfTransformation.value.getMaxScaleOnAxis();
         _pdfLayoutRevision++;
       }
       _pdfViewport = constraints.biggest;
@@ -446,13 +473,18 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               maxScale: 4,
               onInteractionUpdate: _onZoom,
               onInteractionStart: (_) => _pdfInteracting = true,
-              onInteractionEnd: (_) => _pdfInteracting = false,
+              onInteractionEnd: (_) {
+                _pdfInteracting = false;
+                final scale = _pdfTransformation.value.getMaxScaleOnAxis();
+                if (_pdfRenderScale != scale) {
+                  setState(() => _pdfRenderScale = scale);
+                }
+              },
               builder: (context, viewport) {
-                final first = math.max(0, _pageAt(viewport.point0.y) - 1);
-                final last = math.min(
-                  _document!.pagesCount - 1,
-                  _pageAt(viewport.point2.y) + 1,
-                );
+                final first = _pageAt(viewport.point0.y);
+                final last = _pageAt(viewport.point2.y);
+                final pixelWidth =
+                    width * MediaQuery.devicePixelRatioOf(context);
                 return SizedBox(
                   // Keep rendered tiles alive when the gesture state is reset.
                   key: _pdfContentKey,
@@ -460,7 +492,11 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                   height: height,
                   child: Stack(
                     children: [
-                      for (var index = first; index <= last; index++)
+                      for (final index in [
+                        for (var index = first; index <= last; index++) index,
+                        if (first > 0) first - 1,
+                        if (last < _document!.pagesCount - 1) last + 1,
+                      ])
                         Positioned(
                           key: ValueKey(index),
                           top: _pdfPageOffsets[index],
@@ -472,6 +508,11 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                               Spacing.md,
                           child: _PdfPageTile(
                             number: index + 1,
+                            renderWidth: _renderWidth(
+                              index,
+                              pixelWidth,
+                              index >= first && index <= last,
+                            ),
                             renderPage: _renderPage,
                             errorBuilder: _buildError,
                           ),
@@ -553,12 +594,14 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 class _PdfPageTile extends StatefulWidget {
   const _PdfPageTile({
     required this.number,
+    required this.renderWidth,
     required this.renderPage,
     required this.errorBuilder,
   });
 
   final int number;
-  final Future<MemoryImage?> Function(int, bool Function()) renderPage;
+  final double renderWidth;
+  final Future<MemoryImage?> Function(int, double, bool Function()) renderPage;
   final WidgetBuilder errorBuilder;
 
   @override
@@ -568,6 +611,7 @@ class _PdfPageTile extends StatefulWidget {
 class _PdfPageTileState extends State<_PdfPageTile> {
   MemoryImage? _rendered;
   bool _failed = false;
+  int _request = 0;
 
   @override
   void initState() {
@@ -575,16 +619,34 @@ class _PdfPageTileState extends State<_PdfPageTile> {
     unawaited(_load());
   }
 
+  @override
+  void didUpdateWidget(_PdfPageTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.renderWidth != oldWidget.renderWidth) unawaited(_load());
+  }
+
   Future<void> _load() async {
+    final request = ++_request;
     try {
-      final rendered = await widget.renderPage(widget.number, () => mounted);
-      if (mounted) {
-        setState(() => _rendered = rendered);
+      final rendered = await widget.renderPage(
+        widget.number,
+        widget.renderWidth,
+        () => mounted && request == _request,
+      );
+      if (mounted && request == _request) {
+        final previous = _rendered;
+        setState(() {
+          _rendered = rendered;
+          _failed = false;
+        });
+        if (previous != rendered) unawaited(previous?.evict());
       } else {
         unawaited(rendered?.evict());
       }
     } catch (_) {
-      if (mounted) setState(() => _failed = true);
+      if (mounted && request == _request) {
+        setState(() => _failed = _rendered == null);
+      }
     }
   }
 
@@ -601,6 +663,7 @@ class _PdfPageTileState extends State<_PdfPageTile> {
       ? const Center(child: CircularProgressIndicator())
       : Image(
           image: _rendered!,
+          gaplessPlayback: true,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stack) => widget.errorBuilder(context),
         );
