@@ -1,0 +1,1 @@
+- Fixed text and drawings jumping in the photo editor when you pinch with a finger on a corner.

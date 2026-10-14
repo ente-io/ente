@@ -20,6 +20,7 @@ const _textEditorWidthInset = 34.0;
 LayerInteractionConfigs imageEditorLayerInteractionConfigs(
   BuildContext context,
   ValueGetter<ProImageEditorState?> editor,
+  ImageEditorLayerScaleRotate scaleRotate,
 ) {
   final colors = context.componentColors;
   final strings = context.strings;
@@ -40,8 +41,12 @@ LayerInteractionConfigs imageEditorLayerInteractionConfigs(
             builder: (_) => _LayerSelection(
               info: info,
               colors: colors,
-              onScaleRotateDown: interactions.scaleRotateDown,
-              onScaleRotateUp: interactions.scaleRotateUp,
+              onScaleRotateDown: (event) => scaleRotate.onHandleDown(
+                event,
+                interactions.scaleRotateDown,
+                interactions.scaleRotateUp,
+              ),
+              onScaleRotateEnd: scaleRotate.onHandleEnd,
               actions: [
                 if (layer.isTextLayer ||
                     (layer is PaintLayer && !layer.item.isCensorArea))
@@ -80,6 +85,39 @@ LayerInteractionConfigs imageEditorLayerInteractionConfigs(
           ),
     ),
   );
+}
+
+class ImageEditorLayerScaleRotate {
+  int? _pointer;
+  VoidCallback? _release;
+
+  void onHandleDown(
+    PointerDownEvent event,
+    ValueChanged<PointerDownEvent> scaleRotateDown,
+    ValueChanged<PointerUpEvent> scaleRotateUp,
+  ) {
+    _end();
+    _pointer = event.pointer;
+    _release = () => scaleRotateUp(
+      PointerUpEvent(pointer: event.pointer, position: event.position),
+    );
+    scaleRotateDown(event);
+  }
+
+  void onHandleEnd(PointerEvent event) {
+    if (event.pointer == _pointer) _end();
+  }
+
+  void onScaleStart(ScaleStartDetails details) {
+    if (details.pointerCount > 1) _end();
+  }
+
+  void _end() {
+    final release = _release;
+    _pointer = null;
+    _release = null;
+    release?.call();
+  }
 }
 
 class ImageEditorLayerDoubleTap {
@@ -296,14 +334,14 @@ class _LayerSelection extends StatelessWidget {
     required this.info,
     required this.colors,
     required this.onScaleRotateDown,
-    required this.onScaleRotateUp,
+    required this.onScaleRotateEnd,
     required this.actions,
   });
 
   final OverlayChildLayoutInfo info;
   final ColorTokens colors;
   final ValueChanged<PointerDownEvent> onScaleRotateDown;
-  final ValueChanged<PointerUpEvent> onScaleRotateUp;
+  final ValueChanged<PointerEvent> onScaleRotateEnd;
   final List<Widget> actions;
 
   @override
@@ -366,7 +404,8 @@ class _LayerSelection extends StatelessWidget {
             child: Listener(
               behavior: HitTestBehavior.translucent,
               onPointerDown: onScaleRotateDown,
-              onPointerUp: onScaleRotateUp,
+              onPointerUp: onScaleRotateEnd,
+              onPointerCancel: onScaleRotateEnd,
               child: const IgnorePointer(child: SizedBox.expand()),
             ),
           ),

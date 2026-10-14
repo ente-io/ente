@@ -62,6 +62,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   late final _layerDoubleTap = ImageEditorLayerDoubleTap(
     () => editorKey.currentState,
   );
+  final _layerScaleRotate = ImageEditorLayerScaleRotate();
   SubEditor? _activeSubEditor;
   final _logger = Logger("ImageEditor");
 
@@ -287,6 +288,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 onOpenSubEditor: (editor) => _activeSubEditor = editor,
                 onLayerTapDown: _layerDoubleTap.onLayerDown,
                 onLayerTapUp: _layerDoubleTap.onLayerUp,
+                onScaleStart: _layerScaleRotate.onScaleStart,
                 onCreateTextLayer: () =>
                     imageEditorCreateTextLayer(() => editorKey.currentState),
                 onEndCloseSubEditor: (editor) {
@@ -326,6 +328,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               layerInteraction: imageEditorLayerInteractionConfigs(
                 context,
                 () => editorKey.currentState,
+                _layerScaleRotate,
               ),
               theme: ThemeData(
                 scaffoldBackgroundColor: colors.backgroundBase,

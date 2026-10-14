@@ -194,6 +194,69 @@ void main() {
     expect(find.bySubtype<TextEditor>(), findsNothing);
   });
 
+  for (final cornerFirst in [true, false]) {
+    testWidgets(
+      'pinching text with one finger on a corner scales it like a pinch '
+      '(${cornerFirst ? 'corner' : 'text'} touched first)',
+      (tester) async {
+        final editor = await _openEditor(tester);
+        await _tap(tester, find.text('Done'));
+        final rect = tester.getRect(
+          find.byKey(editor.activeLayers.single.keyInternalSize),
+        );
+        final corner = rect.topRight + const Offset(6, -6);
+        final anchor = rect.centerLeft + const Offset(8, 0);
+        Offset cornerAt(double spread) => anchor + (corner - anchor) * spread;
+        final first = await tester.startGesture(cornerFirst ? corner : anchor);
+        if (cornerFirst) {
+          expect(
+            editor.layerInteractionManager.rotateScaleLayerSizeHelper,
+            isNotNull,
+          );
+        }
+        final second = await tester.startGesture(cornerFirst ? anchor : corner);
+        final cornerGesture = cornerFirst ? first : second;
+        var spread = 1.0;
+        for (var i = 0; i < 10 && !editor.isLayerBeingTransformed; i++) {
+          spread += 0.1;
+          await cornerGesture.moveTo(cornerAt(spread));
+          await tester.pump();
+        }
+        final startScale = editor.activeLayers.single.scale;
+        await cornerGesture.moveTo(cornerAt(spread * 1.5));
+        await tester.pump();
+
+        final layer = editor.activeLayers.single;
+        expect(layer.scale, closeTo(startScale * 1.5, 0.05));
+        expect(layer.rotation, closeTo(0, 0.01));
+        await first.up();
+        await second.up();
+        await tester.pumpAndSettle();
+      },
+    );
+  }
+
+  testWidgets('a cancelled corner touch stops rotating and scaling', (
+    tester,
+  ) async {
+    final editor = await _openEditor(tester);
+    await _tap(tester, find.text('Done'));
+    final rect = tester.getRect(
+      find.byKey(editor.activeLayers.single.keyInternalSize),
+    );
+    final gesture = await tester.startGesture(
+      rect.topRight + const Offset(6, -6),
+    );
+    expect(
+      editor.layerInteractionManager.rotateScaleLayerSizeHelper,
+      isNotNull,
+    );
+    await gesture.cancel();
+    await tester.pumpAndSettle();
+
+    expect(editor.layerInteractionManager.rotateScaleLayerSizeHelper, isNull);
+  });
+
   testWidgets('typed text remains visible after rotating to landscape', (
     tester,
   ) async {
@@ -220,6 +283,7 @@ Future<ProImageEditorState> _openEditor(
   final key = GlobalKey<ProImageEditorState>();
   SubEditor? activeSubEditor;
   final doubleTap = ImageEditorLayerDoubleTap(() => key.currentState, now: now);
+  final scaleRotate = ImageEditorLayerScaleRotate();
   await tester.pumpWidget(
     MaterialApp(
       theme: darkThemeData,
@@ -243,6 +307,7 @@ Future<ProImageEditorState> _openEditor(
                 onOpenSubEditor: (editor) => activeSubEditor = editor,
                 onLayerTapDown: doubleTap.onLayerDown,
                 onLayerTapUp: doubleTap.onLayerUp,
+                onScaleStart: scaleRotate.onScaleStart,
                 onCreateTextLayer: () =>
                     imageEditorCreateTextLayer(() => key.currentState),
               ),
@@ -256,6 +321,7 @@ Future<ProImageEditorState> _openEditor(
               layerInteraction: imageEditorLayerInteractionConfigs(
                 context,
                 () => key.currentState,
+                scaleRotate,
               ),
               textEditor: imageEditorTextConfigs(context),
               mainEditor: MainEditorConfigs(
