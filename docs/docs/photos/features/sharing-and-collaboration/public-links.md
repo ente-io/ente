@@ -123,15 +123,24 @@ Set an expiration date for your link. After this time, the link automatically st
 
 ![Link expiry row highlighted in Manage link on Ente Photos web](https://docs-assets.ente.com/screenshots/web-album-manage-link-expiry-callout.png){width=720px}
 
-### Device limits {#device-limits}
+### Device limits
 
-Limit how many devices can access a public link. This helps limit access if the link is forwarded.
+Limit how many devices can access the link. This prevents the link from being widely forwarded.
 
-A device limit is not a count of individual people or a guarantee of continued access from a particular phone. Different browsers or app access contexts can be counted separately. Opening the public link or scanning its QR code can still reach the limit, even if you have used that phone before or the album is already shared with your Ente account.
+**How devices are identified:**
 
-If the album is shared directly with your Ente account, open it from your [shared-album list](/photos/faq/sharing-and-collaboration#view-shared-albums) instead of reopening the public link. The owner can also [share the album directly with Ente users](/photos/faq/sharing-and-collaboration#share-with-users).
+A "device" is determined by the combination of IP address and browser/app (User-Agent). This means:
 
-For a free-plan link that has reached its limit, see [how the owner can keep the same link and QR code after upgrading](/photos/faq/sharing-and-collaboration#keep-public-link-after-device-limit).
+- Same browser on the same network = 1 device
+- Different browsers on the same device = separate devices
+- Same browser from different networks (e.g., home vs mobile data) = separate devices
+- Once a device has accessed the link, it can continue accessing it even if the limit is later reached
+
+**When to use:**
+
+- Sharing with a known small group
+- Preventing viral spread of the link
+- Adding accountability to sharing
 
 ![Device limit row highlighted in Manage link on Ente Photos web](https://docs-assets.ente.com/screenshots/web-album-manage-link-device-limit-callout.png){width=720px}
 

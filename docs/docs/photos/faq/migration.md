@@ -27,7 +27,7 @@ When you export your data using Google Takeout, Google provides both your photos
 
 For example, `flower.jpeg` might be in one zip and `flower.json` in another. This prevents Ente from correctly mapping them.
 
-**Best practice**: [Extract all parts of the same Takeout into one combined folder](/photos/migration/from-google-photos/), merging matching album folders while keeping their subfolders. This lets Ente look for photos and their JSON sidecars together. Use the current stable desktop app and check a sample after import; folder assembly does not guarantee that every sidecar can be matched. See [incorrect dates after import](#google-photos-dates-wrong) if files are already in Ente.
+**Best practice**: We [recommend](/photos/migration/from-google-photos/) unzipping all of your Google Takeout zips into a single parent folder, keeping subfolders as-is (do not flatten files), then importing that parent folder into Ente. This way, we can always correctly map photos and their metadata.
 
 ### What if my Takeout download is unfinished or too large for my computer? {#takeout-download-incomplete}
 
@@ -143,9 +143,11 @@ Google Photos/
 
 When you have multiple Takeout ZIPs, extract all of them into the same parent folder so the album folders end up at the same level — don't keep `Takeout 1/`, `Takeout 2/` as wrappers.
 
-If photos have already uploaded into the wrong albums, keep your original Takeout and verify a separate backup before changing or removing any items in Ente. Check a small set of affected photos and their expected album folders first.
+If photos already uploaded without the right album assignment, Ente can't reconstruct it after the fact. The cleanest fix:
 
-Contact [support@ente.com](mailto:support@ente.com) for help with targeted album correction or reimport. Do not delete the entire upload or empty Trash to test a fix. If an import is still running, [stop it before cleanup](/photos/migration/from-local-hard-disk#stop-and-resume-an-upload), because items still in the selected source can upload again.
+1. Delete the existing upload and empty Trash.
+2. Re-arrange the extracted Takeout contents into a single merged folder as shown above.
+3. Re-upload through the desktop app.
 
 ### Why are "Photos from 20XX" yearly albums appearing on migration from Google photos? {#yearly-albums-recreated}
 

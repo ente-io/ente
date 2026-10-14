@@ -82,12 +82,6 @@ You can support the development of this project by subscribing to our Photos app
 
 You can enable FaceID lock under Settings → Security → Lockscreen.
 
-### Why can't I type my app-lock PIN with my Mac keyboard? {#mac-keyboard-pin}
-
-Check which Auth build you installed. If you are running the iOS App Store app on an Apple-silicon Mac, try the [native macOS desktop app](/auth/faq/installing#desktop), downloaded as a `.dmg`. The native app is also available for Intel Macs.
-
-Keep the current app until you have confirmed that your codes are synced and accessible elsewhere, or saved and verified an [encrypted export](/auth/migration/export). If keyboard entry still fails in the native app, contact [support@ente.com](mailto:support@ente.com) with your macOS and Auth versions. Do not include your PIN or codes.
-
 ### How secure is the lock screen provided by Ente Auth?
 
 Auth's lock screen acts as a barrier to prevent an attacker from accessing the contents of the app. It does not introduce a layer of cryptographic security.
@@ -125,10 +119,6 @@ Also ensure that your system time is accurate, as any time drift can cause TOTP 
 ### Can I access my codes on web? {#can-i-access-my-codes-on-web}
 
 You can access the codes synced to your Ente account at [auth.ente.com](https://auth.ente.com).
-
-There is currently no per-account setting to disable web access. App lock protects access to that installation of the app; it does not prevent someone from attempting to sign in to your account on the web or another device.
-
-Use a strong, unique account password and consider [two-factor authentication](/photos/faq/security-and-privacy#two-factor-auth) or [passkeys](/photos/features/account/passkeys). Keep your recovery key safe, and read [Enteception](/auth/faq/enteception/) before storing your Ente account's own second factor in Auth.
 
 ### Why doesn't auth.ente.com recognize my email when I try to log in? {#auth-web-email-not-recognized}
 
@@ -261,11 +251,15 @@ If you recover your account using your current device and reset the password, a 
 
 ### Why do I get verification errors when signing in on a new device, but it works hours later? {#login-fails-low-ram}
 
-Password verification performs a memory-intensive cryptographic operation. Limited available memory can cause problems on some devices, but a generic verification error or a later successful sign-in does not establish that memory was the cause. Connection problems and other errors can produce similar symptoms.
+When you sign in to Ente Auth, the app performs a deliberately heavy cryptographic step that needs around 1 GB of free RAM on the device. This is part of how we keep your password secure. If a lot of other apps are running in the background, there often isn't enough free memory available and the sign-in fails. After a few hours, the operating system clears out enough background apps to free up that memory, which is why it eventually works.
 
-If the app reports that the device cannot perform password verification, try closing other apps or restarting the device before trying again. Keep any working Ente session on your other devices signed in.
+This is more likely on phones and tablets with 2-3 GB of RAM (older models such as iPhone 7, 8, SE, or older iPads).
 
-For a generic error, start with the [connection, browser, and recovery-key checks](#sync-password-recovery-failures). Avoid resetting your password solely because an unexplained verification error occurred.
+Try the following:
+
+1. Restart your device, then open Ente Auth immediately before other apps load.
+2. Close other apps (swipe them away in the app switcher) and try again.
+3. In the meantime, access your codes at [auth.ente.com](https://auth.ente.com) in a browser on another device.
 
 ### I can't change my app lock PIN. What do I do? {#cant-change-app-lock-pin}
 

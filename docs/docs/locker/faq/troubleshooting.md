@@ -103,9 +103,9 @@ See the [Lock screen guide](/locker/features/security/lock-screen) for setup det
 
 ### I forgot my Locker PIN {#locker-forgot-pin}
 
-A custom Locker PIN is separate from Device lock, so biometric authentication is not an additional fallback for a PIN-locked app.
+If you configured biometric authentication, use that to access the app, then change your PIN in `Settings > Security`.
 
-[Contact support](#locker-contact-support) before reinstalling Locker or clearing its data. First make sure you can sign in to your Ente account and that any items that have not finished syncing are preserved outside Locker. If you cannot verify this, do not remove the app or its local data.
+If you only have a PIN and forgot it, you may need to reinstall the app and log in again with your Ente credentials.
 
 ## Getting Help
 

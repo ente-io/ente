@@ -453,7 +453,7 @@ We support **annual** subscriptions over PayPal.
 
 **Renewing a PayPal plan**
 
-PayPal plans are renewed manually. Before your paid period ends, email [paypal@ente.com](mailto:paypal@ente.com) from your registered Ente email address and mention the annual plan you want to renew. We will send the payment instructions for your renewal. Keep track of your plan's end date rather than relying on a reminder email.
+PayPal plans are renewed manually. Before your paid period ends, email [paypal@ente.com](mailto:paypal@ente.com) from your registered Ente email address and mention the annual plan you want to renew. We will send the payment instructions for your renewal.
 
 ### Does Ente store my card details? {#card-security}
 

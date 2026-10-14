@@ -80,7 +80,7 @@ When you export your data using Google Takeout, Google provides both your photos
 
 For example, `flower.jpeg` might be in one zip and `flower.json` in another. This prevents Ente from correctly mapping them.
 
-**Best practice**: [Extract all parts of the same Takeout into one combined folder](/photos/migration/from-google-photos/), merging matching album folders while keeping their subfolders. This lets Ente look for photos and their JSON sidecars together. Use the current stable desktop app and check a sample after import; folder assembly does not guarantee that every sidecar can be matched. See [incorrect dates after import](#google-photos-dates-wrong) if files are already in Ente.
+**Best practice**: We [recommend](/photos/migration/from-google-photos/) unzipping all of your Google Takeout zips into a single parent folder, keeping subfolders as-is (do not flatten files), then importing that parent folder into Ente. This way, we can always correctly map photos and their metadata.
 
 ### Why are my Google Photos dates wrong after import? {#google-photos-dates-wrong}
 
