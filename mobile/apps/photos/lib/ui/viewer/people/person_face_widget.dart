@@ -67,6 +67,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   bool _personHasContactLink = false;
   int? _linkedContactUserId;
   int _loadGeneration = 0;
+  int _faceCropRetryRevision = 0;
   StreamSubscription<ContactsChangedEvent>? _contactsChangedSubscription;
   StreamSubscription<PeopleChangedEvent>? _peopleChangedSubscription;
 
@@ -101,10 +102,10 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       _linkedContactUserId = null;
       _personIdentity = null;
       faceCropFuture = _startFaceCropLoad();
-    } else if (_faceCropFailed &&
-        widget.retryKey != null &&
+    } else if (widget.retryKey != null &&
         oldWidget.retryKey != widget.retryKey) {
-      faceCropFuture = _startFaceCropLoad();
+      _faceCropRetryRevision++;
+      if (_faceCropFailed) faceCropFuture = _startFaceCropLoad();
     }
   }
 
@@ -214,17 +215,28 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   }
 
   Future<Uint8List?> _startFaceCropLoad() async {
-    _faceCropFailed = false;
     final generation = ++_loadGeneration;
-    try {
-      final crop = await _loadFaceCrop(generation);
-      if (_isCurrentLoad(generation)) _faceCropFailed = crop == null;
-      return crop;
-    } catch (_) {
-      if (_isCurrentLoad(generation)) _faceCropFailed = true;
-      rethrow;
+    while (true) {
+      _faceCropFailed = false;
+      final retryRevision = _faceCropRetryRevision;
+      try {
+        final crop = await _loadFaceCrop(generation);
+        if (_isCurrentLoad(generation)) _faceCropFailed = crop == null;
+        if (crop != null || !_hasNewFaceCropRetry(generation, retryRevision)) {
+          return crop;
+        }
+      } catch (_) {
+        if (_isCurrentLoad(generation)) _faceCropFailed = true;
+        if (!_hasNewFaceCropRetry(generation, retryRevision)) rethrow;
+      }
     }
   }
+
+  bool _hasNewFaceCropRetry(int generation, int retryRevision) =>
+      mounted &&
+      _isCurrentLoad(generation) &&
+      widget.retryKey != null &&
+      _faceCropRetryRevision != retryRevision;
 
   Future<Uint8List?> _loadFaceCrop(int generation) async {
     final String personOrClusterId = widget.personId ?? widget.clusterID!;

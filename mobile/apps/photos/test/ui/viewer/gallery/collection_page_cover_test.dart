@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 import "dart:io";
 import "dart:typed_data";
@@ -23,6 +24,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
+import "package:photos/gateways/entity/models/type.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
@@ -30,8 +32,10 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/ignored_file.dart";
+import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/hierarchical/camera_filter.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/selected_files.dart";
@@ -39,8 +43,10 @@ import "package:photos/module/download/thumbnail.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/app_navigation_service.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/entity_service.dart";
 import "package:photos/services/favorites_service.dart";
 import "package:photos/services/ignored_files_service.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/settings/local_settings.dart";
 import "package:photos/src/rust/frb_generated.dart";
 import "package:photos/ui/collections/album/row_item.dart";
@@ -747,16 +753,17 @@ void main() {
         ),
       );
       addTearDown(provider.dispose);
-      void refresh() => provider.clearAndAddRecommendations([
-        for (final cluster in ["loaded-cluster", "failed-cluster"])
-          FaceFilter(
-            personId: null,
-            clusterId: cluster,
-            faceName: null,
-            faceFile: null,
-            occurrence: 1,
-          ),
-      ]);
+      void refresh([String missing = "failed-cluster"]) =>
+          provider.clearAndAddRecommendations([
+            for (final cluster in ["loaded-cluster", missing])
+              FaceFilter(
+                personId: cluster == "pending-person" ? cluster : null,
+                clusterId: cluster == "pending-person" ? null : cluster,
+                faceName: null,
+                faceFile: null,
+                occurrence: 1,
+              ),
+          ]);
       refresh();
       await tester.pumpWidget(
         MaterialApp(
@@ -772,7 +779,9 @@ void main() {
         ),
       );
       Finder face(String cluster) => find.byWidgetPredicate(
-        (widget) => widget is PersonFaceWidget && widget.clusterID == cluster,
+        (widget) =>
+            widget is PersonFaceWidget &&
+            (widget.clusterID == cluster || widget.personId == cluster),
       );
       Future<Uint8List?>? future(String cluster) => tester
           .widget<FutureBuilder<Uint8List?>>(
@@ -831,6 +840,31 @@ void main() {
         tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
         1,
       );
+      final entities = _PendingEntityService();
+      PersonService.init(
+        entities,
+        MLDataDB.instance,
+        await SharedPreferences.getInstance(),
+      );
+      refresh("pending-person");
+      await tester.pump();
+      final pendingFuture = future("pending-person");
+      expect(entities.lookups, 1);
+      await tester.runAsync(() => cacheFace("pending-person", 903));
+      for (var i = 0; i < 3; i++) {
+        refresh("pending-person");
+        await tester.pump();
+        expect(future("pending-person"), same(pendingFuture));
+        expect(future("loaded-cluster"), same(loadedFuture));
+        expect(entities.lookups, 1);
+      }
+      entities.firstLookup.complete(null);
+      await settleFaces(2);
+      expect(entities.lookups, 2);
+      expect(tester.element(face("loaded-cluster")), same(loadedElement));
+      refresh("pending-person");
+      await tester.pump();
+      expect(entities.lookups, 2);
       await _disposeAlbum(tester);
     },
   );
@@ -962,4 +996,24 @@ const _onePixelPng =
 class _FakePhotosRustApi extends Fake implements EntePhotosRustApi {
   @override
   bool crateApiMlDbApiDecideMlDbBackend({required bool preferRust}) => false;
+}
+
+class _PendingEntityService extends Fake implements EntityService {
+  final firstLookup = Completer<LocalEntityData?>();
+  int lookups = 0;
+
+  @override
+  int lastSyncTime(EntityType type) => 0;
+
+  @override
+  Future<LocalEntityData?> getEntity(EntityType type, String id) async {
+    if (++lookups == 1) return firstLookup.future;
+    return LocalEntityData(
+      id: id,
+      type: type,
+      data: jsonEncode(PersonData(name: "Person").toJson()),
+      ownerID: 1,
+      updatedAt: 1,
+    );
+  }
 }
