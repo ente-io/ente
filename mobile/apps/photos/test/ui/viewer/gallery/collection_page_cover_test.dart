@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:convert";
 import "dart:io";
 import "dart:typed_data";
+import "dart:ui" as ui;
 
 import "package:dio/dio.dart";
 import "package:ente_components/ente_components.dart";
@@ -10,6 +11,7 @@ import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/loading_widget.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:flutter_test/flutter_test.dart";
@@ -56,6 +58,7 @@ import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/component/album_cover_app_bar.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
+import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
@@ -162,6 +165,71 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("Album route"), findsNothing);
     expect(find.text("Open album"), findsOneWidget);
+  });
+
+  testWidgets("paints the pinned date flush with the album app bar", (
+    tester,
+  ) async {
+    const pixelRatio = 2.8125;
+    tester.view.devicePixelRatio = pixelRatio;
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.padding = const FakeViewPadding(top: 95, bottom: 135);
+    addTearDown(tester.view.reset);
+    final files = List.generate(100, (index) => _file(index + 1));
+    await tester.runAsync(() => FilesDB.instance.insertMultiple(files));
+    final boundaryKey = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: boundaryKey,
+        child: MaterialApp(
+          theme: darkThemeData,
+          localizationsDelegates: StringsLocalizations.localizationsDelegates,
+          supportedLocales: StringsLocalizations.supportedLocales,
+          home: CollectionPage(
+            CollectionWithThumbnail(_collection(), files.last),
+          ),
+        ),
+      ),
+    );
+    await _expectCover(tester, files.last, count: files.length);
+    final pinned = tester.widget<PinnedGroupHeader>(
+      find.byType(PinnedGroupHeader),
+    );
+    pinned.scrollController.jumpTo(pinned.scrollOffsetBase + 80);
+    await tester.pumpAndSettle();
+    final header = find.byWidgetPredicate(
+      (widget) => widget is GroupHeaderWidget && widget.isPinnedHeader,
+    );
+    expect(header, findsOneWidget);
+    final top = tester.getTopLeft(header).dy * pixelRatio;
+    final background = GalleryAppBarWidget.backgroundColor(
+      tester.element(header),
+    );
+    final boundary =
+        boundaryKey.currentContext!.findRenderObject()!
+            as RenderRepaintBoundary;
+    final image = (await tester.runAsync(
+      () => boundary.toImage(pixelRatio: pixelRatio),
+    ))!;
+    addTearDown(image.dispose);
+    final pixels = (await tester.runAsync(
+      () => image.toByteData(format: ui.ImageByteFormat.rawRgba),
+    ))!;
+    final backgroundArgb = background.toARGB32();
+    for (var y = top.floor() - 1; y <= top.ceil(); y++) {
+      final offset = (y * image.width + 4) * 4;
+      expect(
+        pixels.buffer.asUint8List(offset, 3),
+        [
+          (backgroundArgb >> 16) & 0xff,
+          (backgroundArgb >> 8) & 0xff,
+          backgroundArgb & 0xff,
+        ],
+        reason:
+            "The album/date boundary must hide the photos at physical row $y",
+      );
+    }
+    await _disposeAlbum(tester);
   });
 
   testWidgets("lets a short album fully collapse its cover", (tester) async {

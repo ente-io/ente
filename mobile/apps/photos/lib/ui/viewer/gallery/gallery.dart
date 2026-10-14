@@ -1397,6 +1397,13 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
+                    Positioned.fill(
+                      // Cover fractional-pixel gaps at the app bar boundary.
+                      top: widget.topOffset > 0
+                          ? -1 / MediaQuery.devicePixelRatioOf(context)
+                          : 0,
+                      child: ColoredBox(color: backgroundColor),
+                    ),
                     const Positioned.fill(
                       child: ClipRect(
                         clipper: _PinnedHeaderBottomShadowClipper(),

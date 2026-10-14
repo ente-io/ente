@@ -1,0 +1,1 @@
+- Fixed a thin gap above the pinned date header in albums on some displays.
