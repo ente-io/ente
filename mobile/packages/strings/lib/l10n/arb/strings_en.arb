@@ -3995,6 +3995,10 @@
   "@send": {
     "description": "Label for send button"
   },
+  "sendACopy": "Send a copy",
+  "@sendACopy": {
+    "description": "Share a copy of the current photo or video using the system share sheet, as opposed to sending a viewing link"
+  },
   "sendCountInvites": "{count, plural, =0{Send invites} one{Send {count} invite} other{Send {count} invites}}",
   "@sendCountInvites": {
     "placeholders": {
@@ -4003,6 +4007,10 @@
         "example": "2"
       }
     }
+  },
+  "sendFileToAnotherApp": "Send the file to another app",
+  "@sendFileToAnotherApp": {
+    "description": "Subtitle for sending a copy of the current photo or video from the file viewer"
   },
   "sendInvite": "Send invite",
   "sendLink": "Send link",
@@ -4114,6 +4122,10 @@
   "shareKey": "Share key",
   "shareLegacyDescription": "Send each card to the person it's for. No single card works alone.",
   "shareLink": "Share link",
+  "shareLinkToThisItem": "Share a link to this item",
+  "@shareLinkToThisItem": {
+    "description": "Subtitle for sending a viewing link to the current photo or video from the file viewer"
+  },
   "shareMemory": "Share memory",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.com.",
   "@shareMyVerificationID": {
