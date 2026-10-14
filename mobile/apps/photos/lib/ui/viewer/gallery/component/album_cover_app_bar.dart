@@ -857,6 +857,11 @@ class _AlbumCoverDelegate extends SliverPersistentHeaderDelegate {
   ) {
     final collapseOffset = math.min(shrinkOffset, geometry.collapseExtent);
     final collapseProgress = collapseOffset / geometry.collapseExtent;
+    final toolbarInset = ui.lerpDouble(
+      Spacing.md,
+      Spacing.xs,
+      collapseProgress,
+    )!;
     final pinnedProgress =
         ((collapseProgress - _pinnedFadeStart) / (1 - _pinnedFadeStart)).clamp(
           0.0,
@@ -933,8 +938,8 @@ class _AlbumCoverDelegate extends SliverPersistentHeaderDelegate {
               topPadding +
               (Spacing.lg - (collapsedHeight - _compactHeaderControlSize) / 2) *
                   (1 - pinnedProgress),
-          left: Spacing.lg,
-          right: Spacing.lg,
+          left: toolbarInset,
+          right: toolbarInset,
           height: collapsedHeight,
           child: SafeArea(
             top: false,
@@ -970,7 +975,11 @@ class _AlbumCoverDelegate extends SliverPersistentHeaderDelegate {
                 ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  spacing: _headerActionSpacing,
+                  spacing: ui.lerpDouble(
+                    _headerActionSpacing,
+                    2.0,
+                    collapseProgress,
+                  )!,
                   children: actionsBuilder(foregroundColor),
                 ),
               ],

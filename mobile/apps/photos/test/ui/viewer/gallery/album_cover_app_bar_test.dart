@@ -128,7 +128,7 @@ void main() {
         );
       }
       final backIcon = tester.getRect(find.byIcon(Icons.arrow_back));
-      expect(backIcon.left, size.width >= 1024 ? padding.left + 28 : 28);
+      expect(backIcon.left, size.width >= 1024 ? padding.left + 24 : 24);
       final lastAction = tester.getRect(find.byType(IconButton).last);
       expect(
         lastAction.right,
