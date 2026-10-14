@@ -42,9 +42,19 @@ void main() {
     await tester.tap(find.text("Share"));
     expect(tapped, "Share");
     await tester.dragFrom(const Offset(180, 200), const Offset(0, -100));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
     expect(gallery.offset, greaterThan(0));
     expect(controller.size, sheet.minChildSize);
+    await tester.pumpAndSettle();
+    await tester.fling(
+      find.byType(CustomScrollView),
+      const Offset(0, -100),
+      2000,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(controller.size, closeTo(sheet.initialChildSize, 0.001));
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -320));
     await tester.pumpAndSettle();
     expect(controller.size, sheet.maxChildSize);
@@ -56,6 +66,9 @@ void main() {
     expect(controller.size, sheet.minChildSize);
     swipeActive.value = false;
     await tester.tap(find.bySemanticsLabel("More"));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(controller.size, sheet.maxChildSize);
     await tester.pumpAndSettle();
     await tester.dragFrom(const Offset(180, 100), const Offset(0, -60));
     await tester.pumpAndSettle();
