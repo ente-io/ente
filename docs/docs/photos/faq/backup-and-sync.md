@@ -11,6 +11,8 @@ description: Frequently asked questions about backing up and syncing photos in E
 
 Once you select which albums to backup in your mobile app settings, Ente automatically syncs new photos and videos from those albums to the cloud. Backup happens in the background without needing to open the app.
 
+Each selected device folder or album backs up to a corresponding Ente album. Mobile automatic backup does not offer **Uncategorized** as a destination. You can browse local folders under **Albums > Device** and backed-up Ente albums under **Albums > Ente**.
+
 **Key features:**
 
 - Background sync runs automatically
@@ -32,6 +34,8 @@ Open `Settings > Backup > Backed up folders` and select the albums you want to a
 
 Once configured, new photos added to these albums will automatically sync in the background.
 
+The chooser lists device folders and albums; it is separate from your Ente album list. The count on a folder tile is the total reported for that device folder, not the number waiting to upload. If **Backup only new photos** is enabled, its cutoff still applies even when the tile shows older photos in its total.
+
 ### What does the slashed cloud icon mean, and how do I back that photo up? {#slashed-cloud-icon}
 
 A slashed cloud icon on a photo means it isn't backed up to Ente - usually because it's in a folder you haven't selected for backup, or because you deleted it from Ente while keeping it on your device.
@@ -51,6 +55,8 @@ Yes. You can enable this during signup/login on the permissions screen, or later
 - **Via the settings toggle**: Ente uses the current moment as the cutoff - only photos taken from that point forward are backed up.
 
 In both cases, photos older than the cutoff will not be uploaded to Ente.
+
+The totals shown in **Backed up folders** still include older items in each device folder. Those totals do not mean older items are eligible for automatic upload. Use [Backup status](#check-backup-status) to check pending uploads.
 
 To resume backing up your full library, toggle the setting off.
 
@@ -170,13 +176,11 @@ Learn more in the [Storage optimization guide](/photos/features/albums-and-organ
 
 ### If I delete a photo from Ente, will it be re-uploaded from my device? {#delete-reupload}
 
-**No, it will not be re-uploaded automatically.**
+**Mobile automatic backup remembers photos you deleted from Ente** and does not automatically upload those same device items again.
 
-Ente tracks which files have been uploaded and won't upload them again, even if you delete them from Ente while they're still on your device.
+To upload an individual photo again, open it in Ente's device view and use **Upload to Ente**, or select it and use **Add to album**. See [the slashed cloud icon](#slashed-cloud-icon). The **Reset ignored files** action can make ignored files eligible for another upload attempt; review the files carefully before using it.
 
-**To force a re-upload of previously uploaded files:**
-
-You would need to use "Reset ignored files" option seen when opening an 'On Device' album that is backed up. However, this is rarely needed and should be done carefully as it will re-upload all previously uploaded files.
+This mobile behavior does not prevent a desktop or Google Takeout import from uploading files that are still in its source. Stop any active import before cleanup, preserve the source, and verify your backups before removing files. See [Takeout retries and date repairs](/photos/faq/metadata-and-editing#google-photos-dates-wrong).
 
 ### How does Ente handle duplicate files during backup? {#duplicate-handling}
 
@@ -343,19 +347,15 @@ iCloud Shared Albums store compressed copies, not the original files. Because of
 
 Ente reads photos through Apple's photo library APIs, which don't always return every item shown in the Photos app. In particular, some burst frames and certain shared or synced assets are excluded from third-party app queries by iOS itself. This can make Ente's Recents count in the on-device section slightly lower than iOS's.
 
-### On iOS, which album should I back up to capture everything? {#ios-which-album-to-backup}
+### On iOS, can I back up Recents instead of selecting every system album? {#ios-which-album-to-backup}
 
-On iOS, the photo library is split into several system albums (Recents, Live Photos, Portraits, Screenshots, and so on) that you cannot reorganize. If you're coming from an Android camera roll and want everything in one place, back up **Recents**.
+Yes. **Recents** is the broad device-library view for photos and videos from sources such as the camera, screenshots, and saved downloads. If you want these items backed up together, you can select Recents instead of separately selecting overlapping system albums such as Live Photos, Portraits, and Screenshots.
 
-Recents is the smart album that shows every photo and video in your library, sorted by date added, regardless of where it came from (camera, screenshots, WhatsApp, AirDrop, browser downloads, etc.). It's the closest equivalent to the single Camera Roll in an Android gallery.
+Open `Settings > Backup > Backed up folders`, enable **Recents**, and deselect the overlapping albums you do not want backed up separately. Deselecting a backup folder stops future automatic backup from that selection; it does not delete an existing Ente album or its backed-up photos.
 
-**On iOS:**
+Selecting Recents alone does not prove that every asset has been backed up. Ente normally backs up only the primary image from a [Burst](#burst-photos-backup), and iOS can exclude certain burst frames and shared or synced assets from third-party queries. See [why Recents counts can differ](#ios-recents-count-mismatch).
 
-Open `Settings > Backup > Backed up folders`, enable backup for **Recents**, and disable the others (Live Photos, Portraits, and so on). Their photos are already included in Recents, so nothing is missed.
-
-> [!NOTE]
->
-> iOS does not let any third-party app replace the native Photos app, so Ente cannot back up to a single custom album the way a default gallery would. See [Can Ente replace my default Photos or Camera gallery?](#ente-as-default-gallery).
+Check [Backup status](#check-backup-status) and verify important photos and videos in Ente before deleting originals.
 
 ### Why aren't photos from my Samsung "Gallery" folder backing up? {#samsung-gallery-folder}
 

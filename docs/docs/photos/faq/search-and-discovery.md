@@ -112,6 +112,10 @@ Machine Learning enables features like face recognition and magic search.
 
 Local processing controls whether the current device performs the indexing work itself. When local processing is on, the device downloads photos, runs the ML models, and builds indexes locally.
 
+Local processing describes where the indexing work happens. While signed in, face recognition and Magic search index photos backed up to Ente. A photo being visible in the device gallery does not make it eligible for signed-in indexing if it has not been backed up.
+
+In [Gallery Mode](/photos/faq/gallery-mode), the mobile app can index local photos it has permission to access while you are signed out.
+
 If local processing is turned off, that device skips the heavy work and can instead use indexes created by another device, such as your desktop.
 
 This can be useful on phones with low memory or limited performance.
