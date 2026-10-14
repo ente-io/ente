@@ -138,6 +138,50 @@ describe("post grid mosaic", () => {
         expect(layoutPostGrid(photos, 374)).toEqual(before);
     });
 
+    it.each([288, 374, 768])(
+        "keeps every displayed tile stable across feed batches at %ipx",
+        (width) => {
+            const ratios = [0.75, 1.5, 1.8, 1, 0.8, 3, 1.5, 0.75, 2, 1];
+            const photos = Array.from({ length: 40 }, (_, index) => ({
+                frameAspectRatio: ratios[index % ratios.length]!,
+                batchIndex:
+                    index < 20 ? undefined : Math.floor((index - 20) / 10) + 1,
+            }));
+            for (const count of [20, 30]) {
+                const before = layoutPostGrid(photos.slice(0, count), width);
+                const after = layoutPostGrid(
+                    photos.slice(0, count + 10),
+                    width,
+                );
+                expect(after.tiles).toHaveLength(count + 10);
+                expect(after.tiles.slice(0, count)).toEqual(before.tiles);
+                expect(after.tiles[count]!.top).toBeCloseTo(before.height + 8);
+            }
+        },
+    );
+
+    it.each([1, 2, 3])(
+        "finishes a %i-post batch before starting the next row",
+        (count) => {
+            const photos = photosWithRatios(Array<number>(count).fill(1));
+            const { tiles } = layoutPostGrid(
+                [...photos, { frameAspectRatio: 1, batchIndex: 1 }],
+                374,
+            );
+            const firstBatch = tiles.slice(0, count);
+            const bottom = Math.max(
+                ...firstBatch.map((tile) => tile.top + tile.height),
+            );
+            expect(Math.min(...firstBatch.map((tile) => tile.left))).toBe(0);
+            expect(
+                Math.max(...firstBatch.map((tile) => tile.left + tile.width)),
+            ).toBeCloseTo(374);
+            expect(tiles[count]!.top).toBeCloseTo(bottom + 8);
+            if (count > 1)
+                expect(firstBatch.every((tile) => tile.width < 374)).toBe(true);
+        },
+    );
+
     it("has no height before measurement or without photos", () => {
         expect(layoutPostGrid(photosWithRatios([1, 0.75]), 0)).toEqual({
             tiles: [],

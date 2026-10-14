@@ -10,9 +10,9 @@ import {
 } from "utils/viewer-geometry";
 
 const originAttribute = "data-space-viewer-origin";
-const openDuration = 0.6;
+const openDuration = 0.48;
 const openBounce = 0.26;
-const closeDuration = 0.46;
+const closeDuration = 0.36;
 const swapFadeMs = 220;
 const closingFlights = new WeakMap<HTMLElement, () => void>();
 

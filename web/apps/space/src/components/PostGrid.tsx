@@ -4,6 +4,7 @@ import { layoutPostGrid } from "utils/post-grid";
 
 interface PostGridItem {
     id: string;
+    batchIndex?: number;
     frameAspectRatio?: number;
     width?: number;
     height?: number;
