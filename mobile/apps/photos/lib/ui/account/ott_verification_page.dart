@@ -96,6 +96,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
     return OnboardingPageScaffold(
       title: context.strings.verifyEmail,
       illustration: OnboardingIllustration.email,
+      minimumKeyboardHeaderHeight: OnboardingPageScaffold.compactHeaderHeight,
       isBodyCentered: true,
       body: _getBody(),
       actions: [

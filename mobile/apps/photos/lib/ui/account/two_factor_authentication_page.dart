@@ -55,6 +55,7 @@ class _TwoFactorAuthenticationPageState
     return OnboardingPageScaffold(
       title: context.strings.twoFAVerification,
       illustration: OnboardingIllustration.key,
+      minimumKeyboardHeaderHeight: OnboardingPageScaffold.compactHeaderHeight,
       isBodyCentered: true,
       body: Column(
         mainAxisSize: MainAxisSize.min,
