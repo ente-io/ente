@@ -236,6 +236,27 @@ void main() {
     );
   }
 
+  testWidgets('a cancelled corner touch stops rotating and scaling', (
+    tester,
+  ) async {
+    final editor = await _openEditor(tester);
+    await _tap(tester, find.text('Done'));
+    final rect = tester.getRect(
+      find.byKey(editor.activeLayers.single.keyInternalSize),
+    );
+    final gesture = await tester.startGesture(
+      rect.topRight + const Offset(6, -6),
+    );
+    expect(
+      editor.layerInteractionManager.rotateScaleLayerSizeHelper,
+      isNotNull,
+    );
+    await gesture.cancel();
+    await tester.pumpAndSettle();
+
+    expect(editor.layerInteractionManager.rotateScaleLayerSizeHelper, isNull);
+  });
+
   testWidgets('typed text remains visible after rotating to landscape', (
     tester,
   ) async {

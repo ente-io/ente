@@ -405,6 +405,7 @@ class _LayerSelection extends StatelessWidget {
               behavior: HitTestBehavior.translucent,
               onPointerDown: onScaleRotateDown,
               onPointerUp: onScaleRotateEnd,
+              onPointerCancel: onScaleRotateEnd,
               child: const IgnorePointer(child: SizedBox.expand()),
             ),
           ),
