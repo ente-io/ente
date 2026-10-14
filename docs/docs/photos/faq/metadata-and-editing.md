@@ -101,6 +101,14 @@ For JPEG photos, an edit that only rotates or flips the image is applied without
 
 The original photo remains untouched.
 
+### Does saving photo edits change the original or reduce resolution? {#saving-photo-edits}
+
+Saving an image edit creates a separate copy. Your original photo stays unchanged.
+
+The edited copy is rendered again, so its format, file size, and pixel dimensions can change. Cropping changes the dimensions by design. Other edits may re-encode the image even when you do not crop it. On mobile, most edits are saved as JPEG. On web and desktop, JPEG and WebP are kept where possible; other formats may be saved as PNG.
+
+A smaller file size does not always mean fewer pixels. Compare the width and height of the original and edited copy to check whether the resolution changed. If you need a full-resolution edited version and the copy has fewer pixels, edit the original in an app that exports at full resolution, then upload that copy to Ente.
+
 ### How do I add descriptions or captions to photos? {#add-descriptions}
 
 You can add descriptions (captions) to your photos in Ente:

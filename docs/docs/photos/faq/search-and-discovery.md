@@ -281,6 +281,12 @@ ML indexing requires internet initially to download the ML models and to downloa
 
 Internet is also required to sync the encrypted indexes across your devices.
 
+### How much data do Ente Photos' machine-learning models download? {#ml-model-download-size}
+
+The machine-learning models can take around 300 MB to download. The amount depends on which features you enable and may change with app updates.
+
+Ente may also download photos that are not already on your device to index them locally. Those photo downloads are separate from the model download, so total data use can be higher.
+
 ### Is my face data used to train AI models? {#face-data-training}
 
 No. All machine learning (face recognition and magic search) happens entirely on your device. Your photos are downloaded to your device, indexed locally, and the indexes are encrypted before being synced across your devices.
