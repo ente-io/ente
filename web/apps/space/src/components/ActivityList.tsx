@@ -87,7 +87,7 @@ export const SpaceActivityIdentity = ({
                 whiteSpace: "nowrap",
             }}
         >
-            {formatTimeAgo(createdAtMs * 1000)}
+            {formatTimeAgo(createdAtMs * 1000).replace(/ ago$/, "")}
         </Box>
     </Box>
 );
