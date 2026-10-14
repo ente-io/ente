@@ -134,24 +134,22 @@ Keep the same home and key across unattended invocations."
     },
     #[command(
         about = "Print a shell completion script",
-        after_help = format!(
-            "Enable completion in the current shell, or add the commands to its startup file:
+        after_help = "Enable completion in the current shell, or add the commands to its startup file:
   Bash (~/.bashrc):
-    source <({bin} completion bash)
+    eval \"$(ente-cli-next completion bash)\"
   Zsh (~/.zshrc):
     autoload -Uz compinit; compinit
-    source <({bin} completion zsh)
-  Fish (~/.config/fish/config.fish):
-    {bin} completion fish | source
+    source <(ente-cli-next completion zsh)
   PowerShell ($PROFILE):
-    {bin} completion powershell | Out-String | Invoke-Expression
+    ente-cli-next completion powershell | Out-String | Invoke-Expression
   Elvish (~/.config/elvish/rc.elv):
-    eval ({bin} completion elvish | slurp)
+    eval (ente-cli-next completion elvish | slurp)
 
-Regenerate saved scripts after upgrading the CLI.
-Prints the script to stdout, including when --json is set.",
-            bin = env!("CARGO_PKG_NAME")
-        )
+Fish loads a saved script on demand. Write it once, and again after upgrading:
+  mkdir -p ~/.config/fish/completions
+  ente-cli-next completion fish > ~/.config/fish/completions/ente-cli-next.fish
+
+Prints the script to stdout, including when --json is set."
     )]
     Completion { shell: Shell },
 }
