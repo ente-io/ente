@@ -8,6 +8,15 @@ class MemoryLaneNowCaption extends StatelessWidget {
 
   final String name;
 
+  static TextStyle get textStyle => TextStyle(
+    color: darkTheme.textTheme.h2Bold.color,
+    fontFamily: "Gochi Hand",
+    package: TextStyles.fontPackage,
+    fontFamilyFallback: const [TextStyles.fontFamily],
+    fontWeight: FontWeight.w400,
+    fontSize: 22,
+  );
+
   @override
   Widget build(BuildContext context) {
     const placeholder = "\uFFFC";
@@ -21,17 +30,7 @@ class MemoryLaneNowCaption extends StatelessWidget {
         children: [
           for (var index = 0; index < parts.length; index++) ...[
             if (index > 0)
-              TextSpan(
-                text: strings.memoryLaneNow,
-                style: TextStyle(
-                  color: darkTheme.textTheme.h2Bold.color,
-                  fontFamily: "Gochi Hand",
-                  package: TextStyles.fontPackage,
-                  fontFamilyFallback: const [TextStyles.fontFamily],
-                  fontWeight: FontWeight.w400,
-                  fontSize: 22,
-                ),
-              ),
+              TextSpan(text: strings.memoryLaneNow, style: textStyle),
             TextSpan(text: parts[index]),
           ],
         ],
