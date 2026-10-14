@@ -19,7 +19,6 @@ class PdfViewerPage extends StatefulWidget {
     required this.localFile,
     required this.fileName,
     required this.onOpenExternally,
-    this.openPdf = pdf.PdfDocument.openFile,
     this.onDownload,
     this.onShare,
   });
@@ -27,7 +26,6 @@ class PdfViewerPage extends StatefulWidget {
   final File localFile;
   final String fileName;
   final Future<void> Function(BuildContext) onOpenExternally;
-  final Future<pdf.PdfDocument> Function(String) openPdf;
   final Future<void> Function(BuildContext)? onDownload;
   final Future<void> Function(BuildContext)? onShare;
 
@@ -113,7 +111,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   Future<void> _openDocument() async {
     try {
-      _document = await widget.openPdf(widget.localFile.path);
+      _document = await pdf.PdfDocument.openFile(widget.localFile.path);
       if (_document!.pagesCount < 1) {
         final document = _document!;
         _document = null;
