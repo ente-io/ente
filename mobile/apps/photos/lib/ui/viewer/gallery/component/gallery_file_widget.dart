@@ -24,6 +24,7 @@ import "package:photos/ui/viewer/file/gallery_photo_page_route.dart";
 import "package:photos/ui/viewer/file/hero_image.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
+import "package:photos/ui/viewer/gallery/gallery_thumbnail_snapshot.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart";
@@ -59,6 +60,27 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   int? _currentPointerId;
   bool _isPointerInside = false;
   late final StreamSubscription<FileUploadedEvent> _fileUploadedSubscription;
+  GalleryThumbnailSnapshots? _snapshots;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final snapshots = GalleryThumbnailSnapshotScope.of(context);
+    if (_snapshots != snapshots) {
+      _snapshots?.unregister(widget.file, context);
+      _snapshots = snapshots;
+      _snapshots?.register(widget.file, context);
+    }
+  }
+
+  @override
+  void didUpdateWidget(GalleryFileWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.file, widget.file)) {
+      _snapshots?.unregister(oldWidget.file, context);
+      _snapshots?.register(widget.file, context);
+    }
+  }
 
   @override
   void initState() {
@@ -79,6 +101,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   @override
   void dispose() {
+    _snapshots?.unregister(widget.file, context);
     _fileUploadedSubscription.cancel();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
