@@ -13,7 +13,7 @@ import type {
     UpdateSaveGroup,
 } from "../components/utils/save-groups";
 
-export interface BrowserSaveDownloader {
+interface BrowserSaveDownloader {
     fileBlob(file: EnteFile): Promise<Blob>;
 }
 
