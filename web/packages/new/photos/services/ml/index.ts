@@ -25,7 +25,11 @@ import { deleteUserEntity } from "../user-entity/remote";
 import type { ClusterFacesReason, FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, savedFaceIndex, savedIndexCounts } from "./db";
-import { fileIDFromFaceID } from "./face";
+import {
+    annotateFileFaces,
+    fileIDFromFaceID,
+    type AnnotatedFaceID,
+} from "./face";
 import {
     _applyPersonSuggestionUpdates,
     filterNamedPeople,
@@ -333,11 +337,7 @@ export const clipMatches = (
 ): Promise<CLIPMatches | undefined> =>
     worker().then((w) => w.clipMatches(searchPhrase));
 
-export interface AnnotatedFaceID {
-    faceID: string;
-    personID: string;
-    personName: string | undefined;
-}
+export type { AnnotatedFaceID } from "./face";
 
 export const getAnnotatedFacesForFile = async (
     file: EnteFile,
@@ -350,22 +350,7 @@ export const getAnnotatedFacesForFile = async (
     const personByFaceID = _state.peopleStateSnapshot?.personByFaceID;
     if (!personByFaceID) return [];
 
-    const sortableFaces: [AnnotatedFaceID, number][] = [];
-    for (const { faceID } of index.faces) {
-        const person = personByFaceID.get(faceID);
-        if (!person) continue;
-        sortableFaces.push([
-            { faceID, personID: person.id, personName: person.name },
-            person.fileIDs.length,
-        ]);
-    }
-
-    sortableFaces.sort((a, b) => {
-        if (a[0].personName && !b[0].personName) return -1;
-        if (!a[0].personName && b[0].personName) return 1;
-        return b[1] - a[1];
-    });
-    return sortableFaces.map(([f]) => f);
+    return annotateFileFaces(index.faces, personByFaceID);
 };
 
 export const faceCrop = async (faceID: string, file: EnteFile) => {

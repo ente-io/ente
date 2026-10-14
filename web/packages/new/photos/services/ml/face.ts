@@ -1,4 +1,42 @@
 import { assertionFailed } from "ente-base/assert";
+import type { Person } from "./people";
+
+export interface AnnotatedFaceID {
+    faceID: string;
+    personID: string;
+    personName: string | undefined;
+    isIgnored: boolean;
+}
+
+export const annotateFileFaces = (
+    faces: Face[],
+    personByFaceID: ReadonlyMap<string, Person>,
+): AnnotatedFaceID[] => {
+    const annotatedFaces = faces.flatMap(({ faceID, score }) => {
+        const person = personByFaceID.get(faceID);
+        if (!person) return [];
+        return [
+            {
+                annotation: {
+                    faceID,
+                    personID: person.id,
+                    personName: person.name,
+                    isIgnored: person.type == "cgroup" && person.isHidden,
+                },
+                isAssigned: person.type == "cgroup",
+                score,
+            },
+        ];
+    });
+
+    annotatedFaces.sort((a, b) => {
+        if (a.annotation.isIgnored != b.annotation.isIgnored)
+            return a.annotation.isIgnored ? 1 : -1;
+        if (a.isAssigned != b.isAssigned) return a.isAssigned ? -1 : 1;
+        return b.score - a.score;
+    });
+    return annotatedFaces.map(({ annotation }) => annotation);
+};
 
 export const faceIndexingVersion = 1;
 

@@ -169,7 +169,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         return (peopleState?.people ?? []).filter(
             (p) =>
                 p.type == "cgroup" &&
-                !!p.name &&
                 p.cgroup.data.manuallyAssigned.includes(file.id) &&
                 !detectedPersonIDs.has(p.id),
         );
@@ -200,7 +199,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         return () => {
             didCancel = true;
         };
-    }, [file, open]);
+    }, [file, open, peopleState]);
 
     const handleClose = () => {
         if (captionEditState == "saving") return;

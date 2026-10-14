@@ -133,54 +133,63 @@ export const FilePeopleList: React.FC<FilePeopleListProps> = ({
     onAddPerson,
     addPersonTitle,
     addPersonLabel,
-}) => (
-    <FilePeopleList_>
-        {annotatedFaceIDs.map((annotatedFaceID) => (
-            <AnnotatedFaceButton
-                key={annotatedFaceID.faceID}
-                onClick={() => onSelectFace(annotatedFaceID)}
-            >
-                <FaceCropImageView
-                    faceID={annotatedFaceID.faceID}
-                    file={file}
-                    placeholderDimension={65}
-                />
-                <Typography variant="small" sx={{ color: "text.muted" }}>
-                    {annotatedFaceID.personName}
-                </Typography>
-            </AnnotatedFaceButton>
-        ))}
-        {manuallyAssignedPeople?.map((person) => (
-            <ManuallyAssignedPersonButton
-                key={person.id}
-                onClick={() => onSelectPerson?.(person.id)}
-            >
-                <FaceCropImageView
-                    faceID={person.displayFaceID}
-                    file={person.displayFaceFile}
-                    placeholderDimension={65}
-                />
-                <Typography variant="small" sx={{ color: "text.muted" }}>
-                    {person.name}
-                </Typography>
-            </ManuallyAssignedPersonButton>
-        ))}
-        {onAddPerson && (
-            <AddPersonButton
-                onClick={onAddPerson}
-                title={addPersonTitle}
-                aria-label={addPersonTitle}
-            >
-                <AddPersonAvatar>
-                    <PersonAddIcon />
-                </AddPersonAvatar>
-                <Typography variant="small" sx={{ color: "text.muted" }}>
-                    {addPersonLabel}
-                </Typography>
-            </AddPersonButton>
-        )}
-    </FilePeopleList_>
-);
+}) => {
+    const entries = [
+        ...(manuallyAssignedPeople ?? [])
+            .toSorted((a, b) => {
+                const an = (a.name ?? "").toLowerCase();
+                const bn = (b.name ?? "").toLowerCase();
+                return an < bn ? -1 : an > bn ? 1 : 0;
+            })
+            .map((person) => ({
+                key: person.id,
+                faceID: person.displayFaceID,
+                file: person.displayFaceFile,
+                name: person.name,
+                isIgnored: person.type == "cgroup" && person.isHidden,
+                onClick: () => onSelectPerson?.(person.id),
+            })),
+        ...annotatedFaceIDs.map((face) => ({
+            key: face.faceID,
+            faceID: face.faceID,
+            file,
+            name: face.personName,
+            isIgnored: face.isIgnored,
+            onClick: () => onSelectFace(face),
+        })),
+    ];
+
+    return (
+        <FilePeopleList_>
+            {entries.map(({ key, faceID, file, name, isIgnored, onClick }) => (
+                <AnnotatedFaceButton key={key} onClick={onClick}>
+                    <FaceCropImageView
+                        faceID={faceID}
+                        file={file}
+                        placeholderDimension={65}
+                    />
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
+                        {isIgnored ? `(${t("ignored")})` : name}
+                    </Typography>
+                </AnnotatedFaceButton>
+            ))}
+            {onAddPerson && (
+                <AddPersonButton
+                    onClick={onAddPerson}
+                    title={addPersonTitle}
+                    aria-label={addPersonTitle}
+                >
+                    <AddPersonAvatar>
+                        <PersonAddIcon />
+                    </AddPersonAvatar>
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
+                        {addPersonLabel}
+                    </Typography>
+                </AddPersonButton>
+            )}
+        </FilePeopleList_>
+    );
+};
 
 const FilePeopleList_ = styled("div")`
     display: flex;
@@ -207,8 +216,6 @@ const AnnotatedFaceButton = styled(UnstyledButton)(
     }
 `,
 );
-
-const ManuallyAssignedPersonButton = AnnotatedFaceButton;
 
 const AddPersonButton = styled(UnstyledButton)(
     ({ theme }) => `
