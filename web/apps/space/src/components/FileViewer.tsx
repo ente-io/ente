@@ -209,8 +209,15 @@ const setViewerBackground = (root: HTMLElement, opacity: number) =>
 const viewerPadding = (
     hasDraftPhotoControls: boolean,
     headerHeight: number,
+    header: HTMLElement | null,
 ) => {
     const isDesktop = window.innerWidth >= viewerDesktopMinWidth;
+    let top = isDesktop ? 0 : headerHeight;
+    if (header && document.documentElement.hasAttribute("data-space-ios-pwa")) {
+        top = isDesktop
+            ? parseFloat(getComputedStyle(header).paddingTop)
+            : header.offsetHeight;
+    }
     return {
         bottom: hasDraftPhotoControls
             ? 176
@@ -219,7 +226,7 @@ const viewerPadding = (
               : viewerBottomPadding,
         left: 0,
         right: 0,
-        top: isDesktop ? 0 : headerHeight,
+        top,
     };
 };
 
@@ -631,6 +638,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         ? Fade
         : SpaceBottomSheetTransition;
     const viewerRootRef = React.useRef<HTMLDivElement | null>(null);
+    const viewerHeaderRef = React.useRef<HTMLDivElement>(null);
     const stableViewportSizeRef = React.useRef<ViewerViewportSize>(
         currentViewerViewportSize(null),
     );
@@ -714,6 +722,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             const { top, bottom } = viewerPadding(
                 hasDraftPhotoControlsRef.current,
                 headerHeight,
+                viewerHeaderRef.current,
             );
             const areaHeight = viewport.y - top - bottom;
             const scale = Math.min(1, viewport.x / width, areaHeight / height);
@@ -1399,6 +1408,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         let disposed = false;
         let closedByReact = false;
         let pswp: PhotoSwipe | undefined;
+        const headerObserver = new ResizeObserver(() => pswp?.updateSize(true));
+        if (document.documentElement.hasAttribute("data-space-ios-pwa"))
+            headerObserver.observe(viewerHeaderRef.current!);
         let swipeStart:
             { x: number; y: number; photoIndex: number } | undefined;
 
@@ -1434,6 +1446,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                     viewerPadding(
                         hasDraftPhotoControlsRef.current,
                         headerHeight,
+                        viewerHeaderRef.current,
                     ),
                 pinchToClose: false,
                 returnFocus: false,
@@ -1702,6 +1715,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
 
         return () => {
             disposed = true;
+            headerObserver.disconnect();
             closedByReact = true;
             pswpRef.current = undefined;
             pswp?.destroy();
@@ -1841,6 +1855,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 </Box>
             )}
             <Box
+                ref={viewerHeaderRef}
                 component="header"
                 sx={{
                     alignItems: "center",
@@ -1848,10 +1863,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                     flexShrink: 0,
                     gap: "12px",
                     gridTemplateColumns: "minmax(0, 1fr) auto",
-                    minHeight: headerHeight,
+                    minHeight: `calc(${headerHeight}px + var(--space-ios-safe-area-top, 0px))`,
+                    pt: "var(--space-ios-safe-area-top, 0px)",
                     position: "relative",
-                    pl: "16px",
-                    pr: "4px",
+                    pl: "max(16px, var(--space-ios-safe-area-left, 0px))",
+                    pr: "max(4px, var(--space-ios-safe-area-right, 0px))",
                     width: "100%",
                     zIndex: 2,
                 }}
@@ -2345,7 +2361,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 sx={{
                     background:
                         "linear-gradient(180deg, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.13) 58%, rgba(0, 0, 0, 0) 100%)",
-                    height: 44,
+                    height: "calc(44px + var(--space-ios-safe-area-top, 0px))",
                     left: 0,
                     pointerEvents: "none",
                     position: "fixed",

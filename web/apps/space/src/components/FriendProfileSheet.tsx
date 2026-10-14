@@ -64,6 +64,10 @@ export const FriendProfileSheet: React.FC<FriendProfileSheetProps> = ({
             "--space-friend-profile-reveal",
             String(1 - preview),
         );
+        panelRef.current!.style.setProperty(
+            "--space-friend-profile-top",
+            `${position}px`,
+        );
         handleRef.current!.style.opacity = String(preview);
         backdropRef.current!.style.opacity = String(Math.max(0, backdrop));
     }, []);
@@ -124,7 +128,10 @@ export const FriendProfileSheet: React.FC<FriendProfileSheetProps> = ({
             const height = rootRef.current!.clientHeight;
             const headerBottom =
                 header.getBoundingClientRect().bottom -
-                contentRef.current!.getBoundingClientRect().top;
+                contentRef.current!.getBoundingClientRect().top -
+                parseFloat(
+                    getComputedStyle(header.previousElementSibling!).paddingTop,
+                );
             const bottomPadding = parseFloat(
                 getComputedStyle(contentRef.current!).paddingBottom,
             );
