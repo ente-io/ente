@@ -1,6 +1,7 @@
 use std::{io::IsTerminal, num::NonZeroUsize, path::PathBuf};
 
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{Arg, ArgAction, Args, CommandFactory, Parser, Subcommand, ValueEnum};
+use clap_complete::Shell;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -25,6 +26,15 @@ pub struct Cli {
     pub options: Options,
     #[command(subcommand)]
     pub command: Command,
+}
+
+pub fn command() -> clap::Command {
+    Cli::command().subcommand_required(false).arg(
+        Arg::new("help-all")
+            .long("help-all")
+            .action(ArgAction::SetTrue)
+            .help("Print help for all commands"),
+    )
 }
 
 #[derive(Args)]
@@ -122,6 +132,8 @@ Keep the same home and key across unattended invocations."
         #[command(subcommand)]
         command: VaultCommand,
     },
+    #[command(about = "Print a shell completion script")]
+    Completion { shell: Shell },
 }
 
 #[derive(Subcommand)]

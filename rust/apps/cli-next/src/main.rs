@@ -17,7 +17,7 @@ use std::{
 };
 
 use anyhow::{Context, Result, bail, ensure};
-use clap::{Arg, ArgAction, CommandFactory, FromArgMatches};
+use clap::FromArgMatches;
 use ente_core::{b64, crypto::Key};
 use serde::de::DeserializeOwned;
 use serde_json::json;
@@ -29,12 +29,7 @@ use vault::{Account, State, Vault};
 
 #[tokio::main]
 async fn main() {
-    let mut command = Cli::command().subcommand_required(false).arg(
-        Arg::new("help-all")
-            .long("help-all")
-            .action(ArgAction::SetTrue)
-            .help("Print help for all commands"),
-    );
+    let mut command = args::command();
     let matches = command.get_matches_mut();
     let result = if matches.get_flag("help-all") {
         command.build();
@@ -91,6 +86,12 @@ async fn run(cli: Cli) -> Result<()> {
                     command: KeyCommand::Generate,
                 },
         } => vault_key(options.json),
+        Command::Completion { shell } => {
+            let mut command = args::command();
+            let name = command.get_name().to_owned();
+            clap_complete::generate(shell, &mut command, name, &mut std::io::stdout().lock());
+            Ok(())
+        }
     }
 }
 

@@ -54,6 +54,7 @@ edition = "2024"
 anyhow = "1.0.104"
 chrono = { version = "0.4.45", default-features = false }
 clap = "4.6.7"
+clap_complete = "4.6.11"
 dialoguer = { version = "0.12.0", default-features = false }
 dirs = "7.0.0"
 ente-accounts = { path = "crates/accounts" }
