@@ -15,6 +15,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/settings/local_settings.dart";
 import "package:photos/ui/settings/gallery_settings_screen.dart";
@@ -55,6 +56,118 @@ void main() {
 
   setUp(() async {
     await localSettings.setGalleryLayoutType(GalleryLayoutType.grid);
+  });
+
+  testWidgets(
+    "pinching selection galleries changes density without changing selection",
+    (tester) async {
+      for (final mode in ["sheet", "single", "selected"]) {
+        await localSettings.setPhotoGridSize(4);
+        final galleryKey = GlobalKey<GalleryState>();
+        final files = List.generate(
+          12,
+          (index) => EnteFile()
+            ..generatedID = index + 1
+            ..creationTime = DateTime(2026, 8, 19).microsecondsSinceEpoch
+            ..fileType = FileType.image
+            ..title = "photo-$index.jpg",
+        );
+        final selectedFiles = SelectedFiles();
+        if (mode == "selected") selectedFiles.selectAll({files.first});
+        var selectionChanges = 0;
+        selectedFiles.addListener(() => selectionChanges++);
+        final selectionBefore = selectedFiles.files.toSet();
+        await _mountPinchGallery(
+          tester,
+          Gallery(
+            key: galleryKey,
+            asyncLoader: (start, end, {limit, asc}) async =>
+                FileLoadResult(files, false),
+            selectedFiles: selectedFiles,
+            tagPrefix: "pinch_$mode",
+            enableFileGrouping: false,
+            inSelectionMode: mode == "sheet",
+            limitSelectionToOne: mode == "single",
+            showSelectAll: false,
+          ),
+        );
+        selectionChanges = 0;
+
+        final first = await tester.startGesture(
+          const Offset(120, 150),
+          pointer: 1,
+        );
+        final second = await tester.startGesture(
+          const Offset(280, 150),
+          pointer: 2,
+        );
+        await first.moveTo(const Offset(150, 150));
+        await second.moveTo(const Offset(250, 150));
+        await tester.pump();
+        expect(
+          find.byKey(const ValueKey("gallery-grid-zoom-overlay")),
+          findsOneWidget,
+          reason: mode,
+        );
+        expect(localSettings.getPhotoGridSize(), 4, reason: mode);
+        await first.up();
+        await second.up();
+        await tester.pumpAndSettle();
+
+        expect(localSettings.getPhotoGridSize(), 5, reason: mode);
+        expect(galleryKey.currentState!.galleryGroups!.crossAxisCount, 5);
+        expect(selectedFiles.files, unorderedEquals(selectionBefore));
+        expect(selectionChanges, 0, reason: mode);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump(const Duration(milliseconds: 100));
+        selectedFiles.dispose();
+      }
+    },
+  );
+
+  testWidgets("fixed-layout and non-scrollable galleries ignore pinches", (
+    tester,
+  ) async {
+    for (final fixedLayout in [false, true]) {
+      await localSettings.setPhotoGridSize(4);
+      final galleryKey = GlobalKey<GalleryState>();
+      await _mountPinchGallery(
+        tester,
+        Gallery(
+          key: galleryKey,
+          asyncLoader: (start, end, {limit, asc}) async =>
+              FileLoadResult(List.generate(12, _justifiedTestFile), false),
+          tagPrefix: "pinch_excluded",
+          enableFileGrouping: false,
+          disableScroll: !fixedLayout,
+          layoutTypeOverride: fixedLayout ? GalleryLayoutType.grid : null,
+        ),
+      );
+      final first = await tester.startGesture(
+        const Offset(120, 150),
+        pointer: 1,
+      );
+      final second = await tester.startGesture(
+        const Offset(280, 150),
+        pointer: 2,
+      );
+      await first.moveTo(const Offset(150, 150));
+      await second.moveTo(const Offset(250, 150));
+      await tester.pump();
+      expect(
+        find.byKey(const ValueKey("gallery-grid-zoom-overlay")),
+        findsNothing,
+      );
+      await first.up();
+      await second.up();
+      await tester.pumpAndSettle();
+      expect(localSettings.getPhotoGridSize(), 4);
+      expect(galleryKey.currentState!.galleryGroups!.crossAxisCount, 4);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 100));
+    }
   });
 
   testWidgets("keeps the current gallery controller after an animated swap", (
@@ -552,6 +665,21 @@ void main() {
 
 Widget _galleryHost(Gallery gallery) {
   return GalleryBoundariesProvider(child: GalleryFilesState(child: gallery));
+}
+
+Future<void> _mountPinchGallery(WidgetTester tester, Gallery gallery) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: lightThemeData,
+      localizationsDelegates: StringsLocalizations.localizationsDelegates,
+      supportedLocales: StringsLocalizations.supportedLocales,
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(width: 400, height: 600, child: _galleryHost(gallery)),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
 }
 
 DummyFile _dummyFile(String groupID) {

@@ -117,5 +117,25 @@ void main() {
     await next.up();
     expect(swipeActive.value, isFalse);
     expect(helper.isActive, isFalse);
+
+    final pending = await tester.startGesture(
+      const Offset(250, 550),
+      pointer: 4,
+    );
+    final beforeDeferredSelection = selectedFiles.files.toSet();
+    swipeActive.value = true;
+    tester.binding.addPostFrameCallback((_) {
+      tester.binding.handlePointerEvent(
+        const PointerDownEvent(pointer: 5, position: Offset(450, 550)),
+      );
+    });
+    await tester.pump();
+    expect(swipeActive.value, isFalse);
+    expect(helper.isActive, isFalse);
+    expect(selectedFiles.files, unorderedEquals(beforeDeferredSelection));
+    tester.binding.handlePointerEvent(
+      const PointerUpEvent(pointer: 5, position: Offset(450, 550)),
+    );
+    await pending.up();
   });
 }

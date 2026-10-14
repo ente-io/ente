@@ -6,10 +6,13 @@ import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/models/file/dummy_file.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/gallery/gallery_grid_zoom_layout.dart";
 import "package:photos/models/gallery/gallery_groups.dart";
+import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
@@ -79,6 +82,7 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
     super.initState();
     _density.addListener(_updateSegment);
     _justifiedCatchup.addListener(_applyRequestedDensity);
+    widget.groups.selectedFiles?.addListener(_selectionChanged);
   }
 
   @override
@@ -132,6 +136,11 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
   @override
   void didUpdateWidget(GalleryGridZoom oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.groups.selectedFiles != widget.groups.selectedFiles) {
+      oldWidget.groups.selectedFiles?.removeListener(_selectionChanged);
+      widget.groups.selectedFiles?.addListener(_selectionChanged);
+      _clear();
+    }
     if (oldWidget.groups != widget.groups) _warmLayouts();
     if (!widget.enabled ||
         !identical(oldWidget.groups.allFiles, widget.groups.allFiles) ||
@@ -139,6 +148,10 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
         (!_committing && oldWidget.groups != widget.groups)) {
       _clear();
     }
+  }
+
+  void _selectionChanged() {
+    if (_session != null) setState(_clear);
   }
 
   void _start(Offset focalPoint) {
@@ -313,20 +326,40 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
       final last = end.tileForIndex(index)!;
       final from = first.rect.shift(Offset(0, startOrigin));
       final to = last.rect.shift(Offset(0, endOrigin));
-      items.add(
-        _ZoomItem(
-          key: ValueKey(("gallery-grid-zoom-tile", index)),
-          from: from,
-          to: to,
-          fromOpacity: from.overlaps(viewport) ? 1 : 0,
-          toOpacity: to.overlaps(viewport) ? 1 : 0,
-          fadeDuringReflow:
-              from.overlaps(viewport) &&
-              to.overlaps(viewport) &&
-              (from.left - to.left).abs() > (from.width + to.width) / 2,
-          file: first.file,
-        ),
+      final isSelected =
+          widget.groups.selectedFiles?.files.contains(first.file) ?? false;
+      final item = _ZoomItem(
+        key: ValueKey(("gallery-grid-zoom-tile", index)),
+        from: from,
+        to: to,
+        fromOpacity: from.overlaps(viewport) ? 1 : 0,
+        toOpacity: to.overlaps(viewport) ? 1 : 0,
+        fadeDuringReflow:
+            from.overlaps(viewport) &&
+            to.overlaps(viewport) &&
+            (from.left - to.left).abs() > (from.width + to.width) / 2,
+        file: first.file,
+        fileIndex: index,
+        isSelected: isSelected,
       );
+      items.add(item);
+      if (isSelected) {
+        items.add(
+          _ZoomItem(
+            key: ValueKey(("gallery-grid-zoom-selection", index)),
+            from: Rect.fromLTWH(from.right - 20, from.top + 4, 16, 16),
+            to: Rect.fromLTWH(to.right - 20, to.top + 4, 16, 16),
+            fromOpacity: item.fromOpacity,
+            toOpacity: item.toOpacity,
+            fadeDuringReflow: item.fadeDuringReflow,
+            selectionColor: galleryFileSelectionColor(
+              context,
+              first.file,
+              widget.groups.currentUserID,
+            ),
+          ),
+        );
+      }
     }
     Map<String, ({GalleryGridZoomHeader header, Rect rect})> headers(
       GalleryGridZoomLayout layout,
@@ -367,6 +400,16 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
     for (final id in {...startHeaders.keys, ...endHeaders.keys}) {
       final first = startHeaders[id];
       final last = endHeaders[id];
+      final header = (first ?? last)!.header;
+      final allSelected = session.headerSelections.putIfAbsent(id, () {
+        final selected = widget.groups.selectedFiles?.files;
+        return selected != null &&
+            selected.isNotEmpty &&
+            widget.groups.allFiles
+                .getRange(header.firstFileIndex, header.endFileIndex)
+                .where((file) => file is! DummyFile)
+                .every(selected.contains);
+      });
       items.add(
         _ZoomItem(
           key: ValueKey(("gallery-grid-zoom-header", id)),
@@ -374,7 +417,8 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
           to: last?.rect ?? first!.rect,
           fromOpacity: first == null ? 0 : 1,
           toOpacity: last == null ? 0 : 1,
-          header: (first ?? last)!.header,
+          header: header,
+          isSelected: allSelected,
           pinnedFrom: id == pinnedFrom,
           pinnedTo: id == pinnedTo,
           headerActions:
@@ -457,11 +501,44 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
   @override
   void dispose() {
     _warmupTimer?.cancel();
+    widget.groups.selectedFiles?.removeListener(_selectionChanged);
     _clear();
     _density.dispose();
     _opacity.dispose();
     _justifiedCatchup.dispose();
     super.dispose();
+  }
+
+  Widget _buildThumbnail(_ZoomSession session, _ZoomItem item, EnteFile file) {
+    final image = GalleryZoomImage(
+      animation: _density,
+      lower: _lower,
+      from: item.from,
+      to: item.to,
+      image: session.images[file],
+      child: session.images[file] != null
+          ? const SizedBox.expand()
+          : widget.thumbnailBuilder?.call(file) ??
+                ThumbnailWidget(
+                  file,
+                  rawThumbnail: true,
+                  thumbnailSize: session.initialColumns <= 3
+                      ? thumbnailLargeSize
+                      : thumbnailSmallSize,
+                  useCachedThumbnailAsPlaceholder: true,
+                ),
+    );
+    if (!item.isSelected) return image;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        image,
+        ColoredBox(
+          key: ValueKey(("gallery-grid-zoom-selection-shade", item.fileIndex!)),
+          color: const Color.fromARGB(102, 0, 0, 0),
+        ),
+      ],
+    );
   }
 
   @override
@@ -501,34 +578,22 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
                           ),
                           children: [
                             for (final item in _items)
-                              if (item.file case final file?)
+                              if (item.selectionColor case final color?)
+                                RepaintBoundary(
+                                  key: item.key,
+                                  child: SelectAllStatusIcon(
+                                    isSelected: true,
+                                    size: 16,
+                                    selectedFillColor: color,
+                                    selectedTickCutsOut: true,
+                                  ),
+                                )
+                              else if (item.file case final file?)
                                 RepaintBoundary(
                                   key: item.key,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(1),
-                                    child: GalleryZoomImage(
-                                      animation: _density,
-                                      lower: _lower,
-                                      from: item.from,
-                                      to: item.to,
-                                      image: session.images[file],
-                                      child: session.images[file] != null
-                                          ? const SizedBox.expand()
-                                          : widget.thumbnailBuilder?.call(
-                                                  file,
-                                                ) ??
-                                                ThumbnailWidget(
-                                                  file,
-                                                  rawThumbnail: true,
-                                                  thumbnailSize:
-                                                      session.initialColumns <=
-                                                          3
-                                                      ? thumbnailLargeSize
-                                                      : thumbnailSmallSize,
-                                                  useCachedThumbnailAsPlaceholder:
-                                                      true,
-                                                ),
-                                    ),
+                                    child: _buildThumbnail(session, item, file),
                                   ),
                                 )
                               else
@@ -541,6 +606,7 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
                                       gridSize: session.initialColumns,
                                       filesInGroup: const [],
                                       selectedFiles: null,
+                                      allSelectedOverride: item.isSelected,
                                       showSelectAll: widget.showSelectAll,
                                       showGalleryLayoutSettingCTA:
                                           item.headerActions &&
@@ -583,6 +649,7 @@ class _ZoomSession {
   final Size size;
   final double clipTop;
   final Map<EnteFile, ui.Image> images;
+  final Map<String, bool> headerSelections = {};
   Future<void>? justifiedReady;
 }
 
@@ -594,6 +661,9 @@ class _ZoomItem {
     required this.fromOpacity,
     required this.toOpacity,
     this.file,
+    this.fileIndex,
+    this.isSelected = false,
+    this.selectionColor,
     this.header,
     this.pinnedFrom = false,
     this.pinnedTo = false,
@@ -606,6 +676,9 @@ class _ZoomItem {
   final double fromOpacity;
   final double toOpacity;
   final EnteFile? file;
+  final int? fileIndex;
+  final bool isSelected;
+  final Color? selectionColor;
   final GalleryGridZoomHeader? header;
   final bool pinnedFrom;
   final bool pinnedTo;
@@ -631,12 +704,14 @@ class _ZoomFlowDelegate extends FlowDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) =>
-      BoxConstraints.tight(
-        Size(
-          items[i].file != null ? tileExtent : constraints.maxWidth,
-          items[i].file != null ? tileExtent : headerExtent,
-        ),
-      );
+      items[i].selectionColor != null
+      ? const BoxConstraints.tightFor(width: 16, height: 16)
+      : BoxConstraints.tight(
+          Size(
+            items[i].file != null ? tileExtent : constraints.maxWidth,
+            items[i].file != null ? tileExtent : headerExtent,
+          ),
+        );
 
   @override
   void paintChildren(FlowPaintingContext context) {

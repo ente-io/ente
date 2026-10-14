@@ -29,6 +29,23 @@ import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart";
 
+Color galleryFileSelectionColor(
+  BuildContext context,
+  EnteFile file,
+  int? currentUserID,
+) {
+  if (file.isUploaded &&
+      file.ownerID != null &&
+      file.ownerID != currentUserID) {
+    final owner = CollectionsService.instance.resolveUserIdentity(
+      file.ownerID!,
+      file.collectionID,
+    );
+    return getUserAvatarColor(context, owner);
+  }
+  return Colors.white;
+}
+
 class GalleryFileWidget extends StatefulWidget {
   final EnteFile file;
   final SelectedFiles? selectedFiles;
@@ -132,17 +149,6 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   Widget _buildFileContent(BuildContext context) {
     final disableSelection =
         GalleryContextState.of(context)?.disableSelection ?? false;
-    Color selectionColor = Colors.white;
-    if (_isFileSelected &&
-        widget.file.isUploaded &&
-        widget.file.ownerID != null &&
-        widget.file.ownerID != widget.currentUserID) {
-      final owner = CollectionsService.instance.resolveUserIdentity(
-        widget.file.ownerID!,
-        widget.file.collectionID,
-      );
-      selectionColor = getUserAvatarColor(context, owner);
-    }
     final String heroTag = widget.tag + widget.file.tag;
     final isPhoto =
         widget.file.fileType == FileType.image ||
@@ -225,7 +231,11 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                   child: SelectAllStatusIcon(
                     isSelected: true,
                     size: 16,
-                    selectedFillColor: selectionColor,
+                    selectedFillColor: galleryFileSelectionColor(
+                      context,
+                      widget.file,
+                      widget.currentUserID,
+                    ),
                     selectedTickCutsOut: true,
                   ),
                 ),

@@ -1010,9 +1010,6 @@ class GalleryState extends State<Gallery> {
       enabled:
           !widget.disableScroll &&
           widget.layoutTypeOverride == null &&
-          !widget.limitSelectionToOne &&
-          !widget.inSelectionMode &&
-          !(widget.selectedFiles?.files.isNotEmpty ?? false) &&
           _allGalleryFiles.isNotEmpty,
       onCommit: _commitGridZoom,
       showSelectAll: widget.showSelectAll && !widget.limitSelectionToOne,

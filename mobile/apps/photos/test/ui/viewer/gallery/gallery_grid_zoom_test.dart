@@ -11,8 +11,11 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/gallery/gallery_groups.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/settings/local_settings.dart";
+import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
+import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/gallery_grid_zoom.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -166,6 +169,112 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
+
+  testWidgets(
+    "selection stays aligned through justified morphs and clearing it cancels",
+    (tester) async {
+      for (final sourceLayout in [
+        GalleryLayoutType.grid,
+        GalleryLayoutType.justified,
+      ]) {
+        await localSettings.setPhotoGridSize(3);
+        await localSettings.setGalleryLayoutType(sourceLayout);
+        final selection = SelectedFiles();
+        final fixture = _ZoomFixture(
+          fileCount: 9,
+          leadingExtent: 56,
+          groupType: GroupType.day,
+          selectedFiles: selection,
+        );
+        addTearDown(selection.dispose);
+        addTearDown(fixture.controller.dispose);
+        selection.selectAll(fixture.files.toSet());
+        await fixture.mount(tester);
+        final sourceTile = fixture.groups
+            .gridZoomLayout(
+              columns: fixture.groups.crossAxisCount,
+              headerExtent: fixture.headerExtent,
+            )
+            .tileForIndex(0)!;
+        final focalPoint =
+            sourceTile.rect.center + Offset(0, fixture.leadingExtent);
+        const halfSpan = 25.0;
+        final first = await tester.startGesture(
+          focalPoint - const Offset(halfSpan, 0),
+          pointer: 1,
+        );
+        final second = await tester.startGesture(
+          focalPoint + const Offset(halfSpan, 0),
+          pointer: 2,
+        );
+        await tester.pump();
+        final tile = find.byKey(const ValueKey(("gallery-grid-zoom-tile", 0)));
+        final initialSize = tester.getRect(tile).size;
+        final marker = find.byKey(
+          const ValueKey(("gallery-grid-zoom-selection", 0)),
+        );
+        final shade = find.byKey(
+          const ValueKey(("gallery-grid-zoom-selection-shade", 0)),
+        );
+        for (final scale
+            in sourceLayout == GalleryLayoutType.grid
+                ? [1.4, 2.4]
+                : [0.8, 0.6]) {
+          await first.moveTo(focalPoint - Offset(halfSpan * scale, 0));
+          await second.moveTo(focalPoint + Offset(halfSpan * scale, 0));
+          await tester.pump();
+          final tileRect = tester.getRect(tile);
+          final markerRect = tester.getRect(marker);
+          expect(tileRect.size, isNot(initialSize));
+          expect(markerRect.width, closeTo(16, 0.001));
+          expect(markerRect.height, closeTo(16, 0.001));
+          expect(markerRect.right, closeTo(tileRect.right - 4, 0.001));
+          expect(markerRect.top, closeTo(tileRect.top + 4, 0.001));
+          expect(tester.getRect(shade), tileRect);
+          expect(
+            tester.widget<ColoredBox>(shade).color,
+            const Color.fromARGB(102, 0, 0, 0),
+          );
+          expect(
+            tester
+                .widget<SelectAllStatusIcon>(
+                  find.descendant(
+                    of: marker,
+                    matching: find.byType(SelectAllStatusIcon),
+                  ),
+                )
+                .isSelected,
+            isTrue,
+          );
+          final selectedHeader = find.descendant(
+            of: find.descendant(
+              of: _overlay,
+              matching: find.byType(GroupHeaderWidget),
+            ),
+            matching: find.byType(SelectAllStatusIcon),
+          );
+          expect(selectedHeader, findsOneWidget);
+          expect(
+            tester.widget<SelectAllStatusIcon>(selectedHeader).isSelected,
+            isTrue,
+          );
+          expect(selection.files, unorderedEquals(fixture.files));
+        }
+
+        selection.clearAll(fireEvent: false);
+        await tester.pump();
+        expect(_overlay, findsNothing);
+        await first.up();
+        await second.up();
+        await tester.pumpAndSettle();
+        expect(fixture.commits, isEmpty);
+        expect(selection.files, isEmpty);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    },
+  );
 
   testWidgets("morphs into the justified layout and back to three columns", (
     tester,
@@ -486,21 +595,29 @@ void main() {
 Finder get _overlay => find.byKey(const ValueKey("gallery-grid-zoom-overlay"));
 
 class _ZoomFixture {
-  _ZoomFixture({int fileCount = 1200, this.leadingExtent = contentTop})
-    : files = List<EnteFile>.generate(
-        fileCount,
-        (index) => EnteFile()
-          ..generatedID = index + 1
-          ..creationTime = DateTime(2026, 8, 19).microsecondsSinceEpoch
-          ..fileType = FileType.image
-          ..pubMagicMetadata = PubMagicMetadata(
-            w: index.isEven ? 1600 : 900,
-            h: index.isEven ? 900 : 1600,
-          ),
-      );
+  _ZoomFixture({
+    int fileCount = 1200,
+    this.leadingExtent = contentTop,
+    this.groupType = GroupType.none,
+    this.selectedFiles,
+  }) : files = List<EnteFile>.generate(
+         fileCount,
+         (index) => EnteFile()
+           ..generatedID = index + 1
+           ..creationTime = DateTime(2026, 8, 19).microsecondsSinceEpoch
+           ..fileType = FileType.image
+           ..pubMagicMetadata = PubMagicMetadata(
+             w: index.isEven ? 1600 : 900,
+             h: index.isEven ? 900 : 1600,
+           ),
+       );
 
   static const contentTop = 112.0;
   final double leadingExtent;
+  final GroupType groupType;
+  final SelectedFiles? selectedFiles;
+  double get headerExtent =>
+      groupType == GroupType.none ? GalleryGroups.spacing : 48;
   final controller = ScrollController();
   final commits = <(int, double)>[];
   List<EnteFile> files;
@@ -510,21 +627,19 @@ class _ZoomFixture {
 
   GalleryGroups _groups() => GalleryGroups(
     allFiles: files,
-    groupType: GroupType.none,
+    groupType: groupType,
     widthAvailable: 400,
-    selectedFiles: null,
+    selectedFiles: selectedFiles,
     tagPrefix: "zoom_test_",
-    groupHeaderExtent: GalleryGroups.spacing,
-    showSelectAll: false,
+    groupHeaderExtent: headerExtent,
+    showSelectAll: selectedFiles != null,
   );
 
   Future<void> mount(WidgetTester tester, {bool prewarm = true}) async {
     groups = _groups();
     if (prewarm) {
       await tester.runAsync(
-        () => groups.prepareJustifiedZoomLayout(
-          headerExtent: GalleryGroups.spacing,
-        ),
+        () => groups.prepareJustifiedZoomLayout(headerExtent: headerExtent),
       );
     }
     await tester.pumpWidget(
@@ -546,6 +661,7 @@ class _ZoomFixture {
                   sectionOrigin: () => leadingExtent - controller.offset,
                   appBarHeight: 56,
                   pinHeaders: false,
+                  showSelectAll: selectedFiles != null,
                   enabled: true,
                   onCommit: (columns, scrollOffset) async {
                     commits.add((columns, scrollOffset));

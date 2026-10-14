@@ -22,12 +22,16 @@ class GalleryGridZoomHeader {
   const GalleryGridZoomHeader({
     required this.id,
     required this.firstFile,
+    required this.firstFileIndex,
+    required this.endFileIndex,
     required this.groupType,
     required this.rect,
   });
 
   final String id;
   final EnteFile firstFile;
+  final int firstFileIndex;
+  final int endFileIndex;
   final GroupType groupType;
   final Rect rect;
 
@@ -224,6 +228,8 @@ class GalleryGridZoomLayout {
       GalleryGridZoomHeader(
         id: "${groupType.name}:${section.firstFileIndex}",
         firstFile: _files[section.firstFileIndex],
+        firstFileIndex: section.firstFileIndex,
+        endFileIndex: section.endFileIndex,
         groupType: groupType,
         rect: Rect.fromLTWH(0, section.top, width, headerExtent),
       );
