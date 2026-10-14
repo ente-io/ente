@@ -25,6 +25,7 @@ import "package:photos/ui/home/memories/memory_music_session.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/home/memories/memory_viewer_constants.dart";
 import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
+import "package:photos/ui/viewer/people/memory_lane_now_caption.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 import "package:photos/utils/share_util.dart";
@@ -418,7 +419,10 @@ class _MemoryLanePageV2State extends State<MemoryLanePageV2> {
               number: captionPlaceholder,
             );
           } else {
-            caption = context.strings.memoryLaneCaptionNow(name: name ?? "");
+            caption = context.strings.memoryLaneCaptionNow(
+              name: name ?? "",
+              now: captionPlaceholder,
+            );
           }
           caption = caption.trim();
         }
@@ -758,35 +762,39 @@ class _MemoryLanePageV2State extends State<MemoryLanePageV2> {
                               constraints: const BoxConstraints(minHeight: 48),
                               child: Align(
                                 alignment: Alignment.bottomCenter,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.baseline,
-                                  textBaseline: TextBaseline.alphabetic,
-                                  spacing: screenSize.width * 0.02,
-                                  children: [
-                                    for (
-                                      var index = 0;
-                                      index < captionParts.length;
-                                      index++
-                                    ) ...[
-                                      if (index > 0 && captionValue != null)
-                                        _MemoryLaneAnimatedDigit(
-                                          value: captionValue,
-                                        ),
-                                      Flexible(
-                                        child: Text(
-                                          captionParts[index],
-                                          style: darkTheme.textTheme.bodyMuted,
-                                          textAlign: TextAlign.center,
-                                          softWrap: false,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                child: captionValue == null
+                                    ? MemoryLaneNowCaption(name: name ?? "")
+                                    : Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.baseline,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        spacing: screenSize.width * 0.02,
+                                        children: [
+                                          for (
+                                            var index = 0;
+                                            index < captionParts.length;
+                                            index++
+                                          ) ...[
+                                            if (index > 0)
+                                              _MemoryLaneAnimatedDigit(
+                                                value: captionValue,
+                                              ),
+                                            Flexible(
+                                              child: Text(
+                                                captionParts[index],
+                                                style: darkTheme
+                                                    .textTheme
+                                                    .bodyMuted,
+                                                textAlign: TextAlign.center,
+                                                softWrap: false,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
-                                    ],
-                                  ],
-                                ),
                               ),
                             ),
                             SizedBox(height: screenSize.height * 0.01),
