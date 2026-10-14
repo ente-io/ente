@@ -56,7 +56,8 @@ const initializeRouteHistory = (router: NextRouter) => {
         __N: boolean;
     };
     const navigation = performance.getEntriesByType("navigation")[0] as
-        PerformanceNavigationTiming | undefined;
+        | PerformanceNavigationTiming
+        | undefined;
     if (navigation?.type == "reload") {
         try {
             const saved = JSON.parse(
@@ -124,8 +125,10 @@ const startSpaceRouteTransition = async <T,>(
         typeof destination == "string"
             ? destination
             : (destination.pathname ?? "");
-    root.dataset.spaceRouteMotion = [fromPath, toPath].some((path) =>
-        path.startsWith(`${spaceRoutes.messages}/`),
+    root.dataset.spaceRouteMotion = [fromPath, toPath].some(
+        (path) =>
+            path.startsWith(`${spaceRoutes.messages}/`) ||
+            path.startsWith("/app/posts/"),
     )
         ? "fade-with-navigation"
         : "fade";

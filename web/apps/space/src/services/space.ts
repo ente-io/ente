@@ -63,6 +63,7 @@ interface SpacePostBase {
     caption?: string;
     friendID: string;
     height?: number;
+    likeCount?: number;
     name: string;
     postId: number;
     timestampMs: number;
@@ -454,6 +455,7 @@ const postBaseFromResponse = (
     caption: post.caption,
     friendID: author.id,
     isUnavailable: post.isUnavailable,
+    likeCount: post.likeCount,
     name: author.fullName || author.username,
     postId: post.postId,
     spaceId: post.spaceId,
@@ -1307,7 +1309,8 @@ export const createCurrentMediaPost = async ({
         return session.postId;
     } catch (error) {
         const uploadError = error as
-            (Error & { status?: number; code?: string }) | undefined;
+            | (Error & { status?: number; code?: string })
+            | undefined;
         logToDisk(
             `[error] Space post upload failed ${JSON.stringify({ requestId: session.requestId, stage, itemIndex, itemCount: images.length, bytes, status: uploadError?.status, code: uploadError?.code, name: uploadError?.name, message: uploadError?.message, stack: uploadError?.stack })}`.replaceAll(
                 spaceId,
@@ -1346,6 +1349,25 @@ export const loadCurrentCreatedPost = async (
         });
         await prependCachedSpaceFeedPost(spaceId, post);
         return post;
+    } finally {
+        releaseCurrentSpaceContext(ctx);
+    }
+};
+
+export const loadCurrentPostLikes = async (spaceId: string, postId: number) => {
+    const ctx = await ensureCurrentSpaceContext();
+    try {
+        const actors = await ctx.listPostLikes(spaceId, BigInt(postId));
+        return await Promise.all(
+            actors.map(async (item) => {
+                const actor = actorProfile(item);
+                actor.avatarUrl = await cachedAccountAvatarURLIfPresent(
+                    actor.spaceId,
+                    item.avatar,
+                );
+                return actor;
+            }),
+        );
     } finally {
         releaseCurrentSpaceContext(ctx);
     }
