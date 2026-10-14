@@ -1,7 +1,6 @@
 package io.ente.ensu.chat
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -249,8 +248,9 @@ internal fun MessageInput(
                         fieldValue = newValue
                         onMessageChange(newValue.text)
                     },
-                    modifier = Modifier.weight(1f).focusRequester(focusRequester).focusable(),
+                    modifier = Modifier.weight(1f).focusRequester(focusRequester),
                     textStyle = EnsuTypography.message.copy(color = EnsuColor.textPrimary()),
+                    visualTransformation = LongMessageVisualTransformation,
                     minLines = 1,
                     maxLines = 5,
                     keyboardOptions =

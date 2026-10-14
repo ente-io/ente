@@ -8,7 +8,7 @@ struct ChatView: View {
 
     @StateObject private var viewState = ChatViewState()
     @StateObject private var keyboard = KeyboardObserver()
-    @FocusState private var isInputFocused: Bool
+    @State private var isInputFocused = false
 
     private var editingMessage: RenderedChatMessage? {
         guard let editingId = viewModel.editingMessageId else { return nil }
