@@ -75,15 +75,17 @@ export const SpaceHomeHeader: React.FC<{ profile: SetupProfile | null }> = ({
                 color: spaceText,
                 display: "grid",
                 gridTemplateColumns: "44px minmax(0, 1fr) 44px",
-                height: 68,
+                height: "calc(68px + var(--space-ios-safe-area-top, 0px))",
                 mx: "auto",
-                px: 2,
+                pt: "var(--space-ios-safe-area-top, 0px)",
+                pl: "max(16px, var(--space-ios-safe-area-left, 0px))",
+                pr: "max(16px, var(--space-ios-safe-area-right, 0px))",
                 position: "sticky",
                 top: 0,
                 transform: visible ? "translateY(0)" : "translateY(-100%)",
                 transition: visible
-                    ? "transform 220ms cubic-bezier(0.2, 0, 0, 1)"
-                    : "transform 360ms ease-in-out",
+                    ? "transform 340ms cubic-bezier(0.4, 0, 0.2, 1)"
+                    : "transform 440ms cubic-bezier(0.4, 0, 0.2, 1)",
                 width: "100%",
                 zIndex: 10,
                 "@media (prefers-reduced-motion: reduce)": {

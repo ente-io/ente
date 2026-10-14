@@ -266,6 +266,7 @@ const Page: React.FC = () => {
     );
 
     if (
+        (profileLoadStatus == "loading" && !profile) ||
         (profileLoadStatus == "error" &&
             feedItems.length == 0 &&
             localFeedPosts.length == 0) ||

@@ -162,9 +162,10 @@ const PublicFriendRequestScreen: React.FC<PublicFriendRequestScreenProps> = ({
                     gridTemplateColumns: "40px 1fr 40px",
                     height: 40,
                     maxWidth: 390,
-                    mt: "clamp(24px, 5.5svh, 44px)",
+                    mt: "calc(clamp(24px, 5.5svh, 44px) + var(--space-ios-safe-area-top, 0px))",
                     mx: "auto",
-                    px: 3,
+                    pl: "max(24px, var(--space-ios-safe-area-left, 0px))",
+                    pr: "max(24px, var(--space-ios-safe-area-right, 0px))",
                     width: "100%",
                 }}
             >
