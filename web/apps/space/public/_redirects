@@ -18,6 +18,7 @@
 /manifest-public.webmanifest    /manifest-public.webmanifest    200
 /favicon.ico    /favicon.ico    200
 /sw.js    /sw.js    200
+/ios-pwa.js    /ios-pwa.js    200
 /passkeys/finish    /passkeys/finish    200
 /passkeys/verify    /passkeys/verify    200
 /create-profile    /create-profile    200
