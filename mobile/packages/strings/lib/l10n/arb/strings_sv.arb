@@ -1,4 +1,12 @@
 {
+  "createMyAccount": "Skapa mitt konto",
+  "@createMyAccount": {
+    "description": "Create account button on the Photos onboarding screen"
+  },
+  "onboardingOrganizeDesc": "Organisera dina foton och videor. Alla minnen på en plats.",
+  "@onboardingOrganizeDesc": {
+    "description": "Description on the Photos onboarding screen"
+  },
   "wallpaper": "Bakgrundsbild",
   "setWallpaper": "Ställ in bakgrundsbild",
   "wallpaperHome": "Startskärm",
@@ -819,6 +827,7 @@
   "credentialNotesHint": "Aaterstaellningsmetoder, saekerhetsfraagar, ...",
   "criticalUpdateAvailable": "Kritisk uppdatering tillgänglig",
   "crop": "Beskär",
+  "cropAndRotate": "Beskär och rotera",
   "curatedMemories": "Utvalda minnen",
   "currentBackupFolder": "Aktuell mapp för säkerhetskopia:",
   "currentlyRunning": "körs just nu",
@@ -1288,7 +1297,7 @@
   "enableAutomaticBackups": "Automatisk säkerhetskopiering",
   "enableBackupsIosInstruction": "För att aktivera säkerhetskopior på iOS, välj en mapp i Filer (till exempel \"På min iPhone\").",
   "enableComment": "Kommentarer och reaktioner",
-  "enableDownloadsToAllowJoining": "Aktivera hämtningar för att tillåta andra att gå med.",
+  "enableDownloadsToAllowJoining": "Aktivera hämtningar för att kunna gå med.",
   "enabled": "Aktiverad",
   "enableMaps": "Aktivera kartor",
   "encrypted": "Krypterad",
@@ -1460,63 +1469,6 @@
       "number": {
         "type": "String",
         "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionMonthsAgo": "{name} {count, plural, one{{number} månad sedan} other{{number} månader sedan}}",
-  "@memoryLaneCaptionMonthsAgo": {
-    "description": "Memory Lane caption in elapsed months. Always keep the number, including for one.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "number": {
-        "type": "String",
-        "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionWeeksAgo": "{name} {count, plural, one{{number} vecka sedan} other{{number} veckor sedan}}",
-  "@memoryLaneCaptionWeeksAgo": {
-    "description": "Memory Lane caption in elapsed weeks. Always keep the number, including for one.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "number": {
-        "type": "String",
-        "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionDaysAgo": "{name} {count, plural, one{{number} dag sedan} other{{number} dagar sedan}}",
-  "@memoryLaneCaptionDaysAgo": {
-    "description": "Memory Lane caption in elapsed days. Always keep the number, including for one.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "number": {
-        "type": "String",
-        "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionToday": "{name} i dag",
-  "@memoryLaneCaptionToday": {
-    "description": "Memory Lane caption for a photo taken today, without a number.",
-    "placeholders": {
-      "name": {
-        "type": "String"
       }
     }
   },
@@ -1936,15 +1888,43 @@
   "ignore": "Ignorera",
   "ignored": "ignorerad",
   "ignorePerson": "Ignorera person",
+  "imageEditorAlignCenter": "Centrera",
+  "imageEditorAlignLeft": "Vänsterjustera",
+  "imageEditorAlignRight": "Högerjustera",
+  "imageEditorBackgroundColor": "Bakgrundsfärg",
+  "imageEditorBlue": "Blå",
+  "imageEditorBold": "Fetstil",
   "imageEditorBrightness": "Ljusstyrka",
   "imageEditorContrast": "Kontrast",
+  "imageEditorCustomColor": "Anpassad färg",
+  "imageEditorDuplicate": "Duplicera",
+  "imageEditorEnterText": "Ange text",
   "imageEditorExposure": "Exponering",
   "imageEditorFade": "Tona",
+  "imageEditorGreen": "Grön",
   "imageEditorHue": "Nyans",
-  "imageEditorLuminance": "Luminans",
+  "imageEditorItalic": "Kursiv",
+  "imageEditorNoBackground": "Ingen bakgrund",
+  "@imageEditorNoBackground": {
+    "description": "Text background style with no visible background"
+  },
+  "imageEditorOrange": "Orange",
+  "imageEditorPink": "Rosa",
+  "imageEditorPurple": "Lila",
+  "imageEditorRed": "Röd",
   "imageEditorSaturation": "Mättnad",
-  "imageEditorSharpness": "Skärpa",
   "imageEditorTemperature": "Temperatur",
+  "imageEditorText": "Text",
+  "@imageEditorText": {
+    "description": "Tool for adding text to a photo"
+  },
+  "imageEditorTextColor": "Textfärg",
+  "imageEditorTint": "Ton",
+  "imageEditorTranslucentBackground": "Genomskinlig bakgrund",
+  "@imageEditorTranslucentBackground": {
+    "description": "Text background style with a half-transparent color"
+  },
+  "imageEditorWhite": "Vit",
   "imageNotAnalyzed": "Bild inte analyserad",
   "immediate": "Omedelbart",
   "immediately": "Omedelbart",
@@ -1963,6 +1943,15 @@
   "importEnteEncGuide": "Välj den krypterade JSON-filen som exporteras från Ente",
   "importEnterSetupKey": "Ange en konfigurationskod",
   "importFailureDesc": "Kunde inte tolka den valda filen.",
+  "importFileTooLarge": "Den markerade filen är för stor. Maximal storlek: {size}.",
+  "@importFileTooLarge": {
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "10 MiB"
+      }
+    }
+  },
   "importFromGallery": "Importera från galleri",
   "importGoogleAuthConfirmation": "{codeCount, plural, one{Importera 1 kod från Google Authenticator?} other{Importera {codeCount} koder från Google Authenticator?}}",
   "@importGoogleAuthConfirmation": {
@@ -2781,6 +2770,7 @@
   },
   "noResult": "Inga resultat",
   "noResultsFound": "Inga resultat hittades",
+  "noMatchingResultsFound": "Inga matchande resultat hittades",
   "noSessionsFound": "Inga sessioner hittades!",
   "noSimilarImagesFound": "Inga liknande bilder hittades",
   "noSuggestionsForPerson": "Inga förslag för {personName}",
@@ -3952,6 +3942,10 @@
   "sendInvite": "Skicka inbjudan",
   "sendLink": "Skicka länk",
   "sendLogsDescription": "Detta kommer att skicka över loggar för att hjälpa oss felsöka ditt problem. Även om vi vidtar försiktighetsåtgärder för att säkerställa att känslig information inte loggas, uppmuntrar vi dig att se dessa loggar innan du delar dem.",
+  "sendPhoto": "Skicka foto",
+  "@sendPhoto": {
+    "description": "Share a copy of the current photo using the system share sheet, as opposed to sending a viewing link"
+  },
   "sendQrCode": "Skicka QR-kod",
   "sendToEmail": "Skicka till {email}",
   "@sendToEmail": {
@@ -3961,6 +3955,10 @@
         "example": "support@ente.com"
       }
     }
+  },
+  "sendVideo": "Skicka video",
+  "@sendVideo": {
+    "description": "Share a copy of the current video using the system share sheet, as opposed to sending a viewing link"
   },
   "serverEndpoint": "Serverns slutpunkt",
   "@serverEndpoint": {
@@ -4194,6 +4192,7 @@
   "sortNewestFirst": "Nyast först",
   "sortOldestFirst": "Äldst först",
   "sortZToA": "Z–A",
+  "speed": "Hastighet",
   "sportsAction": "Matchdags",
   "sportsWithThem": "Sport med {name}",
   "@sportsWithThem": {
@@ -4256,6 +4255,7 @@
       }
     }
   },
+  "straighten": "Räta ut",
   "streamDetails": "Strömdetaljer",
   "streetArt": "Gatukonstberättelser",
   "streetFood": "Gatumat",
@@ -5048,7 +5048,7 @@
       }
     }
   },
-  "removePersonBody": "{count, plural, =0{Personen förlorar omedelbart åtkomsten till albumet.} one{Personen förlorar omedelbart åtkomsten till albumet. Fotot som personen lade till tas bort.} other{Personen förlorar omedelbart åtkomsten till albumet. De {count} foton som personen lade till tas bort.}}",
+  "removePersonBody": "{count, plural, =0{Personen förlorar omedelbart åtkomsten till albumet.} one{Personen förlorar omedelbart åtkomsten till albumet. Det {count} foto som personen lade till tas bort.} other{Personen förlorar omedelbart åtkomsten till albumet. De {count} foton som personen lade till tas bort.}}",
   "@removePersonBody": {
     "placeholders": {
       "count": {
@@ -5064,7 +5064,7 @@
       }
     }
   },
-  "leaveAlbumBody": "{count, plural, =0{Du förlorar omedelbart åtkomsten till albumet.} one{Du förlorar omedelbart åtkomsten till albumet. Fotot som du lade till tas bort.} other{Du förlorar omedelbart åtkomsten till albumet. De {count} foton som du lade till tas bort.}}",
+  "leaveAlbumBody": "{count, plural, =0{Du förlorar omedelbart åtkomsten till albumet.} one{Du förlorar omedelbart åtkomsten till albumet. Det {count} foto som du lade till tas bort.} other{Du förlorar omedelbart åtkomsten till albumet. De {count} foton som du lade till tas bort.}}",
   "@leaveAlbumBody": {
     "placeholders": {
       "count": {

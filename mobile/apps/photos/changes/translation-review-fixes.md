@@ -1,0 +1,1 @@
+- Improved translations for sharing, account recovery, storage cleanup, and onboarding.

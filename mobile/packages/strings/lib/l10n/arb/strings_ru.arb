@@ -6,7 +6,7 @@
   "wallpaper": "Обои",
   "setWallpaper": "Установить как обои",
   "wallpaperHome": "Домашний экран",
-  "wallpaperLock": "Экран блокировки",
+  "wallpaperLock": "Блокировка экрана",
   "wallpaperBoth": "Домашний экран и экран блокировки",
   "wallpaperSet": "Обои установлены",
   "wallpaperFailed": "Не удалось установить обои",
@@ -422,17 +422,17 @@
       }
     }
   },
-  "backupModeCheckingForMoreItems": "Поиск других файлов",
+  "backupModeCheckingForMoreItems": "Проверка наличия других товаров",
   "backupModeFinishYourBackup": "Завершите резервное копирование",
   "backupModeKeepAppOpen": "Не закрывайте приложение",
   "backupModeNoBackupInProgress": "Резервное копирование не выполняется",
   "backupModeNoBackupInProgressDescription": "Начните резервное копирование, затем вернитесь в режим резервного копирования.",
   "backupModePlugInPhone": "Подключите телефон к зарядке. Резервные копии расходуют заряд батареи.",
-  "backupModePreservingYourMemories": "Сохраняем ваши воспоминания",
+  "backupModePreservingYourMemories": "Сохраните свои воспоминания",
   "backupModeScreenDimmingDescription": "Экран приглушается для экономии заряда батареи. Коснитесь его в любом месте, чтобы вернуться к яркости.",
   "backupModeScreenWillDim": "Экран автоматически приглушится для экономии заряда батареи",
-  "backupModeSettingsDescription": "Не закрывайте приложение до завершения резервного копирования",
-  "backupModeStart": "Включить режим резервного копирования",
+  "backupModeSettingsDescription": "Не закрывайте приложение, до завершения резервного копирования",
+  "backupModeStart": "Начать резервное копирование",
   "backupModeStayInEnte": "Оставайтесь в Ente. Переключение между приложениями приостанавливает резервное копирование.",
   "backupModeTapToWakeScreen": "Нажмите, чтобы разбудить экран",
   "backupOnlyNewPhotos": "Резервное копирование только новых фото",
@@ -784,7 +784,7 @@
   "count": "Количество",
   "cozyCafes": "Кофейный уголок",
   "craftingMemoriesFirstHalf": "Создание",
-  "craftingMemoriesSecondHalf": "воспоминаний",
+  "craftingMemoriesSecondHalf": "воспоминания",
   "crashAndErrorReporting": "Отчёт об ошибках",
   "crashReporting": "Отчёты об ошибках",
   "create": "Создать",
@@ -938,7 +938,7 @@
       }
     }
   },
-  "deleteLegacyKitMessage": "Переданные другим людям листы больше нельзя будет использовать для восстановления",
+  "deleteLegacyKitMessage": "Общие листы больше не могут использоваться для восстановления",
   "deleteLink": "Удалить ссылку",
   "deleteLinkQuestion": "Удалить ссылку?",
   "deleteLocation": "Удалить местоположение",
@@ -1292,7 +1292,7 @@
   "enableAutomaticBackups": "Автоматическое резервное копирование",
   "enableBackupsIosInstruction": "Чтобы включить резервное копирование на iOS, выберите папку в меню «Файлы» (например, «На моем iPhone»).",
   "enableComment": "Комментарии и реакции",
-  "enableDownloadsToAllowJoining": "Разрешите скачивание файлов, чтобы разрешить присоединение.",
+  "enableDownloadsToAllowJoining": "Разрешите загрузку файлов, чтобы разрешить присоединение.",
   "enabled": "Включено",
   "enableMaps": "Включить карты",
   "encrypted": "Зашифрованный",
@@ -1464,63 +1464,6 @@
       "number": {
         "type": "String",
         "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionMonthsAgo": "{name} {count, plural, one{{number} месяц назад} few{{number} месяца назад} many{{number} месяцев назад} other{{number} месяца назад}}",
-  "@memoryLaneCaptionMonthsAgo": {
-    "description": "Memory Lane caption in elapsed months. Always keep the number, including for one.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "number": {
-        "type": "String",
-        "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionWeeksAgo": "{name} {count, plural, one{{number} неделю назад} few{{number} недели назад} many{{number} недель назад} other{{number} недели назад}}",
-  "@memoryLaneCaptionWeeksAgo": {
-    "description": "Memory Lane caption in elapsed weeks. Always keep the number, including for one.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "number": {
-        "type": "String",
-        "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionDaysAgo": "{name} {count, plural, one{{number} день назад} few{{number} дня назад} many{{number} дней назад} other{{number} дня назад}}",
-  "@memoryLaneCaptionDaysAgo": {
-    "description": "Memory Lane caption in elapsed days. Always keep the number, including for one.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "number": {
-        "type": "String",
-        "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionToday": "{name} сегодня",
-  "@memoryLaneCaptionToday": {
-    "description": "Memory Lane caption for a photo taken today, without a number.",
-    "placeholders": {
-      "name": {
-        "type": "String"
       }
     }
   },
@@ -1769,7 +1712,7 @@
   "@generatingEncryptionKeysTitle": {
     "description": "Generating encryption keys title"
   },
-  "getAnotherPartOfKitFrom": "Другую часть комплекта можно получить у следующих людей:",
+  "getAnotherPartOfKitFrom": "Дополнительную часть комплекта можно получить здесь",
   "getInTouch": "Связь",
   "getStarted": "Начать",
   "gettingReady": "Идет подготовка",
@@ -1837,7 +1780,7 @@
   "hintForDesktop": "Щелкните правой кнопкой мыши по коду, чтобы редактировать его или удалить.",
   "hintForMobile": "Нажмите и удерживайте код, чтобы отредактировать или удалить его.",
   "historicSites": "Историческое место",
-  "homeEmptyStateLegacyDescription": "Настройте Legacy, чтобы ваши близкие могли получить доступ к важной информации в ваше отсутствие",
+  "homeEmptyStateLegacyDescription": "Создайте систему завещаний таким образом, чтобы ваши близкие могли получить доступ к важной информации в ваше отсутствие",
   "@homeEmptyStateLegacyDescription": {
     "description": "Description shown in the empty Locker home state above the Legacy setup action"
   },
@@ -1857,9 +1800,7 @@
   "imageEditorExposure": "Экспозиция",
   "imageEditorFade": "Затухание",
   "imageEditorHue": "Оттенок",
-  "imageEditorLuminance": "Светимость",
   "imageEditorSaturation": "Насыщенность",
-  "imageEditorSharpness": "Резкость",
   "imageEditorTemperature": "Температура",
   "imageNotAnalyzed": "Изображение не проанализировано",
   "immediate": "Мгновенно",
@@ -1963,7 +1904,7 @@
   "invalidProtonExportMessage": "Выбранный файл не является допустимым экспортом Proton Authenticator.",
   "invalidProtonExportTitle": "Неверный экспорт Proton",
   "invalidQRCode": "Неверный QR-код",
-  "invalidRecoveryKey": "Введённый вами ключ восстановления недействителен. Убедитесь, что он содержит 24 слова, и проверьте правильность написания каждого слова.\n\nЕсли вы ввели старый код восстановления, убедитесь, что он состоит из 64 символов, и проверьте каждый из них.",
+  "invalidRecoveryKey": "Введенный вами ключ восстановления недействителен. Убедитесь, что он содержит 24 слова, и проверьте правильность написания каждого символа.\n\nЕсли вы ввели старый код восстановления, убедитесь, что он состоит из 64 символов, и проверьте каждый из них.",
   "invalidReferralCode": "Неверный код",
   "invite": "Пригласить",
   "inviteLimitReached": "Вы добавили 5 приглашений. Удалите одно, чтобы добавить другое",
@@ -2067,7 +2008,7 @@
   "legacyDesc": "Надежные контакты, Legacy-набор и план восстановления аккаунта",
   "legacyEmptyStateDescription": "В ваше отсутствие Legacy поможет вашим близким получить доступ к вашей информации в Locker.",
   "legacyIntroCard1": "Мы даем вам 3 карты",
-  "legacyIntroCard2": "Передайте их\n3 людям, которым доверяете",
+  "legacyIntroCard2": "Поделитесь ими с\n3 человека, которым вы доверяете",
   "legacyIntroCard3": "Любые 2 из этих 3 человек могут разблокировать вашу информацию в Locker",
   "legacyIntroTitle": "Помогите близким получить доступ к важной информации в ваше отсутствие.",
   "legacyInvite": "{email} пригласил вас стать доверенным контактом",
@@ -2079,7 +2020,7 @@
       }
     }
   },
-  "legacyKitAllSetDescription": "Вы можете в любое время создать дополнительные комплекты Legacy или отозвать доступ.",
+  "legacyKitAllSetDescription": "Вы можете в любое время настроить Legacy-набор или отозвать доступ.",
   "legacyKitAllSetTitle": "Ваш комплект Legacy полностью готов!",
   "legacyKitEmptyDescription": "Дайте возможность людям, которым вы доверяете, объединиться для восстановления вашего аккаунта",
   "legacyKitMaxReached": "Вы можете создать до 5 комплектов Legacy.",
@@ -2149,7 +2090,7 @@
   "librarySharingAllCurrentAlbumsShared": "Вы уже поделились всеми текущими альбомами",
   "librarySharingBannerDescription": "Поделитесь всеми своими альбомами",
   "librarySharingDisable": "Отключить",
-  "librarySharingDisableDescription": "Альбомы, которыми вы уже поделились, останутся доступными для {recipient}, включая фотографии, которые вы в них добавите. Новые альбомы не будут автоматически становиться общими.\n\nЧтобы прекратить общий доступ к альбому, коснитесь его и выберите «{stopSharingLabel}».",
+  "librarySharingDisableDescription": "Альбомы, которыми вы уже поделились, останутся доступными для {recipient}, включая фотографии, которые вы в них добавите. Новые альбомы не будут автоматически становится общими.\n\nЧтобы прекратить общий доступ к альбому, коснитесь его и выберите «{stopSharingLabel}».",
   "@librarySharingDisableDescription": {
     "placeholders": {
       "recipient": {
@@ -2163,7 +2104,7 @@
     }
   },
   "librarySharingDisableTitle": "Отключить общий доступ к библиотеке?",
-  "librarySharingEnableDescription": "Ваши существующие альбомы и все альбомы, которые вы создадите в будущем, будут автоматически доступны {recipient}.",
+  "librarySharingEnableDescription": "Ваши существующие альбомы, а также любые альбомы, которые вы создадите в будущем, будут автоматически переданы {recipient}.",
   "@librarySharingEnableDescription": {
     "placeholders": {
       "recipient": {
@@ -2187,6 +2128,7 @@
   "librarySharingHiddenAlbumsDescription": "Скрытые альбомы не будут доступны для просмотра. Вы можете прекратить доступ к любому альбому в любое время.",
   "librarySharingMixed": "Смешанное",
   "librarySharingNoAlbumsToShare": "Пока нет альбомов для общего доступа",
+  "librarySharingRetryFailedAlbums": "Повторить для проблемных альбомов",
   "librarySharingRole": "Роль",
   "librarySharingRoles": "Роли",
   "librarySharingShareAlbums": "Поделиться альбомами",
@@ -2390,7 +2332,7 @@
       }
     }
   },
-  "menubarMode": "Режим строки меню",
+  "menubarMode": "Режимы меню",
   "message": "Сообщение",
   "minimizeAppOnCopy": "Сворачивать приложение при копировании",
   "minimizeToTrayOnClose": "Сворачивать в трей при закрытии",
@@ -3178,7 +3120,7 @@
       "storageInGB": {}
     }
   },
-  "referralStep3": "3. Вы получите {storageInGB} ГБ бесплатно, когда они перейдут на платный тариф",
+  "referralStep3": "3. Вы получите {storageInGB} Гб при обновлении",
   "@referralStep3": {
     "placeholders": {
       "storageInGB": {}
@@ -3483,7 +3425,7 @@
   "scanCode": "Сканировать код",
   "scanDocumentDescription": "Просканируйте важные документы.",
   "scanDocumentTitle": "Документ",
-  "scanFilenamePrefix": "Скан",
+  "scanFilenamePrefix": "Сканировать",
   "@scanFilenamePrefix": {
     "description": "Prefix of the default filename for a scanned document PDF, e.g. 'Scan 13 Aug 2026, 14.30.pdf'"
   },
@@ -3699,7 +3641,7 @@
   "selectOneDateAndTime": "Выбрать одну дату и время",
   "selectOneDateAndTimeForAll": "Выберите одну дату и время для всех",
   "selectPerson": "Выбрать человека",
-  "selectPersonToLinkToThisContact": "Выберите человека, чтобы автоматически заполнить данные этого контакта",
+  "selectPersonToLinkToThisContact": "Выберите человека, для которого будет автоматически заполнено это контактное имя",
   "selectReason": "Выберите причину",
   "@selectReason": {
     "description": "Placeholder for account deletion reason picker"
@@ -3789,7 +3731,7 @@
   "@setupLegacy": {
     "description": "Short action label on the home banner that opens Legacy setup"
   },
-  "setupLegacyDescription": "Выберите 3 человек, которым доверяете. Любые двое из них вместе смогут получить доступ к вашей информации. Один человек не сможет сделать это самостоятельно.",
+  "setupLegacyDescription": "Выберите 3 человек, которым вы доверяете. Любые 2 из них вместе могут получить доступ к вашей информации - но не один из них.",
   "setupYourLegacy": "Настроить Наследие",
   "share": "Поделиться",
   "shareALink": "Поделиться ссылкой",
@@ -3835,7 +3777,7 @@
   "shareTextRecommendUsingEnte": "Скачайте Ente, чтобы мы могли легко обмениваться файлами оригинального качества\n\nhttps://ente.com",
   "shareTextRecommendUsingEnteForFamily": "Скачай Ente, чтобы я мог добавить тебя в свой семейный тариф\n\nhttps://ente.com",
   "shareTextRecommendUsingEnteForPhotos": "Скачай Ente, чтобы мы могли легко делиться фото и видео в оригинальном качестве\n\nhttps://ente.com",
-  "shareTextReferralInvite": "Получите 20 Гб бесплатно с помощью Ente Photos! Скачайте приложение по ссылке https://ente.com/invite и используйте код {referralCode}.",
+  "shareTextReferralInvite": "Получите 20 Гб бесплатно с помощью Ente Photos! Скачайте приложение по ссылке https://ente.com/invite and use code {referralCode}.",
   "@shareTextReferralInvite": {
     "placeholders": {
       "referralCode": {}
@@ -4160,7 +4102,7 @@
   "@thisWillLogYouOutOfTheFollowingDevice": {
     "description": "Warning message for logging out of another device"
   },
-  "thisWillLogYouOutOfThisDevice": "Это приведёт к выходу из системы на этом устройстве!",
+  "thisWillLogYouOutOfThisDevice": "Это приведет к выходу из системы на устройстве!",
   "@thisWillLogYouOutOfThisDevice": {
     "description": "Warning message for logging out of current device"
   },
@@ -4494,7 +4436,7 @@
   "viewAllHelpTopics": "Посмотреть все темы справки",
   "viewer": "Зритель",
   "viewLargeFiles": "Большие файлы",
-  "viewLargeFilesDesc": "Найти элементы, которые занимают больше всего места",
+  "viewLargeFilesDesc": "Определить элементы, используя наибольшее количество места",
   "viewLogs": "Просмотреть логи",
   "@viewLogs": {
     "description": "Button to view logs"
@@ -4614,7 +4556,7 @@
     }
   },
   "youAreOnTheLatestVersion": "Вы используете последнюю версию",
-  "youCannotAddYourselfAsLegacyContact": "Вы не можете добавить себя в качестве доверенного контакта Legacy",
+  "youCannotAddYourselfAsLegacyContact": "Вы не можете добавить себя в качестве контактного лица для связи с предыдущими контактами",
   "youCannotDowngradeToThisPlan": "Вы не можете понизить до этого тарифа",
   "youCannotShareWithYourself": "Вы не можете поделиться с самим собой",
   "youHaveNoFileSuggestedForDeletion": "У вас нет файлов, которые были предложены для удаления",
@@ -4651,7 +4593,7 @@
   "cameraPermissionRequired": "Для фотографирования необходим доступ к камере.",
   "cameraPermissionSettings": "Доступ к камере отключен. Включите его в настройках, чтобы продолжить.",
   "cameraPermissionRestricted": "Доступ к камере на этом устройстве ограничен.",
-  "legacyKitSheetGreeting": "Здравствуйте, {name}! Храните этот лист в надёжном месте.",
+  "legacyKitSheetGreeting": "Привет {name}, пожалуйста, сохрани это.",
   "@legacyKitSheetGreeting": {
     "description": "Greeting printed at the top of a Legacy kit recovery sheet, addressed to the person holding it",
     "placeholders": {
@@ -4684,7 +4626,7 @@
       }
     }
   },
-  "legacyKitSheetStepScan": "Отсканируйте {count} листа.",
+  "legacyKitSheetStepScan": "Сканируйте листы {count}.",
   "@legacyKitSheetStepScan": {
     "description": "Third recovery step. {count} is how many sheets must be scanned together",
     "placeholders": {
@@ -4723,7 +4665,7 @@
     }
   },
   "shareAllPersonPhotos": "Поделитесь всеми фотографиями",
-  "shareAllPersonPhotosDescription": "Все фотографии, на которых есть {name}, включая будущие",
+  "shareAllPersonPhotosDescription": "Все фотографии {name} включая будущие фото",
   "@shareAllPersonPhotosDescription": {
     "placeholders": {
       "name": {
@@ -4742,7 +4684,7 @@
     }
   },
   "sharedByYou": "Вы поделились",
-  "sharedByOwner": "Альбомом делится {owner}",
+  "sharedByOwner": "Поделился {owner}",
   "@sharedByOwner": {
     "placeholders": {
       "owner": {
@@ -4750,7 +4692,7 @@
       }
     }
   },
-  "youAreViewer": "Ваша роль — зритель",
+  "youAreViewer": "Вы смотрите",
   "youAreCollaborator": "Вы соавтор",
   "youAreAdmin": "Вы админ",
   "emptyAlbumShareMessage": "Вы еще ни с кем не делились этим альбомом.",

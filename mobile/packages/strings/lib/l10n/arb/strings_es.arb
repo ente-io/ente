@@ -250,7 +250,7 @@
     "description": "Action of 'Archiving' an element"
   },
   "archiveAlbum": "Archivar álbum",
-  "archiveCollectionName": "Archivo",
+  "archiveCollectionName": "Archivar",
   "@archiveCollectionName": {
     "description": "Name of the 'Archive' collection"
   },
@@ -302,7 +302,7 @@
   "authToInitiateAccountDeletion": "Desbloquear para eliminar tu cuenta",
   "authToInitiateSignIn": "Por favor, autentícate para iniciar la sesión para realizar la copia de seguridad.",
   "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza",
-  "authToManageLegacyKit": "Autentícate para administrar los kits de Legacy",
+  "authToManageLegacyKit": "Autenticar para administrar kits heredados",
   "authToSetBackupPassword": "Autenticar para establecer la contraseña de la copia de seguridad",
   "authToUpdateBackupPassword": "Autenticar para actualizar contraseña de la copia de seguridad",
   "authToViewPasskey": "Por favor, autentícate para ver tu clave de acceso",
@@ -345,7 +345,7 @@
   "backingUpLastSevenDaysPhotos": "Respaldar fotos de los últimos 7 días",
   "backup": "Copia de seguridad",
   "backupAndSync": "Copia de seguridad y sincronización",
-  "backupAndSyncDesc": "Copias de seguridad automáticas, estado de sincronización y subidas",
+  "backupAndSyncDesc": "Realizar copias de seguridad automáticamente, mostrar estadísticas de sincronización y subidas",
   "backupCreated": "¡Copia de seguridad creada!",
   "backupFailed": "La copia de seguridad ha fallado",
   "backupFile": "Archivo de copia de seguridad",
@@ -358,7 +358,7 @@
   "backupModeNoBackupInProgressDescription": "Inicia una copia de seguridad. Luego, vuelve al modo de copia de seguridad.",
   "backupModePlugInPhone": "Carga tu teléfono. Las copias de seguridad consumen batería.",
   "backupModePreservingYourMemories": "Guardando tus recuerdos",
-  "backupModeScreenDimmingDescription": "La pantalla se atenúa para ahorrar batería. Tócala en cualquier momento para volver.",
+  "backupModeScreenDimmingDescription": "La pantalla se atenúa para ahorrar batería. Toca en cualquier momento para encender.",
   "backupModeScreenWillDim": "La pantalla se atenuará automáticamente para ahorrar batería",
   "backupModeSettingsDescription": "Mantén la aplicación abierta para terminar la copia de seguridad",
   "backupModeStart": "Iniciar modo de copia de seguridad",
