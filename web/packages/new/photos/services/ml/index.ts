@@ -25,11 +25,7 @@ import { deleteUserEntity } from "../user-entity/remote";
 import type { ClusterFacesReason, FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, savedFaceIndex, savedIndexCounts } from "./db";
-import {
-    annotateFileFaces,
-    fileIDFromFaceID,
-    type AnnotatedFaceID,
-} from "./face";
+import { fileIDFromFaceID } from "./face";
 import {
     _applyPersonSuggestionUpdates,
     filterNamedPeople,
@@ -337,7 +333,12 @@ export const clipMatches = (
 ): Promise<CLIPMatches | undefined> =>
     worker().then((w) => w.clipMatches(searchPhrase));
 
-export type { AnnotatedFaceID } from "./face";
+export interface AnnotatedFaceID {
+    faceID: string;
+    personID: string;
+    personName: string | undefined;
+    isIgnored: boolean;
+}
 
 export const getAnnotatedFacesForFile = async (
     file: EnteFile,
@@ -350,7 +351,28 @@ export const getAnnotatedFacesForFile = async (
     const personByFaceID = _state.peopleStateSnapshot?.personByFaceID;
     if (!personByFaceID) return [];
 
-    return annotateFileFaces(index.faces, personByFaceID);
+    const sortableFaces: [AnnotatedFaceID, number, boolean][] = [];
+    for (const { faceID, score } of index.faces) {
+        const person = personByFaceID.get(faceID);
+        if (!person) continue;
+        sortableFaces.push([
+            {
+                faceID,
+                personID: person.id,
+                personName: person.name,
+                isIgnored: person.type == "cgroup" && person.isHidden,
+            },
+            score,
+            person.type == "cgroup",
+        ]);
+    }
+
+    sortableFaces.sort((a, b) => {
+        if (a[0].isIgnored != b[0].isIgnored) return a[0].isIgnored ? 1 : -1;
+        if (a[2] != b[2]) return a[2] ? -1 : 1;
+        return b[1] - a[1];
+    });
+    return sortableFaces.map(([f]) => f);
 };
 
 export const faceCrop = async (faceID: string, file: EnteFile) => {
