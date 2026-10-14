@@ -11,13 +11,31 @@ export const SpacePostPreviewThumbnail = ({
     post?: SpacePostPreview;
 }) =>
     post?.imageUrl ? (
-        <Box sx={{ position: "relative", width: 44, height: 44 }}>
+        <Box
+            sx={{
+                borderRadius: "20%",
+                height: 44,
+                isolation: "isolate",
+                position: "relative",
+                width: 44,
+                "&::after": {
+                    borderRadius: "inherit",
+                    boxShadow: "inset 0 0 0 1px #282828",
+                    content: '""',
+                    inset: 0,
+                    mixBlendMode: "lighten",
+                    pointerEvents: "none",
+                    position: "absolute",
+                    zIndex: 2,
+                },
+            }}
+        >
             <Box
                 component="img"
                 alt=""
                 src={post.imageUrl}
                 sx={{
-                    borderRadius: "20%",
+                    borderRadius: "inherit",
                     display: "block",
                     height: "100%",
                     objectFit: "cover",

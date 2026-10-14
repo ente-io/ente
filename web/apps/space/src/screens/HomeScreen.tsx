@@ -71,6 +71,7 @@ import {
     homeFeedEntries,
     homeFeedSeparatorBefore,
     type HomeFeedEntry,
+    type HomeFeedPost,
 } from "utils/home-feed";
 import {
     spacePostFrameAspectRatio,
@@ -111,7 +112,7 @@ const feedPhotoCaptionTextSx = {
     textWrap: "balance",
 } as const;
 interface HomeScreenProps {
-    feedItems: SpacePost[];
+    feedItems: HomeFeedPost[];
     friendRequestSentToastName?: string;
     hasFeedLoadMoreError?: boolean;
     hasMoreFeedItems?: boolean;

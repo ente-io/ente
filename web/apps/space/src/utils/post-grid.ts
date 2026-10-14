@@ -3,6 +3,7 @@ import { minimumPostPhotoFrameAspectRatio } from "../styles/tiles";
 const gap = 8;
 
 interface PostGridPhoto {
+    batchIndex?: number;
     frameAspectRatio?: number;
     width?: number;
     height?: number;
@@ -108,10 +109,15 @@ export const layoutPostGrid = (
     let previousKind: PhotoGroup["kind"] | undefined;
     let previousSide: PhotoGroup["side"];
     while (tiles.length < photos.length) {
-        const candidates = photoGroups(
-            ratios.slice(tiles.length, tiles.length + (fullWidth ? 1 : 3)),
-            width,
-        );
+        const start = tiles.length;
+        let end = start + 1;
+        while (
+            end < photos.length &&
+            end < start + (fullWidth ? 1 : 3) &&
+            photos[end]!.batchIndex == photos[start]!.batchIndex
+        )
+            end++;
+        const candidates = photoGroups(ratios.slice(start, end), width);
         const score = (group: PhotoGroup) => {
             if (
                 group.tiles.length > 1 &&

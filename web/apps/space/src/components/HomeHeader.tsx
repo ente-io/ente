@@ -81,7 +81,9 @@ export const SpaceHomeHeader: React.FC<{ profile: SetupProfile | null }> = ({
                 position: "sticky",
                 top: 0,
                 transform: visible ? "translateY(0)" : "translateY(-100%)",
-                transition: "transform 220ms cubic-bezier(0.2, 0, 0, 1)",
+                transition: visible
+                    ? "transform 220ms cubic-bezier(0.2, 0, 0, 1)"
+                    : "transform 360ms ease-in-out",
                 width: "100%",
                 zIndex: 10,
                 "@media (prefers-reduced-motion: reduce)": {
