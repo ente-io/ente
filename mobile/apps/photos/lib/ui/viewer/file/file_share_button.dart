@@ -310,12 +310,7 @@ class _ShareDock extends StatelessWidget {
   final double maxHalfWidth;
   final ValueChanged<_FileShareAction> onSelected;
 
-  static const _colors = ColorTokens.dark;
-  static const _padding = 8.0;
-  static const _actionPadding = 8.0;
-  static const _iconSize = 20.0;
-  static const _horizontalInsets = _padding * 2 + 1;
-  static final _labelStyle = TextStyles.body.copyWith(color: _colors.textBase);
+  static final _labelStyle = TextStyles.body.copyWith(color: Colors.white);
 
   @override
   Widget build(BuildContext context) {
@@ -326,7 +321,7 @@ class _ShareDock extends StatelessWidget {
           textDirection: Directionality.of(context),
           textScaler: textScaler,
         );
-        var contentWidth = _iconSize;
+        var contentWidth = 26.0;
         for (final label in [fileLabel, linkLabel]) {
           painter.text = TextSpan(text: label, style: _labelStyle);
           painter.layout();
@@ -334,24 +329,16 @@ class _ShareDock extends StatelessWidget {
         }
         final halfWidth = math.min(
           maxHalfWidth,
-          math.max(kMinInteractiveDimension, contentWidth + _actionPadding * 2),
+          math.max(kMinInteractiveDimension, contentWidth + 24),
         );
-        final dockWidth = math.min(
-          constraints.maxWidth,
-          halfWidth * 2 + _horizontalInsets,
-        );
+        final dockWidth = math.min(constraints.maxWidth, halfWidth * 2 + 17);
         var stacked = false;
         if (textScaler.scale(_labelStyle.fontSize!) >=
             _labelStyle.fontSize! * 2) {
           painter.maxLines = 2;
           for (final label in [fileLabel, linkLabel]) {
             painter.text = TextSpan(text: label, style: _labelStyle);
-            painter.layout(
-              maxWidth: math.max(
-                0,
-                (dockWidth - _horizontalInsets) / 2 - _actionPadding * 2,
-              ),
-            );
+            painter.layout(maxWidth: math.max(0, (dockWidth - 17) / 2 - 24));
             stacked |= painter.didExceedMaxLines;
           }
         }
@@ -371,19 +358,19 @@ class _ShareDock extends StatelessWidget {
           action: _FileShareAction.link,
           stacked: stacked,
         );
-        final dividerColor = _colors.strokeFaint;
+        final dividerColor = Colors.white.withValues(alpha: 0.16);
         return SizedBox(
           width: stacked ? math.min(360, constraints.maxWidth) : dockWidth,
           child: Material(
             key: const ValueKey("file-share-dock"),
-            color: _colors.fillLight.withValues(alpha: 0.96),
+            color: ColorTokens.dark.fillLight.withValues(alpha: 0.96),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-              side: BorderSide(color: _colors.strokeDark),
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.22)),
             ),
             clipBehavior: Clip.antiAlias,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(_padding),
+              padding: const EdgeInsets.all(8),
               child: stacked
                   ? Column(
                       mainAxisSize: MainAxisSize.min,
@@ -420,11 +407,7 @@ class _ShareDock extends StatelessWidget {
     required _FileShareAction action,
     required bool stacked,
   }) {
-    final iconWidget = HugeIcon(
-      icon: icon,
-      color: _colors.iconColor,
-      size: _iconSize,
-    );
+    final iconWidget = HugeIcon(icon: icon, color: Colors.white, size: 26);
     final text = Text(
       label,
       style: _labelStyle,
@@ -432,24 +415,24 @@ class _ShareDock extends StatelessWidget {
     );
     return InkWell(
       key: ValueKey("file-share-${action.name}"),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       onTap: () => onSelected(action),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 64),
+        constraints: BoxConstraints(minHeight: stacked ? 64 : 88),
         child: Padding(
-          padding: const EdgeInsets.all(_actionPadding),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           child: stacked
               ? Row(
                   children: [
                     iconWidget,
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 16),
                     Expanded(child: text),
                   ],
                 )
               : Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [iconWidget, const SizedBox(height: 6), text],
+                  children: [iconWidget, const SizedBox(height: 10), text],
                 ),
         ),
       ),
