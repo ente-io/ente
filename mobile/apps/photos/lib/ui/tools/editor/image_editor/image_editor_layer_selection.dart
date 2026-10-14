@@ -69,7 +69,13 @@ LayerInteractionConfigs imageEditorLayerInteractionConfigs(
                   label: strings.imageEditorDuplicate,
                   icon: HugeIcons.strokeRoundedCopy01,
                   color: colors.iconColor,
-                  onTap: interactions.duplicated,
+                  onTap: () {
+                    interactions.duplicated();
+                    final state = editor();
+                    if (state != null) {
+                      _selectLayerWhenReady(state, state.activeLayers.last.id);
+                    }
+                  },
                 ),
                 _LayerAction(
                   label: strings.delete,
@@ -233,11 +239,11 @@ Future<TextLayer?> imageEditorCreateTextLayer(
   );
   if (layer == null) return null;
   layer.id = id;
-  _selectLayerAfterClose(state, id);
+  _selectLayerWhenReady(state, id);
   return layer;
 }
 
-void _selectLayerAfterClose(ProImageEditorState state, String id) {
+void _selectLayerWhenReady(ProImageEditorState state, String id) {
   void selectWhenReady(Duration _) {
     if (!state.mounted) return;
     if (state.isSubEditorOpen) {
@@ -320,7 +326,7 @@ Future<void> _editTextLayer(ProImageEditorState editor, TextLayer layer) async {
     index: editor.activeLayers.indexWhere((other) => other.id == layer.id),
     layer: updated,
   );
-  _selectLayerAfterClose(editor, layer.id);
+  _selectLayerWhenReady(editor, layer.id);
   WidgetsBinding.instance.addPostFrameCallback((_) {
     updated
       ..color = color
