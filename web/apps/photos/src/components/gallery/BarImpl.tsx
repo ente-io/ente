@@ -21,12 +21,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PeopleIcon from "@mui/icons-material/People";
+import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
     ButtonBase,
     Divider,
     Drawer,
     IconButton,
+    InputBase,
     Stack,
     Tooltip,
     Typography,
@@ -112,37 +114,85 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const mobile = useMediaQuery(useTheme().breakpoints.down("md"));
     const titleID = useId();
     const listRef = useRef<FixedSizeList | null>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const isSearching = mode == "albums" && !!searchQuery.trim();
+    const matchingCollectionSummaries = useMemo(() => {
+        if (!isSearching) return collectionSummaries;
+        const search = searchQuery.trim().toLowerCase();
+        return collectionSummaries.filter((cs) =>
+            cs.name.toLowerCase().includes(search),
+        );
+    }, [collectionSummaries, searchQuery, isSearching]);
     const [viewportHeight, setViewportHeight] = useState(0);
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter | undefined>(
         "ente",
     );
+    const [searchAlbumFilter, setSearchAlbumFilter] = useState<
+        AlbumFilter | null | undefined
+    >(null);
     const visibleAlbumFilters = useMemo(
-        () => getVisibleAlbumFilters(collectionSummaries),
-        [collectionSummaries],
+        () =>
+            getVisibleAlbumFilters(collectionSummaries).filter(
+                ({ value }) =>
+                    !isSearching ||
+                    matchingCollectionSummaries.some((cs) =>
+                        matchesAlbumFilter(cs, value),
+                    ),
+            ),
+        [collectionSummaries, isSearching, matchingCollectionSummaries],
     );
+    const selectedAlbumFilter = isSearching
+        ? searchAlbumFilter === null
+            ? (albumFilter ?? visibleAlbumFilters[0]?.value)
+            : searchAlbumFilter
+        : albumFilter;
     const activeAlbumFilter =
-        albumFilter === undefined ||
-        visibleAlbumFilters.some(({ value }) => value == albumFilter)
-            ? albumFilter
-            : "ente";
+        selectedAlbumFilter === undefined ||
+        visibleAlbumFilters.some(({ value }) => value == selectedAlbumFilter)
+            ? selectedAlbumFilter
+            : visibleAlbumFilters[0]?.value;
+    const setActiveAlbumFilter = isSearching
+        ? setSearchAlbumFilter
+        : setAlbumFilter;
     const visibleCollectionSummaries = useMemo(
         () =>
             mode != "albums"
                 ? collectionSummaries
-                : collectionSummaries.filter(
+                : matchingCollectionSummaries.filter(
                       (cs) =>
                           activeAlbumFilter !== undefined &&
                           matchesAlbumFilter(cs, activeAlbumFilter),
                   ),
-        [mode, collectionSummaries, activeAlbumFilter],
+        [
+            mode,
+            collectionSummaries,
+            matchingCollectionSummaries,
+            activeAlbumFilter,
+        ],
     );
 
     useEffect(() => {
-        if (albumFilter != activeAlbumFilter) setAlbumFilter(activeAlbumFilter);
-    }, [albumFilter, activeAlbumFilter]);
+        if (!isSearching) setSearchAlbumFilter(null);
+        if (!isSearching && albumFilter != activeAlbumFilter)
+            setAlbumFilter(activeAlbumFilter);
+    }, [albumFilter, activeAlbumFilter, isSearching]);
 
     useEffect(() => {
-        if (!listRef.current) return;
+        if (
+            mode != "albums" ||
+            (mobile ? !mobileDrawerProps.open : collapsed)
+        ) {
+            setSearchQuery("");
+        }
+    }, [mode, mobile, mobileDrawerProps.open, collapsed]);
+
+    useEffect(() => {
+        if (isSearching) listRef.current?.scrollTo(0);
+    }, [searchQuery, isSearching]);
+
+    useEffect(() => {
+        if (!listRef.current || isSearching) return;
         let i = -1;
         switch (mode) {
             case "albums":
@@ -167,6 +217,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         mobile,
         mobileDrawerProps.open,
         viewportHeight,
+        isSearching,
     ]);
 
     const itemData = useMemo<ItemData>(
@@ -276,6 +327,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         <Stack
             component="nav"
             aria-labelledby={titleID}
+            onKeyDown={(event) => {
+                if (event.key == "Escape" && mode == "albums" && searchQuery) {
+                    event.stopPropagation();
+                    setSearchQuery("");
+                }
+            }}
             sx={(theme) => ({
                 "--gallery-navigation-surface": "#FFFFFF",
                 "--gallery-navigation-hover":
@@ -368,7 +425,66 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 )}
             </Stack>
-            {mode == "albums" ? (
+            {mode == "albums" && (
+                <Stack
+                    direction="row"
+                    sx={{
+                        alignItems: "center",
+                        flexShrink: 0,
+                        height: 52,
+                        gap: "10px",
+                        px: "16px",
+                        borderRadius: "12px",
+                        bgcolor: "var(--gallery-navigation-surface)",
+                        border: "1px solid",
+                        borderColor: "stroke.faint",
+                        "&:focus-within": {
+                            outline: "1px solid",
+                            outlineColor: "stroke.muted",
+                            outlineOffset: -1,
+                        },
+                    }}
+                >
+                    <SearchIcon sx={{ fontSize: 18, color: "text.muted" }} />
+                    <InputBase
+                        inputRef={searchInputRef}
+                        fullWidth
+                        placeholder={t("search_in_albums")}
+                        inputProps={{ "aria-label": t("search_in_albums") }}
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        sx={{
+                            fontSize: mobile ? 13 : 14,
+                            fontWeight: 500,
+                            color: "text.base",
+                            "& input::placeholder": {
+                                color: "text.muted",
+                                opacity: 1,
+                            },
+                        }}
+                    />
+                    {searchQuery && (
+                        <IconButton
+                            aria-label={t("clear_search")}
+                            onClick={() => {
+                                setSearchQuery("");
+                                searchInputRef.current?.focus();
+                            }}
+                            size="small"
+                        >
+                            <CloseIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                    )}
+                </Stack>
+            )}
+            {isSearching && !visibleAlbumFilters.length ? (
+                <Typography
+                    role="status"
+                    sx={{ px: "16px", color: "text.muted" }}
+                >
+                    {t("no_results")}
+                </Typography>
+            ) : mode == "albums" ? (
                 <Stack
                     role="group"
                     aria-label={t("filter_albums")}
@@ -393,8 +509,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                                         : undefined
                                 }
                                 onClick={() =>
-                                    setAlbumFilter((current) =>
-                                        current == filter.value
+                                    setActiveAlbumFilter(
+                                        activeAlbumFilter == filter.value
                                             ? undefined
                                             : filter.value,
                                     )

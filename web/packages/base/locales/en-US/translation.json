@@ -489,6 +489,8 @@
     "no_location": "No location",
     "search_hint": "Search for albums, dates, descriptions, ...",
     "albums_search_hint": "Search for albums...",
+    "search_in_albums": "Search in Albums",
+    "clear_search": "Clear search",
     "album": "Album",
     "date": "Date",
     "description": "Description",
