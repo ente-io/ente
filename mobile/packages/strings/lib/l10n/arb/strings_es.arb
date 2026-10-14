@@ -176,7 +176,7 @@
   "allowDownloads": "Permitir descargas",
   "allowJoining": "Permitir unirse",
   "allowJoiningAlbum": "Permitir unirse al álbum",
-  "allowJoiningDescription": "Los usuarios con una cuenta de Ente pueden unirse a tu álbum y mantenerse actualizados",
+  "allowJoiningDescription": "Quienes pueden ver tu álbum y tienen una cuenta de Ente pueden unirse a él y mantenerse al día",
   "allowPermBody": "Por favor, permite el acceso a tus fotos desde Ajustes para que Ente pueda mostrar y hacer una copia de seguridad de tu biblioteca.",
   "allowPermTitle": "Permitir el acceso a las fotos",
   "allPersonGroupingWillReset": "Se eliminarán todas las agrupaciones para esta persona, y se eliminarán todas sus sugerencias",

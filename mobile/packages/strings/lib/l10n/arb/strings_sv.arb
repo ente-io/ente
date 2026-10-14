@@ -224,7 +224,7 @@
   "allowDownloads": "Tillåt nedladdningar",
   "allowJoining": "Tillåt att gå med",
   "allowJoiningAlbum": "Tillåt att gå med till albumet",
-  "allowJoiningDescription": "Personer med ett Ente-konto kan gå med i ditt album och få uppdateringar",
+  "allowJoiningDescription": "Personer som kan se ditt album och har ett Ente-konto kan gå med i albumet och få uppdateringar",
   "allowPermBody": "Tillåt åtkomst till dina foton i Inställningar så att Ente kan visa och säkerhetskopiera ditt bibliotek.",
   "allowPermTitle": "Tillåt åtkomst till foton",
   "allPersonGroupingWillReset": "Alla grupperingar för personen återställs och du förlorar alla förslag för personen",
