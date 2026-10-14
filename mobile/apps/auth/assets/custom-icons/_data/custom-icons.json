@@ -455,6 +455,11 @@
       ]
     },
     {
+      "title": "Cardmarket",
+      "slug": "cardmarket",
+      "hex": "012169"
+    },
+    {
       "title": "Carta",
       "hex": "000000",
       "altNames": [
