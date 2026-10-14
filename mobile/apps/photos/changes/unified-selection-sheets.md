@@ -1,1 +1,1 @@
-- Refreshed album selection with the shared expandable sheet and consistent action labels.
+- Unified album and people selection sheets with photo selection and consistent action labels.
