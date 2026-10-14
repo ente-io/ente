@@ -106,6 +106,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter | undefined>(
         "ente",
     );
+    const [searchAlbumFilter, setSearchAlbumFilter] = useState<
+        AlbumFilter | null | undefined
+    >(null);
     const visibleAlbumFilters = useMemo(
         () =>
             getVisibleAlbumFilters(collectionSummaries).filter(
@@ -117,11 +120,19 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             ),
         [collectionSummaries, isSearching, matchingCollectionSummaries],
     );
+    const selectedAlbumFilter = isSearching
+        ? searchAlbumFilter === null
+            ? (albumFilter ?? visibleAlbumFilters[0]?.value)
+            : searchAlbumFilter
+        : albumFilter;
     const activeAlbumFilter =
-        albumFilter === undefined ||
-        visibleAlbumFilters.some(({ value }) => value == albumFilter)
-            ? albumFilter
+        selectedAlbumFilter === undefined ||
+        visibleAlbumFilters.some(({ value }) => value == selectedAlbumFilter)
+            ? selectedAlbumFilter
             : visibleAlbumFilters[0]?.value;
+    const setActiveAlbumFilter = isSearching
+        ? setSearchAlbumFilter
+        : setAlbumFilter;
     const visibleCollectionSummaries = useMemo(
         () =>
             mode != "albums"
@@ -140,6 +151,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     useEffect(() => {
+        if (!isSearching) setSearchAlbumFilter(null);
         if (!isSearching && albumFilter != activeAlbumFilter)
             setAlbumFilter(activeAlbumFilter);
     }, [albumFilter, activeAlbumFilter, isSearching]);
@@ -437,7 +449,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                                         : undefined
                                 }
                                 onClick={() =>
-                                    setAlbumFilter(
+                                    setActiveAlbumFilter(
                                         activeAlbumFilter == filter.value
                                             ? undefined
                                             : filter.value,
