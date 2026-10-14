@@ -18,10 +18,7 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { SpaceActionToast } from "components/ActionToast";
-import {
-    SpaceActivityAvatar as Avatar,
-    SpaceActivityIdentity,
-} from "components/ActivityList";
+import { SpaceActivityAvatar as Avatar } from "components/ActivityList";
 import { SpaceConversationPokeButton } from "components/ConversationPokeButton";
 import { SpaceLiveStatus } from "components/LiveStatus";
 import {
@@ -38,6 +35,7 @@ import { SpaceLoadingSpinner } from "components/RouteFallback";
 import { SpaceShareInviteButton } from "components/ShareInviteButton";
 import { SpaceSkipLink } from "components/SkipLink";
 import { emojiName } from "data/emojis";
+import { formatTimeAgo } from "ente-base/date";
 import log from "ente-base/log";
 import { isSpaceIOS } from "hooks/use-pwa-install-prompt";
 import React from "react";
@@ -226,7 +224,13 @@ const ConversationPreviewLine: React.FC<{
     conversation: SpaceMessageConversation;
 }> = ({ conversation }) => {
     const activity = conversation.latestActivity;
-    const previewLineSx = spaceActivityPreviewSx;
+    const previewLineSx = {
+        ...spaceActivityPreviewSx,
+        color: conversation.notificationUnread ? "#D0D0D0" : spaceTextMuted,
+        fontWeight: conversation.notificationUnread
+            ? 600
+            : spaceActivityPreviewSx.fontWeight,
+    };
 
     if (activity.type == "message_like" && activity.text) {
         return (
@@ -396,7 +400,7 @@ const ConversationListItem: React.FC<{
                             appearance: "none",
                             bgcolor: "transparent",
                             border: 0,
-                            borderRadius: "50%",
+                            borderRadius: showPostThumbnailSlot ? "28%" : "50%",
                             cursor: "pointer",
                             display: "block",
                             height: 44,
@@ -408,47 +412,46 @@ const ConversationListItem: React.FC<{
                             },
                         }}
                     >
-                        <Avatar
-                            avatarUrl={conversation.friend.avatarUrl}
-                            size={44}
-                        />
+                        {showPostThumbnailSlot ? (
+                            <>
+                                <SpacePostPreviewThumbnail
+                                    borderRadius="28%"
+                                    post={activityPost ?? post}
+                                />
+                                <Box
+                                    sx={{
+                                        bgcolor: spaceAppBackgroundColor,
+                                        borderRadius: "50%",
+                                        bottom: -2,
+                                        boxShadow: `0 0 0 2px ${spaceAppBackgroundColor}`,
+                                        position: "absolute",
+                                        right: -2,
+                                    }}
+                                >
+                                    <Avatar
+                                        avatarUrl={
+                                            conversation.friend.avatarUrl
+                                        }
+                                        size={20}
+                                    />
+                                </Box>
+                            </>
+                        ) : (
+                            <Avatar
+                                avatarUrl={conversation.friend.avatarUrl}
+                                size={44}
+                            />
+                        )}
                     </Box>
-                    {unreadCount > 0 && (
-                        <Box
-                            aria-label={`${unreadCount} unread update${unreadCount == 1 ? "" : "s"}`}
-                            component="span"
-                            sx={{
-                                alignItems: "center",
-                                bgcolor: dangerColor,
-                                borderRadius: "8px",
-                                boxShadow: `0 0 0 2px ${spaceAppBackgroundColor}`,
-                                color: spaceOnAccent,
-                                display: "inline-flex",
-                                flexShrink: 0,
-                                fontFamily:
-                                    '"Inter Variable", Inter, sans-serif',
-                                fontSize: 10,
-                                fontWeight: 700,
-                                height: 16,
-                                justifyContent: "center",
-                                lineHeight: "16px",
-                                minWidth: 16,
-                                position: "absolute",
-                                pointerEvents: "none",
-                                px: "4px",
-                                right: -2,
-                                top: -2,
-                                zIndex: 1,
-                            }}
-                        >
-                            {conversationUnreadLabel(unreadCount)}
-                        </Box>
-                    )}
                 </Box>
                 <Box
                     component="button"
                     type="button"
-                    aria-label={`Open conversation with ${name}`}
+                    aria-label={`Open conversation with ${name}${
+                        unreadCount > 0
+                            ? `, ${unreadCount} unread update${unreadCount == 1 ? "" : "s"}`
+                            : ""
+                    }`}
                     onClick={() => onOpenThread(conversation)}
                     sx={{
                         alignItems: "center",
@@ -458,11 +461,10 @@ const ConversationListItem: React.FC<{
                         color: "inherit",
                         cursor: "pointer",
                         display: "grid",
-                        gap: "10px",
                         gridColumn: "2 / -1",
-                        gridTemplateColumns: showPostThumbnailSlot
-                            ? "minmax(0, 1fr) 44px"
-                            : "minmax(0, 1fr)",
+                        gridTemplateColumns: "minmax(0, 1fr)",
+                        gridTemplateRows: "20px 20px",
+                        minHeight: spaceTouchTargetSize,
                         minWidth: 0,
                         p: 0,
                         textAlign: "left",
@@ -474,20 +476,91 @@ const ConversationListItem: React.FC<{
                         },
                     }}
                 >
-                    <Box sx={{ minWidth: 0 }}>
-                        <SpaceActivityIdentity
-                            name={firstNameFrom(name)}
-                            createdAtMs={
-                                conversation.latestActivity.createdAtMs
-                            }
-                        />
-                        <ConversationPreviewLine conversation={conversation} />
+                    <Box
+                        sx={{
+                            alignItems: "center",
+                            display: "flex",
+                            gap: "10px",
+                            minWidth: 0,
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                flex: 1,
+                                fontFamily:
+                                    '"Inter Variable", Inter, sans-serif',
+                                fontSize: 14,
+                                fontWeight: 700,
+                                lineHeight: "20px",
+                                minWidth: 0,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            {firstNameFrom(name)}
+                        </Box>
+                        <Box
+                            component="time"
+                            dateTime={new Date(
+                                conversation.latestActivity.createdAtMs,
+                            ).toISOString()}
+                            sx={{
+                                color: "#888888",
+                                flexShrink: 0,
+                                fontFamily:
+                                    '"Inter Variable", Inter, sans-serif',
+                                fontSize: 12,
+                                fontWeight: 600,
+                                lineHeight: "16px",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            {formatTimeAgo(
+                                conversation.latestActivity.createdAtMs * 1000,
+                            ).replace(/ ago$/, "")}
+                        </Box>
                     </Box>
-                    {showPostThumbnailSlot && (
-                        <SpacePostPreviewThumbnail
-                            post={activityPost ?? post}
-                        />
-                    )}
+                    <Box
+                        sx={{
+                            alignItems: "center",
+                            display: "flex",
+                            gap: "10px",
+                            minWidth: 0,
+                        }}
+                    >
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <ConversationPreviewLine
+                                conversation={conversation}
+                            />
+                        </Box>
+                        {unreadCount > 0 && (
+                            <Box
+                                aria-label={`${unreadCount} unread update${unreadCount == 1 ? "" : "s"}`}
+                                component="span"
+                                sx={{
+                                    alignItems: "center",
+                                    bgcolor: dangerColor,
+                                    borderRadius: "9px",
+                                    boxSizing: "border-box",
+                                    color: spaceOnAccent,
+                                    display: "inline-flex",
+                                    flexShrink: 0,
+                                    fontFamily:
+                                        '"Inter Variable", Inter, sans-serif',
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    height: 18,
+                                    justifyContent: "center",
+                                    lineHeight: "18px",
+                                    minWidth: 18,
+                                    px: "4px",
+                                }}
+                            >
+                                {conversationUnreadLabel(unreadCount)}
+                            </Box>
+                        )}
+                    </Box>
                 </Box>
             </Box>
         </Box>
