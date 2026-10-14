@@ -30,11 +30,8 @@ import "package:uuid/uuid.dart";
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
-  static const kMaximumConcurrentVideoUploads = 2;
-  static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
   static const kMaxFileSize10Gib = 10737418240;
-  static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
   static const k20MBStorageBuffer = 20 * 1024 * 1024;
   static const _lastStaleFileCleanupTime = "lastStaleFileCleanupTime";
@@ -46,12 +43,8 @@ class FileUploader {
       LinkedHashMap<String, FileUploadItem>();
   final LinkedHashMap<String, BackupItem> _allBackups =
       LinkedHashMap<String, BackupItem>();
-  final kSafeBufferForLockExpiry = const Duration(hours: 4).inMicroseconds;
-  final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
 
   LinkedHashMap<String, BackupItem> get allBackups => _allBackups;
-
-  int _totalCountInUploadSession = 0;
 
   int _uploadCounter = 0;
   late SharedPreferences _prefs;
@@ -77,7 +70,6 @@ class FileUploader {
     Collection collection, {
     String? fileName,
   }) {
-    _totalCountInUploadSession++;
     final String path = file.path;
     final completer = Completer<EnteFile>();
     _queue[path] = FileUploadItem(
@@ -156,10 +148,6 @@ class FileUploader {
     }
   }
 
-  int getCurrentSessionUploadCount() {
-    return _totalCountInUploadSession;
-  }
-
   void clearQueue(final Error reason) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
@@ -175,35 +163,10 @@ class FileUploader {
       );
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
-    _totalCountInUploadSession = 0;
-  }
-
-  void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
-    final List<String> uploadsToBeRemoved = [];
-    _queue.entries
-        .where((entry) => entry.value.status == UploadStatus.notStarted)
-        .forEach((pendingUpload) {
-          if (fn(pendingUpload.value.file)) {
-            uploadsToBeRemoved.add(pendingUpload.key);
-          }
-        });
-    for (final id in uploadsToBeRemoved) {
-      _queue.remove(id)?.completer.completeError(reason);
-      _allBackups[id] = _allBackups[id]!.copyWith(
-        status: BackupItemStatus.retry,
-        error: reason,
-      );
-      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
-    }
-    _logger.info(
-      'number of enteries removed from queue ${uploadsToBeRemoved.length}',
-    );
-    _totalCountInUploadSession -= uploadsToBeRemoved.length;
   }
 
   void _pollQueue() {
     if (_queue.isEmpty) {
-      _totalCountInUploadSession = 0;
       return;
     }
     if (_uploadCounter < kMaximumConcurrentUploads) {
@@ -840,6 +803,4 @@ class FileUploadItem {
   });
 }
 
-enum UploadStatus { notStarted, inProgress, inBackground, completed }
-
-enum ProcessType { background, foreground }
+enum UploadStatus { notStarted, inProgress }
