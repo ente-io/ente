@@ -88,6 +88,30 @@ void main() {
     expect(editor.activeLayers, hasLength(1));
   });
 
+  testWidgets('each duplicate is selected on its own and drags alone', (
+    tester,
+  ) async {
+    final editor = await _openEditor(tester);
+    await _tap(tester, find.text('Done'));
+    for (var i = 0; i < 3; i++) {
+      await _tap(tester, find.byTooltip('Duplicate'));
+      expect(editor.layerInteractionManager.selectedLayerIds, {
+        editor.activeLayers.last.id,
+      });
+    }
+    final offsets = [for (final layer in editor.activeLayers) layer.offset];
+
+    await tester.drag(
+      find.byKey(editor.activeLayers.last.keyInternalSize),
+      const Offset(60, 40),
+    );
+    await tester.pumpAndSettle();
+
+    final moved = [for (final layer in editor.activeLayers) layer.offset];
+    expect(moved.take(3), offsets.take(3));
+    expect(moved.last, isNot(offsets.last));
+  });
+
   testWidgets('double tapping applied text reopens it for typing', (
     tester,
   ) async {
