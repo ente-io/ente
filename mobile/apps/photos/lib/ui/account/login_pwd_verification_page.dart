@@ -4,6 +4,7 @@ import "package:ente_crypto/ente_crypto.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/gateways/users/models/srp.dart";
@@ -27,6 +28,8 @@ class LoginPasswordVerificationPage extends StatefulWidget {
 class _LoginPasswordVerificationPageState
     extends State<LoginPasswordVerificationPage> {
   final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
+  bool _isSubmitting = false;
   String? email;
   bool _hasPassword = false;
   bool _isPasswordIncorrect = false;
@@ -44,6 +47,7 @@ class _LoginPasswordVerificationPageState
 
   @override
   void dispose() {
+    _passwordFocusNode.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -67,15 +71,21 @@ class _LoginPasswordVerificationPageState
   }
 
   Future<void> _verifyEnteredPassword() async {
-    if (!_hasPassword) {
+    if (!_hasPassword || _isSubmitting) {
       return;
     }
-    FocusScope.of(context).unfocus();
-    await verifyPassword(context, _passwordController.text);
+    _isSubmitting = true;
+    _passwordFocusNode.unfocus();
+    try {
+      await verifyPassword(context, _passwordController.text);
+    } finally {
+      _isSubmitting = false;
+    }
   }
 
   Widget _getBody() {
     return AutofillGroup(
+      onDisposeAction: AutofillContextAction.cancel,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,6 +105,7 @@ class _LoginPasswordVerificationPageState
             label: context.strings.password,
             hintText: context.strings.enterYourPassword,
             controller: _passwordController,
+            focusNode: _passwordFocusNode,
             isPasswordInput: true,
             isRequired: true,
             autocorrect: false,
@@ -164,6 +175,7 @@ class _LoginPasswordVerificationPageState
         password,
         dialog,
       );
+      if (mounted) TextInput.finishAutofillContext();
     } on DioException catch (e, s) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 401) {

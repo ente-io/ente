@@ -5,6 +5,7 @@ import "package:ente_components/ente_components.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:ente_strings/ente_strings.dart";
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart" show TextInput;
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
@@ -30,6 +31,8 @@ class PasswordReentryPage extends StatefulWidget {
 class _PasswordReentryPageState extends State<PasswordReentryPage> {
   final _logger = Logger((_PasswordReentryPageState).toString());
   final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
+  bool _isSubmitting = false;
   String? email;
   String? _volatilePassword;
   bool _isPasswordIncorrect = false;
@@ -41,12 +44,15 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     _volatilePassword = Configuration.instance.getVolatilePassword();
     if (_volatilePassword != null) {
       _passwordController.text = _volatilePassword!;
-      Future.delayed(Duration.zero, () => verifyPassword(_volatilePassword!));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_onVerifyPasswordPressed());
+      });
     }
   }
 
   @override
   void dispose() {
+    _passwordFocusNode.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -72,15 +78,19 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   }
 
   Future<void> _onVerifyPasswordPressed() async {
-    if (_passwordController.text.isEmpty) {
+    if (_passwordController.text.isEmpty || _isSubmitting) {
       return;
     }
-    FocusScope.of(context).unfocus();
-    await verifyPassword(_passwordController.text);
+    _isSubmitting = true;
+    try {
+      await verifyPassword(_passwordController.text);
+    } finally {
+      _isSubmitting = false;
+    }
   }
 
   Future<void> verifyPassword(String password) async {
-    FocusScope.of(context).unfocus();
+    _passwordFocusNode.unfocus();
     setState(() {
       _isPasswordIncorrect = false;
     });
@@ -133,6 +143,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       );
       return;
     }
+    if (mounted) TextInput.finishAutofillContext();
     await dialog.hide();
     Configuration.instance.resetVolatilePassword();
     await flagService.tryRefreshFlags();
@@ -190,6 +201,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   Widget _getBody() {
     return AutofillGroup(
+      onDisposeAction: AutofillContextAction.cancel,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,6 +223,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             isRequired: true,
             hintText: context.strings.enterYourPassword,
             controller: _passwordController,
+            focusNode: _passwordFocusNode,
             isPasswordInput: true,
             autocorrect: false,
             shouldUnfocusOnClearOrSubmit: true,

@@ -24,6 +24,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   bool _emailIsValid = false;
+  bool _isSubmitting = false;
   bool _showValidationMessage = false;
   String? _email;
   Timer? _validationTimer;
@@ -62,12 +63,15 @@ class _LoginPageState extends State<LoginPage> {
       showDeveloperSettingsTapArea: true,
       body: _getBody(),
       actions: [
-        ButtonComponent(
-          key: const ValueKey("logInButton"),
-          label: context.strings.continueLabel,
-          shouldShowSuccessState: false,
-          isDisabled: !_emailIsValid,
-          onTap: _emailIsValid ? _submitLoginEmail : null,
+        TextFieldTapRegion(
+          groupId: _emailController,
+          child: ButtonComponent(
+            key: const ValueKey("logInButton"),
+            label: context.strings.continueLabel,
+            shouldShowSuccessState: false,
+            isDisabled: !_emailIsValid,
+            onTap: _emailIsValid ? _submitLoginEmail : null,
+          ),
         ),
         OnboardingAccountPrompt(
           question: context.strings.dontHaveAnAccount,
@@ -94,12 +98,12 @@ class _LoginPageState extends State<LoginPage> {
             label: context.strings.email,
             hintText: context.strings.emailHint,
             controller: _emailController,
+            groupId: _emailController,
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
             autocorrect: false,
             autofocus: true,
             isRequired: true,
-            shouldUnfocusOnClearOrSubmit: true,
             onSubmit: (_) => _submitLoginEmail(),
             onChanged: _onEmailChanged,
             message: _showValidationMessage
@@ -143,6 +147,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _submitLoginEmail() async {
+    if (_isSubmitting) return;
     final trimmed = _emailController.text.trim();
     final isValid = EmailValidator.validate(trimmed);
     if (!isValid) {
@@ -154,16 +159,21 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
     _email = trimmed;
-    await _onLoginPressed();
+    _isSubmitting = true;
+    try {
+      await _onLoginPressed(trimmed);
+    } finally {
+      _isSubmitting = false;
+    }
   }
 
-  Future<void> _onLoginPressed() async {
-    await UserService.instance.setEmail(_email!);
+  Future<void> _onLoginPressed(String email) async {
+    await UserService.instance.setEmail(email);
     Configuration.instance.resetVolatilePassword();
     SrpAttributes? attr;
     bool isEmailVerificationEnabled = true;
     try {
-      attr = await UserService.instance.getSrpAttributes(_email!);
+      attr = await UserService.instance.getSrpAttributes(email);
       isEmailVerificationEnabled = attr.isEmailMFAEnabled;
     } catch (e) {
       if (e is! SrpSetupNotCompleteError) {
@@ -184,12 +194,10 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       await UserService.instance.sendOtt(
         context,
-        _email!,
+        email,
         isCreateAccountScreen: false,
         purpose: "login",
       );
     }
-    if (!mounted) return;
-    FocusScope.of(context).unfocus();
   }
 }

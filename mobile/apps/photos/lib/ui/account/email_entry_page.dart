@@ -273,8 +273,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       isCreateAccountScreen: true,
       purpose: "signup",
     );
-    if (!mounted) return;
-    FocusScope.of(context).unfocus();
   }
 
   Future<void> _updateReferralSourceFieldVisibility() async {

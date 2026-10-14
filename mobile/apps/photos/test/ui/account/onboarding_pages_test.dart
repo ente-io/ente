@@ -132,7 +132,7 @@ void main() {
 
     tester.view.viewInsets = const FakeViewPadding(bottom: 291);
     await settle(tester);
-    expect(tester.getTopLeft(title).dy, lessThan(100));
+    expect(tester.getTopLeft(title).dy, greaterThan(200));
 
     tester.view.viewInsets = FakeViewPadding.zero;
     await settle(tester);

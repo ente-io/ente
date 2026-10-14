@@ -19,6 +19,7 @@ class TextInputComponent extends StatefulWidget {
     super.key,
     this.controller,
     this.focusNode,
+    this.groupId,
     this.label,
     this.message,
     this.hintText,
@@ -58,6 +59,7 @@ class TextInputComponent extends StatefulWidget {
 
   final TextEditingController? controller;
   final FocusNode? focusNode;
+  final Object? groupId;
   final String? label;
   final String? message;
   final String? hintText;
@@ -146,7 +148,8 @@ class _TextInputComponentState extends State<TextInputComponent> {
   @override
   void didUpdateWidget(covariant TextInputComponent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isDisabled != widget.isDisabled) {
+    if (oldWidget.isDisabled != widget.isDisabled ||
+        oldWidget.groupId != widget.groupId) {
       _configureGroupId();
     }
     if (oldWidget.submitNotifier != widget.submitNotifier) {
@@ -210,7 +213,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
   }
 
   void _configureGroupId() {
-    _groupId = _defaultGroupId;
+    _groupId = widget.groupId ?? _defaultGroupId;
     if (widget.isDisabled) {
       _groupId = _disabledGroupId;
     }
@@ -347,26 +350,20 @@ class _TextInputComponentState extends State<TextInputComponent> {
           ),
         ),
         if (message != null) ...[
-          const SizedBox(height: Spacing.xs),
-          ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: Spacing.lg),
-            child: Row(
-              children: [
-                if (messageIcon != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
-                    child: messageIcon,
-                  ),
-                  const SizedBox(width: Spacing.xs),
-                ],
-                Expanded(
-                  child: Text(
-                    message,
-                    style: TextStyles.tiny.copyWith(color: messageColor),
-                  ),
-                ),
+          const SizedBox(height: Spacing.sm),
+          Row(
+            children: [
+              if (messageIcon != null) ...[
+                messageIcon,
+                const SizedBox(width: Spacing.sm),
               ],
-            ),
+              Expanded(
+                child: Text(
+                  message,
+                  style: TextStyles.mini.copyWith(color: messageColor),
+                ),
+              ),
+            ],
           ),
         ],
       ],
@@ -479,7 +476,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
       return () {
         _controller.clear();
         if (widget.shouldUnfocusOnClearOrSubmit) {
-          FocusScope.of(context).unfocus();
+          _focusNode.unfocus();
         }
       };
     }
@@ -520,17 +517,17 @@ class _TextInputComponentState extends State<TextInputComponent> {
 
   Widget? _messageIcon(Color color) {
     if (widget.messageIcon != null) {
-      return Icon(widget.messageIcon, size: IconSizes.tiny, color: color);
+      return Icon(widget.messageIcon, size: IconSizes.small, color: color);
     }
     return switch (widget.messageType) {
       TextInputComponentMessageType.alert => HugeIcon(
         icon: HugeIcons.strokeRoundedAlert02,
-        size: IconSizes.tiny,
+        size: IconSizes.small,
         color: color,
       ),
       TextInputComponentMessageType.success => HugeIcon(
         icon: HugeIcons.strokeRoundedTick02,
-        size: IconSizes.tiny,
+        size: IconSizes.small,
         color: color,
       ),
       TextInputComponentMessageType.error ||
@@ -582,7 +579,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
       if (widget.textInputAction == TextInputAction.next) {
         _focusNode.nextFocus();
       } else if (widget.shouldUnfocusOnClearOrSubmit) {
-        FocusScope.of(context).unfocus();
+        _focusNode.unfocus();
       }
       return;
     }
@@ -604,7 +601,7 @@ class _TextInputComponentState extends State<TextInputComponent> {
     });
 
     if (widget.shouldUnfocusOnClearOrSubmit) {
-      FocusScope.of(context).unfocus();
+      _focusNode.unfocus();
     }
 
     try {
