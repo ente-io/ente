@@ -211,7 +211,7 @@ void main() {
     );
   }
 
-  testWidgets("a thumbnail tier change recreates the thumbnail loader", (
+  testWidgets("Grid thumbnail tiers and overrides recreate the loader", (
     tester,
   ) async {
     final file = EnteFile()
@@ -219,7 +219,7 @@ void main() {
       ..fileType = FileType.image
       ..title = "photo.jpg";
 
-    Widget buildGalleryTile(int thumbnailSize) {
+    Widget buildGalleryTile({required int gridSize, int? thumbnailSize}) {
       return MaterialApp(
         home: GalleryContextState(
           sortOrderAsc: false,
@@ -232,7 +232,7 @@ void main() {
               selectedFiles: null,
               limitSelectionToOne: true,
               tag: "gallery_",
-              photoGridSize: photoGridSizeDefault,
+              photoGridSize: gridSize,
               thumbnailSize: thumbnailSize,
               currentUserID: null,
             ),
@@ -241,28 +241,40 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildGalleryTile(thumbnailSmallSize));
-    final smallThumbnailState = tester.state<State<ThumbnailWidget>>(
-      find.byType(ThumbnailWidget),
-    );
-    expect(
-      tester
-          .widget<ThumbnailWidget>(find.byType(ThumbnailWidget))
-          .thumbnailSize,
-      thumbnailSmallSize,
-    );
+    for (final useOverride in [false, true]) {
+      await tester.pumpWidget(
+        buildGalleryTile(
+          gridSize: useOverride ? 3 : 4,
+          thumbnailSize: useOverride ? thumbnailSmallSize : null,
+        ),
+      );
+      final smallThumbnailState = tester.state<State<ThumbnailWidget>>(
+        find.byType(ThumbnailWidget),
+      );
+      expect(
+        tester
+            .widget<ThumbnailWidget>(find.byType(ThumbnailWidget))
+            .thumbnailSize,
+        thumbnailSmallSize,
+      );
 
-    await tester.pumpWidget(buildGalleryTile(thumbnailLargeSize));
-    final largeThumbnailState = tester.state<State<ThumbnailWidget>>(
-      find.byType(ThumbnailWidget),
-    );
-    expect(
-      tester
-          .widget<ThumbnailWidget>(find.byType(ThumbnailWidget))
-          .thumbnailSize,
-      thumbnailLargeSize,
-    );
-    expect(largeThumbnailState, isNot(same(smallThumbnailState)));
+      await tester.pumpWidget(
+        buildGalleryTile(
+          gridSize: 3,
+          thumbnailSize: useOverride ? thumbnailLargeSize : null,
+        ),
+      );
+      final largeThumbnailState = tester.state<State<ThumbnailWidget>>(
+        find.byType(ThumbnailWidget),
+      );
+      expect(
+        tester
+            .widget<ThumbnailWidget>(find.byType(ThumbnailWidget))
+            .thumbnailSize,
+        thumbnailLargeSize,
+      );
+      expect(largeThumbnailState, isNot(same(smallThumbnailState)));
+    }
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 100));

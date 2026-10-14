@@ -70,8 +70,8 @@
     },
     "devDependencies": {
         "concurrently": "10.0.5",
-        "eslint": "10.11.0",
-        "knip": "6.31.0",
+        "eslint": "10.12.0",
+        "knip": "6.41.0",
         "prettier": "3.9.9",
         "typescript": "6.0.3"
     },

@@ -13,6 +13,7 @@ export const SpacePostPhotosBadge = ({
         <Box
             component="span"
             aria-label={`${count} items`}
+            data-space-viewer-photos-badge
             sx={{
                 alignItems: "center",
                 color: "#FFFFFF",

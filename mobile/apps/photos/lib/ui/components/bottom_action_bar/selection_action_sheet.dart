@@ -59,7 +59,7 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
   double _maxExtent = 1;
   bool _isCollapsing = false;
 
-  static const _duration = Motion.standard;
+  static const _duration = Motion.quick;
 
   @override
   void didChangeDependencies() {
@@ -189,8 +189,8 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
     final colors = context.componentColors;
     final sheetColor = widget.backgroundColor ?? colors.fillLight;
     final labelLineHeight =
-        media.textScaler.scale(TextStyles.body.fontSize!) *
-        TextStyles.body.height!;
+        media.textScaler.scale(TextStyles.mini.fontSize!) *
+        TextStyles.mini.height!;
     final rowHeight = math.max(48.0, labelLineHeight * 2 + Spacing.lg);
     final controlsHeight = math.max(
       44.0,
@@ -211,8 +211,8 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
         );
         final minTileWidth =
             64 *
-            media.textScaler.scale(TextStyles.body.fontSize!) /
-            TextStyles.body.fontSize!;
+            media.textScaler.scale(TextStyles.mini.fontSize!) /
+            TextStyles.mini.fontSize!;
         final gridWidth = sheetWidth - Spacing.md * 2;
         final availableColumns =
             isLandscape &&
@@ -230,7 +230,7 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
         var labelHeight = labelLineHeight;
         for (final action in grid) {
           final painter = TextPainter(
-            text: TextSpan(text: action.labelText, style: TextStyles.body),
+            text: TextSpan(text: action.labelText, style: TextStyles.mini),
             textDirection: Directionality.of(context),
             textScaler: media.textScaler,
             maxLines: 2,
@@ -306,7 +306,7 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
                     : null,
                 snapAnimationDuration: MediaQuery.disableAnimationsOf(context)
                     ? const Duration(milliseconds: 1)
-                    : _duration,
+                    : null,
                 builder: (context, scrollController) {
                   _actionsController = _minExtent == _maxExtent
                       ? null
@@ -541,7 +541,7 @@ class _SheetAction extends StatelessWidget {
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       textAlign: isRow ? TextAlign.start : TextAlign.center,
-      style: TextStyles.body.copyWith(color: foregroundColor),
+      style: TextStyles.mini.copyWith(color: foregroundColor),
     );
     return Semantics(
       button: true,

@@ -27,6 +27,8 @@ import { NavbarBase } from "ente-base/components/Navbar";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { ut } from "ente-base/i18n";
+import { thumbnailGridPadding } from "ente-new/photos/components/utils/thumbnail-grid-layout";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import { t } from "i18next";
 import { useEffect, useState, type ReactNode } from "react";
@@ -65,20 +67,18 @@ export const PhotosNavigationShell: React.FC<
     ...props
 }) => {
     const [railOpen, setRailOpen] = useState(true);
+    const [navigationCollapsed, setNavigationCollapsed] = useState(false);
     const toggleRail = () => setRailOpen((open) => !open);
     const mobile = useMediaQuery(useTheme().breakpoints.down("md"));
     const { show: showMobileNavigation, props: mobileDrawerProps } =
         useModalVisibility();
     const { onClose: closeMobileNavigation } = mobileDrawerProps;
     useEffect(() => {
+        setNavigationCollapsed(false);
+    }, [props.mode, props.isInSearchMode]);
+    useEffect(() => {
         if (!mobile) closeMobileNavigation();
-        else if (
-            props.mode == "hidden-albums" ||
-            props.mode == "archive-albums"
-        ) {
-            showMobileNavigation();
-        }
-    }, [mobile, props.mode, closeMobileNavigation, showMobileNavigation]);
+    }, [mobile, closeMobileNavigation]);
     const handleChangeMode = (mode: GalleryBarMode) => {
         const reopeningSection =
             mobile &&
@@ -86,7 +86,21 @@ export const PhotosNavigationShell: React.FC<
             galleryBarProps &&
             !props.isInSearchMode &&
             (props.mode == "hidden-albums" || props.mode == "archive-albums");
-        if (!reopeningSection) props.onChangeMode(mode);
+        if (
+            galleryBarProps &&
+            !props.isInSearchMode &&
+            (props.mode == mode || reopeningSection)
+        ) {
+            if (mobile) {
+                if (mobileDrawerProps.open) closeMobileNavigation();
+                else showMobileNavigation();
+            } else {
+                setNavigationCollapsed((collapsed) => !collapsed);
+            }
+            return;
+        }
+        setNavigationCollapsed(false);
+        props.onChangeMode(mode);
         if (mobile) showMobileNavigation();
     };
     return (
@@ -154,8 +168,20 @@ export const PhotosNavigationShell: React.FC<
                         {showNormalNavigation && (
                             <NormalNavigationRail
                                 {...props}
+                                isHome={
+                                    props.mode == "albums" &&
+                                    !props.isInSearchMode &&
+                                    galleryBarProps?.activeCollectionID ==
+                                        PseudoCollectionID.all
+                                }
                                 onChangeMode={handleChangeMode}
                                 opensDialog={mobile}
+                                navigationOpen={
+                                    !!galleryBarProps &&
+                                    (mobile
+                                        ? mobileDrawerProps.open
+                                        : !navigationCollapsed)
+                                }
                             />
                         )}
                     </Box>
@@ -171,7 +197,9 @@ export const PhotosNavigationShell: React.FC<
                     {galleryBarProps && (
                         <GalleryBarAndListHeader
                             {...galleryBarProps}
-                            collapsed={showRail && !railOpen}
+                            collapsed={
+                                showRail && (!railOpen || navigationCollapsed)
+                            }
                             mobileDrawerProps={mobileDrawerProps}
                         />
                     )}
@@ -180,7 +208,7 @@ export const PhotosNavigationShell: React.FC<
                             flex: 1,
                             minWidth: 0,
                             minHeight: 0,
-                            pt: showRail ? { xs: 0, sm: "36px" } : 0,
+                            pt: showRail ? `${thumbnailGridPadding}px` : 0,
                             ...(showRail && {
                                 "--mui-palette-background-default": "#FFFFFF",
                                 bgcolor: "background.default",
@@ -265,17 +293,50 @@ const NormalHeaderContents: React.FC<
 };
 
 const NormalNavigationRail: React.FC<
-    Omit<PhotosNavigationShellProps, "onUpload"> & { opensDialog: boolean }
-> = ({ onSidebar, onHome, mode, onChangeMode, opensDialog, ...props }) => (
+    Omit<PhotosNavigationShellProps, "onUpload"> & {
+        isHome: boolean;
+        opensDialog: boolean;
+        navigationOpen: boolean;
+    }
+> = ({
+    onSidebar,
+    onHome,
+    mode,
+    onChangeMode,
+    isHome,
+    opensDialog,
+    navigationOpen,
+    ...props
+}) => (
     <>
-        <HomeButton onClick={onHome} />
+        <HomeButton onClick={onHome} selected={isHome} />
+        <SearchBar {...props} />
+        <Box
+            aria-hidden
+            sx={(theme) => ({
+                width: 38,
+                height: "2px",
+                flexShrink: 0,
+                opacity: 0.5,
+                bgcolor: "#E0E0E0",
+                ...theme.applyStyles("dark", { bgcolor: "#3E3E3E" }),
+            })}
+        />
         {(["albums", "people"] as const).map((item) =>
             item == "people" && !isMLSupported ? null : (
                 <Tooltip key={item} title={t(item)}>
                     <FocusVisibleButton
                         color="secondary"
                         aria-label={t(item)}
-                        aria-pressed={!props.isInSearchMode && mode == item}
+                        aria-pressed={
+                            navigationOpen &&
+                            !isHome &&
+                            !props.isInSearchMode &&
+                            (mode == item ||
+                                (item == "albums" &&
+                                    (mode == "hidden-albums" ||
+                                        mode == "archive-albums")))
+                        }
                         aria-haspopup={opensDialog ? "dialog" : undefined}
                         onClick={() => onChangeMode(item)}
                         sx={{
@@ -285,11 +346,9 @@ const NormalNavigationRail: React.FC<
                             flexShrink: 0,
                             p: 0,
                             borderRadius: "12px",
-                            color:
-                                !props.isInSearchMode && mode == item
-                                    ? "#FFFFFF"
-                                    : "text.muted",
+                            color: "text.base",
                             '&[aria-pressed="true"]': {
+                                color: "#FFFFFF",
                                 bgcolor: "accent.main",
                                 "&:hover": { bgcolor: "accent.main" },
                             },
@@ -300,12 +359,12 @@ const NormalNavigationRail: React.FC<
                                 item == "albums" ? Album02Icon : UserGroupIcon
                             }
                             size={20}
+                            strokeWidth={1.8}
                         />
                     </FocusVisibleButton>
                 </Tooltip>
             ),
         )}
-        <SearchBar {...props} />
         <Box sx={{ flex: 1 }} />
         <Tooltip title={t("settings")}>
             <FocusVisibleButton
@@ -318,21 +377,30 @@ const NormalNavigationRail: React.FC<
                     width: 38,
                     height: 38,
                     flexShrink: 0,
+                    mb: "13px",
                     p: 0,
                     borderRadius: "12px",
                 }}
             >
-                <HugeiconsIcon icon={Settings01Icon} size={20} />
+                <HugeiconsIcon
+                    icon={Settings01Icon}
+                    size={20}
+                    strokeWidth={1.8}
+                />
             </FocusVisibleButton>
         </Tooltip>
     </>
 );
 
-const HomeButton: React.FC<ButtonishProps> = ({ onClick }) => (
+const HomeButton: React.FC<ButtonishProps & { selected: boolean }> = ({
+    onClick,
+    selected,
+}) => (
     <Tooltip title={ut("Home")}>
         <FocusVisibleButton
             color="secondary"
             aria-label={ut("Home")}
+            aria-pressed={selected}
             onClick={onClick}
             sx={{
                 minWidth: 0,
@@ -340,9 +408,15 @@ const HomeButton: React.FC<ButtonishProps> = ({ onClick }) => (
                 height: 38,
                 p: 0,
                 borderRadius: "12px",
+                color: "text.base",
+                '&[aria-pressed="true"]': {
+                    color: "#FFFFFF",
+                    bgcolor: "accent.main",
+                    "&:hover": { bgcolor: "accent.main" },
+                },
             }}
         >
-            <HugeiconsIcon icon={Home01Icon} size={20} />
+            <HugeiconsIcon icon={Home01Icon} size={20} strokeWidth={1.8} />
         </FocusVisibleButton>
     </Tooltip>
 );
@@ -351,7 +425,9 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <HugeiconsIcon icon={Upload01Icon} size={20} />;
+    const icon = (
+        <HugeiconsIcon icon={Upload01Icon} size={20} strokeWidth={1.8} />
+    );
 
     return (
         <>

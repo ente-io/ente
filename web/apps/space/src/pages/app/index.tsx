@@ -28,10 +28,10 @@ import {
     setCurrentPostLiked,
     updateCurrentPostCaption,
     type SpaceFriendRequest,
-    type SpacePost,
 } from "services/space";
 import { useSpaceAppState } from "state/app-state";
 import { spaceAppBackgroundColor as homeBackground } from "styles/colors";
+import type { HomeFeedPost } from "utils/home-feed";
 import { useSpaceRouter } from "utils/route-transitions";
 import { spaceRoutes } from "utils/routes";
 
@@ -53,7 +53,7 @@ const Page: React.FC = () => {
     const [friendRequests, setFriendRequests] = useState<SpaceFriendRequest[]>(
         [],
     );
-    const [feedItems, setFeedItems] = useState<SpacePost[]>([]);
+    const [feedItems, setFeedItems] = useState<HomeFeedPost[]>([]);
     const [feedSession, setFeedSession] = useState<SpaceFeedSession>();
     const [hasFeedLoadMoreError, setHasFeedLoadMoreError] = useState(false);
     const [feedNextCursor, setFeedNextCursor] = useState<string>();
@@ -232,11 +232,12 @@ const Page: React.FC = () => {
                 const existingPostIds = new Set(
                     currentItems.map((item) => item.postId),
                 );
+                const batchIndex = (currentItems.at(-1)?.batchIndex ?? 0) + 1;
                 return [
                     ...currentItems,
-                    ...feed.items.filter(
-                        (item) => !existingPostIds.has(item.postId),
-                    ),
+                    ...feed.items
+                        .filter((item) => !existingPostIds.has(item.postId))
+                        .map((item) => ({ ...item, batchIndex })),
                 ];
             });
             setFeedNextCursor(feed.nextCursor);
@@ -265,6 +266,7 @@ const Page: React.FC = () => {
     );
 
     if (
+        (profileLoadStatus == "loading" && !profile) ||
         (profileLoadStatus == "error" &&
             feedItems.length == 0 &&
             localFeedPosts.length == 0) ||

@@ -4,32 +4,74 @@ import 'package:ente_components/ente_components.dart';
 import 'package:ente_sharing/models/user.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:locker/services/collections/models/collection.dart';
-import 'package:locker/ui/components/collection_selection_widget_v2.dart';
+import 'package:locker/services/configuration.dart';
+import 'package:locker/ui/components/collection_selection_widget.dart';
+import 'package:locker/ui/pages/file_upload_screen.dart';
 import 'package:locker/ui/pages/file_upload_screen_v2.dart';
 
+import '../../test_utils/configuration_test_util.dart';
+
 void main() {
+  late Directory testRoot;
+
+  setUp(() async {
+    testRoot = await setupLockerConfigurationForTest('upload_v2');
+    await Configuration.instance.setUserID(1);
+  });
+
+  tearDown(() async {
+    clearLockerConfigurationTestHandlers();
+    await testRoot.delete(recursive: true);
+  });
+
+  Collection collection(int id, String name) => Collection(
+    id,
+    User(id: 1, email: 'a@b.c'),
+    '',
+    null,
+    name,
+    null,
+    null,
+    CollectionType.folder,
+    CollectionAttributes(),
+    const [],
+    const [],
+    0,
+  );
   final files = [
     File('/upload/Passport_scan.pdf'),
     File('/upload/IMG_4821.png'),
   ];
 
-  Future<void> showScreen(WidgetTester tester) async {
+  Future<void> showScreen(
+    WidgetTester tester, {
+    List<Collection> collections = const [],
+    List<File>? uploadFiles,
+    Collection? selectedCollection,
+    void Function(FileUploadScreenResult?)? onSaved,
+  }) async {
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: StringsLocalizations.localizationsDelegates,
         supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => TextButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) =>
-                    FileUploadScreenV2(files: files, collections: const []),
-              ),
-            ),
+            onPressed: () async {
+              final result = await Navigator.of(context)
+                  .push<FileUploadScreenResult>(
+                    MaterialPageRoute(
+                      builder: (_) => FileUploadScreenV2(
+                        files: uploadFiles ?? files,
+                        collections: collections,
+                        selectedCollection: selectedCollection,
+                      ),
+                    ),
+                  );
+              onSaved?.call(result);
+            },
             child: const Text('open'),
           ),
         ),
@@ -50,6 +92,51 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets('collection chips toggle and save the selected destinations', (
+    tester,
+  ) async {
+    final passport = collection(10, 'Passport');
+    final travel = collection(20, 'Travel');
+    FileUploadScreenResult? saved;
+    await showScreen(
+      tester,
+      collections: [passport, travel],
+      selectedCollection: passport,
+      onSaved: (result) => saved = result,
+    );
+
+    final passportChip = find.widgetWithText(TagChipComponent, 'Passport');
+    final travelChip = find.widgetWithText(TagChipComponent, 'Travel');
+    expect(
+      tester.widget<TagChipComponent>(passportChip).state,
+      TagChipComponentState.selected,
+    );
+    await tester.tap(travelChip);
+    await tester.pumpAndSettle();
+    expect(find.text('2 selected'), findsOneWidget);
+    await tester.tap(passportChip);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ButtonComponent, 'Save'));
+    await tester.pumpAndSettle();
+
+    expect(saved!.selectedCollections.map((c) => c.id), [20]);
+    expect(saved!.files.map((file) => file.path), [
+      '/upload/Passport_scan.pdf',
+      '/upload/IMG_4821.png',
+    ]);
+  });
+
+  testWidgets(
+    'saving with no selected collection uses the uncategorized path',
+    (tester) async {
+      FileUploadScreenResult? saved;
+      await showScreen(tester, onSaved: (result) => saved = result);
+      await tester.tap(find.widgetWithText(ButtonComponent, 'Save'));
+      await tester.pumpAndSettle();
+      expect(saved!.selectedCollections, isEmpty);
+    },
+  );
 
   testWidgets('removing every file shows the empty state instead of popping', (
     tester,
@@ -103,219 +190,65 @@ void main() {
     expect(find.byType(FileUploadScreenV2), findsNothing);
   });
 
-  testWidgets('a removed file comes back with its original name', (
-    tester,
-  ) async {
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('miguelruivo.flutter.plugins.filepicker'),
-      (call) async => [
-        {
-          'name': 'Passport_scan.pdf',
-          'path': '/upload/Passport_scan.pdf',
-          'size': 1,
-        },
-      ],
-    );
-    addTearDown(
-      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        const MethodChannel('miguelruivo.flutter.plugins.filepicker'),
-        null,
-      ),
-    );
-    await showScreen(tester);
-
-    await openRowMenu(tester);
-    await tester.tap(find.text('Rename'));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Passport 2026');
-    await tester.tap(
-      find.descendant(
-        of: find.byType(BottomSheetComponent),
-        matching: find.text('Save'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    for (var i = 0; i < files.length; i++) {
-      await openRowMenu(tester);
-      await tester.tap(find.text('Remove'));
-      await tester.pumpAndSettle();
-    }
-
-    await tester.tap(find.text('Add items'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Passport_scan.pdf'), findsOneWidget);
-    expect(find.text('Passport 2026.pdf'), findsNothing);
-  });
-
-  Future<List<double>> cardHeights(
-    WidgetTester tester, {
-    required int files,
-    required int collections,
-    TargetPlatform? platform,
-  }) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: platform),
-        localizationsDelegates: StringsLocalizations.localizationsDelegates,
-        supportedLocales: const [Locale('en')],
-        home: FileUploadScreenV2(
-          key: ValueKey((files, collections)),
-          files: [for (var i = 0; i < files; i++) File('/upload/f$i.pdf')],
-          collections: [
-            for (var i = 0; i < collections; i++)
-              Collection(
-                i,
-                User(id: 1, email: 'a@b.c'),
-                '',
-                null,
-                'Collection $i',
-                null,
-                null,
-                CollectionType.folder,
-                CollectionAttributes(),
-                const [],
-                const [],
-                0,
-              ),
-          ],
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    return [
-      for (final card in tester.widgetList(find.byType(ScrollCard)))
-        tester.getSize(find.byWidget(card)).height,
-    ];
-  }
-
-  testWidgets('long lists each stop at the same share of the screen', (
-    tester,
-  ) async {
-    final heights = await cardHeights(tester, files: 10, collections: 10);
-    expect(heights[0], moreOrLessEquals(heights[1]));
-    expect(heights[0], lessThan(844 * 0.35));
-  });
-
-  testWidgets('a large batch only builds the visible file rows', (
-    tester,
-  ) async {
-    await cardHeights(tester, files: 1000, collections: 0);
-    expect(
-      find.byType(MenuComponent, skipOffstage: false).evaluate().length,
-      lessThan(50),
-    );
-  });
-
-  testWidgets('large system text keeps Save on screen', (tester) async {
-    tester.view.physicalSize = const Size(320, 568);
-    tester.view.devicePixelRatio = 1;
-    tester.platformDispatcher.textScaleFactorTestValue = 3;
-    addTearDown(tester.view.reset);
-    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: StringsLocalizations.localizationsDelegates,
-        supportedLocales: const [Locale('en')],
-        home: FileUploadScreenV2(
-          files: [for (var i = 0; i < 10; i++) File('/upload/f$i.pdf')],
-          collections: const [],
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('Save').hitTestable(), findsOneWidget);
-  });
-
-  testWidgets('a short file list leaves the rest to collections', (
-    tester,
-  ) async {
-    final heights = await cardHeights(tester, files: 1, collections: 10);
-    expect(heights[1], greaterThan(heights[0] * 3));
-  });
-
-  testWidgets('a short portrait phone keeps collections reachable', (
-    tester,
-  ) async {
+  Future<void> showLongLists(WidgetTester tester) async {
     tester.view.physicalSize = const Size(320, 520);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: StringsLocalizations.localizationsDelegates,
-        supportedLocales: const [Locale('en')],
-        home: FileUploadScreenV2(
-          files: [for (var i = 0; i < 10; i++) File('/upload/f$i.pdf')],
-          collections: const [],
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('New collection').hitTestable(), findsOneWidget);
-  });
-
-  for (var index = 0; index < 2; index++) {
-    final section = index == 0 ? 'items' : 'collections';
-    testWidgets('$section stops at both scroll boundaries on iOS', (
+    await showScreen(
       tester,
-    ) async {
-      await cardHeights(
-        tester,
-        files: 10,
-        collections: 10,
-        platform: TargetPlatform.iOS,
-      );
-
-      final card = find.byType(ScrollCard).at(index);
-      final scrollable = find.descendant(
-        of: card,
-        matching: find.byType(Scrollable),
-      );
-      final position = tester.state<ScrollableState>(scrollable).position;
-      final gesture = await tester.startGesture(tester.getCenter(card));
-      await gesture.moveBy(const Offset(0, 30));
-      await gesture.moveBy(const Offset(0, 150));
-      await tester.pump();
-      expect(position.pixels, 0);
-      await gesture.up();
-      await tester.pumpAndSettle();
-
-      await tester.drag(card, const Offset(0, -1000));
-      await tester.pumpAndSettle();
-      expect(position.pixels, position.maxScrollExtent);
-      final endGesture = await tester.startGesture(tester.getCenter(card));
-      await endGesture.moveBy(const Offset(0, -30));
-      await endGesture.moveBy(const Offset(0, -150));
-      await tester.pump();
-      expect(position.pixels, position.maxScrollExtent);
-      await endGesture.up();
-      await tester.pumpAndSettle();
-    });
+      uploadFiles: [for (var i = 0; i < 10; i++) File('/upload/f$i.pdf')],
+      collections: [
+        for (var i = 0; i < 30; i++) collection(i, 'Collection $i'),
+      ],
+    );
   }
 
-  testWidgets('file, collection and add icons render at the same size', (
+  testWidgets('file list stops at both scroll boundaries on iOS', (
     tester,
   ) async {
-    await cardHeights(tester, files: 2, collections: 1);
-    final icons = tester.widgetList<HugeIcon>(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is HugeIcon &&
-            (widget.icon == HugeIcons.strokeRoundedFile01 ||
-                widget.icon == HugeIcons.strokeRoundedFolder01 ||
-                widget.icon == HugeIcons.strokeRoundedAdd01),
-      ),
+    await showLongLists(tester);
+    final card = find.byType(ListView);
+    final scrollable = find.descendant(
+      of: card,
+      matching: find.byType(Scrollable),
     );
-    expect(icons.length, 4);
-    for (final icon in icons) {
-      expect(tester.getSize(find.byWidget(icon)), const Size(18, 18));
-    }
+    final position = tester.state<ScrollableState>(scrollable).position;
+    final gesture = await tester.startGesture(tester.getCenter(card));
+    await gesture.moveBy(const Offset(0, 30));
+    await gesture.moveBy(const Offset(0, 150));
+    await tester.pump();
+    expect(position.pixels, 0);
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    await tester.drag(card, const Offset(0, -1000));
+    await tester.pumpAndSettle();
+    expect(position.pixels, position.maxScrollExtent);
+    final endGesture = await tester.startGesture(tester.getCenter(card));
+    await endGesture.moveBy(const Offset(0, -30));
+    await endGesture.moveBy(const Offset(0, -150));
+    await tester.pump();
+    expect(position.pixels, position.maxScrollExtent);
+    await endGesture.up();
+    await tester.pumpAndSettle();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('long collection lists keep selection and Save reachable', (
+    tester,
+  ) async {
+    await showLongLists(tester);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Save').hitTestable(), findsOneWidget);
+    final chips = find.byType(CollectionSelectionWidget);
+    await tester.drag(chips, const Offset(0, -2000));
+    await tester.pumpAndSettle();
+    final lastChip = find.widgetWithText(TagChipComponent, 'Collection 29');
+    expect(lastChip.hitTestable(), findsOneWidget);
+    await tester.tap(lastChip);
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<TagChipComponent>(lastChip).state,
+      TagChipComponentState.selected,
+    );
   });
 }

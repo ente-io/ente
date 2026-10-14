@@ -43,7 +43,12 @@ Future<T?> showAlbumActionsSheet<T>(
                   : 2;
               final tiles = [
                 ...options
-                    .where((option) => option.labelColor == null)
+                    .where(
+                      (option) =>
+                          option.labelColor == null &&
+                          option.secondaryLabel == null &&
+                          option.trailingWidget == null,
+                    )
                     .take(criticalIndex == -1 ? columns : columns - 1),
                 if (criticalIndex != -1) options[criticalIndex],
               ];
@@ -305,6 +310,24 @@ class _AlbumActionRow<T> extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (option.secondaryLabel != null)
+                  Expanded(
+                    child: Text(
+                      option.secondaryLabel!,
+                      textAlign: TextAlign.end,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyles.mini.copyWith(color: colors.textLight),
+                    ),
+                  ),
+                if (option.trailingWidget != null)
+                  IconTheme.merge(
+                    data: IconThemeData(
+                      color: colors.textLight,
+                      size: IconSizes.small,
+                    ),
+                    child: option.trailingWidget!,
+                  ),
               ],
             ),
           ),

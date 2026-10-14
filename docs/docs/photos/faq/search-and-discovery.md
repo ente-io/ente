@@ -112,6 +112,10 @@ Machine Learning enables features like face recognition and magic search.
 
 Local processing controls whether the current device performs the indexing work itself. When local processing is on, the device downloads photos, runs the ML models, and builds indexes locally.
 
+Local processing describes where the indexing work happens. While signed in, face recognition and Magic search index photos backed up to Ente. A photo being visible in the device gallery does not make it eligible for signed-in indexing if it has not been backed up.
+
+In [Gallery Mode](/photos/faq/gallery-mode), the mobile app can index local photos it has permission to access while you are signed out.
+
 If local processing is turned off, that device skips the heavy work and can instead use indexes created by another device, such as your desktop.
 
 This can be useful on phones with low memory or limited performance.
@@ -280,6 +284,12 @@ Yes! Once your photos have been indexed, face recognition and magic search work 
 ML indexing requires internet initially to download the ML models and to download any photos not already present locally on your device. Once your photos have been indexed completely, face recognition and magic search work completely offline.
 
 Internet is also required to sync the encrypted indexes across your devices.
+
+### How much data do Ente Photos' machine-learning models download? {#ml-model-download-size}
+
+The machine-learning models can take around 300 MB to download. The amount depends on which features you enable and may change with app updates.
+
+Ente may also download photos that are not already on your device to index them locally. Those photo downloads are separate from the model download, so total data use can be higher.
 
 ### Is my face data used to train AI models? {#face-data-training}
 

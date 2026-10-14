@@ -83,7 +83,7 @@ export const FullScreenDropZone: React.FC<
         <>
             <input {...getInputProps()} />
             <Stack
-                sx={{ flex: 1 }}
+                sx={{ flex: 1, minHeight: 0 }}
                 {...getRootProps({ onDragEnter: handleDragEnter })}
             >
                 {!disabled && (isDragActive || isDropPending) && (

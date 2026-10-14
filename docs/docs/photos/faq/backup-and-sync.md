@@ -11,6 +11,8 @@ description: Frequently asked questions about backing up and syncing photos in E
 
 Once you select which albums to backup in your mobile app settings, Ente automatically syncs new photos and videos from those albums to the cloud. Backup happens in the background without needing to open the app.
 
+Each selected device folder or album backs up to a corresponding Ente album. Mobile automatic backup does not offer **Uncategorized** as a destination. You can browse local folders under **Albums > Device** and backed-up Ente albums under **Albums > Ente**.
+
 **Key features:**
 
 - Background sync runs automatically
@@ -32,6 +34,17 @@ Open `Settings > Backup > Backed up folders` and select the albums you want to a
 
 Once configured, new photos added to these albums will automatically sync in the background.
 
+The chooser lists device folders and albums; it is separate from your Ente album list. The count on a folder tile is the total reported for that device folder, not the number waiting to upload. If **Backup only new photos** is enabled, its cutoff still applies even when the tile shows older photos in its total.
+
+### Does hiding a folder stop Ente Photos from backing it up? {#hidden-folder-backup}
+
+No. Hiding a folder does not change its backup setting. To stop new photos in that folder from backing up:
+
+1. Open **Settings > Backup > Backed up folders** in the mobile app.
+2. Turn off backup for that folder.
+
+Photos already backed up remain in Ente.
+
 ### What does the slashed cloud icon mean, and how do I back that photo up? {#slashed-cloud-icon}
 
 A slashed cloud icon on a photo means it isn't backed up to Ente - usually because it's in a folder you haven't selected for backup, or because you deleted it from Ente while keeping it on your device.
@@ -51,6 +64,8 @@ Yes. You can enable this during signup/login on the permissions screen, or later
 - **Via the settings toggle**: Ente uses the current moment as the cutoff - only photos taken from that point forward are backed up.
 
 In both cases, photos older than the cutoff will not be uploaded to Ente.
+
+The totals shown in **Backed up folders** still include older items in each device folder. Those totals do not mean older items are eligible for automatic upload. Use [Backup status](#check-backup-status) to check pending uploads.
 
 To resume backing up your full library, toggle the setting off.
 

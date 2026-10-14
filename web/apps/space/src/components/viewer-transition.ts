@@ -10,10 +10,11 @@ import {
 } from "utils/viewer-geometry";
 
 const originAttribute = "data-space-viewer-origin";
-const openDuration = 0.6;
+const openDuration = 0.48;
 const openBounce = 0.26;
-const closeDuration = 0.46;
+const closeDuration = 0.36;
 const swapFadeMs = 220;
+const closingFlights = new WeakMap<HTMLElement, () => void>();
 
 export const viewerOriginKey = (spaceId?: string, postId?: number) =>
     spaceId && postId != undefined ? `${spaceId}:${postId}` : undefined;
@@ -204,15 +205,18 @@ const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
         "[data-space-viewer-avatar]",
     );
     const avatar = button?.firstElementChild;
-    if (!button || !(avatar instanceof HTMLElement)) return undefined;
+    const badge = tile.querySelector<HTMLElement>(
+        "[data-space-viewer-photos-badge]",
+    );
+    const elements: HTMLElement[] = [];
+    if (button && avatar instanceof HTMLElement) elements.push(avatar);
+    if (badge) elements.push(badge);
+    if (!elements.length) return undefined;
+
     const tileRect = rectOf(tile);
-    const avatarRect = rectOf(avatar);
-    const left = avatarRect.x - tileRect.x;
-    const fromBottom = tileRect.y + tileRect.h - avatarRect.y;
-    const rider = avatar.cloneNode(true) as HTMLElement;
-    for (const element of [rider, ...rider.querySelectorAll("*")])
-        if (element instanceof HTMLElement) element.style.animation = "none";
+    const rider = document.createElement("div");
     rider.setAttribute("aria-hidden", "true");
+    rider.inert = true;
     Object.assign(rider.style, {
         left: "0",
         pointerEvents: "none",
@@ -220,20 +224,44 @@ const createRider = (flyer: HTMLElement, tile: HTMLElement) => {
         top: "0",
         zIndex: "1",
     });
+    const drawElements = elements.map((element) => {
+        const bounds = rectOf(element);
+        const clone = element.cloneNode(true) as HTMLElement;
+        for (const child of [clone, ...clone.querySelectorAll("*")])
+            if (child instanceof HTMLElement) child.style.animation = "none";
+        Object.assign(clone.style, {
+            left: "0",
+            position: "absolute",
+            right: "auto",
+            top: "0",
+        });
+        rider.append(clone);
+        element.style.opacity = "0";
+        return (v: ViewerRect) => {
+            const x =
+                element == avatar
+                    ? v.x + bounds.x - tileRect.x
+                    : v.x + v.w - (tileRect.x + tileRect.w - bounds.x);
+            const y =
+                element == avatar
+                    ? v.y + v.h - (tileRect.y + tileRect.h - bounds.y)
+                    : v.y + bounds.y - tileRect.y;
+            clone.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        };
+    });
     flyer.after(rider);
-    button.style.opacity = "0";
 
     return {
         element: rider,
         draw: ({ visible: v }: ViewerPhotoState, t: number) => {
-            rider.style.transform = `translate3d(${v.x + left}px, ${v.y + v.h - fromBottom}px, 0)`;
+            for (const drawElement of drawElements) drawElement(v);
             rider.style.opacity = String(
                 1 - Math.min(1, Math.max(0, t / 0.35)),
             );
         },
         remove: () => rider.remove(),
         reveal: () => {
-            button.style.opacity = "";
+            for (const element of elements) element.style.opacity = "";
         },
     };
 };
@@ -246,6 +274,7 @@ export const playViewerOpen = (
     setProgress: (t: number) => void,
     onLanded: () => void,
 ) => {
+    closingFlights.get(origin)?.();
     if (prefersReducedMotion() || !isOnScreen(origin)) return undefined;
 
     const from = tilePhotoState(
@@ -336,15 +365,24 @@ export const playViewerOpen = (
 
 // throwVelocity is in px per ms. A photo other than the tile's fades into it.
 export const playViewerClose = (
-    root: HTMLElement,
+    viewerRoot: HTMLElement,
     { origin, src, photo }: ViewerFlightTarget,
     from: ViewerPhotoState,
     throwVelocity: { x: number; y: number },
-    setProgress: (t: number) => void,
-    onDone: () => void,
+    startBackground: number,
 ) => {
     if (prefersReducedMotion() || !isOnScreen(origin)) return undefined;
 
+    const root = document.createElement("div");
+    root.setAttribute("aria-hidden", "true");
+    root.inert = true;
+    Object.assign(root.style, {
+        inset: "0",
+        pointerEvents: "none",
+        position: "fixed",
+        zIndex: "1299",
+    });
+    viewerRoot.after(root);
     const end = tilePhotoState(
         rectOf(origin),
         photo,
@@ -356,6 +394,7 @@ export const playViewerClose = (
         const state = mixPhotoState(end, from, t);
         draw(state);
         rider?.draw(state, t);
+        root.style.backgroundColor = `rgb(0 0 0 / ${startBackground * viewerBackgroundOpacity(t)})`;
     };
     origin.style.opacity = "0";
     drawAt(1);
@@ -375,11 +414,15 @@ export const playViewerClose = (
         "img:not([aria-hidden])",
     );
     const isTilePhoto = tileImage?.currentSrc == src || tileImage?.src == src;
+    let fade: Animation | undefined;
 
     const cleanUp = () => {
+        fade?.cancel();
         origin.style.opacity = "";
         rider?.remove();
         rider?.reveal();
+        root.remove();
+        closingFlights.delete(origin);
     };
     const stopSpring = runSpring({
         from: 1,
@@ -388,49 +431,24 @@ export const playViewerClose = (
         duration: closeDuration,
         bounce: 0,
         restDelta: 0.5 / Math.max(1, photoStateTravel(from, end)),
-        onUpdate: (t) => {
-            drawAt(t);
-            setProgress(t);
-        },
+        onUpdate: drawAt,
         onDone: () => {
-            cleanUp();
+            origin.style.opacity = "";
+            rider?.reveal();
             if (isTilePhoto) {
-                flyer.remove();
+                cleanUp();
             } else {
-                // The viewer unmounts next, so fade a copy.
-                const ghost = flyer.cloneNode(true) as HTMLElement;
-                Object.assign(ghost.style, {
-                    position: "fixed",
-                    zIndex: "1301",
+                fade = root.animate([{ opacity: 1 }, { opacity: 0 }], {
+                    duration: swapFadeMs,
+                    easing: "ease",
+                    fill: "forwards",
                 });
-                document.body.append(ghost);
-                const overlay = rider?.element.cloneNode(true) as
-                    HTMLElement | undefined;
-                if (overlay) {
-                    Object.assign(overlay.style, {
-                        position: "fixed",
-                        zIndex: "1302",
-                    });
-                    document.body.append(overlay);
-                }
-                flyer.remove();
-                ghost
-                    .animate([{ opacity: 1 }, { opacity: 0 }], {
-                        duration: swapFadeMs,
-                        easing: "ease",
-                        fill: "forwards",
-                    })
-                    .addEventListener("finish", () => {
-                        ghost.remove();
-                        overlay?.remove();
-                    });
+                fade.addEventListener("finish", cleanUp, { once: true });
             }
-            onDone();
         },
     });
-    return () => {
+    closingFlights.set(origin, () => {
         stopSpring();
         cleanUp();
-        flyer.remove();
-    };
+    });
 };

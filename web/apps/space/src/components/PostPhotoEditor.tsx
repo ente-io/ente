@@ -244,8 +244,9 @@ export const SpacePostPhotoEditor: React.FC<{
                     alignItems: "center",
                     display: "grid",
                     gridTemplateColumns: "1fr auto 1fr",
-                    px: "16px",
-                    pt: "max(6px, env(safe-area-inset-top))",
+                    pl: "max(16px, calc(var(--space-ios-safe-area-left, 0px) + 12px))",
+                    pr: "max(16px, var(--space-ios-safe-area-right, 0px))",
+                    pt: "max(calc(6px + var(--space-ios-safe-area-top, 0px)), env(safe-area-inset-top))",
                     pb: "6px",
                     flexShrink: 0,
                 }}

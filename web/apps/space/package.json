@@ -25,6 +25,6 @@
     "devDependencies": {
         "ente-build-config": "*",
         "vite-plugin-wasm": "3.6.0",
-        "vitest": "5.0.2"
+        "vitest": "5.0.4"
     }
 }

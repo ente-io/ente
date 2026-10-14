@@ -11,7 +11,7 @@ import {
     Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Box, Fade, Menu, MenuItem, Modal } from "@mui/material";
+import { Box, Fade, Menu, MenuItem, Modal, Portal } from "@mui/material";
 import { keyframes } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
 import {
@@ -73,7 +73,6 @@ const viewerBackground = "#000000";
 const inputBackground = spaceControlBackground;
 const inputBackgroundActive = spaceControlBackgroundHover;
 const dangerColor = "#F63A3A";
-const viewerHeaderHeight = 56;
 const viewerBottomPadding = 88;
 const viewerDesktopMinWidth = 600;
 const captionInputMinHeight = 40;
@@ -174,6 +173,7 @@ export interface SpaceFileViewerController {
 interface SpaceFileViewerProps {
     ref?: React.Ref<SpaceFileViewerController>;
     closeOnSwipePastEnd?: boolean;
+    headerHeight?: number;
     draftPhotoControls?: React.ReactNode;
     onLoadPhoto?: SpacePostAssetURLLoader;
     isDraftPostPreviewPending?: boolean;
@@ -206,8 +206,18 @@ interface SpaceFileViewerProps {
 const setViewerBackground = (root: HTMLElement, opacity: number) =>
     root.style.setProperty("--space-viewer-bg-opacity", String(opacity));
 
-const viewerPadding = (hasDraftPhotoControls: boolean) => {
+const viewerPadding = (
+    hasDraftPhotoControls: boolean,
+    headerHeight: number,
+    header: HTMLElement | null,
+) => {
     const isDesktop = window.innerWidth >= viewerDesktopMinWidth;
+    let top = isDesktop ? 0 : headerHeight;
+    if (header && document.documentElement.hasAttribute("data-space-ios-pwa")) {
+        top = isDesktop
+            ? parseFloat(getComputedStyle(header).paddingTop)
+            : header.offsetHeight;
+    }
     return {
         bottom: hasDraftPhotoControls
             ? 176
@@ -216,7 +226,7 @@ const viewerPadding = (hasDraftPhotoControls: boolean) => {
               : viewerBottomPadding,
         left: 0,
         right: 0,
-        top: isDesktop ? 0 : viewerHeaderHeight,
+        top,
     };
 };
 
@@ -240,7 +250,6 @@ interface ViewerMotion {
     landed: boolean;
     flight?: ReturnType<typeof playViewerOpen>;
     reveal?: () => void;
-    stopClose?: () => void;
 }
 
 const endOpenFlight = (motion: ViewerMotion, root: HTMLElement) => {
@@ -454,6 +463,7 @@ const SpaceViewerPhotoOverlay: React.FC<{
 export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     ref,
     closeOnSwipePastEnd = false,
+    headerHeight = 68,
     draftPhotoControls,
     onLoadPhoto,
     focusReplyOnOpen = false,
@@ -628,6 +638,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         ? Fade
         : SpaceBottomSheetTransition;
     const viewerRootRef = React.useRef<HTMLDivElement | null>(null);
+    const viewerHeaderRef = React.useRef<HTMLDivElement>(null);
     const stableViewportSizeRef = React.useRef<ViewerViewportSize>(
         currentViewerViewportSize(null),
     );
@@ -710,6 +721,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             const viewport = viewerViewportSize();
             const { top, bottom } = viewerPadding(
                 hasDraftPhotoControlsRef.current,
+                headerHeight,
+                viewerHeaderRef.current,
             );
             const areaHeight = viewport.y - top - bottom;
             const scale = Math.min(1, viewport.x / width, areaHeight / height);
@@ -722,7 +735,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 h,
             };
         },
-        [viewerViewportSize],
+        [headerHeight, viewerViewportSize],
     );
 
     const requestCloseRef = React.useRef<
@@ -773,36 +786,24 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             delete root.dataset.spaceViewerFlying;
             delete root.dataset.spaceViewerWaiting;
         }
-        const stop =
-            root && item && origin && from && src
-                ? playViewerClose(
-                      root,
-                      {
-                          origin,
-                          src,
-                          photo: {
-                              width: item.width ?? defaultPhotoWidth,
-                              height: item.height ?? defaultPhotoHeight,
-                          },
-                      },
-                      from,
-                      throwVelocity,
-                      (t) =>
-                          setViewerBackground(
-                              root,
-                              startBackground * viewerBackgroundOpacity(t),
-                          ),
-                      () => onCloseRef.current(),
-                  )
-                : undefined;
-        if (!stop || !root) {
-            onCloseRef.current();
-            return;
+        if (root && item && origin && from && src) {
+            playViewerClose(
+                root,
+                {
+                    origin,
+                    src,
+                    photo: {
+                        width: item.width ?? defaultPhotoWidth,
+                        height: item.height ?? defaultPhotoHeight,
+                    },
+                },
+                from,
+                throwVelocity,
+                startBackground,
+            );
         }
         motion.closing = true;
-        motion.stopClose = stop;
-        root.dataset.spaceViewerFlying = "true";
-        root.dataset.spaceViewerLeaving = "true";
+        onCloseRef.current();
     };
 
     React.useImperativeHandle(
@@ -1258,6 +1259,31 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         pswpRef.current?.updateSize(true);
     }, [hasDraftPhotoControls]);
 
+    React.useEffect(() => {
+        if (!isSpaceIOS() || !canReplyToPost) return;
+        const viewport = window.visualViewport;
+        if (!viewport) return;
+
+        const updateReplyViewport = () => {
+            const rect =
+                pswpRef.current?.currSlide?.content.element?.getBoundingClientRect();
+            if (rect && rect.width > 0)
+                motionRef.current.flight?.retarget({
+                    x: rect.left,
+                    y: rect.top,
+                    w: rect.width,
+                    h: rect.height,
+                });
+        };
+
+        viewport.addEventListener("resize", updateReplyViewport);
+        viewport.addEventListener("scroll", updateReplyViewport);
+        return () => {
+            viewport.removeEventListener("resize", updateReplyViewport);
+            viewport.removeEventListener("scroll", updateReplyViewport);
+        };
+    }, [canReplyToPost]);
+
     const handleDeleteSheetExited = () => {
         if (!isDeleteExit) return;
 
@@ -1338,8 +1364,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         const stopMotion = () => {
             motion.flight?.stop();
             motion.flight = undefined;
-            motion.stopClose?.();
-            motion.stopClose = undefined;
             motion.reveal?.();
             motion.reveal = undefined;
             if (root) {
@@ -1384,6 +1408,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         let disposed = false;
         let closedByReact = false;
         let pswp: PhotoSwipe | undefined;
+        const headerObserver = new ResizeObserver(() => pswp?.updateSize(true));
+        if (document.documentElement.hasAttribute("data-space-ios-pwa"))
+            headerObserver.observe(viewerHeaderRef.current!);
         let swipeStart:
             { x: number; y: number; photoIndex: number } | undefined;
 
@@ -1416,7 +1443,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 loop: false,
                 mainClass: "pswp-space-viewer",
                 paddingFn: () =>
-                    viewerPadding(hasDraftPhotoControlsRef.current),
+                    viewerPadding(
+                        hasDraftPhotoControlsRef.current,
+                        headerHeight,
+                        viewerHeaderRef.current,
+                    ),
                 pinchToClose: false,
                 returnFocus: false,
                 showHideAnimationType: "none",
@@ -1684,12 +1715,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
 
         return () => {
             disposed = true;
+            headerObserver.disconnect();
             closedByReact = true;
             pswpRef.current = undefined;
             pswp?.destroy();
             root.style.removeProperty("--space-viewer-bg-opacity");
         };
-    }, [isDraftPost, viewerViewportSize]);
+    }, [headerHeight, isDraftPost, viewerViewportSize]);
 
     React.useEffect(() => {
         if (typeof document == "undefined") return;
@@ -1767,6 +1799,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 transition: `opacity ${draftPostExitDurationMs}ms cubic-bezier(0.22, 1, 0.36, 1)`,
                 width: "100%",
                 zIndex: 1300,
+                "& > .pswp, & > header, & > [data-space-viewer-chrome='true']":
+                    {
+                        translate:
+                            isSpaceIOS() && canReplyToPost
+                                ? "0 calc(-1 * var(--space-keyboard-inset, 0px))"
+                                : undefined,
+                    },
                 "& .space-photo-placeholder": {
                     alignItems: "center",
                     color: spaceTextMuted,
@@ -1782,8 +1821,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                         opacity:
                             "calc((var(--space-viewer-bg-opacity, 1) - 0.5) * 2)",
                     },
-                "&[data-space-viewer-leaving='true'] :is([data-space-viewer-chrome='true'], [data-space-viewer-bottom='true'], [data-space-viewer-close])":
-                    { opacity: 0, transition: "opacity 140ms ease" },
                 // PhotoSwipe sets an inline opacity, so hide it with visibility.
                 "&[data-space-viewer-flying='true'] .pswp": {
                     visibility: "hidden !important",
@@ -1795,6 +1832,15 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 },
             }}
         >
+            {isSpaceIOS() && isReplyFocused && (
+                <Portal
+                    container={() =>
+                        viewerRootRef.current?.parentElement ?? null
+                    }
+                >
+                    <SpaceViewerPostBackdrop />
+                </Portal>
+            )}
             {!isDraftPost && (
                 <Box
                     component="span"
@@ -1809,6 +1855,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 </Box>
             )}
             <Box
+                ref={viewerHeaderRef}
                 component="header"
                 sx={{
                     alignItems: "center",
@@ -1816,10 +1863,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                     flexShrink: 0,
                     gap: "12px",
                     gridTemplateColumns: "minmax(0, 1fr) auto",
-                    minHeight: viewerHeaderHeight,
+                    minHeight: `calc(${headerHeight}px + var(--space-ios-safe-area-top, 0px))`,
+                    pt: "var(--space-ios-safe-area-top, 0px)",
                     position: "relative",
-                    pl: "16px",
-                    pr: "4px",
+                    pl: "max(16px, var(--space-ios-safe-area-left, 0px))",
+                    pr: "max(4px, var(--space-ios-safe-area-right, 0px))",
                     width: "100%",
                     zIndex: 2,
                 }}
@@ -2313,7 +2361,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 sx={{
                     background:
                         "linear-gradient(180deg, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.13) 58%, rgba(0, 0, 0, 0) 100%)",
-                    height: 44,
+                    height: "calc(44px + var(--space-ios-safe-area-top, 0px))",
                     left: 0,
                     pointerEvents: "none",
                     position: "fixed",

@@ -494,6 +494,9 @@ Future<void> _init(
       packageInfo,
     );
 
+    if (!isBackground) {
+      await localSettings.migrateGalleryLayoutPreferences();
+    }
     MLDataDB.initialize(
       preferRust: flagService.rustMlDb || localSettings.rustMlDbOverride,
     );

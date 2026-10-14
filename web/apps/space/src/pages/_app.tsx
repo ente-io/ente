@@ -119,7 +119,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         >
             <CustomHead
                 title={spacePageTitle(router.pathname)}
-                viewportContent="width=device-width, initial-scale=1, maximum-scale=1"
+                viewportContent="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
             >
                 <link
                     rel="preload"
@@ -136,7 +136,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <meta name="apple-mobile-web-app-title" content="Space" />
                 <meta
                     name="apple-mobile-web-app-status-bar-style"
-                    content="black"
+                    content="black-translucent"
                 />
                 <link
                     rel="manifest"
@@ -149,6 +149,13 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <link
                     rel="apple-touch-icon"
                     href="/images/apple-touch-icon.png"
+                    sizes="180x180"
+                />
+                <link
+                    rel="icon"
+                    href="/favicon.ico"
+                    sizes="16x16 32x32 48x48"
+                    type="image/x-icon"
                 />
             </CustomHead>
             <CssBaseline enableColorScheme />

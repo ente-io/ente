@@ -4,6 +4,7 @@ import type { LocalSpaceFeedPost } from "../src/state/app-state";
 import {
     homeFeedEntries,
     homeFeedSeparatorBefore,
+    type HomeFeedPost,
 } from "../src/utils/home-feed";
 
 const post = (postId: number, timestampMs: number): SpacePost => ({
@@ -41,6 +42,23 @@ test("new posts stay full size for the visit and join history on the next visit"
         latest: [],
         history: [newest, existing, older],
     });
+});
+
+test("history keeps batch boundaries when new posts are shown as cards", () => {
+    const posts: HomeFeedPost[] = [
+        post(5, 500),
+        post(4, 400),
+        post(3, 300),
+        { ...post(2, 200), batchIndex: 1 },
+        { ...post(1, 100), batchIndex: 1 },
+    ];
+    const { latest, history } = homeFeedEntries(posts, [], 300);
+    expect(latest.map((entry) => entry.identity)).toEqual(["post:5", "post:4"]);
+    expect(history.map((item) => [item.postId, item.batchIndex])).toEqual([
+        [3, undefined],
+        [2, 1],
+        [1, 1],
+    ]);
 });
 
 test("upload completion does not duplicate a post or move it into the grid", () => {

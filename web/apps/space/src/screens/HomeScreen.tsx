@@ -71,6 +71,7 @@ import {
     homeFeedEntries,
     homeFeedSeparatorBefore,
     type HomeFeedEntry,
+    type HomeFeedPost,
 } from "utils/home-feed";
 import {
     spacePostFrameAspectRatio,
@@ -111,7 +112,7 @@ const feedPhotoCaptionTextSx = {
     textWrap: "balance",
 } as const;
 interface HomeScreenProps {
-    feedItems: SpacePost[];
+    feedItems: HomeFeedPost[];
     friendRequestSentToastName?: string;
     hasFeedLoadMoreError?: boolean;
     hasMoreFeedItems?: boolean;
@@ -2298,7 +2299,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     "@media (min-width: 600px)": { maxWidth: 390 },
                 }}
             >
-                <SpaceHomeHeader />
+                <SpaceHomeHeader profile={profile} />
                 <Box
                     component="section"
                     id="space-main-content"
@@ -2311,7 +2312,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         gap: 0,
                         justifyContent: showFeedCards ? "flex-start" : "center",
                         minHeight:
-                            "calc(var(--space-page-height, 100svh) - 60px)",
+                            "calc(var(--space-page-height, 100svh) - 60px - var(--space-ios-safe-area-top, 0px))",
                         minWidth: 0,
                         pb: showFeedCards ? "24px" : "12px",
                         px: feedHorizontalPadding,
@@ -2577,7 +2578,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                 color: "#FFFFFF",
                                 display: "flex",
                                 flexDirection: "column",
-                                height: "calc(var(--space-page-height, 100svh) - 76px)",
+                                height: "calc(var(--space-page-height, 100svh) - 76px - var(--space-ios-safe-area-top, 0px))",
                                 minHeight: 360,
                                 overflow: "hidden",
                                 px: "24px",

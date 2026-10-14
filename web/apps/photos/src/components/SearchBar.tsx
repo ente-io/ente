@@ -63,6 +63,7 @@ import AsyncSelect from "react-select/async";
 
 export interface SearchBarProps {
     isInSearchMode: boolean;
+    isSettingsOpen: boolean;
     onSelectSearchOption: (
         o: SearchOption | undefined,
         options?: { shouldExitSearchMode?: boolean },
@@ -97,6 +98,8 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
     };
 
     useEffect(() => {
+        if (props.isSettingsOpen) return;
+
         const handleKeyDown = (event: KeyboardEvent) => {
             if ((event.metaKey || event.ctrlKey) && event.key === "k") {
                 event.preventDefault();
@@ -106,7 +109,7 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
 
         document.addEventListener("keydown", handleKeyDown);
         return () => document.removeEventListener("keydown", handleKeyDown);
-    }, []);
+    }, [props.isSettingsOpen]);
 
     const closeButton = isSmallWidth && props.isInSearchMode && (
         <Tooltip title={t("close")}>
@@ -125,6 +128,7 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
                         color="secondary"
                         aria-label={t("search")}
                         aria-haspopup="dialog"
+                        disabled={props.isSettingsOpen}
                         onClick={showSearch}
                         sx={{
                             minWidth: 0,
@@ -134,7 +138,11 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
                             borderRadius: "12px",
                         }}
                     >
-                        <HugeiconsIcon icon={Search01Icon} size={20} />
+                        <HugeiconsIcon
+                            icon={Search01Icon}
+                            size={20}
+                            strokeWidth={1.8}
+                        />
                     </FocusVisibleButton>
                 </Tooltip>
             </Stack>
@@ -146,10 +154,12 @@ export const SearchBar: React.FC<SearchBarProps> = (props) => {
                     disableRestoreFocus
                     fullWidth
                     maxWidth={false}
-                    slotProps={{
-                        backdrop: {
-                            sx: { backgroundColor: "rgba(0,0,0,0.4)" },
+                    sx={{
+                        "& .MuiBackdrop-root": {
+                            backgroundColor: "rgba(0,0,0,0.55)",
                         },
+                    }}
+                    slotProps={{
                         paper: {
                             "aria-label": t("search"),
                             sx: {
@@ -339,7 +349,7 @@ const SearchInput: React.FC<
                 tabSelectsValue={false}
                 aria-label={t("search")}
                 escapeClearsValue
-                menuIsOpen={open}
+                menuIsOpen={open && !!inputValue.trim()}
                 onFocus={handleFocus}
                 placeholder={t("search_hint")}
                 loadingMessage={() => null}
@@ -421,7 +431,7 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
                             label={
                                 <Stack
                                     direction="row"
-                                    sx={{ alignItems: "center", gap: 0.5 }}
+                                    sx={{ alignItems: "baseline", gap: 0.5 }}
                                 >
                                     {t(
                                         category === "places"
@@ -569,22 +579,6 @@ const createSelectStyles = (
         flexDirection: "column",
         gap: "8px",
         padding: 0,
-        scrollbarWidth: "thin",
-        scrollbarColor: `${theme.vars.palette.stroke.muted} transparent`,
-        "@supports selector(::-webkit-scrollbar)": {
-            scrollbarWidth: "auto",
-            scrollbarColor: "auto",
-            "&::-webkit-scrollbar": { width: "4px" },
-            "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
-            "&::-webkit-scrollbar-thumb": {
-                backgroundColor: theme.vars.palette.stroke.muted,
-                borderRadius: "4px",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-                backgroundColor: theme.vars.palette.text.muted,
-            },
-            "&::-webkit-scrollbar-button": { display: "none" },
-        },
     }),
     group: (style) => ({
         ...style,
@@ -599,7 +593,13 @@ const createSelectStyles = (
         },
     }),
     groupHeading: (style) => ({ ...style, margin: 0, padding: 0 }),
-    noOptionsMessage: (style) => ({ ...style, padding: 0 }),
+    noOptionsMessage: (style) => ({
+        ...style,
+        padding: 0,
+        flex: 1,
+        display: "grid",
+        placeItems: "center",
+    }),
     option: (style, { isFocused }) => ({
         ...style,
         padding: 0,
@@ -719,13 +719,7 @@ const EmptyState: React.FC<
     }
 
     const hasPeople = people && people.length > 0;
-    if (!hasPeople && !label) {
-        return (
-            <Typography variant="small" sx={{ color: "text.muted", py: 1 }}>
-                {t("search_start_typing")}
-            </Typography>
-        );
-    }
+    if (!hasPeople && !label) return null;
 
     return (
         <Box sx={{ textAlign: "left" }}>

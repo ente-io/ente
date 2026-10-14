@@ -455,6 +455,11 @@
       ]
     },
     {
+      "title": "Cardmarket",
+      "slug": "cardmarket",
+      "hex": "012169"
+    },
+    {
       "title": "Carta",
       "hex": "000000",
       "altNames": [
@@ -2026,6 +2031,11 @@
         "Post Scan Mail",
         "PostScanMail"
       ]
+    },
+    {
+      "title": "PowerDMARC",
+      "slug": "powerdmarc",
+      "hex": "00213f"
     },
     {
       "title": "Prey Project",
