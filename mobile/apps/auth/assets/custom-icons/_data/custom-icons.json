@@ -2033,6 +2033,11 @@
       ]
     },
     {
+      "title": "PowerDMARC",
+      "slug": "powerdmarc",
+      "hex": "00213f"
+    },
+    {
       "title": "Prey Project",
       "slug": "prey_project",
       "altNames": [
