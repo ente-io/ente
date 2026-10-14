@@ -49,8 +49,11 @@ class FileUtil {
     if (await cachedDecryptedFile.exists()) {
       final cachedSize = await cachedDecryptedFile.length();
       if (cachedSize > 0) {
-        if (!context.mounted) return;
-        await _openDecryptedFile(context, cachedDecryptedFile, file);
+        await _openDecryptedFile(
+          context.mounted ? context : null,
+          cachedDecryptedFile,
+          file,
+        );
         return;
       }
       await cachedDecryptedFile.delete();
@@ -84,9 +87,12 @@ class FileUtil {
 
       await dialog?.hide();
 
-      if (!context.mounted) return;
       if (decryptedFile != null) {
-        await _openDecryptedFile(context, decryptedFile, file);
+        await _openDecryptedFile(
+          context.mounted ? context : null,
+          decryptedFile,
+          file,
+        );
       } else if (context.mounted) {
         await showBottomSheetComponent(
           context: context,
@@ -384,17 +390,16 @@ class FileUtil {
   }
 
   static Future<void> _openDecryptedFile(
-    BuildContext context,
+    BuildContext? context,
     File localFile,
     EnteFile file,
   ) async {
-    if (!context.mounted) return;
-    Future<void> openExternally(BuildContext viewerContext) => _launchFile(
+    Future<void> openExternally(BuildContext? viewerContext) => _launchFile(
       localFile,
       displayName: file.displayName,
       lockerFile: file,
       showError: ({required error, resultType}) async {
-        if (!viewerContext.mounted) return;
+        if (viewerContext == null || !viewerContext.mounted) return;
         await _showOpenFileError(
           viewerContext,
           error: error,
@@ -403,6 +408,8 @@ class FileUtil {
         );
       },
     );
+
+    if (context == null || !context.mounted) return openExternally(context);
 
     final extension = getPreferredFileExtension(
       file,
