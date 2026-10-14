@@ -1,6 +1,6 @@
 use std::{io::IsTerminal, num::NonZeroUsize, path::PathBuf};
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -9,13 +9,16 @@ use serde::{Deserialize, Serialize};
     about = "Use Ente from the command line",
     override_usage = "ente-cli-next [OPTIONS] <COMMAND>",
     after_help = "Photos:
-  ente-cli-next photos login
+  ente-cli-next account login --app photos
   ente-cli-next photos album list
   ente-cli-next photos file list --album <ID>
   ente-cli-next photos export <DIR>
 Auth backups:
-  ente-cli-next auth login
-  ente-cli-next auth export <DIR>"
+  ente-cli-next account login --app auth
+  ente-cli-next auth export <DIR>
+Paste:
+  ente-cli-next paste create --input <PATH>
+  ente-cli-next paste consume <URL>"
 )]
 pub struct Cli {
     #[command(flatten)]
@@ -36,7 +39,9 @@ pub struct Options {
 
 impl Options {
     pub fn can_prompt(&self) -> bool {
-        !self.no_input && std::io::stdin().is_terminal() && std::io::stderr().is_terminal()
+        !self.no_input
+            && std::io::stderr().is_terminal()
+            && (cfg!(unix) || std::io::stdin().is_terminal())
     }
 }
 
@@ -81,12 +86,12 @@ pub enum Command {
         #[command(subcommand)]
         command: PhotosCommand,
     },
-    #[command(about = "Manage Locker sessions and make API requests")]
+    #[command(about = "Manage Ente Locker")]
     Locker {
         #[command(flatten)]
         selector: AccountSelector,
         #[command(subcommand)]
-        command: SessionCommand,
+        command: LockerCommand,
     },
     #[command(about = "Manage Ente Auth")]
     Auth {
@@ -95,8 +100,13 @@ pub enum Command {
         #[command(subcommand)]
         command: AuthCommand,
     },
-    #[command(about = "Manage accounts on this device", alias = "account")]
-    Accounts {
+    #[command(about = "Share and consume one-time encrypted text without an account")]
+    Paste {
+        #[command(subcommand)]
+        command: PasteCommand,
+    },
+    #[command(about = "Manage Ente accounts", alias = "accounts")]
+    Account {
         #[command(subcommand)]
         command: AccountCommand,
     },
@@ -115,22 +125,80 @@ Keep the same home and key across unattended invocations."
 }
 
 #[derive(Subcommand)]
+pub enum PasteCommand {
+    #[command(
+        about = "Create a one-time encrypted paste",
+        after_long_help = "Supply TEXT or --input PATH; --input - reads stdin verbatim.
+With neither, reads piped stdin.
+Text must be nonblank and at most 4,000 Unicode scalar values.
+Pastes expire after 24 hours.
+With --password, uses ENTE_CLI_PASSWORD when set; otherwise prompts for a paste password and confirmation.
+With --password --no-input, ENTE_CLI_PASSWORD is required.
+Prints the paste URL. With --json: {\"url\": \"...\"}. Requires network access."
+    )]
+    Create {
+        #[arg(
+            conflicts_with = "input",
+            help = "Literal paste text; defaults to piped stdin"
+        )]
+        text: Option<String>,
+        #[arg(
+            long,
+            value_name = "PATH|-",
+            help = "Read plain UTF-8 text from a file, or stdin with -"
+        )]
+        input: Option<PathBuf>,
+        #[arg(long, help = "Require a password to decrypt the paste")]
+        password: bool,
+        #[arg(long, help = "Ente API server; defaults to api.ente.com")]
+        host: Option<String>,
+        #[arg(
+            long,
+            default_value = "https://paste.ente.com",
+            value_name = "URL",
+            help = "Website used in the returned link"
+        )]
+        paste_origin: url::Url,
+    },
+    #[command(
+        about = "Consume a paste and permanently remove its server copy",
+        after_long_help = "Supply a URL including its #key fragment, or TOKEN --key KEY.
+Protected pastes use ENTE_CLI_PASSWORD when set; otherwise prompt for the paste password.
+Consumes the paste before decryption, even with a wrong password or key.
+A wrong ENTE_CLI_PASSWORD fails immediately; prompted retries work only while this command stays running.
+Prints the text without adding a newline. Terminal controls are escaped except tabs and newlines.
+With --json: {\"text\": \"...\"}. --raw affects plain terminal output only. Requires network access."
+    )]
+    Consume {
+        #[arg(value_name = "URL|TOKEN", help = "Paste URL or access token")]
+        link_or_token: String,
+        #[arg(long, help = "Decryption key when passing an access token")]
+        key: Option<String>,
+        #[arg(long, help = "Print text verbatim even on a terminal")]
+        raw: bool,
+        #[arg(long, help = "Ente API server; defaults to api.ente.com")]
+        host: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
 pub enum AuthCommand {
-    #[command(flatten)]
-    Session(SessionCommand),
+    #[command(about = "Make an authenticated API request", after_help = API_HELP)]
+    Api(ApiArgs),
     #[command(about = "Export your Auth codes; encrypted by default")]
     #[command(
         after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
-Set ENTE_CLI_EXPORT_PASSWORD for encrypted export with --no-input.
+Encrypted export uses ENTE_CLI_PASSWORD when set; otherwise prompts for an export password.
+With --no-input, encrypted export requires ENTE_CLI_PASSWORD.
 DIR receives dated backups. --output writes a new file, or backup bytes to stdout with -.
 --json formats file/directory summaries; stdout backups contain only the artifact."
     )]
     Export(AuthExportArgs),
     #[command(about = "Decrypt an Auth export without an account")]
-    #[command(
-        after_long_help = "Reads a backup without network access. Set ENTE_CLI_EXPORT_PASSWORD with --no-input.
-Writes readable URI lines to stdout, or a new --output file. --json only formats the file summary."
-    )]
+    #[command(after_long_help = "Reads a backup without network access.
+Uses ENTE_CLI_PASSWORD as the export password when set; otherwise prompts.
+With --no-input, ENTE_CLI_PASSWORD is required.
+Writes readable URI lines to stdout, or a new --output file. --json only formats the file summary.")]
     Decrypt {
         #[arg(value_name = "PATH", help = "Encrypted Auth backup to decrypt")]
         input: PathBuf,
@@ -164,20 +232,14 @@ pub struct AuthExportArgs {
 
 #[derive(Subcommand)]
 pub enum PhotosCommand {
-    #[command(flatten)]
-    Session(SessionCommand),
-    #[command(flatten)]
-    Library(PhotosLibraryCommand),
-}
-
-#[derive(Subcommand)]
-pub enum PhotosLibraryCommand {
+    #[command(about = "Make an authenticated API request", after_help = API_HELP)]
+    Api(ApiArgs),
     #[command(about = "Maintain an independent copy of your Photos library")]
     #[command(
         after_long_help = "Refreshes metadata and downloads originals to DESTINATION; requires network access.
 Progress goes to stderr; the result goes to stdout. Use --json for a structured result."
     )]
-    Export(ExportArgs),
+    Export(PhotosExportArgs),
     #[command(about = "Manage albums")]
     Album {
         #[command(subcommand)]
@@ -198,7 +260,7 @@ Progress goes to stderr; the result goes to stdout. Use --json for a structured 
 }
 
 #[derive(Args)]
-pub struct ExportArgs {
+pub struct PhotosExportArgs {
     #[arg(
         long,
         value_name = "ALBUM",
@@ -214,6 +276,12 @@ pub struct ExportArgs {
     pub adopt: bool,
     #[arg(
         long,
+        help = "Share originals across albums using hard links",
+        long_help = "Share originals across albums using hard links. Replace unchanged copies in selected albums with links, reusing originals elsewhere in this export, including unselected albums and Trash. Linked files share contents, timestamps and permissions. Later runs without this flag keep existing links. Requires a filesystem that supports hard links. Otherwise, omit this flag to use copies."
+    )]
+    pub hardlinks: bool,
+    #[arg(
+        long,
         short = 'j',
         value_name = "N",
         default_value = "16",
@@ -225,46 +293,30 @@ pub struct ExportArgs {
 }
 
 #[derive(Subcommand)]
-pub enum SessionCommand {
-    #[command(
-        about = "Log in",
-        after_help = "Non-interactive login reads JSON from --input:
-  {\"email\": \"...\", \"password\": \"...\", \"otp\": \"123456\", \"totp\": \"654321\"}
-
-All fields are strings. otp is the email code; totp is the authenticator code. Supply them when required.
-With --no-input, supply email and password through --input PATH or --input -.
-For unattended vault access, set ENTE_CLI_VAULT_KEY (see vault --help)."
-    )]
-    Login(LoginArgs),
-    #[command(about = "Log out")]
-    Logout,
-    #[command(
-        about = "Make an authenticated API request",
-        after_help = "The response body is written unchanged, including when --json is set."
-    )]
+pub enum LockerCommand {
+    #[command(about = "Make an authenticated API request", after_help = API_HELP)]
     Api(ApiArgs),
 }
 
 #[derive(Args)]
 pub struct LoginArgs {
+    #[arg(help = "Local account name; creates an entry if it does not exist")]
+    pub name: Option<String>,
+    #[arg(long, value_enum, help = "App to log in to")]
+    pub app: App,
     #[arg(
         long,
-        conflicts_with = "account",
-        help = "Ente server to log in to; defaults to api.ente.com"
+        help = "Ente server; defaults to the saved account's server or api.ente.com"
     )]
     pub host: Option<String>,
-    #[arg(
-        long,
-        conflicts_with = "account",
-        help = "Name for a new account on this device; defaults to the account's email"
-    )]
-    pub name: Option<String>,
     #[arg(
         long,
         help = "Read login credentials as JSON from this file, or from stdin with -"
     )]
     pub input: Option<PathBuf>,
 }
+
+const API_HELP: &str = "The response body is written unchanged, including when --json is set.";
 
 #[derive(Args)]
 pub struct ApiArgs {
@@ -340,18 +392,50 @@ pub enum FileCommand {
 
 const ACCOUNT_HELP: &str = "Reads accounts stored on this device without network access.
 With --json, list returns an array and view returns one object.
-Fields: id, name, email, host (strings); products (string array); selected (boolean).";
+Fields: id, name, email, host (strings); apps (string array); selected (boolean).";
 
 #[derive(Subcommand)]
 pub enum AccountCommand {
+    #[command(
+        about = "Log an account into an app",
+        after_long_help = "An existing name requires matching credentials; a new name creates a local entry.
+Omit NAME to use the selected account, or the only saved account.
+With no saved accounts, creates an entry named after the authenticated email.
+With several accounts and none selected, supply NAME or use account switch.
+A new entry becomes selected; logging into an existing entry keeps the selection.
+
+Non-interactive login reads JSON from --input:
+  {\"email\": \"...\", \"password\": \"...\", \"otp\": \"123456\", \"totp\": \"654321\"}
+
+All fields are strings. otp is the email code; totp is the authenticator code. Supply them when required.
+With --no-input, supply email and password through --input PATH or --input -.
+For unattended vault access, set ENTE_CLI_VAULT_KEY (see vault --help)."
+    )]
+    Login(LoginArgs),
     #[command(about = "List accounts on this device")]
     #[command(after_long_help = ACCOUNT_HELP)]
     List,
     #[command(about = "Show an account")]
     #[command(after_long_help = ACCOUNT_HELP)]
     View {
-        #[arg(help = "Account name")]
-        name: String,
+        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        name: Option<String>,
+    },
+    #[command(about = "Print the saved API token for an account")]
+    #[command(
+        after_long_help = "Uses NAME, otherwise the selected account, otherwise the only saved account.
+With several accounts and none selected, supply NAME or use account switch.
+--app is required and selects that account's saved login.
+Reads the saved token from the local vault without contacting the server or refreshing it.
+This prints a secret and does not check whether the server still accepts it.
+Plain output is padded URL-safe Base64 followed by a newline.
+With --json, returns {\"token\":\"...\"}."
+    )]
+    Token {
+        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        name: Option<String>,
+        #[arg(long, value_enum, help = "App whose token to print")]
+        app: App,
     },
     #[command(about = "Make an account the selected one")]
     Switch {
@@ -360,17 +444,29 @@ pub enum AccountCommand {
     },
     #[command(about = "Change an account's local name")]
     Rename {
-        #[arg(help = "Account name")]
+        #[arg(value_name = "OLD_NAME", help = "Current local name")]
         name: String,
-        #[arg(help = "New local name")]
+        #[arg(value_name = "NEW_NAME", help = "New local name")]
         new_name: String,
     },
-    #[command(about = "Log out of every product and remove the account from this device")]
+    #[command(
+        about = "Log out of an app, or every app when --app is omitted",
+        after_long_help = "Removes the local account and its cached data after its last app login is removed.
+Without --app, logs out of all this account's saved app logins on this device.
+--local removes the account and its cached data without contacting the server."
+    )]
     Logout {
-        #[arg(help = "Account name")]
-        name: String,
+        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        name: Option<String>,
         #[arg(
             long,
+            value_enum,
+            help = "App to log out of; defaults to every saved app"
+        )]
+        app: Option<App>,
+        #[arg(
+            long,
+            conflicts_with = "app",
             help = "Forget the account on this device without logging out on the server"
         )]
         local: bool,
@@ -392,15 +488,15 @@ pub enum KeyCommand {
     Generate,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, ValueEnum)]
 #[serde(rename_all = "lowercase")]
-pub enum Product {
+pub enum App {
     Photos,
     Locker,
     Auth,
 }
 
-impl Product {
+impl App {
     pub fn name(self) -> &'static str {
         match self {
             Self::Photos => "photos",

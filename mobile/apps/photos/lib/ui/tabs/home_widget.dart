@@ -199,7 +199,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _selectedTabIndex = event.selectedIndex;
       _selectedTabIndexNotifier.value = event.selectedIndex;
 
-      if (event.selectedIndex == 3) {
+      if (event.selectedIndex == searchTabIndex) {
         isOnSearchTabNotifier.value = true;
         unawaited(SemanticSearchService.instance.prepareForInteractiveSearch());
       } else {
@@ -248,6 +248,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _logger.info('logged out, selectTab index to 0');
       _selectedTabIndex = 0;
       _selectedTabIndexNotifier.value = 0;
+      isOnSearchTabNotifier.value = false;
       _startWithoutAccount = false;
       if (mounted) {
         setState(() {});
@@ -892,7 +893,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               _isAlbumsSearchActiveNotifier.value = false;
             }
           }
-          if (_selectedTabIndex == 3) {
+          if (_selectedTabIndex == searchTabIndex) {
             if (_shouldSearchTabSearchConsumeBackNotifier.value) {
               Bus.instance.fire(ClearAndUnfocusSearchBar());
               return;
@@ -1112,6 +1113,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                           SearchTab(
                             shouldConsumeBackNotifier:
                                 _shouldSearchTabSearchConsumeBackNotifier,
+                            isOnSearchTab: isOnSearchTabNotifier,
                           ),
                         ),
                       ],

@@ -34,10 +34,6 @@
   "@deleteAccount": {
     "description": "Delete account button label"
   },
-  "doThisLater": "പിന്നീട് ചെയ്യുക",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "email": "ഇമെയിൽ",
   "@email": {
     "description": "Email field label"

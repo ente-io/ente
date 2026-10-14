@@ -1,4 +1,5 @@
 {
+  "@@locale": "ckb",
   "accountSetupIncompleteCreateAccount": "سازکردنی هەژمار تەواو نەبووە. هەژمارێک دروست بکە بۆ تەواوکردنی.",
   "@accountSetupIncompleteCreateAccount": {
     "description": "Error shown when account exists but signup is incomplete"

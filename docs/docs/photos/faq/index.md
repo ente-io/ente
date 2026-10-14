@@ -37,6 +37,7 @@ Jump to a category:
 - [Why is the latest version not available on F-Droid?](/photos/faq/account-creation#fdroid-delay)
 - [How can I manually setup Ente Photos installation with Obtainium?](/photos/faq/account-creation#manual-obtanium)
 - [How do I update to the latest version?](/photos/faq/account-creation#update-latest)
+- [Why is my language not an option in Ente?](/photos/faq/account-creation#language-not-available)
 
 ### Multi-Device Setup
 
@@ -107,6 +108,7 @@ Jump to a category:
 
 - [How do I delete photos in Ente?](/photos/faq/albums-and-organization#delete-photos)
 - [How do I restore deleted photos?](/photos/faq/albums-and-organization#restore-photos)
+- [If I restore several photos from Trash, will they return to their original albums?](/photos/faq/albums-and-organization#bulk-restore-original-albums)
 - [How do I permanently delete photos or empty trash?](/photos/faq/albums-and-organization#empty-trash)
 - [Can I recover files after 30 days in trash?](/photos/faq/albums-and-organization#recover-after-30-days)
 - [Does trash count against my storage?](/photos/faq/albums-and-organization#trash-storage)

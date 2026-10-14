@@ -1,4 +1,8 @@
 {
+  "bringMemoriesTogether": "Зберіть свої спогади разом",
+  "createMyAccount": "Створити мій акаунт",
+  "localGalleryPermissionDesc": "Надайте дозвіл на доступ до фотографій і їх упорядкування за допомогою розпізнавання облич. Уся обробка виконується на вашому пристрої.",
+  "onboardingOrganizeDesc": "Упорядкуйте свої фото й відео. Усі спогади в одному місці.",
   "wallpaper": "Шпалери",
   "setWallpaper": "Установити шпалери",
   "wallpaperHome": "Робочий стіл",
@@ -755,10 +759,6 @@
   },
   "dontHaveAnAccount": "Немає облікового запису?",
   "dontSave": "Не зберігати",
-  "doThisLater": "Зробити це пізніше",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Ви можете двічі натиснути на запис для перегляду коду",
   "download": "Завантажити",
   "downloadApplicationUpdate": "Завантажити оновлення",
@@ -1674,6 +1674,7 @@
   },
   "nightLights": "Неонові ночі",
   "no": "Ні",
+  "noAlbumsOnThisDevice": "Немає альбомів на цьому пристрої",
   "noChangesWereMade": "Змін не внесено",
   "noCollections": "Немає колекцій",
   "noDefaultBackupFolder": "Не вдалося створити типову теку резервних копій.",
@@ -2473,7 +2474,6 @@
   "selectFile": "Вибрати файл",
   "selectFolder": "Вибрати теку",
   "selectFolders": "Оберіть теки",
-  "selectFoldersForBackup": "Оберіть теки для резервного копіювання",
   "selectFolderToContinue": "Оберіть теку, щоб продовжити",
   "selectItemsToAdd": "Виберіть елементи для додавання",
   "selectLanguage": "Оберіть мову",

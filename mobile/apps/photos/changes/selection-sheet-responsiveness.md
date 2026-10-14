@@ -1,0 +1,1 @@
+- Made the photo selection sheet more responsive with compact labels.

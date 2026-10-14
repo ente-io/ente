@@ -1,4 +1,8 @@
 {
+  "bringMemoriesTogether": "Reúne tus recuerdos",
+  "createMyAccount": "Crear mi cuenta",
+  "localGalleryPermissionDesc": "Concede permiso para acceder y organizar tus fotos mediante reconocimiento facial. Todo el procesamiento se realiza en tu dispositivo.",
+  "onboardingOrganizeDesc": "Organiza tus fotos y vídeos. Todos tus recuerdos en un solo lugar.",
   "wallpaper": "Fondo de pantalla",
   "setWallpaper": "Establecer fondo de pantalla",
   "wallpaperHome": "Pantalla de inicio",
@@ -98,7 +102,7 @@
   "@addPage": {
     "description": "Button to capture another page in the document scanner"
   },
-  "addPeopleWidgetPrompt": "Añadir un widget de álbum a la pantalla de inicio para personalizarlo aquí.",
+  "addPeopleWidgetPrompt": "Añadir un widget de personas a la pantalla de inicio para personalizarlo aquí.",
   "addPerson": "Añadir persona",
   "@addPerson": {
     "description": "Title for the manual tagging flow where user selects a person to tag files with."
@@ -152,6 +156,7 @@
   "albumsOnDevicePermissionCta": "Permitir acceso",
   "albumsOnEnteEmptyCta": "Selecciona los álbumes que respaldar en Ente",
   "albumsOnEnteEmptyTitle": "Respalda tus recuerdos",
+  "albumsReceivedEmptyTitle": "Ver recuerdos compartidos contigo",
   "albumsWidgetDesc": "Selecciona los álbumes que quieres ver en tu pantalla de inicio.",
   "albumTitle": "Título del álbum",
   "albumUpdated": "Álbum actualizado",
@@ -2601,7 +2606,6 @@
   "selectFile": "Seleccionar archivo",
   "selectFolder": "Seleccionar carpeta",
   "selectFolders": "Seleccionar carpetas",
-  "selectFoldersForBackup": "Seleccionar carpetas para la copia de seguridad",
   "selectFolderToContinue": "Selecciona un archivo para continuar",
   "selectItemsToAdd": "Selecciona elementos para agregar",
   "selectMailApp": "Seleccionar app de correo",
@@ -2760,7 +2764,6 @@
       }
     }
   },
-  "startWithLatestPhotos": "Iniciar con las últimas fotos",
   "status": "Estado",
   "sticker": "Pegatina",
   "stopCastingBody": "¿Quieres dejar de transmitir?",

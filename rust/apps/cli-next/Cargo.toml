@@ -17,6 +17,7 @@ ente-accounts.workspace = true
 ente-auth.workspace = true
 ente-collections.workspace = true
 ente-core.workspace = true
+ente-paste.workspace = true
 ente-photos.workspace = true
 ente-photos-export.workspace = true
 keyring = { workspace = true, features = ["apple-native", "windows-native", "linux-native-sync-persistent", "crypto-rust"] }
@@ -38,6 +39,7 @@ rusqlite = { workspace = true, features = ["bundled-sqlcipher-vendored-openssl"]
 ente-test-support.workspace = true
 futures-util.workspace = true
 mockito.workspace = true
+same-file.workspace = true
 zip.workspace = true
 
 [lints]

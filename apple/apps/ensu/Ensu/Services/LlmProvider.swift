@@ -8,6 +8,18 @@ func automaticMaxOutputTokens(contextLength: Int) -> Int {
 struct LlmModelSelection: Equatable {
     let id: String
     let contextLength: Int?
+
+    private var isSmallModel: Bool { id == "lfm-350m" }
+    var batchSize: Int { isSmallModel ? 128 : 512 }
+
+    var contextCandidates: [Int] {
+        let defaultContext = isSmallModel ? 2048 : 12000
+        let requested = contextLength.flatMap { $0 > 0 ? $0 : nil } ?? defaultContext
+        let desired = isSmallModel ? min(requested, defaultContext) : requested
+        return ([desired] + [12000, 8192, 4096, 2048, 1024])
+            .filter { $0 <= desired }
+            .reduce(into: [Int]()) { if !$0.contains($1) { $0.append($1) } }
+    }
 }
 
 struct DownloadProgress: Equatable {
@@ -82,6 +94,12 @@ struct EmbeddingAssetInvalidError: LocalizedError {
 struct ModelMemoryDeferred: Error {}
 struct ModelMemoryUnavailable: LocalizedError {
     var errorDescription: String? { "Not enough free memory. Close other apps and try again." }
+}
+
+struct ModelImagesUnsupported: LocalizedError {
+    var errorDescription: String? {
+        "This model doesn't support images. Send a text-only message."
+    }
 }
 
 actor LlmProvider {
@@ -315,6 +333,7 @@ actor LlmProvider {
             throw UnsupportedDeviceMemoryError(capability: capability)
         }
         try await downloadAssets([chatAsset(selection)], onProgress: onProgress)
+        assetStore.cleanupObsoleteChatModels(selection.id)
     }
 
     func ensureModelReady(
@@ -399,6 +418,8 @@ actor LlmProvider {
             try await downloadAssets([asset], onProgress: onProgress)
         }
 
+        assetStore.cleanupObsoleteChatModels(selection.id)
+
         onProgress(DownloadProgress(percent: 100, status: "Loading model...", phase: .loading))
         do {
             guard let modelPath = assetStore.llmModelPath(asset) else {
@@ -452,7 +473,8 @@ actor LlmProvider {
                 defer { generationControl.withLock { $0 = nil } }
                 let context = try model.newTitleContext(
                     chatContextSize: loadedContext.contextSize(),
-                    nThreads: Int32(max(1, ProcessInfo.processInfo.activeProcessorCount - 1))
+                    nThreads: Int32(max(1, ProcessInfo.processInfo.activeProcessorCount - 1)),
+                    nThreadsGeneration: nil
                 )
                 let outputTokens = 48
                 let inputTokens = max(0, min(2000, Int(context.contextSize()) - outputTokens))
@@ -549,6 +571,9 @@ actor LlmProvider {
             imageFiles.isEmpty
             ? nil
             : assetStore.llmMmprojPath(asset)?.path
+        if !imageFiles.isEmpty && mmprojPath == nil {
+            throw ModelImagesUnsupported()
+        }
         if mmprojPath != nil && !hasRequiredWorkReserve() {
             throw ModelMemoryUnavailable()
         }
@@ -678,9 +703,11 @@ actor LlmProvider {
 
     func resetContext() async {
         try? await withModelLock {
-            guard let model = loadedModel else { return }
+            guard let model = loadedModel, let key = currentModelKey else { return }
+            let selection = LlmModelSelection(id: key.id, contextLength: key.requestedContextLength)
             let contextParams = LlmContextParams(
-                contextSize: currentContextLength.map(Int32.init), nThreads: nil, nBatch: nil)
+                contextSize: currentContextLength.map(Int32.init), nThreads: nil,
+                nThreadsGeneration: nil, nBatch: Int32(selection.batchSize))
             loadedContext = nil
             loadedContext = try? model.newContext(params: contextParams)
         }
@@ -712,27 +739,30 @@ actor LlmProvider {
         llmAsset(modelId: selection.id)
     }
 
+    nonisolated func supportsImages(_ selection: LlmModelSelection) -> Bool {
+        assetStore.llmMmprojPath(chatAsset(selection)) != nil
+    }
+
     private func loadModel(_ selection: LlmModelSelection, modelPath: URL) throws {
         let params = LlmModelLoadParams(
             modelPath: modelPath.path, nGpuLayers: 0, useMmap: true, useMlock: false)
         let model = try LlmModel.load(params: params)
         loadedModel = model
 
-        let desiredContext = selection.contextLength ?? 12000
-        let candidates = [desiredContext, 12000, 8192, 4096, 2048, 1024]
-            .filter { $0 > 0 }
-            .reduce(into: [Int]()) { if !$0.contains($1) { $0.append($1) } }
+        let candidates = selection.contextCandidates
         let threadCount = max(1, ProcessInfo.processInfo.activeProcessorCount - 1)
 
         for contextSize in candidates {
             do {
                 let contextParams = LlmContextParams(
                     contextSize: Int32(contextSize), nThreads: Int32(threadCount),
-                    nBatch: Int32(512))
-                loadedContext = try model.newContext(params: contextParams)
+                    nThreadsGeneration: nil,
+                    nBatch: Int32(selection.batchSize))
+                let context = try model.newContext(params: contextParams)
+                loadedContext = context
                 currentModelKey = LoadedModelKey(
                     id: selection.id, requestedContextLength: selection.contextLength)
-                currentContextLength = contextSize
+                currentContextLength = Int(context.contextSize())
                 return
             } catch {
                 continue

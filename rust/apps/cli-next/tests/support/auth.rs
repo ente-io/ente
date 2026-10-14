@@ -45,7 +45,7 @@ fn page(server: &mut Server, since: i64, rows: Vec<Value>) -> Mock {
 }
 
 #[test]
-fn refresh_keeps_progress_and_refuses_unreadable_records_until_updated() {
+fn refresh_keeps_progress_and_refuses_unreadable_codes_until_updated() {
     let mut server = Server::new();
     let home = TestHome::new();
     seed(&home, &server.url());
@@ -99,13 +99,13 @@ fn refresh_keeps_progress_and_refuses_unreadable_records_until_updated() {
         "--json",
     ]);
     let stderr = failure(&failed);
-    assert!(stderr.contains("2 unreadable Auth records"));
+    assert!(stderr.contains("2 unreadable Auth codes"));
     assert!(stderr.contains(&Uuid::from_u128(1).to_string()));
     assert!(!stderr.contains("private-secret"));
     assert!(!stderr.contains("JBSWY3DPEHPK3PXP"));
     assert_eq!(
         serde_json::from_slice::<Value>(&failed.stdout).unwrap(),
-        json!({"output": null, "records": 0, "failed": 2})
+        json!({"output": null, "codes": 0, "failures": 2})
     );
     assert_eq!(fs::read_dir(output_dir.path()).unwrap().count(), 1);
     changed.assert();
@@ -272,7 +272,7 @@ fn encrypted_export_and_independent_decrypt_keep_artifacts_separate_from_summari
     let plain = success(
         home.command(EXPORT)
             .arg("--no-input")
-            .env("ENTE_CLI_EXPORT_PASSWORD", "")
+            .env("ENTE_CLI_PASSWORD", "")
             .output()
             .unwrap(),
     )
@@ -308,7 +308,7 @@ fn encrypted_export_and_independent_decrypt_keep_artifacts_separate_from_summari
         "--output",
         plaintext_file.to_str().unwrap(),
     ]);
-    assert_eq!(plain_summary["records"], 1);
+    assert_eq!(plain_summary["codes"], 1);
     assert_eq!(fs::read(plaintext_file).unwrap(), plain);
     let password = "  independent export password  ";
     let result = success(
@@ -321,23 +321,23 @@ fn encrypted_export_and_independent_decrypt_keep_artifacts_separate_from_summari
             "--json",
         ])
         .arg("--no-input")
-        .env("ENTE_CLI_EXPORT_PASSWORD", password)
+        .env("ENTE_CLI_PASSWORD", password)
         .output()
         .unwrap(),
     );
     let summary: Value = serde_json::from_slice(&result.stdout).unwrap();
-    assert_eq!(summary["records"], 1);
-    assert_eq!(summary["failed"], 0);
+    assert_eq!(summary["codes"], 1);
+    assert_eq!(summary["failures"], 0);
     let encoded = fs::read(&encrypted).unwrap();
     let stream = success(
         home.command(&["auth", "export", "--offline", "--output", "-", "--json"])
-            .env("ENTE_CLI_EXPORT_PASSWORD", password)
+            .env("ENTE_CLI_PASSWORD", password)
             .output()
             .unwrap(),
     );
     let stream: Value = serde_json::from_slice(&stream.stdout).unwrap();
     assert_eq!(stream["version"], 1);
-    assert!(stream.get("records").is_none());
+    assert!(stream.get("codes").is_none());
     assert!(stream["encryptedData"].is_string());
     let restore = TestHome::new();
     let absent_home = restore.dir.path().join("absent");
@@ -348,7 +348,7 @@ fn encrypted_export_and_independent_decrypt_keep_artifacts_separate_from_summari
             .arg("--no-input")
             .env_remove("ENTE_CLI_VAULT_KEY")
             .env("ENTE_CLI_HOME", &absent_home)
-            .env("ENTE_CLI_EXPORT_PASSWORD", password);
+            .env("ENTE_CLI_PASSWORD", password);
         command
     };
     assert_eq!(success(command().output().unwrap()).stdout, plain);
@@ -380,7 +380,7 @@ fn encrypted_export_and_independent_decrypt_keep_artifacts_separate_from_summari
     );
     assert_eq!(fs::read(&encrypted).unwrap(), encoded);
     let wrong = command()
-        .env("ENTE_CLI_EXPORT_PASSWORD", "wrong")
+        .env("ENTE_CLI_PASSWORD", "wrong")
         .output()
         .unwrap();
     assert!(failure(&wrong).contains(&format!("cannot decrypt {}: ", encrypted.display())));
@@ -405,10 +405,10 @@ fn password_and_destination_errors_are_resolved_before_account_access() {
         let mut command = home.command(&["auth", "export", "--output", path.to_str().unwrap()]);
         command.arg("--no-input");
         if let Some(value) = value {
-            command.env("ENTE_CLI_EXPORT_PASSWORD", value);
+            command.env("ENTE_CLI_PASSWORD", value);
         }
         let output = command.output().unwrap();
-        assert!(failure(&output).contains("ENTE_CLI_EXPORT_PASSWORD"));
+        assert!(failure(&output).contains("ENTE_CLI_PASSWORD"));
         assert!(output.stdout.is_empty());
         assert!(!path.exists());
     }
@@ -417,17 +417,14 @@ fn password_and_destination_errors_are_resolved_before_account_access() {
         use std::os::unix::ffi::OsStringExt;
         let output = home
             .command(&["auth", "export", "--output", path.to_str().unwrap()])
-            .env(
-                "ENTE_CLI_EXPORT_PASSWORD",
-                std::ffi::OsString::from_vec(vec![255]),
-            )
+            .env("ENTE_CLI_PASSWORD", std::ffi::OsString::from_vec(vec![255]))
             .output()
             .unwrap();
         assert!(failure(&output).contains("must be UTF-8"));
     }
     let missing = home.run(&["auth", "decrypt", path.to_str().unwrap()]);
     assert!(failure(&missing).contains(&format!("cannot read {}", path.display())));
-    assert!(!failure(&missing).contains("ENTE_CLI_EXPORT_PASSWORD"));
+    assert!(!failure(&missing).contains("ENTE_CLI_PASSWORD"));
     assert!(missing.stdout.is_empty());
     fs::write(&path, "existing").unwrap();
     let occupied = home.run(&["auth", "export", "--output", path.to_str().unwrap()]);

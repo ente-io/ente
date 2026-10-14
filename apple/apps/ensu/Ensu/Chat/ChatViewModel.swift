@@ -323,6 +323,10 @@ final class ChatViewModel: ObservableObject {
         !deviceCapability.isChatSupported
     }
 
+    var supportsImageAttachments: Bool {
+        provider.supportsImages(modelSettings.currentSelection())
+    }
+
     var unsupportedDeviceMessage: String {
         Self.unsupportedDeviceMessage
     }
@@ -569,7 +573,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func addImageAttachment(data: Data, fileName: String?) {
-        guard !isGenerating,
+        guard supportsImageAttachments, !isGenerating,
             !isDownloading,
             draftImageAttachmentCount < ChatAttachmentLimits.maxImagesPerMessage
         else { return }
@@ -590,7 +594,10 @@ final class ChatViewModel: ObservableObject {
                     isUploading: false
                 )
                 await MainActor.run {
-                    if self.draftImageAttachmentCount >= ChatAttachmentLimits.maxImagesPerMessage {
+                    if !self.supportsImageAttachments
+                        || self.draftImageAttachmentCount
+                            >= ChatAttachmentLimits.maxImagesPerMessage
+                    {
                         try? FileManager.default.removeItem(at: url)
                         self.isProcessingAttachments = false
                         return
@@ -722,6 +729,10 @@ final class ChatViewModel: ObservableObject {
         let sessionId = currentSessionId
         let editingId = editingMessageId
         let selection = modelSettings.currentSelection()
+        if attachments.contains(where: { $0.kind == .image }), !provider.supportsImages(selection) {
+            generationErrorMessage = ModelImagesUnsupported().localizedDescription
+            return
+        }
         let sendId = UUID()
         pendingSendId = sendId
         isSendPending = true
@@ -1124,7 +1135,11 @@ final class ChatViewModel: ObservableObject {
             _ = await priorGeneration?.result
             _ = await priorSummary?.result
             guard let self else { return }
-            await provider.resetContext()
+            if !userNode.attachments.contains(where: { $0.kind == .image })
+                || provider.supportsImages(modelSettings.currentSelection())
+            {
+                await provider.resetContext()
+            }
             startGeneration(for: userNode)
         }
     }
@@ -1176,7 +1191,6 @@ final class ChatViewModel: ObservableObject {
         }
         cancelChatWarmup(releaseLoadedModel: false)
         let selection = modelSettings.currentSelection()
-        let prompt = buildPrompt(text: userNode.text, attachments: userNode.attachments)
         let priorGeneration = generationTask
         let priorSummary = sessionSummaryTask
         priorGeneration?.cancel()
@@ -1184,6 +1198,16 @@ final class ChatViewModel: ObservableObject {
         provider.stopGeneration(invalidatePreparation: true)
         conversationStatus = nil
         stopRequested = false
+
+        if userNode.attachments.contains(where: { $0.kind == .image }),
+            !provider.supportsImages(selection)
+        {
+            resetGenerationState()
+            generationErrorMessage = ModelImagesUnsupported().localizedDescription
+            rebuildMessages(for: userNode.sessionId)
+            return
+        }
+        let prompt = buildPrompt(text: userNode.text, attachments: userNode.attachments)
 
         let generationId = UUID()
         activeGenerationId = generationId
@@ -1417,7 +1441,9 @@ final class ChatViewModel: ObservableObject {
                                 generationErrorMessage = detail
                             } else if case ConversationError.Stale = error {
                                 generationErrorMessage = "Conversation changed. Retry the message."
-                            } else if error is ModelMemoryUnavailable {
+                            } else if error is ModelMemoryUnavailable
+                                || error is ModelImagesUnsupported
+                            {
                                 generationErrorMessage = error.localizedDescription
                             } else {
                                 generationErrorMessage = "Response failed. Try again."
@@ -1517,7 +1543,8 @@ final class ChatViewModel: ObservableObject {
         hasOutput: @escaping @Sendable () -> Bool,
         onToken: @escaping @Sendable (String) -> Void
     ) async throws -> ImageChatResult {
-        try await provider.withConversationContext(
+        guard provider.supportsImages(selection) else { throw ModelImagesUnsupported() }
+        return try await provider.withConversationContext(
             selection,
             onProgress: { progress in
                 Task { @MainActor in self.handleProgress(progress) }

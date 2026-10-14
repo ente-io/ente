@@ -3,6 +3,7 @@ import {
     ArrowLeft02Icon,
     BubbleChatIcon,
     HandPointingRightIcon,
+    Menu01Icon,
     Tick02Icon,
     UserRemove01Icon,
 } from "@hugeicons/core-free-icons";
@@ -21,6 +22,7 @@ import { SpaceButtonSpinner } from "components/ButtonSpinner";
 import { ConfirmationActionSheet } from "components/ConfirmationActionSheet";
 import {
     SpaceFileViewer,
+    type SpaceFileViewerController,
     type SpaceViewerPhoto,
     type SpaceViewerPostActionMode,
 } from "components/FileViewer";
@@ -62,11 +64,8 @@ const profileCoverBackground = spaceSurface;
 const profileCoverTopShadow =
     "linear-gradient(180deg, rgba(0, 0, 0, 0.26) 0%, rgba(0, 0, 0, 0.18) 36%, rgba(0, 0, 0, 0.08) 72%, rgba(0, 0, 0, 0) 100%)";
 const profileCoverSkeletonBackground = spaceSurface;
-const profileHeaderHeight = 56;
 const profileAvatarTopOffset = 54;
 const profileAvatarSize = 132;
-const profileCoverHeight =
-    profileHeaderHeight + profileAvatarTopOffset + profileAvatarSize / 2;
 const photoPlaceholderBackground = spaceSurface;
 const profileCoverRadius = "24px";
 const profilePostLoadRootMargin = "800px 0px";
@@ -86,6 +85,13 @@ interface SelectedProfilePost {
 
 const profilePostImageCacheKey = (item: ProfilePostItem) =>
     [item.id, item.imageAsset?.objectKey ?? item.imageUrl ?? ""].join(":");
+
+const profilePostPhoto = (item: ProfilePostItem, index: number) => {
+    const photo = item.photos?.[index];
+    return index > 0 && photo
+        ? { ...item, ...photo, imageUrl: photo.imageUrl }
+        : item;
+};
 
 const ProfileStatsSkeleton: React.FC = () => (
     <Box
@@ -181,7 +187,9 @@ const PublicProfileActionButton: React.FC<PublicProfileActionButtonProps> = ({
     </Box>
 );
 
-const ProfilePostLoadingIndicator: React.FC = () => (
+const ProfilePostLoadingIndicator: React.FC<{ coverHeight: number }> = ({
+    coverHeight,
+}) => (
     <Box
         sx={{
             alignItems: "center",
@@ -191,7 +199,7 @@ const ProfilePostLoadingIndicator: React.FC = () => (
             justifyContent: "center",
             pointerEvents: "none",
             position: "absolute",
-            top: `${profileCoverHeight}px`,
+            top: `var(--space-profile-post-loading-top, calc(${coverHeight}px + var(--space-profile-safe-area-top, 0px)))`,
             width: "100%",
         }}
     >
@@ -200,6 +208,7 @@ const ProfilePostLoadingIndicator: React.FC = () => (
 );
 
 interface ProfileScreenProps {
+    headerRef?: React.Ref<HTMLDivElement>;
     friendsCount?: number;
     headerVariant?: "friend" | "owner" | "public" | "public-anonymous";
     isAddingFriend?: boolean;
@@ -207,6 +216,7 @@ interface ProfileScreenProps {
     isCoverLoading?: boolean;
     isNameLoading?: boolean;
     isPostsLoading?: boolean;
+    isPreview?: boolean;
     isPostPhotoOpening?: boolean;
     isStatsLoading?: boolean;
     showPostLoadingIndicator?: boolean;
@@ -219,6 +229,7 @@ interface ProfileScreenProps {
     onOpenFriends?: () => void;
     onOpenProfileCover?: () => void;
     onOpenProfilePhoto?: () => void;
+    onOpenSettings?: () => void;
     onLoadPostImage?: (asset: SpacePostAsset) => Promise<string>;
     onMessageFriend?: () => void;
     onPokeFriend?: (requestID: string) => Promise<void>;
@@ -240,12 +251,14 @@ interface ProfileScreenProps {
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
+    headerRef,
     friendsCount = 0,
     headerVariant = "owner",
     isAddingFriend = false,
     isCoverLoading = false,
     isNameLoading = false,
     isPostsLoading = false,
+    isPreview = false,
     isPostPhotoOpening = false,
     isStatsLoading = false,
     onBack,
@@ -257,6 +270,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     onOpenFriends,
     onOpenProfileCover,
     onOpenProfilePhoto,
+    onOpenSettings,
     onLoadPostImage,
     onMessageFriend,
     onPokeFriend,
@@ -275,6 +289,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 }) => {
     const [selectedPost, setSelectedPost] =
         useState<SelectedProfilePost | null>(null);
+    const [tilePhotoIndices, setTilePhotoIndices] = useState<
+        Record<string, number>
+    >({});
     const [isInviteLinkCopied, setIsInviteLinkCopied] = useState(false);
     const [deletedPostIDs, setDeletedPostIDs] = useState<Set<string>>(
         () => new Set(),
@@ -307,6 +324,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     const isAnonymousPublicProfile = headerVariant == "public-anonymous";
     const isPublicProfile =
         headerVariant == "public" || isAnonymousPublicProfile;
+    const profileHeaderHeight = isAnonymousPublicProfile ? 56 : 68;
+    const profileCoverHeight =
+        profileHeaderHeight + profileAvatarTopOffset + profileAvatarSize / 2;
     const isUnfriendActionRunning = unfriendActionPhase != null;
     const canManageFriend =
         isFriendProfile &&
@@ -423,9 +443,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         if (!isPostPhotoOpening) postInputRef.current?.click();
     };
     const closeSelectedPost = () => setSelectedPost(null);
+    const viewerRef = React.useRef<SpaceFileViewerController>(null);
     useBrowserBackClose({
         open: Boolean(selectedPost),
-        onClose: closeSelectedPost,
+        onClose: () => viewerRef.current?.close(),
         stateKey: "space-profile-viewer",
     });
     const rememberLoadedPhotoDimensions = (
@@ -516,7 +537,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             avatarUrl: profile.avatarUrl,
             imageUrl: loadedPostImageURLFor(item),
             name: displayName,
-        }).map((photo) => ({ ...photo, id: item.id })),
+        }).map((photo, index) => ({
+            ...photo,
+            id: item.id,
+            imageUrl:
+                photo.imageUrl ||
+                (loadedPostImageURLFor(profilePostPhoto(item, index)) ?? ""),
+        })),
     );
     const selectedPhotoIndex = selectedPost
         ? profileViewerPhotos.findIndex(
@@ -527,12 +554,16 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         : 0;
     const handleSelectedPostIndexChange = (photoIndex: number) => {
         const photo = profileViewerPhotos[photoIndex];
-        if (photo)
-            setSelectedPost({
-                id: photo.id,
-                photo,
-                photoIndex: photo.postPhotoIndex!,
-            });
+        if (!photo) return;
+        setSelectedPost({
+            id: photo.id,
+            photo,
+            photoIndex: photo.postPhotoIndex!,
+        });
+        setTilePhotoIndices((current) => ({
+            ...current,
+            [photo.id]: photo.postPhotoIndex ?? 0,
+        }));
     };
 
     const shareInvite = async () => {
@@ -568,7 +599,19 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     };
 
     const renderPostTile = (item: ProfilePostItem, index: number) => {
-        const imageUrl = loadedPostImageURLFor(item);
+        const remembered = Math.min(
+            tilePhotoIndices[item.id] ?? 0,
+            (item.photos?.length || 1) - 1,
+        );
+        const photoIndex =
+            remembered > 0 &&
+            unavailablePostsByKey[
+                profilePostImageCacheKey(profilePostPhoto(item, remembered))
+            ]
+                ? 0
+                : remembered;
+        const shown = profilePostPhoto(item, photoIndex);
+        const imageUrl = loadedPostImageURLFor(shown);
         const isUnavailable = !viewerPostIDs.has(item.id);
         return (
             <SpacePostTile
@@ -577,23 +620,26 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 imageUrl={imageUrl}
                 index={index}
                 isUnavailable={isUnavailable}
-                item={item}
+                item={{ ...item, ...dimensionsForPost(item) }}
+                photoIndex={photoIndex}
                 loadRootMargin={postImageLoadRootMargin}
-                onLoadImage={() => loadPostImage(item)}
+                onLoadImage={() => loadPostImage(shown)}
                 onImageDecodeError={() =>
                     setUnavailablePostsByKey((current) => ({
                         ...current,
-                        [profilePostImageCacheKey(item)]: true,
+                        [profilePostImageCacheKey(shown)]: true,
                     }))
                 }
                 onOpen={(openedImageUrl) => {
                     const photo = profileViewerPhotos.find(
-                        (photo) => photo.id == item.id,
+                        (photo) =>
+                            photo.id == item.id &&
+                            (photo.postPhotoIndex ?? 0) == photoIndex,
                     );
                     if (!photo) return;
                     setSelectedPost({
                         id: item.id,
-                        photoIndex: 0,
+                        photoIndex,
                         photo: { ...photo, imageUrl: openedImageUrl },
                     });
                 }}
@@ -606,6 +652,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         return (
             <Box
                 component="header"
+                inert={isPreview}
                 sx={{
                     alignItems: "center",
                     color: coverForeground,
@@ -613,17 +660,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     gridTemplateColumns: isPublicProfile
                         ? undefined
                         : `${spaceTouchTargetSize}px minmax(0, 1fr) ${spaceTouchTargetSize}px`,
-                    height: profileHeaderHeight,
+                    height: `calc(${profileHeaderHeight}px + var(--space-profile-safe-area-top))`,
                     justifyContent: isPublicProfile
                         ? "space-between"
                         : undefined,
                     mx: "auto",
+                    opacity: isPreview
+                        ? "clamp(0, calc((var(--space-friend-profile-reveal, 0) - 0.7) * 5), 1)"
+                        : 1,
                     position: "relative",
-                    px: isPublicProfile ? 1 : 2,
-                    py: 0,
+                    pl: `max(${isPublicProfile ? 8 : 16}px, var(--space-ios-safe-area-left, 0px))`,
+                    pr: `max(${isPublicProfile ? 8 : 16}px, var(--space-ios-safe-area-right, 0px))`,
+                    pt: "var(--space-profile-safe-area-top)",
+                    pb: 0,
                     width: "100%",
                     zIndex: 3,
-                    "@media (min-width: 600px)": { maxWidth: 390 },
+                    "@media (min-width: 600px)": {
+                        maxWidth: isPreview ? "none" : 390,
+                    },
                 }}
             >
                 {isPublicProfile ? (
@@ -717,7 +771,43 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                         >
                             {firstName}
                         </Box>
-                        <Box aria-hidden sx={{ width: spaceTouchTargetSize }} />
+                        {isOwnerProfile && onOpenSettings ? (
+                            <Box
+                                component="button"
+                                type="button"
+                                aria-label="Settings"
+                                onClick={onOpenSettings}
+                                sx={{
+                                    alignItems: "center",
+                                    bgcolor: "transparent",
+                                    border: 0,
+                                    color: "inherit",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    height: spaceTouchTargetSize,
+                                    justifyContent: "flex-end",
+                                    p: 0,
+                                    width: spaceTouchTargetSize,
+                                    "&:focus-visible": {
+                                        borderRadius: "50%",
+                                        outline: `2px solid ${green}`,
+                                        outlineOffset: 2,
+                                    },
+                                }}
+                            >
+                                <HugeiconsIcon
+                                    icon={Menu01Icon}
+                                    size={23}
+                                    strokeWidth={1.8}
+                                    absoluteStrokeWidth
+                                />
+                            </Box>
+                        ) : (
+                            <Box
+                                aria-hidden
+                                sx={{ width: spaceTouchTargetSize }}
+                            />
+                        )}
                     </>
                 )}
             </Box>
@@ -728,6 +818,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         <Box
             component="main"
             sx={{
+                "--space-profile-safe-area-top": isPreview
+                    ? "max(0px, calc(var(--space-ios-safe-area-top, 0px) - var(--space-friend-profile-top, 100vh)))"
+                    : "var(--space-ios-safe-area-top, 0px)",
                 background: spaceAppBackground,
                 color: textBase,
                 display: "grid",
@@ -737,7 +830,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 position: "relative",
             }}
         >
-            {!isPublicProfile && <SpaceSkipLink />}
+            {!isPublicProfile && !isPreview && <SpaceSkipLink />}
             <Box
                 sx={{
                     bgcolor: "transparent",
@@ -749,7 +842,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     overflow: "hidden",
                     position: "relative",
                     width: "100%",
-                    "@media (min-width: 600px)": { maxWidth: 390 },
+                    "@media (min-width: 600px)": {
+                        maxWidth: isPreview ? "none" : 390,
+                    },
                 }}
             >
                 {isOwnerProfile && onPostPhotoSelect && (
@@ -765,7 +860,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             : profileCoverBackground,
                         borderBottomLeftRadius: profileCoverRadius,
                         borderBottomRightRadius: profileCoverRadius,
-                        height: profileCoverHeight,
+                        height: `calc(${profileCoverHeight}px + var(--space-profile-safe-area-top))`,
                         insetInline: 0,
                         overflow: "hidden",
                         position: "absolute",
@@ -810,7 +905,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                         aria-hidden
                         sx={{
                             background: profileCoverTopShadow,
-                            height: profileHeaderHeight + 8,
+                            height: `calc(${profileHeaderHeight + 8}px + var(--space-profile-safe-area-top))`,
                             insetInline: 0,
                             pointerEvents: "none",
                             position: "absolute",
@@ -828,7 +923,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             bgcolor: "transparent",
                             border: 0,
                             cursor: "pointer",
-                            height: profileCoverHeight,
+                            height: `calc(${profileCoverHeight}px + var(--space-profile-safe-area-top))`,
                             insetInline: 0,
                             p: 0,
                             position: "absolute",
@@ -844,8 +939,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 )}
                 {renderHeader()}
                 <Box
+                    ref={headerRef}
                     component={isPublicProfile ? "div" : "section"}
-                    id={isPublicProfile ? undefined : "space-main-content"}
+                    id={
+                        isPublicProfile || isPreview
+                            ? undefined
+                            : "space-main-content"
+                    }
                     aria-label={
                         isPublicProfile ? undefined : `${displayName}'s profile`
                     }
@@ -1294,10 +1394,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </Box>
                 <Box
                     component="section"
+                    inert={isPreview}
                     sx={{
                         alignItems: "stretch",
                         boxSizing: "border-box",
                         display: "flex",
+                        opacity: isPreview
+                            ? "var(--space-friend-profile-reveal, 0)"
+                            : 1,
                         flex: hasProfilePosts ? "0 0 auto" : "1 1 0",
                         flexDirection: "column",
                         minHeight: 0,
@@ -1319,13 +1423,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             }}
                         >
                             <SpacePostGrid
-                                items={visiblePostItems}
+                                items={visiblePostItems.map((item) => ({
+                                    ...item,
+                                    ...dimensionsForPost(item),
+                                }))}
                                 postCount={displayedPostsCount}
                                 renderTile={renderPostTile}
                             />
                         </Box>
                     ) : shouldShowPostLoadingIndicator ? (
-                        <ProfilePostLoadingIndicator />
+                        <ProfilePostLoadingIndicator
+                            coverHeight={profileCoverHeight}
+                        />
                     ) : isPostsLoading ? null : (
                         <Box
                             sx={{
@@ -1340,7 +1449,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                                 pointerEvents: "none",
                                 position: "absolute",
                                 px: 3,
-                                top: `${profileCoverHeight}px`,
+                                top: `calc(${profileCoverHeight}px + var(--space-profile-safe-area-top))`,
                                 bottom: 0,
                                 insetInline: 0,
                                 textAlign: "center",
@@ -1404,7 +1513,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </Box>
                 {selectedPost && (
                     <SpaceFileViewer
+                        ref={viewerRef}
                         closeOnSwipePastEnd
+                        headerHeight={profileHeaderHeight}
                         photo={selectedPost.photo}
                         photos={profileViewerPhotos}
                         photoIndex={selectedPhotoIndex}

@@ -26,7 +26,6 @@ import {
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
     collectionsSortBy,
-    haveOnlySystemCollections,
     PseudoCollectionID,
     sortCollectionSummaries,
     type CollectionsSortBy,
@@ -41,7 +40,7 @@ import {
     type CollectionHeaderProps,
 } from "./CollectionHeader";
 
-type GalleryBarAndListHeaderProps = Omit<
+export type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
     | "onSelectCollectionID"
@@ -80,9 +79,11 @@ export const GalleryBarAndListHeader: React.FC<
 > = ({
     shouldHide,
     mode,
-    onChangeMode,
     user,
     barCollectionSummaries: toShowCollectionSummaries,
+    normalCollectionSummaries,
+    uncategorizedCollectionSummaryID,
+    onShowCollectionSummary,
     activeCollection,
     activeCollectionID,
     setActiveCollectionID,
@@ -102,6 +103,8 @@ export const GalleryBarAndListHeader: React.FC<
     onShowMap,
     onCollectionSlideshow,
     setFileListHeader,
+    collapsed,
+    mobileDrawerProps,
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
@@ -134,14 +137,6 @@ export const GalleryBarAndListHeader: React.FC<
     const [peopleSortBy, setPeopleSortBy] =
         useState<PeopleSortBy>("count-desc");
 
-    const shouldBeHidden = useMemo(
-        () =>
-            shouldHide ||
-            (haveOnlySystemCollections(toShowCollectionSummaries) &&
-                activeCollectionID === PseudoCollectionID.all),
-        [shouldHide, toShowCollectionSummaries, activeCollectionID],
-    );
-
     const sortedCollectionSummaries = useMemo(
         () =>
             sortCollectionSummaries(
@@ -165,6 +160,22 @@ export const GalleryBarAndListHeader: React.FC<
     const albumDescription =
         activeCollection?.pubMagicMetadata?.data.caption?.trim();
     const [descriptionHeight, setDescriptionHeight] = useState(0);
+
+    const { onClose: closeMobileDrawer } = mobileDrawerProps;
+    const selectCollection = useCallback(
+        (id: number) => {
+            setActiveCollectionID(id);
+            closeMobileDrawer();
+        },
+        [setActiveCollectionID, closeMobileDrawer],
+    );
+    const selectPerson = useCallback(
+        (id: string) => {
+            onSelectPerson(id);
+            closeMobileDrawer();
+        },
+        [onSelectPerson, closeMobileDrawer],
+    );
 
     useEffect(() => {
         if (shouldHide) return;
@@ -242,7 +253,7 @@ export const GalleryBarAndListHeader: React.FC<
         // people,
     ]);
 
-    if (shouldBeHidden) {
+    if (shouldHide) {
         return <></>;
     }
 
@@ -251,24 +262,34 @@ export const GalleryBarAndListHeader: React.FC<
             <GalleryBarImpl
                 {...{
                     mode,
-                    onChangeMode,
                     activeCollectionID,
                     people: sortedPeople,
                     activePerson,
-                    onSelectPerson,
                     collectionsSortBy,
                     peopleSortBy,
+                    collapsed,
+                    mobileDrawerProps,
+                    normalCollectionSummaries,
+                    uncategorizedCollectionSummaryID,
+                    onShowCollectionSummary,
                 }}
-                onSelectCollectionID={setActiveCollectionID}
+                onSelectCollectionID={selectCollection}
+                onSelectPerson={selectPerson}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onChangePeopleSortBy={setPeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (cs) =>
-                        !cs.attributes.has("hideFromCollectionBar") &&
-                        !cs.attributes.has("quickLink") &&
-                        (mode != "albums" || !cs.attributes.has("archived")),
+                        cs.id !== uncategorizedCollectionSummaryID &&
+                        cs.id !== PseudoCollectionID.hiddenItems &&
+                        cs.id !== PseudoCollectionID.archiveItems &&
+                        cs.id !== PseudoCollectionID.trash &&
+                        (mode == "albums"
+                            ? !cs.attributes.has("system") ||
+                              (cs.id > 0 && cs.type == "uncategorized")
+                            : !cs.attributes.has("hideFromCollectionBar") &&
+                              !cs.attributes.has("quickLink")),
                 )}
             />
 
@@ -277,10 +298,11 @@ export const GalleryBarAndListHeader: React.FC<
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (cs) => !cs.attributes.has("system"),
                 )}
-                onSelectCollectionID={setActiveCollectionID}
+                onSelectCollectionID={selectCollection}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
+                isInArchiveSection={mode == "archive-albums"}
                 canCreateAlbum={canCreateAlbum}
                 onRemotePull={onRemotePull}
             />
@@ -288,7 +310,7 @@ export const GalleryBarAndListHeader: React.FC<
                 {...allPeopleVisibilityProps}
                 people={sortedPeople}
                 allPeople={allPeople}
-                onSelectPerson={onSelectPerson}
+                onSelectPerson={selectPerson}
                 peopleSortBy={peopleSortBy}
                 onChangePeopleSortBy={setPeopleSortBy}
             />

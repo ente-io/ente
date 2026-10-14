@@ -1,7 +1,5 @@
 import "dart:async";
-import "dart:io";
 
-import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_strings/ente_strings.dart";
 import 'package:flutter/material.dart';
@@ -46,7 +44,6 @@ import "package:photos/ui/components/bottom_action_bar/selection_action_sheet.da
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
-import "package:photos/ui/sharing/offline_link_selection_sheet.dart";
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import "package:photos/ui/viewer/actions/suggest_delete_sheet.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
@@ -223,21 +220,9 @@ class _FileSelectionActionsWidgetState
           SelectionSheetAction(
             labelText: context.strings.share,
             gridOrder: 0,
-            hugeIcon: Platform.isIOS
-                ? HugeIcons.strokeRoundedShare03
-                : HugeIcons.strokeRoundedShare08,
+            hugeIcon: HugeIcons.strokeRoundedShare08,
             key: shareButtonKey,
             onTap: _shareSelectedFiles,
-          ),
-        );
-      }
-
-      if (_canShowOfflineLinkOption(widget.selectedFiles.files)) {
-        items.add(
-          SelectionSheetAction(
-            hugeIcon: HugeIcons.strokeRoundedLink02,
-            labelText: pendingTranslation("(i) Offline link"),
-            onTap: _showOfflineLinkShareSheet,
           ),
         );
       }
@@ -305,7 +290,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showMoveToAlbum()) {
         items.add(
           SelectionSheetAction(
-            hugeIcon: HugeIcons.strokeRoundedArrowRight01,
+            hugeIcon: HugeIcons.strokeRoundedImageUpload,
             labelText: context.strings.moveToAlbum,
             onTap: anyUploadedFiles ? _moveFiles : null,
             shouldShow: ownedFilesCount > 0,
@@ -316,7 +301,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showMovetoHiddenAlbum()) {
         items.add(
           SelectionSheetAction(
-            hugeIcon: HugeIcons.strokeRoundedArrowRight01,
+            hugeIcon: HugeIcons.strokeRoundedImageUpload,
             labelText: context.strings.moveToAlbum,
             onTap: _moveFilesToHiddenAlbum,
           ),
@@ -326,7 +311,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showRemoveFromAlbum()) {
         items.add(
           SelectionSheetAction(
-            hugeIcon: HugeIcons.strokeRoundedRemove01,
+            hugeIcon: HugeIcons.strokeRoundedImageDelete01,
             labelText: context.strings.removeFromAlbum,
             onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
             shouldShow: removeCount > 0,
@@ -337,7 +322,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showRemoveFromHiddenAlbum()) {
         items.add(
           SelectionSheetAction(
-            hugeIcon: HugeIcons.strokeRoundedRemove01,
+            hugeIcon: HugeIcons.strokeRoundedImageDelete01,
             labelText: context.strings.removeFromAlbum,
             onTap: _removeFilesFromHiddenAlbum,
           ),
@@ -393,7 +378,7 @@ class _FileSelectionActionsWidgetState
           SelectionSheetAction(
             labelText: context.strings.download,
             gridOrder: 7,
-            hugeIcon: HugeIcons.strokeRoundedDownload01,
+            hugeIcon: HugeIcons.strokeRoundedDownload04,
             onTap: () => _download(widget.selectedFiles.files.toList()),
           ),
         );
@@ -625,24 +610,6 @@ class _FileSelectionActionsWidgetState
   Future<void> _shareSelectedFiles() async {
     shareSelected(context, shareButtonKey, widget.selectedFiles.files.toList());
     widget.selectedFiles.clearAll();
-  }
-
-  Future<void> _showOfflineLinkShareSheet() async {
-    final files = widget.selectedFiles.files
-        .where((file) => file.localID != null)
-        .toList(growable: false);
-    await showBottomSheetComponent<void>(
-      context: context,
-      enableDrag: false,
-      builder: (_) => OfflineLinkSelectionSheet(files: files),
-    );
-  }
-
-  bool _canShowOfflineLinkOption(Iterable<EnteFile> files) {
-    // TODO: Move this entry point to local-gallery mode when the feature is ready.
-    return flagService.offlineLinkSharing &&
-        !isLocalGalleryMode &&
-        Configuration.instance.hasConfiguredAccount();
   }
 
   Future<void> _moveFiles() async {

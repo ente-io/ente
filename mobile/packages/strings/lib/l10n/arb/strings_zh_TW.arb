@@ -1,4 +1,8 @@
 {
+  "bringMemoriesTogether": "匯聚你的美好回憶",
+  "createMyAccount": "建立我的帳號",
+  "localGalleryPermissionDesc": "授予存取照片的權限，並透過人臉辨識進行整理。所有處理均在你的裝置上完成。",
+  "onboardingOrganizeDesc": "整理你的照片和影片。所有回憶，盡在一處。",
   "about": "關於",
   "acceptTrustInvite": "接受邀請",
   "account": "帳號",
@@ -157,6 +161,7 @@
   "albumsOnDevicePermissionCta": "開啟權限",
   "albumsOnEnteEmptyCta": "選擇要備份的相簿",
   "albumsOnEnteEmptyTitle": "備份您的回憶",
+  "albumsReceivedEmptyTitle": "檢視收到的分享回憶與您分享",
   "albumsSharedEmptyTitle": "分享您的回憶",
   "albumsWidgetDesc": "選擇您想在主畫面上看到的相簿。",
   "albumTitle": "相簿標題",
@@ -808,10 +813,6 @@
   },
   "dontHaveAnAccount": "還沒有帳號？",
   "dontSave": "不要儲存",
-  "doThisLater": "稍後再做",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "您可以連按兩下項目來查看驗證碼",
   "download": "下載",
   "downloadFailed": "下載失敗",
@@ -1735,6 +1736,7 @@
   "nextTotpTitle": "下一個",
   "nightLights": "霓虹燈",
   "no": "否",
+  "noAlbumsOnThisDevice": "此裝置上沒有相簿",
   "noDefaultBackupFolder": "無法建立預設備份資料夾。",
   "noDeleteSuggestion": "沒有刪除建議",
   "noDeviceFound": "找不到裝置",
@@ -2631,7 +2633,6 @@
   "selectFile": "選擇檔案",
   "selectFolder": "選擇資料夾",
   "selectFolders": "選擇資料夾",
-  "selectFoldersForBackup": "選擇要備份的資料夾",
   "selectFolderToContinue": "選擇一個資料夾以繼續",
   "selectItemsToAdd": "選擇要新增的項目",
   "selectLanguage": "選擇語言",
@@ -2875,8 +2876,8 @@
       }
     }
   },
+  "startSnappingYourPhotosWillShowUpHere": "開始拍照，您的照片會顯示在這裡",
   "startWithAddingPhotosOrFamiliarFaces": "先新增照片或熟悉的臉孔",
-  "startWithLatestPhotos": "從最新照片開始",
   "status": "狀態",
   "sticker": "表情符號",
   "stopCastingBody": "您要停止投放嗎？",

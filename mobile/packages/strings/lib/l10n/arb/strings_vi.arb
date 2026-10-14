@@ -1120,10 +1120,6 @@
   },
   "dontHaveAnAccount": "Chưa có tài khoản?",
   "dontSave": "Không lưu",
-  "doThisLater": "Để sau",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Bạn có thể nhấn đúp vào một mục để xem mã",
   "download": "Tải xuống",
   "downloadApplicationUpdate": "Tải xuống bản cập nhật",
@@ -2153,9 +2149,6 @@
   "lastYearsTrip": "Phượt năm ngoái",
   "layout": "Bố cục",
   "layoutGrouped": "Đã phân nhóm",
-  "layoutJustified": "Căn đều",
-  "layoutJustifiedComfort": "Căn đều · Thoải mái",
-  "layoutJustifiedFlex": "Căn đều · Linh hoạt",
   "layoutMasonry": "Masonry",
   "layoutTrip": "Chuyến đi",
   "leave": "Rời",
@@ -3956,7 +3949,6 @@
   "selectFile": "Chọn tệp",
   "selectFolder": "Chọn thư mục",
   "selectFolders": "Chọn nhiều thư mục",
-  "selectFoldersForBackup": "Chọn thư mục để sao lưu",
   "selectFolderToContinue": "Chọn một thư mục để tiếp tục",
   "selectItemsToAdd": "Chọn mục để thêm",
   "selectLanguage": "Chọn ngôn ngữ",
@@ -4275,7 +4267,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "Bắt đầu chụp, ảnh của bạn sẽ hiển thị ở đây.",
   "startWithAddingPhotosOrFamiliarFaces": "Bắt đầu bằng cách thêm\nảnh hoặc gương mặt gia đình",
-  "startWithLatestPhotos": "Bắt đầu với những ảnh mới nhất",
   "status": "Trạng thái",
   "sticker": "Sticker",
   "stopCastingBody": "Bạn có muốn dừng phát không?",
@@ -4950,12 +4941,12 @@
       }
     }
   },
-  "legacyKitSheetIntro": "Nếu tôi ngủm hoặc mất quyền truy cập vào tài khoản, bảng tính này sẽ giúp bạn khôi phục ảnh, tài liệu và nhiều thứ khác của tôi.",
+  "legacyKitSheetIntro": "Nếu có lúc tôi không còn ở bên hoặc mất quyền truy cập vào tài khoản, tờ giấy này sẽ giúp bạn khôi phục ảnh, tài liệu và nhiều nội dung khác của tôi.",
   "@legacyKitSheetIntro": {
     "description": "Written in the voice of the account owner, addressed to the sheet holder"
   },
   "legacyKitSheetHowToRecover": "Cách khôi phục tài khoản của tôi",
-  "legacyKitSheetStepGetAnother": "Đây là {index} trong {total} bảng tính. Hỏi {names} về cái của họ — bạn chỉ cần thêm một cái nữa.",
+  "legacyKitSheetStepGetAnother": "Đây là tờ thứ {index} trong tổng số {total} tờ. Hãy hỏi xin {names} tờ của họ — bạn chỉ cần thêm một tờ nữa.",
   "@legacyKitSheetStepGetAnother": {
     "description": "First recovery step. {names} is a list of the other sheet holders, already joined and emphasised",
     "placeholders": {
@@ -4991,7 +4982,7 @@
       }
     }
   },
-  "legacyKitSheetStepScan": "Quét {count} bảng tính.",
+  "legacyKitSheetStepScan": "Quét {count} tờ giấy.",
   "@legacyKitSheetStepScan": {
     "description": "Third recovery step. {count} is how many sheets must be scanned together",
     "placeholders": {
@@ -5067,7 +5058,7 @@
   "permissions": "Quyền truy cập",
   "viewerRoleDescription": "Xem và tải xuống ảnh",
   "collaboratorRoleDescription": "Thêm ảnh của họ",
-  "adminRoleDescription": "Thêm ảnh của họ và xóa người",
+  "adminRoleDescription": "Ngoài ra, có thể thêm và xóa người",
   "addAsViewers": "{count, plural, other{Thêm làm người xem}}",
   "@addAsViewers": {
     "placeholders": {

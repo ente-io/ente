@@ -15,6 +15,7 @@ import {
     markCurrentMessagesRead,
     replyToCurrentMessage,
     sendCurrentMessage,
+    sendCurrentPoke,
     setCurrentMessageReaction,
     shouldAutoReadMessageActivities,
     type SpaceMessage,
@@ -102,6 +103,7 @@ export const SpaceMessagesPage: React.FC<SpaceMessagesPageProps> = ({
 }) => {
     const router = useSpaceRouter();
     const {
+        friends,
         postPublication,
         profile,
         profileLoadError,
@@ -150,11 +152,11 @@ export const SpaceMessagesPage: React.FC<SpaceMessagesPageProps> = ({
     const selectedFriendFromFriends = React.useMemo(
         () =>
             selectedSpaceId
-                ? conversationFriends.find(
+                ? friends.find(
                       (friend) => friendSpaceId(friend) == selectedSpaceId,
                   )
                 : undefined,
-        [conversationFriends, selectedSpaceId],
+        [friends, selectedSpaceId],
     );
     const selectedLoadedFriendProfile =
         selectedFriendProfile &&
@@ -624,6 +626,9 @@ export const SpaceMessagesPage: React.FC<SpaceMessagesPageProps> = ({
                 onOpenThread={openConversation}
                 onLoadActivityPost={(post) =>
                     loadCurrentPostPreview(post, actorSpaceId)
+                }
+                onPokeFriend={(spaceId, requestID) =>
+                    sendCurrentPoke(actorSpaceId, spaceId, requestID)
                 }
                 onSendMessage={async (spaceId, text) => {
                     const sender = currentProfileMessageActor(profile);

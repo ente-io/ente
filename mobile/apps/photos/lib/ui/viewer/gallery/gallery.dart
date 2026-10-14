@@ -19,7 +19,6 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import "package:photos/models/gallery/gallery_groups.dart";
-import "package:photos/models/gallery/gallery_layout_config.dart";
 import "package:photos/models/gallery_type.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart" show localSettings;
@@ -396,7 +395,6 @@ class GalleryState extends State<Gallery> {
       showGallerySettingsCTA: widget.showGallerySettingsCTA,
       groupHeaderAction: widget.groupHeaderAction,
       layoutTypeOverride: widget.layoutTypeOverride,
-      justifiedLayoutAvailable: isJustifiedLayoutAvailable,
     );
     galleryGroups = groups;
 
@@ -479,12 +477,18 @@ class GalleryState extends State<Gallery> {
         : 0;
   }
 
+  int get _photoGridSize =>
+      (widget.layoutTypeOverride ?? localSettings.getGalleryLayoutType()) ==
+          GalleryLayoutType.justified
+      ? 2
+      : localSettings.getPhotoGridSize();
+
   Future<double> _measureGroupHeaderExtent() async {
     if (!_groupType.showGroupHeader()) return GalleryGroups.spacing;
     final size = await getIntrinsicSizeOfWidget(
       GroupHeaderWidget(
         title: "Dummy title",
-        gridSize: localSettings.getPhotoGridSize(),
+        gridSize: _photoGridSize,
         filesInGroup: const [],
         selectedFiles: null,
         showSelectAll: false,
@@ -824,7 +828,10 @@ class GalleryState extends State<Gallery> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _boundariesProvider?.setScrollController(_scrollController);
+        _boundariesProvider?.setScrollController(
+          _scrollController,
+          swipeActiveNotifier: _swipeActiveNotifier,
+        );
       }
     });
 
@@ -864,7 +871,7 @@ class GalleryState extends State<Gallery> {
     final shouldEnableSwipeSelection = widget.limitSelectionToOne == false;
 
     if (groupHeaderExtent == null) {
-      final photoGridSize = localSettings.getPhotoGridSize();
+      final photoGridSize = _photoGridSize;
       final tileHeight =
           (widthAvailable - (photoGridSize - 1) * GalleryGroups.spacing) /
           photoGridSize;

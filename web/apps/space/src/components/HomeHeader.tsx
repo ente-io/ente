@@ -1,13 +1,29 @@
-import { Menu01Icon, Notification01Icon } from "@hugeicons/core-free-icons";
+import { Notification01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Box } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
+import { SpaceAvatarImage } from "components/AvatarImage";
 import React from "react";
+import type { SetupProfile } from "screens/SetupProfileScreen";
+import { useSpaceAppState } from "state/app-state";
 import { useSpaceUnreadStatus } from "state/navigation";
-import { spaceAppBackgroundColor, spaceText } from "styles/colors";
+import {
+    spaceAppBackgroundColor,
+    spaceSurface,
+    spaceText,
+} from "styles/colors";
 import { useSpaceRouter } from "utils/route-transitions";
 import { spaceRoutes } from "utils/routes";
 
-export const SpaceHomeHeader: React.FC = () => {
+const headerAvatarImageSize = 28;
+const avatarFadeSx = {
+    "@keyframes spaceAvatarFade": { from: { opacity: 0 }, to: { opacity: 1 } },
+    animation: "spaceAvatarFade 320ms cubic-bezier(0.22, 1, 0.36, 1) both",
+    "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+} as const;
+
+export const SpaceHomeHeader: React.FC<{ profile: SetupProfile | null }> = ({
+    profile,
+}) => {
     const router = useSpaceRouter();
     const { notificationsUnread } = useSpaceUnreadStatus();
     const [visible, setVisible] = React.useState(true);
@@ -59,13 +75,17 @@ export const SpaceHomeHeader: React.FC = () => {
                 color: spaceText,
                 display: "grid",
                 gridTemplateColumns: "44px minmax(0, 1fr) 44px",
-                height: 60,
+                height: "calc(68px + var(--space-ios-safe-area-top, 0px))",
                 mx: "auto",
-                px: 2,
+                pt: "var(--space-ios-safe-area-top, 0px)",
+                pl: "max(16px, var(--space-ios-safe-area-left, 0px))",
+                pr: "max(16px, var(--space-ios-safe-area-right, 0px))",
                 position: "sticky",
                 top: 0,
                 transform: visible ? "translateY(0)" : "translateY(-100%)",
-                transition: "transform 220ms cubic-bezier(0.2, 0, 0, 1)",
+                transition: visible
+                    ? "transform 340ms cubic-bezier(0.4, 0, 0.2, 1)"
+                    : "transform 440ms cubic-bezier(0.4, 0, 0.2, 1)",
                 width: "100%",
                 zIndex: 10,
                 "@media (prefers-reduced-motion: reduce)": {
@@ -77,16 +97,11 @@ export const SpaceHomeHeader: React.FC = () => {
             <Box
                 component="button"
                 type="button"
-                aria-label="Settings"
-                onClick={() => void router.push(spaceRoutes.settings)}
+                aria-label="Profile"
+                onClick={() => void router.push(spaceRoutes.profile)}
                 sx={{ ...actionSx, justifyContent: "flex-start" }}
             >
-                <HugeiconsIcon
-                    icon={Menu01Icon}
-                    size={23}
-                    strokeWidth={1.8}
-                    absoluteStrokeWidth
-                />
+                <SpaceHomeHeaderAvatar profile={profile} />
             </Box>
             <Box
                 component="img"
@@ -144,5 +159,38 @@ export const SpaceHomeHeader: React.FC = () => {
                 </Box>
             </Box>
         </Box>
+    );
+};
+
+const SpaceHomeHeaderAvatar: React.FC<{ profile: SetupProfile | null }> = ({
+    profile,
+}) => {
+    const { cachedProfileAvatarUrl } = useSpaceAppState();
+    const avatarUrl = profile ? profile.avatarUrl : cachedProfileAvatarUrl;
+
+    return avatarUrl || (profile && !profile.avatarObjectID) ? (
+        <Box
+            key={avatarUrl ?? "default-avatar"}
+            sx={{
+                ...avatarFadeSx,
+                borderRadius: "50%",
+                filter: avatarUrl ? undefined : "brightness(0.9)",
+                height: headerAvatarImageSize,
+                overflow: "hidden",
+                width: headerAvatarImageSize,
+            }}
+        >
+            <SpaceAvatarImage src={avatarUrl} />
+        </Box>
+    ) : (
+        <Skeleton
+            variant="circular"
+            sx={{
+                bgcolor: spaceSurface,
+                height: headerAvatarImageSize,
+                transform: "none",
+                width: headerAvatarImageSize,
+            }}
+        />
     );
 };

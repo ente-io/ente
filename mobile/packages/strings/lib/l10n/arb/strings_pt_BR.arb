@@ -1,4 +1,8 @@
 {
+  "bringMemoriesTogether": "Reúna suas memórias",
+  "createMyAccount": "Criar minha conta",
+  "localGalleryPermissionDesc": "Conceda permissão para acessar e organizar suas fotos com reconhecimento facial. Todo o processamento é feito no seu dispositivo.",
+  "onboardingOrganizeDesc": "Organize suas fotos e vídeos. Todas as memórias em um só lugar.",
   "about": "Sobre",
   "acceptTrustInvite": "Aceitar convite",
   "account": "Conta",
@@ -182,6 +186,7 @@
   "albumsOnDevicePermissionCta": "Permitir",
   "albumsOnEnteEmptyCta": "Selecione os álbuns para backup",
   "albumsOnEnteEmptyTitle": "Fazer backup de suas memórias",
+  "albumsReceivedEmptyTitle": "Veja memórias compartilhadas com você",
   "albumsSharedEmptyTitle": "Compartilhe suas memórias",
   "albumsWidgetDesc": "Selecione os álbuns que deseja ver na tela inicial.",
   "albumTitle": "Título do álbum",
@@ -1036,10 +1041,6 @@
   },
   "dontHaveAnAccount": "Não possui uma conta?",
   "dontSave": "Não salvar",
-  "doThisLater": "Mais tarde",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Você pode tocar duas vezes em uma entrada para ver o código",
   "download": "Baixar",
   "downloadApplicationUpdate": "Baixar atualização",
@@ -2190,6 +2191,7 @@
   "nextTotpTitle": "próximo",
   "nightLights": "Noites de néon",
   "no": "Não",
+  "noAlbumsOnThisDevice": "Nenhum álbum no dispositivo",
   "noDefaultBackupFolder": "Não foi possível criar uma pasta de backup padrão.",
   "noDeleteSuggestion": "Nenhuma sugestão para exclusão",
   "noDeviceFound": "Nenhum dispositivo encontrado",
@@ -3100,7 +3102,6 @@
   "selectFile": "Selecionar arquivo",
   "selectFolder": "Selecionar pasta",
   "selectFolders": "Selecionar pastas",
-  "selectFoldersForBackup": "Selecione as pastas para backup",
   "selectFolderToContinue": "Selecione uma pasta para continuar",
   "selectItemsToAdd": "Selecionar itens para adicionar",
   "selectMailApp": "Selecionar aplicativo de e-mail",
@@ -3350,8 +3351,8 @@
       }
     }
   },
+  "startSnappingYourPhotosWillShowUpHere": "Comece a arrastar, suas fotos aparecerão aqui",
   "startWithAddingPhotosOrFamiliarFaces": "Comece adicionando\nfotos ou rostos familiares",
-  "startWithLatestPhotos": "Iniciar pelas últimas fotos",
   "status": "Estado",
   "sticker": "Figurinha",
   "stopCastingBody": "Deseja parar a transmissão?",

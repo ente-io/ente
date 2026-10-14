@@ -52,6 +52,7 @@ import "package:photos/ui/viewer/gallery/component/album_description_header.dart
 import "package:photos/ui/viewer/gallery/gallery_app_bar_actions.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
+import "package:photos/ui/viewer/gallery/hooks/album_sort_sheet.dart";
 import "package:photos/ui/viewer/gallery/hooks/edit_album_details_sheet.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
@@ -848,8 +849,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         _menuOption(
           AlbumPopupAction.editDetails,
           strings.editDetails,
-          const HugeIcon(
-            icon: HugeIcons.strokeRoundedEdit03,
+          HugeIcon(
+            icon: onCover
+                ? HugeIcons.strokeRoundedEdit02
+                : HugeIcons.strokeRoundedEdit03,
             size: IconSizes.small,
           ),
         ),
@@ -871,12 +874,19 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             size: IconSizes.small,
           ),
         ),
-      if (galleryType.canSort() && !onCover)
+      if (galleryType.canSort())
         _menuOption(
           AlbumPopupAction.sort,
-          strings.sortAlbumsBy,
+          strings.sort,
           const HugeIcon(
             icon: HugeIcons.strokeRoundedSorting01,
+            size: IconSizes.small,
+          ),
+          secondaryLabel: (widget.collection!.pubMagicMetadata.asc ?? false)
+              ? strings.sortOldestFirst
+              : strings.sortNewestFirst,
+          trailingWidget: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowRight01,
             size: IconSizes.small,
           ),
         ),
@@ -929,8 +939,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           isArchived ? strings.unarchive : strings.archive,
           HugeIcon(
             icon: isArchived
-                ? HugeIcons.strokeRoundedUnarchive03
-                : HugeIcons.strokeRoundedArchive03,
+                ? (onCover
+                      ? HugeIcons.strokeRoundedInboxUpload
+                      : HugeIcons.strokeRoundedUnarchive03)
+                : (onCover
+                      ? HugeIcons.strokeRoundedInboxDownload
+                      : HugeIcons.strokeRoundedArchive03),
             size: IconSizes.small,
           ),
         ),
@@ -941,7 +955,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           HugeIcon(
             icon: isHidden
                 ? HugeIcons.strokeRoundedView
-                : HugeIcons.strokeRoundedViewOffSlash,
+                : (onCover
+                      ? HugeIcons.strokeRoundedViewOff
+                      : HugeIcons.strokeRoundedViewOffSlash),
             size: IconSizes.small,
           ),
         ),
@@ -964,8 +980,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               : strings.archive,
           HugeIcon(
             icon: widget.collection!.hasShareeArchived()
-                ? HugeIcons.strokeRoundedUnarchive03
-                : HugeIcons.strokeRoundedArchive03,
+                ? (onCover
+                      ? HugeIcons.strokeRoundedInboxUpload
+                      : HugeIcons.strokeRoundedUnarchive03)
+                : (onCover
+                      ? HugeIcons.strokeRoundedInboxDownload
+                      : HugeIcons.strokeRoundedArchive03),
             size: IconSizes.small,
           ),
         ),
@@ -976,7 +996,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           HugeIcon(
             icon: widget.collection!.hasShareeHidden()
                 ? HugeIcons.strokeRoundedView
-                : HugeIcons.strokeRoundedViewOffSlash,
+                : (onCover
+                      ? HugeIcons.strokeRoundedViewOff
+                      : HugeIcons.strokeRoundedViewOffSlash),
             size: IconSizes.small,
           ),
         ),
@@ -998,7 +1020,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 !flagService.enableMultiCast &&
                     castService.getActiveSessions().isNotEmpty
                 ? HugeIcons.strokeRoundedTvSmart
-                : HugeIcons.strokeRoundedTv02,
+                : (onCover
+                      ? HugeIcons.strokeRoundedAirplayLine
+                      : HugeIcons.strokeRoundedTv02),
             size: IconSizes.small,
           ),
         ),
@@ -1059,8 +1083,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         _menuOption(
           AlbumPopupAction.downloadAlbum,
           strings.download,
-          const HugeIcon(
-            icon: HugeIcons.strokeRoundedDownload01,
+          HugeIcon(
+            icon: onCover
+                ? HugeIcons.strokeRoundedDownload04
+                : HugeIcons.strokeRoundedDownload01,
             size: IconSizes.small,
           ),
         ),
@@ -1098,12 +1124,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     String label,
     Widget leadingWidget, {
     Color? labelColor,
+    String? secondaryLabel,
+    Widget? trailingWidget,
   }) {
     return EntePopupMenuOption(
       value: value,
       label: label,
       labelColor: labelColor,
       leadingWidget: leadingWidget,
+      secondaryLabel: secondaryLabel,
+      trailingWidget: trailingWidget,
     );
   }
 
@@ -1283,28 +1313,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _showSortOption(BuildContext bContext) async {
-    final bool? sortByAsc = await showMenu<bool>(
-      context: bContext,
-      position: RelativeRect.fromLTRB(
-        MediaQuery.of(context).size.width,
-        kToolbarHeight + 12,
-        12,
-        0,
-      ),
-      items: [
-        PopupMenuItem(
-          value: false,
-          child: Text(context.strings.sortNewestFirst),
-        ),
-        PopupMenuItem(
-          value: true,
-          child: Text(context.strings.sortOldestFirst),
-        ),
-      ],
+    final collection = widget.collection!;
+    final sortByAsc = await showAlbumSortSheet(
+      bContext,
+      ascending: collection.pubMagicMetadata.asc ?? false,
     );
-    if (sortByAsc != null) {
-      if (!bContext.mounted) return;
-      unawaited(changeSortOrder(bContext, widget.collection!, sortByAsc));
+    if (sortByAsc != null &&
+        sortByAsc != (collection.pubMagicMetadata.asc ?? false) &&
+        bContext.mounted) {
+      await changeSortOrder(bContext, collection, sortByAsc);
     }
   }
 

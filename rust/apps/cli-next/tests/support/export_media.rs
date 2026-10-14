@@ -414,3 +414,260 @@ fn engine_recovery_preserves_edits_at_either_move_endpoint() {
         fetched.assert();
     }
 }
+
+fn linked(root: &Path, first: &str, second: &str) -> bool {
+    same_file::is_same_file(root.join(first), root.join(second)).unwrap()
+}
+
+#[test]
+fn engine_consolidates_copies_and_keeps_linked_history() {
+    let mut server = mockito::Server::new();
+    let key = Key::generate();
+    let (record, bytes) = original_fixture(&key, b"old", false, true, 10);
+    let fetched = download(&mut server, 10, &bytes, 1);
+    let mut other = public(record.clone(), &key, json!({"editedName":"Other.jpg"}), 20);
+    other["id"] = json!(11);
+    let separate = download(&mut server, 11, &bytes, 1);
+    let mut engine = new_engine(&server, key, record.clone());
+    engine.catalog.files.insert((2, 11), other);
+    engine.catalog.albums.insert(3, "Excluded".into());
+    engine.catalog.files.insert((3, 10), record.clone());
+    run(&mut engine, true);
+    let root = engine.root();
+    let first = root.join("First/Photo.jpg");
+    let second = root.join("Second/Photo.jpg");
+    assert!(!same_file::is_same_file(&first, &second).unwrap());
+    let permissions = fs::metadata(&first).unwrap().permissions();
+    let mut readonly = permissions.clone();
+    readonly.set_readonly(true);
+    fs::set_permissions(&first, readonly).unwrap();
+    engine.hardlinks = true;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let directory = root.join("Second");
+        let permissions = fs::metadata(&directory).unwrap().permissions();
+        fs::set_permissions(&directory, fs::Permissions::from_mode(0o500)).unwrap();
+        let probe = directory.join("permission-probe");
+        let result = fs::hard_link(&first, &probe)
+            .is_err()
+            .then(|| engine.run(false, &["First", "Second"]));
+        fs::set_permissions(&directory, permissions).unwrap();
+        if let Some(result) = result {
+            let result = result.unwrap();
+            assert!(!result.complete);
+            assert_eq!(result.json["copies"]["completed"], 2);
+            assert_eq!(fs::read(&second).unwrap(), b"old");
+            assert!(!same_file::is_same_file(&first, &second).unwrap());
+        } else {
+            fs::remove_file(probe).unwrap();
+            eprintln!(
+                "skipping permission failure: directory permissions do not prevent hard links"
+            );
+        }
+    }
+    assert_eq!(run(&mut engine, true)["changes"]["exported"], 2);
+    assert!(same_file::is_same_file(&first, &second).unwrap());
+    assert!(!same_file::is_same_file(&first, root.join("Second/Other.jpg")).unwrap());
+    assert_eq!(run(&mut engine, true)["changes"]["exported"], 0);
+    assert!(fs::metadata(&second).unwrap().permissions().readonly());
+    fs::set_permissions(&first, permissions).unwrap();
+    assert_eq!(count(&engine.db(), "SELECT count(*) FROM temporaries"), 0);
+    for album in ["First", "Second"] {
+        for entry in fs::read_dir(root.join(album)).unwrap() {
+            let name = entry.unwrap().file_name();
+            assert!(!name.to_string_lossy().ends_with(".part"));
+        }
+    }
+    engine.catalog.files.remove(&(1, 10));
+    run(&mut engine, true);
+    let retained = root.join("Trash/First/Photo.jpg");
+    assert!(same_file::is_same_file(&retained, &second).unwrap());
+    let history_path = root.join("Trash/First/metadata/Photo.jpg.json");
+    let history = fs::read(&history_path).unwrap();
+    let before = fs::metadata(&retained).unwrap().modified().unwrap();
+    engine.hardlinks = false;
+    let changed = public(
+        record,
+        &engine.catalog.key,
+        json!({"editedTime":1_700_000_100_000_000i64}),
+        30,
+    );
+    engine.catalog.files.insert((2, 10), changed);
+    assert!(engine.run(false, &["Second"]).unwrap().complete);
+    assert_ne!(fs::metadata(&retained).unwrap().modified().unwrap(), before);
+    assert!(same_file::is_same_file(&retained, &second).unwrap());
+    let (new, bytes) = original_fixture(&engine.catalog.key, b"new", false, true, 40);
+    engine.catalog.files.insert((2, 10), new.clone());
+    let replacement = download(&mut server, 10, &bytes, 1);
+    assert!(engine.run(false, &["Second"]).unwrap().complete);
+    assert_eq!(fs::read(&retained).unwrap(), b"old");
+    assert_eq!(fs::read(&history_path).unwrap(), history);
+    assert_eq!(fs::read(root.join("Excluded/Photo.jpg")).unwrap(), b"old");
+    engine.catalog.files.insert((1, 10), new);
+    assert!(engine.run(false, &["First", "Second"]).unwrap().complete);
+    assert_component(&root, "First", "Photo.jpg", b"new");
+    assert!(!same_file::is_same_file(&first, &second).unwrap());
+    fetched.assert();
+    separate.assert();
+    replacement.assert();
+}
+
+#[test]
+fn engine_links_live_components_and_preserves_edits() {
+    let mut server = mockito::Server::new();
+    let key = Key::generate();
+    let (record, bytes) = original_fixture(&key, b"original", true, true, 10);
+    let fetched = download(&mut server, 10, &bytes, 1);
+    let mut engine = new_engine(&server, key, record);
+    engine.hardlinks = true;
+    run(&mut engine, true);
+    let root = engine.root();
+    for name in ["Motion.heic", "Motion.mov"] {
+        assert!(linked(
+            &root,
+            &format!("First/{name}"),
+            &format!("Second/{name}")
+        ));
+        assert!(!linked(
+            &root,
+            &format!("First/metadata/{name}.json"),
+            &format!("Second/metadata/{name}.json")
+        ));
+        assert_component(&root, "Second", name, b"original");
+    }
+    assert!(!linked(&root, "First/Motion.heic", "First/Motion.mov"));
+    let first = root.join("First/Motion.heic");
+    let second = root.join("Second/Motion.heic");
+    fs::remove_file(&first).unwrap();
+    assert_eq!(fs::read(&second).unwrap(), b"original");
+    run(&mut engine, true);
+    assert!(same_file::is_same_file(&first, &second).unwrap());
+    fs::write(&first, b"edited in place").unwrap();
+    let (other, bytes) = source(11, &engine.catalog.key, b"independent", "Other.jpg");
+    engine.catalog.files.insert((2, 11), other);
+    let independent = download(&mut server, 11, &bytes, 1);
+    let result = run(&mut engine, false);
+    assert_eq!(result["conflicts"], 2);
+    assert_eq!(result["copies"]["completed"], 1);
+    assert_component(&root, "Second", "Other.jpg", b"independent");
+    assert_eq!(fs::read(&second).unwrap(), b"edited in place");
+    fs::remove_file(&first).unwrap();
+    fs::write(&first, b"independent local edit").unwrap();
+    assert_eq!(run(&mut engine, false)["conflicts"], 2);
+    assert_eq!(fs::read(&first).unwrap(), b"independent local edit");
+    independent.assert();
+    fetched.assert();
+}
+
+#[test]
+fn engine_recovers_interrupted_link_publication() {
+    for boundary in [
+        "BEFORE INSERT ON pending WHEN new.album=2 AND json_type(new.action,'$.Publish.output.Media') IS NOT NULL",
+        "BEFORE UPDATE ON pending WHEN old.album=2 AND json_type(old.action,'$.Publish.output.Media') IS NOT NULL AND new.action='null'",
+        "BEFORE UPDATE ON components WHEN new.folder='active:2' AND old.intended_time IS NULL AND new.intended_time IS NOT NULL",
+    ] {
+        let mut server = mockito::Server::new();
+        let key = Key::generate();
+        let (record, bytes) = original_fixture(&key, b"original", false, true, 10);
+        let fetched = download(&mut server, 10, &bytes, 1);
+        let mut engine = new_engine(&server, key, record);
+        run(&mut engine, true);
+        engine.hardlinks = true;
+        let db = engine.db();
+        db.execute_batch(&format!("CREATE TRIGGER stop_link {boundary} BEGIN SELECT RAISE(ABORT,'link publication interrupted'); END;")).unwrap();
+        run(&mut engine, false);
+        let root = engine.root();
+        assert_eq!(
+            fs::read(root.join("Second/Photo.jpg")).unwrap(),
+            b"original"
+        );
+        db.execute_batch("DROP TRIGGER stop_link").unwrap();
+        if boundary.contains("ON components") {
+            let photo = root.join("Second/Photo.jpg");
+            let modified = fs::metadata(&photo).unwrap().modified().unwrap();
+            fs::write(&photo, b"modified").unwrap();
+            fs::File::options()
+                .write(true)
+                .open(&photo)
+                .unwrap()
+                .set_modified(modified)
+                .unwrap();
+            engine.hardlinks = false;
+            for _ in 0..2 {
+                let result = engine.run(false, &["Second"]).unwrap();
+                assert!(!result.complete);
+                assert_eq!(result.json["conflicts"], 1);
+            }
+            assert_eq!(fs::read(&photo).unwrap(), b"modified");
+            fs::write(&photo, b"original").unwrap();
+            engine.hardlinks = true;
+        }
+        run(&mut engine, true);
+        assert!(linked(&root, "First/Photo.jpg", "Second/Photo.jpg"));
+        assert_eq!(count(&db, "SELECT count(*) FROM temporaries"), 0);
+        fetched.assert();
+    }
+}
+
+#[test]
+fn engine_rechecks_link_source_before_completion() {
+    use std::time::{Duration, UNIX_EPOCH};
+    let mut server = mockito::Server::new();
+    let key = Key::generate();
+    let (record, bytes) = original_fixture(&key, b"original", false, true, 10);
+    let fetched = download(&mut server, 10, &bytes, 1);
+    let mut engine = new_engine(&server, key, record.clone());
+    for (id, name) in [(3, "Third"), (4, "Fourth")] {
+        engine.catalog.albums.insert(id, name.into());
+        engine.catalog.files.insert((id, 10), record.clone());
+    }
+    run(&mut engine, true);
+    let root = engine.root();
+    let first = root.join("First/Photo.jpg");
+    fs::remove_file(root.join("Fourth/Photo.jpg")).unwrap();
+    fs::hard_link(&first, root.join("Fourth/Photo.jpg")).unwrap();
+    let changed = public(
+        record,
+        &engine.catalog.key,
+        json!({"editedTime":1_700_000_100_000_000i64}),
+        30,
+    );
+    for record in engine.catalog.files.values_mut() {
+        *record = changed.clone();
+    }
+    let modified = UNIX_EPOCH + Duration::from_secs(1_700_000_100);
+    engine.hardlinks = true;
+    let export = engine.prepare(engine.options(false, &[])).unwrap();
+    let blocked = root.join("Third/metadata/Photo.jpg.json");
+    fs::remove_file(&blocked).unwrap();
+    fs::create_dir(&blocked).unwrap();
+    let result = engine.execute_with_report(export, &|line| {
+        eprintln!("{line}");
+        if line.starts_with("file:3:10:") && line.contains("expected a regular file") {
+            assert!(linked(&root, "First/Photo.jpg", "Second/Photo.jpg"));
+            assert_eq!(fs::metadata(&first).unwrap().modified().unwrap(), modified);
+            fs::write(&first, b"modified").unwrap();
+            fs::File::options()
+                .write(true)
+                .open(&first)
+                .unwrap()
+                .set_modified(modified + Duration::from_secs(1))
+                .unwrap();
+        }
+    });
+    let result = result.unwrap();
+    assert!(!result.complete);
+    assert_eq!(result.json["conflicts"], 2);
+    assert_eq!(result.json["copies"]["completed"], 2);
+    assert_eq!(fs::read(&first).unwrap(), b"modified");
+    assert_eq!(
+        fs::metadata(&first).unwrap().modified().unwrap(),
+        modified + Duration::from_secs(1)
+    );
+    let result = engine.run(false, &["First", "Second", "Fourth"]).unwrap();
+    assert!(!result.complete);
+    assert_eq!(result.json["conflicts"], 3);
+    assert_eq!(result.json["copies"]["completed"], 0);
+    fetched.assert();
+}

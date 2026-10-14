@@ -681,7 +681,7 @@
     }
   },
   "compactMode": "조밀하게 보기",
-  "comparingImageDetails": "{count, plural, =0{댓글 없음} one{댓글 {count}개} other{댓글 {count}개}}",
+  "comparingImageDetails": "이미지 세부 정보 비교 중...",
   "concertNights": "콘서트의 밤",
   "confirm": "확인",
   "@confirm": {
@@ -1103,10 +1103,6 @@
   },
   "dontHaveAnAccount": "계정이 없으신가요?",
   "dontSave": "저장 안 함",
-  "doThisLater": "나중에 하기",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "코드를 보시려면 해당 칸을 두 번 눌러주세요",
   "download": "다운로드",
   "downloadApplicationUpdate": "업데이트 다운로드",
@@ -5002,7 +4998,7 @@
     }
   },
   "shareAllPersonPhotos": "모든 사진 공유",
-  "shareAllPersonPhotosDescription": "모든 사진 공유",
+  "shareAllPersonPhotosDescription": "{name}님이 나온 모든 사진(앞으로 추가될 사진 포함)",
   "@shareAllPersonPhotosDescription": {
     "placeholders": {
       "name": {

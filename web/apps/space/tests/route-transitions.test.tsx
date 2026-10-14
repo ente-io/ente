@@ -74,6 +74,7 @@ const setup = async (initialPath: string) => {
             position++;
         }
         mocks.router.asPath = as;
+        mocks.router.pathname = url.split("?")[0]!;
         render();
         emit("routeChangeComplete", as);
         return Promise.resolve(true);
@@ -83,6 +84,7 @@ const setup = async (initialPath: string) => {
         popState(entries[position]!);
     });
     vi.stubGlobal("window", {
+        matchMedia: () => ({ matches: false }),
         history: {
             get state() {
                 return entries[position];
@@ -131,7 +133,80 @@ const setup = async (initialPath: string) => {
     };
 };
 
+describe("Space conversation transitions", () => {
+    it("leaves shallow friend sheet navigation to the sheet animation", async () => {
+        const app = await setup("/app/friends");
+        const startViewTransition = vi.fn();
+        vi.stubGlobal("document", { startViewTransition });
+        await app.router.push("/app/friends?friend=alex", undefined, {
+            shallow: true,
+        });
+        await app.router.replace(
+            "/app/friends?friend=alex&expanded=1",
+            "/alex",
+            { shallow: true },
+        );
+        await app.router.back("/app/friends");
+        expect(app.path).toBe("/app/friends");
+        expect(startViewTransition).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ["/app/messages", "/app/messages/alex", "fade-with-navigation"],
+        ["/app/messages/alex", "/app/messages", "fade-with-navigation"],
+        ["/app/friends", "/app/messages", "fade"],
+    ])("transitions from %s to %s using %s", async (from, to, motion) => {
+        const app = await setup(from);
+        const dataset: Record<string, string> = {};
+        const capturedMotions: (string | undefined)[] = [];
+        vi.stubGlobal("document", {
+            documentElement: { dataset },
+            startViewTransition: (update: () => Promise<unknown>) => {
+                capturedMotions.push(dataset.spaceRouteMotion);
+                const updateCallbackDone = Promise.resolve().then(update);
+                return {
+                    ready: updateCallbackDone,
+                    updateCallbackDone,
+                    finished: updateCallbackDone,
+                };
+            },
+        });
+
+        await app.router.push(to);
+        await app.router.back(from);
+
+        expect(capturedMotions).toEqual([motion, motion]);
+        await vi.waitFor(() =>
+            expect(dataset.spaceRouteMotion).toBeUndefined(),
+        );
+    });
+});
+
 describe("Space back navigation", () => {
+    it("expands a friend preview without adding another back step", async () => {
+        const app = await setup("/app/friends");
+        const options = { shallow: true, scroll: false };
+        await app.router.push("/app/friends?friend=alex", undefined, options);
+        const previewHistoryLength = app.length;
+        await app.router.replace(
+            "/app/friends?friend=alex&expanded=1",
+            "/alex",
+            options,
+        );
+
+        expect(mocks.router.replace).toHaveBeenLastCalledWith(
+            "/app/friends?friend=alex&expanded=1",
+            "/alex",
+            options,
+        );
+        expect(app.length).toBe(previewHistoryLength);
+        await app.router.push("/app/messages/alex");
+        await app.router.back("/app/messages");
+        expect(app.path).toBe("/alex");
+        await app.router.back("/app/friends");
+        expect(app.path).toBe("/app/friends");
+    });
+
     it.each(["/app/friends", "/app/messages", "/anand"])(
         "returns from a DM to its origin %s",
         async (origin) => {

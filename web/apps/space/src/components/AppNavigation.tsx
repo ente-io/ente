@@ -1,12 +1,12 @@
 import {
     BubbleChatIcon,
     Home01Icon,
-    PlusSignSquareIcon,
-    UserCircleIcon,
+    PlusSignIcon,
     UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Box } from "@mui/material";
+import { preloadPostLikeAnimation } from "components/post-like-rive";
 import { SpacePostPhotoInput } from "components/PostPhotoInput";
 import log from "ente-base/log";
 import { isSpaceIOS } from "hooks/use-pwa-install-prompt";
@@ -17,11 +17,7 @@ import {
     emptySpaceUnreadStatus,
     SpaceUnreadStatusContext,
 } from "state/navigation";
-import {
-    spaceAppBackgroundColor,
-    spaceText,
-    spaceTextMuted,
-} from "styles/colors";
+import { spaceText } from "styles/colors";
 import {
     spaceNavigationDestination,
     spaceUnreadStatusChangedEvent,
@@ -37,13 +33,22 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
         profileLoadStatus,
         setPendingPostPhotoFiles,
     } = useSpaceAppState();
-    const showNavigation = Boolean(
+    const isAppPage = Boolean(
         router.pathname == spaceRoutes.home ||
         router.pathname.startsWith(`${spaceRoutes.home}/`) ||
         (profile && router.pathname == spaceRoutes.friendPage),
     );
+    const isConversation = router.pathname.startsWith(
+        `${spaceRoutes.messages}/`,
+    );
+    const isFriendPreview =
+        router.pathname == spaceRoutes.friends &&
+        typeof router.query.friend == "string" &&
+        router.query.expanded != "1";
+    const showNavigation =
+        isAppPage && Boolean(profile) && !isConversation && !isFriendPreview;
     const spaceID =
-        showNavigation && profileLoadStatus == "ready"
+        isAppPage && profileLoadStatus == "ready"
             ? profile?.spaceId
             : undefined;
     const [unreadStatus, setUnreadStatus] = React.useState(
@@ -52,6 +57,10 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
     const layoutRef = React.useRef<HTMLDivElement>(null);
     const postInputRef = React.useRef<HTMLInputElement>(null);
     const path = router.asPath.split(/[?#]/)[0] ?? router.pathname;
+
+    React.useEffect(() => {
+        if (isAppPage) void preloadPostLikeAnimation();
+    }, [isAppPage]);
 
     React.useEffect(() => {
         if (!spaceID) {
@@ -80,7 +89,7 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
     }, [spaceID, path]);
 
     React.useEffect(() => {
-        if (!showNavigation) return;
+        if (!isAppPage) return;
         if (isSpaceIOS())
             layoutRef.current?.style.setProperty(
                 "--space-bottom-nav-padding",
@@ -103,9 +112,17 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
                           Math.max(0, viewport.offsetTop),
                   )
                 : 0;
+            layoutRef.current?.toggleAttribute(
+                "data-space-keyboard-open",
+                keyboardInset > 0,
+            );
             layoutRef.current?.style.setProperty(
                 "--space-viewport-height",
                 `${viewport.height}px`,
+            );
+            layoutRef.current?.style.setProperty(
+                "--space-viewport-offset-top",
+                `${Math.max(0, viewport.offsetTop)}px`,
             );
             layoutRef.current?.style.setProperty(
                 "--space-keyboard-inset",
@@ -123,36 +140,40 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
             document.removeEventListener("focusin", updateViewport);
             document.removeEventListener("focusout", updateViewport);
         };
-    }, [showNavigation]);
+    }, [isAppPage]);
 
-    const destinations = [
-        { label: "Home", href: spaceRoutes.home, icon: Home01Icon, size: 23 },
-        {
-            label: "Messages",
-            href: spaceRoutes.messages,
-            icon: BubbleChatIcon,
-            size: 23,
-        },
-        { label: "Post", icon: PlusSignSquareIcon, href: undefined, size: 25 },
-        {
-            label: "Friends",
-            href: spaceRoutes.friends,
-            icon: UserMultiple02Icon,
-            size: 22,
-        },
-        {
-            label: "Profile",
-            href: spaceRoutes.profile,
-            icon: UserCircleIcon,
-            size: 22,
-        },
+    const destinationGroups = [
+        [
+            {
+                label: "Messages",
+                href: spaceRoutes.messages,
+                icon: BubbleChatIcon,
+                size: 23,
+            },
+        ],
+        [
+            {
+                label: "Space",
+                href: spaceRoutes.home,
+                icon: Home01Icon,
+                size: 23,
+            },
+            {
+                label: "Friends",
+                href: spaceRoutes.friends,
+                icon: UserMultiple02Icon,
+                size: 22,
+            },
+        ],
+        [{ label: "Post", icon: PlusSignIcon, href: undefined, size: 25 }],
     ];
 
     return (
         <SpaceUnreadStatusContext.Provider value={unreadStatus}>
             <Box
                 ref={layoutRef}
-                className={showNavigation ? "space-app-layout" : undefined}
+                className={isAppPage ? "space-app-layout" : undefined}
+                data-space-conversation={isConversation || undefined}
             >
                 {children}
                 {showNavigation && (
@@ -162,144 +183,248 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
                             onSelect={setPendingPostPhotoFiles}
                         />
                         <Box
+                            aria-hidden
+                            sx={{
+                                bottom: "var(--space-keyboard-inset, 0px)",
+                                height: "calc(54px + var(--space-bottom-nav-padding))",
+                                left: "50%",
+                                pointerEvents: "none",
+                                position: "fixed",
+                                transform: "translateX(-50%)",
+                                width: "calc(100% - 16px)",
+                                zIndex: 19,
+                                "@media (min-width: 600px)": { maxWidth: 374 },
+                            }}
+                        >
+                            {[1, 2, 3].map((layer) => (
+                                <Box
+                                    key={layer}
+                                    className={`space-bottom-nav-blur space-bottom-nav-blur-${layer}`}
+                                />
+                            ))}
+                        </Box>
+                        <Box
                             component="nav"
                             aria-label="Main navigation"
                             sx={{
                                 alignItems: "center",
-                                bgcolor: spaceAppBackgroundColor,
                                 bottom: "var(--space-keyboard-inset, 0px)",
-                                display: "flex",
+                                display: "grid",
+                                columnGap: "16px",
+                                gridTemplateColumns:
+                                    "52px minmax(0, 208px) 52px",
                                 justifyContent: "space-between",
                                 height: "var(--space-bottom-nav-height)",
-                                pb: "var(--space-bottom-nav-padding)",
+                                pb: "calc(12px + var(--space-bottom-nav-padding))",
+                                pt: "8px",
                                 left: "50%",
-                                px: "10px",
+                                px: "16px",
                                 position: "fixed",
                                 transform: "translateX(-50%)",
-                                viewTransitionName: "space-bottom-nav",
                                 width: "100%",
                                 zIndex: 20,
                                 "@media (min-width: 600px)": { maxWidth: 390 },
                             }}
                         >
-                            {destinations.map(({ label, href, icon, size }) => {
-                                const selected = Boolean(
-                                    href &&
-                                    href ==
-                                        spaceNavigationDestination(
-                                            router.pathname,
-                                        ),
-                                );
-                                const isPost = label == "Post";
-                                return (
-                                    <Box
-                                        key={label}
-                                        component={isPost ? "button" : "a"}
-                                        href={href}
-                                        type={isPost ? "button" : undefined}
-                                        disabled={
-                                            isPost
-                                                ? Boolean(pendingPostPhotoFiles)
-                                                : undefined
-                                        }
-                                        aria-label={
-                                            label == "Messages" &&
-                                            unreadStatus.messagesUnread
-                                                ? "Messages with unread activity"
-                                                : label
-                                        }
-                                        aria-current={
-                                            selected ? "page" : undefined
-                                        }
-                                        onClick={(
-                                            event: React.MouseEvent<HTMLElement>,
-                                        ) => {
-                                            if (isPost) {
-                                                postInputRef.current?.click();
-                                            } else if (
+                            {destinationGroups.map((destinations) => (
+                                <Box
+                                    key={destinations[0]!.label}
+                                    data-space-bottom-nav-pill
+                                    sx={{
+                                        alignItems: "center",
+                                        backdropFilter:
+                                            "blur(24px) saturate(120%)",
+                                        WebkitBackdropFilter:
+                                            "blur(24px) saturate(120%)",
+                                        bgcolor: "rgba(32, 32, 32, 0.7)",
+                                        borderRadius: "999px",
+                                        display: "flex",
+                                        height: 52,
+                                        minWidth: 0,
+                                        p: "4px",
+                                        viewTransitionName: `space-bottom-nav-${destinations[0]!.label.toLowerCase()}`,
+                                    }}
+                                >
+                                    {destinations.map(
+                                        ({ label, href, icon, size }) => {
+                                            const selected = Boolean(
                                                 href &&
-                                                !event.metaKey &&
-                                                !event.ctrlKey &&
-                                                !event.shiftKey &&
-                                                !event.altKey
-                                            ) {
-                                                event.preventDefault();
-                                                if (path == href)
-                                                    window.scrollTo({
-                                                        top: 0,
-                                                        behavior: "smooth",
-                                                    });
-                                                else void router.push(href);
-                                            }
-                                        }}
-                                        sx={{
-                                            alignItems: "center",
-                                            bgcolor: "transparent",
-                                            border: 0,
-                                            borderRadius: "24px",
-                                            color: selected
-                                                ? spaceText
-                                                : spaceTextMuted,
-                                            cursor: "pointer",
-                                            display: "flex",
-                                            height: 52,
-                                            justifyContent: "center",
-                                            minWidth: 0,
-                                            width: 44,
-                                            p: 0,
-                                            textDecoration: "none",
-                                            "&:focus-visible": {
-                                                outline: "2px solid #08C225",
-                                                outlineOffset: 2,
-                                            },
-                                            "&:disabled": {
-                                                opacity: 0.6,
-                                                cursor: "default",
-                                            },
-                                        }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                alignItems: "center",
-                                                display: "flex",
-                                                height: size,
-                                                justifyContent: "center",
-                                                position: "relative",
-                                                width: size,
-                                                "& svg path:last-of-type":
-                                                    label == "Messages"
-                                                        ? { display: "none" }
-                                                        : undefined,
-                                            }}
-                                        >
-                                            <HugeiconsIcon
-                                                icon={icon}
-                                                size={size}
-                                                strokeWidth={1.8}
-                                                absoluteStrokeWidth
-                                            />
-                                            {label == "Messages" &&
-                                                unreadStatus.messagesUnread && (
+                                                href ==
+                                                    spaceNavigationDestination(
+                                                        router.pathname,
+                                                    ),
+                                            );
+                                            const isPost = label == "Post";
+                                            const isCenter =
+                                                destinations.length > 1;
+                                            return (
+                                                <Box
+                                                    key={label}
+                                                    component={
+                                                        isPost ? "button" : "a"
+                                                    }
+                                                    href={href}
+                                                    type={
+                                                        isPost
+                                                            ? "button"
+                                                            : undefined
+                                                    }
+                                                    disabled={
+                                                        isPost
+                                                            ? Boolean(
+                                                                  pendingPostPhotoFiles,
+                                                              )
+                                                            : undefined
+                                                    }
+                                                    aria-label={
+                                                        label == "Messages" &&
+                                                        unreadStatus.messagesUnread
+                                                            ? "Messages with unread activity"
+                                                            : label
+                                                    }
+                                                    aria-current={
+                                                        selected
+                                                            ? "page"
+                                                            : undefined
+                                                    }
+                                                    onClick={(
+                                                        event: React.MouseEvent<HTMLElement>,
+                                                    ) => {
+                                                        if (isPost) {
+                                                            postInputRef.current?.click();
+                                                        } else if (
+                                                            href &&
+                                                            !event.metaKey &&
+                                                            !event.ctrlKey &&
+                                                            !event.shiftKey &&
+                                                            !event.altKey
+                                                        ) {
+                                                            event.preventDefault();
+                                                            if (path == href)
+                                                                window.scrollTo(
+                                                                    {
+                                                                        top: 0,
+                                                                        behavior:
+                                                                            "smooth",
+                                                                    },
+                                                                );
+                                                            else
+                                                                void router.push(
+                                                                    href,
+                                                                );
+                                                        }
+                                                    }}
+                                                    sx={{
+                                                        alignItems: "center",
+                                                        appearance: "none",
+                                                        bgcolor: selected
+                                                            ? "rgba(255, 255, 255, 0.14)"
+                                                            : "transparent",
+                                                        border: 0,
+                                                        borderRadius: "24px",
+                                                        color: selected
+                                                            ? spaceText
+                                                            : "rgba(255, 255, 255, 0.75)",
+                                                        cursor: "pointer",
+                                                        display: "flex",
+                                                        fontFamily:
+                                                            '"Inter Variable", Inter, sans-serif',
+                                                        fontSize: 14,
+                                                        fontWeight: 500,
+                                                        height: 44,
+                                                        justifyContent:
+                                                            "center",
+                                                        minWidth: 0,
+                                                        width: isCenter
+                                                            ? "50%"
+                                                            : 44,
+                                                        p: 0,
+                                                        textDecoration: "none",
+                                                        "&:focus-visible": {
+                                                            outline:
+                                                                "2px solid #08C225",
+                                                            outlineOffset: 2,
+                                                        },
+                                                        "&:disabled": {
+                                                            opacity: 0.6,
+                                                            cursor: "default",
+                                                        },
+                                                    }}
+                                                >
                                                     <Box
-                                                        aria-hidden
-                                                        className="space-unread-indicator"
                                                         sx={{
-                                                            bgcolor: "#FF0000",
-                                                            border: `2.5px solid ${spaceAppBackgroundColor}`,
-                                                            borderRadius: "50%",
-                                                            height: 11.5,
+                                                            alignItems:
+                                                                "center",
+                                                            display: "flex",
+                                                            height: isCenter
+                                                                ? undefined
+                                                                : size,
+                                                            justifyContent:
+                                                                "center",
                                                             position:
-                                                                "absolute",
-                                                            right: "-0.75px",
-                                                            top: "-0.75px",
-                                                            width: 11.5,
+                                                                "relative",
+                                                            width: isCenter
+                                                                ? undefined
+                                                                : size,
+                                                            "& svg":
+                                                                label ==
+                                                                    "Messages" &&
+                                                                unreadStatus.messagesUnread
+                                                                    ? {
+                                                                          maskImage:
+                                                                              "radial-gradient(circle at calc(100% - 5px) 5px, transparent 5.75px, #000 6px)",
+                                                                          WebkitMaskImage:
+                                                                              "radial-gradient(circle at calc(100% - 5px) 5px, transparent 5.75px, #000 6px)",
+                                                                      }
+                                                                    : undefined,
+                                                            "& svg path:last-of-type":
+                                                                label ==
+                                                                "Messages"
+                                                                    ? {
+                                                                          display:
+                                                                              "none",
+                                                                      }
+                                                                    : undefined,
                                                         }}
-                                                    />
-                                                )}
-                                        </Box>
-                                    </Box>
-                                );
-                            })}
+                                                    >
+                                                        {isCenter ? (
+                                                            label
+                                                        ) : (
+                                                            <HugeiconsIcon
+                                                                icon={icon}
+                                                                size={size}
+                                                                strokeWidth={
+                                                                    1.8
+                                                                }
+                                                                absoluteStrokeWidth
+                                                            />
+                                                        )}
+                                                        {label == "Messages" &&
+                                                            unreadStatus.messagesUnread && (
+                                                                <Box
+                                                                    aria-hidden
+                                                                    className="space-unread-indicator"
+                                                                    sx={{
+                                                                        bgcolor:
+                                                                            "#FF0000",
+                                                                        borderRadius:
+                                                                            "50%",
+                                                                        height: 6.5,
+                                                                        position:
+                                                                            "absolute",
+                                                                        right: "1.75px",
+                                                                        top: "1.75px",
+                                                                        width: 6.5,
+                                                                    }}
+                                                                />
+                                                            )}
+                                                    </Box>
+                                                </Box>
+                                            );
+                                        },
+                                    )}
+                                </Box>
+                            ))}
                         </Box>
                     </>
                 )}

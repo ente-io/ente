@@ -122,6 +122,8 @@ Additionally, configure **Auto lock** to automatically lock the app after a spec
 
 App lock protects access to the app UI. It is not a recovery password for your codes and does not re-encrypt the stored Auth data.
 
+On Android, **Hide content** under `Settings > Security > App lock` blocks screen capture and hides app previews. This can make screenshots, recordings, or screen mirroring appear blank. Turning it off allows capture and can expose your codes, so only do so knowingly and turn it back on when finished. This is separate from **Hide codes**, which hides individual code values in the app.
+
 ### Import / Export
 
 ![Import codes provider list on Ente Auth mobile](https://docs-assets.ente.com/screenshots/auth-import-hub.png){width=320px}

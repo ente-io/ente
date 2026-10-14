@@ -786,10 +786,6 @@
   },
   "dontHaveAnAccount": "Neturite paskyros?",
   "dontSave": "Neišsaugoti",
-  "doThisLater": "Daryti tai vėliau",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Galite dukart paliesti elementą, kad peržiūrėtumėte kodą",
   "download": "Atsisiųsti",
   "downloadFailed": "Atsisiuntimas nepavyko.",
@@ -2503,7 +2499,6 @@
   "selectExportFormat": "Pasirinkite eksporto formatą",
   "selectFile": "Pasirinkti failą",
   "selectFolder": "Pasirinkti aplanką",
-  "selectFoldersForBackup": "Pasirinkite aplankus atsarginėms kopijoms kurti",
   "selectFolderToContinue": "Pasirinkite aplanką, kad tęstumėte",
   "selectItemsToAdd": "Pasirinkite elementus įtraukti",
   "selectLanguage": "Pasirinkite kalbą",
@@ -2713,6 +2708,7 @@
   "spotlightOnYourself": "Dėmesys į save",
   "startBackup": "Pradėti kurti atsarginę kopiją",
   "startRecovery": "Pradėti atkūrimą",
+  "startSnappingYourPhotosWillShowUpHere": "Pradėkite fotografuoti – jūsų nuotraukos bus rodomos čia.",
   "status": "Būsena",
   "sticker": "Lipdukas",
   "stopCastingBody": "Ar norite sustabdyti perdavimą?",

@@ -10,11 +10,8 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/gallery/fixed_extent_grid_row.dart";
 import "package:photos/models/gallery/fixed_extent_section_layout.dart";
 import "package:photos/models/gallery/flex_layout.dart";
-import "package:photos/models/gallery/gallery_layout_config.dart";
 import "package:photos/models/gallery/justified_grid_row.dart";
 import "package:photos/models/gallery/justified_layout.dart";
-import "package:photos/models/gallery/justified_layout_strategy.dart";
-import "package:photos/models/gallery/justified_layout_tuning.dart";
 import "package:photos/models/gallery/section_layout.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
@@ -36,7 +33,6 @@ class GalleryGroups {
   final bool showGallerySettingsCTA;
   final Widget? groupHeaderAction;
   final GalleryLayoutType? layoutTypeOverride;
-  final bool justifiedLayoutAvailable;
 
   final bool sortOrderAsc;
   final double widthAvailable;
@@ -55,7 +51,6 @@ class GalleryGroups {
     this.showGallerySettingsCTA = false,
     this.groupHeaderAction,
     this.layoutTypeOverride,
-    required this.justifiedLayoutAvailable,
   }) {
     init();
     if (!groupType.showGroupHeader()) {
@@ -70,6 +65,7 @@ class GalleryGroups {
   // Product decision: limit how tall the preferred justified row can grow as
   // the gallery widens.
   static const double _maximumJustifiedTargetRowHeight = 320.0;
+  static const double _justifiedTargetRowHeightScale = 1.12;
 
   late final int crossAxisCount;
   late final GalleryLayoutType layoutType;
@@ -271,11 +267,10 @@ class GalleryGroups {
   }
 
   void init() {
-    crossAxisCount = localSettings.getPhotoGridSize();
-    layoutType = resolveGalleryLayoutType(
-      layoutTypeOverride ?? localSettings.getGalleryLayoutType(),
-      justifiedLayoutAvailable: justifiedLayoutAvailable,
-    );
+    layoutType = layoutTypeOverride ?? localSettings.getGalleryLayoutType();
+    crossAxisCount = layoutType == GalleryLayoutType.justified
+        ? 2
+        : localSettings.getPhotoGridSize();
     _buildGroups();
 
     _groupLayouts = switch (layoutType) {
@@ -450,24 +445,13 @@ class GalleryGroups {
 
   List<SectionLayout> _computeJustifiedGroupLayouts() {
     final stopwatch = Stopwatch()..start();
-    final strategy = localSettings.getJustifiedLayoutStrategy();
-    final flexTuning = strategy == JustifiedLayoutStrategy.flex
-        ? localSettings.getFlexLayoutTuning()
-        : FlexLayoutTuning.defaults;
-    final comfortLargeTuning = strategy == JustifiedLayoutStrategy.comfortLarge
-        ? localSettings.getComfortLargeLayoutTuning()
-        : ComfortLargeLayoutTuning.defaults;
     final gridTargetRowHeight =
         (widthAvailable - (crossAxisCount - 1) * spacing) / crossAxisCount;
     final baseTargetRowHeight = gridTargetRowHeight.isFinite
         ? math.min(gridTargetRowHeight, _maximumJustifiedTargetRowHeight)
         : gridTargetRowHeight;
-    final targetHeightScale = switch (strategy) {
-      JustifiedLayoutStrategy.comfortLarge =>
-        comfortLargeTuning.targetHeightScale,
-      JustifiedLayoutStrategy.flex => flexTuning.targetHeightScale,
-    };
-    final targetRowHeight = baseTargetRowHeight * targetHeightScale;
+    final targetRowHeight =
+        baseTargetRowHeight * _justifiedTargetRowHeightScale;
     final groupLayouts = <SectionLayout>[];
     var currentIndex = 0;
     var currentOffset = 0.0;
@@ -475,34 +459,17 @@ class GalleryGroups {
     for (final groupID in _groupIdToFilesMap.keys) {
       final filesInGroup = _groupIdToFilesMap[groupID]!;
       final aspectRatios = filesInGroup.map(
-        (file) => JustifiedLayoutCalculator.aspectRatioForDimensions(
+        (file) => FlexLayoutCalculator.aspectRatioForDimensions(
           file.width,
           file.height,
         ),
       );
-      final rows = switch (strategy) {
-        JustifiedLayoutStrategy.comfortLarge =>
-          JustifiedLayoutCalculator.computeRows(
-            aspectRatios: aspectRatios,
-            availableWidth: widthAvailable,
-            targetRowHeight: targetRowHeight,
-            spacing: spacing,
-            maximumRowHeightFactor: comfortLargeTuning.maximumHeightFactor,
-            wideFinalMaximumRowHeightFactor:
-                comfortLargeTuning.wideFinalMaximumHeightFactor,
-            minimumLandscapeRowHeightFactor:
-                comfortLargeTuning.minimumLandscapeHeightFactor,
-          ),
-        JustifiedLayoutStrategy.flex => FlexLayoutCalculator.computeRows(
-          aspectRatios: aspectRatios,
-          availableWidth: widthAvailable,
-          targetRowHeight: targetRowHeight,
-          spacing: spacing,
-          maximumRowHeightFactor: flexTuning.maximumHeightFactor,
-          minimumNonFinalSingletonAspectRatio:
-              flexTuning.minimumNonFinalSingletonAspectRatio,
-        ),
-      };
+      final rows = FlexLayoutCalculator.computeRows(
+        aspectRatios: aspectRatios,
+        availableWidth: widthAvailable,
+        targetRowHeight: targetRowHeight,
+        spacing: spacing,
+      );
       final firstIndex = currentIndex == 0 ? currentIndex : currentIndex + 1;
       final lastIndex = firstIndex + rows.length;
       final minOffset = currentOffset;

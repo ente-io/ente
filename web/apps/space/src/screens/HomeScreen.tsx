@@ -16,6 +16,7 @@ import {
 } from "components/feed-video-playback";
 import {
     SpaceFileViewer,
+    type SpaceFileViewerController,
     type SpaceViewerPhoto,
     type SpaceViewerPostActionMode,
 } from "components/FileViewer";
@@ -27,8 +28,10 @@ import {
     spacePostLikePopDurationMs,
     spacePostLikePopTiming,
 } from "components/post-like-animation";
+import { paintStretchingDot } from "components/post-photos-dots";
 import { SpacePostAvatar } from "components/PostAvatar";
 import { SpacePostGrid } from "components/PostGrid";
+import { SpacePostLikeHeart } from "components/PostLikeHeart";
 import { SpacePostPhotosCounter } from "components/PostPhotosCounter";
 import { SpacePostPhotosDots } from "components/PostPhotosDots";
 import { SpacePostTile } from "components/PostTile";
@@ -36,6 +39,7 @@ import { SpacePWAInstallPrompt } from "components/PWAInstallPrompt";
 import { SpaceLoadingSpinner } from "components/RouteFallback";
 import { SpaceShareInviteButton } from "components/ShareInviteButton";
 import { SpaceSkipLink } from "components/SkipLink";
+import { viewerOriginKey } from "components/viewer-transition";
 import log from "ente-base/log";
 import { useBrowserBackClose } from "hooks/use-browser-back-close";
 import { useDecodedImage } from "hooks/use-decoded-image";
@@ -63,7 +67,12 @@ import {
 } from "styles/colors";
 import { spaceTouchTargetSize } from "styles/touch-targets";
 import { firstNameFrom, formatSpaceDate } from "utils/display";
-import { homeFeedEntries, type HomeFeedEntry } from "utils/home-feed";
+import {
+    homeFeedEntries,
+    homeFeedSeparatorBefore,
+    type HomeFeedEntry,
+    type HomeFeedPost,
+} from "utils/home-feed";
 import {
     spacePostFrameAspectRatio,
     spacePostPhotos,
@@ -103,7 +112,7 @@ const feedPhotoCaptionTextSx = {
     textWrap: "balance",
 } as const;
 interface HomeScreenProps {
-    feedItems: SpacePost[];
+    feedItems: HomeFeedPost[];
     friendRequestSentToastName?: string;
     hasFeedLoadMoreError?: boolean;
     hasMoreFeedItems?: boolean;
@@ -510,12 +519,14 @@ interface FeedLikeButtonProps {
     isLiked: boolean;
     onClick: () => void;
     popID: number;
+    toggleID: number;
 }
 
 const FeedLikeButton: React.FC<FeedLikeButtonProps> = ({
     isLiked,
     onClick,
     popID,
+    toggleID,
 }) => {
     const isPopping = isLiked && popID > 0;
 
@@ -562,31 +573,41 @@ const FeedLikeButton: React.FC<FeedLikeButtonProps> = ({
                 },
             }}
         >
-            <Box
-                key={isPopping ? `heart-${popID}` : "heart"}
-                component="span"
-                sx={{
-                    animation: isPopping
-                        ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
-                        : undefined,
-                    display: "flex",
-                    lineHeight: 0,
-                    position: "relative",
-                    transformOrigin: "50% 58%",
-                    zIndex: 1,
-                    "@media (prefers-reduced-motion: reduce)": {
-                        animation: "none",
-                    },
-                }}
-            >
-                <HugeiconsIcon
-                    fill={isLiked ? green : "none"}
-                    icon={FavouriteIcon}
-                    primaryColor={isLiked ? green : feedActionForeground}
-                    size={feedActionIconSize}
-                    strokeWidth={2.2}
-                />
-            </Box>
+            <SpacePostLikeHeart
+                liked={isLiked}
+                toggleID={toggleID}
+                popID={popID}
+                size={feedActionIconSize}
+                fallback={
+                    <Box
+                        key={isPopping ? `heart-${popID}` : "heart"}
+                        component="span"
+                        sx={{
+                            animation: isPopping
+                                ? `${spacePostLikeHeartPop} ${spacePostLikePopDurationMs}ms ${spacePostLikePopTiming} both`
+                                : undefined,
+                            display: "flex",
+                            lineHeight: 0,
+                            position: "relative",
+                            transformOrigin: "50% 58%",
+                            zIndex: 1,
+                            "@media (prefers-reduced-motion: reduce)": {
+                                animation: "none",
+                            },
+                        }}
+                    >
+                        <HugeiconsIcon
+                            fill={isLiked ? green : "none"}
+                            icon={FavouriteIcon}
+                            primaryColor={
+                                isLiked ? green : feedActionForeground
+                            }
+                            size={feedActionIconSize}
+                            strokeWidth={2.2}
+                        />
+                    </Box>
+                }
+            />
         </Box>
     );
 };
@@ -598,6 +619,7 @@ const FeedPhotoOverlay: React.FC<{
 }> = ({ caption, photoIndex, photoCount }) => {
     return (
         <Box
+            data-space-viewer-overlay
             sx={{
                 ...feedPhotoCaptionTextSx,
                 bottom: 20,
@@ -617,6 +639,7 @@ const FeedPhotoOverlay: React.FC<{
                 index={photoIndex}
                 count={photoCount}
                 activeColor={green}
+                stretches
             />
             {caption && (
                 <Box title={caption} sx={{ minWidth: 0, width: "100%" }}>
@@ -640,6 +663,7 @@ const FeedPhoto: React.FC<{
     shouldLoad: boolean;
     shouldPreloadVideo: boolean;
     thumbHash?: string;
+    viewerOrigin?: string;
 }> = ({
     imageUrl,
     isActive,
@@ -653,6 +677,7 @@ const FeedPhoto: React.FC<{
     shouldPreloadVideo,
     thumbHash,
     video,
+    viewerOrigin,
 }) => {
     const decodedPhoto = useDecodedImage(imageUrl, true);
     const isPostUnavailable = isUnavailable || Boolean(decodedPhoto.failed);
@@ -695,6 +720,7 @@ const FeedPhoto: React.FC<{
             }
             disabled={video ? undefined : !canOpenPhoto}
             tabIndex={!video && isActive ? 0 : -1}
+            data-space-viewer-origin={viewerOrigin}
             onClick={video ? undefined : onOpenPhoto}
             onFocus={(event: React.FocusEvent<HTMLElement>) => {
                 if (video && event.target == event.currentTarget)
@@ -706,6 +732,7 @@ const FeedPhoto: React.FC<{
                 appearance: "none",
                 bgcolor: "transparent",
                 border: 0,
+                borderRadius: "inherit",
                 cursor: canOpenPhoto ? "pointer" : "default",
                 display: "block",
                 height: "100%",
@@ -714,7 +741,7 @@ const FeedPhoto: React.FC<{
                 scrollSnapStop: "always",
                 maxWidth: "100%",
                 minWidth: 0,
-                overflow: "hidden",
+                clipPath: "inset(0)",
                 p: 0,
                 position: "relative",
                 width: "100%",
@@ -849,6 +876,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
     const [isLiked, setIsLiked] = useState(viewerLiked);
     const [muted, setMuted] = useState(true);
     const [likePopID, setLikePopID] = useState(0);
+    const [likeToggleID, setLikeToggleID] = useState(0);
     const [shouldLoadMedia, setShouldLoadMedia] = useState(
         !isUnavailable && Boolean(imageUrl) && !isAvatarPending,
     );
@@ -1071,6 +1099,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
 
         const nextLiked = !isLiked;
         setIsLiked(nextLiked);
+        setLikeToggleID((id) => id + 1);
         if (nextLiked) setLikePopID((id) => id + 1);
         void onSetPostLiked?.(postId, nextLiked).catch((error: unknown) => {
             log.error("Failed to update post like", error);
@@ -1203,6 +1232,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
             >
                 {(photoCount > 1 || showSoundControl) && (
                     <Box
+                        data-space-viewer-overlay
                         sx={{
                             alignItems: "center",
                             display: "flex",
@@ -1347,6 +1377,11 @@ const FeedItem: React.FC<FeedItemProps> = ({
                     }}
                     onScroll={(event) => {
                         const carousel = event.currentTarget;
+                        paintStretchingDot(
+                            rootRef.current!,
+                            carousel.scrollLeft / carousel.clientWidth,
+                            photoCount,
+                        );
                         const index = Math.round(
                             carousel.scrollLeft / carousel.clientWidth,
                         );
@@ -1374,9 +1409,10 @@ const FeedItem: React.FC<FeedItemProps> = ({
                         scrollToPhoto(index);
                     }}
                     sx={{
+                        borderRadius: "inherit",
                         display: "flex",
                         height: "100%",
-                        overflowX: "hidden",
+                        overflow: "hidden",
                         overscrollBehaviorX: "contain",
                         scrollSnapType: "x mandatory",
                         scrollbarWidth: "none",
@@ -1414,11 +1450,17 @@ const FeedItem: React.FC<FeedItemProps> = ({
                             shouldPreloadVideo={shouldPreloadVideo}
                             thumbHash={photo.thumbHash}
                             video={photo.video}
+                            viewerOrigin={
+                                index == photoIndex
+                                    ? viewerOriginKey(spaceId, postId)
+                                    : undefined
+                            }
                         />
                     ))}
                 </Box>
                 <Box
                     aria-hidden
+                    data-space-viewer-header-shade
                     sx={{
                         background:
                             "linear-gradient(180deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0))",
@@ -1433,6 +1475,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                     }}
                 />
                 <Box
+                    data-space-viewer-header
                     sx={{
                         alignItems: "center",
                         boxSizing: "border-box",
@@ -1713,6 +1756,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                         isLiked={isLiked}
                         onClick={handleLikeClick}
                         popID={likePopID}
+                        toggleID={likeToggleID}
                     />
                 </Box>
             )}
@@ -1874,6 +1918,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 }) => {
     const [selectedViewer, setSelectedViewer] =
         useState<SelectedHomeViewer | null>(null);
+    const viewerRef = React.useRef<SpaceFileViewerController>(null);
     const [feedPhotoIndices, setFeedPhotoIndices] = useState<
         Record<number, number>
     >({});
@@ -1943,9 +1988,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     const { clearBrowserBackState: clearSelectedPhotoHistory } =
         useBrowserBackClose({
             open: Boolean(selectedViewer),
-            onClose: () => {
-                closeSelectedPhoto();
-            },
+            onClose: () => viewerRef.current?.close(),
             stateKey: "space-feed-viewer",
         });
     const deleteSelectedPost = async () => {
@@ -2256,7 +2299,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     "@media (min-width: 600px)": { maxWidth: 390 },
                 }}
             >
-                <SpaceHomeHeader />
+                <SpaceHomeHeader profile={profile} />
                 <Box
                     component="section"
                     id="space-main-content"
@@ -2269,7 +2312,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         gap: 0,
                         justifyContent: showFeedCards ? "flex-start" : "center",
                         minHeight:
-                            "calc(var(--space-page-height, 100svh) - 60px)",
+                            "calc(var(--space-page-height, 100svh) - 60px - var(--space-ios-safe-area-top, 0px))",
                         minWidth: 0,
                         pb: showFeedCards ? "24px" : "12px",
                         px: feedHorizontalPadding,
@@ -2277,25 +2320,61 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         width: "100%",
                     }}
                 >
-                    <Box
-                        component="section"
-                        aria-label="Latest"
-                        hidden={latestFeedEntries.length == 0}
-                    >
-                        <FeedMotionList
-                            entries={latestFeedEntries}
-                            presentedPostIdentities={
-                                feedSession?.presentedPostIdentities
-                            }
-                            renderEntry={(entry) =>
-                                entry.kind == "local"
-                                    ? localFeedItemFor(entry.item)
-                                    : feedItemFor(entry.item, entry.item.postId)
-                            }
-                        />
-                    </Box>
                     {hasFeedItems ? (
                         <>
+                            <Box
+                                component="section"
+                                aria-label="Latest"
+                                hidden={latestFeedEntries.length == 0}
+                            >
+                                <FeedMotionList
+                                    entries={latestFeedEntries}
+                                    presentedPostIdentities={
+                                        feedSession?.presentedPostIdentities
+                                    }
+                                    renderEntry={(entry) =>
+                                        entry.kind == "local"
+                                            ? localFeedItemFor(entry.item)
+                                            : feedItemFor(
+                                                  entry.item,
+                                                  entry.item.postId,
+                                              )
+                                    }
+                                />
+                            </Box>
+                            {homeFeedSeparatorBefore(
+                                latestFeedEntries,
+                                gridFeedItems,
+                            ) && (
+                                <Box
+                                    role="separator"
+                                    aria-label="Earlier posts"
+                                    sx={{
+                                        alignItems: "center",
+                                        color: spaceTextMuted,
+                                        display: "flex",
+                                        height: 36,
+                                        justifyContent: "center",
+                                        mb: "12px",
+                                    }}
+                                >
+                                    <svg
+                                        aria-hidden="true"
+                                        width="116"
+                                        height="12"
+                                        viewBox="0 0 116 12"
+                                        fill="none"
+                                    >
+                                        <path
+                                            d="M4 6 Q10 -2 16 6 T28 6 T40 6 T52 6 T64 6 T76 6 T88 6 T100 6 T112 6"
+                                            stroke="currentColor"
+                                            strokeOpacity="0.6"
+                                            strokeWidth="2.5"
+                                            strokeLinecap="round"
+                                        />
+                                    </svg>
+                                </Box>
+                            )}
                             <SpacePostGrid
                                 postCount={
                                     latestFeedEntries.length +
@@ -2313,11 +2392,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                     };
                                 })}
                                 renderTile={(item, index) => {
-                                    const photo = {
-                                        ...spacePostPhotos(item)[0]!,
+                                    const postPhotos = spacePostPhotos(item);
+                                    const photoAt = (index: number) => ({
+                                        ...postPhotos[index]!,
                                         postId: item.postId,
                                         spaceId: item.spaceId,
-                                    };
+                                    });
+                                    const remembered = Math.min(
+                                        feedPhotoIndices[item.postId] ?? 0,
+                                        postPhotos.length - 1,
+                                    );
+                                    const photoIndex =
+                                        remembered > 0 &&
+                                        unavailableFeedPostsByKey[
+                                            feedPostImageCacheKey(
+                                                photoAt(remembered),
+                                            )
+                                        ]
+                                            ? 0
+                                            : remembered;
+                                    const photo = photoAt(photoIndex);
                                     const imageUrl =
                                         loadedFeedImageURLFor(photo);
                                     const avatarUrl =
@@ -2335,6 +2429,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                         <SpacePostTile
                                             key={item.id}
                                             item={{ ...item, avatarUrl }}
+                                            photoIndex={photoIndex}
                                             displayName={item.name}
                                             showAvatar
                                             subtlePhotosBadge
@@ -2384,14 +2479,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                                 const post = {
                                                     ...item,
                                                     avatarUrl,
-                                                    imageUrl,
+                                                    imageUrl:
+                                                        photoIndex == 0
+                                                            ? imageUrl
+                                                            : item.imageUrl,
                                                 };
-                                                openFeedPhoto(
-                                                    post,
-                                                    viewerPhotosFromPost(
+                                                openFeedPhoto(post, {
+                                                    ...viewerPhotosFromPost(
                                                         post,
-                                                    )[0]!,
-                                                );
+                                                    )[photoIndex]!,
+                                                    imageUrl,
+                                                });
                                             }}
                                         />
                                     );
@@ -2480,7 +2578,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                 color: "#FFFFFF",
                                 display: "flex",
                                 flexDirection: "column",
-                                height: "calc(var(--space-page-height, 100svh) - 76px)",
+                                height: "calc(var(--space-page-height, 100svh) - 76px - var(--space-ios-safe-area-top, 0px))",
                                 minHeight: 360,
                                 overflow: "hidden",
                                 px: "24px",
@@ -2575,6 +2673,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </Box>
                 {selectedViewer && (
                     <SpaceFileViewer
+                        ref={viewerRef}
                         closeOnSwipePastEnd
                         focusReplyOnOpen={selectedViewer.focusReplyOnOpen}
                         photo={selectedViewer.photo}

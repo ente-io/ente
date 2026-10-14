@@ -64,8 +64,9 @@ export const FriendRequestScreen: React.FC<FriendRequestScreenProps> = ({
                         display: "grid",
                         flexShrink: 0,
                         gridTemplateColumns: "44px 1fr 44px",
-                        height: 56,
-                        px: 2,
+                        height: 68,
+                        pl: "max(16px, var(--space-ios-safe-area-left, 0px))",
+                        pr: "max(16px, var(--space-ios-safe-area-right, 0px))",
                     }}
                 >
                     <Box

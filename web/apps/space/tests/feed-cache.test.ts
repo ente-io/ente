@@ -513,3 +513,76 @@ test("latest sessions are isolated between accounts, spaces and servers", async 
     vi.mocked(apiOrigin).mockResolvedValue("https://api.example.com");
     expect(await loadSpaceFeedSession("self")).toBe(session);
 });
+
+test("restores mixed photo and video metadata without expired video URLs", async () => {
+    const original = post(3);
+    const video = {
+        asset: {
+            ...original.imageAsset!,
+            objectKey: "video-3",
+            mediaType: "video/mp4",
+        },
+        durationMs: 8000,
+    };
+    original.photos = [
+        {
+            imageAsset: original.imageAsset,
+            width: 900,
+            height: 1600,
+            thumbHash: original.thumbHash,
+        },
+        {
+            imageAsset: { ...original.imageAsset!, objectKey: "video-cover" },
+            imageUrl: "blob:video-cover",
+            width: 1600,
+            height: 900,
+            thumbHash: original.thumbHash,
+            video: { ...video, url: "blob:video" },
+        },
+    ];
+    await cacheCurrentSpaceFeedPage("self", { items: [original] });
+    clearSpaceFeedMemoryCache();
+
+    const restored = (await loadCachedSpaceFeed("self"))!.items[0]!;
+    expect(
+        restored.photos?.map(({ width, height }) => [width, height]),
+    ).toEqual([
+        [900, 1600],
+        [1600, 900],
+    ]);
+    expect(restored.photos?.[1]?.video).toEqual(video);
+    expect(restored.photos?.[1]?.imageAsset?.objectKey).toBe("video-cover");
+    expect(restored.photos?.[1]?.thumbHash).toBe(original.thumbHash);
+    expect(restored.photos?.[1]).not.toHaveProperty("imageUrl");
+});
+
+test("feed entrance animations stay remembered across navigation and reset on reload", async () => {
+    const session = (await loadSpaceFeedSession("self"))!;
+    session.presentedPostIdentities.add("post:150");
+    await cacheCurrentSpaceFeedPage("self", { items: [post(150)] });
+    const returned = (await loadSpaceFeedSession("self"))!;
+    expect(returned).toBe(session);
+    expect(returned.presentedPostIdentities.has("post:150")).toBe(true);
+
+    clearSpaceFeedMemoryCache();
+    const reopened = (await loadSpaceFeedSession("self"))!;
+    expect(reopened.presentedPostIdentities.size).toBe(0);
+});
+
+test("a cache without a visit cutoff keeps its posts and pagination on the first restored visit", async () => {
+    await cacheCurrentSpaceFeedPage("self", {
+        items: [post(2), post(1)],
+        nextCursor: "older",
+    });
+    vi.useFakeTimers();
+    vi.setSystemTime(100);
+    clearSpaceFeedMemoryCache();
+    const session = (await loadSpaceFeedSession("self"))!;
+    const cached = (await loadCachedSpaceFeed("self"))!;
+    expect(session.newPostsSinceMs).toBe(100);
+    expect(session.latestPosts).toEqual([]);
+    expect(cached.nextCursor).toBe("older");
+    expect(
+        spaceFeedSessionItems(session, cached.items).map((item) => item.postId),
+    ).toEqual([2, 1]);
+});

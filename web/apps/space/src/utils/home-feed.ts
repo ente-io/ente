@@ -1,6 +1,10 @@
 import type { SpacePost } from "services/space";
 import type { LocalSpaceFeedPost } from "state/app-state";
 
+export interface HomeFeedPost extends SpacePost {
+    batchIndex?: number;
+}
+
 export type HomeFeedEntry =
     | {
           identity: string;
@@ -8,10 +12,15 @@ export type HomeFeedEntry =
           kind: "local";
           renderKey: string;
       }
-    | { identity: string; item: SpacePost; kind: "remote"; renderKey: string };
+    | {
+          identity: string;
+          item: HomeFeedPost;
+          kind: "remote";
+          renderKey: string;
+      };
 
 export const homeFeedEntries = (
-    feedItems: SpacePost[],
+    feedItems: HomeFeedPost[],
     localFeedPosts: LocalSpaceFeedPost[],
     newPostsSinceMs: number | undefined,
     latestPostIDs?: ReadonlySet<number>,
@@ -46,9 +55,9 @@ export const homeFeedEntries = (
             })),
     ];
     const latest: HomeFeedEntry[] = [];
-    const history: SpacePost[] = [];
+    const history: HomeFeedPost[] = [];
     for (const entry of entries) {
-        let post: SpacePost;
+        let post: HomeFeedPost;
         if (entry.kind == "remote") {
             post = entry.item;
         } else {
@@ -74,3 +83,9 @@ export const homeFeedEntries = (
     );
     return { latest, history };
 };
+
+export const homeFeedSeparatorBefore = (
+    latest: HomeFeedEntry[],
+    history: SpacePost[],
+) =>
+    history.length && latest.length ? `post:${history[0]!.postId}` : undefined;

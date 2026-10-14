@@ -593,10 +593,6 @@
     "description": "Do not sign out button label"
   },
   "dontSave": "Yadda saxlama",
-  "doThisLater": "Bunu sonra et",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "download": "Yüklə",
   "downloadFailed": "Yükləmə uğursuz oldu",
   "downloading": "Yüklənir...",
@@ -1971,7 +1967,6 @@
     }
   },
   "selectFolders": "Qovluqları seçin",
-  "selectFoldersForBackup": "Yedəkləmə üçün qovluqları seçin",
   "selectItemsToAdd": "Əlavə etmək üçün elementləri seçin",
   "selectLanguage": "Dil seçin",
   "selectMailApp": "Poçt tətbiqini seçin",
@@ -2118,7 +2113,6 @@
       }
     }
   },
-  "startWithLatestPhotos": "Ən son fotolardan başlayın",
   "sticker": "Stiker",
   "stopCastingBody": "Yayımı dayandırmaq istəyirsiniz?",
   "stopCastingTitle": "Yayımı dayandır",

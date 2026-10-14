@@ -20,6 +20,31 @@ private actor ModelOperationBarrier {
 
 @MainActor
 final class ModelMemoryCoordinationTests: XCTestCase {
+    func testMinimumRamBlocksOnlyKnownReadingsBelowTheFloor() {
+        XCTAssertFalse(chatDeviceCapability(totalMemoryBytes: 1_599_999_999).isChatSupported)
+        XCTAssertTrue(chatDeviceCapability(totalMemoryBytes: 1_600_000_000).isChatSupported)
+        let unknown = chatDeviceCapability(totalMemoryBytes: 0)
+        XCTAssertEqual(unknown, .unknown)
+        XCTAssertTrue(unknown.isChatSupported)
+    }
+
+    func testModelDefaultsOverridesAndFallbacksRespectAllocationLimits() {
+        for requested: Int? in [nil, 0, 12000] {
+            let selection = LlmModelSelection(id: "lfm-350m", contextLength: requested)
+            XCTAssertEqual(selection.contextCandidates, [2048, 1024])
+            XCTAssertEqual(selection.batchSize, 128)
+        }
+        let standard = LlmModelSelection(id: "lfm-vl-1.6b", contextLength: nil)
+        XCTAssertEqual(standard.contextCandidates, [12000, 8192, 4096, 2048, 1024])
+        XCTAssertEqual(standard.batchSize, 512)
+
+        for id in ["lfm-350m", "lfm-vl-1.6b"] {
+            XCTAssertEqual(LlmModelSelection(id: id, contextLength: 512).contextCandidates, [512])
+            XCTAssertEqual(
+                LlmModelSelection(id: id, contextLength: 1536).contextCandidates, [1536, 1024])
+        }
+    }
+
     func testOptionalWorkWaitsForBothCleanupAndCooldown() {
         var pressure = ModelMemoryPressureState()
         pressure.recordPressure(now: 10)

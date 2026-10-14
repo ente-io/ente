@@ -12,9 +12,23 @@ void main() {
     tester,
   ) async {
     final gallery = ScrollController();
+    final swipeActive = ValueNotifier(false);
     addTearDown(gallery.dispose);
+    addTearDown(swipeActive.dispose);
     var tapped = "";
-    await _pumpSheet(tester, gallery, onTap: (label) => tapped = label);
+    await _pumpSheet(
+      tester,
+      gallery,
+      galleryVisible: false,
+      swipeActive: swipeActive,
+      onTap: (label) => tapped = label,
+    );
+    await _pumpSheet(
+      tester,
+      gallery,
+      swipeActive: swipeActive,
+      onTap: (label) => tapped = label,
+    );
     final sheet = tester.widget<DraggableScrollableSheet>(
       find.byType(DraggableScrollableSheet),
     );
@@ -28,14 +42,40 @@ void main() {
     await tester.tap(find.text("Share"));
     expect(tapped, "Share");
     await tester.dragFrom(const Offset(180, 200), const Offset(0, -100));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
     expect(gallery.offset, greaterThan(0));
     expect(controller.size, sheet.minChildSize);
+    await tester.pumpAndSettle();
+    await tester.fling(
+      find.byType(CustomScrollView),
+      const Offset(0, -100),
+      2000,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(controller.size, closeTo(sheet.initialChildSize, 0.001));
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -320));
     await tester.pumpAndSettle();
     expect(controller.size, sheet.maxChildSize);
     await tester.tap(find.text("Guest view"));
     expect(tapped, "Guest view");
+    swipeActive.value = true;
+    gallery.jumpTo(gallery.offset + 50);
+    await tester.pumpAndSettle();
+    expect(controller.size, sheet.minChildSize);
+    swipeActive.value = false;
+    await tester.tap(find.bySemanticsLabel("More"));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(controller.size, sheet.maxChildSize);
+    await tester.pumpAndSettle();
+    await tester.dragFrom(const Offset(180, 100), const Offset(0, -60));
+    await tester.pumpAndSettle();
+    expect(controller.size, sheet.minChildSize);
+    await tester.tap(find.bySemanticsLabel("More"));
+    await tester.pumpAndSettle();
+    expect(controller.size, sheet.maxChildSize);
     final galleryOffset = gallery.offset;
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 330));
     await tester.pumpAndSettle();
@@ -81,7 +121,9 @@ void main() {
       );
       controller ??= sheet.controller;
       expect(sheet.controller, same(controller));
-      sheet.controller!.jumpTo(sheet.maxChildSize);
+      if (sheet.controller!.isAttached) {
+        sheet.controller!.jumpTo(sheet.maxChildSize);
+      }
       final scrollable = find.descendant(
         of: find.byType(CustomScrollView),
         matching: find.byType(Scrollable),
@@ -179,6 +221,8 @@ Future<void> _pumpSheet(
   Size size = const Size(375, 667),
   EdgeInsets padding = EdgeInsets.zero,
   double textScale = 1,
+  bool galleryVisible = true,
+  ValueNotifier<bool>? swipeActive,
   bool reduceMotion = false,
   bool dark = false,
   List<SelectionSheetAction>? actions,
@@ -221,19 +265,22 @@ Future<void> _pumpSheet(
           child: Builder(
             builder: (context) {
               WidgetsBinding.instance.addPostFrameCallback(
-                (_) => GalleryBoundariesProvider.of(
-                  context,
-                )!.setScrollController(gallery),
+                (_) =>
+                    GalleryBoundariesProvider.of(context)!.setScrollController(
+                      gallery,
+                      swipeActiveNotifier: swipeActive,
+                    ),
               );
               return Stack(
                 alignment: Alignment.bottomCenter,
                 children: [
-                  ListView(
-                    controller: gallery,
-                    children: [
-                      Container(height: 2000, color: Colors.transparent),
-                    ],
-                  ),
+                  if (galleryVisible)
+                    ListView(
+                      controller: gallery,
+                      children: [
+                        Container(height: 2000, color: Colors.transparent),
+                      ],
+                    ),
                   SelectionActionSheet(
                     selectionControls: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),

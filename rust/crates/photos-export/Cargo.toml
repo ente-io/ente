@@ -11,6 +11,7 @@ ente-core.workspace = true
 ente-photos.workspace = true
 icu_casemap.workspace = true
 rusqlite.workspace = true
+same-file.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tempfile.workspace = true

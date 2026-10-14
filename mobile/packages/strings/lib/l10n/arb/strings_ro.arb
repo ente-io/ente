@@ -1,4 +1,8 @@
 {
+  "bringMemoriesTogether": "Adună-ți amintirile",
+  "createMyAccount": "Creează contul meu",
+  "localGalleryPermissionDesc": "Acordă permisiunea de a accesa și organiza fotografiile cu recunoaștere facială. Toată procesarea are loc pe dispozitivul tău.",
+  "onboardingOrganizeDesc": "Organizează-ți fotografiile și videoclipurile. Toate amintirile într-un singur loc.",
   "about": "Despre",
   "acceptTrustInvite": "Acceptați invitația",
   "account": "Cont",
@@ -430,10 +434,6 @@
   },
   "documentsHint": "Documente",
   "done": "Finalizat",
-  "doThisLater": "Mai târziu",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "download": "Descărcare",
   "downloadFailed": "Descărcarea nu a reușit",
   "downloading": "Se descarcă...",
@@ -1409,7 +1409,6 @@
     }
   },
   "selectFile": "Selectează fișier",
-  "selectFoldersForBackup": "Selectați folderele pentru copie de rezervă",
   "selectItemsToAdd": "Selectați elementele de adăugat",
   "selectMailApp": "Selectați aplicația de e-mail",
   "selectMorePhotos": "Selectați mai multe fotografii",

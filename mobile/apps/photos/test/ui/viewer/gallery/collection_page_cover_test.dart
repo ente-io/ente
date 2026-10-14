@@ -37,6 +37,7 @@ import "package:photos/services/favorites_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/components/bottom_action_bar/action_bar_widget.dart";
+import "package:photos/ui/components/bottom_action_bar/selection_action_sheet.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/component/album_cover_app_bar.dart";
@@ -187,7 +188,16 @@ void main() {
           .widget<GalleryAppBarWidget>(find.byType(GalleryAppBarWidget))
           .selectedFiles;
       expect(find.byType(AlbumCoverActionButton), findsNWidgets(2));
-      expect(find.byTooltip("Sort"), findsOneWidget);
+      expect(find.byTooltip("Sort"), findsNothing);
+      await tester.tap(find.byTooltip("More"));
+      await tester.pumpAndSettle();
+      expect(find.text("Newest first"), findsOneWidget);
+      await tester.tap(find.text("Sort"));
+      await tester.pumpAndSettle();
+      expect(find.text("Sort photos"), findsOneWidget);
+      await tester.tap(find.text("Newest first"));
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheetComponent), findsNothing);
       selectedFiles.toggleSelection(newest);
       await tester.pumpAndSettle();
       expect(find.byType(AlbumCoverActionButton), findsNothing);
@@ -236,7 +246,7 @@ void main() {
         MediaQuery.paddingOf(tester.element(find.byType(Gallery))).bottom,
       );
       expect(find.byType(AlbumCoverActionButton), findsNWidgets(2));
-      expect(find.byTooltip("Sort"), findsOneWidget);
+      expect(find.byTooltip("Sort"), findsNothing);
 
       collection.pubMagicMetadata = CollectionPubMagicMetadata(asc: true);
       Bus.instance.fire(
@@ -244,6 +254,11 @@ void main() {
       );
       await _expectCover(tester, oldest, count: 2);
       expect(find.text("1–3 JAN 2026"), findsOneWidget);
+      await tester.tap(find.byTooltip("More"));
+      await tester.pumpAndSettle();
+      expect(find.text("Oldest first"), findsOneWidget);
+      Navigator.of(tester.element(find.byType(CollectionPage))).pop();
+      await tester.pumpAndSettle();
 
       final middle = _file(2);
       await tester.runAsync(() => FilesDB.instance.insertMultiple([middle]));
@@ -392,10 +407,58 @@ void main() {
           AlbumPopupAction.albumSlideshow,
         ]),
       );
+      final sortSelection = Future.sync(
+        () => menu.onSelected(AlbumPopupAction.sort),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text("Sort photos"), findsOneWidget);
+      await tester.tap(find.text("Newest first"));
+      await tester.pumpAndSettle();
+      await sortSelection;
       await _disposeAlbum(tester);
       selectedFiles.dispose();
     },
   );
+
+  testWidgets("anchors the selection sheet during interrupted resizing", (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final file = _file(1);
+    await tester.runAsync(() => FilesDB.instance.insertMultiple([file]));
+    await _pumpAlbum(tester, _collection());
+    await _expectCover(tester, file);
+    final selectedFiles = tester
+        .widget<FileSelectionOverlayBar>(find.byType(FileSelectionOverlayBar))
+        .selectedFiles;
+    selectedFiles.toggleSelection(file);
+    await tester.pumpAndSettle();
+    final sheet = find.byType(SelectionActionSheet);
+    final material = find.descendant(
+      of: sheet,
+      matching: find.byType(Material),
+    );
+    final handle = find.descendant(
+      of: sheet,
+      matching: find.bySemanticsLabel("More"),
+    );
+    await tester.tap(handle);
+    await tester.pumpAndSettle();
+    await tester.tap(handle);
+    await tester.pump();
+    for (var frame = 0; frame < 24; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(tester.getBottomRight(material).dy, closeTo(812, 0.01));
+      if (frame == 3) await tester.tap(handle);
+    }
+    selectedFiles.clearAll();
+    await tester.pumpAndSettle();
+    expect(sheet, findsNothing);
+    expect(tester.takeException(), isNull);
+    await _disposeAlbum(tester);
+  });
 
   testWidgets(
     "animates the thumbnail into the header through reversal and cover changes",

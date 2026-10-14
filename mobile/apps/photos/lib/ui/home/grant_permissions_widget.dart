@@ -43,6 +43,8 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   );
   late final rive.FileLoader _permissionsAnimationLoader;
 
+  static const double _logoWidth = 50;
+
   @override
   void initState() {
     super.initState();
@@ -70,6 +72,9 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Widget _buildOnlinePermissionScreen(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final skipLabelHeight =
+        MediaQuery.textScalerOf(context).scale(TextStyles.body.fontSize!) *
+        TextStyles.body.height!;
     return Scaffold(
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
@@ -78,26 +83,36 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
+        toolbarHeight: max(kMinInteractiveDimension, skipLabelHeight),
         centerTitle: true,
         title: SvgPicture.asset(
-          "assets/ente-branding.svg",
-          height: 15,
+          "packages/ente_components/assets/ente_wordmark.svg",
+          width: _logoWidth,
           colorFilter: ColorFilter.mode(colorScheme.content, BlendMode.srcIn),
         ),
+        actions: [_buildSkipAction(context)],
       ),
       body: SafeArea(
         top: false,
         child: CustomScrollView(
           slivers: [
-            const SliverPadding(padding: EdgeInsets.only(top: 24)),
-            SliverToBoxAdapter(child: _buildHeaderContent(context)),
             SliverFillRemaining(
               hasScrollBody: false,
               child: Padding(
-                padding: const EdgeInsets.only(top: 36, bottom: 20),
+                padding: const EdgeInsets.only(bottom: 27),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [_buildNewFeatureActionArea(context)],
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: Spacing.xl,
+                          bottom: Spacing.xxl,
+                        ),
+                        child: Center(child: _buildHeaderContent(context)),
+                      ),
+                    ),
+                    _buildNewFeatureActionArea(context),
+                  ],
                 ),
               ),
             ),
@@ -107,59 +122,102 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
     );
   }
 
-  Widget _buildHeaderContent(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-
-    return Column(
-      children: [
-        Center(
+  Widget _buildSkipAction(BuildContext context) {
+    final color = context.componentColors.primary;
+    final toolbarWidth =
+        MediaQuery.sizeOf(context).width -
+        MediaQuery.paddingOf(context).horizontal;
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        key: const ValueKey("skipForNowButton"),
+        behavior: HitTestBehavior.opaque,
+        onTap: _onTapSkip,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: kMinInteractiveDimension,
+            maxWidth:
+                toolbarWidth -
+                _logoWidth -
+                2 * NavigationToolbar.kMiddleSpacing,
+          ),
           child: Padding(
-            padding: const EdgeInsets.only(top: 28),
-            child: _buildPermissionsAnimation(context),
-          ),
-        ),
-        const SizedBox(height: 22),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            context.strings.readyToBackupTitle,
-            textAlign: TextAlign.center,
-            style: TextStyles.display1.copyWith(color: colorScheme.content),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            context.strings.readyToBackupSubtitle,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-              fontWeight: FontWeight.w500,
-              color: colorScheme.contentLight,
+            padding: const EdgeInsets.only(left: 12, right: 18),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    context.strings.skip,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyles.body.copyWith(color: color),
+                  ),
+                ),
+                const SizedBox(width: Spacing.xs),
+                ExcludeSemantics(
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowRight01,
+                    size: IconSizes.small,
+                    strokeWidth: 2,
+                    color: color,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildPermissionsAnimation(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.2,
+  Widget _buildHeaderContent(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final availableWidth =
+        MediaQuery.sizeOf(context).width -
+        MediaQuery.paddingOf(context).horizontal;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: max(44.0, (availableWidth - 287) / 2),
       ),
-      child: rive.RiveWidgetBuilder(
-        fileLoader: _permissionsAnimationLoader,
-        builder: (BuildContext context, rive.RiveState state) {
-          if (state is rive.RiveLoaded) {
-            return rive.RiveWidget(
-              controller: state.controller,
-              fit: rive.Fit.contain,
-            );
-          }
-          return const SizedBox.shrink();
-        },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 155,
+            height: 168,
+            child: _buildPermissionsAnimation(),
+          ),
+          const SizedBox(height: Spacing.xl),
+          Text(
+            context.strings.readyToBackupTitle,
+            textAlign: TextAlign.center,
+            style: TextStyles.display2.copyWith(color: colorScheme.content),
+          ),
+          const SizedBox(height: Spacing.sm),
+          Text(
+            context.strings.readyToBackupSubtitle,
+            textAlign: TextAlign.center,
+            style: TextStyles.body.copyWith(color: colorScheme.contentLight),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildPermissionsAnimation() {
+    return rive.RiveWidgetBuilder(
+      fileLoader: _permissionsAnimationLoader,
+      builder: (BuildContext context, rive.RiveState state) {
+        if (state is rive.RiveLoaded) {
+          return rive.RiveWidget(
+            controller: state.controller,
+            fit: rive.Fit.contain,
+          );
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 
@@ -278,34 +336,27 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Widget _buildNewFeatureActionArea(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.xxl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ButtonWidgetV2(
+          ButtonComponent(
             key: const ValueKey("selectFoldersButton"),
-            buttonType: ButtonTypeV2.primary,
-            labelText: context.strings.selectFoldersForBackup,
+            density: ButtonComponentDensity.compact,
+            label: context.strings.chooseAlbumsToBackup,
             onTap: _onTapSelectFolders,
           ),
-          const SizedBox(height: 12),
-          ButtonWidgetV2(
+          const SizedBox(height: Spacing.md),
+          ButtonComponent(
             key: const ValueKey("onlyNewPhotosButton"),
-            buttonType: ButtonTypeV2.secondary,
-            labelText: context.strings.startWithLatestPhotos,
+            variant: ButtonComponentVariant.secondary,
+            density: ButtonComponentDensity.compact,
+            label: context.strings.backupLatestPhotos,
             onTap: () async {
               _onlyNewActionDebouncer.run(() async {
                 await _onTapOnlyNewPhotos();
               });
             },
-            shouldSurfaceExecutionStates: false,
-          ),
-          const SizedBox(height: 12),
-          ButtonWidgetV2(
-            key: const ValueKey("skipForNowButton"),
-            buttonType: ButtonTypeV2.link,
-            labelText: context.strings.doThisLater,
-            onTap: _onTapSkip,
             shouldSurfaceExecutionStates: false,
           ),
         ],
@@ -349,7 +400,12 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 32),
-                        _buildPermissionsAnimation(context),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.sizeOf(context).height * 0.2,
+                          ),
+                          child: _buildPermissionsAnimation(),
+                        ),
                         const Flexible(child: SizedBox(height: 22)),
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 297),

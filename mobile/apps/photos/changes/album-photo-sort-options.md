@@ -1,0 +1,1 @@
+- Moved photo sorting into album options.

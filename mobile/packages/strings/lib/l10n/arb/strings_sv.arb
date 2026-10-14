@@ -203,6 +203,7 @@
   "albumsOnDevicePermissionCta": "Tillåt åtkomst",
   "albumsOnEnteEmptyCta": "Välj album att säkerhetskopiera",
   "albumsOnEnteEmptyTitle": "Säkerhetskopiera dina minnen",
+  "albumsReceivedEmptyTitle": "Visa minnen som har delats med dig",
   "albumsSharedEmptyTitle": "Dela dina minnen",
   "albumsWidgetDesc": "Markera de album du vill ska synas på startskärmen.",
   "albumTitle": "Albumtitel",
@@ -1095,10 +1096,6 @@
   },
   "dontHaveAnAccount": "Har du inget konto?",
   "dontSave": "Spara inte",
-  "doThisLater": "Gör detta senare",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Du kan dubbeltrycka på en post för att visa koden",
   "download": "Ladda ner",
   "downloadApplicationUpdate": "Ladda ner uppdatering",
@@ -2113,9 +2110,6 @@
   "lastYearsTrip": "Förra årets resa",
   "layout": "Layout",
   "layoutGrouped": "Grupperad",
-  "layoutJustified": "Justerad",
-  "layoutJustifiedComfort": "Justifierad · Bekväm",
-  "layoutJustifiedFlex": "Justifierad · Flexibel",
   "layoutMasonry": "Mosaik",
   "layoutTrip": "Resa",
   "leave": "Lämna",
@@ -2712,6 +2706,7 @@
   },
   "nightLights": "Neonnätter",
   "no": "Nej",
+  "noAlbumsOnThisDevice": "Inga album på den här enheten",
   "noAppToOpenFileDownloadInstead": "Ingen app kan förhandsvisa den här filen. Du kan ladda ner den och öppna den i en annan app.",
   "@noAppToOpenFileDownloadInstead": {
     "description": "Message shown when Android cannot find an app to open or preview a file"
@@ -3909,7 +3904,6 @@
   "selectFile": "Välj fil",
   "selectFolder": "Välj mapp",
   "selectFolders": "Markera mappar",
-  "selectFoldersForBackup": "Välj mappar för säkerhetskopiering",
   "selectFolderToContinue": "Välj en mapp för att fortsätta",
   "selectItemsToAdd": "Markera objekt att lägga till",
   "selectLanguage": "Välj språk",
@@ -4225,8 +4219,8 @@
       }
     }
   },
+  "startSnappingYourPhotosWillShowUpHere": "Börja ta bilder så visas dina foton här",
   "startWithAddingPhotosOrFamiliarFaces": "Börja med att lägga till\nfoton eller välbekanta ansikten",
-  "startWithLatestPhotos": "Börja med de senaste fotona",
   "status": "Status",
   "sticker": "Klistermärke",
   "stopCastingBody": "Vill du sluta casta?",
@@ -4452,7 +4446,7 @@
     }
   },
   "trashIsEmpty": "Papperskorgen är tom",
-  "trim": "Beskär",
+  "trim": "Trimma",
   "tripInYear": "Resa under {year}",
   "@tripInYear": {
     "placeholders": {
@@ -5011,6 +5005,7 @@
   "youAreViewer": "Du är visningsbehörig",
   "youAreCollaborator": "Du är samarbetspartner",
   "youAreAdmin": "Du är administratör",
+  "emptyAlbumShareMessage": "Du har inte delat det här albumet med någon ännu.",
   "addPeople": "Lägg till personer",
   "fromYourContacts": "Från dina kontakter",
   "chooseAccess": "Välj åtkomst",

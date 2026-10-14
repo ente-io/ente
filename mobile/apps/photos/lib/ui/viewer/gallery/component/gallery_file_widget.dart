@@ -10,6 +10,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file_type.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/module/share/picker_result_uri.dart";
@@ -19,6 +20,8 @@ import "package:photos/ui/common/touch_cross_detector.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
+import "package:photos/ui/viewer/file/gallery_photo_page_route.dart";
+import "package:photos/ui/viewer/file/hero_image.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
@@ -52,6 +55,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   static const borderRadius = BorderRadius.all(Radius.circular(1));
   static final _logger = Logger("GalleryFileWidget");
   late bool _isFileSelected;
+  late final _heroThumbnailKey = GlobalKey();
   int? _currentPointerId;
   bool _isPointerInside = false;
   late final StreamSubscription<FileUploadedEvent> _fileUploadedSubscription;
@@ -117,11 +121,12 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
       selectionColor = getUserAvatarColor(context, owner);
     }
     final String heroTag = widget.tag + widget.file.tag;
+    final isPhoto =
+        widget.file.fileType == FileType.image ||
+        widget.file.fileType == FileType.livePhoto;
     final effectiveThumbnailSize =
         widget.thumbnailSize ??
-        (widget.photoGridSize < photoGridSizeDefault
-            ? thumbnailLargeSize
-            : thumbnailSmallSize);
+        (widget.photoGridSize <= 3 ? thumbnailLargeSize : thumbnailSmallSize);
     final Widget thumbnailWidget = ThumbnailWidget(
       widget.file,
       diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
@@ -132,12 +137,20 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
       key: ValueKey((heroTag, effectiveThumbnailSize)),
       thumbnailSize: effectiveThumbnailSize,
       useRequestedThumbnailSizeForLocalCache: widget.thumbnailSize != null,
+      gaplessPlayback: isPhoto,
       shouldShowOwnerAvatar: !_isFileSelected,
       ownerAvatarType: widget.photoGridSize < photoGridSizeMax
           ? AvatarType.small
           : AvatarType.xs,
       shouldShowVideoDuration: true,
     );
+    final thumbnail = ClipRRect(
+      borderRadius: borderRadius,
+      child: thumbnailWidget,
+    );
+    final heroChild = isPhoto
+        ? KeyedSubtree(key: _heroThumbnailKey, child: thumbnail)
+        : thumbnail;
     return GestureDetector(
       onTap: disableSelection
           ? null
@@ -160,19 +173,21 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                   borderRadius: borderRadius,
                   child: Hero(
                     tag: heroTag,
-                    flightShuttleBuilder:
-                        (
-                          flightContext,
-                          animation,
-                          flightDirection,
-                          fromHeroContext,
-                          toHeroContext,
-                        ) => (toHeroContext.widget as Hero).child,
+                    placeholderBuilder: isPhoto
+                        ? imageHeroPlaceholderBuilder
+                        : null,
+                    createRectTween: isPhoto ? imageHeroRectTween : null,
+                    flightShuttleBuilder: isPhoto
+                        ? imageHeroFlightShuttleBuilder
+                        : (
+                            flightContext,
+                            animation,
+                            flightDirection,
+                            fromHeroContext,
+                            toHeroContext,
+                          ) => (toHeroContext.widget as Hero).child,
                     transitionOnUserGestures: true,
-                    child: ClipRRect(
-                      borderRadius: borderRadius,
-                      child: thumbnailWidget,
-                    ),
+                    child: heroChild,
                   ),
                 ),
                 Container(
@@ -198,19 +213,21 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
               borderRadius: borderRadius,
               child: Hero(
                 tag: heroTag,
-                flightShuttleBuilder:
-                    (
-                      flightContext,
-                      animation,
-                      flightDirection,
-                      fromHeroContext,
-                      toHeroContext,
-                    ) => (toHeroContext.widget as Hero).child,
+                placeholderBuilder: isPhoto
+                    ? imageHeroPlaceholderBuilder
+                    : null,
+                createRectTween: isPhoto ? imageHeroRectTween : null,
+                flightShuttleBuilder: isPhoto
+                    ? imageHeroFlightShuttleBuilder
+                    : (
+                        flightContext,
+                        animation,
+                        flightDirection,
+                        fromHeroContext,
+                        toHeroContext,
+                      ) => (toHeroContext.widget as Hero).child,
                 transitionOnUserGestures: true,
-                child: ClipRRect(
-                  borderRadius: borderRadius,
-                  child: thumbnailWidget,
-                ),
+                child: heroChild,
               ),
             ),
     );
@@ -325,6 +342,19 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         galleryType: galleryType,
       ),
     );
-    routeToPage(context, page, forceCustomPageRoute: true);
+    final isPhoto =
+        file.fileType == FileType.image || file.fileType == FileType.livePhoto;
+    if (isPhoto) {
+      Navigator.of(context).push(
+        GalleryPhotoPageRoute(
+          page: page,
+          tag: widget.tag + file.tag,
+          sourceImage: imageFromHero(context),
+          disableAnimations: MediaQuery.disableAnimationsOf(context),
+        ),
+      );
+    } else {
+      routeToPage(context, page, forceCustomPageRoute: true);
+    }
   }
 }

@@ -8,7 +8,6 @@ import 'package:ente_events/event_bus.dart';
 import "package:ente_events/models/trigger_logout_event.dart";
 import "package:ente_legacy/events/legacy_kit_created_event.dart";
 import 'package:ente_strings/ente_strings.dart';
-import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
@@ -27,6 +26,7 @@ import "package:locker/states/user_details_state.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import "package:locker/ui/components/legacy_setup_banner.dart";
+import "package:locker/ui/components/locker_progress_dialog.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import "package:locker/ui/components/save_to_locker_empty_state_widget.dart";
 import 'package:locker/ui/components/search_result_view.dart';
@@ -341,8 +341,10 @@ class _HomePageState extends UploaderPageState<HomePage>
             label: context.strings.ok,
             onTap: () async {
               navigator.pop();
-              final dialog = createProgressDialog(context, l10n.pleaseWait);
-              await dialog.show();
+              final dialog = await showLockerProgressDialog(
+                context,
+                l10n.pleaseWait,
+              );
               await Configuration.instance.logout();
               await dialog.hide();
               navigator.popUntil((route) => route.isFirst);

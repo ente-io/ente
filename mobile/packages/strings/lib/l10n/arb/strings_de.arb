@@ -1120,10 +1120,6 @@
   },
   "dontHaveAnAccount": "Kein Konto vorhanden?",
   "dontSave": "Nicht speichern",
-  "doThisLater": "Später erledigen",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Sie können auf einen Eintrag doppelt tippen, um den Code anzuzeigen",
   "download": "Herunterladen",
   "downloadApplicationUpdate": "Aktualisierung herunterladen",
@@ -1484,7 +1480,7 @@
       }
     }
   },
-  "memoryLaneCaptionYearsAgo": "{name} {count, plural, one{vor einem Jahr} other{vor {number} Jahren}}",
+  "memoryLaneCaptionYearsAgo": "{name} {count, plural, one{vor {number} Jahr} other{vor {number} Jahren}}",
   "@memoryLaneCaptionYearsAgo": {
     "description": "Memory Lane caption in elapsed years. Always keep the number, including for one.",
     "placeholders": {
@@ -2005,9 +2001,6 @@
   "lastWeek": "Letzte Woche",
   "lastYearsTrip": "Reise im letzten Jahr",
   "layoutGrouped": "Gruppiert",
-  "layoutJustified": "Bündig",
-  "layoutJustifiedComfort": "Bündig · Komfort",
-  "layoutJustifiedFlex": "Bündig · Flexibel",
   "layoutMasonry": "Mauerwerk",
   "layoutTrip": "Reise",
   "leave": "Verlassen",
@@ -3766,7 +3759,6 @@
   "selectFile": "Datei auswählen",
   "selectFolder": "Ordner auswählen",
   "selectFolders": "Ordner auswählen",
-  "selectFoldersForBackup": "Ordner für Sicherung auswählen",
   "selectFolderToContinue": "Wähle zum Fortfahren einen Ordner aus",
   "selectItemsToAdd": "Elemente zum Hinzufügen auswählen",
   "selectLanguage": "Sprache auswählen",
@@ -4085,7 +4077,6 @@
   },
   "startSnappingYourPhotosWillShowUpHere": "Fang an zu knipsen, deine Fotos werden hier erscheinen.",
   "startWithAddingPhotosOrFamiliarFaces": "Beginne mit dem Hinzufügen von\nFotos oder bekannten Gesichtern",
-  "startWithLatestPhotos": "Beginne mit den neuesten Fotos",
   "status": "Status",
   "sticker": "Aufkleber",
   "stopCastingBody": "Möchtest du die Übertragung beenden?",

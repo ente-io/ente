@@ -432,7 +432,7 @@ class SemanticSearchService {
             );
         final endTime = DateTime.now();
         _logger.info(
-          "computingSimilarities (rust simsimd exact) took for ${textQueryToEmbeddingMap.length} queries " +
+          "computingSimilarities (rust SIMD exact) took for ${textQueryToEmbeddingMap.length} queries " +
               (endTime.millisecondsSinceEpoch -
                       startTime.millisecondsSinceEpoch)
                   .toString() +

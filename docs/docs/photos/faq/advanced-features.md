@@ -230,6 +230,12 @@ Ente Cast lets you play slideshow albums on Chromecast TVs or any internet-conne
 
 For setup instructions, see the [Cast feature guide](/photos/features/utilities/cast/).
 
+### When I scroll through photos on my phone, does Cast show the same photo on the TV? {#cast-phone-scrolling}
+
+No. Cast plays the album you selected as a slideshow on the TV. Scrolling through photos on your phone does not change the photo shown on the TV.
+
+To show photos from another album, start Cast from that album.
+
 ### Can I use Cast without Chromecast? {#cast-without-chromecast}
 
 Yes! Use the "Pair with PIN" option which works with any device. Load [cast.ente.com](https://cast.ente.com) on your large screen device and enter the displayed PIN on your mobile or web device.
@@ -286,6 +292,18 @@ Notifications are currently only available on mobile apps. See the [Notification
 ### How do I manage notification settings? {#manage-notifications}
 
 Open `Settings > Notifications` to enable or disable specific notification categories. All categories are enabled by default when you grant notification permission.
+
+### How do I stop birthday reminders or Memories for one person? {#birthday-reminders-one-person}
+
+Birthday reminders use the birthday saved for a person in **People**.
+
+1. Open **People** and select the person.
+2. Open the overflow menu, tap **Edit**, clear **Birthday**, and save. This stops their birthday reminders.
+3. To keep the person out of Memories too, open the same menu and tap **Hide from memories**.
+
+### Can Ente remind me before someone's birthday? {#birthday-reminders-early}
+
+No. Birthday reminders are sent on the birthday. Ente does not currently offer a setting for an earlier reminder.
 
 ## Home Widgets
 

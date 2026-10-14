@@ -182,6 +182,7 @@
   "albumsOnDevicePermissionCta": "Allow access",
   "albumsOnEnteEmptyCta": "Select albums to backup",
   "albumsOnEnteEmptyTitle": "Back up your memories",
+  "albumsReceivedEmptyTitle": "View memories shared with you",
   "albumsSharedEmptyTitle": "Share your memories",
   "albumsWidgetDesc": "Select the albums you want to see on your home screen.",
   "albumTitle": "Album title",
@@ -1036,10 +1037,6 @@
   },
   "dontHaveAnAccount": "Нямате профил?",
   "dontSave": "Don't save",
-  "doThisLater": "Направете това по-късно",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Можете да докоснете два пъти върху запис, за да видите кода",
   "download": "Download",
   "downloadApplicationUpdate": "Download update",
@@ -2382,6 +2379,7 @@
   },
   "nightLights": "Neon nights",
   "no": "Не",
+  "noAlbumsOnThisDevice": "No albums on this device",
   "noAppToOpenFileDownloadInstead": "No app is available to preview this file. You can download it and open it with another app.",
   "@noAppToOpenFileDownloadInstead": {
     "description": "Message shown when Android cannot find an app to open or preview a file"
@@ -3466,7 +3464,6 @@
   "selectFile": "Избор на файл",
   "selectFolder": "Изберете папка",
   "selectFolders": "Select folders",
-  "selectFoldersForBackup": "Select folders for backup",
   "selectFolderToContinue": "Изберете папка, за да продължите",
   "selectItemsToAdd": "Select items to add",
   "selectLanguage": "Изберете език",
@@ -3754,8 +3751,8 @@
       }
     }
   },
+  "startSnappingYourPhotosWillShowUpHere": "Start snapping, your photos will show up here",
   "startWithAddingPhotosOrFamiliarFaces": "Start with adding\nphotos or familiar faces",
-  "startWithLatestPhotos": "Start with latest photos",
   "status": "Status",
   "sticker": "Sticker",
   "stopCastingBody": "Do you want to stop casting?",

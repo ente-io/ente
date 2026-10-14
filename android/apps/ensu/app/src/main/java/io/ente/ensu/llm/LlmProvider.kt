@@ -22,7 +22,7 @@ import io.ente.ensu.bindings.knowledgeEmbeddingModelAsset
 import io.ente.ensu.bindings.llmAsset
 import io.ente.ensu.bindings.llmCancel
 import io.ente.ensu.bindings.llmHasRequiredWorkReserve
-import io.ente.ensu.bindings.llmInitBackend
+import io.ente.ensu.bindings.llmInitBackendFromDirectory
 import io.ente.ensu.bindings.llmMemoryBudget
 import io.ente.ensu.device.AndroidDeviceCapabilityProvider
 import io.ente.ensu.device.requireChatSupported
@@ -44,6 +44,9 @@ internal class ModelMemoryDeferred : Exception()
 internal class ModelMemoryUnavailable :
     Exception("Not enough free memory. Close other apps and try again.")
 
+internal class ModelImagesUnsupported :
+    Exception("This model doesn't support images. Send a text-only message.")
+
 class RequiredModelValidationError(val modelId: String) :
     Exception("Downloaded model failed validation: $modelId")
 
@@ -52,6 +55,7 @@ class LlmProvider(
     private val transcriber: Transcriber,
     private val deviceCapabilityProvider: AndroidDeviceCapabilityProvider,
     private val knowledgeEmbedding: KnowledgeEmbeddingConfig,
+    private val nativeLibraryDir: String,
     private val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO,
 ) {
     private data class LoadedModelKey(
@@ -224,6 +228,7 @@ class LlmProvider(
         val asset = chatAsset(selection)
         downloadAssets(listOf(asset), onProgress)
         if (!assetStore.isDownloaded(asset)) throw RequiredModelValidationError(selection.id)
+        assetStore.cleanupObsoleteChatModels(selection.id)
     }
 
     internal suspend fun prewarmChatModelIfDownloaded(
@@ -339,6 +344,9 @@ class LlmProvider(
         deviceCapabilityProvider.chatCapability().requireChatSupported()
         currentJobId = null
         val mmprojPath = assetStore.llmMmprojPath(chatAsset(selection))?.absolutePath
+        if (imageFiles.isNotEmpty() && mmprojPath == null) {
+            throw ModelImagesUnsupported()
+        }
         if (mmprojPath != null && !hasRequiredWorkReserve()) {
             throw ModelMemoryUnavailable()
         }
@@ -388,6 +396,7 @@ class LlmProvider(
                 .newTitleContext(
                     chatContextSize = checkNotNull(currentContextLength).toUInt(),
                     nThreads = max(1, Runtime.getRuntime().availableProcessors() - 1),
+                    nThreadsGeneration = generationThreads(),
                 )
                 .use { context ->
                     coroutine.ensureActive()
@@ -508,7 +517,7 @@ class LlmProvider(
                     }
                 }
                 if (!backendInitialized) {
-                    llmInitBackend()
+                    llmInitBackendFromDirectory(nativeLibraryDir)
                     backendInitialized = true
                 }
 
@@ -557,11 +566,13 @@ class LlmProvider(
         withModelContext {
             withResources {
                 val model = loadedModel ?: return@withResources
+                val key = currentModelKey ?: return@withResources
                 val contextParams =
                     LlmContextParams(
                         contextSize = currentContextLength,
                         nThreads = null,
-                        nBatch = null,
+                        nThreadsGeneration = generationThreads(),
+                        nBatch = LlmModelSelection(key.id, key.requestedContextLength).batchSize,
                     )
                 loadedContext?.destroy()
                 loadedContext = model.newContext(contextParams)
@@ -608,7 +619,7 @@ class LlmProvider(
         deviceCapabilityProvider.chatCapability().requireChatSupported()
         val modelKey = LoadedModelKey(selection.id, selection.contextLength)
         if (!backendInitialized) {
-            llmInitBackend()
+            llmInitBackendFromDirectory(nativeLibraryDir)
             backendInitialized = true
         }
 
@@ -624,6 +635,8 @@ class LlmProvider(
         if (shouldDownload) {
             downloadAssets(listOf(asset), onProgress)
         }
+
+        assetStore.cleanupObsoleteChatModels(selection.id)
 
         onProgress(DownloadProgress(100, "Loading model...", phase = DownloadPhase.Loading))
         try {
@@ -665,12 +678,16 @@ class LlmProvider(
 
     private fun chatAsset(selection: LlmModelSelection): Asset = llmAsset(selection.id)
 
+    fun supportsImages(selection: LlmModelSelection): Boolean =
+        assetStore.llmMmprojPath(chatAsset(selection)) != null
+
+    private fun generationThreads(): Int =
+        (Runtime.getRuntime().availableProcessors() - 1).coerceIn(1, 3)
+
     private fun loadWithFallbacks(selection: LlmModelSelection, modelFile: File) {
-        val desiredCtx = selection.contextLength ?: 12000
-        val contexts =
-            listOf(desiredCtx, 12000, 8192, 4096, 2048, 1024).distinct().filter { it > 0 }
+        val contexts = selection.contextCandidates()
         val threads = max(1, Runtime.getRuntime().availableProcessors() - 1)
-        val batch = 512
+        val batch = selection.batchSize
 
         val modelParams =
             LlmModelLoadParams(
@@ -690,6 +707,7 @@ class LlmProvider(
                     LlmContextParams(
                         contextSize = ctx,
                         nThreads = threads,
+                        nThreadsGeneration = generationThreads(),
                         nBatch = batch,
                     )
                 loadedContext = model.newContext(contextParams)

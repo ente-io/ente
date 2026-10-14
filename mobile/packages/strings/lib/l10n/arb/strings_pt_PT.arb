@@ -1,4 +1,8 @@
 {
+  "bringMemoriesTogether": "Reúna as suas memórias",
+  "createMyAccount": "Criar a minha conta",
+  "localGalleryPermissionDesc": "Dê permissão para aceder e organizar as suas fotografias com reconhecimento facial. Todo o processamento é feito no seu dispositivo.",
+  "onboardingOrganizeDesc": "Organize as suas fotografias e vídeos. Todas as memórias num só lugar.",
   "about": "Sobre",
   "acceptTrustInvite": "Aceite o convite",
   "account": "Conta",
@@ -536,10 +540,6 @@
   "done": "Concluído",
   "dontHaveAnAccount": "Não tem uma conta?",
   "dontSave": "Não guarde",
-  "doThisLater": "Fazer isto mais tarde",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Toque duplo numa entrada para visualizar código",
   "downloadFailed": "Falha no download",
   "downloading": "A transferir...",
@@ -1755,7 +1755,6 @@
   "selectFile": "Selecionar ficheiro",
   "selectFolder": "Selecionar pasta",
   "selectFolders": "Selecione pastas",
-  "selectFoldersForBackup": "Selecionar pastas para cópia de segurança",
   "selectFolderToContinue": "Selecionar uma pasta para continuar",
   "selectItemsToAdd": "Selecionar itens para adicionar",
   "selectMailApp": "Selecione Aplicação de Correios",
@@ -1879,7 +1878,6 @@
   "spotlightOnYourself": "A dar destaque em vos",
   "startBackup": "Iniciar cópia de segurança",
   "startRecovery": "Começar Recuperação",
-  "startWithLatestPhotos": "Comece pelas fotos recentes",
   "sticker": "Autocolante",
   "stopCastingBody": "Queres parar de fazer transmissão?",
   "stopCastingTitle": "Parar transmissão",
