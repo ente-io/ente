@@ -1,0 +1,1 @@
+- Smoother text transitions in memory lanes.
