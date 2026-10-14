@@ -36,6 +36,15 @@ Once configured, new photos added to these albums will automatically sync in the
 
 The chooser lists device folders and albums; it is separate from your Ente album list. The count on a folder tile is the total reported for that device folder, not the number waiting to upload. If **Backup only new photos** is enabled, its cutoff still applies even when the tile shows older photos in its total.
 
+### Does hiding a folder stop Ente Photos from backing it up? {#hidden-folder-backup}
+
+No. Hiding a folder does not change its backup setting. To stop new photos in that folder from backing up:
+
+1. Open **Settings > Backup > Backed up folders** in the mobile app.
+2. Turn off backup for that folder.
+
+Photos already backed up remain in Ente.
+
 ### What does the slashed cloud icon mean, and how do I back that photo up? {#slashed-cloud-icon}
 
 A slashed cloud icon on a photo means it isn't backed up to Ente - usually because it's in a folder you haven't selected for backup, or because you deleted it from Ente while keeping it on your device.

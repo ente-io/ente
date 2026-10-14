@@ -446,6 +446,14 @@ To restore photos deleted from your device on Android 11 and newer, select **Dev
 
 Restored photos will be moved to an album of choice.
 
+### How do I select all items in Ente Trash on mobile? {#select-all-ente-trash}
+
+The **All** option appears after you select one item.
+
+1. Open **Albums**, then open **Trash**. Choose **Ente** if you see both Ente and Device tabs.
+2. Select one item in Trash.
+3. Tap **All**.
+
 ### If I restore several photos from Trash, will they return to their original albums? {#bulk-restore-original-albums}
 
 No. You can restore several photos together, but Ente moves the selection to an album you choose. It does not automatically return each photo to its previous album.
