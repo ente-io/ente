@@ -437,8 +437,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                                         : undefined
                                 }
                                 onClick={() =>
-                                    setAlbumFilter((current) =>
-                                        current == filter.value
+                                    setAlbumFilter(
+                                        activeAlbumFilter == filter.value
                                             ? undefined
                                             : filter.value,
                                     )
