@@ -652,7 +652,7 @@ For a subscription purchased through Apple or Google Play, cancel renewal in tha
 
 If you want to switch from Apple to direct billing, follow the [payment-provider transition steps](#update-payment).
 
-After cancellation, you'll have access to your data for 30 days, after which it will be deleted. Make sure to export your photos before the grace period ends if you want to keep them.
+Cancelling renewal does not delete your Ente account. Your paid plan continues until its expiry date. See [What happens when my subscription expires?](#subscription-expires) for what happens next. Make sure to export your photos before the grace period ends if you want to keep them.
 
 If support helps move your account back to the free plan, the [inactive free-account policy](#inactive-free-account) applies if the account is not used for 12 consecutive months. We will notify you, any family plan members, and any Legacy trusted contacts multiple times before any account deletion.
 
