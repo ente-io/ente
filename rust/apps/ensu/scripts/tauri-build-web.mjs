@@ -30,6 +30,9 @@ const child = spawn(npmBin, ["run", "build:ensu"], {
         ENTE_TAURI: "1",
         _ENTE_IS_DESKTOP: "1",
         NEXT_PUBLIC_ENSU_DESKTOP_VERSION: desktopVersion,
+        // Older WebKit is supported by the desktop UI, which uses native inference.
+        BROWSERSLIST:
+            "chrome >= 111, edge >= 111, firefox >= 111, safari >= 15.4",
     },
 });
 
