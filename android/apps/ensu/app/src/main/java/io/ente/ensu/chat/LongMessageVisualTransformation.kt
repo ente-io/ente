@@ -5,120 +5,89 @@ import android.icu.lang.UCharacterDirection
 import android.icu.text.BreakIterator
 import android.text.TextDirectionHeuristics
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import java.util.Locale
-import java.util.TreeSet
 
 internal object LongMessageVisualTransformation : VisualTransformation {
-    private const val LongParagraphLength = 8192
+    private const val LongRunLength = 8192
     private const val LayoutSectionLength = 2048
 
     override fun filter(text: AnnotatedString): TransformedText {
-        val breaks = TreeSet<Int>()
+        if (!text.hasEqualAnnotations(AnnotatedString(""))) {
+            return TransformedText(text, OffsetMapping.Identity)
+        }
+        val breaks = mutableListOf<Int>()
         var characters: BreakIterator? = null
         var words: BreakIterator? = null
         var start = 0
         while (start < text.length) {
             val end = text.text.indexOf('\n', start).let { if (it < 0) text.length else it }
             if (
-                end - start > LongParagraphLength &&
-                    !hasDirectionSensitiveText(text.text, start, end)
+                end - start > LongRunLength &&
+                    !hasDirectionSensitiveText(text.text, start, end) &&
+                    isLeftToRight(text.text, start, end)
             ) {
-                val iterator =
-                    characters
-                        ?: BreakIterator.getCharacterInstance(Locale.ROOT).also {
-                            it.setText(text.text)
-                            characters = it
-                        }
-                val direction = paragraphDirection(text.text, start, end)
-                val wordIterator =
-                    words
-                        ?: BreakIterator.getWordInstance(Locale.getDefault()).also {
-                            it.setText(text.text)
-                            words = it
-                        }
-                var previousWordBoundary = start
-                var nextWordBoundary = wordIterator.following(start)
-                val paragraphBreaks = mutableListOf<Int>()
-                var sectionStart = start
-                var preservesDirection = true
-                while (sectionStart < end) {
-                    val boundary =
-                        if (end - sectionStart > LayoutSectionLength) {
-                            val target = sectionStart + LayoutSectionLength
-                            while (
-                                nextWordBoundary != BreakIterator.DONE && nextWordBoundary <= target
-                            ) {
-                                if (
-                                    iterator.isBoundary(nextWordBoundary) &&
-                                        (!isPunctuation(
-                                            Character.codePointBefore(text.text, nextWordBoundary)
-                                        ) ||
-                                            !isPunctuation(
-                                                Character.codePointAt(text.text, nextWordBoundary)
-                                            ))
-                                ) {
-                                    previousWordBoundary = nextWordBoundary
-                                }
-                                nextWordBoundary = wordIterator.next()
-                            }
-                            if (previousWordBoundary > sectionStart) {
-                                previousWordBoundary
-                            } else {
-                                iterator.following(target - 1).let {
-                                    if (it == BreakIterator.DONE || it >= end) end else it
-                                }
-                            }
-                        } else {
-                            end
-                        }
-                    if (paragraphDirection(text.text, sectionStart, boundary) != direction) {
-                        preservesDirection = false
-                        break
+                var runStart = start
+                while (runStart < end) {
+                    if (text.text[runStart].isWhitespace()) {
+                        runStart++
+                        continue
                     }
-                    if (boundary < end) paragraphBreaks.add(boundary)
-                    sectionStart = boundary
+                    var runEnd = runStart + 1
+                    while (runEnd < end && !text.text[runEnd].isWhitespace()) runEnd++
+                    if (runEnd - runStart > LongRunLength) {
+                        val iterator =
+                            characters
+                                ?: BreakIterator.getCharacterInstance(Locale.ROOT).also {
+                                    it.setText(text.text)
+                                    characters = it
+                                }
+                        val wordIterator =
+                            words
+                                ?: BreakIterator.getWordInstance(Locale.getDefault()).also {
+                                    it.setText(text.text)
+                                    words = it
+                                }
+                        var boundary = iterator.following(runStart + LayoutSectionLength - 1)
+                        while (boundary != BreakIterator.DONE && boundary < runEnd) {
+                            if (
+                                text.text[boundary - 1].isAsciiLetterOrDigit() &&
+                                    text.text[boundary].isAsciiLetterOrDigit() &&
+                                    !wordIterator.isBoundary(boundary)
+                            ) {
+                                breaks.add(boundary)
+                                if (runEnd - boundary <= LayoutSectionLength) break
+                                boundary = iterator.following(boundary + LayoutSectionLength - 1)
+                            } else {
+                                boundary = iterator.next()
+                            }
+                        }
+                    }
+                    runStart = runEnd
                 }
-                if (preservesDirection) breaks.addAll(paragraphBreaks)
             }
             start = end + 1
         }
         if (breaks.isEmpty()) return TransformedText(text, OffsetMapping.Identity)
 
-        text.paragraphStyles.forEach {
-            breaks.add(it.start)
-            breaks.add(it.end)
-        }
-        breaks.add(text.length)
-        val styled = AnnotatedString.Builder()
+        val rendered = StringBuilder(text.length + breaks.size)
         var previous = 0
         breaks.forEach { end ->
-            if (end > previous) {
-                val section = text.subSequence(previous, end)
-                styled.append(section)
-                if (section.paragraphStyles.isEmpty()) {
-                    styled.addStyle(ParagraphStyle(), previous, end)
-                }
-            }
+            rendered.append(text.text, previous, end)
+            rendered.append('\u200E')
             previous = end
         }
-        return TransformedText(styled.toAnnotatedString(), OffsetMapping.Identity)
+        rendered.append(text.text, previous, text.length)
+        return TransformedText(
+            AnnotatedString(rendered.toString()),
+            LayoutOffsetMapping(breaks.toIntArray()),
+        )
     }
 
-    private fun isPunctuation(codePoint: Int): Boolean =
-        when (Character.getType(codePoint)) {
-            Character.CONNECTOR_PUNCTUATION.toInt(),
-            Character.DASH_PUNCTUATION.toInt(),
-            Character.END_PUNCTUATION.toInt(),
-            Character.FINAL_QUOTE_PUNCTUATION.toInt(),
-            Character.INITIAL_QUOTE_PUNCTUATION.toInt(),
-            Character.OTHER_PUNCTUATION.toInt(),
-            Character.START_PUNCTUATION.toInt() -> true
-            else -> false
-        }
+    private fun Char.isAsciiLetterOrDigit(): Boolean =
+        this in 'a'..'z' || this in 'A'..'Z' || this in '0'..'9'
 
     private fun hasDirectionSensitiveText(text: String, start: Int, end: Int): Boolean {
         var index = start
@@ -143,7 +112,22 @@ internal object LongMessageVisualTransformation : VisualTransformation {
         return false
     }
 
-    private fun paragraphDirection(text: String, start: Int, end: Int): Pair<Boolean, Boolean> =
-        TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(text, start, end - start) to
-            TextDirectionHeuristics.FIRSTSTRONG_RTL.isRtl(text, start, end - start)
+    private fun isLeftToRight(text: String, start: Int, end: Int): Boolean =
+        !TextDirectionHeuristics.FIRSTSTRONG_RTL.isRtl(text, start, end - start)
+
+    private class LayoutOffsetMapping(private val breaks: IntArray) : OffsetMapping {
+        private val renderedBreaks = IntArray(breaks.size) { breaks[it] + it }
+
+        override fun originalToTransformed(offset: Int): Int {
+            val index = breaks.binarySearch(offset)
+            val count = if (index < 0) -index - 1 else index + 1
+            return offset + count
+        }
+
+        override fun transformedToOriginal(offset: Int): Int {
+            val index = renderedBreaks.binarySearch(offset)
+            val count = if (index < 0) -index - 1 else index
+            return offset - count
+        }
+    }
 }
