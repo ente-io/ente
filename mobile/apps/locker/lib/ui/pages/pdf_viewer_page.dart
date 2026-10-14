@@ -5,14 +5,13 @@ import 'dart:ui' as ui;
 
 import 'package:ente_components/ente_components.dart';
 import 'package:ente_strings/ente_strings.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:logging/logging.dart';
 import 'package:pdfx/pdfx.dart' as pdf;
 
 enum _ViewerAction { download, openExternally }
-
-typedef _RenderedPdfPage = ({MemoryImage image, double aspectRatio});
 
 class PdfViewerPage extends StatefulWidget {
   const PdfViewerPage({
@@ -43,13 +42,14 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   final _pdfContentKey = GlobalKey();
   final _pdfPage = ValueNotifier(1);
   final _pageAspectRatios = <int, double>{};
+  (double, double)? _pdfLayout;
   List<double> _pdfPageOffsets = [];
   Size _pdfViewport = Size.zero;
   pdf.PdfDocument? _document;
   Future<void>? _pendingRender;
   bool _loading = false;
   bool _failed = false;
-  Completer<void>? _pdfInteraction;
+  bool _pdfInteracting = false;
   int _pdfLayoutRevision = 0;
   bool _toolbarVisible = true;
 
@@ -118,6 +118,46 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         await document.close();
         throw StateError('PDF has no pages');
       }
+      for (var number = 1; number <= _document!.pagesCount; number++) {
+        if (!mounted) return;
+        try {
+          final page = await _document!.getPage(number);
+          try {
+            var ratio = page.width / page.height;
+            if (!ratio.isFinite || ratio <= 0) {
+              throw StateError('Invalid PDF page dimensions');
+            }
+            if (defaultTargetPlatform == TargetPlatform.iOS) {
+              // pdfx reports unrotated dimensions on iOS, even after rendering.
+              final scale = 64 / math.max(page.width, page.height);
+              final preview = await page.render(
+                width: math.max(1.0, page.width * scale),
+                height: math.max(1.0, page.height * scale),
+                format: pdf.PdfPageImageFormat.png,
+              );
+              if (preview == null) throw StateError('PDF page cannot be sized');
+              final buffer = await ui.ImmutableBuffer.fromUint8List(
+                preview.bytes,
+              );
+              try {
+                final descriptor = await ui.ImageDescriptor.encoded(buffer);
+                if ((descriptor.width > descriptor.height) != (ratio > 1)) {
+                  ratio = 1 / ratio;
+                }
+                descriptor.dispose();
+              } finally {
+                buffer.dispose();
+              }
+            }
+            _pageAspectRatios[number] = ratio;
+          } finally {
+            await page.close();
+          }
+        } catch (error, stack) {
+          _logger.warning('Failed to measure PDF page $number', error, stack);
+          _pageAspectRatios[number] = 3 / 4;
+        }
+      }
       if (mounted) setState(() => _loading = false);
     } catch (error, stack) {
       _logger.warning('Failed to open PDF document', error, stack);
@@ -130,9 +170,9 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     }
   }
 
-  Future<_RenderedPdfPage?> _renderPage(int number, bool Function() isActive) {
+  Future<MemoryImage?> _renderPage(int number, bool Function() isActive) {
     // Android permits only one open native page per document at a time.
-    final result = _pendingRender!.then<_RenderedPdfPage?>((_) async {
+    final result = _pendingRender!.then<MemoryImage?>((_) async {
       if (!mounted || !isActive()) return null;
       final page = await _document!.getPage(number);
       try {
@@ -147,20 +187,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         if (rendered == null) {
           throw StateError('PDF page could not be rendered');
         }
-        final buffer = await ui.ImmutableBuffer.fromUint8List(rendered.bytes);
-        late double aspectRatio;
-        try {
-          final descriptor = await ui.ImageDescriptor.encoded(buffer);
-          aspectRatio = descriptor.width / descriptor.height;
-          descriptor.dispose();
-        } finally {
-          buffer.dispose();
-        }
         if (!mounted || !isActive()) return null;
-        if ((_pageAspectRatios[number] ?? 3 / 4) != aspectRatio) {
-          unawaited(_updatePdfAspectRatio(number, aspectRatio));
-        }
-        return (image: MemoryImage(rendered.bytes), aspectRatio: aspectRatio);
+        return MemoryImage(rendered.bytes);
       } finally {
         await page.close();
       }
@@ -172,17 +200,6 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       },
     );
     return result;
-  }
-
-  Future<void> _updatePdfAspectRatio(int number, double aspectRatio) async {
-    while (_pdfInteraction != null) {
-      await _pdfInteraction!.future;
-    }
-    if (!mounted || _pageAspectRatios[number] == aspectRatio) return;
-    setState(() {
-      _pageAspectRatios[number] = aspectRatio;
-      _pdfLayoutRevision++;
-    });
   }
 
   Future<void> _closeDocument() async {
@@ -197,8 +214,6 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   @override
   void dispose() {
-    _pdfInteraction?.complete();
-    _pdfInteraction = null;
     unawaited(_closeDocument());
     _pdfTransformation.dispose();
     _pdfPage.dispose();
@@ -320,7 +335,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   }
 
   void _scrollPdf(double direction) {
-    if (_pdfInteraction != null) {
+    if (_pdfInteracting) {
       return;
     }
     final matrix = _pdfTransformation.value.clone();
@@ -346,7 +361,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   Widget _buildPdf(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      // Keep the same page position when page sizes or the viewport change.
+      // Keep the reading position when the viewport or toolbar size changes.
       final anchor = _pdfTransformation.toScene(
         _pdfViewport.center(Offset.zero),
       );
@@ -359,19 +374,22 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                     Spacing.md);
       final viewportShift = (constraints.maxHeight - _pdfViewport.height) / 2;
       if (_pdfViewport != constraints.biggest) {
-        _pdfInteraction?.complete();
-        _pdfInteraction = null;
+        _pdfInteracting = false;
         _pdfLayoutRevision++;
       }
       _pdfViewport = constraints.biggest;
       final width = constraints.maxWidth - Spacing.lg * 2;
-      _pdfPageOffsets = [_toolbarHeight + Spacing.lg];
-      for (var page = 1; page <= _document!.pagesCount; page++) {
-        _pdfPageOffsets.add(
-          _pdfPageOffsets.last +
-              width / (_pageAspectRatios[page] ?? 3 / 4) +
-              Spacing.md,
-        );
+      final layout = (width, _toolbarHeight);
+      if (_pdfLayout != layout) {
+        _pdfPageOffsets = [_toolbarHeight + Spacing.lg];
+        for (var page = 1; page <= _document!.pagesCount; page++) {
+          _pdfPageOffsets.add(
+            _pdfPageOffsets.last +
+                width / _pageAspectRatios[page]! +
+                Spacing.md,
+          );
+        }
+        _pdfLayout = layout;
       }
       final height = math.max(
         constraints.maxHeight,
@@ -427,11 +445,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               minScale: 1,
               maxScale: 4,
               onInteractionUpdate: _onZoom,
-              onInteractionStart: (_) => _pdfInteraction ??= Completer<void>(),
-              onInteractionEnd: (_) {
-                _pdfInteraction?.complete();
-                _pdfInteraction = null;
-              },
+              onInteractionStart: (_) => _pdfInteracting = true,
+              onInteractionEnd: (_) => _pdfInteracting = false,
               builder: (context, viewport) {
                 final first = math.max(0, _pageAt(viewport.point0.y) - 1);
                 final last = math.min(
@@ -543,7 +558,7 @@ class _PdfPageTile extends StatefulWidget {
   });
 
   final int number;
-  final Future<_RenderedPdfPage?> Function(int, bool Function()) renderPage;
+  final Future<MemoryImage?> Function(int, bool Function()) renderPage;
   final WidgetBuilder errorBuilder;
 
   @override
@@ -551,7 +566,7 @@ class _PdfPageTile extends StatefulWidget {
 }
 
 class _PdfPageTileState extends State<_PdfPageTile> {
-  _RenderedPdfPage? _rendered;
+  MemoryImage? _rendered;
   bool _failed = false;
 
   @override
@@ -566,7 +581,7 @@ class _PdfPageTileState extends State<_PdfPageTile> {
       if (mounted) {
         setState(() => _rendered = rendered);
       } else {
-        unawaited(rendered?.image.evict());
+        unawaited(rendered?.evict());
       }
     } catch (_) {
       if (mounted) setState(() => _failed = true);
@@ -575,7 +590,7 @@ class _PdfPageTileState extends State<_PdfPageTile> {
 
   @override
   void dispose() {
-    _rendered?.image.evict();
+    _rendered?.evict();
     super.dispose();
   }
 
@@ -585,7 +600,7 @@ class _PdfPageTileState extends State<_PdfPageTile> {
       : _rendered == null
       ? const Center(child: CircularProgressIndicator())
       : Image(
-          image: _rendered!.image,
+          image: _rendered!,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stack) => widget.errorBuilder(context),
         );
