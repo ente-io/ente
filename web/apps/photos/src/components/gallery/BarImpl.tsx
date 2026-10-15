@@ -116,14 +116,28 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const listRef = useRef<FixedSizeList | null>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const isSearching = mode == "albums" && !!searchQuery.trim();
+    const canSearch = mode == "albums" || mode == "people";
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    const isSearching = canSearch && !!normalizedSearchQuery;
+    const isSearchingAlbums = mode == "albums" && isSearching;
+    const matchingPeople = useMemo(
+        () =>
+            mode == "people" && isSearching
+                ? people.filter((person) =>
+                      person.name
+                          ?.toLowerCase()
+                          .includes(normalizedSearchQuery),
+                  )
+                : people,
+        [mode, people, isSearching, normalizedSearchQuery],
+    );
     const matchingCollectionSummaries = useMemo(() => {
-        if (!isSearching) return collectionSummaries;
-        const search = searchQuery.trim().toLowerCase();
+        if (!isSearchingAlbums) return collectionSummaries;
+        const search = normalizedSearchQuery;
         return collectionSummaries.filter((cs) =>
             cs.name.toLowerCase().includes(search),
         );
-    }, [collectionSummaries, searchQuery, isSearching]);
+    }, [collectionSummaries, normalizedSearchQuery, isSearchingAlbums]);
     const [viewportHeight, setViewportHeight] = useState(0);
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter | undefined>(
         "ente",
@@ -135,14 +149,14 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         () =>
             getVisibleAlbumFilters(collectionSummaries).filter(
                 ({ value }) =>
-                    !isSearching ||
+                    !isSearchingAlbums ||
                     matchingCollectionSummaries.some((cs) =>
                         matchesAlbumFilter(cs, value),
                     ),
             ),
-        [collectionSummaries, isSearching, matchingCollectionSummaries],
+        [collectionSummaries, isSearchingAlbums, matchingCollectionSummaries],
     );
-    const selectedAlbumFilter = isSearching
+    const selectedAlbumFilter = isSearchingAlbums
         ? searchAlbumFilter === null
             ? (albumFilter ?? visibleAlbumFilters[0]?.value)
             : searchAlbumFilter
@@ -152,7 +166,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         visibleAlbumFilters.some(({ value }) => value == selectedAlbumFilter)
             ? selectedAlbumFilter
             : visibleAlbumFilters[0]?.value;
-    const setActiveAlbumFilter = isSearching
+    const setActiveAlbumFilter = isSearchingAlbums
         ? setSearchAlbumFilter
         : setAlbumFilter;
     const visibleCollectionSummaries = useMemo(
@@ -173,19 +187,18 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     useEffect(() => {
-        if (!isSearching) setSearchAlbumFilter(null);
-        if (!isSearching && albumFilter != activeAlbumFilter)
+        if (!isSearchingAlbums) setSearchAlbumFilter(null);
+        if (!isSearchingAlbums && albumFilter != activeAlbumFilter)
             setAlbumFilter(activeAlbumFilter);
-    }, [albumFilter, activeAlbumFilter, isSearching]);
+    }, [albumFilter, activeAlbumFilter, isSearchingAlbums]);
 
     useEffect(() => {
-        if (
-            mode != "albums" ||
-            (mobile ? !mobileDrawerProps.open : collapsed)
-        ) {
-            setSearchQuery("");
-        }
-    }, [mode, mobile, mobileDrawerProps.open, collapsed]);
+        setSearchQuery("");
+    }, [mode]);
+
+    useEffect(() => {
+        if (mobile ? !mobileDrawerProps.open : collapsed) setSearchQuery("");
+    }, [mobile, mobileDrawerProps.open, collapsed]);
 
     useEffect(() => {
         if (isSearching) listRef.current?.scrollTo(0);
@@ -203,7 +216,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 );
                 break;
             case "people":
-                i = people.findIndex(({ id }) => id == activePerson?.id);
+                i = matchingPeople.findIndex(
+                    ({ id }) => id == activePerson?.id,
+                );
                 break;
         }
         if (i != -1) listRef.current.scrollToItem(i, "smart");
@@ -211,7 +226,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         mode,
         visibleCollectionSummaries,
         activeCollectionID,
-        people,
+        matchingPeople,
         activePerson,
         collapsed,
         mobile,
@@ -234,7 +249,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                   }
                 : {
                       type: "people" as const,
-                      people,
+                      people: matchingPeople,
                       activePerson,
                       onSelectPerson,
                   },
@@ -243,7 +258,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             visibleCollectionSummaries,
             activeCollectionID,
             onSelectCollectionID,
-            people,
+            matchingPeople,
             activePerson,
             onSelectPerson,
         ],
@@ -328,7 +343,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             component="nav"
             aria-labelledby={titleID}
             onKeyDown={(event) => {
-                if (event.key == "Escape" && mode == "albums" && searchQuery) {
+                if (event.key == "Escape" && canSearch && searchQuery) {
                     event.stopPropagation();
                     setSearchQuery("");
                 }
@@ -425,7 +440,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 )}
             </Stack>
-            {mode == "albums" && (
+            {canSearch && (
                 <Stack
                     direction="row"
                     sx={{
@@ -449,8 +464,18 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     <InputBase
                         inputRef={searchInputRef}
                         fullWidth
-                        placeholder={t("search_in_albums")}
-                        inputProps={{ "aria-label": t("search_in_albums") }}
+                        placeholder={t(
+                            mode == "people"
+                                ? "people_search_hint"
+                                : "search_in_albums",
+                        )}
+                        inputProps={{
+                            "aria-label": t(
+                                mode == "people"
+                                    ? "people_search_hint"
+                                    : "search_in_albums",
+                            ),
+                        }}
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
                         sx={{
@@ -477,7 +502,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     )}
                 </Stack>
             )}
-            {isSearching && !visibleAlbumFilters.length ? (
+            {(isSearchingAlbums && !visibleAlbumFilters.length) ||
+            (mode == "people" && isSearching && !matchingPeople.length) ? (
                 <Typography
                     role="status"
                     sx={{ px: "16px", color: "text.muted" }}
