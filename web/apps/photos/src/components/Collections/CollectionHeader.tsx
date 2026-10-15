@@ -705,10 +705,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 <OverflowMenu
                     ariaID="collection-options"
                     triggerButtonIcon={
-                        <MoreHorizIcon
-                            ref={overflowMenuIconRef}
-                            sx={{ fontSize: 28 }}
-                        />
+                        <MoreHorizIcon ref={overflowMenuIconRef} />
                     }
                 >
                     {validMenuOptions}
@@ -875,8 +872,8 @@ type DownloadQuickOptionProps = OptionProps & {
 
 const DownloadIcon: React.FC = () => (
     <svg
-        width="26"
-        height="26"
+        width="22"
+        height="22"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -941,8 +938,8 @@ interface ShareQuickOptionProps {
 
 const ShareIcon: React.FC = () => (
     <svg
-        width="26"
-        height="24"
+        width="21"
+        height="19"
         viewBox="0 0 22 20"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
