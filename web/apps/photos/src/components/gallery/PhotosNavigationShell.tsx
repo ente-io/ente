@@ -218,7 +218,8 @@ export const PhotosNavigationShell: React.FC<
                                 !(
                                     props.mode == "people" &&
                                     !props.isInSearchMode &&
-                                    !galleryBarProps?.activePerson
+                                    galleryBarProps &&
+                                    !galleryBarProps.activePerson
                                 )
                                     ? `${thumbnailGridPadding}px`
                                     : 0,
