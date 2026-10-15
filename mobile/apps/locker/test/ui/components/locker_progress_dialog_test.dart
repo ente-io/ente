@@ -18,24 +18,8 @@ void main() {
   tearDownAll(() => Network.instance = originalNetwork);
 
   for (final mode in [
-    (
-      flow: 'internal user',
-      disabled: false,
-      useNewUi: false,
-      expectsNewUi: true,
-    ),
-    (
-      flow: 'internal user disabled',
-      disabled: true,
-      useNewUi: false,
-      expectsNewUi: false,
-    ),
-    (
-      flow: 'explicit new UI',
-      disabled: true,
-      useNewUi: true,
-      expectsNewUi: true,
-    ),
+    (flow: 'internal user', disabled: false),
+    (flow: 'internal user disabled', disabled: true),
   ]) {
     for (final dismissWithBack in [false, true]) {
       testWidgets(
@@ -54,7 +38,6 @@ void main() {
                     dialog = await showLockerProgressDialog(
                       context,
                       'Sharing',
-                      useNewUi: mode.useNewUi,
                       isDismissible: true,
                     );
                   },
@@ -69,10 +52,7 @@ void main() {
           await tester.pump(const Duration(milliseconds: 16));
           await tester.pump(const Duration(milliseconds: 300));
           expect(find.text('Sharing'), findsOneWidget);
-          expect(
-            find.byType(LoadingComponent),
-            mode.expectsNewUi ? findsOneWidget : findsNothing,
-          );
+          expect(find.byType(LoadingComponent), findsOneWidget);
 
           if (dismissWithBack) {
             await tester.binding.handlePopRoute();
@@ -109,7 +89,6 @@ void main() {
                 dialog = await showLockerProgressDialog(
                   context,
                   'Uploaded 0 of 2 files',
-                  useNewUi: mode.useNewUi,
                 );
                 shown = true;
               },
@@ -130,14 +109,8 @@ void main() {
       expect(dialog.didShow, isTrue);
       expect(dialog.isShowing(), isTrue);
       expect(find.text('Uploaded 0 of 2 files'), findsOneWidget);
-      expect(
-        find.byType(LoadingComponent),
-        mode.expectsNewUi ? findsOneWidget : findsNothing,
-      );
-      expect(
-        find.byType(EnteLoadingWidget),
-        mode.expectsNewUi ? findsNothing : findsOneWidget,
-      );
+      expect(find.byType(LoadingComponent), findsOneWidget);
+      expect(find.byType(EnteLoadingWidget), findsNothing);
 
       await tester.tapAt(const Offset(5, 5));
       await tester.binding.handlePopRoute();
