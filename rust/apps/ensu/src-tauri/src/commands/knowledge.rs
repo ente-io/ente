@@ -25,7 +25,6 @@ pub struct State {
     pack_lifecycles: Mutex<HashMap<String, Arc<async_runtime::Mutex<()>>>>,
 }
 
-/// The sources allowed for one response, captured from the chat's selection.
 pub(crate) struct SourceSelection {
     pack_ids: HashSet<String>,
     note_collection_ids: HashSet<String>,
@@ -109,7 +108,7 @@ pub struct KnowledgePackDto {
     stable_id: String,
     label: String,
     download_size_bytes: i64,
-    status: Option<KnowledgePackStatusDto>,
+    status: KnowledgePackStatusDto,
     attribution: AttributionDto,
 }
 
@@ -380,13 +379,13 @@ fn reconcile_and_open(
 
 fn pack_dto(
     dataset: KnowledgeDatasetConfig,
-    reconciliation: Option<retrieval::KnowledgeReconciliation>,
+    reconciliation: retrieval::KnowledgeReconciliation,
 ) -> KnowledgePackDto {
     KnowledgePackDto {
         stable_id: dataset.stable_id,
         label: dataset.label,
         download_size_bytes: dataset.download_size_bytes,
-        status: reconciliation.map(|result| result.status.into()),
+        status: reconciliation.status.into(),
         attribution: dataset.attribution.into(),
     }
 }
@@ -395,19 +394,10 @@ fn pack_dto(
 pub async fn knowledge_catalog(
     model_state: TauriState<'_, ModelDownloadState>,
     knowledge_state: TauriState<'_, State>,
-    reconcile_stable_ids: Option<Vec<String>>,
 ) -> Result<Vec<KnowledgePackDto>, ApiError> {
     let store = model_state.store();
-    let selected = reconcile_stable_ids.map(|ids| ids.into_iter().collect::<HashSet<_>>());
     let mut packs = Vec::new();
     for dataset in ente_ensu::config::defaults().knowledge_datasets {
-        if selected
-            .as_ref()
-            .is_some_and(|ids| !ids.contains(&dataset.stable_id))
-        {
-            packs.push(pack_dto(dataset, None));
-            continue;
-        }
         let lifecycle = knowledge_state.pack_lifecycle(&dataset.stable_id);
         let _lifecycle = lifecycle.lock().await;
         let indexes = Arc::clone(&knowledge_state.indexes);
@@ -416,30 +406,9 @@ pub async fn knowledge_catalog(
         let reconciliation = async_runtime::spawn_blocking(move || {
             reconcile_and_open(&reconcile_store, &indexes, &reconcile_dataset)
         })
-        .await;
-        let reconciliation = match reconciliation {
-            Ok(Ok(result)) => result,
-            result => {
-                let error = match result {
-                    Ok(Err(error)) => error.message,
-                    Err(error) => error.to_string(),
-                    Ok(Ok(_)) => unreachable!(),
-                };
-                logging::log(
-                    "Knowledge",
-                    format!(
-                        "pack reconciliation failed pack={} error={error}",
-                        dataset.stable_id
-                    ),
-                );
-                retrieval::KnowledgeReconciliation {
-                    status: retrieval::KnowledgeReconciliationStatus::Download,
-                    active_identity: None,
-                    active_directory: None,
-                }
-            }
-        };
-        packs.push(pack_dto(dataset, Some(reconciliation)));
+        .await
+        .map_err(|error| ApiError::other(error.to_string()))??;
+        packs.push(pack_dto(dataset, reconciliation));
     }
     Ok(packs)
 }
@@ -548,7 +517,7 @@ pub async fn knowledge_download_pack(
         ));
     }
 
-    Ok(pack_dto(dataset, Some(reconciliation)))
+    Ok(pack_dto(dataset, reconciliation))
 }
 
 #[tauri::command]
@@ -563,17 +532,30 @@ pub fn knowledge_cancel_pack_download(knowledge_state: TauriState<'_, State>, st
     }
 }
 
-#[tauri::command]
-pub async fn knowledge_retrieve(
-    app: AppHandle,
-    model_state: TauriState<'_, ModelDownloadState>,
-    llm_state: TauriState<'_, crate::commands::llm::State>,
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RetrieveRequest {
     query: String,
     enabled_stable_ids: Vec<String>,
     enabled_note_collection_ids: Vec<String>,
     max_context_utf8_bytes: u32,
     retrieval_epoch: u64,
+}
+
+#[tauri::command]
+pub async fn knowledge_retrieve(
+    app: AppHandle,
+    model_state: TauriState<'_, ModelDownloadState>,
+    llm_state: TauriState<'_, crate::commands::llm::State>,
+    input: RetrieveRequest,
 ) -> Result<Option<GroundedPromptContextDto>, ApiError> {
+    let RetrieveRequest {
+        query,
+        enabled_stable_ids,
+        enabled_note_collection_ids,
+        max_context_utf8_bytes,
+        retrieval_epoch,
+    } = input;
     let knowledge_state = app.state::<State>();
     let selection = SourceSelection::new(enabled_stable_ids, enabled_note_collection_ids);
     let (note_collection_ids, notes) = app
@@ -832,64 +814,6 @@ mod tests {
     use ente_ensu::notes::NotesSearchHit;
 
     const COLLECTION_ID: &str = "123e4567-e89b-12d3-a456-426614174000";
-
-    #[test]
-    fn response_source_selection_is_explicit_and_independent_for_packs_and_folders() {
-        let pack = retrieval::PassageLocator::EnsuPack {
-            dataset_id: "selected-pack".into(),
-            revision_sha256: "a".repeat(64),
-            row: 0,
-        };
-        let note = retrieval::PassageLocator::LocalNote(note(0).locator);
-        let new_pack = retrieval::PassageLocator::EnsuPack {
-            dataset_id: "new-pack".into(),
-            revision_sha256: "b".repeat(64),
-            row: 0,
-        };
-        let mut new_folder_note = note.clone();
-        if let retrieval::PassageLocator::LocalNote(locator) = &mut new_folder_note {
-            locator.collection_id = "another-folder".into();
-        }
-
-        for (packs_enabled, notes_enabled) in
-            [(false, false), (true, false), (false, true), (true, true)]
-        {
-            let selection = SourceSelection::new(
-                if packs_enabled {
-                    vec!["selected-pack".into()]
-                } else {
-                    vec![]
-                },
-                if notes_enabled {
-                    vec![COLLECTION_ID.into()]
-                } else {
-                    vec![]
-                },
-            );
-            assert_eq!(selection.allows(&pack), packs_enabled);
-            assert_eq!(selection.allows(&note), notes_enabled);
-            assert!(!selection.allows(&new_pack));
-            assert!(!selection.allows(&new_folder_note));
-        }
-    }
-
-    #[test]
-    fn selected_sources_cover_new_content_without_enabling_new_sources() {
-        let selection = SourceSelection::new(vec!["pack".into()], vec![COLLECTION_ID.into()]);
-        for revision in ["a", "b"] {
-            let pack = retrieval::PassageLocator::EnsuPack {
-                dataset_id: "pack".into(),
-                revision_sha256: revision.repeat(64),
-                row: 123,
-            };
-            assert!(selection.allows(&pack));
-        }
-        for index in 0..3 {
-            let mut locator = note(index).locator;
-            locator.indexed_revision = "c".repeat(64);
-            assert!(selection.allows(&retrieval::PassageLocator::LocalNote(locator)));
-        }
-    }
 
     fn note(index: usize) -> NotesSearchHit {
         NotesSearchHit {

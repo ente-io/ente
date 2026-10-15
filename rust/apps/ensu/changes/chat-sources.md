@@ -1,1 +1,1 @@
-- Choose which Ensu Packs and note folders each chat uses from the composer, with pack downloads and folder setup in the same view.
+`Ensu Packs and Notes popup after model download

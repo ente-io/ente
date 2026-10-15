@@ -46,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -58,7 +59,6 @@ import kotlinx.coroutines.withContext
 
 internal class ChatStoreActions(
     private val state: MutableStateFlow<AppState>,
-    private val sourcePreferences: ChatSourceSelectionPreferences,
     private val sessionPreferences: SessionPreferencesDataStore,
     private val chatRepository: ChatRepository,
     private val llmProvider: LlmProvider,
@@ -75,7 +75,6 @@ internal class ChatStoreActions(
     private val sourceInventoryReady: Boolean
         get() = state.value.knowledge.inventoryReady && notesStore.state.value.inventoryReady
 
-    private val sourceSelections = ChatSourceSelections(sourcePreferences)
     private val branchSelections = mutableMapOf<String, MutableMap<String, String>>()
     private val sessionSummaries = mutableMapOf<String, String>()
     private val sessionAccessTimes = mutableMapOf<String, Long>()
@@ -100,7 +99,7 @@ internal class ChatStoreActions(
     fun bootstrap(scope: CoroutineScope) {
         this.scope = scope
 
-        refreshSourceSelectionInventory()
+        refreshSourceInventory()
         scope.launch {
             combine(
                     state.map { it.knowledge.inventoryReady },
@@ -109,11 +108,16 @@ internal class ChatStoreActions(
                     packsReady && notesReady
                 }
                 .distinctUntilChanged()
-                .collectLatest { ready ->
-                    if (ready) {
-                        refreshSourceSelectionInventory()
-                    } else {
-                        state.update { it.copy(chat = it.chat.copy(sourceSelectionReady = false)) }
+                .collect { ready ->
+                    state.update {
+                        it.copy(
+                            chat =
+                                it.chat.copy(
+                                    sourceSelectionReady = ready,
+                                    sourceSelectionError =
+                                        if (ready) null else it.chat.sourceSelectionError,
+                                )
+                        )
                     }
                 }
         }
@@ -139,83 +143,47 @@ internal class ChatStoreActions(
         }
     }
 
-    fun refreshSourceSelectionInventory() {
+    fun refreshSourceInventory() {
         scope?.launch {
+            state.update { it.copy(chat = it.chat.copy(sourceSelectionError = null)) }
             awaitKnowledgeReady()
             notesStore.awaitReady()
             state.update { appState ->
                 appState.copy(
                     chat =
                         appState.chat.copy(
-                            sourceSelection = readSourceSelection(sourceSelectionTarget()),
                             sourceSelectionReady = sourceInventoryReady,
+                            sourceSelectionError =
+                                if (sourceInventoryReady) null
+                                else "Couldn’t load sources. Try again.",
                         )
                 )
             }
         }
     }
 
-    fun sourceSelectionTarget(): String =
-        state.value.chat.currentSessionId ?: sourcePreferences.draftKey
-
-    private fun initialSourceSelection(): ChatSourceSelection =
+    private fun currentSourceSelection(): ChatSourceSelection =
         ChatSourceSelection(
             selectedPackIds =
                 state.value.knowledge.packs.values
-                    .filter { it.activeIdentity != null }
+                    .filter {
+                        it.activeIdentity != null &&
+                            it.config.stableId !in state.value.knowledge.disabledIds
+                    }
                     .map { it.config.stableId }
                     .toSet(),
-            selectedFolderIds = notesStore.state.value.collections.map { it.id }.toSet(),
+            selectedFolderIds =
+                notesStore.state.value.collections
+                    .filter { it.id !in notesStore.state.value.disabledIds }
+                    .map { it.id }
+                    .toSet(),
         )
 
-    private fun readSourceSelection(target: String): ChatSourceSelection =
-        sourceSelections.initialize(target, sourceInventoryReady, ::initialSourceSelection)
-
-    fun selectAddedPack(target: String, id: String) =
-        selectAddedSource(target) { it.withPackEnabled(id, true) }
-
-    fun selectAddedFolder(target: String, id: String) =
-        selectAddedSource(target) { it.withFolderEnabled(id, true) }
-
-    private fun selectAddedSource(
-        target: String,
-        transform: (ChatSourceSelection) -> ChatSourceSelection,
-    ) {
-        val (destination, updated) = sourceSelections.selectAdded(target, transform) ?: return
-        if (destination == sourceSelectionTarget()) {
-            state.update { it.copy(chat = it.chat.copy(sourceSelection = updated)) }
-        }
-    }
-
-    fun setPackEnabled(id: String, enabled: Boolean) {
-        updateSourceSelection { it.withPackEnabled(id, enabled) }
-    }
-
-    fun setFolderEnabled(id: String, enabled: Boolean) {
-        updateSourceSelection { it.withFolderEnabled(id, enabled) }
-    }
-
-    private fun updateSourceSelection(transform: (ChatSourceSelection) -> ChatSourceSelection) {
-        val chat = state.value.chat
-        if (!sourceInventoryReady || chat.isGenerating || chat.preparationStatus != null) return
-        val selection = transform(chat.sourceSelection)
-        sourcePreferences.write(sourceSelectionTarget(), selection)
-        state.update { it.copy(chat = it.chat.copy(sourceSelection = selection)) }
-    }
-
     fun createNewSession(): String {
+        check(sourceInventoryReady)
         resetGenerationState()
 
-        val selection =
-            if (state.value.chat.currentSessionId == null)
-                readSourceSelection(sourcePreferences.draftKey)
-            else initialSourceSelection()
         val session = chatRepository.createSession("New Chat")
-        if (sourceInventoryReady) sourcePreferences.write(session.id, selection)
-        if (state.value.chat.currentSessionId == null) {
-            sourceSelections.promote(sourcePreferences.draftKey, session.id)
-        }
-        sourcePreferences.resetDraft()
         messageStore[session.id] = mutableListOf()
         branchSelections[session.id] = mutableMapOf()
 
@@ -226,7 +194,6 @@ internal class ChatStoreActions(
                     appState.chat.copy(
                         sessions = updatedSessions,
                         currentSessionId = session.id,
-                        sourceSelection = selection,
                         messageText = "",
                         attachments = emptyList(),
                         editingMessageId = null,
@@ -245,13 +212,11 @@ internal class ChatStoreActions(
 
         resetGenerationState()
         attachmentActions.discardAttachments(state.value.chat.attachments)
-        sourcePreferences.resetDraft()
         state.update { appState ->
             appState.copy(
                 chat =
                     appState.chat.copy(
                         currentSessionId = null,
-                        sourceSelection = readSourceSelection(sourcePreferences.draftKey),
                         messages = emptyList(),
                         branchSelections = emptyMap(),
                         messageText = "",
@@ -265,13 +230,7 @@ internal class ChatStoreActions(
     fun selectSession(sessionId: String) {
         resetGenerationState()
         state.update { appState ->
-            appState.copy(
-                chat =
-                    appState.chat.copy(
-                        currentSessionId = sessionId,
-                        sourceSelection = readSourceSelection(sessionId),
-                    )
-            )
+            appState.copy(chat = appState.chat.copy(currentSessionId = sessionId))
         }
         val scope = scope ?: return
         scope.launch(Dispatchers.IO) {
@@ -289,7 +248,6 @@ internal class ChatStoreActions(
         }
 
         chatRepository.deleteSession(sessionId)
-        sourcePreferences.remove(sessionId)
         if (isCurrent) attachmentActions.discardAttachments(currentState.chat.attachments)
         removeSessionCaches(sessionId)
         sessionSummaries.remove(sessionKey(sessionId))
@@ -312,8 +270,6 @@ internal class ChatStoreActions(
                     appState.chat.copy(
                         sessions = sessions,
                         currentSessionId = newCurrent,
-                        sourceSelection =
-                            readSourceSelection(newCurrent ?: sourcePreferences.draftKey),
                         isGenerating = if (resetCurrent) false else appState.chat.isGenerating,
                         preparationStatus =
                             if (resetCurrent) null else appState.chat.preparationStatus,
@@ -434,6 +390,10 @@ internal class ChatStoreActions(
     }
 
     fun retryAssistantMessage(messageId: String) {
+        if (!sourceInventoryReady) {
+            refreshSourceInventory()
+            return
+        }
         val priorGeneration = generationJob
         val priorSummary = sessionSummaryJob
         if (state.value.chat.isGenerating) {
@@ -454,6 +414,7 @@ internal class ChatStoreActions(
                 messageStore[sessionId]?.firstOrNull { it.id == parentId }
             } ?: return
 
+        val sourceSelection = currentSourceSelection()
         priorGeneration?.cancel()
         priorSummary?.cancel()
         llmProvider.stopGeneration()
@@ -469,11 +430,12 @@ internal class ChatStoreActions(
             ) {
                 llmProvider.resetContext()
             }
-            startGeneration(sessionId, parent)
+            startGeneration(sessionId, parent, sourceSelection)
         }
     }
 
     fun sendMessage() {
+        if (!sourceInventoryReady) return
         val currentState = state.value
         if (currentState.chat.isGenerating || currentState.chat.isDownloading) return
         if (!currentState.chat.deviceCapability.isChatSupported()) return
@@ -552,7 +514,7 @@ internal class ChatStoreActions(
         overflowBypassMessageId = pending.messageId
         pendingOverflow = null
         clearOverflowDialog()
-        startGeneration(pending.sessionId, message)
+        startGeneration(pending.sessionId, message, pending.sourceSelection)
     }
 
     fun cancelOverflowDialog() {
@@ -601,11 +563,6 @@ internal class ChatStoreActions(
                         appState.chat.copy(
                             sessions = sessions,
                             currentSessionId = if (sessionStillExists) currentSessionId else null,
-                            sourceSelection =
-                                readSourceSelection(
-                                    if (sessionStillExists) currentSessionId
-                                    else sourcePreferences.draftKey
-                                ),
                         )
                 )
             }
@@ -618,9 +575,17 @@ internal class ChatStoreActions(
         }
     }
 
-    private fun startGeneration(sessionId: String, userMessage: ChatMessage) {
+    private fun startGeneration(
+        sessionId: String,
+        userMessage: ChatMessage,
+        sourceSelection: ChatSourceSelection = currentSourceSelection(),
+    ) {
         val scope = scope ?: return
         if (!state.value.chat.deviceCapability.isChatSupported()) return
+        if (!sourceInventoryReady) {
+            refreshSourceInventory()
+            return
+        }
         modelSettingsActions.cancelChatWarmup(releaseLoadedModel = false)
         val priorGeneration = generationJob
         val priorSummary = sessionSummaryJob
@@ -673,7 +638,6 @@ internal class ChatStoreActions(
         }
         rebuildChatState(sessionId)
 
-        val requestedSourceSelection = sourcePreferences.read(sessionId)
         val notesScope = notesStore.suspendMaintenance()
         var followup: ConversationFollowup? = null
         val activeJob = scope.launch {
@@ -691,18 +655,6 @@ internal class ChatStoreActions(
             if (!isActive()) return@launch
             val progressTracker = DownloadProgressTracker()
             var embeddingAssetInvalid = false
-            val sourceSelection = requestedSourceSelection ?: readSourceSelection(sessionId)
-            if (!state.value.chat.sourceSelectionReady) {
-                state.update {
-                    it.copy(
-                        chat =
-                            it.chat.copy(
-                                sourceSelection = sourceSelection,
-                                sourceSelectionReady = sourceInventoryReady,
-                            )
-                    )
-                }
-            }
             val enabledDatasets =
                 state.value.knowledge.readyDatasets.filter {
                     sourceSelection.isPackEnabled(it.stableId)
@@ -941,6 +893,7 @@ internal class ChatStoreActions(
                     userMessage,
                     prompt,
                     selection,
+                    sourceSelection,
                     modelSettingsActions.resolveTemperature(settings),
                     knowledgeHits,
                     onModelProgress,
@@ -962,6 +915,7 @@ internal class ChatStoreActions(
         userMessage: ChatMessage,
         prompt: PromptResult,
         selection: LlmModelSelection,
+        sourceSelection: ChatSourceSelection,
         temperature: Float,
         knowledgeHits: List<GroundedExcerpt>,
         onModelProgress: (DownloadProgress) -> Unit,
@@ -998,7 +952,8 @@ internal class ChatStoreActions(
                             overflowBypassMessageId != userMessage.id
                     ) {
                         overflowBypassMessageId = null
-                        pendingOverflow = PendingOverflow(sessionId, userMessage.id)
+                        pendingOverflow =
+                            PendingOverflow(sessionId, userMessage.id, sourceSelection)
                         streamingParentId = null
                         state.update { appState ->
                             appState.copy(
@@ -1898,6 +1853,7 @@ internal class ChatStoreActions(
     private data class PendingOverflow(
         val sessionId: String,
         val messageId: String,
+        val sourceSelection: ChatSourceSelection,
     )
 
     private fun buildPrompt(text: String, attachments: List<Attachment>): PromptResult {

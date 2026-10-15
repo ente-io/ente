@@ -51,6 +51,7 @@ fun KnowledgeSettingsScreen(
     packDownloadsAllowed: Boolean,
     onDownloadOrUpdate: (String) -> Unit,
     onCancel: (String) -> Unit,
+    onSetEnabled: (String, Boolean) -> Unit,
 ) {
     var attributionConfig by remember { mutableStateOf<KnowledgeDatasetConfig?>(null) }
 
@@ -58,10 +59,19 @@ fun KnowledgeSettingsScreen(
         modifier = Modifier.padding(horizontal = EnsuSpacing.pageHorizontal.dp),
         verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp),
     ) {
+        item {
+            Text(
+                "Choose packs for future messages in all chats. Changes apply to your next message.",
+                style = EnsuTypography.small,
+                color = EnsuColor.textMuted(),
+            )
+        }
         items(state.packs.values.toList(), key = { it.config.stableId }) { pack ->
             KnowledgePackCard(
                 pack = pack,
                 packDownloadsAllowed = packDownloadsAllowed,
+                selected = pack.config.stableId !in state.disabledIds,
+                onSetEnabled = { onSetEnabled(pack.config.stableId, it) },
                 onDownloadOrUpdate = { onDownloadOrUpdate(pack.config.stableId) },
                 onCancel = { onCancel(pack.config.stableId) },
                 onOpenAttribution = { attributionConfig = pack.config },
@@ -78,15 +88,14 @@ fun KnowledgeSettingsScreen(
 }
 
 @Composable
-internal fun KnowledgePackCard(
+private fun KnowledgePackCard(
     pack: KnowledgePackState,
     packDownloadsAllowed: Boolean,
     onDownloadOrUpdate: () -> Unit,
     onCancel: () -> Unit,
     onOpenAttribution: () -> Unit,
-    selected: Boolean? = null,
-    controlsEnabled: Boolean = true,
-    onSetEnabled: (Boolean) -> Unit = {},
+    selected: Boolean,
+    onSetEnabled: (Boolean) -> Unit,
 ) {
     KnowledgeCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -101,14 +110,15 @@ internal fun KnowledgePackCard(
                 )
                 PackMetadataLine(pack = pack, onOpenAttribution = onOpenAttribution)
             }
-            if (selected != null && pack.activeIdentity != null) {
+            if (pack.activeIdentity != null) {
                 Switch(
                     checked = selected,
                     onCheckedChange = onSetEnabled,
-                    enabled = controlsEnabled,
+                    enabled = !pack.isMutating,
                     modifier =
                         Modifier.semantics {
-                            contentDescription = "Use ${pack.config.label} in this chat"
+                            contentDescription =
+                                "Use ${pack.config.label} for future messages in all chats"
                         },
                 )
             } else if (
@@ -119,7 +129,6 @@ internal fun KnowledgePackCard(
                 CompactButton(
                     label = "Download",
                     onClick = onDownloadOrUpdate,
-                    enabled = controlsEnabled,
                 )
             }
         }
@@ -156,7 +165,7 @@ internal fun KnowledgePackCard(
             packDownloadsAllowed && pack.status == KnowledgeReconciliationStatus.UPDATE_AVAILABLE
         ) {
             Spacer(Modifier.height(EnsuSpacing.md.dp))
-            CompactButton(label = "Update", onClick = onDownloadOrUpdate, enabled = controlsEnabled)
+            CompactButton(label = "Update", onClick = onDownloadOrUpdate)
         }
 
         pack.errorMessage?.let { Text(it, style = EnsuTypography.small, color = EnsuColor.error) }
@@ -200,7 +209,7 @@ private fun PackMetadataLine(
 }
 
 @Composable
-internal fun PackAttributionDialog(
+private fun PackAttributionDialog(
     config: KnowledgeDatasetConfig,
     onDismiss: () -> Unit,
 ) {

@@ -6,12 +6,12 @@ import log from "ente-base/log";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export const useChatSources = (
-    sessionId: string | undefined,
-    defaults: ChatSourceSelection,
-    inventoryReady: boolean,
+    available: ChatSourceSelection,
+    packInventoryReady: boolean,
+    notesInventoryReady: boolean,
 ) => {
-    const [draftId, setDraftId] = useState("draft:initial");
-    const [revision, setRevision] = useState(0);
+    const [, setRevision] = useState(0);
+    const [packSettingsReady, setPackSettingsReady] = useState(false);
     const storeRef = useRef<ChatSourceSelectionStore | null>(null);
     if (!storeRef.current) {
         storeRef.current = new ChatSourceSelectionStore(
@@ -20,49 +20,37 @@ export const useChatSources = (
         );
     }
     const store = storeRef.current;
-    const targetId = sessionId ?? draftId;
-    const selection = store.get(targetId);
+    const inventoryReady =
+        packInventoryReady && packSettingsReady && notesInventoryReady;
+    const selection = inventoryReady ? store.selection(available) : undefined;
     useEffect(() => {
-        if (!inventoryReady || store.get(targetId)) return;
-        store.initialize(targetId, defaults);
-        setRevision((value) => value + 1);
-    }, [defaults, inventoryReady, revision, store, targetId]);
+        if (!packInventoryReady) return;
+        store.migratePackSettings(available.packIds);
+        setPackSettingsReady(true);
+    }, [available.packIds, packInventoryReady, store]);
 
-    const setEnabled = useCallback(
-        (
-            target: string,
-            kind: keyof ChatSourceSelection,
-            sourceId: string,
-            enabled: boolean,
-        ) => {
-            store.setEnabled(target, kind, sourceId, enabled);
+    const setPackEnabled = useCallback(
+        (id: string, enabled: boolean) => {
+            if (!packInventoryReady) return;
+            store.setPackEnabled(id, enabled, available.packIds);
+            setRevision((value) => value + 1);
+        },
+        [available.packIds, packInventoryReady, store],
+    );
+    const setNoteEnabled = useCallback(
+        (id: string, enabled: boolean) => {
+            store.setNoteEnabled(id, enabled);
             setRevision((value) => value + 1);
         },
         [store],
     );
-    const transferDraft = useCallback(
-        (session: string) => {
-            store.transferDraft(draftId, session);
-            setRevision((value) => value + 1);
-        },
-        [draftId, store],
-    );
-    const resetDraft = useCallback(() => {
-        setDraftId(`draft:${crypto.randomUUID()}`);
-    }, []);
-    const removeSelection = useCallback(
-        (session: string) => {
-            store.remove(session);
-            setRevision((value) => value + 1);
-        },
-        [store],
-    );
+
     return {
         selection,
-        targetId,
-        setEnabled,
-        transferDraft,
-        resetDraft,
-        removeSelection,
+        packSettingsReady: packInventoryReady && packSettingsReady,
+        disabledNoteIds: store.disabledNoteIds(),
+        disabledPackIds: store.disabledPackIds(),
+        setPackEnabled,
+        setNoteEnabled,
     };
 };

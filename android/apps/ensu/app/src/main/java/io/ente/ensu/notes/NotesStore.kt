@@ -71,7 +71,7 @@ data class NotesState(
     val collections: List<NoteCollectionState> = emptyList(),
     val error: String? = null,
     val inventoryReady: Boolean = false,
-    val inventoryLoading: Boolean = true,
+    val disabledIds: Set<String> = emptySet(),
 )
 
 val LocalNotesStore = staticCompositionLocalOf<NotesStore?> { null }
@@ -108,8 +108,21 @@ class NotesStore(
     private var foreground = false
     private var loaded = false
     private var disabled = false
-    private val _state = MutableStateFlow(NotesState())
+    private val preferences =
+        context.applicationContext.getSharedPreferences("ensu_note_defaults", Context.MODE_PRIVATE)
+    private val _state =
+        MutableStateFlow(
+            NotesState(
+                disabledIds = preferences.getStringSet("disabled", emptySet()).orEmpty().toSet()
+            )
+        )
     val state: StateFlow<NotesState> = _state.asStateFlow()
+
+    fun setEnabled(id: String, enabled: Boolean) {
+        val disabledIds = state.value.disabledIds.let { if (enabled) it - id else it + id }
+        preferences.edit().putStringSet("disabled", disabledIds).apply()
+        _state.update { it.copy(disabledIds = disabledIds) }
+    }
 
     fun bootstrap(owner: CoroutineScope) {
         if (bootstrapJob != null) return
@@ -143,7 +156,7 @@ class NotesStore(
                         )
                     }
                 }
-                _state.value = NotesState(states, inventoryReady = true, inventoryLoading = false)
+                _state.update { it.copy(collections = states, inventoryReady = true) }
                 loaded = true
                 scans.addAll(registrations.keys)
             } catch (e: CancellationException) {
@@ -156,11 +169,11 @@ class NotesStore(
                     throwable = e,
                 )
                 disabled = true
-                _state.value =
-                    NotesState(
-                        error = "Could not load Your Notes. Existing indexes have been preserved.",
-                        inventoryLoading = false,
+                _state.update {
+                    it.copy(
+                        error = "Could not load Your Notes. Existing indexes have been preserved."
                     )
+                }
             }
             pump()
         }
@@ -170,13 +183,13 @@ class NotesStore(
         bootstrapJob?.join()
     }
 
-    fun retryInventory() {
-        val ownerScope = scope ?: return
-        if (bootstrapJob?.isActive == true || loaded) return
-        disabled = false
+    fun retryLoad() {
+        if (loaded || bootstrapJob?.isActive == true) return
+        val owner = scope ?: return
         bootstrapJob = null
-        _state.update { it.copy(inventoryLoading = true, error = null) }
-        bootstrap(ownerScope)
+        disabled = false
+        _state.update { it.copy(error = null) }
+        bootstrap(owner)
     }
 
     fun setForeground(value: Boolean) {
@@ -211,13 +224,14 @@ class NotesStore(
         active?.job?.join()
     }
 
-    fun add(tree: Uri, onAdded: ((String) -> Unit)? = null) {
+    fun add(tree: Uri) {
         scope?.launch {
             awaitReady()
             if (disabled) return@launch
             withMaintenanceSuspended {
                 try {
                     val record = provider.add(tree)
+                    if (record.id !in registrations) setEnabled(record.id, true)
                     registrations[record.id] = record
                     _state.update {
                         it.copy(
@@ -226,7 +240,6 @@ class NotesStore(
                             error = null,
                         )
                     }
-                    onAdded?.invoke(record.id)
                     enqueue(record.id, immediate = true)
                 } catch (error: CancellationException) {
                     throw error

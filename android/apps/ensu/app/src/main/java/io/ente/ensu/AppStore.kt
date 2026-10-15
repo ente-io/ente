@@ -7,7 +7,6 @@ import io.ente.ensu.chat.Attachment
 import io.ente.ensu.chat.AttachmentStoreActions
 import io.ente.ensu.chat.ChatMessage
 import io.ente.ensu.chat.ChatRepository
-import io.ente.ensu.chat.ChatSourceSelectionPreferences
 import io.ente.ensu.chat.ChatStoreActions
 import io.ente.ensu.device.AndroidDeviceCapabilityProvider
 import io.ente.ensu.device.ChatDeviceCapability
@@ -41,7 +40,8 @@ class AppStore(
     private val logRepository: FileLogRepository,
     clock: () -> Long = { System.currentTimeMillis() },
 ) {
-    private val sourcePreferences = ChatSourceSelectionPreferences(context)
+    private val sourcePreferences =
+        context.applicationContext.getSharedPreferences("ensu_chat_sources", Context.MODE_PRIVATE)
     private val _state = MutableStateFlow(AppState())
     val state: StateFlow<AppState> = _state.asStateFlow()
 
@@ -52,6 +52,7 @@ class AppStore(
     private val attachmentActions = AttachmentStoreActions(_state, messageStore)
     private val knowledgeStore =
         KnowledgeStore(
+            context = context,
             state = _state,
             provider = knowledgeProvider,
             datasets = configDefaults.knowledgeDatasets,
@@ -69,7 +70,6 @@ class AppStore(
     private val chatActions =
         ChatStoreActions(
             state = _state,
-            sourcePreferences = sourcePreferences,
             sessionPreferences = sessionPreferences,
             chatRepository = chatRepository,
             llmProvider = llmProvider,
@@ -205,33 +205,25 @@ class AppStore(
 
     fun refreshModelDownloadInfo() = modelSettingsActions.refreshModelDownloadInfo()
 
+    fun retrySourceInventory() {
+        knowledgeStore.retry()
+        notesStore.retryLoad()
+        chatActions.refreshSourceInventory()
+    }
+
     fun downloadOrUpdateKnowledgePack(stableId: String) = knowledgeStore.downloadOrUpdate(stableId)
 
-    fun cancelKnowledgePackDownload(stableId: String) = knowledgeStore.cancel(stableId)
-
-    fun retrySourceInventory() {
-        knowledgeStore.retryInventory()
-        notesStore.retryInventory()
-        chatActions.refreshSourceSelectionInventory()
-    }
-
-    fun sourceSelectionTarget(): String = chatActions.sourceSelectionTarget()
-
-    fun downloadKnowledgePackForChat(stableId: String, target: String) {
-        val wasInstalled = _state.value.knowledge.packs[stableId]?.activeIdentity != null
-        knowledgeStore.downloadOrUpdate(stableId) {
-            if (!wasInstalled) chatActions.selectAddedPack(target, stableId)
-        }
-    }
-
-    fun addNotesFolderForChat(tree: android.net.Uri, target: String) =
-        notesStore.add(tree) { id -> chatActions.selectAddedFolder(target, id) }
-
     fun setKnowledgePackEnabled(stableId: String, enabled: Boolean) =
-        chatActions.setPackEnabled(stableId, enabled)
+        knowledgeStore.setEnabled(stableId, enabled)
 
-    fun setNotesFolderEnabled(id: String, enabled: Boolean) =
-        chatActions.setFolderEnabled(id, enabled)
+    fun hasSeenSourceIntroduction() =
+        sourcePreferences.getBoolean("sources_introduction_seen", false)
+
+    fun completeSourceIntroduction() {
+        sourcePreferences.edit().putBoolean("sources_introduction_seen", true).apply()
+    }
+
+    fun cancelKnowledgePackDownload(stableId: String) = knowledgeStore.cancel(stableId)
 
     fun cancelDownload() {
         chatActions.cancelGenerationForDownload()

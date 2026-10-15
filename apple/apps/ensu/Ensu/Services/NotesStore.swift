@@ -25,6 +25,9 @@ final class NotesStore: ObservableObject, ModelMaintenance {
     @Published private(set) var collections: [NoteCollectionState] = []
     @Published var operationError: String?
     @Published var preview: NotesPreview?
+    @Published private(set) var disabledIDs: Set<String>
+    private let sourceDefaults: UserDefaults
+    private static let disabledDefaultsKey = "ensu.notes.disabledByDefault"
 
     private struct Pending {
         let generation: UInt64
@@ -53,21 +56,22 @@ final class NotesStore: ObservableObject, ModelMaintenance {
     private var wake: Task<Void, Never>?
     private static let emptyNotes = "No supported non-empty UTF-8 notes were found"
 
-    init(provider: LlmProvider, notesProvider: NotesProvider = NotesProvider()) {
+    init(
+        provider: LlmProvider, notesProvider: NotesProvider = NotesProvider(),
+        defaults: UserDefaults = .standard
+    ) {
+        sourceDefaults = defaults
+        disabledIDs = Set(defaults.stringArray(forKey: Self.disabledDefaultsKey) ?? [])
         modelProvider = provider
         self.provider = notesProvider
     }
 
-    var inventoryReady: Bool { loaded }
-
-    func retryBootstrap() async {
-        await bootstrapTask?.value
-        guard !loaded else { return }
-        disabled = false
-        operationError = nil
-        bootstrapTask = nil
-        await bootstrap()
+    func setEnabled(_ id: String, enabled: Bool) {
+        if enabled { disabledIDs.remove(id) } else { disabledIDs.insert(id) }
+        sourceDefaults.set(Array(disabledIDs), forKey: Self.disabledDefaultsKey)
     }
+
+    var inventoryReady: Bool { loaded }
 
     func bootstrap() async {
         if let bootstrapTask {
@@ -95,6 +99,8 @@ final class NotesStore: ObservableObject, ModelMaintenance {
                     }
                 }
                 loaded = true
+                disabled = false
+                operationError = nil
                 scans.formUnion(records.map(\.id))
                 pump()
             } catch {
@@ -104,6 +110,7 @@ final class NotesStore: ObservableObject, ModelMaintenance {
         }
         bootstrapTask = task
         await task.value
+        if !loaded { bootstrapTask = nil }
     }
 
     func setForeground(_ value: Bool) {
@@ -137,17 +144,19 @@ final class NotesStore: ObservableObject, ModelMaintenance {
         await active?.task.value
     }
 
-    func add(_ url: URL, onAdded: ((String) -> Void)? = nil) {
+    func add(_ url: URL) {
         Task {
             await bootstrap()
             guard !disabled else { return }
             do {
                 try await withMaintenanceSuspended {
                     let record = try await provider.add(url)
-                    collections.append(NoteCollectionState(id: record.id, label: record.label))
+                    if !collections.contains(where: { $0.id == record.id }) {
+                        setEnabled(record.id, enabled: true)
+                        collections.append(NoteCollectionState(id: record.id, label: record.label))
+                    }
                     operationError = nil
                     enqueue(record.id, due: .distantPast)
-                    onAdded?(record.id)
                 }
             } catch {
                 operationError = Self.message(error)

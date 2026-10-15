@@ -4,18 +4,78 @@ import QuickLook
 
 struct NotesSettingsView: View {
     @ObservedObject var store: NotesStore
+    var allowsRemoval = true
     @State private var showPicker = false
     @State private var removing: NoteCollectionState?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: EnsuSpacing.md) {
+                Text(
+                    "Choose notes for future messages in all chats. Existing answers stay unchanged."
+                )
+                .font(EnsuTypography.small)
+                .foregroundStyle(EnsuColor.textMuted)
                 ForEach(store.collections) { collection in
-                    NoteCollectionCard(
-                        store: store, collection: collection,
-                        onRemove: {
-                            removing = collection
-                        })
+                    EnsuCard {
+                        HStack {
+                            VStack(alignment: .leading, spacing: EnsuSpacing.xs) {
+                                Text(collection.label)
+                                    .font(EnsuTypography.large)
+                                    .foregroundStyle(EnsuColor.textPrimary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Text(summary(collection))
+                                    .font(EnsuTypography.mini)
+                                    .foregroundStyle(EnsuColor.textMuted)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            Spacer()
+                            Toggle(
+                                "Use \(collection.label) for future messages",
+                                isOn: Binding(
+                                    get: { !store.disabledIDs.contains(collection.id) },
+                                    set: {
+                                        store.setEnabled(collection.id, enabled: $0)
+                                    })
+                            )
+                            .labelsHidden()
+                            .tint(EnsuColor.accent)
+                            if allowsRemoval {
+                                ActionButton(
+                                    icon: "Delete01Icon", tooltip: "Remove \(collection.label)",
+                                    size: 44
+                                ) {
+                                    removing = collection
+                                }
+                            }
+                        }
+                        if let progress = collection.progress {
+                            HStack(spacing: EnsuSpacing.sm) {
+                                ProgressView(value: Double(progress), total: 100)
+                                    .tint(EnsuColor.action)
+                                Text("\(progress)%")
+                                    .font(EnsuTypography.mini)
+                                    .foregroundStyle(EnsuColor.textMuted)
+                            }
+                        } else if collection.status == .indexing || collection.status == .updating {
+                            ProgressView().tint(EnsuColor.action)
+                        }
+                        if collection.status == .pending {
+                            Text("Indexing will continue when the app and model are ready.")
+                                .font(EnsuTypography.small)
+                                .foregroundStyle(EnsuColor.textMuted)
+                        }
+                        if let error = collection.error {
+                            Text(error)
+                                .font(EnsuTypography.small)
+                                .foregroundStyle(EnsuColor.error)
+                        }
+                        if collection.status == .error || collection.status == .unavailable {
+                            CompactButton(text: "Retry") {
+                                store.retry(collection.id)
+                            }
+                        }
+                    }
                 }
                 CompactButton(text: "Add notes folder") {
                     showPicker = true
@@ -36,83 +96,22 @@ struct NotesSettingsView: View {
         .background(EnsuColor.backgroundBase)
         .navigationTitle("Your Notes")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showPicker) { NotesFolderPicker { store.add($0) } }
+        .sheet(isPresented: $showPicker) {
+            NotesFolderPicker { url in
+                store.add(url)
+            }
+        }
         .alert(
             "Remove folder?",
             isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })
         ) {
             Button("Remove", role: .destructive) {
-                if let collection = removing { store.remove(collection.id) }
+                if allowsRemoval, let collection = removing { store.remove(collection.id) }
                 removing = nil
             }
             Button("Cancel", role: .cancel) { removing = nil }
         } message: {
             Text("Remove this folder from Your Notes? Your original files will be kept.")
-        }
-    }
-
-}
-
-struct NoteCollectionCard: View {
-    @ObservedObject var store: NotesStore
-    let collection: NoteCollectionState
-    var selection: Binding<Bool>? = nil
-    var controlsDisabled = false
-    var onRemove: (() -> Void)? = nil
-
-    var body: some View {
-        EnsuCard {
-            HStack {
-                VStack(alignment: .leading, spacing: EnsuSpacing.xs) {
-                    Text(collection.label)
-                        .font(EnsuTypography.large)
-                        .foregroundStyle(EnsuColor.textPrimary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(summary(collection))
-                        .font(EnsuTypography.mini)
-                        .foregroundStyle(EnsuColor.textMuted)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer()
-                if let selection {
-                    Toggle("Use \(collection.label) in this chat", isOn: selection)
-                        .labelsHidden()
-                        .tint(EnsuColor.accent)
-                        .disabled(controlsDisabled)
-                }
-                if let onRemove {
-                    ActionButton(
-                        icon: "Delete01Icon", tooltip: "Remove \(collection.label)",
-                        size: 44, action: onRemove)
-                }
-            }
-            if let progress = collection.progress {
-                HStack(spacing: EnsuSpacing.sm) {
-                    ProgressView(value: Double(progress), total: 100)
-                        .tint(EnsuColor.action)
-                    Text("\(progress)%")
-                        .font(EnsuTypography.mini)
-                        .foregroundStyle(EnsuColor.textMuted)
-                }
-            } else if collection.status == .indexing || collection.status == .updating {
-                ProgressView().tint(EnsuColor.action)
-            }
-            if collection.status == .pending {
-                Text("Indexing will continue when the app and model are ready.")
-                    .font(EnsuTypography.small)
-                    .foregroundStyle(EnsuColor.textMuted)
-            }
-            if let error = collection.error {
-                Text(error)
-                    .font(EnsuTypography.small)
-                    .foregroundStyle(EnsuColor.error)
-            }
-            if collection.status == .error || collection.status == .unavailable {
-                CompactButton(text: "Retry") {
-                    store.retry(collection.id)
-                }
-                .disabled(controlsDisabled)
-            }
         }
     }
 
@@ -130,7 +129,7 @@ struct NoteCollectionCard: View {
     }
 }
 
-struct NotesFolderPicker: UIViewControllerRepresentable {
+private struct NotesFolderPicker: UIViewControllerRepresentable {
     let selected: (URL) -> Void
     func makeCoordinator() -> Coordinator { Coordinator(selected: selected) }
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {

@@ -37,7 +37,7 @@ internal class ModelSettingsActions(
     private var modelDownloadJob: Job? = null
     private var chatActive = false
     private var appForeground = false
-    private var pickerPending = false
+    @Volatile private var pickerPending = false
     private var backgroundReleaseJob: Job? = null
     private val activeVoiceJobs = AtomicInteger()
     private var warmupSuppressed = false
@@ -339,6 +339,9 @@ internal class ModelSettingsActions(
             ) {
                 cancelChatWarmup(releaseLoadedModel = false)
             }
+        } else if (!pickerPending) {
+            cancelChatWarmup(releaseLoadedModel = false)
+            scope?.launch { llmProvider.releaseInactiveChatResources { pickerPending } }
         }
         refreshChatWarmup()
     }

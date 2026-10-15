@@ -15,7 +15,7 @@ export interface KnowledgePack {
     stableId: string;
     label: string;
     downloadSizeBytes: number;
-    status: KnowledgePackStatus | null;
+    status: KnowledgePackStatus;
     attribution: KnowledgeAttribution;
 }
 
@@ -64,10 +64,8 @@ const invokeKnowledge = async <T>(
     return invoke<T>(command, args);
 };
 
-export const loadKnowledgeCatalog = (reconcileStableIds?: string[]) =>
-    invokeKnowledge<KnowledgePack[]>("knowledge_catalog", {
-        reconcileStableIds,
-    });
+export const loadKnowledgeCatalog = () =>
+    invokeKnowledge<KnowledgePack[]>("knowledge_catalog");
 
 export const downloadKnowledgePack = async (
     stableId: string,
@@ -102,11 +100,13 @@ export const retrieveKnowledge = (
     retrievalEpoch: number,
 ) =>
     invokeKnowledge<KnowledgePromptContext | null>("knowledge_retrieve", {
-        query,
-        enabledStableIds,
-        enabledNoteCollectionIds,
-        maxContextUtf8Bytes,
-        retrievalEpoch,
+        input: {
+            query,
+            enabledStableIds,
+            enabledNoteCollectionIds,
+            maxContextUtf8Bytes,
+            retrievalEpoch,
+        },
     });
 
 export const knowledgeErrorMessage = (error: unknown) => {

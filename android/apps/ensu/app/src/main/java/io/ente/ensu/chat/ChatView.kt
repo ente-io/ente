@@ -46,20 +46,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import io.ente.ensu.AppStore
 import io.ente.ensu.assets.AssetStore
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.device.ChatDeviceCapability
-import io.ente.ensu.knowledge.KnowledgeState
 import io.ente.ensu.llm.LlmProvider
 import kotlinx.coroutines.Job
 
 @Composable
 fun ChatView(
     chatState: ChatState,
-    knowledgeState: KnowledgeState,
-    store: AppStore,
     assetStore: AssetStore,
     llmProvider: LlmProvider,
     isDrawerOpen: Boolean,
@@ -79,6 +75,11 @@ fun ChatView(
     onOverflowTrim: () -> Unit,
     onOverflowCancel: () -> Unit,
     onVoiceInputJob: (Job) -> Unit,
+    onOpenPacks: () -> Unit,
+    onOpenNotes: () -> Unit,
+    hasSeenSourceIntroduction: Boolean,
+    onCompleteSourceIntroduction: () -> Unit,
+    onRetrySources: () -> Unit,
 ) {
     val density = LocalDensity.current
     val context = LocalContext.current
@@ -86,7 +87,8 @@ fun ChatView(
     val latestMessageText by rememberUpdatedState(chatState.messageText)
     val latestOnMessageChange by rememberUpdatedState(onMessageChange)
     val sessionKey = chatState.currentSessionId ?: "new-session"
-    var showSources by remember(sessionKey) { mutableStateOf(false) }
+    var introductionSeen by
+        remember(hasSeenSourceIntroduction) { mutableStateOf(hasSeenSourceIntroduction) }
     val latestSessionKey by rememberUpdatedState(sessionKey)
     val unsupportedCapability =
         chatState.deviceCapability as? ChatDeviceCapability.UnsupportedLowMemory
@@ -154,8 +156,17 @@ fun ChatView(
     var focusRequestId by remember { mutableIntStateOf(0) }
     var wasDrawerOpen by remember { mutableStateOf(false) }
 
+    val showIntroduction =
+        !introductionSeen &&
+            chatState.isModelDownloaded &&
+            !chatState.isDownloading &&
+            !chatState.isGenerating &&
+            !isChatUnsupported &&
+            !isDrawerOpen
+
     val shouldAutoFocusInput =
-        chatState.isModelDownloaded &&
+        !showIntroduction &&
+            chatState.isModelDownloaded &&
             !showDownloadOnboarding &&
             !isChatUnsupported &&
             !chatState.isDownloading &&
@@ -196,13 +207,16 @@ fun ChatView(
         voiceController.cancelActiveVoiceInput()
     }
 
-    ChatSourcesSheet(
-        visible = showSources,
-        chatState = chatState,
-        knowledgeState = knowledgeState,
-        store = store,
-        onDismiss = { showSources = false },
-    )
+    if (showIntroduction) {
+        SourceIntroductionSheet(
+            onDismiss = {
+                onCompleteSourceIntroduction()
+                introductionSeen = true
+            },
+            onOpenPacks = onOpenPacks,
+            onOpenNotes = onOpenNotes,
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().imePadding()) {
@@ -292,6 +306,9 @@ fun ChatView(
                     isProcessingAttachments = chatState.isProcessingAttachments,
                     isGenerating = chatState.isGenerating,
                     isDownloading = chatState.isDownloading,
+                    sourcesReady = chatState.sourceSelectionReady,
+                    sourcesError = chatState.sourceSelectionError,
+                    onRetrySources = onRetrySources,
                     onMessageChange = onMessageChange,
                     onSend = {
                         focusManager.clearFocus()
@@ -301,10 +318,6 @@ fun ChatView(
                     onAttachmentSelected = onAttachmentSelected,
                     onRemoveAttachment = onRemoveAttachment,
                     onCancelEdit = onCancelEdit,
-                    onOpenSources = {
-                        focusManager.clearFocus()
-                        showSources = true
-                    },
                     voiceInputState = voiceController.state,
                     onVoiceInput = {
                         if (voiceController.state.isRecording) {

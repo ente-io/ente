@@ -5,7 +5,6 @@ import {
 import { ChatDialogs } from "@/components/chat/ChatDialogs";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatSidebar } from "@/components/chat/ChatSidebar";
-import { useFileInput } from "@/components/utils/use-file-input";
 import { useChatSources } from "@/hooks/use-chat-sources";
 import { useNotesCollections } from "@/hooks/use-notes-collections";
 import { handleManualAppUpdateCheck } from "@/services/app-update";
@@ -22,6 +21,7 @@ import {
     initChatKeyStore,
 } from "@/services/chat/chat-key";
 import { initializeChatStorePersistence } from "@/services/chat/persistence";
+import type { ChatSourceSelection } from "@/services/chat/source-selection";
 import {
     addMessage,
     createSession,
@@ -69,6 +69,7 @@ import type {
     ModelInfo,
     ModelSettings,
 } from "@/services/llm/types";
+import { NotesIndexingIdleScheduler } from "@/services/notes-indexing-idle";
 import { tauriCommandError } from "@/services/tauri-error";
 import { isTauriRuntime as detectTauriAppRuntime } from "@/services/tauri-runtime";
 import { Menu01Icon } from "@hugeicons/core-free-icons";
@@ -217,9 +218,6 @@ const IMAGE_SELECTOR_EXTENSIONS = [
     "heif",
     "avif",
 ] as const;
-const IMAGE_SELECTOR_ACCEPT = IMAGE_SELECTOR_EXTENSIONS.map(
-    (ext) => `.${ext}`,
-).join(",");
 const MAX_IMAGE_ATTACHMENTS_PER_MESSAGE = 2;
 
 const buildPromptWithImages = (text: string, imageCount: number) => {
@@ -559,9 +557,12 @@ const Page: React.FC = () => {
         string | null
     >(null);
     const [knowledgeCatalogLoaded, setKnowledgeCatalogLoaded] = useState(false);
-    const [showSources, setShowSources] = useState(false);
     const [isPreparingMessage, setIsPreparingMessage] = useState(false);
     const pendingSendRef = useRef(false);
+    const settingsFlowOpenRef = useRef(false);
+    const notesWarmupEpochRef = useRef(0);
+    const notesIndexingPausedRef = useRef(false);
+    const [notesIndexingPaused, setNotesIndexingPaused] = useState(false);
     const [knowledgeDownloadProgress, setKnowledgeDownloadProgress] = useState<
         Record<string, number | undefined>
     >({});
@@ -587,8 +588,6 @@ const Page: React.FC = () => {
         DocumentAttachment[]
     >([]);
     const [pendingImages, setPendingImages] = useState<ImageAttachment[]>([]);
-    const [attachmentAnchor, setAttachmentAnchor] =
-        useState<HTMLElement | null>(null);
     const [chatNotification, setChatNotification] = useState<
         NotificationAttributes | undefined
     >(undefined);
@@ -1765,12 +1764,54 @@ const Page: React.FC = () => {
         return providerRef.current;
     }, []);
 
-    const isNotesGenerationActive = useCallback(
+    const isChatBusy = useCallback(
         () =>
             pendingSendRef.current ||
             generationActiveRef.current ||
             sessionSummaryActiveRef.current,
         [],
+    );
+    const notesIdleSchedulerRef = useRef<NotesIndexingIdleScheduler | null>(
+        null,
+    );
+    if (!notesIdleSchedulerRef.current) {
+        notesIdleSchedulerRef.current = new NotesIndexingIdleScheduler(
+            () => {
+                notesIndexingPausedRef.current = false;
+                setNotesIndexingPaused(false);
+            },
+            isChatBusy,
+            {
+                schedule: (callback, delayMs) =>
+                    window.setTimeout(callback, delayMs),
+                cancel: (handle) => window.clearTimeout(handle),
+            },
+        );
+    }
+    const notesIdleScheduler = notesIdleSchedulerRef.current;
+    useEffect(
+        () => () => {
+            notesWarmupEpochRef.current += 1;
+            notesIdleScheduler.cancel();
+        },
+        [notesIdleScheduler],
+    );
+    const handleChatActivity = useCallback(
+        () => notesIdleScheduler.activity(),
+        [notesIdleScheduler],
+    );
+    useEffect(() => {
+        handleChatActivity();
+    }, [
+        handleChatActivity,
+        isPreparingMessage,
+        isGenerating,
+        isSessionSummaryGenerating,
+    ]);
+
+    const isIndexingBlocked = useCallback(
+        () => notesIndexingPausedRef.current || isChatBusy(),
+        [isChatBusy],
     );
     const cancelNotesIndexing = useCallback(() => {
         const provider = providerRef.current;
@@ -1800,21 +1841,22 @@ const Page: React.FC = () => {
         loaded: notesCollectionsLoaded,
         error: notesCollectionsError,
         retry: retryNotesCollections,
-        addFolder: handleAddNotesFolder,
+        addFolder: addNotesFolder,
         removeCollection: handleRemoveNotesCollection,
         runIndex: runNotesIndex,
     } = useNotesCollections({
         isTauriRuntime,
         isGenerating:
             isPreparingMessage || isGenerating || isSessionSummaryGenerating,
-        isGenerationActive: isNotesGenerationActive,
+        isIndexingPaused: notesIndexingPaused,
+        isIndexingBlocked,
         modelReady: modelGateStatus === "ready",
         ensureProvider,
         cancelIndexing: cancelNotesIndexing,
         confirmRemoval: confirmNotesRemoval,
     });
 
-    const sourceDefaults = useMemo(
+    const availableSources = useMemo(
         () => ({
             packIds: knowledgePacks
                 .filter(
@@ -1831,80 +1873,28 @@ const Page: React.FC = () => {
     );
     const {
         selection: sourceSelection,
-        targetId: sourceSelectionTarget,
-        setEnabled: setChatSourceEnabled,
-        transferDraft: transferDraftSources,
-        resetDraft: resetDraftSources,
-        removeSelection: removeChatSources,
+        packSettingsReady,
+        disabledNoteIds,
+        disabledPackIds,
+        setPackEnabled: handleSetPackEnabled,
+        setNoteEnabled: handleSetNotesEnabled,
     } = useChatSources(
-        currentSessionId,
-        sourceDefaults,
-        isTauriRuntime && knowledgeCatalogLoaded && notesCollectionsLoaded,
-    );
-    const enabledKnowledgePackIds = useMemo(
-        () => new Set(sourceSelection?.packIds ?? []),
-        [sourceSelection],
-    );
-    const enabledNoteCollectionIds = useMemo(
-        () => new Set(sourceSelection?.noteCollectionIds ?? []),
-        [sourceSelection],
+        availableSources,
+        isTauriRuntime && knowledgeCatalogLoaded,
+        notesCollectionsLoaded,
     );
     const sourcesReady =
         Boolean(sourceSelection) &&
         knowledgeCatalogLoaded &&
         notesCollectionsLoaded;
-    const sourceSelectionDisabled =
-        isPreparingMessage ||
-        isGenerating ||
-        isSessionSummaryGenerating ||
-        !sourcesReady;
-    const openSources = useCallback(() => setShowSources(true), []);
-    const closeSources = useCallback(() => setShowSources(false), []);
-    const handleSetKnowledgePackEnabled = useCallback(
-        (stableId: string, enabled: boolean) => {
-            if (isNotesGenerationActive() || !sourceSelection) return;
-            setChatSourceEnabled(
-                sourceSelectionTarget,
-                "packIds",
-                stableId,
-                enabled,
-            );
-        },
-        [
-            isNotesGenerationActive,
-            setChatSourceEnabled,
-            sourceSelection,
-            sourceSelectionTarget,
-        ],
+    const handleAddNotesFolder = useCallback(
+        () =>
+            addNotesFolder((collection) => {
+                if (!notesCollections.some((item) => item.id === collection.id))
+                    handleSetNotesEnabled(collection.id, true);
+            }),
+        [addNotesFolder, handleSetNotesEnabled, notesCollections],
     );
-    const handleSetNotesCollectionEnabled = useCallback(
-        (collectionId: string, enabled: boolean) => {
-            if (isNotesGenerationActive() || !sourceSelection) return;
-            setChatSourceEnabled(
-                sourceSelectionTarget,
-                "noteCollectionIds",
-                collectionId,
-                enabled,
-            );
-        },
-        [
-            isNotesGenerationActive,
-            setChatSourceEnabled,
-            sourceSelection,
-            sourceSelectionTarget,
-        ],
-    );
-    const handleAddChatNotesFolder = useCallback(async () => {
-        const target = sourceSelectionTarget;
-        const collection = await handleAddNotesFolder();
-        if (collection)
-            setChatSourceEnabled(
-                target,
-                "noteCollectionIds",
-                collection.id,
-                true,
-            );
-    }, [handleAddNotesFolder, setChatSourceEnabled, sourceSelectionTarget]);
 
     const getModelSettings = useCallback((): ModelSettings => {
         return {
@@ -2266,6 +2256,55 @@ const Page: React.FC = () => {
         }
     }, [ensureProvider, formatErrorMessage, getModelSettings, showMiniDialog]);
 
+    const handleSettingsFlowVisibilityChange = useCallback(
+        (open: boolean) => {
+            if (!isTauriRuntime) return;
+            if (settingsFlowOpenRef.current === open) return;
+            settingsFlowOpenRef.current = open;
+            const epoch = ++notesWarmupEpochRef.current;
+            if (open) {
+                notesIdleScheduler.resumeNow();
+                return;
+            }
+            notesIdleScheduler.cancel();
+            notesIndexingPausedRef.current = true;
+            setNotesIndexingPaused(true);
+            void (async () => {
+                try {
+                    const canRestoreChat = () =>
+                        notesWarmupEpochRef.current === epoch &&
+                        !settingsFlowOpenRef.current &&
+                        !isChatBusy();
+                    if (!canRestoreChat()) return;
+                    const provider = await ensureProvider();
+                    if (!canRestoreChat()) return;
+                    await provider.cancelGeneration(-1);
+                    if (!canRestoreChat()) return;
+                    await provider.ensureModelReady(getModelSettings());
+                    if (!canRestoreChat()) return;
+                    setLoadedModelName(
+                        provider.getCurrentModel()?.name ?? null,
+                    );
+                } catch (error) {
+                    log.warn("Failed to restore chat model after Notes", error);
+                } finally {
+                    if (
+                        notesWarmupEpochRef.current === epoch &&
+                        !settingsFlowOpenRef.current
+                    )
+                        notesIdleScheduler.defer();
+                }
+            })();
+        },
+        [
+            ensureProvider,
+            getModelSettings,
+            isChatBusy,
+            isTauriRuntime,
+            notesIdleScheduler,
+        ],
+    );
+
     const prewarmSelectedImageInference = useCallback(() => {
         if (!isTauriRuntime) return;
         void (async () => {
@@ -2490,8 +2529,6 @@ const Page: React.FC = () => {
 
     const handleNewChat = useCallback(() => {
         cancelActiveGenerationForNavigation();
-        resetDraftSources();
-        setShowSources(false);
         setCurrentSessionId(undefined);
         currentSessionIdRef.current = undefined;
         setAllMessages([]);
@@ -2516,14 +2553,12 @@ const Page: React.FC = () => {
         focusInput,
         isSmall,
         resetPendingImages,
-        resetDraftSources,
         updateRouteSession,
     ]);
 
     const handleSelectSession = useCallback(
         (sessionId: string) => {
             cancelActiveGenerationForNavigation();
-            setShowSources(false);
             setCurrentSessionId(sessionId);
             currentSessionIdRef.current = sessionId;
             setIsDraftSession(false);
@@ -2543,7 +2578,6 @@ const Page: React.FC = () => {
     const removeSessionFromState = useCallback(
         (sessionId: string) => {
             manuallyRenamedSessionIdsRef.current.delete(sessionId);
-            removeChatSources(sessionId);
             setSessions((prev) =>
                 prev.filter((session) => session.sessionUuid !== sessionId),
             );
@@ -2552,8 +2586,6 @@ const Page: React.FC = () => {
             );
 
             if (currentSessionIdRef.current === sessionId) {
-                resetDraftSources();
-                setShowSources(false);
                 setCurrentSessionId(undefined);
                 currentSessionIdRef.current = undefined;
                 setIsDraftSession(true);
@@ -2561,7 +2593,7 @@ const Page: React.FC = () => {
                 updateRouteSession(undefined, true);
             }
         },
-        [removeChatSources, resetDraftSources, updateRouteSession],
+        [updateRouteSession],
     );
 
     const handleDeleteSession = useCallback(
@@ -2989,6 +3021,7 @@ const Page: React.FC = () => {
             sessionUuid,
             imagePaths,
             mediaMarker,
+            sources = sourceSelection,
         }: {
             promptText: string;
             parentMessage: ChatMessage;
@@ -2998,6 +3031,7 @@ const Page: React.FC = () => {
             sessionUuid?: string;
             imagePaths?: string[];
             mediaMarker?: string;
+            sources?: ChatSourceSelection;
         }): Promise<void> => {
             const parentMessageUuid = parentMessage.messageUuid;
             const activeSessionId =
@@ -3009,9 +3043,9 @@ const Page: React.FC = () => {
             ) {
                 return;
             }
-            if (isTauriRuntime && !sourcesReady) return;
-            const selectedPackIds = new Set(sourceSelection?.packIds);
-            const selectedNoteIds = new Set(sourceSelection?.noteCollectionIds);
+            if (isTauriRuntime && !sources) return;
+            const selectedPackIds = new Set(sources?.packIds);
+            const selectedNoteIds = new Set(sources?.noteCollectionIds);
             generationStartingRef.current = true;
             generationActiveRef.current = true;
             setIsGenerating(true);
@@ -3529,7 +3563,6 @@ const Page: React.FC = () => {
             systemPrompt,
             isTauriRuntime,
             sourceSelection,
-            sourcesReady,
             knowledgePacks,
             notesCollections,
         ],
@@ -3572,6 +3605,7 @@ const Page: React.FC = () => {
                 return;
             }
             const historyPath = slicePathUntil(messageState.path, parentUuid);
+            handleChatActivity();
             await startGeneration({
                 promptText: parentMessage.text,
                 parentMessage,
@@ -3583,6 +3617,7 @@ const Page: React.FC = () => {
         },
         [
             allMessages,
+            handleChatActivity,
             chatKey,
             currentSessionId,
             isDownloading,
@@ -3772,9 +3807,15 @@ const Page: React.FC = () => {
         [],
     );
     const handleDownloadKnowledgePack = useCallback(
-        (stableId: string, selectForChat?: string) => {
+        (stableId: string) => {
             if (activeKnowledgeDownloadsRef.current.has(stableId)) return;
             activeKnowledgeDownloadsRef.current.add(stableId);
+            const isNew = !knowledgePacks.some(
+                (pack) =>
+                    pack.stableId === stableId &&
+                    (pack.status === "ready" ||
+                        pack.status === "updateAvailable"),
+            );
 
             setKnowledgeErrors((current) => ({
                 ...current,
@@ -3791,18 +3832,12 @@ const Page: React.FC = () => {
                 }));
             })
                 .then((pack) => {
+                    if (isNew) handleSetPackEnabled(stableId, true);
                     setKnowledgePacks((current) =>
                         current.map((item) =>
                             item.stableId === stableId ? pack : item,
                         ),
                     );
-                    if (selectForChat)
-                        setChatSourceEnabled(
-                            selectForChat,
-                            "packIds",
-                            stableId,
-                            true,
-                        );
                 })
                 .catch((error: unknown) => {
                     const { name } = tauriCommandError(error);
@@ -3822,7 +3857,7 @@ const Page: React.FC = () => {
                     }));
                 });
         },
-        [refreshKnowledgeCatalog, setChatSourceEnabled],
+        [refreshKnowledgeCatalog, knowledgePacks, handleSetPackEnabled],
     );
     const handleCancelKnowledgePackDownload = useCallback(
         (stableId: string) => {
@@ -3834,22 +3869,6 @@ const Page: React.FC = () => {
         },
         [],
     );
-    const handleDownloadChatKnowledgePack = useCallback(
-        (stableId: string) => {
-            const installed = knowledgePacks.some(
-                (pack) =>
-                    pack.stableId === stableId &&
-                    (pack.status === "ready" ||
-                        pack.status === "updateAvailable"),
-            );
-            handleDownloadKnowledgePack(
-                stableId,
-                installed ? undefined : sourceSelectionTarget,
-            );
-        },
-        [handleDownloadKnowledgePack, knowledgePacks, sourceSelectionTarget],
-    );
-
     const handleBuildVersionTap = useCallback(() => {
         if (advancedUnlocked || typeof window === "undefined") return;
         if (buildVersionTapTimeoutRef.current) {
@@ -3951,61 +3970,6 @@ const Page: React.FC = () => {
         setShowSystemPromptSettings(false);
     }, []);
 
-    const closeAttachmentMenu = useCallback(() => {
-        setAttachmentAnchor(null);
-    }, []);
-
-    const handleDocumentSelect = useCallback(
-        (files: File[]) => {
-            closeAttachmentMenu();
-            void (async () => {
-                const results = await Promise.allSettled(
-                    files.map(async (file) => ({
-                        id: createDocumentId(),
-                        name: file.name,
-                        text: await file.text(),
-                        size: file.size,
-                    })),
-                );
-
-                const successful = results
-                    .filter(
-                        (
-                            result,
-                        ): result is PromiseFulfilledResult<DocumentAttachment> =>
-                            result.status === "fulfilled",
-                    )
-                    .map((result) => result.value);
-
-                if (successful.length) {
-                    setPendingDocuments((prev) => [...prev, ...successful]);
-                }
-
-                const failed = results.length - successful.length;
-                if (failed > 0) {
-                    showMiniDialog({
-                        title: "Some documents failed",
-                        message:
-                            "We could not read some documents. Please try again.",
-                    });
-                }
-            })();
-        },
-        [closeAttachmentMenu, showMiniDialog],
-    );
-
-    const handleDocumentCancel = useCallback(() => {
-        closeAttachmentMenu();
-    }, [closeAttachmentMenu]);
-
-    const {
-        getInputProps: getDocumentInputProps,
-        openSelector: openDocumentSelector,
-    } = useFileInput({
-        directory: false,
-        onSelect: handleDocumentSelect,
-        onCancel: handleDocumentCancel,
-    });
     const imageAttachmentSlotsRemaining = Math.max(
         0,
         MAX_IMAGE_ATTACHMENTS_PER_MESSAGE - pendingImages.length,
@@ -4033,7 +3997,6 @@ const Page: React.FC = () => {
 
     const handleImageSelect = useCallback(
         (files: File[]) => {
-            closeAttachmentMenu();
             if (imageAttachmentSlotsRemaining <= 0) return;
             const images = files.map((file) => ({
                 id: createAttachmentId(),
@@ -4052,22 +4015,8 @@ const Page: React.FC = () => {
                 });
             }
         },
-        [closeAttachmentMenu, imageAttachmentSlotsRemaining],
+        [imageAttachmentSlotsRemaining],
     );
-
-    const handleImageCancel = useCallback(() => {
-        closeAttachmentMenu();
-    }, [closeAttachmentMenu]);
-
-    const {
-        getInputProps: getImageInputProps,
-        openSelector: openImageSelector,
-    } = useFileInput({
-        directory: false,
-        accept: IMAGE_SELECTOR_ACCEPT,
-        onSelect: handleImageSelect,
-        onCancel: handleImageCancel,
-    });
 
     const processTauriImagePaths = useCallback(
         async (selectedPaths: string[], source: "picker" | "drop") => {
@@ -4077,7 +4026,6 @@ const Page: React.FC = () => {
                 imageAttachmentSlotsRemaining,
             );
             if (pathsToProcess.length === 0) {
-                handleImageCancel();
                 return;
             }
 
@@ -4121,8 +4069,6 @@ const Page: React.FC = () => {
                 if (files.length > 0) {
                     handleImageSelect(files);
                     prewarmSelectedImageInference();
-                } else {
-                    handleImageCancel();
                 }
             } catch (error) {
                 if (epoch !== imageAttachmentEpochRef.current) return;
@@ -4140,7 +4086,6 @@ const Page: React.FC = () => {
             }
         },
         [
-            handleImageCancel,
             handleImageSelect,
             imageAttachmentSlotsRemaining,
             prewarmSelectedImageInference,
@@ -4149,7 +4094,6 @@ const Page: React.FC = () => {
     );
 
     const openTauriImageSelector = useCallback(async () => {
-        closeAttachmentMenu();
         if (imageAttachmentSlotsRemaining <= 0) return;
         try {
             const { open: openFileDialog } =
@@ -4165,14 +4109,12 @@ const Page: React.FC = () => {
                 ],
             });
             if (!selection) {
-                handleImageCancel();
                 return;
             }
             const selectedPaths = Array.isArray(selection)
                 ? selection
                 : [selection];
             if (selectedPaths.length === 0) {
-                handleImageCancel();
                 return;
             }
             await processTauriImagePaths(selectedPaths, "picker");
@@ -4183,13 +4125,7 @@ const Page: React.FC = () => {
                 message: "Could not open the image picker. Please try again.",
             });
         }
-    }, [
-        closeAttachmentMenu,
-        handleImageCancel,
-        imageAttachmentSlotsRemaining,
-        processTauriImagePaths,
-        showMiniDialog,
-    ]);
+    }, [imageAttachmentSlotsRemaining, processTauriImagePaths, showMiniDialog]);
 
     useEffect(() => {
         if (!isTauriRuntime || !showImageAttachment) return;
@@ -4270,39 +4206,14 @@ const Page: React.FC = () => {
         showMiniDialog,
     ]);
 
-    const openAttachmentMenu = useCallback(() => {
-        closeAttachmentMenu();
-        if (showImageAttachment) {
-            if (isImageAttachmentLimitReached) return;
-            void openTauriImageSelector();
-            return;
-        }
-        openDocumentSelector();
+    const openPhotoPicker = useCallback(() => {
+        if (!showImageAttachment || isImageAttachmentLimitReached) return;
+        void openTauriImageSelector();
     }, [
-        closeAttachmentMenu,
-        isImageAttachmentLimitReached,
-        openDocumentSelector,
-        openTauriImageSelector,
         showImageAttachment,
+        isImageAttachmentLimitReached,
+        openTauriImageSelector,
     ]);
-
-    const handleAttachmentChoice = useCallback(
-        (choice: "image" | "document") => {
-            closeAttachmentMenu();
-            if (choice === "image") {
-                if (isImageAttachmentLimitReached) return;
-                openImageSelector();
-            } else {
-                openDocumentSelector();
-            }
-        },
-        [
-            closeAttachmentMenu,
-            isImageAttachmentLimitReached,
-            openDocumentSelector,
-            openImageSelector,
-        ],
-    );
 
     const removePendingDocument = useCallback((id: string) => {
         setPendingDocuments((prev) => prev.filter((doc) => doc.id !== id));
@@ -4353,7 +4264,9 @@ const Page: React.FC = () => {
         }
 
         pendingSendRef.current = true;
+        handleChatActivity();
         setIsPreparingMessage(true);
+        const messageSources = sourceSelection;
         try {
             setStickToBottom(true);
 
@@ -4365,7 +4278,6 @@ const Page: React.FC = () => {
                     onGenericError(error);
                     return;
                 }
-                transferDraftSources(activeSessionId);
                 setCurrentSessionId(activeSessionId);
                 currentSessionIdRef.current = activeSessionId;
                 setIsDraftSession(false);
@@ -4522,6 +4434,7 @@ const Page: React.FC = () => {
                         sessionUuid: activeSessionId,
                         imagePaths: inferenceImagePaths,
                         mediaMarker: MEDIA_MARKER,
+                        sources: messageSources,
                     });
                     return;
                 }
@@ -4557,6 +4470,7 @@ const Page: React.FC = () => {
                     sessionUuid: activeSessionId,
                     imagePaths: inferenceImagePaths,
                     mediaMarker: MEDIA_MARKER,
+                    sources: messageSources,
                 });
             } catch (error) {
                 if (!messageStored) await cleanupUnstoredAttachments();
@@ -4809,36 +4723,36 @@ const Page: React.FC = () => {
                         formatBytes={formatBytes}
                         isGenerating={isGenerating}
                         handleSend={handleSend}
+                        onActivity={handleChatActivity}
                         handleStopGeneration={handleStopGeneration}
-                        showSourcePicker={isTauriRuntime}
-                        openSources={openSources}
+                        retrySources={
+                            knowledgeCatalogError || notesCollectionsError
+                                ? () => {
+                                      void refreshKnowledgeCatalog();
+                                      retryNotesCollections();
+                                  }
+                                : undefined
+                        }
                         isPreparingMessage={isPreparingMessage}
-                        sourcesDisabled={sourceSelectionDisabled}
                         sourcesLoading={isTauriRuntime && !sourcesReady}
                         sourcesStatus={
                             isTauriRuntime && !sourcesReady
                                 ? knowledgeCatalogError || notesCollectionsError
-                                    ? "Couldn’t load sources. Open Sources to retry."
+                                    ? "Couldn’t load sources. Try again."
                                     : "Loading sources for this chat…"
                                 : undefined
                         }
                         showAttachmentPicker={isTauriRuntime}
-                        openAttachmentMenu={openAttachmentMenu}
-                        attachmentAnchor={attachmentAnchor}
-                        closeAttachmentMenu={closeAttachmentMenu}
-                        handleAttachmentChoice={handleAttachmentChoice}
+                        openPhotoPicker={openPhotoPicker}
                         showImageAttachment={showImageAttachment}
                         isImageAttachmentLimitReached={
                             isImageAttachmentLimitReached
                         }
-                        getDocumentInputProps={getDocumentInputProps}
-                        getImageInputProps={getImageInputProps}
                         actionButtonSx={actionButtonSx}
                         drawerIconButtonSx={drawerIconButtonSx}
                         smallIconProps={smallIconProps}
                         compactIconProps={compactIconProps}
                         actionIconProps={actionIconProps}
-                        stopButtonColor={theme.palette.error.main}
                     />
                     {showImageDropOverlay && (
                         <Box
@@ -4888,17 +4802,6 @@ const Page: React.FC = () => {
             </Box>
 
             <ChatDialogs
-                showSources={showSources}
-                closeSources={closeSources}
-                sourceSelectionDisabled={sourceSelectionDisabled}
-                handleDownloadChatKnowledgePack={
-                    handleDownloadChatKnowledgePack
-                }
-                handleAddChatNotesFolder={handleAddChatNotesFolder}
-                enabledNoteCollectionIds={enabledNoteCollectionIds}
-                handleSetNotesCollectionEnabled={
-                    handleSetNotesCollectionEnabled
-                }
                 showSettingsModal={showSettingsModal}
                 openSettingsModal={openSettingsModal}
                 closeSettingsModal={closeSettingsModal}
@@ -4944,23 +4847,30 @@ const Page: React.FC = () => {
                 handleSaveSystemPrompt={handleSaveSystemPrompt}
                 handleUseDefaultSystemPrompt={handleUseDefaultSystemPrompt}
                 knowledgePacks={knowledgePacks}
-                knowledgeCatalogLoading={knowledgeCatalogLoading}
+                knowledgeCatalogLoading={
+                    knowledgeCatalogLoading || !packSettingsReady
+                }
                 knowledgeCatalogError={knowledgeCatalogError}
                 retryKnowledgeCatalog={refreshKnowledgeCatalog}
-                enabledKnowledgePackIds={enabledKnowledgePackIds}
                 knowledgeDownloadProgress={knowledgeDownloadProgress}
                 knowledgeErrors={knowledgeErrors}
                 handleDownloadKnowledgePack={handleDownloadKnowledgePack}
                 handleCancelKnowledgePackDownload={
                     handleCancelKnowledgePackDownload
                 }
-                handleSetKnowledgePackEnabled={handleSetKnowledgePackEnabled}
                 notesCollections={notesCollections}
                 notesCollectionsLoading={notesCollectionsLoading}
                 notesCollectionsError={notesCollectionsError}
                 retryNotesCollections={retryNotesCollections}
                 handleAddNotesFolder={handleAddNotesFolder}
                 handleRemoveNotesCollection={handleRemoveNotesCollection}
+                onSettingsFlowVisibilityChange={
+                    handleSettingsFlowVisibilityChange
+                }
+                disabledNoteIds={disabledNoteIds}
+                disabledPackIds={disabledPackIds}
+                handleSetPackEnabled={handleSetPackEnabled}
+                handleSetNotesEnabled={handleSetNotesEnabled}
                 handleIndexNotesCollection={runNotesIndex}
                 chatNotificationOpen={chatNotificationOpen}
                 setChatNotificationOpen={setChatNotificationOpen}

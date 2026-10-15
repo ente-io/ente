@@ -9,7 +9,12 @@ interface NotesIndexCompletion {
 type NotesIndexActivity = "starting" | "queued" | "failed" | null;
 
 export type NotesCollectionActivity =
-    "starting" | "waitingForGeneration" | "waitingForModel" | "failed" | null;
+    | "starting"
+    | "waitingForGeneration"
+    | "waitingForModel"
+    | "waitingForChat"
+    | "failed"
+    | null;
 
 export interface NotesCollectionView extends NotesCollection {
     activity: NotesCollectionActivity;

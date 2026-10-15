@@ -25,7 +25,7 @@ struct MessageTextView: UIViewRepresentable {
         view.isScrollEnabled = true
         view.alwaysBounceVertical = false
         view.autocapitalizationType = .sentences
-        view.accessibilityLabel = "Write a message..."
+        view.accessibilityLabel = "Ask Ensu"
         view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         return view
     }
