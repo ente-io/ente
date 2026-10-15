@@ -18,6 +18,7 @@ import "package:photos/events/file_public_metadata_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/file/trash_file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/service_locator.dart";
@@ -73,13 +74,15 @@ void _cacheThumbnail(EnteFile file) {
 
 Widget _tile(
   EnteFile file, {
-  GalleryType type = GalleryType.homepage,
+  GalleryType? type,
+  GroupType groupType = GroupType.day,
   bool picker = false,
 }) {
   _cacheThumbnail(file);
   return GalleryContextState(
     sortOrderAsc: false,
     galleryType: type,
+    type: groupType,
     child: SizedBox(
       width: 87,
       height: 87,
@@ -302,11 +305,22 @@ void main() {
       await tester.pumpWidget(_host(_tile(file)));
       expect(find.byType(GalleryFileIndicators), findsOneWidget);
       expect(find.byIcon(Icons.notes_rounded), findsOneWidget);
-      for (final type in [
-        GalleryType.sharedPublicCollection,
-        GalleryType.trash,
+      await tester.pumpWidget(
+        _host(_tile(file, type: GalleryType.sharedPublicCollection)),
+      );
+      expect(find.byIcon(Icons.notes_rounded), findsOneWidget);
+      final trashed = DeviceTrashFile.from(
+        file,
+        deleteBy: DateTime.now()
+            .add(const Duration(days: 30))
+            .microsecondsSinceEpoch,
+      );
+      for (final (entry, groupType) in [
+        (trashed, GroupType.day),
+        (file, GroupType.size),
+        (_file()..debugCaption = "debug", GroupType.day),
       ]) {
-        await tester.pumpWidget(_host(_tile(file, type: type)));
+        await tester.pumpWidget(_host(_tile(entry, groupType: groupType)));
         expect(find.byType(GalleryFileIndicators), findsNothing);
       }
       await tester.pumpWidget(_host(_tile(file, picker: true)));

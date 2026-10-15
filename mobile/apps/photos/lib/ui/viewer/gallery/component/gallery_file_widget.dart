@@ -166,18 +166,6 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         galleryContext?.type != GroupType.size &&
         widget.file.debugCaption == null &&
         !localSettings.showLocalIDOverThumbnails &&
-        const {
-          GalleryType.homepage,
-          GalleryType.archive,
-          GalleryType.uncategorized,
-          GalleryType.hiddenSection,
-          GalleryType.hiddenOwnedCollection,
-          GalleryType.favorite,
-          GalleryType.localFolder,
-          GalleryType.sharedCollection,
-          GalleryType.ownedCollection,
-          GalleryType.searchResults,
-        }.contains(galleryContext?.galleryType) &&
         flagService.internalUser;
     final effectiveThumbnailSize =
         widget.thumbnailSize ??

@@ -1,6 +1,7 @@
 import "dart:typed_data";
 
 import "package:dio/dio.dart";
+import "package:ente_strings/ente_strings.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -112,6 +113,7 @@ void main() {
         buildNumber: "1",
       ),
     );
+    expect(flagService.internalUser, isTrue);
   });
 
   for (final startWithLongPress in [true, false]) {
@@ -137,6 +139,8 @@ void main() {
         if (!startWithLongPress) selectedFiles.selectAll({files.first});
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: StringsLocalizations.localizationsDelegates,
+            supportedLocales: StringsLocalizations.supportedLocales,
             home: GalleryBoundariesProvider(
               child: GalleryContextState(
                 sortOrderAsc: false,
