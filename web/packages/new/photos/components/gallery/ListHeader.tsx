@@ -14,8 +14,6 @@ interface GalleryItemsSummaryProps {
     description?: string;
     descriptionMaxWidth?: number;
     nameProps?: TypographyProps;
-    countProps?: TypographyProps;
-    titleSpacing?: number;
     fileCount: number;
     endIcon?: React.ReactNode;
     // This cannot be the only way to invoke the action; it is mouse-only.
@@ -28,15 +26,30 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
     description,
     descriptionMaxWidth,
     nameProps,
-    countProps,
-    titleSpacing,
     fileCount,
     endIcon,
     onNameClick,
     onDescriptionHeightChange,
 }) => (
     <Box sx={{ minWidth: 0 }}>
-        <Typography variant="h3" {...(nameProps ?? {})} onClick={onNameClick}>
+        <Typography
+            variant="h3"
+            {...(nameProps ?? {})}
+            sx={[
+                {
+                    fontFamily: '"Outfit Variable", Outfit, sans-serif',
+                    fontWeight: 600,
+                    fontSize: "24px",
+                    lineHeight: "32px",
+                },
+                ...(nameProps?.sx
+                    ? isSxArray(nameProps.sx)
+                        ? nameProps.sx
+                        : [nameProps.sx]
+                    : []),
+            ]}
+            onClick={onNameClick}
+        >
             {name}
         </Typography>
 
@@ -46,13 +59,17 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
                 gap: 1.5,
                 // Keep the header height stable without an end icon.
                 minHeight: "24px",
-                mt: titleSpacing,
+                mt: "4px",
             }}
         >
             <Typography
                 variant="small"
-                sx={{ color: "text.muted" }}
-                {...countProps}
+                sx={{
+                    color: "text.muted",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    lineHeight: "18px",
+                }}
             >
                 {t("photos_count", { count: fileCount })}
             </Typography>

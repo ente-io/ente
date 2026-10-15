@@ -126,23 +126,6 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
             <SpacedRow>
                 <GalleryItemsSummary
                     name={name}
-                    nameProps={{
-                        sx: {
-                            fontFamily: '"Outfit Variable", Outfit, sans-serif',
-                            fontWeight: 600,
-                            fontSize: "24px",
-                            lineHeight: "32px",
-                        },
-                    }}
-                    countProps={{
-                        sx: {
-                            color: "text.muted",
-                            fontSize: "14px",
-                            fontWeight: 500,
-                            lineHeight: "18px",
-                        },
-                    }}
-                    titleSpacing={0.25}
                     description={description}
                     descriptionMaxWidth={480}
                     fileCount={fileCount}
