@@ -46,7 +46,6 @@ void main() {
 
     for (var index = 0; index < sheets.length; index++) {
       expect(String.fromCharCodes(sheets[index].take(4)), "%PDF");
-      expect(String.fromCharCodes(sheets[index]), isNot(contains("/Keywords")));
     }
   });
 

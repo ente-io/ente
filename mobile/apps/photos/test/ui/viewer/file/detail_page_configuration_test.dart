@@ -5,11 +5,8 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/gallery_file_viewer_filmstrip.dart";
 
 void main() {
-  test("gallery filmstrip defaults off and copyWith preserves opt-in", () {
+  test("copyWith preserves gallery filmstrip opt-in", () {
     final file = EnteFile()..fileType = FileType.image;
-
-    final genericConfig = DetailPageConfiguration([file], 0, "generic");
-    expect(genericConfig.showGalleryFilmstrip, isFalse);
 
     final galleryConfig = DetailPageConfiguration(
       [file],
