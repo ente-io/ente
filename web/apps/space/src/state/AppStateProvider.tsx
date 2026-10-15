@@ -46,6 +46,7 @@ import {
     failLocalFeedPost,
 } from "utils/local-feed-post";
 import { prepareSpacePostImageFromEdit } from "utils/post-image";
+import { logSpaceImageReadCheck } from "utils/post-image-diagnostics";
 import { spacePostFrameAspectRatio } from "utils/post-photos";
 import { prepareSpaceVideo } from "utils/post-video";
 
@@ -248,6 +249,16 @@ export const SpaceAppStateProvider: React.FC<React.PropsWithChildren> = ({
                                           image.rotationDegrees,
                                       );
                             } catch (error) {
+                                if (!image.video)
+                                    void logSpaceImageReadCheck(
+                                        image.file,
+                                        error,
+                                        {
+                                            requestId: session.requestId,
+                                            attempt,
+                                            item: index + 1,
+                                        },
+                                    ).catch(() => undefined);
                                 const details =
                                     error instanceof Error
                                         ? {
