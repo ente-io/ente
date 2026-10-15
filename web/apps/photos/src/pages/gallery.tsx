@@ -30,6 +30,7 @@ import { Upload } from "@/components/Upload";
 import { WhatsNew } from "@/components/WhatsNew";
 import {
     GalleryEmptyState,
+    PeopleConsentDialog,
     PeopleEmptyState,
     SearchResultsHeader,
     type RemotePullOpts,
@@ -284,6 +285,8 @@ const Page: React.FC = () => {
     const lastAuthenticationForHiddenTimestamp = useRef<number>(0);
 
     const { show: showSidebar, props: sidebarVisibilityProps } =
+        useModalVisibility();
+    const { show: showPeopleConsent, props: peopleConsentVisibilityProps } =
         useModalVisibility();
     const { show: showPlanSelector, props: planSelectorVisibilityProps } =
         useModalVisibility();
@@ -1480,9 +1483,22 @@ const Page: React.FC = () => {
         [showCollectionSummary],
     );
 
-    const handleChangeBarMode = (mode: GalleryBarMode) => {
+    const handleShowPeople = () => {
+        if (!isMLEnabled()) {
+            showPeopleConsent();
+            return;
+        }
         setCleanupView(undefined);
-        dispatch({ type: mode == "people" ? "showPeople" : "showAlbums" });
+        dispatch({ type: "showPeople" });
+    };
+
+    const handleChangeBarMode = (mode: GalleryBarMode) => {
+        if (mode == "people") {
+            handleShowPeople();
+            return;
+        }
+        setCleanupView(undefined);
+        dispatch({ type: "showAlbums" });
     };
 
     const handleFileViewerToggleFavorite = useCallback(
@@ -1993,10 +2009,7 @@ const Page: React.FC = () => {
                     handleShowCollectionSummaryWithID(PseudoCollectionID.all)
                 }
                 onSelectSearchOption={handleSelectSearchOption}
-                onSelectPeople={() => {
-                    setCleanupView(undefined);
-                    dispatch({ type: "showPeople" });
-                }}
+                onSelectPeople={handleShowPeople}
                 onSelectPerson={handleSelectPerson}
                 galleryBarProps={
                     isCleanupViewOpen
@@ -2102,7 +2115,7 @@ const Page: React.FC = () => {
                   !isFirstLoad &&
                   state.view?.type == "people" &&
                   !state.view.activePerson ? (
-                    <PeopleEmptyState />
+                    <PeopleEmptyState onEnableML={showPeopleConsent} />
                 ) : (
                     <FileListWithViewer
                         mode={barMode}
@@ -2212,6 +2225,10 @@ const Page: React.FC = () => {
                 {sidebarVisibilityProps.open && subscriptionDialogs}
             </Sidebar>
             <WhatsNew {...whatsNewVisibilityProps} />
+            <PeopleConsentDialog
+                {...peopleConsentVisibilityProps}
+                onEnabled={handleShowPeople}
+            />
             <AssignPersonDialog
                 {...contextMenuAssignPersonProps}
                 people={namedPeople}

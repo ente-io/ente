@@ -16,6 +16,10 @@ import {
     TitledNestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
+import {
+    v2CancelButtonSx,
+    v2SubmitButtonSx,
+} from "ente-base/components/SingleInput.styles";
 import { RowCard } from "ente-base/components/v2/RowCard";
 import { useBaseContext } from "ente-base/context";
 import { useMLStatusSnapshot } from "ente-new/photos/components/utils/use-snapshot";
@@ -154,11 +158,15 @@ const FaceConsentDrawer: React.FC<FaceConsentDrawerProps> = ({
 interface FaceConsentProps {
     onConsent: () => void;
     onCancel: () => void;
+    submitting?: boolean;
+    variant?: "dialog";
 }
 
 export const FaceConsent: React.FC<FaceConsentProps> = ({
     onConsent,
     onCancel,
+    submitting = false,
+    variant,
 }) => {
     const [acceptTerms, setAcceptTerms] = useState(false);
 
@@ -176,8 +184,25 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
     );
 
     return (
-        <Stack sx={{ gap: 3, py: 1, px: 2 }}>
-            <Typography component="div" sx={{ color: "text.muted", px: "8px" }}>
+        <Stack
+            sx={
+                variant == "dialog" ? { gap: "20px" } : { gap: 3, py: 1, px: 2 }
+            }
+        >
+            <Typography
+                component="div"
+                sx={{
+                    color: "text.muted",
+                    ...(variant == "dialog"
+                        ? {
+                              fontSize: 14,
+                              lineHeight: "20px",
+                              "& p:first-of-type": { mt: 0 },
+                              "& p:last-of-type": { mb: 0 },
+                          }
+                        : { px: "8px" }),
+                }}
+            >
                 <Trans
                     i18nKey={"ml_consent_description"}
                     components={{ a: privacyPolicyLink }}
@@ -186,10 +211,21 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
             <FormGroup sx={{ width: "100%" }}>
                 <FormControlLabel
                     sx={{ color: "text.muted", ml: 0 }}
+                    slotProps={
+                        variant == "dialog"
+                            ? {
+                                  typography: {
+                                      sx: { fontSize: 14, lineHeight: "20px" },
+                                  },
+                              }
+                            : undefined
+                    }
                     control={
                         <Checkbox
                             size="small"
+                            sx={variant == "dialog" ? { pl: 0 } : undefined}
                             checked={acceptTerms}
+                            disabled={submitting}
                             onChange={(e) => setAcceptTerms(e.target.checked)}
                         />
                     }
@@ -201,14 +237,26 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
                     fullWidth
                     color="accent"
                     disabled={!acceptTerms}
+                    loading={submitting}
                     onClick={onConsent}
+                    sx={
+                        variant == "dialog"
+                            ? [v2SubmitButtonSx, { flex: "none" }]
+                            : undefined
+                    }
                 >
                     {t("ml_consent")}
                 </FocusVisibleButton>
                 <FocusVisibleButton
                     fullWidth
                     color="secondary"
+                    disabled={submitting}
                     onClick={onCancel}
+                    sx={
+                        variant == "dialog"
+                            ? [v2CancelButtonSx, { flex: "none" }]
+                            : undefined
+                    }
                 >
                     {t("cancel")}
                 </FocusVisibleButton>
