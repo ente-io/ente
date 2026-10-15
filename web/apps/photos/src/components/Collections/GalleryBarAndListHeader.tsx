@@ -12,7 +12,7 @@ import {
     type GalleryBarImplProps,
 } from "@/components/gallery/BarImpl";
 import { PeopleHeader } from "@/components/gallery/PeopleHeader";
-import { sortPeople, type PeopleSortBy } from "@/utils/people-sort";
+import { sortPeople } from "@/utils/people-sort";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import {
     isSaveCancelled,
@@ -46,8 +46,6 @@ export type GalleryBarAndListHeaderProps = Omit<
     | "onSelectCollectionID"
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
-    | "peopleSortBy"
-    | "onChangePeopleSortBy"
     | "onShowAllAlbums"
     | "onShowAllPeople"
 > & {
@@ -89,6 +87,8 @@ export const GalleryBarAndListHeader: React.FC<
     setActiveCollectionID,
     setBlockingLoad,
     people,
+    peopleSortBy,
+    onChangePeopleSortBy,
     onSelectPerson,
     allPeople,
     saveGroups,
@@ -134,8 +134,6 @@ export const GalleryBarAndListHeader: React.FC<
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
-    const [peopleSortBy, setPeopleSortBy] =
-        useState<PeopleSortBy>("count-desc");
 
     const sortedCollectionSummaries = useMemo(
         () =>
@@ -276,7 +274,7 @@ export const GalleryBarAndListHeader: React.FC<
                 onSelectCollectionID={selectCollection}
                 onSelectPerson={selectPerson}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
-                onChangePeopleSortBy={setPeopleSortBy}
+                onChangePeopleSortBy={onChangePeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
                 collectionSummaries={sortedCollectionSummaries.filter(
@@ -312,7 +310,7 @@ export const GalleryBarAndListHeader: React.FC<
                 allPeople={allPeople}
                 onSelectPerson={selectPerson}
                 peopleSortBy={peopleSortBy}
-                onChangePeopleSortBy={setPeopleSortBy}
+                onChangePeopleSortBy={onChangePeopleSortBy}
             />
             {activeCollection && (
                 <>

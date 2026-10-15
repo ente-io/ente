@@ -31,12 +31,12 @@ import { WhatsNew } from "@/components/WhatsNew";
 import {
     GalleryEmptyState,
     PeopleConsentDialog,
-    PeopleEmptyState,
     SearchResultsHeader,
     type RemotePullOpts,
 } from "@/components/gallery";
 import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
+import { PeopleOverview } from "@/components/gallery/PeopleOverview";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
 import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 import {
@@ -58,6 +58,7 @@ import { useIsOffline } from "@/components/utils/use-is-offline";
 import { shouldShowWhatsNew } from "@/services/changelog";
 import exportService from "@/services/export";
 import { processPendingAlbumJoin } from "@/services/join-album";
+import type { PeopleSortBy } from "@/utils/people-sort";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Link, Typography } from "@mui/material";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
@@ -213,6 +214,8 @@ const Page: React.FC = () => {
         context: { mode: "albums", collectionID: PseudoCollectionID.all },
     });
     const [blockingLoad, setBlockingLoad] = useState(false);
+    const [peopleSortBy, setPeopleSortBy] =
+        useState<PeopleSortBy>("count-desc");
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
         [],
@@ -2035,6 +2038,8 @@ const Page: React.FC = () => {
                               activeCollection: activeCollection!,
                               activeCollectionID: activeCollectionID!,
                               activePerson,
+                              peopleSortBy,
+                              onChangePeopleSortBy: setPeopleSortBy,
                               setFileListHeader,
                               saveGroups,
                               canCreateAlbum: !isInArchiveSection,
@@ -2129,7 +2134,11 @@ const Page: React.FC = () => {
                   !isFirstLoad &&
                   state.view?.type == "people" &&
                   !state.view.activePerson ? (
-                    <PeopleEmptyState />
+                    <PeopleOverview
+                        people={state.view.visiblePeople}
+                        peopleSortBy={peopleSortBy}
+                        onSelectPerson={handleSelectPerson}
+                    />
                 ) : (
                     <FileListWithViewer
                         mode={barMode}
