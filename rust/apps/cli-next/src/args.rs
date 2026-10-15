@@ -1,6 +1,7 @@
 use std::{io::IsTerminal, num::NonZeroUsize, path::PathBuf};
 
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{Arg, ArgAction, Args, CommandFactory, Parser, Subcommand, ValueEnum};
+use clap_complete::Shell;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -25,6 +26,15 @@ pub struct Cli {
     pub options: Options,
     #[command(subcommand)]
     pub command: Command,
+}
+
+pub fn command() -> clap::Command {
+    Cli::command().subcommand_required(false).arg(
+        Arg::new("help-all")
+            .long("help-all")
+            .action(ArgAction::SetTrue)
+            .help("Print help for all commands"),
+    )
 }
 
 #[derive(Args)]
@@ -122,6 +132,26 @@ Keep the same home and key across unattended invocations."
         #[command(subcommand)]
         command: VaultCommand,
     },
+    #[command(
+        about = "Print a shell completion script",
+        after_help = "Enable completion in the current shell, or add the commands to its startup file:
+  Bash (~/.bashrc):
+    eval \"$(ente-cli-next completion bash)\"
+  Zsh (~/.zshrc):
+    autoload -Uz compinit; compinit
+    source <(ente-cli-next completion zsh)
+  PowerShell ($PROFILE):
+    ente-cli-next completion powershell | Out-String | Invoke-Expression
+  Elvish (~/.config/elvish/rc.elv):
+    eval (ente-cli-next completion elvish | slurp)
+
+Fish loads a saved script on demand. Write it once, and again after upgrading:
+  mkdir -p ~/.config/fish/completions
+  ente-cli-next completion fish > ~/.config/fish/completions/ente-cli-next.fish
+
+Prints the script to stdout, including when --json is set."
+    )]
+    Completion { shell: Shell },
 }
 
 #[derive(Subcommand)]
