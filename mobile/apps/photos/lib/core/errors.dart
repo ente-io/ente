@@ -89,7 +89,7 @@ class InvalidStateError extends AssertionError {
 
 class SrpSetupNotCompleteError extends Error {}
 
-class IncorrectPasswordError implements Exception {
+class IncorrectPasswordError implements Exception, LocallyHandledError {
   @override
   String toString() => "Incorrect password";
 }
