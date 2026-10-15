@@ -57,7 +57,10 @@ html[data-space-ios-pwa]
     padding-bottom: var(--space-bottom-nav-height);
 }
 
-.space-app-layout[data-space-conversation] {
+.space-app-layout[data-space-conversation],
+.space-app-layout[data-space-settings],
+.space-app-layout[data-space-profile],
+.space-app-layout[data-space-notifications] {
     --space-bottom-nav-height: 0px;
 }
 
