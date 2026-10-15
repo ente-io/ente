@@ -14,6 +14,8 @@ interface GalleryItemsSummaryProps {
     description?: string;
     descriptionMaxWidth?: number;
     nameProps?: TypographyProps;
+    countProps?: TypographyProps;
+    titleSpacing?: number;
     fileCount: number;
     endIcon?: React.ReactNode;
     // This cannot be the only way to invoke the action; it is mouse-only.
@@ -26,6 +28,8 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
     description,
     descriptionMaxWidth,
     nameProps,
+    countProps,
+    titleSpacing,
     fileCount,
     endIcon,
     onNameClick,
@@ -42,9 +46,14 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
                 gap: 1.5,
                 // Keep the header height stable without an end icon.
                 minHeight: "24px",
+                mt: titleSpacing,
             }}
         >
-            <Typography variant="small" sx={{ color: "text.muted" }}>
+            <Typography
+                variant="small"
+                sx={{ color: "text.muted" }}
+                {...countProps}
+            >
                 {t("photos_count", { count: fileCount })}
             </Typography>
             {endIcon && (

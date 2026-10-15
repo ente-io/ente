@@ -126,6 +126,23 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
             <SpacedRow>
                 <GalleryItemsSummary
                     name={name}
+                    nameProps={{
+                        sx: {
+                            fontFamily: '"Outfit Variable", Outfit, sans-serif',
+                            fontWeight: 600,
+                            fontSize: "24px",
+                            lineHeight: "32px",
+                        },
+                    }}
+                    countProps={{
+                        sx: {
+                            color: "text.muted",
+                            fontSize: "14px",
+                            fontWeight: 500,
+                            lineHeight: "18px",
+                        },
+                    }}
+                    titleSpacing={0.25}
                     description={description}
                     descriptionMaxWidth={480}
                     fileCount={fileCount}
@@ -705,7 +722,10 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 <OverflowMenu
                     ariaID="collection-options"
                     triggerButtonIcon={
-                        <MoreHorizIcon ref={overflowMenuIconRef} />
+                        <MoreHorizIcon
+                            ref={overflowMenuIconRef}
+                            sx={{ fontSize: 28 }}
+                        />
                     }
                 >
                     {validMenuOptions}
@@ -872,8 +892,8 @@ type DownloadQuickOptionProps = OptionProps & {
 
 const DownloadIcon: React.FC = () => (
     <svg
-        width="22"
-        height="22"
+        width="26"
+        height="26"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -938,8 +958,8 @@ interface ShareQuickOptionProps {
 
 const ShareIcon: React.FC = () => (
     <svg
-        width="21"
-        height="19"
+        width="26"
+        height="24"
         viewBox="0 0 22 20"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
