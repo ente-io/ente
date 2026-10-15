@@ -1,2 +1,0 @@
-- Improved action sheet legibility with consistent icons and text.
-- Made selection actions respond faster and collapse reliably while browsing.

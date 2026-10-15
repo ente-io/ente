@@ -1,1 +1,0 @@
-- Redesigned the empty Feed and Albums screens.

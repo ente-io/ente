@@ -1,1 +1,0 @@
-- Made album options more compact with layouts that fit landscape and tablets.
