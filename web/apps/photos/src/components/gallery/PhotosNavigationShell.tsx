@@ -108,14 +108,6 @@ export const PhotosNavigationShell: React.FC<
         setNavigationCollapsed(false);
         if (mobile) showMobileNavigation();
     };
-    const hasContentPadding =
-        showRail &&
-        !(
-            props.mode == "people" &&
-            !props.isInSearchMode &&
-            galleryBarProps &&
-            !galleryBarProps.activePerson
-        );
     return (
         <Stack
             sx={(theme) => ({
@@ -221,13 +213,13 @@ export const PhotosNavigationShell: React.FC<
                             flex: 1,
                             minWidth: 0,
                             minHeight: 0,
-                            pt: hasContentPadding
+                            pt: showRail
                                 ? {
                                       xs: `${thumbnailGridPadding}px`,
                                       md: "36px",
                                   }
                                 : 0,
-                            px: hasContentPadding ? { xs: 0, md: "12px" } : 0,
+                            px: showRail ? { xs: 0, md: "12px" } : 0,
                             ...(showRail && {
                                 "--mui-palette-background-default": "#FFFFFF",
                                 bgcolor: "background.default",

@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { ItemCard } from "ente-new/photos/components/Tiles";
 import { UnstyledButton } from "ente-new/photos/components/UnstyledButton";
+import { thumbnailGridPadding } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import type { Person } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import { useMemo } from "react";
@@ -36,7 +37,7 @@ export const PeopleOverview = ({
                 flex: 1,
                 minHeight: 0,
                 overflow: "hidden",
-                p: { xs: "16px 14px", md: "36px" },
+                px: `${thumbnailGridPadding}px`,
                 gap: "24px",
             }}
         >
