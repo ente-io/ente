@@ -41,12 +41,27 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
     const isConversation = router.pathname.startsWith(
         `${spaceRoutes.messages}/`,
     );
-    const isFriendPreview =
-        router.pathname == spaceRoutes.friends &&
-        typeof router.query.friend == "string" &&
-        router.query.expanded != "1";
+    const isSettingsPage =
+        router.pathname == spaceRoutes.settings ||
+        router.pathname == spaceRoutes.settingsProfileName ||
+        router.pathname == spaceRoutes.profilePhoto ||
+        router.pathname == spaceRoutes.editProfilePhoto ||
+        router.pathname == spaceRoutes.profileCover ||
+        router.pathname == spaceRoutes.editProfileCover;
+    const isProfilePage =
+        router.pathname == spaceRoutes.profile ||
+        router.pathname == spaceRoutes.friendPage ||
+        (router.pathname == spaceRoutes.friends &&
+            typeof router.query.friend == "string" &&
+            router.query.expanded == "1");
+    const isNotificationsPage = router.pathname == spaceRoutes.notifications;
     const showNavigation =
-        isAppPage && Boolean(profile) && !isConversation && !isFriendPreview;
+        isAppPage &&
+        Boolean(profile) &&
+        !isConversation &&
+        !isSettingsPage &&
+        !isProfilePage &&
+        !isNotificationsPage;
     const spaceID =
         isAppPage && profileLoadStatus == "ready"
             ? profile?.spaceId
@@ -174,6 +189,9 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
                 ref={layoutRef}
                 className={isAppPage ? "space-app-layout" : undefined}
                 data-space-conversation={isConversation || undefined}
+                data-space-settings={isSettingsPage || undefined}
+                data-space-profile={isProfilePage || undefined}
+                data-space-notifications={isNotificationsPage || undefined}
             >
                 {children}
                 {showNavigation && (
