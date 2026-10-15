@@ -34,7 +34,7 @@ Future<bool> confirmSharedMediaBackup(
             closeResult: false,
             actions: [
               ButtonComponent(
-                label: l10n.add,
+                label: l10n.addAnyway,
                 shouldSurfaceExecutionStates: false,
                 onTap: () => Navigator.of(sheetContext).pop(true),
               ),

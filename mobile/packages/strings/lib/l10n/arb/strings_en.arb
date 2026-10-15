@@ -62,6 +62,10 @@
   "add": "Add",
   "addAlbumWidgetPrompt": "Add an album widget to your home screen to customize it here.",
   "addANameAndPhoto": "Add a name and photo",
+  "addAnyway": "Add anyway",
+  "@addAnyway": {
+    "description": "Action to add shared photos despite a warning that their locations may be missing."
+  },
   "addCode": "Add code",
   "addedAMemoryTo": "added a memory to {albumName}",
   "@addedAMemoryTo": {
@@ -4100,8 +4104,8 @@
     }
   },
   "sharedPhotoNotifications": "New shared photos and albums",
-  "sharedPhotoLocationWarningTitle": "May lack location",
-  "sharedPhotoLocationWarningMessage": "Photos shared from other apps may lose their location data. Use “{addFromDevice}” in an album to preserve it.",
+  "sharedPhotoLocationWarningTitle": "Keep photo locations",
+  "sharedPhotoLocationWarningMessage": "Photos shared from other apps may be missing their locations. Use “{addFromDevice}” in an album to keep them.",
   "@sharedPhotoLocationWarningMessage": {
     "description": "Precaution before backing up photos shared from another app. addFromDevice is the localized action label.",
     "placeholders": {"addFromDevice": {"type": "String"}}
