@@ -63,7 +63,7 @@ pub struct ListArgs {
         long,
         default_value_t = DEFAULT_LIST_LIMIT,
         value_parser = clap::value_parser!(u32).range(1..),
-        help = "Maximum number of results; does not limit metadata refresh"
+        help = "Maximum number of results shown"
     )]
     pub limit: u32,
     #[arg(long, conflicts_with = "limit", help = "List every result")]
@@ -152,6 +152,20 @@ Fish loads a saved script on demand. Write it once, and again after upgrading:
 Prints the script to stdout, including when --json is set."
     )]
     Completion { shell: Shell },
+    #[command(about = "Administer an Ente server", after_long_help = ADMIN_HELP)]
+    Admin {
+        #[command(flatten)]
+        selector: AccountSelector,
+        #[arg(
+            long,
+            global = true,
+            value_enum,
+            help = "Saved app session; defaults to the sole app, otherwise Photos"
+        )]
+        app: Option<App>,
+        #[command(subcommand)]
+        command: AdminCommand,
+    },
 }
 
 #[derive(Subcommand)]
@@ -516,6 +530,124 @@ pub enum VaultCommand {
 pub enum KeyCommand {
     #[command(about = "Print a new vault key for ENTE_CLI_VAULT_KEY")]
     Generate,
+}
+
+const ADMIN_HELP: &str =
+    "Uses the selected account's server and saved login; the server grants administrator access.
+Log in with: ente-cli-next account login NAME --app photos --host URL
+--account selects a saved account by name; otherwise uses the selected or sole account.
+--app selects its session; otherwise uses the sole saved app, then Photos.
+With multiple apps and no Photos login, supply --app.
+Listing users, deleting users and disabling TOTP require a login less than ten minutes old.
+Changes to users require confirmation; --yes approves them, --no-input only disables prompts.
+All admin commands require network access. --json prints results, not prompts or errors.
+
+Examples:
+  ente-cli-next admin --account home user view alice@example.com
+  ente-cli-next admin --account home user update-subscription alice@example.com --no-limit
+  ente-cli-next admin --account home user list --all --no-input --json";
+
+#[derive(Subcommand)]
+pub enum AdminCommand {
+    #[command(about = "Inspect and manage users")]
+    User {
+        #[command(subcommand)]
+        command: AdminUserCommand,
+    },
+    #[command(about = "Test server email")]
+    Email {
+        #[command(subcommand)]
+        command: AdminEmailCommand,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum AdminUserCommand {
+    #[command(
+        about = "List users",
+        after_long_help = "Requires a login less than ten minutes old.
+Lists users in creation order. Fetches all users matching --since before applying --limit.
+--since accepts YYYY-MM-DD (midnight UTC) or RFC3339 with a timezone.
+JSON returns an array: id and email (strings), createdAt (RFC3339)."
+    )]
+    List {
+        #[command(flatten)]
+        list: ListArgs,
+        #[arg(long, value_name = "WHEN", value_parser = crate::admin::parse_date, help = "Include users created strictly after this instant")]
+        since: Option<i64>,
+    },
+    #[command(
+        about = "Show a user's ID and subscription",
+        after_long_help = "JSON returns id, email, createdAt and subscription.
+subscription contains productId, storageBytes and expiresAt, or null when unavailable.
+IDs are strings; timestamps are RFC3339; storageBytes is an integer."
+    )]
+    View {
+        #[arg(value_name = "USER", help = "User email or numeric ID")]
+        user: String,
+    },
+    #[command(
+        about = "Delete an account and schedule its data cleanup",
+        after_long_help = "Requires a login less than ten minutes old. Reports whether the server cancelled the subscription."
+    )]
+    Delete(AdminTarget),
+    #[command(
+        about = "Disable authenticator-code two-factor authentication",
+        after_long_help = "Requires a login less than ten minutes old. Leaves passkeys enabled."
+    )]
+    DisableTotp(AdminTarget),
+    #[command(
+        about = "Remove all of a user's passkeys",
+        after_long_help = "Leaves authenticator-code two-factor authentication enabled."
+    )]
+    RemovePasskeys(AdminTarget),
+    #[command(
+        about = "Change a free plan's storage or expiry",
+        after_long_help = "--no-limit sets 100 TB (100 × 1024^4 bytes) and expiry 100 calendar years from now.
+Alternatively supply --storage, --expires or both; omitted values stay unchanged.
+With neither, prompts to choose the preset or custom values. --no-input requires explicit values and --yes.
+Sizes accept MB, GB and TB, case-insensitive, using powers of 1024; fractions are allowed.
+Dates accept YYYY-MM-DD (00:00 UTC at the start of that date) or RFC3339 with a timezone.
+Shows old and new limits before confirmation. Paid plans are rejected."
+    )]
+    UpdateSubscription(SubscriptionArgs),
+}
+
+#[derive(Args)]
+pub struct AdminTarget {
+    #[arg(value_name = "USER", help = "User email or numeric ID")]
+    pub user: String,
+    #[arg(long, help = "Approve this change without prompting")]
+    pub yes: bool,
+}
+
+#[derive(Args)]
+pub struct SubscriptionArgs {
+    #[command(flatten)]
+    pub target: AdminTarget,
+    #[arg(long, conflicts_with_all = ["storage", "expires"], help = "Set 100 TB of storage and another 100 years")]
+    pub no_limit: bool,
+    #[arg(long, value_name = "SIZE", value_parser = crate::admin::parse_size, help = "Storage limit, e.g. 500GB or 1.5TB")]
+    pub storage: Option<i64>,
+    #[arg(long, value_name = "WHEN", value_parser = crate::admin::parse_date, help = "Expiry date or timestamp")]
+    pub expires: Option<i64>,
+}
+
+#[derive(Subcommand)]
+pub enum AdminEmailCommand {
+    #[command(
+        about = "Send a fixed test message through the server",
+        after_long_help = "Reports request acceptance, not delivery. An unconfigured server may accept without sending.
+The server's SMTP configuration can override the supplied sender."
+    )]
+    Test {
+        #[arg(long, help = "Recipient email")]
+        to: String,
+        #[arg(long, help = "Sender email")]
+        from: String,
+        #[arg(long, default_value = "Ente", help = "Sender name")]
+        from_name: String,
+    },
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, ValueEnum)]

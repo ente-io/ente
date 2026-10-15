@@ -29,7 +29,7 @@ fn require_srp_m2(auth_response: &AuthResponse) -> Result<&str> {
 }
 
 pub struct AccountsClient {
-    api: Api,
+    pub(crate) api: Api,
     client_package: String,
 }
 

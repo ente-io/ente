@@ -1,19 +1,14 @@
 #![cfg(test)]
 #![cfg(feature = "museum")]
 
-use std::time::{SystemTime, UNIX_EPOCH};
-
 use ente_accounts::{
     AccountsClient, AccountsClientConfig, TwoFactorSetup,
     login::{LoginFlow, LoginStep},
     signup::Signup,
 };
+use ente_test_support::account_fixture::current_totp;
 use ente_test_support::{HARDCODED_OTT, HARDCODED_OTT_EMAIL_SUFFIX, Museum, TestResult};
-use hmac::{Hmac, KeyInit, Mac};
-use sha1::Sha1;
 use uuid::Uuid;
-
-type HmacSha1 = Hmac<Sha1>;
 
 #[test]
 fn accounts() -> TestResult {
@@ -44,7 +39,7 @@ async fn run(endpoint: String) -> TestResult {
     )
     .await?;
     setup
-        .enable(&client, &current_totp(&setup.secret_code))
+        .enable(&client, &current_totp(&setup.secret_code)?)
         .await?;
 
     let login_client = accounts_client(endpoint);
@@ -54,7 +49,7 @@ async fn run(endpoint: String) -> TestResult {
             LoginStep::EmailCode => flow.submit_code(&login_client, HARDCODED_OTT).await?,
             LoginStep::Password => flow.submit_password(&login_client, &password).await?,
             LoginStep::SecondFactor { totp: true, .. } => {
-                flow.submit_code(&login_client, &current_totp(&setup.secret_code))
+                flow.submit_code(&login_client, &current_totp(&setup.secret_code)?)
                     .await?
             }
             LoginStep::SecondFactor { .. } => panic!("expected authenticator verification"),
@@ -75,42 +70,4 @@ fn accounts_client(endpoint: &str) -> AccountsClient {
             .with_user_agent("ente-accounts-e2e"),
     )
     .unwrap()
-}
-
-fn current_totp(secret: &str) -> String {
-    let key = decode_base32(secret);
-    let counter = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_secs()
-        / 30;
-    let mut mac = HmacSha1::new_from_slice(&key).unwrap();
-    mac.update(&counter.to_be_bytes());
-    let digest = mac.finalize().into_bytes();
-    let offset = (digest[19] & 0x0f) as usize;
-    let binary = ((digest[offset] as u32 & 0x7f) << 24)
-        | ((digest[offset + 1] as u32) << 16)
-        | ((digest[offset + 2] as u32) << 8)
-        | digest[offset + 3] as u32;
-    format!("{:06}", binary % 1_000_000)
-}
-
-fn decode_base32(secret: &str) -> Vec<u8> {
-    let mut output = Vec::new();
-    let mut buffer = 0u32;
-    let mut bits = 0u8;
-    for ch in secret.chars().filter(|ch| *ch != '=') {
-        let value = match ch {
-            'A'..='Z' => ch as u8 - b'A',
-            '2'..='7' => ch as u8 - b'2' + 26,
-            _ => panic!("invalid base32 character: {ch}"),
-        } as u32;
-        buffer = (buffer << 5) | value;
-        bits += 5;
-        while bits >= 8 {
-            bits -= 8;
-            output.push(((buffer >> bits) & 0xff) as u8);
-        }
-    }
-    output
 }

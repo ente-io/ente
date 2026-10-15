@@ -28,7 +28,15 @@ fn completion_prints_scripts_without_storage() {
         assert!(output.stderr.is_empty(), "{shell}");
         let script = String::from_utf8(output.stdout).unwrap();
         assert!(serde_json::from_str::<Value>(&script).is_err(), "{shell}");
-        for item in ["help-all", "account", "paste", "hardlinks", "completion"] {
+        for item in [
+            "help-all",
+            "account",
+            "paste",
+            "hardlinks",
+            "completion",
+            "admin",
+            "update-subscription",
+        ] {
             assert!(script.contains(item), "{shell}: {item}");
         }
         assert!(!path.exists(), "{shell} created the CLI home");
@@ -983,21 +991,28 @@ fn failure(output: &Output) -> String {
     String::from_utf8_lossy(&output.stderr).into_owned()
 }
 
-#[path = "support/files.rs"]
-mod files;
+#[path = "support/admin.rs"]
+mod admin;
+
+#[cfg(feature = "museum")]
+#[path = "support/admin_museum.rs"]
+mod admin_museum;
 
 #[path = "support/auth.rs"]
 mod auth;
 
-#[path = "support/paste.rs"]
-mod paste;
+#[path = "support/export_process.rs"]
+mod export_process;
+
+#[path = "support/export_sources.rs"]
+mod export_sources;
+
+#[path = "support/files.rs"]
+mod files;
 
 #[cfg(feature = "museum")]
 #[path = "support/museum.rs"]
 mod museum;
 
-#[path = "support/export_sources.rs"]
-mod export_sources;
-
-#[path = "support/export_process.rs"]
-mod export_process;
+#[path = "support/paste.rs"]
+mod paste;
