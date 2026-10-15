@@ -1,1 +1,0 @@
-- Fixed duplicated text and drawings moving together in the photo editor.

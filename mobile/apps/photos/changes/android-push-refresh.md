@@ -1,1 +1,0 @@
-- Added support for push-triggered background refresh on Android.

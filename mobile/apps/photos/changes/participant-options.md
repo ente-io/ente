@@ -1,1 +1,0 @@
-- Made album participants' roles visible and their sharing options easier to open.
