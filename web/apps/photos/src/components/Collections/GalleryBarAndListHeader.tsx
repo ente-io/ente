@@ -225,7 +225,7 @@ export const GalleryBarAndListHeader: React.FC<
             ) : (
                 <></>
             ),
-            height: 68 + (albumDescription ? descriptionHeight : 0),
+            height: 72 + (albumDescription ? descriptionHeight : 0),
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
