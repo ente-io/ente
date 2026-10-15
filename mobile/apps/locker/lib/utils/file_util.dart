@@ -415,7 +415,9 @@ class FileUtil {
       file,
       fallbackPath: localFile.path,
     ).toLowerCase();
-    if (extension != '.pdf' || !(Platform.isAndroid || Platform.isIOS)) {
+    if (extension != '.pdf' ||
+        MediaQuery.accessibleNavigationOf(context) ||
+        !(Platform.isAndroid || Platform.isIOS)) {
       return openExternally(context);
     }
 
