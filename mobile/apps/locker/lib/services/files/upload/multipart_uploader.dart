@@ -8,7 +8,6 @@ class MultipartUploader {
   static const partSize = 20 * 1024 * 1024;
   static const _maximumAttempts = 3;
 
-  // The default IO adapter streams file ranges; NativeAdapter buffers them.
   final _dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 15)));
   final _logger = Logger('MultipartUploader');
 
@@ -62,7 +61,6 @@ class MultipartUploader {
           responseType: ResponseType.plain,
         ),
       );
-      // S3 can return an error in the body after sending HTTP 200 headers.
       if (!(response.data?.contains('<CompleteMultipartUploadResult') ??
           false)) {
         throw DioException(
