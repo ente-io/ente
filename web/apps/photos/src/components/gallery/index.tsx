@@ -256,8 +256,8 @@ export const PeopleConsentDialog: React.FC<
         setSubmitting(true);
         try {
             await enableML();
-            onClose();
             onEnabled();
+            onClose();
         } finally {
             submittingRef.current = false;
             setSubmitting(false);

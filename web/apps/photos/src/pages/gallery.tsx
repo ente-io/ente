@@ -288,6 +288,9 @@ const Page: React.FC = () => {
         useModalVisibility();
     const { show: showPeopleConsent, props: peopleConsentVisibilityProps } =
         useModalVisibility();
+    const pendingPeopleSearchReset = useRef<(() => void) | undefined>(
+        undefined,
+    );
     const { show: showPlanSelector, props: planSelectorVisibilityProps } =
         useModalVisibility();
     const {
@@ -1483,11 +1486,13 @@ const Page: React.FC = () => {
         [showCollectionSummary],
     );
 
-    const handleShowPeople = () => {
+    const handleShowPeople = (onNavigate?: () => void) => {
         if (!isMLEnabled()) {
+            pendingPeopleSearchReset.current = onNavigate;
             showPeopleConsent();
             return false;
         }
+        onNavigate?.();
         setCleanupView(undefined);
         dispatch({ type: "showPeople" });
         return true;
@@ -2228,7 +2233,13 @@ const Page: React.FC = () => {
             <WhatsNew {...whatsNewVisibilityProps} />
             <PeopleConsentDialog
                 {...peopleConsentVisibilityProps}
-                onEnabled={handleShowPeople}
+                onClose={() => {
+                    pendingPeopleSearchReset.current = undefined;
+                    peopleConsentVisibilityProps.onClose();
+                }}
+                onEnabled={() =>
+                    handleShowPeople(pendingPeopleSearchReset.current)
+                }
             />
             <AssignPersonDialog
                 {...contextMenuAssignPersonProps}
