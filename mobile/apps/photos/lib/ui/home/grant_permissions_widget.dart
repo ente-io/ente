@@ -15,7 +15,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/permission_granted_event.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import 'package:photos/services/sync/sync_service.dart';
@@ -225,7 +224,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget>
       final state = await permissionService.requestPhotoMangerPermissions();
       _logger.info("Offline permission state: $state");
       if (state.hasAccess) {
-        // Otherwise the resume check enters after the preference reload.
         if (WidgetsBinding.instance.lifecycleState ==
             AppLifecycleState.resumed) {
           await _enterLocalGallery(state);
@@ -257,15 +255,11 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget>
   }
 
   Future<void> _enterLocalGallery(PermissionState state) async {
-    if (_isEnteringLocalGallery) {
+    if (!mounted || !widget.startWithoutAccount || _isEnteringLocalGallery) {
       return;
     }
     _isEnteringLocalGallery = true;
     try {
-      await AppLifecycleService.instance.preferencesReloaded;
-      if (!mounted || !widget.startWithoutAccount) {
-        return;
-      }
       await localSettings.setAppMode(AppMode.localGallery);
       localSettings.localGalleryModeEnabledThisSession = true;
       try {
