@@ -3,11 +3,13 @@ use std::io::Write;
 use anyhow::{Context, Result};
 use chrono::{DateTime, SecondsFormat};
 use dialoguer::console::{Alignment, measure_text_width, pad_str};
+use ente_accounts::admin::{Subscription, User, UserDetails};
 use ente_photos::{
     collections::{Collection, Visibility},
     files::File,
 };
 use serde::Serialize;
+use serde_json::json as json_value;
 use uuid::Uuid;
 
 use crate::{
@@ -118,6 +120,42 @@ impl FileView {
             width: file.width,
             height: file.height,
             visibility: file.visibility.map(Visibility::name),
+        })
+    }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminUserView {
+    id: String,
+    email: String,
+    created_at: String,
+}
+
+impl AdminUserView {
+    pub fn new(user: &User) -> Result<Self> {
+        Ok(Self {
+            id: user.id.to_string(),
+            email: user.email.clone(),
+            created_at: timestamp(user.created_at)?,
+        })
+    }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubscriptionView {
+    product_id: String,
+    pub storage_bytes: i64,
+    pub expires_at: String,
+}
+
+impl SubscriptionView {
+    pub fn new(subscription: &Subscription) -> Result<Self> {
+        Ok(Self {
+            product_id: subscription.product_id.clone(),
+            storage_bytes: subscription.storage,
+            expires_at: timestamp(subscription.expiry_time)?,
         })
     }
 }
@@ -275,6 +313,62 @@ pub fn file(file: &FileView) -> Result<()> {
     write_fields(&fields)
 }
 
+pub fn admin_users(users: Vec<User>, args: &ListArgs, as_json: bool) -> Result<()> {
+    list(
+        users.iter().map(AdminUserView::new),
+        args,
+        as_json,
+        ["ID", "EMAIL", "CREATED"],
+        "No users.",
+        |user| [user.id, escape_controls(&user.email), user.created_at],
+    )
+}
+
+pub fn admin_user(details: &UserDetails, as_json: bool) -> Result<()> {
+    let user = AdminUserView::new(&details.user)?;
+    let subscription = details
+        .subscription
+        .as_ref()
+        .map(SubscriptionView::new)
+        .transpose()?;
+    if as_json {
+        return json(&json_value!({"id": user.id, "email": user.email,
+            "createdAt": user.created_at, "subscription": subscription}));
+    }
+    let mut fields = vec![
+        ("Email", escape_controls(&user.email)),
+        ("ID", user.id),
+        ("Created", user.created_at),
+    ];
+    if let Some(subscription) = subscription {
+        fields.extend([
+            ("Plan", escape_controls(&subscription.product_id)),
+            ("Storage", storage_size(subscription.storage_bytes)),
+            ("Expires", subscription.expires_at),
+        ]);
+    } else {
+        fields.push(("Subscription", "unavailable".into()));
+    }
+    write_fields(&fields)
+}
+
+pub fn storage_size(bytes: i64) -> String {
+    for (unit, divisor) in [
+        ("TB", 1024_i64.pow(4)),
+        ("GB", 1024_i64.pow(3)),
+        ("MB", 1024_i64.pow(2)),
+    ] {
+        if bytes >= divisor {
+            let size = format!("{:.2}", bytes as f64 / divisor as f64);
+            return format!(
+                "{} {unit} ({bytes} bytes)",
+                size.trim_end_matches('0').trim_end_matches('.')
+            );
+        }
+    }
+    format!("{bytes} bytes")
+}
+
 fn timestamp(micros: i64) -> Result<String> {
     Ok(DateTime::from_timestamp_micros(micros)
         .context("timestamp is outside the supported range")?
@@ -399,7 +493,7 @@ fn write_row<const N: usize>(
     Ok(())
 }
 
-fn escape_controls(value: &str) -> String {
+pub(crate) fn escape_controls(value: &str) -> String {
     let mut escaped = String::with_capacity(value.len());
     for c in value.chars() {
         if c.is_control() {

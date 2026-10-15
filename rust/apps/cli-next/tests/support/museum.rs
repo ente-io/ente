@@ -679,7 +679,7 @@ async fn exercise(origin: String) -> TestResult {
     Ok(())
 }
 
-fn login(home: &TestHome, app: &str, email: &str, options: &[&str]) {
+pub(super) fn login(home: &TestHome, app: &str, email: &str, options: &[&str]) {
     let mut args = vec!["account", "login", "--app", app, "--input", "-", "--json"];
     args.extend_from_slice(options);
     let output = success(home.with_input(&args, &credentials(email)));
@@ -700,7 +700,7 @@ fn credentials(email: &str) -> Vec<u8> {
         .unwrap()
 }
 
-async fn create_account(origin: &str, email: &str) -> AuthenticatedAccount {
+pub(super) async fn create_account(origin: &str, email: &str) -> AuthenticatedAccount {
     let client =
         AccountsClient::new(AccountsClientConfig::new("io.ente.photos").with_origin(origin))
             .unwrap();

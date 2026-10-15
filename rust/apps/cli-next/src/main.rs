@@ -1,3 +1,4 @@
+mod admin;
 mod api;
 mod args;
 mod auth;
@@ -92,6 +93,11 @@ async fn run(cli: Cli) -> Result<()> {
             clap_complete::generate(shell, &mut command, name, &mut std::io::stdout().lock());
             Ok(())
         }
+        Command::Admin {
+            selector,
+            app,
+            command,
+        } => admin::run(command, selector.account.as_deref(), app, &options).await,
     }
 }
 

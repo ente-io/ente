@@ -41,6 +41,7 @@ ente-test-support.workspace = true
 futures-util.workspace = true
 mockito.workspace = true
 same-file.workspace = true
+sha2.workspace = true
 zip.workspace = true
 
 [lints]
