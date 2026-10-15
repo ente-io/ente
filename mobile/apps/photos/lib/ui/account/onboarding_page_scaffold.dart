@@ -429,15 +429,35 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
 
   Widget _buildHeader(ColorTokens colors, MediaQueryData mediaQuery) {
     final illustration = widget.illustration;
+    final compactIllustrationScale = mediaQuery.viewInsets.bottom > 0
+        ? switch (illustration) {
+            OnboardingIllustration.login ||
+            OnboardingIllustration.password => 0.85,
+            OnboardingIllustration.email => 0.65,
+            OnboardingIllustration.key
+                when widget.minimumKeyboardHeaderHeight > 0 =>
+              0.65,
+            _ => 0.0,
+          }
+        : 0.0;
     final hasHeaderBar = widget.titleBarStyle == OnboardingTitleBarStyle.header;
     final canPop = widget.showBackButton && (_route?.canPop ?? false);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final illustrationScale = widget.headerHeight > 0
-            ? ((constraints.maxHeight - mediaQuery.padding.top) /
-                      widget.headerHeight)
-                  .clamp(0.0, 1.0)
+        final visibleHeaderHeight =
+            constraints.maxHeight - mediaQuery.padding.top;
+        final naturalScale = widget.headerHeight > 0
+            ? (visibleHeaderHeight / widget.headerHeight).clamp(0.0, 1.0)
             : 0.0;
+        final illustrationScale = compactIllustrationScale > 0
+            ? math.max(
+                naturalScale,
+                (visibleHeaderHeight /
+                        OnboardingPageScaffold.compactHeaderHeight *
+                        compactIllustrationScale)
+                    .clamp(0.0, compactIllustrationScale),
+              )
+            : naturalScale;
         return Stack(
           clipBehavior: Clip.none,
           children: [
@@ -474,7 +494,12 @@ class OnboardingPageScaffoldState extends State<OnboardingPageScaffold> {
               Positioned(
                 top:
                     mediaQuery.padding.top +
-                    illustration.topOffset * illustrationScale,
+                    illustration.topOffset * illustrationScale +
+                    (compactIllustrationScale > 0
+                        ? (visibleHeaderHeight - widget.headerHeight) *
+                              illustrationScale *
+                              0.18
+                        : 0),
                 left: 0,
                 right: 0,
                 height: illustration.height,
