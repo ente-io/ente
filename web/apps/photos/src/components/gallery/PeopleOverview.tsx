@@ -1,4 +1,4 @@
-import { sortPeople } from "@/utils/people-sort";
+import { sortPeople, type PeopleSortBy } from "@/utils/people-sort";
 import { Box, Stack, Typography, styled } from "@mui/material";
 import { ItemCard } from "ente-new/photos/components/Tiles";
 import { UnstyledButton } from "ente-new/photos/components/UnstyledButton";
@@ -9,14 +9,16 @@ import { PeopleEmptyState } from ".";
 
 export const PeopleOverview = ({
     people,
+    peopleSortBy,
     onSelectPerson,
 }: {
     people: Person[];
+    peopleSortBy: PeopleSortBy;
     onSelectPerson: (id: string) => void;
 }) => {
     const sortedPeople = useMemo(
-        () => sortPeople(people, "count-desc"),
-        [people],
+        () => sortPeople(people, peopleSortBy),
+        [people, peopleSortBy],
     );
     return (
         <Stack
