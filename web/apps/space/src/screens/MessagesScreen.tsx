@@ -190,7 +190,7 @@ const conversationPreview = (conversation: SpaceMessageConversation) => {
     const activity = conversation.latestActivity;
     if (activity.isUnavailable) return "Message unavailable";
     if (activity.type == "empty") {
-        return "No messages yet";
+        return "Say hello!";
     }
     const text = activity.text ? truncateMessageText(activity.text) : "";
     if (activity.type == "post_reply") {
@@ -227,6 +227,7 @@ const ConversationPreviewLine: React.FC<{
     const previewLineSx = {
         ...spaceActivityPreviewSx,
         color: conversation.notificationUnread ? "#D0D0D0" : spaceTextMuted,
+        fontStyle: activity.type == "empty" ? "italic" : "normal",
         fontWeight: conversation.notificationUnread
             ? 600
             : spaceActivityPreviewSx.fontWeight,
@@ -353,7 +354,9 @@ const ConversationListItem: React.FC<{
 }) => {
     const name =
         conversation.friend.fullName.trim() || conversation.friend.username;
-    const post = conversation.latestActivity.post;
+    const post = conversation.latestActivity.outgoing
+        ? undefined
+        : conversation.latestActivity.post;
     const showPostThumbnailSlot = Boolean(post);
     const unreadCount = conversation.unreadCount;
     React.useEffect(() => {
