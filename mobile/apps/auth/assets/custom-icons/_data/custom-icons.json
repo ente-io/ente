@@ -873,6 +873,11 @@
       ]
     },
     {
+      "title": "Enable Banking",
+      "slug": "enablebanking",
+      "hex": "000000"
+    },
+    {
       "title": "eneba"
     },
     {
@@ -882,11 +887,6 @@
     {
       "title": "ente",
       "hex": "1DB954"
-    },
-    {
-      "title": "Enable Banking",
-      "slug": "enablebanking",
-      "hex": "000000"
     },
     {
       "title": "Epic Games",
