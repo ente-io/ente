@@ -10,7 +10,6 @@ import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
 import "package:locker/services/trash/models/trash_file.dart";
-import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/file_edit_sheet.dart";
 import "package:locker/ui/components/locker_progress_dialog.dart";
@@ -310,68 +309,6 @@ class FileActions {
       if (context.mounted) {
         await showLockerErrorSheet(context, e);
       }
-    }
-  }
-
-  static Future<void> deleteMultipleFiles(
-    BuildContext context,
-    List<EnteFile> files, {
-    VoidCallback? onSuccess,
-  }) async {
-    if (files.isEmpty) {
-      return;
-    }
-
-    final confirmation = await showDeleteConfirmationSheet(
-      context,
-      title: context.strings.moveToTrashQuestion,
-      body: context.strings.itemsWillBeDeletedFromAllCollections(
-        count: files.length,
-      ),
-      deleteButtonLabel: context.strings.deleteItemCount(count: files.length),
-      illustration: LockerBottomSheetIllustration.fileDelete,
-    );
-
-    if (confirmation == null) {
-      return;
-    }
-
-    final dialog = context.mounted
-        ? await showLockerProgressDialog(context, context.strings.deletingFile)
-        : null;
-
-    try {
-      for (final file in files) {
-        final collections = await CollectionService.instance
-            .getCollectionsForFile(file);
-
-        if (collections.isNotEmpty) {
-          await CollectionService.instance.trashFile(
-            file,
-            collections.first,
-            runSync: false,
-          );
-        }
-      }
-
-      await CollectionService.instance.sync();
-      await TrashService.instance.syncTrash();
-
-      await dialog?.hide();
-
-      if (context.mounted) {
-        showToast(context, context.strings.fileDeletedSuccessfully);
-      }
-
-      onSuccess?.call();
-    } catch (e, stackTrace) {
-      await dialog?.hide();
-
-      _logger.severe('Failed to delete files: $e', e, stackTrace);
-      if (!context.mounted) {
-        return;
-      }
-      await showLockerErrorSheet(context, e);
     }
   }
 

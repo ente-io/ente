@@ -19,7 +19,6 @@ import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/configuration.dart';
-import 'package:locker/services/feature_flag_service.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/local_settings.dart';
 import "package:locker/states/user_details_state.dart";
@@ -717,12 +716,8 @@ class _HomePageState extends UploaderPageState<HomePage>
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              if (FeatureFlagService
-                                  .instance
-                                  .documentScanner) ...[
-                                _buildScannerFab(colors),
-                                const SizedBox(height: 14),
-                              ],
+                              _buildScannerFab(colors),
+                              const SizedBox(height: 14),
                               FloatingActionButton(
                                 tooltip: 'Add item',
                                 onPressed: () =>
