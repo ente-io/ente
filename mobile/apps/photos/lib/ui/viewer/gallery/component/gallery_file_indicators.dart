@@ -155,34 +155,53 @@ class _GalleryFileIndicatorsState extends State<GalleryFileIndicators> {
             _isLive &&
             left.length > 1 &&
             width < leftWidth + size + gap + horizontalPadding * 2;
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-              vertical: 4,
-            ),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Color.fromRGBO(0, 0, 0, 0.45)],
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            for (final corner in [
+              if (left.isNotEmpty) Alignment.bottomLeft,
+              if (_isLive) Alignment.bottomRight,
+            ])
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: corner,
+                    end: Alignment.center,
+                    colors: const [
+                      Color.fromRGBO(0, 0, 0, 0.14),
+                      Color.fromRGBO(0, 0, 0, 0.05),
+                      Color.fromRGBO(0, 0, 0, 0.0),
+                    ],
+                    stops: const [0, 0.6, 1],
+                  ),
+                ),
+              ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: 4,
+                ),
+                child: needsTwoRows
+                    ? Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: leftRow,
+                          ),
+                          SizedBox(height: gap),
+                          Align(alignment: Alignment.centerRight, child: live),
+                        ],
+                      )
+                    : Row(
+                        textDirection: TextDirection.ltr,
+                        children: [leftRow, const Spacer(), if (_isLive) live],
+                      ),
               ),
             ),
-            child: needsTwoRows
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Align(alignment: Alignment.centerLeft, child: leftRow),
-                      SizedBox(height: gap),
-                      Align(alignment: Alignment.centerRight, child: live),
-                    ],
-                  )
-                : Row(
-                    textDirection: TextDirection.ltr,
-                    children: [leftRow, const Spacer(), if (_isLive) live],
-                  ),
-          ),
+          ],
         );
       },
     );
