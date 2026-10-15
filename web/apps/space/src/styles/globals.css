@@ -11,6 +11,7 @@ html[data-space-ios-pwa]:has(.space-onboarding) body {
 
 html[data-space-ios-pwa] {
     --space-ios-safe-area-top: env(safe-area-inset-top);
+    --space-ios-safe-area-bottom: env(safe-area-inset-bottom);
     --space-ios-safe-area-left: env(safe-area-inset-left);
     --space-ios-safe-area-right: env(safe-area-inset-right);
 }
