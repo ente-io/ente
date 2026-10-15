@@ -868,11 +868,22 @@ const PersonCard: React.FC<PersonCardProps> = ({
                 coverFaceID={person.displayFaceID}
             />
         </Box>
-        {person.name && <CardText>{person.name}</CardText>}
+        <CardText>{person.name || t("unnamed_person")}</CardText>
         {person.isPinned && (
             <CollectionBarCardIcon_ aria-hidden>
                 <HugeiconsIcon icon={PinIcon} size={14} />
             </CollectionBarCardIcon_>
         )}
+        <Typography
+            component="span"
+            sx={{
+                flexShrink: 0,
+                fontSize: 12,
+                lineHeight: "20px",
+                color: "text.muted",
+            }}
+        >
+            {person.fileIDs.length.toLocaleString()}
+        </Typography>
     </BarCard>
 );

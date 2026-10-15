@@ -80,6 +80,11 @@ export const PhotosNavigationShell: React.FC<
         if (!mobile) closeMobileNavigation();
     }, [mobile, closeMobileNavigation]);
     const handleChangeMode = (mode: GalleryBarMode) => {
+        if (mode == "people") {
+            closeMobileNavigation();
+            props.onChangeMode(mode);
+            return;
+        }
         const reopeningSection =
             mobile &&
             mode == "albums" &&
@@ -208,7 +213,15 @@ export const PhotosNavigationShell: React.FC<
                             flex: 1,
                             minWidth: 0,
                             minHeight: 0,
-                            pt: showRail ? `${thumbnailGridPadding}px` : 0,
+                            pt:
+                                showRail &&
+                                !(
+                                    props.mode == "people" &&
+                                    !props.isInSearchMode &&
+                                    !galleryBarProps?.activePerson
+                                )
+                                    ? `${thumbnailGridPadding}px`
+                                    : 0,
                             ...(showRail && {
                                 "--mui-palette-background-default": "#FFFFFF",
                                 bgcolor: "background.default",

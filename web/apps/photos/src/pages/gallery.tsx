@@ -30,12 +30,12 @@ import { Upload } from "@/components/Upload";
 import { WhatsNew } from "@/components/WhatsNew";
 import {
     GalleryEmptyState,
-    PeopleEmptyState,
     SearchResultsHeader,
     type RemotePullOpts,
 } from "@/components/gallery";
 import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
+import { PeopleOverview } from "@/components/gallery/PeopleOverview";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
 import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 import {
@@ -2102,7 +2102,10 @@ const Page: React.FC = () => {
                   !isFirstLoad &&
                   state.view?.type == "people" &&
                   !state.view.activePerson ? (
-                    <PeopleEmptyState />
+                    <PeopleOverview
+                        people={state.view.visiblePeople}
+                        onSelectPerson={handleSelectPerson}
+                    />
                 ) : (
                     <FileListWithViewer
                         mode={barMode}

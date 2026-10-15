@@ -806,8 +806,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 state.peopleState,
                 state.tempDeletedFileIDs,
                 state.tempHiddenFileIDs,
-                state.selectedPersonID,
-                state.extraVisiblePerson,
+                undefined,
+                undefined,
             );
             return stateByUpdatingFilteredFiles({
                 ...state,
@@ -1552,8 +1552,6 @@ const derivePeopleView = (
         activePerson = findByIDIn(people);
         if (activePerson) {
             extraVisiblePerson = activePerson;
-        } else {
-            activePerson = visiblePeople[0];
         }
     }
 
