@@ -62,7 +62,7 @@ class ChangeLogStrings {
     'en': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'A new look for your gallery',
+          title: 'New look for your gallery',
           description:
               'See photos in their original proportions with the new mosaic layout. Pinch to switch layouts and change how many photos fit on your screen.',
         ),
@@ -72,7 +72,7 @@ class ChangeLogStrings {
               'Add text to your photos with a choice of fonts, colors, backgrounds, and alignment. You can now straighten tilted photos too.',
         ),
         ChangeLogEntryStrings(
-          title: 'A fresh look for albums and more',
+          title: 'Fresh look for albums and more',
           description:
               'Redesigned albums and simpler menus for your photo actions.',
           isOnlineOnly: true,
@@ -104,7 +104,7 @@ class ChangeLogStrings {
     'ca': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Un nou aspecte per a la teva galeria',
+          title: 'Nou aspecte per a la teva galeria',
           description:
               'Mira les fotos amb les proporcions originals amb el nou disseny en mosaic. Ajunta o separa dos dits per canviar de disseny i ajustar quantes fotos caben a la pantalla.',
         ),
@@ -114,7 +114,7 @@ class ChangeLogStrings {
               'Afegeix text a les fotos i tria entre diversos tipus de lletra, colors, fons i opcions d’alineació. Ara també pots redreçar les fotos inclinades.',
         ),
         ChangeLogEntryStrings(
-          title: 'Un nou aspecte per als àlbums i més',
+          title: 'Nou aspecte per als àlbums i més',
           description:
               'Àlbums redissenyats i menús més senzills per a les accions amb les fotos.',
           isOnlineOnly: true,
@@ -188,7 +188,7 @@ class ChangeLogStrings {
     'de': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Ein neuer Look für deine Galerie',
+          title: 'Neuer Look für deine Galerie',
           description:
               'Sieh dir Fotos mit dem neuen Mosaiklayout in ihren ursprünglichen Proportionen an. Ziehe zwei Finger zusammen oder auseinander, um das Layout zu wechseln und anzupassen, wie viele Fotos auf deinen Bildschirm passen.',
         ),
@@ -198,7 +198,7 @@ class ChangeLogStrings {
               'Füge deinen Fotos Text hinzu und wähle Schriftart, Farbe, Hintergrund und Ausrichtung. Jetzt kannst du auch schiefe Fotos gerade ausrichten.',
         ),
         ChangeLogEntryStrings(
-          title: 'Ein frischer Look für Alben und mehr',
+          title: 'Frischer Look für Alben und mehr',
           description:
               'Neu gestaltete Alben und einfachere Menüs für deine Fotoaktionen.',
           isOnlineOnly: true,
@@ -230,7 +230,7 @@ class ChangeLogStrings {
     'es': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Un nuevo aspecto para tu galería',
+          title: 'Nuevo aspecto para tu galería',
           description:
               'Ve las fotos con sus proporciones originales con el nuevo diseño de mosaico. Junta o separa dos dedos para cambiar de diseño y ajustar cuántas fotos caben en la pantalla.',
         ),
@@ -240,7 +240,7 @@ class ChangeLogStrings {
               'Añade texto a tus fotos y elige entre distintas fuentes, colores, fondos y opciones de alineación. Ahora también puedes enderezar las fotos inclinadas.',
         ),
         ChangeLogEntryStrings(
-          title: 'Un nuevo aspecto para los álbumes y más',
+          title: 'Nuevo aspecto para los álbumes y más',
           description:
               'Álbumes rediseñados y menús más sencillos para las acciones con tus fotos.',
           isOnlineOnly: true,
@@ -272,7 +272,7 @@ class ChangeLogStrings {
     'fr': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Un nouveau look pour votre galerie',
+          title: 'Nouveau look pour votre galerie',
           description:
               'Affichez vos photos dans leurs proportions d’origine grâce à la nouvelle disposition en mosaïque. Rapprochez ou écartez deux doigts pour changer de disposition et ajuster le nombre de photos à l’écran.',
         ),
@@ -282,7 +282,7 @@ class ChangeLogStrings {
               'Ajoutez du texte à vos photos en choisissant les polices, les couleurs, les arrière-plans et l’alignement. Vous pouvez désormais aussi redresser les photos inclinées.',
         ),
         ChangeLogEntryStrings(
-          title: 'Un nouveau look pour les albums et plus encore',
+          title: 'Nouveau look pour les albums et plus encore',
           description:
               'Des albums repensés et des menus simplifiés pour vos actions sur les photos.',
           isOnlineOnly: true,
@@ -314,7 +314,7 @@ class ChangeLogStrings {
     'it': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Un nuovo look per la tua galleria',
+          title: 'Nuovo look per la tua galleria',
           description:
               'Guarda le foto nelle loro proporzioni originali con il nuovo layout a mosaico. Avvicina o allontana due dita per cambiare layout e regolare quante foto entrano nello schermo.',
         ),
@@ -324,7 +324,7 @@ class ChangeLogStrings {
               'Aggiungi testo alle tue foto scegliendo caratteri, colori, sfondi e allineamento. Ora puoi anche raddrizzare le foto inclinate.',
         ),
         ChangeLogEntryStrings(
-          title: 'Un nuovo look per gli album e non solo',
+          title: 'Nuovo look per gli album e non solo',
           description:
               'Album ridisegnati e menu più semplici per le azioni sulle tue foto.',
           isOnlineOnly: true,
@@ -436,7 +436,7 @@ class ChangeLogStrings {
     'nl': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Een nieuwe look voor je galerij',
+          title: 'Nieuwe look voor je galerij',
           description:
               'Bekijk foto’s in hun oorspronkelijke verhoudingen met de nieuwe mozaïekindeling. Beweeg twee vingers naar elkaar toe of uit elkaar om van indeling te wisselen en aan te passen hoeveel foto’s op je scherm passen.',
         ),
@@ -446,7 +446,7 @@ class ChangeLogStrings {
               'Voeg tekst toe aan je foto’s met een keuze uit lettertypen, kleuren, achtergronden en uitlijning. Je kunt nu ook scheve foto’s rechtzetten.',
         ),
         ChangeLogEntryStrings(
-          title: 'Een frisse look voor albums en meer',
+          title: 'Frisse look voor albums en meer',
           description:
               'Vernieuwde albums en eenvoudigere menu’s voor je fotoacties.',
           isOnlineOnly: true,
@@ -478,7 +478,7 @@ class ChangeLogStrings {
     'no': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Et nytt utseende for galleriet ditt',
+          title: 'Nytt utseende for galleriet ditt',
           description:
               'Se bilder i de opprinnelige proporsjonene med det nye mosaikkoppsettet. Før to fingre sammen eller fra hverandre for å bytte oppsett og endre hvor mange bilder som får plass på skjermen.',
         ),
@@ -488,7 +488,7 @@ class ChangeLogStrings {
               'Legg til tekst på bildene dine og velg skrifttyper, farger, bakgrunner og tekstjustering. Nå kan du også rette opp skjeve bilder.',
         ),
         ChangeLogEntryStrings(
-          title: 'Et friskt utseende for album og mer',
+          title: 'Friskt utseende for album og mer',
           description:
               'Album med nytt design og enklere menyer for handlinger med bildene dine.',
           isOnlineOnly: true,
@@ -562,7 +562,7 @@ class ChangeLogStrings {
     'pt_BR': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Um novo visual para sua galeria',
+          title: 'Novo visual para sua galeria',
           description:
               'Veja as fotos nas proporções originais com o novo layout em mosaico. Junte ou afaste dois dedos para mudar o layout e ajustar quantas fotos cabem na tela.',
         ),
@@ -572,7 +572,7 @@ class ChangeLogStrings {
               'Adicione texto às suas fotos escolhendo fontes, cores, fundos e alinhamento. Agora você também pode endireitar fotos inclinadas.',
         ),
         ChangeLogEntryStrings(
-          title: 'Um novo visual para os álbuns e mais',
+          title: 'Novo visual para os álbuns e mais',
           description:
               'Álbuns redesenhados e menus mais simples para as ações nas suas fotos.',
           isOnlineOnly: true,
@@ -604,7 +604,7 @@ class ChangeLogStrings {
     'pt_PT': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Um novo visual para a sua galeria',
+          title: 'Novo visual para a sua galeria',
           description:
               'Veja as fotografias nas proporções originais com o novo esquema em mosaico. Junte ou afaste dois dedos para mudar o esquema e ajustar quantas fotografias cabem no ecrã.',
         ),
@@ -614,7 +614,7 @@ class ChangeLogStrings {
               'Adicione texto às suas fotografias, escolhendo tipos de letra, cores, fundos e alinhamento. Agora também pode endireitar fotografias inclinadas.',
         ),
         ChangeLogEntryStrings(
-          title: 'Um novo visual para os álbuns e mais',
+          title: 'Novo visual para os álbuns e mais',
           description:
               'Álbuns redesenhados e menus mais simples para as ações nas suas fotografias.',
           isOnlineOnly: true,
@@ -646,7 +646,7 @@ class ChangeLogStrings {
     'ro': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Un aspect nou pentru galeria ta',
+          title: 'Aspect nou pentru galeria ta',
           description:
               'Vezi fotografiile în proporțiile originale cu noul aranjament mozaic. Apropie sau depărtează două degete pentru a schimba aranjamentul și numărul de fotografii care încap pe ecran.',
         ),
@@ -656,7 +656,7 @@ class ChangeLogStrings {
               'Adaugă text pe fotografii, alegând fonturi, culori, fundaluri și alinierea. Acum poți și să îndrepți fotografiile înclinate.',
         ),
         ChangeLogEntryStrings(
-          title: 'Un aspect nou pentru albume și nu numai',
+          title: 'Aspect nou pentru albume și nu numai',
           description:
               'Albume reproiectate și meniuri mai simple pentru acțiunile asupra fotografiilor.',
           isOnlineOnly: true,
@@ -731,7 +731,7 @@ class ChangeLogStrings {
     'tr': ChangeLogStrings(
       entries: [
         ChangeLogEntryStrings(
-          title: 'Galeriniz için yeni bir görünüm',
+          title: 'Galeriniz için yeni görünüm',
           description:
               'Yeni mozaik düzeniyle fotoğraflarınızı özgün oranlarında görün. Düzenler arasında geçiş yapmak ve ekrana kaç fotoğraf sığacağını değiştirmek için iki parmağınızı birleştirin veya ayırın.',
         ),
@@ -741,7 +741,7 @@ class ChangeLogStrings {
               'Yazı tipi, renk, arka plan ve hizalama seçenekleriyle fotoğraflarınıza metin ekleyin. Artık eğik fotoğrafları da düzeltebilirsiniz.',
         ),
         ChangeLogEntryStrings(
-          title: 'Albümler ve daha fazlası için yeni bir görünüm',
+          title: 'Albümler ve daha fazlası için yeni görünüm',
           description:
               'Yeniden tasarlanan albümler ve fotoğraf işlemleriniz için daha sade menüler.',
           isOnlineOnly: true,
