@@ -68,6 +68,7 @@ class DetailPageConfiguration {
   final bool showGalleryFilmstrip;
   final GalleryType? galleryType;
   final FutureOr<void> Function(BuildContext context)? onBackPressed;
+  final ValueChanged<EnteFile>? onDismissed;
 
   final void Function(BuildContext context)? onPageReady;
 
@@ -81,6 +82,7 @@ class DetailPageConfiguration {
     this.showGalleryFilmstrip = false,
     this.galleryType,
     this.onBackPressed,
+    this.onDismissed,
     this.onPageReady,
   });
 
@@ -95,6 +97,7 @@ class DetailPageConfiguration {
     bool? showGalleryFilmstrip,
     GalleryType? galleryType,
     FutureOr<void> Function(BuildContext context)? onBackPressed,
+    ValueChanged<EnteFile>? onDismissed,
     void Function(BuildContext context)? onPageReady,
   }) {
     return DetailPageConfiguration(
@@ -107,6 +110,7 @@ class DetailPageConfiguration {
       showGalleryFilmstrip: showGalleryFilmstrip ?? this.showGalleryFilmstrip,
       galleryType: galleryType ?? this.galleryType,
       onBackPressed: onBackPressed ?? this.onBackPressed,
+      onDismissed: onDismissed ?? this.onDismissed,
       onPageReady: onPageReady ?? this.onPageReady,
     );
   }
@@ -333,6 +337,11 @@ class _BodyState extends State<_Body> {
     return PopScope(
       canPop: !isGuestView,
       onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) {
+          final file = _selectedFile;
+          if (file != null) widget.config.onDismissed?.call(file);
+          return;
+        }
         if (isGuestView) {
           final authenticated = await _requestAuthentication();
           if (authenticated) {

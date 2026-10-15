@@ -520,6 +520,36 @@ class GalleryState extends State<Gallery> {
         : 0;
   }
 
+  void revealFile(EnteFile file) {
+    if (!mounted || _scrollController.positions.length != 1) return;
+    final groups = galleryGroups;
+    final geometry = groups?.getGeometryOfFile(file);
+    if (groups == null || geometry == null) return;
+
+    final position = _scrollController.position;
+    final appBar = widget.appBar?.resolveGeometry(context);
+    final rowTop =
+        (appBar?.maxExtent ?? 0) + _headerHeight + geometry.rowOffset;
+    final topInset =
+        (appBar?.minExtent ?? 0) + _pinnedGroupHeaderExtent(groups);
+    final bottomInset = scrollbarBottomPaddingNotifier.value;
+    final visibleTop = position.pixels + topInset;
+    final visibleBottom =
+        position.pixels + position.viewportDimension - bottomInset;
+    if (rowTop >= visibleTop && rowTop + geometry.rowExtent <= visibleBottom) {
+      return;
+    }
+
+    final targetOffset =
+        rowTop -
+        topInset -
+        (visibleBottom - visibleTop - geometry.rowExtent) / 2;
+    // Jump during pop so the destination hero is laid out in its first frame.
+    _scrollController.jumpTo(
+      targetOffset.clamp(position.minScrollExtent, position.maxScrollExtent),
+    );
+  }
+
   int get _photoGridSize =>
       (widget.layoutTypeOverride ?? localSettings.getGalleryLayoutType()) ==
           GalleryLayoutType.justified
