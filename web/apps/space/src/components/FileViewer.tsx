@@ -213,21 +213,21 @@ const viewerPadding = (
 ) => {
     const isDesktop = window.innerWidth >= viewerDesktopMinWidth;
     let top = isDesktop ? 0 : headerHeight;
+    let bottom = hasDraftPhotoControls
+        ? 176
+        : isDesktop
+          ? 0
+          : viewerBottomPadding;
     if (header && document.documentElement.hasAttribute("data-space-ios-pwa")) {
+        const headerStyle = getComputedStyle(header);
         top = isDesktop
-            ? parseFloat(getComputedStyle(header).paddingTop)
+            ? parseFloat(headerStyle.paddingTop)
             : header.offsetHeight;
+        bottom += parseFloat(
+            headerStyle.getPropertyValue("--space-ios-safe-area-bottom"),
+        );
     }
-    return {
-        bottom: hasDraftPhotoControls
-            ? 176
-            : isDesktop
-              ? 0
-              : viewerBottomPadding,
-        left: 0,
-        right: 0,
-        top,
-    };
+    return { bottom, left: 0, right: 0, top };
 };
 
 // index is the photo whose dots are shown, position the gallery index as a float.
