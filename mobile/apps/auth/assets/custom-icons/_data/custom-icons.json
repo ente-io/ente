@@ -873,6 +873,11 @@
       ]
     },
     {
+      "title": "Enable Banking",
+      "slug": "enablebanking",
+      "hex": "000000"
+    },
+    {
       "title": "eneba"
     },
     {

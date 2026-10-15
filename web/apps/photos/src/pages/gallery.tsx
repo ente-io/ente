@@ -30,6 +30,7 @@ import { Upload } from "@/components/Upload";
 import { WhatsNew } from "@/components/WhatsNew";
 import {
     GalleryEmptyState,
+    PeopleConsentDialog,
     SearchResultsHeader,
     type RemotePullOpts,
 } from "@/components/gallery";
@@ -98,6 +99,7 @@ import { ItemVisibility, metadataHash } from "ente-media/file-metadata";
 import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import { EditLocationDialog } from "ente-new/photos/components/EditLocationDialog";
 import {
+    useMLStatusSnapshot,
     usePeopleStateSnapshot,
     useSettingsSnapshot,
     useUserDetailsSnapshot,
@@ -254,6 +256,7 @@ const Page: React.FC = () => {
     const { customDomain, mapEnabled } = useSettingsSnapshot();
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
+    const mlStatus = useMLStatusSnapshot();
 
     const {
         show: showContextMenuAssignPerson,
@@ -285,6 +288,11 @@ const Page: React.FC = () => {
 
     const { show: showSidebar, props: sidebarVisibilityProps } =
         useModalVisibility();
+    const { show: showPeopleConsent, props: peopleConsentVisibilityProps } =
+        useModalVisibility();
+    const pendingPeopleSearchReset = useRef<(() => void) | undefined>(
+        undefined,
+    );
     const { show: showPlanSelector, props: planSelectorVisibilityProps } =
         useModalVisibility();
     const {
@@ -1427,6 +1435,12 @@ const Page: React.FC = () => {
         [],
     );
 
+    useEffect(() => {
+        if (mlStatus?.phase == "disabled" && barMode == "people") {
+            handleShowCollectionSummaryWithID(PseudoCollectionID.all);
+        }
+    }, [mlStatus?.phase, barMode, handleShowCollectionSummaryWithID]);
+
     const showCollectionSummary = useCallback(
         (
             collectionSummaryID: number | undefined,
@@ -1480,9 +1494,25 @@ const Page: React.FC = () => {
         [showCollectionSummary],
     );
 
-    const handleChangeBarMode = (mode: GalleryBarMode) => {
+    const handleShowPeople = (onNavigate?: () => void) => {
+        if (!isMLEnabled()) {
+            pendingPeopleSearchReset.current = onNavigate;
+            showPeopleConsent();
+            return false;
+        }
+        onNavigate?.();
         setCleanupView(undefined);
-        dispatch({ type: mode == "people" ? "showPeople" : "showAlbums" });
+        dispatch({ type: "showPeople" });
+        return true;
+    };
+
+    const handleChangeBarMode = (mode: GalleryBarMode) => {
+        if (mode == "people") {
+            return handleShowPeople();
+        }
+        setCleanupView(undefined);
+        dispatch({ type: "showAlbums" });
+        return true;
     };
 
     const handleFileViewerToggleFavorite = useCallback(
@@ -1993,10 +2023,7 @@ const Page: React.FC = () => {
                     handleShowCollectionSummaryWithID(PseudoCollectionID.all)
                 }
                 onSelectSearchOption={handleSelectSearchOption}
-                onSelectPeople={() => {
-                    setCleanupView(undefined);
-                    dispatch({ type: "showPeople" });
-                }}
+                onSelectPeople={handleShowPeople}
                 onSelectPerson={handleSelectPerson}
                 galleryBarProps={
                     isCleanupViewOpen
@@ -2215,6 +2242,16 @@ const Page: React.FC = () => {
                 {sidebarVisibilityProps.open && subscriptionDialogs}
             </Sidebar>
             <WhatsNew {...whatsNewVisibilityProps} />
+            <PeopleConsentDialog
+                {...peopleConsentVisibilityProps}
+                onClose={() => {
+                    pendingPeopleSearchReset.current = undefined;
+                    peopleConsentVisibilityProps.onClose();
+                }}
+                onEnabled={() =>
+                    handleShowPeople(pendingPeopleSearchReset.current)
+                }
+            />
             <AssignPersonDialog
                 {...contextMenuAssignPersonProps}
                 people={namedPeople}

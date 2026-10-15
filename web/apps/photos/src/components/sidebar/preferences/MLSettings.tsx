@@ -16,6 +16,10 @@ import {
     TitledNestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
+import {
+    v2CancelButtonSx,
+    v2SubmitButtonSx,
+} from "ente-base/components/SingleInput.styles";
 import { RowCard } from "ente-base/components/v2/RowCard";
 import { useBaseContext } from "ente-base/context";
 import { useMLStatusSnapshot } from "ente-new/photos/components/utils/use-snapshot";
@@ -96,7 +100,7 @@ interface EnableMLProps {
     showMagicSearchHint?: boolean;
 }
 
-export const EnableML: React.FC<EnableMLProps> = ({
+const EnableML: React.FC<EnableMLProps> = ({
     onEnable,
     showMagicSearchHint,
 }) => {
@@ -146,7 +150,9 @@ const FaceConsentDrawer: React.FC<FaceConsentDrawerProps> = ({
             onRootClose={handleRootClose}
             title={t("ml_consent_title")}
         >
-            <FaceConsent onConsent={onConsent} onCancel={onClose} />
+            <Box sx={{ px: 3 }}>
+                <FaceConsent onConsent={onConsent} onCancel={onClose} />
+            </Box>
         </TitledNestedSidebarDrawer>
     );
 };
@@ -154,11 +160,13 @@ const FaceConsentDrawer: React.FC<FaceConsentDrawerProps> = ({
 interface FaceConsentProps {
     onConsent: () => void;
     onCancel: () => void;
+    submitting?: boolean;
 }
 
 export const FaceConsent: React.FC<FaceConsentProps> = ({
     onConsent,
     onCancel,
+    submitting = false,
 }) => {
     const [acceptTerms, setAcceptTerms] = useState(false);
 
@@ -176,8 +184,17 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
     );
 
     return (
-        <Stack sx={{ gap: 3, py: 1, px: 2 }}>
-            <Typography component="div" sx={{ color: "text.muted", px: "8px" }}>
+        <Stack sx={{ gap: "20px" }}>
+            <Typography
+                component="div"
+                sx={{
+                    color: "text.muted",
+                    fontSize: 14,
+                    lineHeight: "20px",
+                    "& p:first-of-type": { mt: 0 },
+                    "& p:last-of-type": { mb: 0 },
+                }}
+            >
                 <Trans
                     i18nKey={"ml_consent_description"}
                     components={{ a: privacyPolicyLink }}
@@ -186,10 +203,17 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
             <FormGroup sx={{ width: "100%" }}>
                 <FormControlLabel
                     sx={{ color: "text.muted", ml: 0 }}
+                    slotProps={{
+                        typography: {
+                            sx: { fontSize: 14, lineHeight: "20px" },
+                        },
+                    }}
                     control={
                         <Checkbox
                             size="small"
+                            sx={{ pl: 0 }}
                             checked={acceptTerms}
+                            disabled={submitting}
                             onChange={(e) => setAcceptTerms(e.target.checked)}
                         />
                     }
@@ -201,14 +225,18 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
                     fullWidth
                     color="accent"
                     disabled={!acceptTerms}
+                    loading={submitting}
                     onClick={onConsent}
+                    sx={[v2SubmitButtonSx, { flex: "none" }]}
                 >
                     {t("ml_consent")}
                 </FocusVisibleButton>
                 <FocusVisibleButton
                     fullWidth
                     color="secondary"
+                    disabled={submitting}
                     onClick={onCancel}
+                    sx={[v2CancelButtonSx, { flex: "none" }]}
                 >
                     {t("cancel")}
                 </FocusVisibleButton>

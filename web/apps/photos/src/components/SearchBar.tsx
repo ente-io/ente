@@ -68,7 +68,7 @@ export interface SearchBarProps {
         o: SearchOption | undefined,
         options?: { shouldExitSearchMode?: boolean },
     ) => void;
-    onSelectPeople: () => void;
+    onSelectPeople: (onNavigate: () => void) => void;
     onSelectPerson: (personID: string) => void;
 }
 
@@ -302,8 +302,7 @@ const SearchInput: React.FC<
     };
 
     const handleSelectPeople = () => {
-        resetSearch();
-        onSelectPeople();
+        onSelectPeople(resetSearch);
     };
 
     const handleSelectPerson = (personID: string) => {
@@ -689,7 +688,7 @@ const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
 );
 
 const EmptyState: React.FC<
-    Pick<SearchBarProps, "onSelectPeople" | "onSelectPerson">
+    Pick<SearchBarProps, "onSelectPerson"> & { onSelectPeople: () => void }
 > = ({ onSelectPeople, onSelectPerson }) => {
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
@@ -718,12 +717,13 @@ const EmptyState: React.FC<
             break;
     }
 
-    const hasPeople = people && people.length > 0;
+    const hasPeople =
+        mlStatus?.phase != "disabled" && people && people.length > 0;
     if (!hasPeople && !label) return null;
 
     return (
         <Box sx={{ textAlign: "left" }}>
-            {people && people.length > 0 && (
+            {hasPeople && (
                 <>
                     <SearchPeopleHeader onClick={onSelectPeople} />
                     <SearchPeopleList {...{ people, onSelectPerson }} />
