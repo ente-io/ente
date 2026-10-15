@@ -18,12 +18,12 @@ export const logSpaceImageReadCheck = async (
     const { requestId, attempt, item } = context;
     const startedAt = performance.now();
     logToDisk(
-        `[info] Space image read check ${JSON.stringify({ requestId, attempt, item, outcome: "started" })}`,
+        `[info] Space image prefix read check ${JSON.stringify({ requestId, attempt, item, outcome: "started" })}`,
     );
-    let outcome = "readable";
+    let outcome = "prefix-readable";
     let error: string | undefined;
     try {
-        await file.arrayBuffer();
+        await file.slice(0, 64 * 1024).arrayBuffer();
     } catch (cause) {
         outcome = "failed";
         const name = cause instanceof Error ? cause.name : "Unknown";
@@ -40,6 +40,6 @@ export const logSpaceImageReadCheck = async (
             : "Unknown";
     }
     logToDisk(
-        `[info] Space image read check ${JSON.stringify({ requestId, attempt, item, outcome, error, elapsedMs: Math.round(performance.now() - startedAt) })}`,
+        `[info] Space image prefix read check ${JSON.stringify({ requestId, attempt, item, outcome, error, elapsedMs: Math.round(performance.now() - startedAt) })}`,
     );
 };

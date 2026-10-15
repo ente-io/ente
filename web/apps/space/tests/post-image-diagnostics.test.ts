@@ -25,7 +25,7 @@ test("checks a failed image once and logs progress while the read is pending", a
     const file = new File(["PRIVATE_CONTENT"], "PRIVATE_FILENAME.jpg");
     const pendingRead = Promise.withResolvers<ArrayBuffer>();
     const read = vi
-        .spyOn(file, "arrayBuffer")
+        .spyOn(Blob.prototype, "arrayBuffer")
         .mockReturnValue(pendingRead.promise);
     vi.spyOn(performance, "now").mockReturnValue(100);
 
@@ -40,9 +40,25 @@ test("checks a failed image once and logs progress while the read is pending", a
 
     expect(entries()).toEqual([
         { ...context, outcome: "started" },
-        { ...context, outcome: "readable", elapsedMs: 50 },
+        { ...context, outcome: "prefix-readable", elapsedMs: 50 },
     ]);
 });
+
+test.each([1024, 128 * 1024])(
+    "reads at most 64 KB from a %i-byte file",
+    async (size) => {
+        const file = new File([new Uint8Array(size)], "photo.jpg");
+        const read = vi.spyOn(Blob.prototype, "arrayBuffer");
+
+        await logSpaceImageReadCheck(file, decodeError, context);
+
+        expect(read).toHaveBeenCalledOnce();
+        await expect(read.mock.results[0]!.value).resolves.toHaveProperty(
+            "byteLength",
+            Math.min(size, 64 * 1024),
+        );
+    },
+);
 
 test.each(["NotReadableError", "PRIVATE_NAME"])(
     "logs a safe read error category for %s without private data",
@@ -53,7 +69,7 @@ test.each(["NotReadableError", "PRIVATE_NAME"])(
         });
         const error = new DOMException("PRIVATE_PATH", name);
         error.stack = "PRIVATE_STACK";
-        vi.spyOn(file, "arrayBuffer").mockRejectedValue(error);
+        vi.spyOn(Blob.prototype, "arrayBuffer").mockRejectedValue(error);
         vi.spyOn(performance, "now").mockReturnValue(100);
 
         await logSpaceImageReadCheck(file, decodeError, context);
@@ -75,7 +91,7 @@ test.each([new Error("Could not encode image"), "PRIVATE_ERROR"])(
     "does not read or log for other preparation failures: %s",
     async (error) => {
         const file = new File(["photo"], "photo.jpg");
-        const read = vi.spyOn(file, "arrayBuffer");
+        const read = vi.spyOn(Blob.prototype, "arrayBuffer");
 
         await logSpaceImageReadCheck(file, error, context);
 
