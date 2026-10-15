@@ -2953,6 +2953,7 @@
   "openAlbumInBrowser": "Open album in browser",
   "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
   "openFile": "Open file",
+  "openInAnotherApp": "Open in another app",
   "openLink": "Open link",
   "openSettings": "Open settings",
   "openstreetmapContributors": "OpenStreetMap contributors",
@@ -3038,6 +3039,8 @@
       }
     }
   },
+  "pdfNeedsPassword": "This PDF needs a password",
+  "pdfPasswordNotSupportedOnDevice": "This device cannot unlock password-protected PDFs. Open it in another app.",
   "pending": "Pending",
   "pendingSync": "Pending sync",
   "pendingSyncs": "Warning",
@@ -4628,6 +4631,7 @@
   "@unlock": {
     "description": "Short action label used as the system authentication reason when unlocking the app"
   },
+  "unlockPdf": "Unlock",
   "unnamedCollection": "Unnamed collection",
   "unnamedPeopleDoingSomethingTogether": "Doing it together",
   "unnamedPeopleSpotlight": "A familiar face",

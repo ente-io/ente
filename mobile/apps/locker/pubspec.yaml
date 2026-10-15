@@ -52,6 +52,8 @@ dependencies:
     path: ../../packages/logging
   ente_network:
     path: ../../packages/network
+  ente_pdf_renderer:
+    path: ../../packages/ente_pdf_renderer
   ente_pure_utils:
     path: ../../packages/ente_pure_utils
   ente_sharing:
