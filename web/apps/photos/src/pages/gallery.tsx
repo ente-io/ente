@@ -99,6 +99,7 @@ import { ItemVisibility, metadataHash } from "ente-media/file-metadata";
 import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import { EditLocationDialog } from "ente-new/photos/components/EditLocationDialog";
 import {
+    useMLStatusSnapshot,
     usePeopleStateSnapshot,
     useSettingsSnapshot,
     useUserDetailsSnapshot,
@@ -255,6 +256,7 @@ const Page: React.FC = () => {
     const { customDomain, mapEnabled } = useSettingsSnapshot();
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
+    const mlStatus = useMLStatusSnapshot();
 
     const {
         show: showContextMenuAssignPerson,
@@ -1433,6 +1435,12 @@ const Page: React.FC = () => {
         [],
     );
 
+    useEffect(() => {
+        if (mlStatus?.phase == "disabled" && barMode == "people") {
+            handleShowCollectionSummaryWithID(PseudoCollectionID.all);
+        }
+    }, [mlStatus?.phase, barMode, handleShowCollectionSummaryWithID]);
+
     const showCollectionSummary = useCallback(
         (
             collectionSummaryID: number | undefined,
@@ -2121,7 +2129,7 @@ const Page: React.FC = () => {
                   !isFirstLoad &&
                   state.view?.type == "people" &&
                   !state.view.activePerson ? (
-                    <PeopleEmptyState onEnableML={showPeopleConsent} />
+                    <PeopleEmptyState />
                 ) : (
                     <FileListWithViewer
                         mode={barMode}

@@ -16,7 +16,6 @@ import {
     Typography,
 } from "@mui/material";
 import { CenteredFill, SpacedRow } from "ente-base/components/containers";
-import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { OverflowMenuOption } from "ente-base/components/OverflowMenu";
 import {
     v2CloseButtonSx,
@@ -194,20 +193,12 @@ const SearchSortOrderMenu: React.FC<SearchSortOrderMenuProps> = ({
     );
 };
 
-export const PeopleEmptyState: React.FC<{ onEnableML: () => void }> = ({
-    onEnableML,
-}) => {
+export const PeopleEmptyState: React.FC = () => {
     const mlStatus = useMLStatusSnapshot();
 
     switch (mlStatus?.phase) {
         case "disabled":
-            return (
-                <CenteredFill>
-                    <FocusVisibleButton color="accent" onClick={onEnableML}>
-                        {t("enable")}
-                    </FocusVisibleButton>
-                </CenteredFill>
-            );
+            return null;
         case "done":
             return (
                 <PeopleEmptyStateMessage>
