@@ -101,6 +101,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _selectedAlbums = SelectedAlbums();
   final _selectedFiles = SelectedFiles();
+  final _hasSelectedFilesNotifier = ValueNotifier<bool>(false);
 
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
@@ -181,6 +182,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     _logger.info("initstate");
     super.initState();
+    _selectedFiles.addListener(_selectedFilesListener);
 
     NotificationService.instance
         .initialize(_onDidReceiveNotificationResponse)
@@ -581,8 +583,14 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
+  void _selectedFilesListener() {
+    _hasSelectedFilesNotifier.value = _selectedFiles.files.isNotEmpty;
+  }
+
   @override
   void dispose() {
+    _selectedFiles.removeListener(_selectedFilesListener);
+    _hasSelectedFilesNotifier.dispose();
     _tabChangedEventSubscription.cancel();
     _subscriptionPurchaseEvent.cancel();
     _triggerLogoutEvent.cancel();
@@ -1069,11 +1077,13 @@ class _HomeWidgetState extends State<HomeWidget> {
               listenable: Listenable.merge([
                 _swipeToSelectInProgressNotifier,
                 _selectedAlbums,
+                _hasSelectedFilesNotifier,
               ]),
               builder: (context, child) {
                 final isPageScrollLocked =
                     _swipeToSelectInProgressNotifier.value ||
-                    _selectedAlbums.albums.isNotEmpty;
+                    _selectedAlbums.albums.isNotEmpty ||
+                    _hasSelectedFilesNotifier.value;
                 return ValueListenableBuilder<int>(
                   valueListenable: _selectedTabIndexNotifier,
                   builder: (context, selectedTabIndex, _) {

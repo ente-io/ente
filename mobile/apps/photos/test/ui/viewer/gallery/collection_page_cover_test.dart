@@ -52,8 +52,10 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/settings/local_settings.dart";
 import "package:photos/src/rust/frb_generated.dart";
 import "package:photos/ui/collections/album/row_item.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/components/bottom_action_bar/action_bar_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_sheet.dart";
+import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/component/album_cover_app_bar.dart";
@@ -596,6 +598,44 @@ void main() {
       selectedFiles.dispose();
     },
   );
+
+  testWidgets("album selection controls align and fill the bottom safe area", (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(bottom: 34);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightThemeData,
+        localizationsDelegates: StringsLocalizations.localizationsDelegates,
+        supportedLocales: StringsLocalizations.supportedLocales,
+        home: CollectionListPage([
+          _collection(),
+        ], sectionType: UISectionType.archivedCollections),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final selected = tester
+        .widget<AlbumSelectionOverlayBar>(find.byType(AlbumSelectionOverlayBar))
+        .selectedAlbums;
+    selected.select({_collection()});
+    await tester.pumpAndSettle();
+    final material = find.descendant(
+      of: find.byType(SelectionActionSheet),
+      matching: find.byType(Material),
+    );
+    expect(tester.getBottomRight(material).dy, 812);
+    expect(
+      tester.getTopLeft(find.byType(SelectAllAlbumsButton)).dx,
+      tester.getTopLeft(material).dx + Spacing.sm,
+    );
+    await tester.tap(find.bySemanticsLabel(RegExp("Cancel,")));
+    await tester.pumpAndSettle();
+    expect(selected.albums, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets("anchors the selection sheet during interrupted resizing", (
     tester,
