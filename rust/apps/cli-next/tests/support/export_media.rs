@@ -220,6 +220,71 @@ fn engine_category_filters_recheck_recovered_metadata() {
 }
 
 #[test]
+fn engine_preserves_native_dates_and_metadata_overrides() {
+    let mut server = mockito::Server::new();
+    let key = Key::generate();
+    let original = b"original without embedded metadata";
+    let (mut file, bytes) = source(10, &key, original, "Photo.jpg");
+    let base = json!({
+        "title":"Photo.jpg", "fileType":0, "creationTime":1_700_000_000_123_456i64,
+        "modificationTime":1_700_000_001_654_321i64, "latitude":12.0, "longitude":34.0,
+        "uploaderName":"Original", "extension":{"nested":[true, null, "value"]}
+    });
+    let mut uploaded = base.clone();
+    for field in [
+        "localID",
+        "deviceFolder",
+        "subType",
+        "version",
+        "exif",
+        "hasStaticThumbnail",
+    ] {
+        uploaded[field] = json!("device state");
+    }
+    let encrypted = blob::encrypt_json(&uploaded, &file_key(&file, &key)).unwrap();
+    file["metadata"] = json!({"encryptedData":b64::encode(&encrypted.encrypted_data),"decryptionHeader":b64::encode(encrypted.decryption_header.as_bytes())});
+    let fetched = download(&mut server, 10, &bytes, 1);
+    let mut engine = new_engine(&server, key, file.clone());
+    for (index, (edits, description, location, seconds)) in [
+        (json!({"editedTime":null,"caption":null,"lat":0}), None, (12.0,34.0), "1700000000"),
+        (json!({"editedTime":0,"caption":"","lat":0,"long":0,"editedName":"Holiday: 1.jpg","uploaderName":"Current","dateTime":"2024-01-01T09:00:00"}), None, (0.0,0.0), "0"),
+        (json!({"editedTime":-1,"caption":23,"lat":null,"long":77,"dateTime":"2024-01-01T09:00:00","offsetTime":"+05:30"}), Some("23"), (12.0,34.0), "-1"),
+    ].into_iter().enumerate() {
+        let mut input = edits.clone();
+        input["sv"] = json!(1);
+        input["noThumb"] = json!(true);
+        let remote = public(file.clone(), &engine.catalog.key, input, 200 + index as i64);
+        engine.catalog.files = BTreeMap::from([((1,10),remote.clone()),((2,10),remote)]);
+        run(&mut engine, true);
+        let folder = engine.root().join("First/metadata");
+        let sidecar = fs::read_dir(&folder).unwrap().next().unwrap().unwrap().path();
+        let record = read_json(&sidecar);
+        let mut expected = base.clone();
+        if index == 1 {
+            for field in ["title", "latitude", "longitude", "uploaderName"] {
+                expected.as_object_mut().unwrap().remove(field);
+            }
+        } else if index == 2 {
+            expected.as_object_mut().unwrap().remove("creationTime");
+        }
+        assert_eq!(record["ente"]["metadata"], expected);
+        assert_eq!(record["ente"]["pubMagicMetadata"], edits);
+        assert_eq!(record.get("description").and_then(Value::as_str), description);
+        assert_eq!(record["geoData"], json!({"latitude":location.0,"longitude":location.1}));
+        assert_eq!(record["photoTakenTime"]["timestamp"], seconds);
+        let title = if index == 1 { "Holiday: 1.jpg" } else { "Photo.jpg" };
+        assert_eq!(record["title"], title);
+        let media = record["ente"]["components"][0]["path"].as_str().unwrap();
+        assert_eq!(sidecar.file_name().unwrap().to_str().unwrap(), format!("{media}.json"));
+        assert_eq!(fs::read(engine.root().join("First").join(media)).unwrap(), original);
+        engine.database = format!("recovered-{index}.db");
+        assert!(engine.run(true, &[]).unwrap().complete);
+        assert_eq!(read_json(&sidecar), record);
+    }
+    fetched.assert();
+}
+
+#[test]
 fn engine_preserves_local_media_and_restores_missing_copies() {
     let mut server = mockito::Server::new();
     let key = Key::generate();

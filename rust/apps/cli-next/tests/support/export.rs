@@ -140,16 +140,15 @@ fn export_metadata_updates_and_repairs_preserve_source_values() -> TestResult {
             let sidecar=root.join("Family/metadata/A.jpg.json");
             let sidecar_time=fs::metadata(&sidecar)?.modified()?;
             let record=read_json(&sidecar);
-            assert_eq!(record["ente"]["creationTime"],"2023-11-14T22:13:20.123456Z");
+            let mut expected_original = metadata("A.jpg", original);
+            expected_original.as_object_mut().unwrap().remove("deviceFolder");
+            assert_eq!(record["ente"]["metadata"],expected_original);
+            assert_eq!(record["geoData"],json!({"latitude":10.0,"longitude":20.0}));
             assert_eq!(record["photoTakenTime"]["timestamp"],"1700000000");
             assert_eq!(record["photoTakenTime"]["formatted"],"Nov 14, 2023, 10:13:20 PM UTC");
             assert_eq!(record["ente"]["components"][0]["size"],original.len());
-            assert_eq!(record["ente"]["modificationTime"],"2023-11-14T22:13:21.123456Z");
+            assert_eq!(record["ente"]["metadata"]["modificationTime"],1_700_000_001_123_456i64);
             assert_eq!(record["modificationTime"]["timestamp"],"1700000001");
-            for field in ["deviceFolder","localID","editedName","editedTime","updationTime","pubMagicMetadata"] {
-                assert!(record.get(field).is_none());
-                assert!(record["ente"].get(field).is_none());
-            }
             assert_eq!(fs::read(root.join("Family/A.jpg"))?,original);
             let unchanged=export(&home,&root,&["--album","Family"]);
             assert_eq!(unchanged["changes"],json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0}));
@@ -173,27 +172,22 @@ fn export_metadata_updates_and_repairs_preserve_source_values() -> TestResult {
             export(&home, &root, &["--album", "Travel"]);
             place(origin,&account,favorites,&favorites_key,file,&key,"add-files").await;
             let mut edited_metadata=json!({"editedName":"Renamed.jpg","editedTime":1_700_000_002_654_321i64,"caption":"","lat":0,"long":0,"dateTime":"2023:11:15 03:43:22","offsetTime":"+05:30","w":4096,"h":3072,"cameraMake":"Example","cameraModel":"Camera","uploaderName":"Guest","mediaType":1,"mvi":123});
+            for field in ["title", "creationTime", "latitude", "longitude"] {
+                expected_original.as_object_mut().unwrap().remove(field);
+            }
             for (version,lat,long) in [(1,0,77),(2,12,0),(3,0,0)] {
                 edited_metadata["lat"]=json!(lat);
                 edited_metadata["long"]=json!(long);
                 edit_file(origin,&account,file,&key,version,edited_metadata.clone()).await;
                 export(&home,&root,&["--album","Family"]);
                 let record=read_json(&root.join("Family/metadata/Renamed.jpg.json"));
-                assert_eq!(record["description"],"");
+                assert!(record.get("description").is_none());
                 assert_eq!(record["favorited"],true);
-                assert_eq!(record["ente"]["creationTime"],"2023-11-14T22:13:22.654321Z");
-                assert_eq!(record["ente"]["name"],"Renamed.jpg");
+                assert_eq!(record["title"],"Renamed.jpg");
+                assert_eq!(record["ente"]["metadata"],expected_original);
+                assert_eq!(record["ente"]["pubMagicMetadata"],edited_metadata);
                 assert_eq!(record["photoTakenTime"]["timestamp"],"1700000002");
-                assert!(!record.to_string().contains("2023-11-14T22:13:20.123456Z"));
-                assert!(!record.to_string().contains("not portable"));
-                for (field,value) in [("localDateTime",json!("2023:11:15 03:43:22")),("utcOffset",json!("+05:30")),("width",json!(4096)),("height",json!(3072)),("cameraMake",json!("Example")),("cameraModel",json!("Camera")),("uploaderName",json!("Guest")),("panorama",json!(true)),("motionPhotoVideoOffset",json!(123))] { assert_eq!(record["ente"][field],value); }
-                if lat==0 && long==0 {
-                    assert!(record.get("geoData").is_none());
-                    assert!(record["ente"].get("location").is_none());
-                } else {
-                    assert_eq!(record["geoData"],json!({"latitude":lat as f64,"longitude":long as f64}));
-                    assert_eq!(record["ente"]["location"],record["geoData"]);
-                }
+                assert_eq!(record["geoData"],json!({"latitude":lat as f64,"longitude":long as f64}));
             }
             assert!(root.join("Travel/A.jpg").exists());
             fs::write(root.join("Family/metadata/Renamed.jpg.json"),b"{\"custom\":true}")?;
@@ -609,7 +603,7 @@ fn export_preserves_album_types_visibility_and_settings() -> TestResult {
             assert_eq!(export(&home, &root, &["--exclude-hidden"])["copies"]["completed"], 4);
             assert!(!root.join("Private").exists());
             assert!(!root.join("Hidden").exists());
-            assert_eq!(read_json(&root.join("Quick link/metadata/original.jpg.json"))["ente"]["visibility"], "hidden");
+            assert_eq!(read_json(&root.join("Quick link/metadata/original.jpg.json"))["ente"]["magicMetadata"]["visibility"], 2);
             let result = export(&home, &root, &[]);
             assert_eq!(result["copies"]["completed"], cases.len());
             for (name, _, kind, file_visibility, _, visibility) in cases {
@@ -624,7 +618,7 @@ fn export_preserves_album_types_visibility_and_settings() -> TestResult {
                 assert_eq!(album["ente"]["description"], "album description");
                 assert_eq!(album["ente"]["layout"], "trip");
                 assert_eq!(album["ente"]["coverFileID"], file["ente"]["fileID"]);
-                assert_eq!(file["ente"]["visibility"], if name == "Quick link" { "hidden" } else { ["visible", "archived", "hidden"][file_visibility] });
+                assert_eq!(file["ente"]["magicMetadata"]["visibility"], if name == "Quick link" { 2 } else { file_visibility });
             }
             Ok(())
         })
@@ -754,7 +748,7 @@ fn export_adopts_live_sidecars_with_different_metadata() -> TestResult {
                         .join(format!("{name}.json"));
                     let mut record = read_json(&sidecar);
                     record["description"] = json!(format!("{folder} component {index}"));
-                    record["ente"]["width"] = json!(1024 + index);
+                    record["ente"]["pubMagicMetadata"]["w"] = json!(1024 + index);
                     fs::write(&sidecar, serde_json::to_vec(&record)?)?;
                     if folder != "Active" {
                         preserved.push((
@@ -778,7 +772,7 @@ fn export_adopts_live_sidecars_with_different_metadata() -> TestResult {
             for name in ["Motion.heic", "Motion.mov"] {
                 let record = read_json(&root.join("Active/metadata").join(format!("{name}.json")));
                 assert_eq!(record["description"], "current remote caption");
-                assert_eq!(record["ente"]["width"], 640);
+                assert_eq!(record["ente"]["pubMagicMetadata"]["w"], 640);
             }
             for (path, bytes, modified) in preserved {
                 assert_eq!(fs::read(&path)?, bytes);
@@ -809,7 +803,8 @@ fn export_adopts_live_sidecars_with_different_metadata() -> TestResult {
                     record["description"],
                     format!("Unselected component {index}")
                 );
-                assert_eq!(record["ente"]["width"], 1024 + index);
+                assert_eq!(record["ente"]["pubMagicMetadata"]["w"], 1024 + index);
+                assert_eq!(record["title"], "Motion.heic");
             }
             for folder in ["Active", "Trash/History"] {
                 let sidecar = root.join(folder).join("metadata/Motion.mov.json");
@@ -1513,7 +1508,8 @@ fn export_allocates_live_pairs_from_their_actual_extensions() -> TestResult {
                     let sidecar = folder.join("metadata").join(format!("{path}.json"));
                     let record = read_json(&sidecar);
                     assert_eq!(record["ente"]["fileID"], id.to_string());
-                    assert_eq!(record["ente"]["name"], name);
+                    assert_eq!(record["title"], name);
+                    assert_eq!(record["ente"]["metadata"]["title"], name);
                     assert_eq!(record["ente"]["components"][0]["path"], paths[0]);
                     assert_eq!(record["ente"]["components"][1]["path"], paths[1]);
                     snapshots.push((media, bytes.to_vec()));

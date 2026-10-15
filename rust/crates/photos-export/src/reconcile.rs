@@ -1084,12 +1084,6 @@ impl Run<'_> {
                 }
             }
         }
-        for field in &file.warnings {
-            (self.report)(&format!(
-                "file {}: unfamiliar metadata field {field:?}; exporting supported fields",
-                file.id
-            ));
-        }
         after = 0;
         loop {
             self.check_cancel()?;
@@ -1527,7 +1521,6 @@ impl Run<'_> {
                 name: format!("metadata/{}.json", component.location.name),
             };
             let mut value = previous.value;
-            value["title"] = Value::String(component.location.name.clone());
             let mut layout: Vec<crate::metadata::Component> =
                 serde_json::from_value(value["ente"]["components"].clone())?;
             for identity in &mut layout {

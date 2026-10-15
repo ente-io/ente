@@ -58,7 +58,6 @@ test.each(["A caption", "", undefined])(
         expect(path).toBe("/export/Album/metadata/photo.jpg.json");
         const metadata = JSON.parse(json) as Record<string, unknown>;
         expect(metadata.description).toBe(caption || undefined);
-        expect(metadata).not.toHaveProperty("caption");
         expect(
             (await tryParseTakeoutMetadataJSON(new File([json], path)))
                 ?.description,
