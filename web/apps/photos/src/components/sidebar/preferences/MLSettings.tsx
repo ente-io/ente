@@ -150,7 +150,9 @@ const FaceConsentDrawer: React.FC<FaceConsentDrawerProps> = ({
             onRootClose={handleRootClose}
             title={t("ml_consent_title")}
         >
-            <FaceConsent onConsent={onConsent} onCancel={onClose} />
+            <Box sx={{ px: 3 }}>
+                <FaceConsent onConsent={onConsent} onCancel={onClose} />
+            </Box>
         </TitledNestedSidebarDrawer>
     );
 };
@@ -159,14 +161,12 @@ interface FaceConsentProps {
     onConsent: () => void;
     onCancel: () => void;
     submitting?: boolean;
-    variant?: "dialog";
 }
 
 export const FaceConsent: React.FC<FaceConsentProps> = ({
     onConsent,
     onCancel,
     submitting = false,
-    variant,
 }) => {
     const [acceptTerms, setAcceptTerms] = useState(false);
 
@@ -184,23 +184,15 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
     );
 
     return (
-        <Stack
-            sx={
-                variant == "dialog" ? { gap: "20px" } : { gap: 3, py: 1, px: 2 }
-            }
-        >
+        <Stack sx={{ gap: "20px" }}>
             <Typography
                 component="div"
                 sx={{
                     color: "text.muted",
-                    ...(variant == "dialog"
-                        ? {
-                              fontSize: 14,
-                              lineHeight: "20px",
-                              "& p:first-of-type": { mt: 0 },
-                              "& p:last-of-type": { mb: 0 },
-                          }
-                        : { px: "8px" }),
+                    fontSize: 14,
+                    lineHeight: "20px",
+                    "& p:first-of-type": { mt: 0 },
+                    "& p:last-of-type": { mb: 0 },
                 }}
             >
                 <Trans
@@ -211,19 +203,15 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
             <FormGroup sx={{ width: "100%" }}>
                 <FormControlLabel
                     sx={{ color: "text.muted", ml: 0 }}
-                    slotProps={
-                        variant == "dialog"
-                            ? {
-                                  typography: {
-                                      sx: { fontSize: 14, lineHeight: "20px" },
-                                  },
-                              }
-                            : undefined
-                    }
+                    slotProps={{
+                        typography: {
+                            sx: { fontSize: 14, lineHeight: "20px" },
+                        },
+                    }}
                     control={
                         <Checkbox
                             size="small"
-                            sx={variant == "dialog" ? { pl: 0 } : undefined}
+                            sx={{ pl: 0 }}
                             checked={acceptTerms}
                             disabled={submitting}
                             onChange={(e) => setAcceptTerms(e.target.checked)}
@@ -239,11 +227,7 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
                     disabled={!acceptTerms}
                     loading={submitting}
                     onClick={onConsent}
-                    sx={
-                        variant == "dialog"
-                            ? [v2SubmitButtonSx, { flex: "none" }]
-                            : undefined
-                    }
+                    sx={[v2SubmitButtonSx, { flex: "none" }]}
                 >
                     {t("ml_consent")}
                 </FocusVisibleButton>
@@ -252,11 +236,7 @@ export const FaceConsent: React.FC<FaceConsentProps> = ({
                     color="secondary"
                     disabled={submitting}
                     onClick={onCancel}
-                    sx={
-                        variant == "dialog"
-                            ? [v2CancelButtonSx, { flex: "none" }]
-                            : undefined
-                    }
+                    sx={[v2CancelButtonSx, { flex: "none" }]}
                 >
                     {t("cancel")}
                 </FocusVisibleButton>

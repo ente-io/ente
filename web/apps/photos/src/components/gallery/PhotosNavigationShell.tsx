@@ -79,9 +79,6 @@ export const PhotosNavigationShell: React.FC<
     useEffect(() => {
         if (!mobile) closeMobileNavigation();
     }, [mobile, closeMobileNavigation]);
-    useEffect(() => {
-        if (mobile && props.mode == "people") showMobileNavigation();
-    }, [mobile, props.mode, showMobileNavigation]);
     const handleChangeMode = (mode: GalleryBarMode) => {
         const reopeningSection =
             mobile &&

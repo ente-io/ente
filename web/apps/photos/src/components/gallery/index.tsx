@@ -285,7 +285,6 @@ export const PeopleConsentDialog: React.FC<
                         onConsent={handleConsent}
                         onCancel={handleClose}
                         submitting={submitting}
-                        variant="dialog"
                     />
                 </DialogContent>
             </Stack>
