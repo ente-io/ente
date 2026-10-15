@@ -5799,9 +5799,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.189"
+version = "0.2.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
 
 [[package]]
 name = "libdbus-sys"
@@ -5927,9 +5927,9 @@ checksum = "11d3d7f243d5c5a8b9bb5d6dd2b1602c0cb0b9db1621bafc7ed66e35ff9fe092"
 
 [[package]]
 name = "llama-cpp-2"
-version = "0.1.158"
+version = "0.1.159"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a89d1d5c09794689aa6190206dd55499d8153b3669c72f2ef24a4e8ddc5ccbe"
+checksum = "fab4a3cd6f539c1d658161c85390c18b1d3f67283275e1567b34417dca3dd8c9"
 dependencies = [
  "enumflags2",
  "llama-cpp-sys-2",
@@ -5940,9 +5940,9 @@ dependencies = [
 
 [[package]]
 name = "llama-cpp-sys-2"
-version = "0.1.158"
+version = "0.1.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "608edbeed8bcb8573d8e665f3f047e085202510b7b3d09e7fae2cfe3d80d6bec"
+checksum = "912d8a0522acec022ae07d099366234067c8af6a18570a603f0749b7bb927e9a"
 dependencies = [
  "bindgen",
  "cc",
@@ -6259,9 +6259,9 @@ dependencies = [
 
 [[package]]
 name = "napi"
-version = "3.14.1"
+version = "3.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80683d006f447996c2fb0b063e66f2bbbc629d4fb0f8e2cad22806650aad1b16"
+checksum = "a4e2cf85c02d9b057898c485b824c3c416b65193689e2b7f517efc94b86ed24c"
 dependencies = [
  "bitflags 2.11.0",
  "ctor",
@@ -6282,9 +6282,9 @@ checksum = "b899b545d3aa6dca985939059f258c5488d34e4ecf39c274e20009748f4b846d"
 
 [[package]]
 name = "napi-derive"
-version = "3.6.11"
+version = "3.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "903796e3a3f79eb7e52b1548c11f1817cddec62b0e347a3e97af88b1bd76fd53"
+checksum = "92cec6048ac04041ac8055bdce1ec4f353416cd443ba9222bf73af790c3d4495"
 dependencies = [
  "convert_case 0.12.0",
  "ctor",
@@ -9759,9 +9759,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-updater"
-version = "2.13.1"
+version = "2.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cb0b2ea3e85ca287990d3859a29cc5cb18024240fd78f62e027fb7963670f18"
+checksum = "8cb463cd1f26c9562a01718fe9adf6927795f764c3576e509f27cf567307ddef"
 dependencies = [
  "base64 0.22.1",
  "dirs",
@@ -9769,6 +9769,7 @@ dependencies = [
  "futures-util",
  "http",
  "infer",
+ "libc",
  "log",
  "minisign-verify",
  "osakit",
@@ -12035,9 +12036,9 @@ dependencies = [
 
 [[package]]
 name = "zeroize"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e13c156562582aa81c60cb29407084cdb54c4164760106ab78e6c5b0858cf64e"
+checksum = "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879"
 dependencies = [
  "zeroize_derive",
 ]
