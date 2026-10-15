@@ -100,7 +100,7 @@ interface EnableMLProps {
     showMagicSearchHint?: boolean;
 }
 
-export const EnableML: React.FC<EnableMLProps> = ({
+const EnableML: React.FC<EnableMLProps> = ({
     onEnable,
     showMagicSearchHint,
 }) => {
