@@ -41,7 +41,7 @@ type PhotosNavigationShellProps = SearchBarProps & {
     onUpload: () => void;
     onHome: () => void;
     mode: GalleryBarMode;
-    onChangeMode: (mode: GalleryBarMode) => void;
+    onChangeMode: (mode: GalleryBarMode) => boolean;
 };
 
 export const PhotosNavigationShell: React.FC<
@@ -79,6 +79,9 @@ export const PhotosNavigationShell: React.FC<
     useEffect(() => {
         if (!mobile) closeMobileNavigation();
     }, [mobile, closeMobileNavigation]);
+    useEffect(() => {
+        if (mobile && props.mode == "people") showMobileNavigation();
+    }, [mobile, props.mode, showMobileNavigation]);
     const handleChangeMode = (mode: GalleryBarMode) => {
         const reopeningSection =
             mobile &&
@@ -99,8 +102,8 @@ export const PhotosNavigationShell: React.FC<
             }
             return;
         }
+        if (!props.onChangeMode(mode)) return;
         setNavigationCollapsed(false);
-        props.onChangeMode(mode);
         if (mobile) showMobileNavigation();
     };
     return (
@@ -293,7 +296,8 @@ const NormalHeaderContents: React.FC<
 };
 
 const NormalNavigationRail: React.FC<
-    Omit<PhotosNavigationShellProps, "onUpload"> & {
+    Omit<PhotosNavigationShellProps, "onUpload" | "onChangeMode"> & {
+        onChangeMode: (mode: GalleryBarMode) => void;
         isHome: boolean;
         opensDialog: boolean;
         navigationOpen: boolean;

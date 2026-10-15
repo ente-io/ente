@@ -1486,19 +1486,20 @@ const Page: React.FC = () => {
     const handleShowPeople = () => {
         if (!isMLEnabled()) {
             showPeopleConsent();
-            return;
+            return false;
         }
         setCleanupView(undefined);
         dispatch({ type: "showPeople" });
+        return true;
     };
 
     const handleChangeBarMode = (mode: GalleryBarMode) => {
         if (mode == "people") {
-            handleShowPeople();
-            return;
+            return handleShowPeople();
         }
         setCleanupView(undefined);
         dispatch({ type: "showAlbums" });
+        return true;
     };
 
     const handleFileViewerToggleFavorite = useCallback(
