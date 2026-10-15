@@ -717,12 +717,13 @@ const EmptyState: React.FC<
             break;
     }
 
-    const hasPeople = people && people.length > 0;
+    const hasPeople =
+        mlStatus?.phase != "disabled" && people && people.length > 0;
     if (!hasPeople && !label) return null;
 
     return (
         <Box sx={{ textAlign: "left" }}>
-            {people && people.length > 0 && (
+            {hasPeople && (
                 <>
                     <SearchPeopleHeader onClick={onSelectPeople} />
                     <SearchPeopleList {...{ people, onSelectPerson }} />
