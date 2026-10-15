@@ -1808,17 +1808,11 @@
     "description": "Forgot password link label"
   },
   "forgotPasswordPrompt": "Forgot password?",
-  "@forgotPasswordPrompt": {
-    "description": "Link on the password screens that starts the forgot password flow"
-  },
   "forgotRecoveryKey": "Forgot recovery key?",
   "free10GB": "10GB free on <bold-green>ente</bold-green> Photos",
   "freeStorageOffer": "10% off on <bold-green>ente</bold-green> photos",
   "freeStorageOfferDescription": "Use code \"AUTH\" to get 10% off first year",
   "free": "Free",
-  "@free": {
-    "description": "Price label of the free plan on the pricing page"
-  },
   "freeTrial": "Free trial",
   "freeUpAmount": "Free up {sizeInMBorGB}",
   "@freeUpAmount": {
@@ -2679,9 +2673,6 @@
   "moments": "Moments",
   "month": "month",
   "mostPopular": "Most popular",
-  "@mostPopular": {
-    "description": "Badge on the recommended plan on the pricing page"
-  },
   "monthly": "Monthly",
   "@monthly": {
     "description": "The text to display for monthly plans",
