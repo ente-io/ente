@@ -545,15 +545,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 (loadedPostImageURLFor(profilePostPhoto(item, index)) ?? ""),
         })),
     );
-    const selectedPhotoIndex = selectedPost
-        ? profileViewerPhotos.findIndex(
-              (photo) =>
-                  photo.id == selectedPost.id &&
-                  photo.postPhotoIndex == selectedPost.photoIndex,
-          )
-        : 0;
+    const selectedPostPhotos = profileViewerPhotos.filter(
+        (photo) => photo.id == selectedPost?.id,
+    );
     const handleSelectedPostIndexChange = (photoIndex: number) => {
-        const photo = profileViewerPhotos[photoIndex];
+        const photo = selectedPostPhotos[photoIndex];
         if (!photo) return;
         setSelectedPost({
             id: photo.id,
@@ -1517,8 +1513,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                         closeOnSwipePastEnd
                         headerHeight={profileHeaderHeight}
                         photo={selectedPost.photo}
-                        photos={profileViewerPhotos}
-                        photoIndex={selectedPhotoIndex}
+                        photos={selectedPostPhotos}
+                        photoIndex={selectedPost.photoIndex}
                         onPhotoIndexChange={handleSelectedPostIndexChange}
                         onLoadPhoto={onLoadPostImage}
                         postActionMode={selectedPostActionMode}
