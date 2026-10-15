@@ -32,7 +32,10 @@ impl Destination {
                 match fs::symlink_metadata(path) {
                     Ok(_) => anyhow::bail!("output already exists: {}", path.display()),
                     Err(error) if error.kind() == io::ErrorKind::NotFound => {}
-                    Err(error) => return Err(error.into()),
+                    Err(error) => {
+                        return Err(error)
+                            .with_context(|| format!("cannot inspect output {}", path.display()));
+                    }
                 }
                 ensure!(
                     parent(path).is_dir(),
@@ -45,7 +48,11 @@ impl Destination {
             Self::Directory { path, .. } => {
                 let mut missing = Vec::new();
                 for directory in path.ancestors() {
-                    if directory.as_os_str().is_empty() || directory.try_exists()? {
+                    if directory.as_os_str().is_empty()
+                        || directory.try_exists().with_context(|| {
+                            format!("cannot inspect export directory {}", directory.display())
+                        })?
+                    {
                         break;
                     }
                     missing.push(directory);
@@ -82,7 +89,8 @@ impl Destination {
                 Ok(None)
             }
             Self::File(path) => {
-                stage(parent(path), bytes)?
+                stage(parent(path), bytes)
+                    .with_context(|| format!("cannot prepare output {}", path.display()))?
                     .persist_noclobber(path)
                     .map_err(|error| error.error)
                     .with_context(|| format!("cannot publish {}", path.display()))?;
@@ -95,7 +103,9 @@ impl Destination {
                 Ok(Some(path.clone()))
             }
             Self::Directory { path, extension } => {
-                publish_directory(path, extension, bytes, Local::now().date_naive()).map(Some)
+                publish_directory(path, extension, bytes, Local::now().date_naive())
+                    .map(Some)
+                    .with_context(|| format!("Auth backup directory {}", path.display()))
             }
         }
     }

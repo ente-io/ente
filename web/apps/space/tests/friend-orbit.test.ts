@@ -30,6 +30,7 @@ describe("friend orbit", () => {
         [390, 728, 0.84, 3],
         [390, 728, 0.84, 9],
         [320, 452, 0.84, 9],
+        [390, 728, 0.84, 30],
         [390, 728, 0.84, 36],
     ] as const) {
         it(`keeps ${count} friends separated and in bounds at ${width}px`, () => {

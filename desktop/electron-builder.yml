@@ -36,6 +36,22 @@ linux:
           arch: [x64, arm64]
     category: Photography
     icon: ./build/icon.icns
+# Remove this override when upgrading electron-builder to 27.0.0.
+pacman:
+    depends:
+        - c-ares
+        - ffmpeg
+        - gtk3
+        - libevent
+        - libvpx
+        - libxslt
+        - libxss
+        - minizip
+        - nss
+        - re2
+        - snappy
+        - libnotify
+        - libappindicator-gtk3
 mac:
     minimumSystemVersion: "13.3"
     target:

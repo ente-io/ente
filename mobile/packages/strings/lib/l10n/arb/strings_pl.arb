@@ -1,6 +1,12 @@
 {
-  "bringMemoriesTogether": "Zbierz swoje wspomnienia w jednym miejscu",
-  "createMyAccount": "Utwórz moje konto",
+  "bringMemoriesTogether": "Połącz swoje wspomnienia",
+  "@bringMemoriesTogether": {
+    "description": "Title on the Local Gallery photo permission screen"
+  },
+  "createMyAccount": "Utwórz nowe konto",
+  "@createMyAccount": {
+    "description": "Create account button on the Photos onboarding screen"
+  },
   "localGalleryPermissionDesc": "Zezwól na dostęp do zdjęć i porządkowanie ich za pomocą rozpoznawania twarzy. Całe przetwarzanie odbywa się na Twoim urządzeniu.",
   "onboardingOrganizeDesc": "Uporządkuj swoje zdjęcia i filmy. Wszystkie wspomnienia w jednym miejscu.",
   "about": "O nas",
@@ -18,6 +24,7 @@
       }
     }
   },
+  "accountRecovery": "Odzyskiwanie konta",
   "accountSetupIncompleteCreateAccount": "Konfiguracja konta nieukończona. Utwórz konto, aby ukończyć konfigurację.",
   "@accountSetupIncompleteCreateAccount": {
     "description": "Error shown when account exists but signup is incomplete"
@@ -96,6 +103,7 @@
   "after1Year": "Po 1 roku",
   "albumLayout": "Układ albumu",
   "albums": "Albumy",
+  "albumsOnDevicePermissionCta": "Zezwól na dostęp",
   "albumTitle": "Tytuł albumu",
   "albumUpdated": "Album został zaktualizowany",
   "algorithm": "Algorytm",
@@ -2152,7 +2160,6 @@
   "selectFile": "Wybierz plik",
   "selectFolder": "Wybierz folder",
   "selectFolders": "Wybierz foldery",
-  "selectFoldersForBackup": "Wybierz foldery do stworzenia kopii zapasowej",
   "selectFolderToContinue": "Wybierz folder, aby kontynuować",
   "selectItemsToAdd": "Wybierz elementy do dodania",
   "selectLanguage": "Wybierz język",
@@ -2321,16 +2328,15 @@
       "name": {}
     }
   },
-  "spotlightOnThem": "Uwaga na {name}",
+  "spotlightOnThem": "Wspomnienia z {name}",
   "@spotlightOnThem": {
     "placeholders": {
       "name": {}
     }
   },
-  "spotlightOnYourself": "Uwaga na siebie",
+  "spotlightOnYourself": "Spotlight na siebie",
   "startBackup": "Uruchom tworzenie kopii zapasowej",
   "startRecovery": "Rozpocznij odzyskiwanie",
-  "startWithLatestPhotos": "Zacznij z najnowszymi zdjęciami",
   "status": "Stan",
   "sticker": "Naklejka",
   "stopCastingBody": "Czy chcesz przestać wyświetlać?",

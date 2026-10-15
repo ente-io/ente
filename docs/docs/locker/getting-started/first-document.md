@@ -37,7 +37,7 @@ Document scanning is available in the Locker mobile app on Android and iOS.
 1. Tap the camera button on the home screen
 2. Point the camera at a page. Locker can capture it automatically, or you can switch to **Manual** and tap the shutter button
 3. Scan any additional pages, then tap the check-mark button
-4. Review the pages. You can adjust the crop, rotate or delete a page, add another page, and rename the PDF
+4. Review the pages. You can adjust the crop, rotate or delete a page, retake a page, add another page, and rename the PDF
 5. Tap **Save to Ente**
 6. Leave collections unselected to use **Uncategorized**, or select one or more collections
 7. Tap **Save**
@@ -47,8 +47,9 @@ Document scanning is available in the Locker mobile app on Android and iOS.
 1. Tap the **+** button
 2. Select **File**
 3. Choose one or more files from your device
-4. Leave collections unselected to use **Uncategorized**, or select one or more collections
-5. Tap **Save**
+4. To rename a file, tap the pencil icon beside its name. Enter a new name and tap **Save**
+5. Leave collections unselected to use **Uncategorized**, or select one or more collections
+6. Tap **Save** to upload
 
 ## Example: Adding a secret
 

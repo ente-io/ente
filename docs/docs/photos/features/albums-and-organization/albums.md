@@ -28,10 +28,12 @@ Create albums to organize your photos and videos into collections.
 
 ![Albums grid and New album dialog side by side on Ente Photos mobile](https://docs-assets.ente.com/screenshots/phone-albums-create-duo.png){width=780px}
 
-- Open the **Albums** tab
-- Tap the **Add new** button
-- Enter a name for your album
-- Tap **Create**
+1. Open the **Albums** tab
+2. Select **Ente** at the top
+3. Tap **Create album**
+4. Enter a name and tap **Create**
+
+The **Device** view shows folders from your phone and does not offer this Ente-album creation tile. If **Create album** is missing, scroll to the top, select **Ente**, and clear any active album search.
 
 ### On web / desktop
 
@@ -44,9 +46,19 @@ Create albums to organize your photos and videos into collections.
 
 You can also create albums by uploading photos from your device, manually adding photos to new albums, or automatically through features like [watch folders](/photos/features/backup-and-sync/watch-folders) on desktop.
 
+## Add existing photos to an album {#add-existing-photos}
+
+Creating an empty album using the steps above does not move existing photos into it. To organize photos already in Ente, select them in your gallery or an album and choose **Add to album**. On desktop, choose one destination at a time. On mobile, you can select multiple destination albums.
+
+For photos in **Uncategorized** on desktop, first use **Move** in the action bar to put them in one album. Open that album and use **Add to album** for any additional destinations. See [organizing Uncategorized photos](/photos/features/albums-and-organization/uncategorized#organize-uncategorized-photos).
+
+Use **Upload** when you want to import new local files from your computer.
+
 ## Rename album
 
 Personalize your albums by giving them a meaningful name.
+
+Renaming an Ente album does not rename the corresponding folder on your phone. If that album is already the destination for mobile automatic backup, the existing backup connection continues to use it after the rename. Changing its name does not choose a new backup destination.
 
 ### On mobile
 

@@ -6,18 +6,38 @@ import type { SpacePostPreview } from "services/space";
 import { spaceSurfaceHover, spaceTextMuted } from "styles/colors";
 
 export const SpacePostPreviewThumbnail = ({
+    borderRadius = "20%",
     post,
 }: {
+    borderRadius?: string;
     post?: SpacePostPreview;
 }) =>
     post?.imageUrl ? (
-        <Box sx={{ position: "relative", width: 44, height: 44 }}>
+        <Box
+            sx={{
+                borderRadius,
+                height: 44,
+                isolation: "isolate",
+                position: "relative",
+                width: 44,
+                "&::after": {
+                    borderRadius: "inherit",
+                    boxShadow: "inset 0 0 0 1px #282828",
+                    content: '""',
+                    inset: 0,
+                    mixBlendMode: "lighten",
+                    pointerEvents: "none",
+                    position: "absolute",
+                    zIndex: 2,
+                },
+            }}
+        >
             <Box
                 component="img"
                 alt=""
                 src={post.imageUrl}
                 sx={{
-                    borderRadius: "20%",
+                    borderRadius: "inherit",
                     display: "block",
                     height: "100%",
                     objectFit: "cover",
@@ -40,7 +60,7 @@ export const SpacePostPreviewThumbnail = ({
             sx={{
                 alignItems: "center",
                 bgcolor: spaceSurfaceHover,
-                borderRadius: "20%",
+                borderRadius,
                 color: spaceTextMuted,
                 display: "flex",
                 height: 44,

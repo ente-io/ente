@@ -3,7 +3,6 @@ import "dart:typed_data";
 
 import "package:ente_components/ente_components.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/email_util.dart";
 import "package:file_saver/file_saver.dart";
@@ -15,6 +14,7 @@ import "package:locker/services/files/download/file_downloader.dart"
 import "package:locker/services/files/offline/offline_file_storage.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
+import 'package:locker/ui/components/locker_progress_dialog.dart';
 import "package:locker/ui/pages/account_credentials_page.dart";
 import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
@@ -71,12 +71,11 @@ class FileUtil {
       await cachedDecryptedFile.delete();
     }
 
-    final dialog = context.mounted
-        ? createProgressDialog(context, l10n.downloading, isDismissible: false)
-        : null;
-
+    LockerProgressDialog? dialog;
     try {
-      await dialog?.show();
+      if (context.mounted) {
+        dialog = await showLockerProgressDialog(context, l10n.downloading);
+      }
       final fileKey = await CollectionService.instance.getFileKey(file);
       void progressCallback(int downloaded, int total) {
         if (!context.mounted) {
@@ -154,13 +153,10 @@ class FileUtil {
 
     final total = files.length;
     final l10n = context.strings;
-    final dialog = createProgressDialog(
+    final dialog = await showLockerProgressDialog(
       context,
       "${l10n.downloading} 0/$total",
-      isDismissible: false,
     );
-
-    await dialog.show();
 
     var index = 0;
     final savedNames = <String>[];

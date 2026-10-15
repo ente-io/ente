@@ -364,8 +364,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                         alignItems: "center",
                         display: "grid",
                         gridTemplateColumns: `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
-                        height: 56,
-                        px: 2,
+                        height: "calc(68px + var(--space-ios-safe-area-top, 0px))",
+                        pt: "var(--space-ios-safe-area-top, 0px)",
+                        pl: "max(16px, var(--space-ios-safe-area-left, 0px))",
+                        pr: "max(16px, var(--space-ios-safe-area-right, 0px))",
                         width: "100%",
                     }}
                 >
@@ -425,6 +427,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                         flexDirection: "column",
                         gap: "8px",
                         mt: "24px",
+                        pb: "48px",
                         px: "14px",
                         width: "100%",
                     }}
@@ -586,8 +589,10 @@ export const ChangeNameSettingsScreen: React.FC<
                         alignItems: "center",
                         display: "grid",
                         gridTemplateColumns: `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
-                        height: 56,
-                        px: 2,
+                        height: "calc(68px + var(--space-ios-safe-area-top, 0px))",
+                        pt: "var(--space-ios-safe-area-top, 0px)",
+                        pl: "max(16px, var(--space-ios-safe-area-left, 0px))",
+                        pr: "max(16px, var(--space-ios-safe-area-right, 0px))",
                         width: "100%",
                     }}
                 >

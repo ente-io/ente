@@ -274,6 +274,7 @@ fun ChatView(
                             },
                     messageText = chatState.messageText,
                     attachments = chatState.attachments,
+                    supportsImageAttachments = chatState.supportsImageAttachments,
                     editingMessage = editingMessage,
                     isProcessingAttachments = chatState.isProcessingAttachments,
                     isGenerating = chatState.isGenerating,

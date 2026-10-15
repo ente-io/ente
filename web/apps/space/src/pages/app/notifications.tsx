@@ -43,11 +43,13 @@ import {
     spaceControlBackground,
     spaceControlBackgroundHover,
     spaceOnAccent,
+    spaceSurface,
     spaceSurfaceHover,
     spaceText,
     spaceTextMuted,
 } from "styles/colors";
 import { groupSpaceActivities } from "utils/activity-sections";
+import { firstNameFrom } from "utils/display";
 import { isFriendRequestCanceledError } from "utils/friend-errors";
 import { spacePostDeletedEvent } from "utils/post-events";
 import { postQuoteErrorState } from "utils/post-quote";
@@ -87,10 +89,11 @@ const NotificationAvatar: React.FC<{
 };
 
 const actorName = (actor: SpaceNotification["actors"][number]) =>
-    actor.fullName.trim() || actor.username;
+    firstNameFrom(actor.fullName.trim() || actor.username);
 
 const NotificationRow: React.FC<{
     group: SpaceNotification;
+    isNew: boolean;
     spaceId: string;
     loadPostPreview: (postId: number) => Promise<SpacePostPreview | undefined>;
     onPostSomething: () => void;
@@ -102,6 +105,7 @@ const NotificationRow: React.FC<{
     ) => Promise<void>;
 }> = ({
     group,
+    isNew,
     spaceId,
     loadPostPreview,
     onFriendRequest,
@@ -116,6 +120,7 @@ const NotificationRow: React.FC<{
     const otherCount = group.actorCount - 1;
     const isFriendRequest = group.kind == "friend_request";
     const isPostLike = group.kind == "post_like";
+    const backgroundColor = isNew ? spaceSurface : "transparent";
     const [isRequestPending, setIsRequestPending] = React.useState(false);
     const [requestError, setRequestError] = React.useState<string>();
     const actOnRequest = async (accept: boolean) => {
@@ -161,14 +166,19 @@ const NotificationRow: React.FC<{
                 data-notification-id={group.id}
                 sx={{
                     ...spaceActivityRowSx,
+                    bgcolor: backgroundColor,
+                    borderRadius: 0,
+                    mx: "-16px",
+                    px: "16px",
+                    width: "calc(100% + 32px)",
                     gridTemplateColumns:
                         isFriendRequest || showPostSomething
                             ? "44px minmax(0, 1fr) auto"
                             : "44px minmax(0, 1fr)",
                     "&:has(> [data-space-row-action]:hover), &:has(> [data-space-row-action]:active)":
-                        { bgcolor: "transparent" },
+                        { bgcolor: backgroundColor },
                     ...(isFriendRequest && {
-                        "&:hover, &:active": { bgcolor: "transparent" },
+                        "&:hover, &:active": { bgcolor: backgroundColor },
                     }),
                 }}
             >
@@ -909,6 +919,7 @@ const NotificationsFeed: React.FC<{ spaceId: string; profileLink: string }> = ({
                             <NotificationRow
                                 key={`${group.kind}:${group.postId ?? group.id}`}
                                 group={group}
+                                isNew={newIDs.has(group.id)}
                                 spaceId={spaceId}
                                 loadPostPreview={loadPostPreview}
                                 onFriendRequest={handleFriendRequest}
@@ -1042,8 +1053,9 @@ const Page: React.FC = () => {
                             display: "grid",
                             alignItems: "center",
                             gridTemplateColumns: "44px 1fr 44px",
-                            height: 56,
-                            px: 2,
+                            height: 68,
+                            pl: "max(16px, var(--space-ios-safe-area-left, 0px))",
+                            pr: "max(16px, var(--space-ios-safe-area-right, 0px))",
                         }}
                     >
                         <Box

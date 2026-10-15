@@ -82,10 +82,6 @@
   "discover_selfies": "Selfiar",
   "discover_sunset": "Solnedgang",
   "done": "Ferdig",
-  "doThisLater": "Gjer dette seinare",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "downloading": "Lastar ned …",
   "draw": "Klistremerke",
   "dropSupportEmail": "Send ein e-post til {supportEmail} frå e-postadressa du registrerte deg med",

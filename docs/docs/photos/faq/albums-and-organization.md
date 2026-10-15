@@ -159,6 +159,8 @@ Photos appear in Uncategorized when:
 - You delete an album but choose to keep the photos
 - You delete a file from a [watched folder](/photos/faq/backup-and-sync#watch-folders) on desktop
 
+You cannot choose Uncategorized as the destination for mobile automatic backup. Selected device folders back up to corresponding Ente albums. See [how mobile backup maps to albums](/photos/faq/backup-and-sync#automatic-backup).
+
 Learn more in the [Uncategorized feature guide](/photos/features/albums-and-organization/uncategorized).
 
 ### Why are photos appearing in Uncategorized? {#why-uncategorized}
@@ -187,19 +189,23 @@ Alternatively, if you have the original photos on your device, you can delete th
 
 ### How do I clean up Uncategorized items? {#clean-uncategorized}
 
-**On mobile:**
+To remove entries that are also in another album you own:
 
-1. Open the Uncategorized album
-2. Tap the three dots (overflow menu)
-3. Select "Clean Uncategorized"
+- **On mobile:** Open Uncategorized, tap the three-dot menu, and select **Clean Uncategorized**
+- **On desktop:** Open Uncategorized and select the clean icon (broom)
 
-This will automatically remove all files from Uncategorized that are also present in another album that you own. Only files exclusive to Uncategorized will remain.
+Items that exist only in Uncategorized remain there.
 
-**Manual cleanup:** You can also manually:
+To organize those remaining items on desktop:
 
-- Add photos from Uncategorized to specific albums
-- Delete photos you don't need from Uncategorized
-- Move photos to appropriate albums by selecting them and choosing "Add to album"
+1. Select the photos in Uncategorized and choose **Move** in the action bar
+2. Choose the first destination album
+3. Open that album and select the photos again
+4. Choose **Add to album** for each additional destination, one at a time
+
+On mobile, **Add to album** lets you select multiple destination albums. Adding a photo to another album does not require uploading the original again and does not use extra photo storage.
+
+See [organizing Uncategorized photos](/photos/features/albums-and-organization/uncategorized#organize-uncategorized-photos) for details.
 
 ### Can I delete the Uncategorized album? {#delete-uncategorized}
 
@@ -439,6 +445,20 @@ To restore photos deleted from your device on Android 11 and newer, select **Dev
 - Click the "Restore" button
 
 Restored photos will be moved to an album of choice.
+
+### How do I select all items in Ente Trash on mobile? {#select-all-ente-trash}
+
+The **All** option appears after you select one item.
+
+1. Open **Albums**, then open **Trash**. Choose **Ente** if you see both Ente and Device tabs.
+2. Select one item in Trash.
+3. Tap **All**.
+
+### If I restore several photos from Trash, will they return to their original albums? {#bulk-restore-original-albums}
+
+No. You can restore several photos together, but Ente moves the selection to an album you choose. It does not automatically return each photo to its previous album.
+
+If the photos came from different albums, restore them in separate groups and choose the right album for each group. If a photo was in more than one album, add it back to the other albums after restoring it. Photos in Ente Trash can be restored within 30 days.
 
 ### How do I permanently delete photos or empty trash? {#empty-trash}
 

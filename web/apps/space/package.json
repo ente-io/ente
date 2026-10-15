@@ -12,6 +12,7 @@
         "@fontsource/nunito": "5.3.0",
         "@hugeicons/core-free-icons": "4.3.5",
         "@hugeicons/react": "1.1.10",
+        "@rive-app/canvas-lite": "2.43.1",
         "ente-accounts": "*",
         "ente-base": "*",
         "ente-media": "*",
@@ -24,6 +25,6 @@
     "devDependencies": {
         "ente-build-config": "*",
         "vite-plugin-wasm": "3.6.0",
-        "vitest": "5.0.2"
+        "vitest": "5.0.4"
     }
 }

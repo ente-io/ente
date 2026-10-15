@@ -1,6 +1,10 @@
 import type { SpacePost } from "services/space";
 import type { LocalSpaceFeedPost } from "state/app-state";
 
+export interface HomeFeedPost extends SpacePost {
+    batchIndex?: number;
+}
+
 export type HomeFeedEntry =
     | {
           identity: string;
@@ -8,10 +12,15 @@ export type HomeFeedEntry =
           kind: "local";
           renderKey: string;
       }
-    | { identity: string; item: SpacePost; kind: "remote"; renderKey: string };
+    | {
+          identity: string;
+          item: HomeFeedPost;
+          kind: "remote";
+          renderKey: string;
+      };
 
 export const homeFeedEntries = (
-    feedItems: SpacePost[],
+    feedItems: HomeFeedPost[],
     localFeedPosts: LocalSpaceFeedPost[],
     newPostsSinceMs: number | undefined,
     latestPostIDs?: ReadonlySet<number>,
@@ -25,34 +34,30 @@ export const homeFeedEntries = (
         ),
     );
     const entries: HomeFeedEntry[] = [
-        ...localFeedPosts.map(
-            (item): HomeFeedEntry => ({
-                identity:
-                    item.status == "posted" || item.status == "ready"
-                        ? `post:${item.post.postId}`
-                        : item.postId
-                          ? `post:${item.postId}`
-                          : `local:${item.id}`,
-                item,
-                kind: "local",
-                renderKey: `local:${item.id}`,
-            }),
-        ),
+        ...localFeedPosts.map((item): HomeFeedEntry => ({
+            identity:
+                item.status == "posted" || item.status == "ready"
+                    ? `post:${item.post.postId}`
+                    : item.postId
+                      ? `post:${item.postId}`
+                      : `local:${item.id}`,
+            item,
+            kind: "local",
+            renderKey: `local:${item.id}`,
+        })),
         ...feedItems
             .filter((item) => !localResolvedPostIds.has(item.postId))
-            .map(
-                (item): HomeFeedEntry => ({
-                    identity: `post:${item.postId}`,
-                    item,
-                    kind: "remote",
-                    renderKey: `post:${item.postId}`,
-                }),
-            ),
+            .map((item): HomeFeedEntry => ({
+                identity: `post:${item.postId}`,
+                item,
+                kind: "remote",
+                renderKey: `post:${item.postId}`,
+            })),
     ];
     const latest: HomeFeedEntry[] = [];
-    const history: SpacePost[] = [];
+    const history: HomeFeedPost[] = [];
     for (const entry of entries) {
-        let post: SpacePost;
+        let post: HomeFeedPost;
         if (entry.kind == "remote") {
             post = entry.item;
         } else {
@@ -78,3 +83,9 @@ export const homeFeedEntries = (
     );
     return { latest, history };
 };
+
+export const homeFeedSeparatorBefore = (
+    latest: HomeFeedEntry[],
+    history: SpacePost[],
+) =>
+    history.length && latest.length ? `post:${history[0]!.postId}` : undefined;

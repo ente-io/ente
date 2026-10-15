@@ -436,10 +436,6 @@
   "@doNotSignOut": {
     "description": "Do not sign out button label"
   },
-  "doThisLater": "עשה זאת מאוחר יותר",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "באפשרותך לצפות בקוד של רשומה ע\"י לחיצה כפולה",
   "download": "הורד",
   "downloadFailed": "ההורדה נכשלה",
@@ -1156,7 +1152,6 @@
   },
   "selectExportFormat": "בחר פורמט ייצוא",
   "selectFile": "בחר קובץ",
-  "selectFoldersForBackup": "בחר תיקיות לגיבוי",
   "selectLanguage": "בחר שפה",
   "selectMorePhotos": "בחר תמונות נוספות",
   "send": "שלח",

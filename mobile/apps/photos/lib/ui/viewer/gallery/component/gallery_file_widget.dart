@@ -22,13 +22,33 @@ import "package:photos/ui/common/touch_cross_detector.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/actions/select_all_status_icon.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
+import "package:photos/ui/viewer/file/gallery_photo_page_route.dart";
+import "package:photos/ui/viewer/file/hero_image.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_indicators.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
+import "package:photos/ui/viewer/gallery/gallery_thumbnail_snapshot.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart";
+
+Color galleryFileSelectionColor(
+  BuildContext context,
+  EnteFile file,
+  int? currentUserID,
+) {
+  if (file.isUploaded &&
+      file.ownerID != null &&
+      file.ownerID != currentUserID) {
+    final owner = CollectionsService.instance.resolveUserIdentity(
+      file.ownerID!,
+      file.collectionID,
+    );
+    return getUserAvatarColor(context, owner);
+  }
+  return Colors.white;
+}
 
 class GalleryFileWidget extends StatefulWidget {
   final EnteFile file;
@@ -57,9 +77,31 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   static const borderRadius = BorderRadius.all(Radius.circular(1));
   static final _logger = Logger("GalleryFileWidget");
   late bool _isFileSelected;
+  late final _heroThumbnailKey = GlobalKey();
   int? _currentPointerId;
   bool _isPointerInside = false;
   late final StreamSubscription<FileUploadedEvent> _fileUploadedSubscription;
+  GalleryThumbnailSnapshots? _snapshots;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final snapshots = GalleryThumbnailSnapshotScope.of(context);
+    if (_snapshots != snapshots) {
+      _snapshots?.unregister(widget.file, context);
+      _snapshots = snapshots;
+      _snapshots?.register(widget.file, context);
+    }
+  }
+
+  @override
+  void didUpdateWidget(GalleryFileWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.file, widget.file)) {
+      _snapshots?.unregister(oldWidget.file, context);
+      _snapshots?.register(widget.file, context);
+    }
+  }
 
   @override
   void initState() {
@@ -80,6 +122,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   @override
   void dispose() {
+    _snapshots?.unregister(widget.file, context);
     _fileUploadedSubscription.cancel();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
@@ -110,25 +153,16 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   Widget _buildFileContent(BuildContext context) {
     final disableSelection =
         GalleryContextState.of(context)?.disableSelection ?? false;
-    Color selectionColor = Colors.white;
-    if (_isFileSelected &&
-        widget.file.isUploaded &&
-        widget.file.ownerID != null &&
-        widget.file.ownerID != widget.currentUserID) {
-      final owner = CollectionsService.instance.resolveUserIdentity(
-        widget.file.ownerID!,
-        widget.file.collectionID,
-      );
-      selectionColor = getUserAvatarColor(context, owner);
-    }
     final String heroTag = widget.tag + widget.file.tag;
+    final isPhoto =
+        widget.file.fileType == FileType.image ||
+        widget.file.fileType == FileType.livePhoto;
     final galleryContext = GalleryContextState.of(context);
     final useGroupedIndicators =
         !isLocalGalleryMode &&
         !widget.limitSelectionToOne &&
         !widget.file.isTrash &&
-        (widget.file.fileType == FileType.image ||
-            widget.file.fileType == FileType.livePhoto) &&
+        isPhoto &&
         galleryContext?.type != GroupType.size &&
         widget.file.debugCaption == null &&
         !localSettings.showLocalIDOverThumbnails &&
@@ -147,9 +181,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         flagService.internalUser;
     final effectiveThumbnailSize =
         widget.thumbnailSize ??
-        (widget.photoGridSize < photoGridSizeDefault
-            ? thumbnailLargeSize
-            : thumbnailSmallSize);
+        (widget.photoGridSize <= 3 ? thumbnailLargeSize : thumbnailSmallSize);
     final Widget thumbnailWidget = ThumbnailWidget(
       widget.file,
       diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
@@ -162,12 +194,20 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
       key: ValueKey((heroTag, effectiveThumbnailSize)),
       thumbnailSize: effectiveThumbnailSize,
       useRequestedThumbnailSizeForLocalCache: widget.thumbnailSize != null,
+      gaplessPlayback: isPhoto,
       shouldShowOwnerAvatar: !_isFileSelected,
       ownerAvatarType: widget.photoGridSize < photoGridSizeMax
           ? AvatarType.small
           : AvatarType.xs,
       shouldShowVideoDuration: true,
     );
+    final thumbnail = ClipRRect(
+      borderRadius: borderRadius,
+      child: thumbnailWidget,
+    );
+    final heroChild = isPhoto
+        ? KeyedSubtree(key: _heroThumbnailKey, child: thumbnail)
+        : thumbnail;
     return GestureDetector(
       onTap: disableSelection
           ? null
@@ -190,19 +230,19 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
             borderRadius: borderRadius,
             child: Hero(
               tag: heroTag,
-              flightShuttleBuilder:
-                  (
-                    flightContext,
-                    animation,
-                    flightDirection,
-                    fromHeroContext,
-                    toHeroContext,
-                  ) => (toHeroContext.widget as Hero).child,
+              placeholderBuilder: isPhoto ? imageHeroPlaceholderBuilder : null,
+              createRectTween: isPhoto ? imageHeroRectTween : null,
+              flightShuttleBuilder: isPhoto
+                  ? imageHeroFlightShuttleBuilder
+                  : (
+                      flightContext,
+                      animation,
+                      flightDirection,
+                      fromHeroContext,
+                      toHeroContext,
+                    ) => (toHeroContext.widget as Hero).child,
               transitionOnUserGestures: true,
-              child: ClipRRect(
-                borderRadius: borderRadius,
-                child: thumbnailWidget,
-              ),
+              child: heroChild,
             ),
           ),
           if (useGroupedIndicators)
@@ -226,7 +266,11 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
               child: SelectAllStatusIcon(
                 isSelected: true,
                 size: 16,
-                selectedFillColor: selectionColor,
+                selectedFillColor: galleryFileSelectionColor(
+                  context,
+                  widget.file,
+                  widget.currentUserID,
+                ),
                 selectedTickCutsOut: true,
               ),
             ),
@@ -344,6 +388,19 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         galleryType: galleryType,
       ),
     );
-    routeToPage(context, page, forceCustomPageRoute: true);
+    final isPhoto =
+        file.fileType == FileType.image || file.fileType == FileType.livePhoto;
+    if (isPhoto) {
+      Navigator.of(context).push(
+        GalleryPhotoPageRoute(
+          page: page,
+          tag: widget.tag + file.tag,
+          sourceImage: imageFromHero(context),
+          disableAnimations: MediaQuery.disableAnimationsOf(context),
+        ),
+      );
+    } else {
+      routeToPage(context, page, forceCustomPageRoute: true);
+    }
   }
 }

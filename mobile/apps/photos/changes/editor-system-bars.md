@@ -1,1 +1,0 @@
-- Fixed system bar icons in the photo editor for light and dark themes.

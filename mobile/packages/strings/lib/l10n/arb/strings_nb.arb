@@ -203,10 +203,6 @@
   "@doNotSignOut": {
     "description": "Do not sign out button label"
   },
-  "doThisLater": "Gjør dette senere",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "doubleTapToViewHiddenCode": "Du kan dobbelttrykke på en oppføring for å vise kode",
   "downloadUpdate": "Last ned",
   "duplicateCodes": "Dupliser koder",

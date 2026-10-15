@@ -85,11 +85,7 @@ export const stepFriendOrbit = (
         circle.y += circle.vy * frame;
     });
 
-    for (
-        let pass = 0;
-        pass < Math.max(7, Math.ceil(circles.length / 2));
-        pass++
-    ) {
+    for (let pass = 0; pass < 7; pass++) {
         for (let i = 0; i < circles.length; i++) {
             const first = circles[i]!;
             for (let j = i + 1; j < circles.length; j++) {
@@ -143,13 +139,23 @@ export const arrangeFriendOrbit = (
     circles: FriendOrbitCircle[],
     bounds: FriendOrbitBounds,
     elapsed: number,
+    initialOuterID?: string,
 ) => {
     circles.forEach((circle, index) => {
         const initial = createFriendOrbitCircle(circle.id, index);
         Object.assign(circle, initial, { size: circle.size });
     });
+    const group = circles.filter((circle) => circle.id != initialOuterID);
     for (let frame = 0; frame < 90; frame++) {
-        stepFriendOrbit(circles, bounds, 0, 16.667, undefined, true);
+        stepFriendOrbit(group, bounds, 0, 16.667, undefined, true);
+    }
+    const outer = circles.find((circle) => circle.id == initialOuterID);
+    if (outer && group.length) {
+        const neighbor = group.reduce((top, circle) =>
+            circle.y - circle.size / 2 < top.y - top.size / 2 ? circle : top,
+        );
+        outer.x = neighbor.x;
+        outer.y = neighbor.y - (neighbor.size + outer.size) / 2 - 10;
     }
     const angle = friendOrbitAngle(elapsed);
     circles.forEach((circle) => {

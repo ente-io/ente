@@ -135,10 +135,6 @@
   "discover_visiting_cards": "Bisita txartelak",
   "discover_wallpapers": "Horma-paperak",
   "done": "Eginda",
-  "doThisLater": "Egin hau geroago",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "dropSupportEmail": "Mesedez, bidali e-maila {supportEmail}-era zure erregistratutako e-mail helbidetik",
   "@dropSupportEmail": {
     "placeholders": {

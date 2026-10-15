@@ -49,10 +49,11 @@ impl Context {
         model: &ModelRef,
         chat_context_size: u32,
         n_threads: Option<i32>,
+        n_threads_generation: Option<i32>,
     ) -> Result<ContextRef, Error> {
         Self::new(
             model,
-            super::memory::title_context_params(chat_context_size, n_threads),
+            super::memory::title_context_params(chat_context_size, n_threads, n_threads_generation),
         )
     }
 
@@ -176,6 +177,8 @@ impl Context {
 pub struct ContextParams {
     pub context_size: Option<i32>,
     pub n_threads: Option<i32>,
+    #[serde(default)]
+    pub n_threads_generation: Option<i32>,
     pub n_batch: Option<i32>,
 }
 
@@ -339,6 +342,28 @@ fn mtmd_cache_key_and_params(
     Ok((key, params))
 }
 
+fn with_thread_counts(
+    mut params: LlamaContextParams,
+    threads: Option<i32>,
+    generation: Option<i32>,
+) -> Result<LlamaContextParams, Error> {
+    if let Some(threads) = threads {
+        if threads <= 0 {
+            return Err(Error::InvalidInput("n_threads must be > 0".to_owned()));
+        }
+        params = params.with_n_threads(threads).with_n_threads_batch(threads);
+    }
+    if let Some(threads) = generation {
+        if threads <= 0 {
+            return Err(Error::InvalidInput(
+                "n_threads_generation must be > 0".to_owned(),
+            ));
+        }
+        params = params.with_n_threads(threads);
+    }
+    Ok(params)
+}
+
 impl LocalContext {
     pub fn new(model: &ModelRef, params: ContextParams) -> Result<Self, Error> {
         let mut context_params = LlamaContextParams::default();
@@ -351,14 +376,11 @@ impl LocalContext {
             context_params = context_params.with_n_ctx(Some(context_size));
         }
 
-        if let Some(n_threads) = params.n_threads {
-            if n_threads <= 0 {
-                return Err(Error::InvalidInput("n_threads must be > 0".to_string()));
-            }
-            context_params = context_params
-                .with_n_threads(n_threads)
-                .with_n_threads_batch(n_threads);
-        }
+        context_params = with_thread_counts(
+            context_params,
+            params.n_threads,
+            params.n_threads_generation,
+        )?;
 
         if let Some(n_batch) = params.n_batch {
             let n_batch = u32::try_from(n_batch)
@@ -460,5 +482,39 @@ impl LocalContext {
             self.cached_mtmd_context(ctx.model, &mmproj_path, &marker)
                 .map(|_| ())
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn generation_override_preserves_prompt_threads_and_existing_callers() {
+        let defaults = LlamaContextParams::default();
+        for (threads, generation, expected_generation, expected_prompt) in [
+            (Some(7), Some(3), 3, 7),
+            (Some(4), None, 4, 4),
+            (None, Some(3), 3, defaults.n_threads_batch()),
+            (None, None, defaults.n_threads(), defaults.n_threads_batch()),
+        ] {
+            let params =
+                with_thread_counts(LlamaContextParams::default(), threads, generation).unwrap();
+            assert_eq!(params.n_threads(), expected_generation);
+            assert_eq!(params.n_threads_batch(), expected_prompt);
+        }
+        for (threads, generation) in [
+            (Some(0), None),
+            (Some(-1), Some(7)),
+            (Some(3), Some(0)),
+            (None, Some(-1)),
+        ] {
+            assert!(
+                with_thread_counts(LlamaContextParams::default(), threads, generation).is_err()
+            );
+        }
+        let old_request: ContextParams =
+            serde_json::from_str(r#"{"context_size":512,"n_threads":4,"n_batch":128}"#).unwrap();
+        assert_eq!(old_request.n_threads_generation, None);
     }
 }

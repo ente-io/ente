@@ -383,7 +383,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
 
     if (exif["EXIF ExposureTime"] != null) {
-      _exifData["exposureTime"] = _formatExposureTime(
+      _exifData["exposureTime"] = formatExifExposureTime(
         exif["EXIF ExposureTime"]!,
       );
     }
@@ -398,37 +398,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
     final value = ratio.numerator / ratio.denominator;
     return value.toStringAsFixed(2).replaceFirst(RegExp(r"\.?0+$"), "");
-  }
-
-  String _formatExposureTime(IfdTag exposureTimeTag) {
-    final values = exposureTimeTag.values.toList();
-    if (values.isEmpty) {
-      return exposureTimeTag.toString();
-    }
-
-    final value = values[0];
-    if (value is! Ratio) {
-      return exposureTimeTag.toString();
-    }
-
-    final numerator = value.numerator;
-    final denominator = value.denominator;
-
-    if (denominator == 0) {
-      return exposureTimeTag.toString();
-    }
-
-    final double seconds = numerator / denominator;
-
-    if (seconds >= 1) {
-      if (seconds == seconds.roundToDouble()) {
-        return "${seconds.toInt()}s";
-      }
-      return "${seconds.toStringAsFixed(1)}s";
-    } else {
-      final reciprocal = (1 / seconds).round();
-      return "1/$reciprocal";
-    }
   }
 
   IfdTag? _firstPositiveDimensionTag(

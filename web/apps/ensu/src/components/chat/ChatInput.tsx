@@ -6,6 +6,7 @@ import React, {
     forwardRef,
     memo,
     useImperativeHandle,
+    useLayoutEffect,
     useRef,
     useState,
 } from "react";
@@ -62,6 +63,10 @@ export const ChatInput = memo(
         const [input, setInput] = useState(initialText);
         const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
+        useLayoutEffect(() => {
+            if (inputRef.current) updateInputLayout(inputRef.current, input);
+        }, [input]);
+
         useImperativeHandle(
             ref,
             () => ({
@@ -95,7 +100,7 @@ export const ChatInput = memo(
                 <InputBase
                     multiline
                     inputComponent="textarea"
-                    inputProps={{ rows: 1, type: undefined }}
+                    inputProps={{ rows: 1, type: undefined, wrap: "soft" }}
                     inputRef={inputRef}
                     placeholder={
                         isDownloading
@@ -103,6 +108,20 @@ export const ChatInput = memo(
                             : "Write a message..."
                     }
                     value={input}
+                    onPasteCapture={(event) => {
+                        const textarea = inputRef.current;
+                        if (!textarea) return;
+                        const pasted =
+                            event.clipboardData.getData("text/plain");
+                        const next =
+                            textarea.value.slice(0, textarea.selectionStart) +
+                            pasted +
+                            textarea.value.slice(textarea.selectionEnd);
+                        updateInputLayout(textarea, next);
+                        requestAnimationFrame(() =>
+                            updateInputLayout(textarea, textarea.value),
+                        );
+                    }}
                     onChange={(event) => {
                         const text = event.target.value;
                         setInput(text);
@@ -116,6 +135,7 @@ export const ChatInput = memo(
                     }}
                     sx={{
                         flex: 1,
+                        minWidth: 0,
                         bgcolor: "transparent",
                         borderRadius: 2,
                         px: 1.5,
@@ -129,6 +149,7 @@ export const ChatInput = memo(
                         color: "text.base",
                         "& textarea": {
                             fieldSizing: "content",
+                            width: "100%",
                             maxHeight: "8.5em",
                             overflowY: "auto",
                             padding: 0,
@@ -207,3 +228,20 @@ export const ChatInput = memo(
         );
     }),
 );
+
+function updateInputLayout(textarea: HTMLTextAreaElement, text: string) {
+    let run = 0;
+    let expensive = false;
+    for (let i = 0; i < text.length; i++) {
+        const code = text.charCodeAt(i);
+        run = code > 32 && code < 127 ? run + 1 : 0;
+        if (run > 16384) {
+            expensive = true;
+            break;
+        }
+    }
+    textarea.style.setProperty("field-sizing", expensive ? "fixed" : "content");
+    textarea.style.height = expensive ? "8.5em" : "";
+    textarea.style.fontKerning = expensive ? "none" : "";
+    textarea.style.fontVariantLigatures = expensive ? "none" : "";
+}

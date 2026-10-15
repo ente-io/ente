@@ -218,7 +218,8 @@ export const ProfileImageViewerScreen: React.FC<
                     bgcolor: "transparent",
                     boxSizing: "border-box",
                     display: "grid",
-                    gridTemplateRows: "56px minmax(0, 1fr) auto",
+                    gridTemplateRows:
+                        "calc(68px + var(--space-ios-safe-area-top, 0px)) minmax(0, 1fr) auto",
                     minHeight: "var(--space-page-height, 100svh)",
                     mx: "auto",
                     width: "100%",
@@ -243,8 +244,10 @@ export const ProfileImageViewerScreen: React.FC<
                         alignItems: "center",
                         display: "grid",
                         gridTemplateColumns: `${spaceTouchTargetSize}px 1fr ${spaceTouchTargetSize}px`,
-                        height: 56,
-                        px: 2,
+                        height: "calc(68px + var(--space-ios-safe-area-top, 0px))",
+                        pt: "var(--space-ios-safe-area-top, 0px)",
+                        pl: "max(16px, var(--space-ios-safe-area-left, 0px))",
+                        pr: "max(16px, var(--space-ios-safe-area-right, 0px))",
                         width: "100%",
                     }}
                 >

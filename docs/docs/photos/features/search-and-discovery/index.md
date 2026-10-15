@@ -18,13 +18,15 @@ You can quickly access search using the keyboard shortcut:
 
 This focuses the search bar from anywhere in the app, letting you start searching immediately.
 
-### Date search
+### Date search {#date-search}
 
-Search for photos by specific dates, months, or years. Simply type a date in the search bar:
+Type a date, month, or year in the search bar **without quotation marks**. For example:
 
-- "January 2024" - finds all photos from that month
-- "2023" - finds all photos from that year
-- Specific dates like "July 15, 2024"
+- January 2024
+- 2023
+- July 15, 2024
+
+Then select the matching date suggestion under **Moments** on mobile or **Date** on desktop. This searches by date. Selecting a Magic search suggestion instead searches the visual content of your photos.
 
 ### File name search
 

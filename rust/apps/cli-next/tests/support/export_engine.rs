@@ -91,6 +91,7 @@ pub(super) struct Engine {
     session: Session,
     pub catalog: Catalog,
     pub database: String,
+    pub hardlinks: bool,
 }
 
 impl Engine {
@@ -107,6 +108,7 @@ impl Engine {
             .unwrap(),
             catalog,
             database: "export.db".into(),
+            hardlinks: false,
         }
     }
 
@@ -123,6 +125,7 @@ impl Engine {
             albums: albums.iter().map(|s| (*s).into()).collect(),
             exclude_albums: Vec::new(),
             adopt,
+            hardlinks: self.hardlinks,
             jobs: std::num::NonZeroUsize::new(1).unwrap(),
         }
     }
@@ -146,11 +149,18 @@ impl Engine {
         Ok(export)
     }
 
-    pub fn execute(&self, mut export: Export) -> Result<Summary> {
+    pub fn execute(&self, export: Export) -> Result<Summary> {
+        self.execute_with_report(export, &|line| eprintln!("{line}"))
+    }
+
+    pub fn execute_with_report(
+        &self,
+        mut export: Export,
+        report: &(dyn Fn(&str) + Sync),
+    ) -> Result<Summary> {
         let (send, cancel) = watch::channel(false);
-        tokio::runtime::Runtime::new()?.block_on(async {
-            export.execute(&self.session, &send, &cancel, &|line| eprintln!("{line}"))
-        })
+        tokio::runtime::Runtime::new()?
+            .block_on(async { export.execute(&self.session, &send, &cancel, report) })
     }
 
     pub fn run(&mut self, adopt: bool, albums: &[&str]) -> Result<Summary> {

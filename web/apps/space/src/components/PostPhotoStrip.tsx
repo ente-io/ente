@@ -370,8 +370,10 @@ export const SpacePostPhotoStrip: React.FC<{
                                             ...iconButtonSx,
                                             bgcolor: spaceControlBackground,
                                             outline:
+                                                !photo.isLoading &&
+                                                photo.imageUrl &&
                                                 photo.id ==
-                                                photos[activeIndex]?.id
+                                                    photos[activeIndex]?.id
                                                     ? "1.5px solid #FFFFFF"
                                                     : "none",
                                             outlineOffset: "-1.5px",

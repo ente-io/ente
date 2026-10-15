@@ -3,15 +3,14 @@ import {
     ArrowLeft02Icon,
     BubbleChatIcon,
     HandPointingRightIcon,
-    MoreHorizontalIcon,
+    Menu01Icon,
     Tick02Icon,
     UserRemove01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Box, Menu, MenuItem, Skeleton } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import {
     spaceActionDoneDurationMs,
-    SpaceActionFeedbackIcon,
     type SpaceActionPhase,
 } from "components/ActionFeedback";
 import {
@@ -23,6 +22,7 @@ import { SpaceButtonSpinner } from "components/ButtonSpinner";
 import { ConfirmationActionSheet } from "components/ConfirmationActionSheet";
 import {
     SpaceFileViewer,
+    type SpaceFileViewerController,
     type SpaceViewerPhoto,
     type SpaceViewerPostActionMode,
 } from "components/FileViewer";
@@ -54,7 +54,6 @@ import { spaceDefaultCoverImagePath } from "utils/post-image";
 import { viewerPhotosFromPost } from "utils/post-photos";
 
 const green = "#08C225";
-const dangerColor = "#F63A3A";
 const textBase = spaceText;
 const textSoft = spaceTextMuted;
 const coverForeground = "#FFFFFF";
@@ -65,11 +64,8 @@ const profileCoverBackground = spaceSurface;
 const profileCoverTopShadow =
     "linear-gradient(180deg, rgba(0, 0, 0, 0.26) 0%, rgba(0, 0, 0, 0.18) 36%, rgba(0, 0, 0, 0.08) 72%, rgba(0, 0, 0, 0) 100%)";
 const profileCoverSkeletonBackground = spaceSurface;
-const profileHeaderHeight = 56;
 const profileAvatarTopOffset = 54;
 const profileAvatarSize = 132;
-const profileCoverHeight =
-    profileHeaderHeight + profileAvatarTopOffset + profileAvatarSize / 2;
 const photoPlaceholderBackground = spaceSurface;
 const profileCoverRadius = "24px";
 const profilePostLoadRootMargin = "800px 0px";
@@ -89,6 +85,13 @@ interface SelectedProfilePost {
 
 const profilePostImageCacheKey = (item: ProfilePostItem) =>
     [item.id, item.imageAsset?.objectKey ?? item.imageUrl ?? ""].join(":");
+
+const profilePostPhoto = (item: ProfilePostItem, index: number) => {
+    const photo = item.photos?.[index];
+    return index > 0 && photo
+        ? { ...item, ...photo, imageUrl: photo.imageUrl }
+        : item;
+};
 
 const ProfileStatsSkeleton: React.FC = () => (
     <Box
@@ -184,7 +187,9 @@ const PublicProfileActionButton: React.FC<PublicProfileActionButtonProps> = ({
     </Box>
 );
 
-const ProfilePostLoadingIndicator: React.FC = () => (
+const ProfilePostLoadingIndicator: React.FC<{ coverHeight: number }> = ({
+    coverHeight,
+}) => (
     <Box
         sx={{
             alignItems: "center",
@@ -194,7 +199,7 @@ const ProfilePostLoadingIndicator: React.FC = () => (
             justifyContent: "center",
             pointerEvents: "none",
             position: "absolute",
-            top: `${profileCoverHeight}px`,
+            top: `var(--space-profile-post-loading-top, calc(${coverHeight}px + var(--space-profile-safe-area-top, 0px)))`,
             width: "100%",
         }}
     >
@@ -203,6 +208,7 @@ const ProfilePostLoadingIndicator: React.FC = () => (
 );
 
 interface ProfileScreenProps {
+    headerRef?: React.Ref<HTMLDivElement>;
     friendsCount?: number;
     headerVariant?: "friend" | "owner" | "public" | "public-anonymous";
     isAddingFriend?: boolean;
@@ -210,6 +216,7 @@ interface ProfileScreenProps {
     isCoverLoading?: boolean;
     isNameLoading?: boolean;
     isPostsLoading?: boolean;
+    isPreview?: boolean;
     isPostPhotoOpening?: boolean;
     isStatsLoading?: boolean;
     showPostLoadingIndicator?: boolean;
@@ -222,6 +229,7 @@ interface ProfileScreenProps {
     onOpenFriends?: () => void;
     onOpenProfileCover?: () => void;
     onOpenProfilePhoto?: () => void;
+    onOpenSettings?: () => void;
     onLoadPostImage?: (asset: SpacePostAsset) => Promise<string>;
     onMessageFriend?: () => void;
     onPokeFriend?: (requestID: string) => Promise<void>;
@@ -243,12 +251,14 @@ interface ProfileScreenProps {
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
+    headerRef,
     friendsCount = 0,
     headerVariant = "owner",
     isAddingFriend = false,
     isCoverLoading = false,
     isNameLoading = false,
     isPostsLoading = false,
+    isPreview = false,
     isPostPhotoOpening = false,
     isStatsLoading = false,
     onBack,
@@ -260,6 +270,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     onOpenFriends,
     onOpenProfileCover,
     onOpenProfilePhoto,
+    onOpenSettings,
     onLoadPostImage,
     onMessageFriend,
     onPokeFriend,
@@ -278,12 +289,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 }) => {
     const [selectedPost, setSelectedPost] =
         useState<SelectedProfilePost | null>(null);
+    const [tilePhotoIndices, setTilePhotoIndices] = useState<
+        Record<string, number>
+    >({});
     const [isInviteLinkCopied, setIsInviteLinkCopied] = useState(false);
     const [deletedPostIDs, setDeletedPostIDs] = useState<Set<string>>(
         () => new Set(),
     );
-    const [friendActionsAnchor, setFriendActionsAnchor] =
-        useState<HTMLElement | null>(null);
     const [pokePhase, setPokePhase] = useState<SpaceActionPhase>();
     const [pokeFailed, setPokeFailed] = useState(false);
     const pokeRequestID = React.useRef<string | undefined>(undefined);
@@ -312,9 +324,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     const isAnonymousPublicProfile = headerVariant == "public-anonymous";
     const isPublicProfile =
         headerVariant == "public" || isAnonymousPublicProfile;
-    const friendActionsButtonID = React.useId();
-    const friendActionsMenuID = React.useId();
-    const isFriendActionsOpen = Boolean(friendActionsAnchor);
+    const profileHeaderHeight = isAnonymousPublicProfile ? 56 : 68;
+    const profileCoverHeight =
+        profileHeaderHeight + profileAvatarTopOffset + profileAvatarSize / 2;
     const isUnfriendActionRunning = unfriendActionPhase != null;
     const canManageFriend =
         isFriendProfile &&
@@ -336,9 +348,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             !item.isUnavailable &&
             !unavailablePostsByKey[profilePostImageCacheKey(item)],
     );
-    const viewerPostIndexByID = new Map(
-        viewerPostItems.map((item, index) => [item.id, index]),
-    );
+    const viewerPostIDs = new Set(viewerPostItems.map((item) => item.id));
     const postsSharedCount = visiblePostItems.length;
     const displayedPostsCount = postsCount ?? postsSharedCount;
     const canOpenFriends = isOwnerProfile && Boolean(onOpenFriends);
@@ -359,7 +369,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     const postImageLoadRootMargin = isAnonymousPublicProfile
         ? publicProfilePostLoadRootMargin
         : profilePostLoadRootMargin;
-    const closeFriendActions = () => setFriendActionsAnchor(null);
 
     const poke = async () => {
         if (!onPokeFriend || pokePhase) return;
@@ -381,14 +390,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         if (pokePhase != "done") return;
 
         const timeoutID = window.setTimeout(() => {
-            setFriendActionsAnchor(null);
-        }, spaceActionDoneDurationMs);
+            setPokePhase(undefined);
+        }, 2100);
 
         return () => window.clearTimeout(timeoutID);
     }, [pokePhase]);
 
     const requestUnfriend = () => {
-        closeFriendActions();
         setUnfriendErrorMessage(null);
         setIsUnfriendSheetOpen(true);
     };
@@ -435,9 +443,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         if (!isPostPhotoOpening) postInputRef.current?.click();
     };
     const closeSelectedPost = () => setSelectedPost(null);
+    const viewerRef = React.useRef<SpaceFileViewerController>(null);
     useBrowserBackClose({
         open: Boolean(selectedPost),
-        onClose: closeSelectedPost,
+        onClose: () => viewerRef.current?.close(),
         stateKey: "space-profile-viewer",
     });
     const rememberLoadedPhotoDimensions = (
@@ -521,38 +530,36 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         [loadedPhotoDimensionsByID],
     );
 
-    const profileViewerPhotos = viewerPostItems.map((item) =>
+    const profileViewerPhotos = viewerPostItems.flatMap((item) =>
         viewerPhotosFromPost({
             ...item,
             ...dimensionsForPost(item),
             avatarUrl: profile.avatarUrl,
             imageUrl: loadedPostImageURLFor(item),
             name: displayName,
-        }),
-    );
-    const selectedPostIndex = selectedPost
-        ? viewerPostIndexByID.get(selectedPost.id)
-        : undefined;
-    const selectedPostPhotos =
-        selectedPostIndex == undefined
-            ? undefined
-            : profileViewerPhotos[selectedPostIndex];
-    const handleSelectedPostIndexChange = (photoIndex: number) => {
-        const photo = selectedPostPhotos?.[photoIndex];
-        if (photo && selectedPost)
-            setSelectedPost({ ...selectedPost, photo, photoIndex });
-    };
-    const navigatePost = (direction: -1 | 1) => {
-        if (selectedPostIndex == undefined) return false;
-        const postIndex = selectedPostIndex + direction;
-        const item = viewerPostItems[postIndex];
-        if (!item) return false;
-        setSelectedPost({
+        }).map((photo, index) => ({
+            ...photo,
             id: item.id,
-            photo: profileViewerPhotos[postIndex]![0]!,
-            photoIndex: 0,
+            imageUrl:
+                photo.imageUrl ||
+                (loadedPostImageURLFor(profilePostPhoto(item, index)) ?? ""),
+        })),
+    );
+    const selectedPostPhotos = profileViewerPhotos.filter(
+        (photo) => photo.id == selectedPost?.id,
+    );
+    const handleSelectedPostIndexChange = (photoIndex: number) => {
+        const photo = selectedPostPhotos[photoIndex];
+        if (!photo) return;
+        setSelectedPost({
+            id: photo.id,
+            photo,
+            photoIndex: photo.postPhotoIndex!,
         });
-        return true;
+        setTilePhotoIndices((current) => ({
+            ...current,
+            [photo.id]: photo.postPhotoIndex ?? 0,
+        }));
     };
 
     const shareInvite = async () => {
@@ -566,9 +573,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 setIsInviteLinkCopied(true);
             }
         } catch (error) {
-            if (
-                !(error instanceof DOMException && error.name == "AbortError")
-            ) {
+            if (!(
+                error instanceof DOMException && error.name == "AbortError"
+            )) {
                 log.warn("Failed to share Space invite link", error);
             }
         }
@@ -588,8 +595,20 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     };
 
     const renderPostTile = (item: ProfilePostItem, index: number) => {
-        const imageUrl = loadedPostImageURLFor(item);
-        const isUnavailable = !viewerPostIndexByID.has(item.id);
+        const remembered = Math.min(
+            tilePhotoIndices[item.id] ?? 0,
+            (item.photos?.length || 1) - 1,
+        );
+        const photoIndex =
+            remembered > 0 &&
+            unavailablePostsByKey[
+                profilePostImageCacheKey(profilePostPhoto(item, remembered))
+            ]
+                ? 0
+                : remembered;
+        const shown = profilePostPhoto(item, photoIndex);
+        const imageUrl = loadedPostImageURLFor(shown);
+        const isUnavailable = !viewerPostIDs.has(item.id);
         return (
             <SpacePostTile
                 key={item.id}
@@ -597,25 +616,27 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 imageUrl={imageUrl}
                 index={index}
                 isUnavailable={isUnavailable}
-                item={item}
+                item={{ ...item, ...dimensionsForPost(item) }}
+                photoIndex={photoIndex}
                 loadRootMargin={postImageLoadRootMargin}
-                onLoadImage={() => loadPostImage(item)}
+                onLoadImage={() => loadPostImage(shown)}
                 onImageDecodeError={() =>
                     setUnavailablePostsByKey((current) => ({
                         ...current,
-                        [profilePostImageCacheKey(item)]: true,
+                        [profilePostImageCacheKey(shown)]: true,
                     }))
                 }
                 onOpen={(openedImageUrl) => {
-                    const postIndex = viewerPostIndexByID.get(item.id);
-                    if (postIndex == undefined) return;
+                    const photo = profileViewerPhotos.find(
+                        (photo) =>
+                            photo.id == item.id &&
+                            (photo.postPhotoIndex ?? 0) == photoIndex,
+                    );
+                    if (!photo) return;
                     setSelectedPost({
                         id: item.id,
-                        photoIndex: 0,
-                        photo: {
-                            ...profileViewerPhotos[postIndex]![0]!,
-                            imageUrl: openedImageUrl,
-                        },
+                        photoIndex,
+                        photo: { ...photo, imageUrl: openedImageUrl },
                     });
                 }}
                 onRememberDimensions={rememberLoadedPhotoDimensions}
@@ -627,6 +648,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         return (
             <Box
                 component="header"
+                inert={isPreview}
                 sx={{
                     alignItems: "center",
                     color: coverForeground,
@@ -634,17 +656,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     gridTemplateColumns: isPublicProfile
                         ? undefined
                         : `${spaceTouchTargetSize}px minmax(0, 1fr) ${spaceTouchTargetSize}px`,
-                    height: profileHeaderHeight,
+                    height: `calc(${profileHeaderHeight}px + var(--space-profile-safe-area-top))`,
                     justifyContent: isPublicProfile
                         ? "space-between"
                         : undefined,
                     mx: "auto",
+                    opacity: isPreview
+                        ? "clamp(0, calc((var(--space-friend-profile-reveal, 0) - 0.7) * 5), 1)"
+                        : 1,
                     position: "relative",
-                    px: isPublicProfile ? 1 : 2,
-                    py: 0,
+                    pl: `max(${isPublicProfile ? 8 : 16}px, var(--space-ios-safe-area-left, 0px))`,
+                    pr: `max(${isPublicProfile ? 8 : 16}px, var(--space-ios-safe-area-right, 0px))`,
+                    pt: "var(--space-profile-safe-area-top)",
+                    pb: 0,
                     width: "100%",
                     zIndex: 3,
-                    "@media (min-width: 600px)": { maxWidth: 390 },
+                    "@media (min-width: 600px)": {
+                        maxWidth: isPreview ? "none" : 390,
+                    },
                 }}
             >
                 {isPublicProfile ? (
@@ -738,7 +767,43 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                         >
                             {firstName}
                         </Box>
-                        <Box aria-hidden sx={{ width: spaceTouchTargetSize }} />
+                        {isOwnerProfile && onOpenSettings ? (
+                            <Box
+                                component="button"
+                                type="button"
+                                aria-label="Settings"
+                                onClick={onOpenSettings}
+                                sx={{
+                                    alignItems: "center",
+                                    bgcolor: "transparent",
+                                    border: 0,
+                                    color: "inherit",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    height: spaceTouchTargetSize,
+                                    justifyContent: "flex-end",
+                                    p: 0,
+                                    width: spaceTouchTargetSize,
+                                    "&:focus-visible": {
+                                        borderRadius: "50%",
+                                        outline: `2px solid ${green}`,
+                                        outlineOffset: 2,
+                                    },
+                                }}
+                            >
+                                <HugeiconsIcon
+                                    icon={Menu01Icon}
+                                    size={23}
+                                    strokeWidth={1.8}
+                                    absoluteStrokeWidth
+                                />
+                            </Box>
+                        ) : (
+                            <Box
+                                aria-hidden
+                                sx={{ width: spaceTouchTargetSize }}
+                            />
+                        )}
                     </>
                 )}
             </Box>
@@ -749,6 +814,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         <Box
             component="main"
             sx={{
+                "--space-profile-safe-area-top": isPreview
+                    ? "max(0px, calc(var(--space-ios-safe-area-top, 0px) - var(--space-friend-profile-top, 100vh)))"
+                    : "var(--space-ios-safe-area-top, 0px)",
                 background: spaceAppBackground,
                 color: textBase,
                 display: "grid",
@@ -758,7 +826,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 position: "relative",
             }}
         >
-            {!isPublicProfile && <SpaceSkipLink />}
+            {!isPublicProfile && !isPreview && <SpaceSkipLink />}
             <Box
                 sx={{
                     bgcolor: "transparent",
@@ -770,7 +838,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     overflow: "hidden",
                     position: "relative",
                     width: "100%",
-                    "@media (min-width: 600px)": { maxWidth: 390 },
+                    "@media (min-width: 600px)": {
+                        maxWidth: isPreview ? "none" : 390,
+                    },
                 }}
             >
                 {isOwnerProfile && onPostPhotoSelect && (
@@ -786,7 +856,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             : profileCoverBackground,
                         borderBottomLeftRadius: profileCoverRadius,
                         borderBottomRightRadius: profileCoverRadius,
-                        height: profileCoverHeight,
+                        height: `calc(${profileCoverHeight}px + var(--space-profile-safe-area-top))`,
                         insetInline: 0,
                         overflow: "hidden",
                         position: "absolute",
@@ -831,7 +901,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                         aria-hidden
                         sx={{
                             background: profileCoverTopShadow,
-                            height: profileHeaderHeight + 8,
+                            height: `calc(${profileHeaderHeight + 8}px + var(--space-profile-safe-area-top))`,
                             insetInline: 0,
                             pointerEvents: "none",
                             position: "absolute",
@@ -849,7 +919,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             bgcolor: "transparent",
                             border: 0,
                             cursor: "pointer",
-                            height: profileCoverHeight,
+                            height: `calc(${profileCoverHeight}px + var(--space-profile-safe-area-top))`,
                             insetInline: 0,
                             p: 0,
                             position: "absolute",
@@ -865,8 +935,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 )}
                 {renderHeader()}
                 <Box
+                    ref={headerRef}
                     component={isPublicProfile ? "div" : "section"}
-                    id={isPublicProfile ? undefined : "space-main-content"}
+                    id={
+                        isPublicProfile || isPreview
+                            ? undefined
+                            : "space-main-content"
+                    }
                     aria-label={
                         isPublicProfile ? undefined : `${displayName}'s profile`
                     }
@@ -1002,7 +1077,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                                     profile.username
                                 )}
                             </Box>
-                            {isOwnerProfile ? (
+                            {isOwnerProfile && (
                                 <Box
                                     component="button"
                                     type="button"
@@ -1036,266 +1111,181 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                                 >
                                     <SpaceShareIcon strokeWidth={2.2} />
                                 </Box>
-                            ) : (
-                                canManageFriend && (
-                                    <Box
-                                        component="button"
-                                        id={friendActionsButtonID}
-                                        type="button"
-                                        aria-label={`Actions for ${displayName}`}
-                                        aria-controls={
-                                            isFriendActionsOpen
-                                                ? friendActionsMenuID
-                                                : undefined
-                                        }
-                                        aria-expanded={
-                                            isFriendActionsOpen
-                                                ? "true"
-                                                : undefined
-                                        }
-                                        aria-haspopup="menu"
-                                        onClick={(event) => {
-                                            if (pokePhase == "done")
-                                                setPokePhase(undefined);
-                                            setFriendActionsAnchor(
-                                                event.currentTarget,
-                                            );
-                                        }}
-                                        sx={{
-                                            alignItems: "center",
-                                            bgcolor: "transparent",
-                                            border: 0,
-                                            color: profileIdentityColor,
-                                            cursor: "pointer",
-                                            display: "flex",
-                                            gridColumn: 3,
-                                            height: 24,
-                                            justifyContent: "flex-start",
-                                            justifySelf: "start",
-                                            ml: "8px",
-                                            p: 0,
-                                            width: 24,
-                                            "&:focus-visible": {
-                                                borderRadius: "50%",
-                                                outline: `2px solid ${green}`,
-                                                outlineOffset: 2,
-                                            },
-                                        }}
-                                    >
-                                        <HugeiconsIcon
-                                            icon={MoreHorizontalIcon}
-                                            size={24}
-                                            strokeWidth={2}
-                                        />
-                                    </Box>
-                                )
-                            )}
-                            {canManageFriend && (
-                                <Menu
-                                    id={friendActionsMenuID}
-                                    anchorEl={friendActionsAnchor}
-                                    open={isFriendActionsOpen}
-                                    onClose={closeFriendActions}
-                                    anchorOrigin={{
-                                        horizontal: "left",
-                                        vertical: "bottom",
-                                    }}
-                                    transformOrigin={{
-                                        horizontal: "left",
-                                        vertical: "top",
-                                    }}
-                                    slotProps={{
-                                        paper: {
-                                            sx: {
-                                                bgcolor: spaceDialogBackground,
-                                                borderRadius: "14px",
-                                                boxShadow:
-                                                    "0 14px 40px rgba(0, 0, 0, 0.16)",
-                                                mt: "6px",
-                                                minWidth: 0,
-                                                p: "4px",
-                                                width: "max-content",
-                                            },
-                                        },
-                                        list: {
-                                            "aria-labelledby":
-                                                friendActionsButtonID,
-                                            sx: { p: 0 },
-                                        },
-                                    }}
-                                >
-                                    {onMessageFriend && (
-                                        <MenuItem
-                                            dense
-                                            disableRipple
-                                            onClick={() => {
-                                                closeFriendActions();
-                                                onMessageFriend();
-                                            }}
-                                            sx={{
-                                                borderRadius: "10px",
-                                                color: textBase,
-                                                gap: "8px",
-                                                minHeight: 36,
-                                                px: "9px",
-                                                py: "4px",
-                                                whiteSpace: "nowrap",
-                                                "&.Mui-focusVisible": {
-                                                    bgcolor:
-                                                        "rgba(255, 255, 255, 0.08)",
-                                                },
-                                                "&:active": {
-                                                    bgcolor:
-                                                        "rgba(255, 255, 255, 0.08)",
-                                                },
-                                                "&:hover": {
-                                                    bgcolor:
-                                                        "rgba(255, 255, 255, 0.08)",
-                                                },
-                                            }}
-                                        >
-                                            <HugeiconsIcon
-                                                icon={BubbleChatIcon}
-                                                size={18}
-                                                strokeWidth={1.8}
-                                            />
-                                            <Box
-                                                sx={{
-                                                    fontFamily:
-                                                        '"Inter Variable", Inter, sans-serif',
-                                                    fontSize: 13,
-                                                    fontWeight: 650,
-                                                    lineHeight: "18px",
-                                                }}
-                                            >
-                                                Message
-                                            </Box>
-                                        </MenuItem>
-                                    )}
-                                    {onPokeFriend && (
-                                        <MenuItem
-                                            dense
-                                            disableRipple
-                                            onClick={() => void poke()}
-                                            disabled={pokePhase !== undefined}
-                                            sx={{
-                                                borderRadius: "10px",
-                                                color: textBase,
-                                                gap: "8px",
-                                                minHeight: 36,
-                                                px: "9px",
-                                                py: "4px",
-                                                whiteSpace: "nowrap",
-                                                "&.Mui-disabled": {
-                                                    color: textBase,
-                                                    opacity: 1,
-                                                },
-                                                "&.Mui-focusVisible": {
-                                                    bgcolor:
-                                                        "rgba(255, 255, 255, 0.08)",
-                                                },
-                                                "&:active": {
-                                                    bgcolor:
-                                                        "rgba(255, 255, 255, 0.08)",
-                                                },
-                                                "&:hover": {
-                                                    bgcolor:
-                                                        "rgba(255, 255, 255, 0.08)",
-                                                },
-                                            }}
-                                        >
-                                            <SpaceActionFeedbackIcon
-                                                phase={pokePhase ?? null}
-                                                size={18}
-                                                idleIcon={
-                                                    <HugeiconsIcon
-                                                        icon={
-                                                            HandPointingRightIcon
-                                                        }
-                                                        size={18}
-                                                        strokeWidth={1.8}
-                                                    />
-                                                }
-                                            />
-                                            <Box
-                                                sx={{
-                                                    fontFamily:
-                                                        '"Inter Variable", Inter, sans-serif',
-                                                    fontSize: 13,
-                                                    fontWeight: 650,
-                                                    lineHeight: "18px",
-                                                }}
-                                            >
-                                                {pokePhase == "done"
-                                                    ? "Poked"
-                                                    : "Poke"}
-                                            </Box>
-                                        </MenuItem>
-                                    )}
-                                    {pokeFailed && (
-                                        <Box
-                                            role="alert"
-                                            sx={{
-                                                color: textSoft,
-                                                fontSize: 12,
-                                                px: "9px",
-                                                py: "4px",
-                                            }}
-                                        >
-                                            Couldn&apos;t send poke. Try again.
-                                        </Box>
-                                    )}
-                                    {onUnfriend && (
-                                        <MenuItem
-                                            dense
-                                            disableRipple
-                                            onClick={requestUnfriend}
-                                            sx={{
-                                                alignItems: "center",
-                                                borderRadius: "10px",
-                                                color: dangerColor,
-                                                display: "flex",
-                                                gap: "8px",
-                                                minHeight: 36,
-                                                px: "9px",
-                                                py: "4px",
-                                                whiteSpace: "nowrap",
-                                                "&.Mui-focusVisible": {
-                                                    bgcolor:
-                                                        "rgba(246, 58, 58, 0.14)",
-                                                },
-                                                "&:active": {
-                                                    bgcolor:
-                                                        "rgba(246, 58, 58, 0.14)",
-                                                },
-                                                "&:hover": {
-                                                    bgcolor:
-                                                        "rgba(246, 58, 58, 0.14)",
-                                                },
-                                            }}
-                                        >
-                                            <HugeiconsIcon
-                                                icon={UserRemove01Icon}
-                                                size={18}
-                                                strokeWidth={1.8}
-                                                style={{ flexShrink: 0 }}
-                                            />
-                                            <Box
-                                                sx={{
-                                                    fontFamily:
-                                                        '"Inter Variable", Inter, sans-serif',
-                                                    fontSize: 13,
-                                                    fontWeight: 650,
-                                                    lineHeight: "18px",
-                                                }}
-                                            >
-                                                Unfriend
-                                            </Box>
-                                        </MenuItem>
-                                    )}
-                                </Menu>
                             )}
                         </Box>
+                        {canManageFriend && (
+                            <Box
+                                sx={{
+                                    mt: "20px",
+                                    mx: "auto",
+                                    width: "100%",
+                                    maxWidth: 320,
+                                }}
+                            >
+                                <Box
+                                    role="group"
+                                    aria-label="Friend actions"
+                                    sx={{
+                                        display: "grid",
+                                        gap: "8px",
+                                        gridAutoColumns: "minmax(0, 1fr)",
+                                        gridAutoFlow: "column",
+                                        position: "relative",
+                                        zIndex: 4,
+                                    }}
+                                >
+                                    {[
+                                        {
+                                            label: "Poke",
+                                            icon: HandPointingRightIcon,
+                                            onClick: onPokeFriend
+                                                ? () => void poke()
+                                                : undefined,
+                                        },
+                                        {
+                                            label: "Message",
+                                            icon: BubbleChatIcon,
+                                            onClick: onMessageFriend,
+                                        },
+                                        {
+                                            label: "Unfriend",
+                                            icon: UserRemove01Icon,
+                                            onClick: onUnfriend
+                                                ? requestUnfriend
+                                                : undefined,
+                                        },
+                                    ]
+                                        .filter((action) => action.onClick)
+                                        .map((action) => {
+                                            const isPoke =
+                                                action.label == "Poke";
+                                            const active =
+                                                isPoke &&
+                                                pokePhase !== undefined;
+                                            const done =
+                                                isPoke && pokePhase == "done";
+                                            return (
+                                                <Box
+                                                    key={action.label}
+                                                    component="button"
+                                                    type="button"
+                                                    aria-label={
+                                                        done
+                                                            ? "Poke sent"
+                                                            : action.label
+                                                    }
+                                                    aria-busy={
+                                                        isPoke &&
+                                                        pokePhase == "busy"
+                                                    }
+                                                    aria-live={
+                                                        isPoke
+                                                            ? "polite"
+                                                            : undefined
+                                                    }
+                                                    disabled={active}
+                                                    onClick={action.onClick}
+                                                    sx={{
+                                                        alignItems: "center",
+                                                        bgcolor:
+                                                            spaceDialogBackground,
+                                                        border: 0,
+                                                        borderRadius: "22px",
+                                                        color: active
+                                                            ? green
+                                                            : textBase,
+                                                        cursor: active
+                                                            ? "default"
+                                                            : "pointer",
+                                                        display: "flex",
+                                                        height: 40,
+                                                        justifyContent:
+                                                            "center",
+                                                        minWidth: 0,
+                                                        p: "0 8px",
+                                                        "&:hover:not(:disabled)":
+                                                            {
+                                                                bgcolor:
+                                                                    spaceSurfaceHover,
+                                                            },
+                                                        "&:focus-visible": {
+                                                            outline: `2px solid ${green}`,
+                                                            outlineOffset: 2,
+                                                        },
+                                                    }}
+                                                >
+                                                    <Box
+                                                        component="span"
+                                                        aria-hidden
+                                                        sx={{
+                                                            alignItems:
+                                                                "center",
+                                                            display: "flex",
+                                                            flexShrink: 0,
+                                                            height: 22,
+                                                            justifyContent:
+                                                                "center",
+                                                            width: 22,
+                                                            animation: active
+                                                                ? "spacePokeJab 2000ms ease-in-out"
+                                                                : "none",
+                                                            "@keyframes spacePokeJab":
+                                                                {
+                                                                    "0%, 100%":
+                                                                        {
+                                                                            transform:
+                                                                                "translate(0, 0) rotate(0deg) scale(1)",
+                                                                        },
+                                                                    "27.5%, 52%, 73.75%":
+                                                                        {
+                                                                            transform:
+                                                                                "translate(36px, -94px) rotate(-40deg) scale(3)",
+                                                                        },
+                                                                    "41%, 63%":
+                                                                        {
+                                                                            transform:
+                                                                                "translate(52px, -108px) rotate(-40deg) scale(3)",
+                                                                        },
+                                                                },
+                                                            "@media (prefers-reduced-motion: reduce)":
+                                                                {
+                                                                    animation:
+                                                                        "none",
+                                                                },
+                                                            ...(action.icon ==
+                                                                BubbleChatIcon && {
+                                                                "& svg path:last-of-type":
+                                                                    {
+                                                                        display:
+                                                                            "none",
+                                                                    },
+                                                            }),
+                                                        }}
+                                                    >
+                                                        <HugeiconsIcon
+                                                            icon={action.icon}
+                                                            size={22}
+                                                            strokeWidth={2.2}
+                                                        />
+                                                    </Box>
+                                                </Box>
+                                            );
+                                        })}
+                                </Box>
+                                {pokeFailed && (
+                                    <Box
+                                        role="alert"
+                                        sx={{
+                                            color: textSoft,
+                                            fontSize: 12,
+                                            mt: "8px",
+                                        }}
+                                    >
+                                        Couldn&apos;t send poke. Try again.
+                                    </Box>
+                                )}
+                            </Box>
+                        )}
                         {!isFriendProfile &&
                             (isStatsLoading ? (
                                 <ProfileStatsSkeleton />
@@ -1400,10 +1390,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </Box>
                 <Box
                     component="section"
+                    inert={isPreview}
                     sx={{
                         alignItems: "stretch",
                         boxSizing: "border-box",
                         display: "flex",
+                        opacity: isPreview
+                            ? "var(--space-friend-profile-reveal, 0)"
+                            : 1,
                         flex: hasProfilePosts ? "0 0 auto" : "1 1 0",
                         flexDirection: "column",
                         minHeight: 0,
@@ -1425,13 +1419,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             }}
                         >
                             <SpacePostGrid
-                                items={visiblePostItems}
+                                items={visiblePostItems.map((item) => ({
+                                    ...item,
+                                    ...dimensionsForPost(item),
+                                }))}
                                 postCount={displayedPostsCount}
                                 renderTile={renderPostTile}
                             />
                         </Box>
                     ) : shouldShowPostLoadingIndicator ? (
-                        <ProfilePostLoadingIndicator />
+                        <ProfilePostLoadingIndicator
+                            coverHeight={profileCoverHeight}
+                        />
                     ) : isPostsLoading ? null : (
                         <Box
                             sx={{
@@ -1446,7 +1445,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                                 pointerEvents: "none",
                                 position: "absolute",
                                 px: 3,
-                                top: `${profileCoverHeight}px`,
+                                top: `calc(${profileCoverHeight}px + var(--space-profile-safe-area-top))`,
                                 bottom: 0,
                                 insetInline: 0,
                                 textAlign: "center",
@@ -1510,7 +1509,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </Box>
                 {selectedPost && (
                     <SpaceFileViewer
+                        ref={viewerRef}
                         closeOnSwipePastEnd
+                        headerHeight={profileHeaderHeight}
                         photo={selectedPost.photo}
                         photos={selectedPostPhotos}
                         photoIndex={selectedPost.photoIndex}
@@ -1518,7 +1519,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                         onLoadPhoto={onLoadPostImage}
                         postActionMode={selectedPostActionMode}
                         onClose={closeSelectedPost}
-                        onNavigatePost={navigatePost}
                         onAddFriendForPostAction={
                             isPublicProfile
                                 ? onAddFriendForPostAction

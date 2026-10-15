@@ -162,9 +162,10 @@ const PublicFriendRequestScreen: React.FC<PublicFriendRequestScreenProps> = ({
                     gridTemplateColumns: "40px 1fr 40px",
                     height: 40,
                     maxWidth: 390,
-                    mt: "clamp(24px, 5.5svh, 44px)",
+                    mt: "calc(clamp(24px, 5.5svh, 44px) + var(--space-ios-safe-area-top, 0px))",
                     mx: "auto",
-                    px: 3,
+                    pl: "max(24px, var(--space-ios-safe-area-left, 0px))",
+                    pr: "max(24px, var(--space-ios-safe-area-right, 0px))",
                     width: "100%",
                 }}
             >
@@ -522,7 +523,10 @@ export const Page: React.FC<PageProps> = ({ invitePreview }) => {
         if (!publicIdentity && publicError) {
             return (
                 <>
-                    <SpacePageMeta themeColor="#FFFFFF" preview="invite" />
+                    <SpacePageMeta
+                        themeColor={spaceAppBackgroundColor}
+                        preview="invite"
+                    />
                     <PublicProfileUnavailable />
                 </>
             );
@@ -603,11 +607,7 @@ export const Page: React.FC<PageProps> = ({ invitePreview }) => {
         return (
             <>
                 <SpacePageMeta
-                    themeColor={
-                        publicLink || profile
-                            ? spaceAppBackgroundColor
-                            : "#FFFFFF"
-                    }
+                    themeColor={spaceAppBackgroundColor}
                     title={profile && !publicLink ? "Add friend" : undefined}
                     preview="invite"
                 />
@@ -686,7 +686,10 @@ export const Page: React.FC<PageProps> = ({ invitePreview }) => {
 
     return (
         <>
-            <SpacePageMeta themeColor={onboardingGreen} preview="home" />
+            <SpacePageMeta
+                themeColor={spaceAppBackgroundColor}
+                preview="home"
+            />
             <OnboardingScreen
                 onCreateAccount={() => void router.push(spaceRoutes.signup)}
                 onLogin={() => void router.push(spaceRoutes.login)}

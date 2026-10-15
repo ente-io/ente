@@ -20,6 +20,7 @@ const _textEditorWidthInset = 34.0;
 LayerInteractionConfigs imageEditorLayerInteractionConfigs(
   BuildContext context,
   ValueGetter<ProImageEditorState?> editor,
+  ImageEditorLayerScaleRotate scaleRotate,
 ) {
   final colors = context.componentColors;
   final strings = context.strings;
@@ -40,8 +41,12 @@ LayerInteractionConfigs imageEditorLayerInteractionConfigs(
             builder: (_) => _LayerSelection(
               info: info,
               colors: colors,
-              onScaleRotateDown: interactions.scaleRotateDown,
-              onScaleRotateUp: interactions.scaleRotateUp,
+              onScaleRotateDown: (event) => scaleRotate.onHandleDown(
+                event,
+                interactions.scaleRotateDown,
+                interactions.scaleRotateUp,
+              ),
+              onScaleRotateEnd: scaleRotate.onHandleEnd,
               actions: [
                 if (layer.isTextLayer ||
                     (layer is PaintLayer && !layer.item.isCensorArea))
@@ -64,7 +69,13 @@ LayerInteractionConfigs imageEditorLayerInteractionConfigs(
                   label: strings.imageEditorDuplicate,
                   icon: HugeIcons.strokeRoundedCopy01,
                   color: colors.iconColor,
-                  onTap: interactions.duplicated,
+                  onTap: () {
+                    interactions.duplicated();
+                    final state = editor();
+                    if (state != null) {
+                      _selectLayerWhenReady(state, state.activeLayers.last.id);
+                    }
+                  },
                 ),
                 _LayerAction(
                   label: strings.delete,
@@ -80,6 +91,39 @@ LayerInteractionConfigs imageEditorLayerInteractionConfigs(
           ),
     ),
   );
+}
+
+class ImageEditorLayerScaleRotate {
+  int? _pointer;
+  VoidCallback? _release;
+
+  void onHandleDown(
+    PointerDownEvent event,
+    ValueChanged<PointerDownEvent> scaleRotateDown,
+    ValueChanged<PointerUpEvent> scaleRotateUp,
+  ) {
+    _end();
+    _pointer = event.pointer;
+    _release = () => scaleRotateUp(
+      PointerUpEvent(pointer: event.pointer, position: event.position),
+    );
+    scaleRotateDown(event);
+  }
+
+  void onHandleEnd(PointerEvent event) {
+    if (event.pointer == _pointer) _end();
+  }
+
+  void onScaleStart(ScaleStartDetails details) {
+    if (details.pointerCount > 1) _end();
+  }
+
+  void _end() {
+    final release = _release;
+    _pointer = null;
+    _release = null;
+    release?.call();
+  }
 }
 
 class ImageEditorLayerDoubleTap {
@@ -195,11 +239,11 @@ Future<TextLayer?> imageEditorCreateTextLayer(
   );
   if (layer == null) return null;
   layer.id = id;
-  _selectLayerAfterClose(state, id);
+  _selectLayerWhenReady(state, id);
   return layer;
 }
 
-void _selectLayerAfterClose(ProImageEditorState state, String id) {
+void _selectLayerWhenReady(ProImageEditorState state, String id) {
   void selectWhenReady(Duration _) {
     if (!state.mounted) return;
     if (state.isSubEditorOpen) {
@@ -282,7 +326,7 @@ Future<void> _editTextLayer(ProImageEditorState editor, TextLayer layer) async {
     index: editor.activeLayers.indexWhere((other) => other.id == layer.id),
     layer: updated,
   );
-  _selectLayerAfterClose(editor, layer.id);
+  _selectLayerWhenReady(editor, layer.id);
   WidgetsBinding.instance.addPostFrameCallback((_) {
     updated
       ..color = color
@@ -296,14 +340,14 @@ class _LayerSelection extends StatelessWidget {
     required this.info,
     required this.colors,
     required this.onScaleRotateDown,
-    required this.onScaleRotateUp,
+    required this.onScaleRotateEnd,
     required this.actions,
   });
 
   final OverlayChildLayoutInfo info;
   final ColorTokens colors;
   final ValueChanged<PointerDownEvent> onScaleRotateDown;
-  final ValueChanged<PointerUpEvent> onScaleRotateUp;
+  final ValueChanged<PointerEvent> onScaleRotateEnd;
   final List<Widget> actions;
 
   @override
@@ -366,7 +410,8 @@ class _LayerSelection extends StatelessWidget {
             child: Listener(
               behavior: HitTestBehavior.translucent,
               onPointerDown: onScaleRotateDown,
-              onPointerUp: onScaleRotateUp,
+              onPointerUp: onScaleRotateEnd,
+              onPointerCancel: onScaleRotateEnd,
               child: const IgnorePointer(child: SizedBox.expand()),
             ),
           ),

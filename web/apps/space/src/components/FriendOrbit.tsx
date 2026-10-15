@@ -1,5 +1,4 @@
 import { Box, useMediaQuery } from "@mui/material";
-import type { FriendProfile } from "data/friends";
 import React from "react";
 import {
     arrangeFriendOrbit,
@@ -11,8 +10,13 @@ import {
 } from "utils/friend-orbit";
 
 interface FriendOrbitProps {
-    friends: FriendProfile[];
-    renderFriend: (friend: FriendProfile) => React.ReactNode;
+    initialOuterID?: string;
+    items: {
+        id: string;
+        size?: number;
+        fixedSize?: number;
+        content: React.ReactNode;
+    }[];
 }
 
 interface OrbitDrag {
@@ -26,8 +30,8 @@ interface OrbitDrag {
 }
 
 export const FriendOrbit: React.FC<FriendOrbitProps> = ({
-    friends,
-    renderFriend,
+    initialOuterID,
+    items,
 }) => {
     const fieldRef = React.useRef<HTMLUListElement>(null);
     const elements = React.useRef(new Map<string, HTMLLIElement>());
@@ -59,13 +63,9 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
         const current = new Map(
             circles.current.map((circle) => [circle.id, circle]),
         );
-        let friendsChanged =
-            friends.length != current.size ||
-            friends.some((friend) => !current.has(friend.id));
-        circles.current = friends.map(
-            (friend, index) =>
-                current.get(friend.id) ??
-                createFriendOrbitCircle(friend.id, index),
+        circles.current = items.map(
+            (item, index) =>
+                current.get(item.id) ?? createFriendOrbitCircle(item.id, index),
         );
         const field = fieldRef.current!;
         const resize = () => {
@@ -85,11 +85,15 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
                 scale,
             };
             circles.current.forEach((circle, index) => {
-                circle.size = friendOrbitCircleSize(
-                    index,
-                    friends.length,
-                    availableBounds,
-                );
+                const item = items[index]!;
+                circle.size = item.fixedSize
+                    ? item.fixedSize / scale
+                    : (item.size ??
+                      friendOrbitCircleSize(
+                          index,
+                          items.length,
+                          availableBounds,
+                      ));
             });
             const area = circles.current.reduce(
                 (total, circle) =>
@@ -99,7 +103,6 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
             field.style.minHeight = `${Math.ceil(area / (width * 0.52))}px`;
             const height = field.clientHeight;
             const layoutChanged =
-                friendsChanged ||
                 width != bounds.current.width ||
                 height != bounds.current.height;
             bounds.current = { width, height, scale };
@@ -113,16 +116,24 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
                     circles.current,
                     bounds.current,
                     elapsed.current,
+                    initialOuterID,
                 );
-            friendsChanged = false;
+            else
+                stepFriendOrbit(
+                    circles.current,
+                    bounds.current,
+                    elapsed.current,
+                    0,
+                );
             paint();
             field.style.opacity = "1";
+            field.dataset.ready = "true";
         };
         const observer = new ResizeObserver(resize);
         observer.observe(field);
         resize();
         return () => observer.disconnect();
-    }, [friends, paint]);
+    }, [initialOuterID, items, paint]);
 
     React.useEffect(() => {
         if (reducedMotion) return;
@@ -153,8 +164,9 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
         if (event.button != 0 || !event.isPrimary) return;
         event.stopPropagation();
         const circle = circles.current.find((circle) => circle.id == friendID)!;
-        const button = event.currentTarget.querySelector("button")!;
-        button.setPointerCapture(event.pointerId);
+        const target =
+            (event.target as Element).closest("button") ?? event.currentTarget;
+        target.setPointerCapture(event.pointerId);
         drag.current = {
             pointerID: event.pointerId,
             circle,
@@ -207,7 +219,7 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
         <Box
             component="ul"
             ref={fieldRef}
-            aria-label="Your friends"
+            aria-label="Friends and friend requests"
             onDragStart={(event) => event.preventDefault()}
             onClickCapture={(event) => {
                 if (!suppressClick.current) return;
@@ -216,7 +228,7 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
                 suppressClick.current = false;
             }}
             sx={{
-                height: "calc(var(--space-page-height, 100svh) - 56px)",
+                height: "calc(var(--space-page-height, 100svh) - 68px - var(--space-ios-safe-area-top, 0px))",
                 listStyle: "none",
                 m: 0,
                 overflow: "hidden",
@@ -225,41 +237,53 @@ export const FriendOrbit: React.FC<FriendOrbitProps> = ({
                 position: "relative",
                 userSelect: "none",
                 width: "100%",
+                "&[data-ready] > li > button": {
+                    animation:
+                        "spaceFriendCircleEnter 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--space-friend-enter-delay) both",
+                },
+                "@keyframes spaceFriendCircleEnter": {
+                    from: { transform: "scale(0)" },
+                    to: { transform: "scale(1)" },
+                },
+                "@media (prefers-reduced-motion: reduce)": {
+                    "&[data-ready] > li > button": { animation: "none" },
+                },
             }}
         >
-            {friends.map((friend) => (
+            {items.map((item, index) => (
                 <Box
                     component="li"
-                    key={friend.id}
+                    key={item.id}
                     ref={(element: HTMLLIElement | null) => {
-                        if (element) elements.current.set(friend.id, element);
-                        else elements.current.delete(friend.id);
+                        if (element) elements.current.set(item.id, element);
+                        else elements.current.delete(item.id);
                     }}
-                    onPointerDown={(event) => startDrag(event, friend.id)}
+                    onPointerDown={(event) => startDrag(event, item.id)}
                     onPointerMove={moveDrag}
                     onPointerUp={endDrag}
                     onPointerCancel={endDrag}
                     onLostPointerCapture={endDrag}
                     onContextMenu={(event) => event.preventDefault()}
                     sx={{
+                        "--space-friend-enter-delay": `${(index * 137) % 480}ms`,
                         borderRadius: "50%",
+                        cursor: heldFriendID == item.id ? "grabbing" : "grab",
                         left: 0,
                         position: "absolute",
                         top: 0,
                         touchAction: "none",
                         WebkitTouchCallout: "none",
                         willChange: "transform",
-                        zIndex: heldFriendID == friend.id ? 2 : undefined,
+                        zIndex: heldFriendID == item.id ? 2 : undefined,
                         "&:hover, &:focus-within": { zIndex: 1 },
-                        "& button": {
+                        "& > button": {
                             cursor:
-                                heldFriendID == friend.id ? "grabbing" : "grab",
-                            ...(heldFriendID == friend.id && { scale: "1.06" }),
+                                heldFriendID == item.id ? "grabbing" : "grab",
                         },
                         "& img": { pointerEvents: "none" },
                     }}
                 >
-                    {renderFriend(friend)}
+                    {item.content}
                 </Box>
             ))}
         </Box>

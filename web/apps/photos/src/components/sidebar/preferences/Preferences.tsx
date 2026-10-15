@@ -399,6 +399,8 @@ const localeName = (locale: SupportedLocale) => {
             return "اَلْعَرَبِيَّةُ";
         case "tr-TR":
             return "Türkçe";
+        case "tt-RU":
+            return "Татарча";
         case "cs-CZ":
             return "Čeština";
         case "el-GR":

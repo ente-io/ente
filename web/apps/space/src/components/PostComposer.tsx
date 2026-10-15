@@ -261,12 +261,9 @@ const SpacePostComposer: React.FC<{
                     exportsRef.current.get(draft.id) == job
                 )
                     exportsRef.current.delete(draft.id);
-                if (
-                    !(
-                        error instanceof DOMException &&
-                        error.name == "AbortError"
-                    )
-                )
+                if (!(
+                    error instanceof DOMException && error.name == "AbortError"
+                ))
                     log.warn("Failed to prepare draft video", error);
             });
         }

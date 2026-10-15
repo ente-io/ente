@@ -1,7 +1,6 @@
 package io.ente.ensu.chat
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,6 +63,7 @@ internal fun MessageInput(
     modifier: Modifier,
     messageText: String,
     attachments: List<Attachment>,
+    supportsImageAttachments: Boolean,
     editingMessage: ChatMessage?,
     isProcessingAttachments: Boolean,
     isGenerating: Boolean,
@@ -114,6 +114,8 @@ internal fun MessageInput(
     val bottomPadding = if (hasAttachmentContent) EnsuSpacing.sm.dp else EnsuSpacing.md.dp
     val isImageAttachmentLimitReached =
         attachments.count { it.type == AttachmentType.Image } >= MaxImageAttachmentsPerMessage
+    val hasUnsupportedImages =
+        !supportsImageAttachments && attachments.any { it.type == AttachmentType.Image }
 
     Column(
         modifier = modifier.background(EnsuColor.backgroundBase()),
@@ -155,6 +157,15 @@ internal fun MessageInput(
                     }
                 }
             }
+        }
+
+        if (hasUnsupportedImages) {
+            Text(
+                text = "This model doesn't support images. Remove the image attachments to send.",
+                style = EnsuTypography.small,
+                color = EnsuColor.stopButton,
+                modifier = Modifier.padding(horizontal = EnsuSpacing.pageHorizontal.dp),
+            )
         }
 
         if (isProcessingAttachments) {
@@ -237,8 +248,9 @@ internal fun MessageInput(
                         fieldValue = newValue
                         onMessageChange(newValue.text)
                     },
-                    modifier = Modifier.weight(1f).focusRequester(focusRequester).focusable(),
+                    modifier = Modifier.weight(1f).focusRequester(focusRequester),
                     textStyle = EnsuTypography.message.copy(color = EnsuColor.textPrimary()),
+                    visualTransformation = LongMessageVisualTransformation,
                     minLines = 1,
                     maxLines = 5,
                     keyboardOptions =
@@ -262,7 +274,7 @@ internal fun MessageInput(
 
                 Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
 
-                if (editingMessage == null) {
+                if (editingMessage == null && supportsImageAttachments) {
                     val canAddImageAttachment =
                         !isGenerating && !isDownloading && !isImageAttachmentLimitReached
                     IconButton(
@@ -327,7 +339,8 @@ internal fun MessageInput(
 
                 val canSend =
                     (messageText.isNotBlank() || attachments.isNotEmpty()) &&
-                        !voiceInputState.blocksSend
+                        !voiceInputState.blocksSend &&
+                        !hasUnsupportedImages
 
                 IconButton(
                     onClick = {

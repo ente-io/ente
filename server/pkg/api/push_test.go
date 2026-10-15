@@ -63,3 +63,38 @@ func TestPushRegistrationBindsRequestSession(t *testing.T) {
 	expected := auth.HashToken("session-2")
 	require.Equal(t, expected[:], hash)
 }
+
+func TestPushPlatformRegistration(t *testing.T) {
+	testutil.WithServerRoot(t)
+	db := testutil.RequireTestDB(t)
+	testutil.ResetTables(t, db)
+	t.Cleanup(func() { testutil.ResetTables(t, db) })
+	testutil.InsertUser(t, db, testutil.UserFixture{UserID: 1, Email: "push@example.com", CreationTime: 1})
+	require.NoError(t, (&repo.UserAuthRepository{DB: db}).AddToken(1, ente.Photos, "session", "", ""))
+	router := gin.New()
+	handler := PushHandler{PushController: &controller.PushController{PushRepo: &repo.PushTokenRepository{DB: db}}}
+	router.POST("/push/token", handler.AddToken)
+	for _, tc := range []struct {
+		name, fields, platform string
+		status                 int
+	}{
+		{"old client", "", "ios", http.StatusOK},
+		{"android", `,"platform":"android","apnsToken":null`, "android", http.StatusOK},
+		{"ios", `,"platform":"ios"`, "ios", http.StatusOK},
+		{"invalid platform", `,"platform":"web"`, "ios", http.StatusBadRequest},
+		{"null platform", `,"platform":null`, "ios", http.StatusBadRequest},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodPost, "/push/token", strings.NewReader(`{"fcmToken":"device"`+tc.fields+`}`))
+			request.Header.Set("Content-Type", "application/json")
+			request.Header.Set("X-Auth-User-ID", "1")
+			request.Header.Set("X-Auth-Token", "session")
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, request)
+			require.Equal(t, tc.status, response.Code, response.Body.String())
+			var platform string
+			require.NoError(t, db.QueryRow(`SELECT platform FROM push_tokens WHERE fcm_token='device'`).Scan(&platform))
+			require.Equal(t, tc.platform, platform)
+		})
+	}
+}

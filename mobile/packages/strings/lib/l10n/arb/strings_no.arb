@@ -378,10 +378,6 @@
     "description": "Do not sign out button label"
   },
   "dontSave": "Ikke lagre",
-  "doThisLater": "Gjør dette senere",
-  "@doThisLater": {
-    "description": "Do this later button label"
-  },
   "download": "Last ned",
   "downloadFailed": "Nedlasting mislyktes",
   "downloading": "Laster ned...",
@@ -1317,7 +1313,6 @@
       }
     }
   },
-  "selectFoldersForBackup": "Velg mapper for sikkerhetskopiering",
   "selectItemsToAdd": "Velg produkter å legge til",
   "selectLanguage": "Velg språk",
   "selectMailApp": "Velg e-post-app",
