@@ -78,7 +78,7 @@ android {
         applicationId = "io.ente.ensu"
         minSdk = 24
         targetSdk = 36
-        versionCode = (project.findProperty("versionCode") as? String)?.toInt() ?: 33
+        versionCode = (project.findProperty("versionCode") as? String)?.toInt() ?: 161
         versionName = "0.1.22"
     }
 
