@@ -291,7 +291,8 @@ Several matches fail and list candidates; narrow the search or use an ID.
 Quote queries containing spaces.
 A code in Trash must be restored in Ente Auth first.
 JSON fields: id, name, issuer, accountName, type, otp, validUntil (UTC).
-HOTP values are not supported yet."
+HOTP values are not supported yet.
+Codes use your computer's clock. Make sure its date and time are correct."
     )]
     View {
         #[arg(
@@ -715,7 +716,10 @@ With --json, returns {\"recoveryKey\":\"...\"}."
 pub enum TotpCommand {
     #[command(about = "Print a new authenticator setup secret")]
     Setup,
-    #[command(about = "Confirm and enable authenticator protection")]
+    #[command(
+        about = "Confirm and enable authenticator protection",
+        after_long_help = "Verifying an authenticator code requires your computer's date and time to be correct."
+    )]
     Enable {
         #[arg(
             long,

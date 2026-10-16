@@ -317,8 +317,16 @@ pub async fn totp(
         };
     }
     let setup = TwoFactorSetup::from_secret(secret.to_string(), &account.identity.recovery_key);
+    let incorrect_code =
+        "Code not accepted. Check the code and your computer's date and time, then try again.";
     if let Some(input) = input {
-        setup.enable(&client, &input.totp).await?;
+        setup
+            .enable(&client, &input.totp)
+            .await
+            .map_err(|error| match error {
+                ente_accounts::Error::IncorrectTotp => anyhow::anyhow!(incorrect_code),
+                error => error.into(),
+            })?;
     } else {
         eprintln!("Add this secret to your authenticator: {}", secret.as_str());
         loop {
@@ -329,7 +337,7 @@ pub async fn totp(
             );
             match setup.enable(&client, &code).await {
                 Err(ente_accounts::Error::IncorrectTotp) => {
-                    eprintln!("Incorrect authenticator code. Try again.")
+                    eprintln!("{incorrect_code}")
                 }
                 result => {
                     result?;
