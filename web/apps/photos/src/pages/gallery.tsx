@@ -585,15 +585,15 @@ const Page: React.FC = () => {
     }, [barMode, activeCollectionID]);
 
     useEffect(() => {
-        if (!overviewFilter) return;
         const available = visibleAlbumFilters([
             ...normalCollectionSummaries.values(),
         ]);
-        if (!available.some(({ value }) => value == overviewFilter)) {
+        if (!available.some(({ value }) => value == albumFilter)) {
             setAlbumFilter("ente");
-            dispatch({ type: "showAlbumOverview", albumFilter: "ente" });
+            if (overviewFilter)
+                dispatch({ type: "showAlbumOverview", albumFilter: "ente" });
         }
-    }, [normalCollectionSummaries, overviewFilter]);
+    }, [normalCollectionSummaries, albumFilter, overviewFilter]);
 
     const router = useRouter();
 
