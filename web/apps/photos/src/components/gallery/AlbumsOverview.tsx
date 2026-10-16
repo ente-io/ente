@@ -26,7 +26,6 @@ interface AlbumsOverviewProps {
     onCreateAlbum: () => void;
 }
 
-// Uses the People overview's virtualized rows with the ZIP's fixed album tiles.
 export const AlbumsOverview = ({
     albums,
     title,
@@ -54,7 +53,6 @@ export const AlbumsOverview = ({
     const tileWidth = compact ? 104 : 140;
     const columnGap = compact ? 12 : 22;
     const rowGap = compact ? 16 : 24;
-    // Cover + label gap + name + metadata gap + count.
     const cardHeight = tileWidth + 8 + 20 + 2 + 16;
     const displayTitle =
         filter == "shared"
@@ -126,7 +124,6 @@ export const AlbumsOverview = ({
                 >
                     <AutoSizer>
                         {({ width, height }) => {
-                            // Account for the actual scrollbar without wasting a column on narrow windows.
                             const columns = Math.max(
                                 1,
                                 Math.floor(
