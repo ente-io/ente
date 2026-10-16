@@ -18,6 +18,23 @@ const mounted = () =>
     });
 
 describe("album overview navigation", () => {
+    test("keeps an empty Quick Links overview through collection refreshes", () => {
+        let state = galleryReducer(mounted(), {
+            type: "showAlbumOverview",
+            albumFilter: "links",
+        });
+        state = galleryReducer(state, {
+            type: "setCollections",
+            collections: [],
+        });
+        expect(state.view).toEqual({
+            type: "album-overview",
+            albumFilter: "links",
+        });
+        expect(state.selectedCollectionSummaryID).toBeUndefined();
+        expect(state.filteredFiles).toEqual([]);
+    });
+
     test("opens a group without an active collection or stale photo search results", () => {
         const state = galleryReducer(
             {

@@ -48,7 +48,7 @@ import {
 } from "@/components/gallery/helpers";
 import {
     useGalleryReducer,
-    type GalleryBarMode,
+    type GalleryNavigationSection,
 } from "@/components/gallery/reducer";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import {
@@ -222,6 +222,9 @@ const Page: React.FC = () => {
         context: { mode: "albums", collectionID: PseudoCollectionID.all },
     });
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
+    const [albumNavigationSection, setAlbumNavigationSection] = useState<
+        "albums" | "links"
+    >("albums");
     const [albumSearchQuery, setAlbumSearchQuery] = useState("");
     const [overviewAlbums, setOverviewAlbums] = useState<CollectionSummary[]>(
         [],
@@ -450,6 +453,12 @@ const Page: React.FC = () => {
         state.view?.type == "album-overview"
             ? state.view.albumFilter
             : undefined;
+    const navigationSection: GalleryNavigationSection =
+        barMode == "people"
+            ? "people"
+            : barMode == "albums"
+              ? albumNavigationSection
+              : "albums";
     const quickLinkVisibility =
         barMode == "hidden-albums"
             ? ItemVisibility.hidden
@@ -585,15 +594,34 @@ const Page: React.FC = () => {
     }, [barMode, activeCollectionID]);
 
     useEffect(() => {
+        // A removed collection falls back to All; keep Links in its own overview.
+        if (
+            navigationSection == "links" &&
+            activeCollectionID == PseudoCollectionID.all &&
+            !isInSearchMode
+        ) {
+            dispatch({ type: "showAlbumOverview", albumFilter: "links" });
+        }
+    }, [navigationSection, activeCollectionID, isInSearchMode]);
+
+    useEffect(() => {
         const available = visibleAlbumFilters([
             ...normalCollectionSummaries.values(),
         ]);
-        if (!available.some(({ value }) => value == albumFilter)) {
+        if (
+            navigationSection != "links" &&
+            !available.some(({ value }) => value == albumFilter)
+        ) {
             setAlbumFilter("ente");
             if (overviewFilter)
                 dispatch({ type: "showAlbumOverview", albumFilter: "ente" });
         }
-    }, [normalCollectionSummaries, albumFilter, overviewFilter]);
+    }, [
+        normalCollectionSummaries,
+        albumFilter,
+        overviewFilter,
+        navigationSection,
+    ]);
 
     const router = useRouter();
 
@@ -1489,6 +1517,9 @@ const Page: React.FC = () => {
     const handleShowCollectionSummaryWithID = useCallback(
         (collectionSummaryID: number | undefined) => {
             setCleanupView(undefined);
+            if (collectionSummaryID == PseudoCollectionID.all) {
+                setAlbumNavigationSection("albums");
+            }
             // Museum deletes collection contents asynchronously; pull on entry.
             if (collectionSummaryID == PseudoCollectionID.trash) {
                 void remoteFilesPull();
@@ -1577,12 +1608,14 @@ const Page: React.FC = () => {
         dispatch({ type: "showAlbumOverview", albumFilter: filter });
     };
 
-    const handleChangeBarMode = (mode: GalleryBarMode) => {
+    const handleChangeBarMode = (mode: GalleryNavigationSection) => {
         if (mode == "people") {
             return handleShowPeople();
         }
+        setAlbumNavigationSection(mode);
+        setAlbumSearchQuery("");
         setCleanupView(undefined);
-        handleShowAlbumOverview("ente");
+        handleShowAlbumOverview(mode == "links" ? "links" : "ente");
         return true;
     };
 
@@ -2087,6 +2120,7 @@ const Page: React.FC = () => {
                 isInSearchMode={isInSearchMode}
                 isSettingsOpen={sidebarVisibilityProps.open}
                 mode={barMode}
+                navigationSection={navigationSection}
                 onChangeMode={handleChangeBarMode}
                 onSidebar={showSidebar}
                 onUpload={openUploader}
@@ -2122,6 +2156,7 @@ const Page: React.FC = () => {
                               onShowMap: handleShowCollectionMap,
                               onCollectionSlideshow: startSlideshow,
                               mode: barMode,
+                              navigationSection,
                               shouldHide: isInSearchMode,
                               barCollectionSummaries,
                               normalCollectionSummaries,

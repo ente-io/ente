@@ -87,6 +87,7 @@ export const GalleryBarAndListHeader: React.FC<
 > = ({
     shouldHide,
     mode,
+    navigationSection,
     user,
     barCollectionSummaries: toShowCollectionSummaries,
     normalCollectionSummaries,
@@ -183,11 +184,17 @@ export const GalleryBarAndListHeader: React.FC<
             mode == "albums"
                 ? filterAlbumSummaries(
                       eligibleCollectionSummaries,
-                      albumFilter,
+                      navigationSection == "links" ? "links" : albumFilter,
                       albumSearchQuery,
                   )
                 : eligibleCollectionSummaries,
-        [eligibleCollectionSummaries, mode, albumFilter, albumSearchQuery],
+        [
+            eligibleCollectionSummaries,
+            mode,
+            navigationSection,
+            albumFilter,
+            albumSearchQuery,
+        ],
     );
 
     useEffect(() => {
@@ -320,6 +327,7 @@ export const GalleryBarAndListHeader: React.FC<
             <GalleryBarImpl
                 {...{
                     mode,
+                    navigationSection,
                     albumFilter,
                     albumSearchQuery,
                     onAlbumSearchQueryChange,

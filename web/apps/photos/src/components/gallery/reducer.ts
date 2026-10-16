@@ -50,6 +50,8 @@ import React, { useReducer } from "react";
 export type GalleryBarMode =
     "albums" | "hidden-albums" | "archive-albums" | "people";
 
+export type GalleryNavigationSection = "albums" | "links" | "people";
+
 type GalleryView =
     | { type: "album-overview"; albumFilter: AlbumFilter }
     | {

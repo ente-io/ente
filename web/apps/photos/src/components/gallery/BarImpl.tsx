@@ -58,7 +58,7 @@ import {
     areEqual,
     type ListChildComponentProps,
 } from "react-window";
-import type { GalleryBarMode } from "./reducer";
+import type { GalleryBarMode, GalleryNavigationSection } from "./reducer";
 
 export interface GalleryBarPresentationProps {
     collapsed: boolean;
@@ -67,6 +67,7 @@ export interface GalleryBarPresentationProps {
 
 export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     mode: GalleryBarMode;
+    navigationSection: GalleryNavigationSection;
     albumFilter: AlbumFilter;
     albumSearchQuery: string;
     onAlbumSearchQueryChange: (query: string) => void;
@@ -94,6 +95,7 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     mode,
+    navigationSection,
     albumFilter,
     albumSearchQuery,
     onAlbumSearchQueryChange,
@@ -121,6 +123,15 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const titleID = useId();
     const listRef = useRef<FixedSizeList | null>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const isLinks = navigationSection == "links";
+    const groupedAlbumList = mode == "albums" && !isLinks;
+    const searchPlaceholder = t(
+        isLinks
+            ? "search_in_links"
+            : mode == "people"
+              ? "people_search_hint"
+              : "search_in_albums",
+    );
     const [peopleSearchQuery, setPeopleSearchQuery] = useState("");
     const searchQuery = mode == "albums" ? albumSearchQuery : peopleSearchQuery;
     const setSearchQuery =
@@ -203,7 +214,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 ? {
                       type: "collections",
                       collectionSummaries: collectionSummaries,
-                      indented: mode == "albums",
+                      indented: groupedAlbumList,
+                      showFileCount: isLinks,
                       activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
                   }
@@ -215,6 +227,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                   },
         [
             mode,
+            groupedAlbumList,
+            isLinks,
             collectionSummaries,
             activeCollectionID,
             onSelectCollectionID,
@@ -224,14 +238,15 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         ],
     );
 
-    const title =
-        mode == "people"
-            ? t("people")
-            : mode == "hidden-albums"
-              ? t("hidden_albums")
-              : mode == "archive-albums"
-                ? t("section_archive")
-                : t("albums");
+    const title = isLinks
+        ? t("links_albums_label")
+        : mode == "people"
+          ? t("people")
+          : mode == "hidden-albums"
+            ? t("hidden_albums")
+            : mode == "archive-albums"
+              ? t("section_archive")
+              : t("albums");
 
     const albumShortcuts = [
         {
@@ -263,15 +278,14 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const albumListID = `${titleID}-albums`;
     const items = (
         <Box
-            id={mode == "albums" ? albumListID : undefined}
+            id={groupedAlbumList ? albumListID : undefined}
             sx={{
-                flex: mode == "albums" ? "0 1 auto" : 1,
-                height:
-                    mode == "albums"
-                        ? getItemCount(itemData) * (mobile ? 46 : 50)
-                        : undefined,
+                flex: groupedAlbumList ? "0 1 auto" : 1,
+                height: groupedAlbumList
+                    ? getItemCount(itemData) * (mobile ? 46 : 50)
+                    : undefined,
                 minHeight:
-                    mode == "albums" && getItemCount(itemData) > 0
+                    groupedAlbumList && getItemCount(itemData) > 0
                         ? mobile
                             ? 46
                             : 50
@@ -375,16 +389,27 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     />
                 )}
                 <Tooltip
-                    title={mode == "people" ? t("people") : t("all_albums")}
+                    title={
+                        isLinks
+                            ? t("links_albums_title")
+                            : mode == "people"
+                              ? t("people")
+                              : t("all_albums")
+                    }
                 >
                     <IconButton
                         aria-label={
-                            mode == "people" ? t("people") : t("all_albums")
+                            isLinks
+                                ? t("links_albums_title")
+                                : mode == "people"
+                                  ? t("people")
+                                  : t("all_albums")
                         }
-                        aria-haspopup="dialog"
+                        aria-haspopup={isLinks ? undefined : "dialog"}
                         onClick={() => {
                             mobileDrawerProps.onClose();
-                            if (mode == "people") onShowAllPeople();
+                            if (isLinks) onShowAlbumOverview("links");
+                            else if (mode == "people") onShowAllPeople();
                             else onShowAllAlbums();
                         }}
                     >
@@ -424,18 +449,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     <InputBase
                         inputRef={searchInputRef}
                         fullWidth
-                        placeholder={t(
-                            mode == "people"
-                                ? "people_search_hint"
-                                : "search_in_albums",
-                        )}
-                        inputProps={{
-                            "aria-label": t(
-                                mode == "people"
-                                    ? "people_search_hint"
-                                    : "search_in_albums",
-                            ),
-                        }}
+                        placeholder={searchPlaceholder}
+                        inputProps={{ "aria-label": searchPlaceholder }}
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
                         sx={{
@@ -462,14 +477,21 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     )}
                 </Stack>
             )}
-            {mode == "people" && isSearching && !matchingPeople.length ? (
+            {isLinks && !collectionSummaries.length ? (
+                <Typography
+                    role="status"
+                    sx={{ px: "16px", color: "text.muted" }}
+                >
+                    {t(isSearching ? "no_results" : "no_quick_links")}
+                </Typography>
+            ) : mode == "people" && isSearching && !matchingPeople.length ? (
                 <Typography
                     role="status"
                     sx={{ px: "16px", color: "text.muted" }}
                 >
                     {t("no_results")}
                 </Typography>
-            ) : mode == "albums" ? (
+            ) : groupedAlbumList ? (
                 <Stack
                     role="group"
                     aria-label={t("filter_albums")}
@@ -529,7 +551,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             ) : (
                 items
             )}
-            {mode != "people" && (
+            {mode != "people" && !isLinks && (
                 <Stack sx={{ flexShrink: 0, gap: "2px", pb: "8px" }}>
                     <Divider
                         sx={{
@@ -615,6 +637,7 @@ type ItemData =
           type: "collections";
           collectionSummaries: CollectionSummary[];
           indented: boolean;
+          showFileCount: boolean;
           activeCollectionID: number;
           onSelectCollectionID: (id: number) => void;
       }
@@ -674,6 +697,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
                         data.indented &&
                         !collectionSummary.attributes.has("system")
                     }
+                    showFileCount={data.showFileCount}
                 />
             );
             break;
@@ -698,6 +722,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
 interface CollectionBarCardProps {
     collectionSummary: CollectionSummary;
     indented: boolean;
+    showFileCount: boolean;
     activeCollectionID: number;
     onSelectCollectionID: (collectionID: number) => void;
 }
@@ -705,6 +730,7 @@ interface CollectionBarCardProps {
 const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
     collectionSummary,
     indented,
+    showFileCount,
     activeCollectionID,
     onSelectCollectionID,
 }: CollectionBarCardProps) => (
@@ -728,6 +754,13 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
             />
         </Box>
         <CardText>{collectionSummary.name}</CardText>
+        {showFileCount && (
+            <Typography
+                sx={{ fontSize: 12, color: "text.muted", flexShrink: 0 }}
+            >
+                {t("album_items_count", { count: collectionSummary.fileCount })}
+            </Typography>
+        )}
         <CollectionBarCardIcon attributes={collectionSummary.attributes} />
     </BarCard>
 );

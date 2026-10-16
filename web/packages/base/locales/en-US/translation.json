@@ -495,6 +495,8 @@
     "search_hint": "Search for albums, dates, descriptions, ...",
     "albums_search_hint": "Search for albums...",
     "search_in_albums": "Search in Albums",
+    "search_in_links": "Search in Links",
+    "no_quick_links": "No quick links yet",
     "clear_search": "Clear search",
     "album": "Album",
     "date": "Date",

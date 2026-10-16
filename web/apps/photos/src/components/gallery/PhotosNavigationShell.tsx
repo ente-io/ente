@@ -7,6 +7,7 @@ import { uploadManager } from "@/services/upload-manager";
 import {
     Album02Icon,
     Home01Icon,
+    Link05Icon,
     Settings01Icon,
     Upload01Icon,
     UserGroupIcon,
@@ -34,14 +35,15 @@ import { t } from "i18next";
 import { useEffect, useState, type ReactNode } from "react";
 
 import type { GalleryBarPresentationProps } from "./BarImpl";
-import type { GalleryBarMode } from "./reducer";
+import type { GalleryBarMode, GalleryNavigationSection } from "./reducer";
 
 type PhotosNavigationShellProps = SearchBarProps & {
     onSidebar: () => void;
     onUpload: () => void;
     onHome: () => void;
     mode: GalleryBarMode;
-    onChangeMode: (mode: GalleryBarMode) => boolean;
+    navigationSection: GalleryNavigationSection;
+    onChangeMode: (mode: GalleryNavigationSection) => boolean;
 };
 
 export const PhotosNavigationShell: React.FC<
@@ -75,11 +77,11 @@ export const PhotosNavigationShell: React.FC<
     const { onClose: closeMobileNavigation } = mobileDrawerProps;
     useEffect(() => {
         setNavigationCollapsed(false);
-    }, [props.mode, props.isInSearchMode]);
+    }, [props.mode, props.navigationSection, props.isInSearchMode]);
     useEffect(() => {
         if (!mobile) closeMobileNavigation();
     }, [mobile, closeMobileNavigation]);
-    const handleChangeMode = (mode: GalleryBarMode) => {
+    const handleChangeMode = (mode: GalleryNavigationSection) => {
         if (mode == "people") {
             closeMobileNavigation();
             props.onChangeMode(mode);
@@ -94,7 +96,7 @@ export const PhotosNavigationShell: React.FC<
         if (
             galleryBarProps &&
             !props.isInSearchMode &&
-            ((props.mode == mode &&
+            ((props.navigationSection == mode &&
                 galleryBarProps.activeCollectionID != PseudoCollectionID.all) ||
                 reopeningSection)
         ) {
@@ -177,6 +179,7 @@ export const PhotosNavigationShell: React.FC<
                                 {...props}
                                 isHome={
                                     props.mode == "albums" &&
+                                    props.navigationSection == "albums" &&
                                     !props.isInSearchMode &&
                                     galleryBarProps?.activeCollectionID ==
                                         PseudoCollectionID.all
@@ -307,7 +310,7 @@ const NormalHeaderContents: React.FC<
 
 const NormalNavigationRail: React.FC<
     Omit<PhotosNavigationShellProps, "onUpload" | "onChangeMode"> & {
-        onChangeMode: (mode: GalleryBarMode) => void;
+        onChangeMode: (mode: GalleryNavigationSection) => void;
         isHome: boolean;
         opensDialog: boolean;
         navigationOpen: boolean;
@@ -316,6 +319,7 @@ const NormalNavigationRail: React.FC<
     onSidebar,
     onHome,
     mode,
+    navigationSection,
     onChangeMode,
     isHome,
     opensDialog,
@@ -336,17 +340,22 @@ const NormalNavigationRail: React.FC<
                 ...theme.applyStyles("dark", { bgcolor: "#3E3E3E" }),
             })}
         />
-        {(["albums", "people"] as const).map((item) =>
+        {(["albums", "links", "people"] as const).map((item) =>
             item == "people" && !isMLSupported ? null : (
-                <Tooltip key={item} title={t(item)}>
+                <Tooltip
+                    key={item}
+                    title={t(item == "links" ? "links_albums_label" : item)}
+                >
                     <FocusVisibleButton
                         color="secondary"
-                        aria-label={t(item)}
+                        aria-label={t(
+                            item == "links" ? "links_albums_label" : item,
+                        )}
                         aria-pressed={
                             navigationOpen &&
                             !isHome &&
                             !props.isInSearchMode &&
-                            (mode == item ||
+                            (navigationSection == item ||
                                 (item == "albums" &&
                                     (mode == "hidden-albums" ||
                                         mode == "archive-albums")))
@@ -370,7 +379,11 @@ const NormalNavigationRail: React.FC<
                     >
                         <HugeiconsIcon
                             icon={
-                                item == "albums" ? Album02Icon : UserGroupIcon
+                                item == "albums"
+                                    ? Album02Icon
+                                    : item == "links"
+                                      ? Link05Icon
+                                      : UserGroupIcon
                             }
                             size={20}
                             strokeWidth={1.8}
