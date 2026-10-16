@@ -29,12 +29,20 @@ const categoriesByType = {
     clip: "photos",
 } satisfies Record<SearchSuggestion["type"], Exclude<SearchCategory, "all">>;
 
+const sidebarOption = (actionID: SidebarActionID): SearchOption => ({
+    suggestion: { type: "sidebarAction", actionID, label: actionID, path: [] },
+    fileCount: 0,
+    previewFiles: [],
+});
+
 const option = (type: SearchSuggestion["type"], fileCount = 100) =>
-    ({
-        suggestion: { type, label: type },
-        fileCount,
-        previewFiles: [],
-    }) as SearchOption;
+    type === "sidebarAction"
+        ? sidebarOption("utility.preferences")
+        : ({
+              suggestion: { type, label: type },
+              fileCount,
+              previewFiles: [],
+          } as SearchOption);
 
 describe("search categories", () => {
     test.each(Object.entries(categoriesByType))(
@@ -118,12 +126,6 @@ test("groups results in tab order while preserving rows within each category", (
     ]);
     expect(options).toEqual([firstPhoto, setting, place, secondPhoto, album]);
     expect(groupSearchOptions([])).toEqual([]);
-});
-
-const sidebarOption = (actionID: SidebarActionID): SearchOption => ({
-    suggestion: { type: "sidebarAction", actionID, label: actionID, path: [] },
-    fileCount: 0,
-    previewFiles: [],
 });
 
 const albumShortcuts = [
