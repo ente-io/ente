@@ -25,6 +25,8 @@ fn new_engine(server: &mockito::ServerGuard, producer: &str) -> (Engine, BTreeMa
             user: USER,
             key: Key::generate(),
             albums,
+            categories: BTreeMap::new(),
+            unreadable_album: None,
             files: BTreeMap::new(),
             failed_album: None,
         },
@@ -329,6 +331,26 @@ fn adoption_preflight_refuses_corrupt_media_scope_and_metadata_blockers_without_
                 .contains("exactly")
         );
         assert_eq!(snapshot(&root), before);
+        engine.catalog.categories.insert(FAMILY, (true, true));
+        for unreadable in [None, Some(FAMILY)] {
+            engine.catalog.unreadable_album = unreadable;
+            for shared in [false, true] {
+                let mut options = engine.options(true, &[]);
+                options.exclude_shared = shared;
+                options.exclude_hidden = !shared;
+                assert!(
+                    engine
+                        .prepare(options)
+                        .err()
+                        .unwrap()
+                        .to_string()
+                        .contains("exactly")
+                );
+                assert_eq!(snapshot(&root), before);
+            }
+        }
+        engine.catalog.unreadable_album = None;
+        engine.catalog.categories.clear();
         fs::write(root.join("Family/Photo.jpg"), b"local edit").unwrap();
         fs::write(root.join("Travel/Photo.jpg"), b"second edit").unwrap();
         let before = snapshot(&root);

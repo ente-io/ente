@@ -600,11 +600,16 @@ fn export_preserves_album_types_visibility_and_settings() -> TestResult {
                 let (file, file_key) = upload_fixture(origin, &account, album, &key, name.as_bytes(), metadata("original.jpg", name.as_bytes())).await;
                 set_album_metadata(origin, &account, album, &key, "magic-metadata", json!({"visibility":visibility,"subType":subtype,"order":7})).await;
                 set_album_metadata(origin, &account, album, &key, "public-magic-metadata", json!({"asc":true,"coverID":file,"layout":"trip","caption":"album description"})).await;
-                let private = blob::encrypt_json(&json!({"visibility":visibility}), &file_key)?;
+                let file_visibility = if name == "Quick link" { 2 } else { visibility };
+                let private = blob::encrypt_json(&json!({"visibility":file_visibility}), &file_key)?;
                 request(origin, &account, reqwest::Method::PUT, "/files/magic-metadata", json!({"metadataList":[{"id":file,"magicMetadata":{"version":1,"count":1,"data":b64::encode(&private.encrypted_data),"header":b64::encode(private.decryption_header.as_bytes())}}]})).await;
             }
             let destination = tempfile::tempdir()?;
             let root = destination.path().join("photos");
+            assert_eq!(export(&home, &root, &["--exclude-hidden"])["copies"]["completed"], 4);
+            assert!(!root.join("Private").exists());
+            assert!(!root.join("Hidden").exists());
+            assert_eq!(read_json(&root.join("Quick link/metadata/original.jpg.json"))["ente"]["visibility"], "hidden");
             let result = export(&home, &root, &[]);
             assert_eq!(result["copies"]["completed"], cases.len());
             for (name, _, kind, file_visibility, _, visibility) in cases {
@@ -619,7 +624,7 @@ fn export_preserves_album_types_visibility_and_settings() -> TestResult {
                 assert_eq!(album["ente"]["description"], "album description");
                 assert_eq!(album["ente"]["layout"], "trip");
                 assert_eq!(album["ente"]["coverFileID"], file["ente"]["fileID"]);
-                assert_eq!(file["ente"]["visibility"], ["visible", "archived", "hidden"][file_visibility]);
+                assert_eq!(file["ente"]["visibility"], if name == "Quick link" { "hidden" } else { ["visible", "archived", "hidden"][file_visibility] });
             }
             Ok(())
         })

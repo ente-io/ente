@@ -10,6 +10,8 @@ fn new_engine(server: &mockito::ServerGuard, key: Key, record: Value) -> Engine 
             user: 9007199254740993,
             key,
             albums: BTreeMap::from([(1, "First".into()), (2, "Second".into())]),
+            categories: BTreeMap::new(),
+            unreadable_album: None,
             files: BTreeMap::from([((1, id), record.clone()), ((2, id), record)]),
             failed_album: None,
         },
@@ -20,6 +22,183 @@ fn run(engine: &mut Engine, complete: bool) -> Value {
     let result = engine.run(false, &[]).unwrap();
     assert_eq!(result.complete, complete);
     result.json
+}
+
+#[test]
+fn engine_category_filters_preserve_history_and_reuse_excluded_originals() {
+    let mut server = mockito::Server::new();
+    let key = Key::generate();
+    let (record, bytes) = original_fixture(&key, b"original", false, true, 10);
+    let fetched = download(&mut server, 10, &bytes, 1);
+    let mut engine = new_engine(&server, key, record.clone());
+    run(&mut engine, true);
+    let root = engine.root();
+    let first_metadata = fs::read(root.join("First/metadata.json")).unwrap();
+    engine.catalog.categories.insert(1, (false, true));
+    engine.catalog.failed_album = Some(1);
+    fs::remove_file(root.join("Second/Photo.jpg")).unwrap();
+    let mut options = engine.options(false, &["First", "Second"]);
+    options.exclude_hidden = true;
+    options.hardlinks = true;
+    let export = engine.prepare(options).unwrap();
+    let result = engine.execute(export).unwrap();
+    assert!(result.complete);
+    assert_eq!(result.expected, 1);
+    assert!(
+        same_file::is_same_file(root.join("First/Photo.jpg"), root.join("Second/Photo.jpg"))
+            .unwrap()
+    );
+    assert_eq!(
+        fs::read(root.join("First/metadata.json")).unwrap(),
+        first_metadata
+    );
+    let mut options = engine.options(false, &["First", "Second"]);
+    options.exclude_hidden = true;
+    options.exclude_albums.push("Second".into());
+    let export = engine.prepare(options).unwrap();
+    assert_eq!(engine.execute(export).unwrap().expected, 0);
+
+    for (id, name, shared) in [(3, "Owned", false), (4, "Incoming", true)] {
+        engine.catalog.albums.insert(id, name.into());
+        engine.catalog.categories.insert(id, (shared, false));
+        engine.catalog.files.insert((id, 10), record.clone());
+    }
+    assert!(engine.run(false, &["Owned", "Incoming"]).unwrap().complete);
+    fs::write(root.join("First/.ente-excluded.part"), b"pending").unwrap();
+    engine
+        .db()
+        .execute(
+            "INSERT INTO temporaries VALUES('.ente-excluded.part','active:1',1,10)",
+            [],
+        )
+        .unwrap();
+    engine.catalog.albums.clear();
+    let mut options = engine.options(false, &[]);
+    options.exclude_shared = true;
+    options.exclude_hidden = true;
+    let export = engine.prepare(options).unwrap();
+    let result = engine.execute(export).unwrap();
+    assert!(result.complete);
+    assert_eq!(result.json["changes"]["retained"], 2);
+    for album in ["First", "Incoming", "Trash/Second", "Trash/Owned"] {
+        assert_eq!(
+            fs::read(root.join(album).join("Photo.jpg")).unwrap(),
+            b"original"
+        );
+    }
+    assert_eq!(
+        fs::read(root.join("First/.ente-excluded.part")).unwrap(),
+        b"pending"
+    );
+    assert_eq!(run(&mut engine, true)["changes"]["retained"], 2);
+    assert!(!root.join("First/.ente-excluded.part").exists());
+    fetched.assert();
+}
+
+#[test]
+fn engine_category_recovery_preserves_unknown_albums_after_database_loss() {
+    let mut server = mockito::Server::new();
+    let key = Key::generate();
+    let (record, bytes) = original_fixture(&key, b"original", false, true, 10);
+    let fetched = download(&mut server, 10, &bytes, 1);
+    let mut engine = new_engine(&server, key, record.clone());
+    engine
+        .catalog
+        .categories
+        .extend([(1, (false, true)), (2, (true, false))]);
+    run(&mut engine, true);
+    let root = engine.root();
+    engine.catalog.albums.remove(&1);
+    engine.database = "reconnected.db".into();
+    let mut options = engine.options(true, &[]);
+    options.exclude_shared = true;
+    options.exclude_hidden = true;
+    let export = engine.prepare(options).unwrap();
+    assert!(engine.execute(export).unwrap().complete);
+    assert_eq!(
+        count(&engine.db(), "SELECT count(*) FROM albums WHERE retained=0"),
+        2
+    );
+    engine.catalog.albums.remove(&2);
+    let mut options = engine.options(false, &[]);
+    options.exclude_shared = true;
+    options.exclude_hidden = true;
+    let export = engine.prepare(options).unwrap();
+    assert!(engine.execute(export).unwrap().complete);
+
+    engine.catalog.albums.insert(3, "Current".into());
+    engine.catalog.files.insert((3, 10), record);
+    engine.database = "lost-again.db".into();
+    let mut options = engine.options(true, &[]);
+    options.exclude_shared = true;
+    options.exclude_hidden = true;
+    let export = engine.prepare(options).unwrap();
+    let result = engine.execute(export).unwrap();
+    assert!(!result.complete);
+    assert_eq!(result.json["failures"], 1);
+    assert_eq!(result.completed, 1);
+    for album in ["First", "Second", "Current"] {
+        assert_eq!(
+            fs::read(root.join(album).join("Photo.jpg")).unwrap(),
+            b"original"
+        );
+    }
+    let mut options = engine.options(false, &[]);
+    options.exclude_shared = true;
+    options.exclude_hidden = true;
+    options.exclude_albums.push("Second".into());
+    let export = engine.prepare(options).unwrap();
+    assert!(engine.execute(export).unwrap().complete);
+    assert_eq!(run(&mut engine, true)["changes"]["retained"], 2);
+    engine.database = "history-only.db".into();
+    let mut options = engine.options(true, &[]);
+    options.exclude_shared = true;
+    options.exclude_hidden = true;
+    let export = engine.prepare(options).unwrap();
+    assert!(engine.execute(export).unwrap().complete);
+    fetched.assert();
+}
+
+#[test]
+fn engine_category_filters_recheck_recovered_metadata() {
+    let mut server = mockito::Server::new();
+    let key = Key::generate();
+    let (record, bytes) = original_fixture(&key, b"original", false, true, 10);
+    let fetched = download(&mut server, 10, &bytes, 1);
+    let mut engine = new_engine(&server, key, record);
+    engine.catalog.categories.insert(1, (false, true));
+    engine.catalog.unreadable_album = Some(1);
+    let mut options = engine.options(false, &[]);
+    options.exclude_hidden = true;
+    let export = engine.prepare(options).unwrap();
+    let result = engine.execute(export).unwrap();
+    assert!(result.complete);
+    assert_eq!(result.expected, 1);
+    assert!(!engine.root().join("First").exists());
+    engine.catalog.albums.insert(2, "First".into());
+    let mut options = engine.options(false, &["First"]);
+    options.exclude_hidden = true;
+    assert!(
+        engine
+            .prepare(options)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("ambiguous")
+    );
+    engine.catalog.albums.insert(2, "Second".into());
+    engine.catalog.failed_album = Some(2);
+    let mut options = engine.options(false, &[]);
+    options.exclude_hidden = true;
+    let export = engine.prepare(options).unwrap();
+    let result = engine.execute(export).unwrap();
+    assert!(!result.complete);
+    assert_eq!(result.json["failures"], 1);
+    assert_eq!(
+        fs::read(engine.root().join("Second/Photo.jpg")).unwrap(),
+        b"original"
+    );
+    fetched.assert();
 }
 
 #[test]
