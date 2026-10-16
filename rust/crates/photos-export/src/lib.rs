@@ -182,7 +182,7 @@ impl Export {
                 )?;
             }
         }
-        let mut albums = store.db.prepare("SELECT a.id,a.name,j.value FROM albums a JOIN json_records j ON j.owner=a.key AND j.role='' LEFT JOIN album_sources s ON s.id=a.id WHERE json_extract(s.record,'$.hidden') IS NULL ORDER BY a.retained")?;
+        let mut albums = store.db.prepare("SELECT a.id,a.name,j.value FROM albums a JOIN json_records j ON j.owner=a.key AND j.role='' LEFT JOIN album_sources s ON s.id=a.id WHERE json_extract(s.record,'$.shared') IS NULL OR json_extract(s.record,'$.hidden') IS NULL ORDER BY a.retained")?;
         for row in albums.query_map([], |r| {
             Ok((
                 r.get::<_, i64>(0)?,

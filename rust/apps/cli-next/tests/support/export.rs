@@ -582,18 +582,18 @@ fn export_preserves_album_types_visibility_and_settings() -> TestResult {
             let home = TestHome::new();
             login(&home, "photos", &email, &["--host", origin]);
             let cases = [
-                ("Archive", "album", "album", 1, 0, "archived"),
-                ("Private", "album", "album", 2, 0, "hidden"),
-                ("Hidden", "album", "defaultHidden", 0, 1, "hidden"),
-                ("Quick link", "album", "quicklink", 0, 2, "visible"),
-                ("Folder", "folder", "folder", 0, 0, "visible"),
-                ("Uncategorized", "uncategorized", "uncategorized", 0, 0, "visible"),
+                ("Archive", "album", "album", 1, 0),
+                ("Private", "album", "album", 2, 0),
+                ("Hidden", "album", "defaultHidden", 0, 1),
+                ("Quick link", "album", "quicklink", 0, 2),
+                ("Folder", "folder", "folder", 0, 0),
+                ("Uncategorized", "uncategorized", "uncategorized", 0, 0),
             ];
-            for (name, kind, _, visibility, subtype, _) in cases {
+            for (name, kind, _, visibility, subtype) in cases {
                 let (album, key) = create_album(origin, &account, name, kind).await;
                 let (file, file_key) = upload_fixture(origin, &account, album, &key, name.as_bytes(), metadata("original.jpg", name.as_bytes())).await;
                 set_album_metadata(origin, &account, album, &key, "magic-metadata", json!({"visibility":visibility,"subType":subtype,"order":7})).await;
-                set_album_metadata(origin, &account, album, &key, "public-magic-metadata", json!({"asc":true,"coverID":file,"layout":"trip","caption":"album description"})).await;
+                set_album_metadata(origin, &account, album, &key, "public-magic-metadata", json!({"asc":true,"sortBy":"fileName","coverID":file,"layout":"trip","caption":"album description","extension":{"nested":[true,null,17]}})).await;
                 let file_visibility = if name == "Quick link" { 2 } else { visibility };
                 let private = blob::encrypt_json(&json!({"visibility":file_visibility}), &file_key)?;
                 request(origin, &account, reqwest::Method::PUT, "/files/magic-metadata", json!({"metadataList":[{"id":file,"magicMetadata":{"version":1,"count":1,"data":b64::encode(&private.encrypted_data),"header":b64::encode(private.decryption_header.as_bytes())}}]})).await;
@@ -606,19 +606,16 @@ fn export_preserves_album_types_visibility_and_settings() -> TestResult {
             assert_eq!(read_json(&root.join("Quick link/metadata/original.jpg.json"))["ente"]["magicMetadata"]["visibility"], 2);
             let result = export(&home, &root, &[]);
             assert_eq!(result["copies"]["completed"], cases.len());
-            for (name, _, kind, file_visibility, _, visibility) in cases {
+            for (name, _, kind, visibility, subtype) in cases {
                 let folder = root.join(name);
                 let album = read_json(&folder.join("metadata.json"));
                 let file = read_json(&folder.join("metadata/original.jpg.json"));
                 assert_eq!(fs::read(folder.join("original.jpg"))?, name.as_bytes());
                 assert_eq!(album["ente"]["type"], kind);
-                assert_eq!(album["ente"]["visibility"], visibility);
-                assert_eq!(album["ente"]["displayOrder"], 7);
-                assert_eq!(album["ente"]["sortOrder"], "ascending");
-                assert_eq!(album["ente"]["description"], "album description");
-                assert_eq!(album["ente"]["layout"], "trip");
-                assert_eq!(album["ente"]["coverFileID"], file["ente"]["fileID"]);
-                assert_eq!(file["ente"]["magicMetadata"]["visibility"], if name == "Quick link" { 2 } else { file_visibility });
+                assert_eq!(album["title"], name);
+                assert_eq!(album["ente"]["magicMetadata"], json!({"visibility":visibility,"subType":subtype,"order":7}));
+                assert_eq!(album["ente"]["pubMagicMetadata"], json!({"asc":true,"sortBy":"fileName","coverID":file["ente"]["fileID"].as_str().unwrap().parse::<i64>()?,"layout":"trip","caption":"album description","extension":{"nested":[true,null,17]}}));
+                assert_eq!(file["ente"]["magicMetadata"]["visibility"], if name == "Quick link" { 2 } else { visibility });
             }
             Ok(())
         })

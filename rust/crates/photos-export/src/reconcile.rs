@@ -929,11 +929,6 @@ impl Run<'_> {
             };
             after = id;
             let source: AlbumSource = serde_json::from_str(&source)?;
-            for field in &source.warnings {
-                (self.report)(&format!(
-                    "album {id}: unfamiliar metadata field {field:?}; exporting supported fields"
-                ));
-            }
             if let Err(error) = self.maintain_album(id, &source.name, false, source.metadata) {
                 self.block(id, None, error)?;
             }

@@ -212,7 +212,6 @@ pub struct AlbumSource {
     pub shared: Option<bool>,
     pub hidden: Option<bool>,
     pub metadata: Value,
-    pub warnings: Vec<String>,
 }
 
 #[derive(Clone)]
@@ -588,7 +587,6 @@ impl Store {
             shared: None,
             hidden: None,
             metadata: Value::Null,
-            warnings: Vec::new(),
         });
         source.shared = Some(shared);
         source.hidden = hidden.or(source.hidden);
@@ -612,14 +610,13 @@ impl Store {
             shared: None,
             hidden: None,
             metadata: Value::Null,
-            warnings: Vec::new(),
         });
         source.shared = source.shared.or(shared);
-        source.hidden = source.hidden.or_else(|| {
-            metadata["ente"]["visibility"]
-                .as_str()
-                .map(|visibility| visibility == "hidden")
-        });
+        if metadata.is_object() {
+            let (shared, hidden) = crate::metadata::album_categories(&metadata)?;
+            source.shared = source.shared.or(shared);
+            source.hidden = source.hidden.or(Some(hidden));
+        }
         self.save_album_source(id, &source)
     }
 
@@ -629,13 +626,12 @@ impl Store {
         documents: &Documents,
         user_id: i64,
     ) -> Result<()> {
-        let (metadata, warnings) = crate::metadata::album(album, documents, user_id)?;
+        let metadata = crate::metadata::album(album, documents)?;
         let source = AlbumSource {
             name: album.name.clone(),
             shared: Some(album.owner_id != user_id),
             hidden: Some(matches!(album.visibility, Visibility::Hidden)),
             metadata,
-            warnings,
         };
         self.save_album_source(album.id, &source)
     }

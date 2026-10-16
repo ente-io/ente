@@ -2655,22 +2655,19 @@ fn export_preserves_native_fields_unused_by_common_commands() {
 }
 
 #[test]
-fn export_only_album_metadata_preserves_common_commands_and_favorites() {
-    for (document, value, cause) in [
+fn export_preserves_album_documents_and_favorites() {
+    for (document, value) in [
         (
             "magicMetadata",
-            json!({"order":"broken"}),
-            "invalid album private metadata",
+            json!({"order":7,"extension":{"pinned":true}}),
         ),
         (
             "sharedMagicMetadata",
-            json!({"order":"broken","mute":"broken"}),
-            "invalid album sharee metadata",
+            json!({"order":9,"mute":true,"extension":{"pinned":false}}),
         ),
         (
             "pubMagicMetadata",
-            json!({"asc":"broken","coverID":"broken","layout":17,"caption":17}),
-            "invalid album public metadata",
+            json!({"asc":true,"sortBy":"fileName","coverID":10,"layout":"trip","caption":"Album"}),
         ),
     ] {
         let mut server = mockito::Server::new();
@@ -2718,16 +2715,15 @@ fn export_only_album_metadata_preserves_common_commands_and_favorites() {
         metadata["favorited"] = json!(false);
         fs::write(&sidecar, serde_json::to_vec(&metadata).unwrap()).unwrap();
         let output = home.run(&["photos", "export", root.to_str().unwrap(), "--json"]);
-        let error = failure(&output);
-        assert!(error.contains(&format!("album:5: {cause}")), "{error}");
-        assert!(!error.contains("favorite state is incomplete"), "{error}");
-        let result: Value = serde_json::from_slice(&output.stdout).unwrap();
-        assert_eq!(result["complete"], false);
-        assert_eq!(result["failures"], 1);
-        assert_eq!(result["changes"]["metadataUpdated"], 1);
+        let result: Value = serde_json::from_slice(&success(output).stdout).unwrap();
+        assert_eq!(result["complete"], true);
+        assert_eq!(result["copies"]["completed"], 2);
         assert_eq!(read_json(&sidecar)["favorited"], true);
         assert_component(&root, "Healthy", "Photo.jpg", b"original");
-        assert!(!root.join("Favorites").exists());
+        assert_eq!(
+            read_json(&root.join("Favorites/metadata.json"))["ente"][document],
+            value
+        );
         memberships.assert();
         downloaded.assert();
     }

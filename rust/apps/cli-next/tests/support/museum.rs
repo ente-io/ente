@@ -487,7 +487,10 @@ async fn exercise(origin: String) -> TestResult {
     let album_record: Value =
         serde_json::from_slice(&fs::read(shared_export.join("Monsoon 🌧/metadata.json")).unwrap())
             .unwrap();
-    assert_eq!(album_record["ente"]["visibility"], "hidden");
+    assert_eq!(
+        album_record["ente"]["sharedMagicMetadata"],
+        json!({"visibility": 2})
+    );
     let shared_sidecar = shared_export.join("Monsoon 🌧/metadata/original.jpg.json");
     let file_record: Value = serde_json::from_slice(&fs::read(&shared_sidecar).unwrap()).unwrap();
     assert!(file_record["ente"].get("visibility").is_none());

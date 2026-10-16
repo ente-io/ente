@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value, json};
 
 use ente_photos::{
-    collections::Collection,
+    collections::{Collection, Visibility},
     files::{File, Kind},
     source::{self, Documents, MetadataError},
 };
@@ -56,64 +56,41 @@ pub struct Component {
     pub hash: String,
 }
 
-pub fn album(
-    album: &Collection,
-    documents: &Documents,
-    user_id: i64,
-) -> Result<(Value, Vec<String>), MetadataError> {
-    let private: AlbumPrivate = source::optional(
-        documents.private.as_deref(),
-        "invalid album private metadata",
-    )?;
-    let shared: AlbumShared =
-        source::optional(documents.shared.as_deref(), "invalid album sharee metadata")?;
-    let public: AlbumPublic =
-        source::optional(documents.public.as_deref(), "invalid album public metadata")?;
-    let owned = album.owner_id == user_id;
-    let mut metadata = json!({
-        "albumID": album.id.to_string(), "type": album.kind.name(), "visibility": album.visibility.name(),
-    });
-    optional(
-        &mut metadata,
-        "displayOrder",
-        if owned { private.order } else { shared.order },
-    );
-    optional(
-        &mut metadata,
-        "muted",
-        (!owned).then_some(shared.mute).flatten(),
-    );
-    optional(
-        &mut metadata,
-        "sortOrder",
-        public
-            .asc
-            .map(|asc| if asc { "ascending" } else { "descending" }),
-    );
-    optional(&mut metadata, "description", public.caption.as_deref());
-    optional(
-        &mut metadata,
-        "coverFileID",
-        public.cover_id.map(|id| id.to_string()),
-    );
-    optional(&mut metadata, "layout", public.layout.as_deref());
-    let mut warnings = Vec::new();
-    unfamiliar(
-        documents.private.as_deref(),
-        &["visibility", "subType", "order"],
-        &mut warnings,
-    );
-    unfamiliar(
-        documents.shared.as_deref(),
-        &["visibility", "mute", "order"],
-        &mut warnings,
-    );
-    unfamiliar(
-        documents.public.as_deref(),
-        &["asc", "coverID", "layout", "caption"],
-        &mut warnings,
-    );
-    Ok((json!({"title": album.name, "ente": metadata}), warnings))
+pub fn album(album: &Collection, documents: &Documents) -> Result<Value, MetadataError> {
+    let mut metadata = json!({"albumID": album.id.to_string(), "type": album.kind.name()});
+    for (name, bytes) in [
+        ("magicMetadata", &documents.private),
+        ("pubMagicMetadata", &documents.public),
+        ("sharedMagicMetadata", &documents.shared),
+    ] {
+        if let Some(bytes) = bytes {
+            metadata[name] = json!(source::parse::<Map<String, Value>>(
+                bytes,
+                "invalid album metadata document",
+            )?);
+        }
+    }
+    Ok(json!({"title": album.name, "ente": metadata}))
+}
+
+pub fn album_categories(record: &Value) -> Result<(Option<bool>, bool), MetadataError> {
+    let metadata = &record["ente"];
+    for name in ["magicMetadata", "pubMagicMetadata", "sharedMagicMetadata"] {
+        if let Some(document) = metadata.get(name)
+            && !document.is_object()
+        {
+            return Err(MetadataError("invalid album metadata document"));
+        }
+    }
+    let private = metadata.get("magicMetadata");
+    let shared = metadata.get("sharedMagicMetadata");
+    let visibility = private.or(shared).map_or(Ok(None), |document| {
+        serde_json::from_value::<Option<u8>>(document["visibility"].clone())
+            .map_err(|_| MetadataError("invalid album visibility"))
+    })?;
+    let hidden = metadata["type"] == "defaultHidden"
+        || matches!(Visibility::from_value(visibility)?, Visibility::Hidden);
+    Ok((private.map(|_| false).or(shared.map(|_| true)), hidden))
 }
 
 pub fn file(file: &File, documents: &Documents) -> Result<Value, MetadataError> {
@@ -225,36 +202,4 @@ pub fn publish(
     record["ente"]["component"] = json!(selected.role);
     record["ente"]["components"] = json!(components);
     Ok(record)
-}
-
-#[derive(Default, Deserialize)]
-struct AlbumPrivate {
-    order: Option<i64>,
-}
-
-#[derive(Default, Deserialize)]
-struct AlbumShared {
-    order: Option<i64>,
-    mute: Option<bool>,
-}
-
-#[derive(Default, Deserialize)]
-struct AlbumPublic {
-    asc: Option<bool>,
-    #[serde(rename = "coverID")]
-    cover_id: Option<i64>,
-    layout: Option<String>,
-    caption: Option<String>,
-}
-
-fn unfamiliar(bytes: Option<&[u8]>, known: &[&str], warnings: &mut Vec<String>) {
-    if let Some(bytes) = bytes
-        && let Ok(Value::Object(fields)) = serde_json::from_slice(bytes)
-    {
-        for key in fields.keys() {
-            if !known.contains(&key.as_str()) {
-                warnings.push(key.clone());
-            }
-        }
-    }
 }

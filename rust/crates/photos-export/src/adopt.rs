@@ -249,11 +249,7 @@ fn parse_album(root: &Path, directory: &Path, retained: bool) -> Result<Option<A
         .contains(&identity["type"].as_str().unwrap_or_default()),
         "unsupported album type in {folder}"
     );
-    ensure!(
-        ["visible", "archived", "hidden"]
-            .contains(&identity["visibility"].as_str().unwrap_or_default()),
-        "unsupported album visibility in {folder}"
-    );
+    crate::metadata::album_categories(&record)?;
     ensure!(
         retained || !names::reserved(&folder, true),
         "reserved active album path {folder}"

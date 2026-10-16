@@ -119,6 +119,11 @@ fn engine_category_recovery_preserves_unknown_albums_after_database_loss() {
         count(&engine.db(), "SELECT count(*) FROM albums WHERE retained=0"),
         2
     );
+    let path = root.join("First/metadata.json");
+    let mut metadata = read_json(&path);
+    metadata["ente"]["type"] = json!("defaultHidden");
+    metadata["ente"]["magicMetadata"] = json!({"subType":1});
+    fs::write(&path, serde_json::to_vec(&metadata).unwrap()).unwrap();
     engine.catalog.albums.remove(&2);
     let mut options = engine.options(false, &[]);
     options.exclude_shared = true;
@@ -129,6 +134,21 @@ fn engine_category_recovery_preserves_unknown_albums_after_database_loss() {
     engine.catalog.albums.insert(3, "Current".into());
     engine.catalog.files.insert((3, 10), record);
     engine.database = "lost-again.db".into();
+    let mut options = engine.options(true, &[]);
+    options.exclude_shared = true;
+    options.exclude_hidden = true;
+    let export = engine.prepare(options).unwrap();
+    let result = engine.execute(export).unwrap();
+    assert!(result.complete);
+    assert_eq!(result.completed, 1);
+    let path = root.join("Second/metadata.json");
+    let mut metadata = read_json(&path);
+    metadata["ente"]
+        .as_object_mut()
+        .unwrap()
+        .remove("sharedMagicMetadata");
+    fs::write(&path, serde_json::to_vec(&metadata).unwrap()).unwrap();
+    engine.database = "unknown-owner.db".into();
     let mut options = engine.options(true, &[]);
     options.exclude_shared = true;
     options.exclude_hidden = true;
