@@ -2,7 +2,7 @@ import type { EnteFile } from "ente-media/file";
 import { fileCreationPhotoDate } from "ente-media/file-metadata";
 import i18n from "i18next";
 
-/** Capture dates, independent of the album's sort order, as on mobile. */
+// Capture dates, independent of the album's sort order, as on mobile.
 export const albumCaptureDateRangeForFiles = (
     files: EnteFile[],
     locale = i18n.language === "en" ? "en-GB" : i18n.language,

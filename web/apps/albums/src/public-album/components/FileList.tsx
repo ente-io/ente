@@ -192,7 +192,10 @@ export const FileList: React.FC<FileListProps> = ({
         const pushItemsFromSplits = (splits: FileListAnnotatedFile[][]) => {
             if (!disableGrouping) {
                 items.push({
-                    height: dateListItemHeight,
+                    height:
+                        width < 720
+                            ? mobileDateListItemHeight
+                            : dateListItemHeight,
                     type: "date",
                     groups: splits.map((s) => ({
                         date: s[0]!.timelineDateString,
@@ -1046,6 +1049,7 @@ const GridSpanListItem = styled("div")<{ span: number }>`
 `;
 
 const dateListItemHeight = 48;
+const mobileDateListItemHeight = 36;
 
 const DateListItem = styled(GridSpanListItem)(
     ({ theme }) => `
@@ -1055,9 +1059,12 @@ const DateListItem = styled(GridSpanListItem)(
     height: ${dateListItemHeight}px;
     color: ${theme.vars.palette.text.muted};
     @media (width < 720px) {
+        height: ${mobileDateListItemHeight}px;
         padding-inline: 16px;
         font-size: 12px;
+        font-weight: 500;
         line-height: 16px;
+        & .MuiCheckbox-root { padding: 4px; padding-inline-start: 0; }
     }
 `,
 );

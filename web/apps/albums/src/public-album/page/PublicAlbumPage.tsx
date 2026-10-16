@@ -1602,9 +1602,7 @@ const MobileAlbumCover = styled(Box, {
     ...theme.applyStyles("dark", { backgroundColor: "#1b1b1b" }),
 }));
 
-const MobileAlbumCoverPreviewImage = styled("img")({
-    filter: "blur(3px)",
-});
+const MobileAlbumCoverPreviewImage = styled("img")({ filter: "blur(3px)" });
 
 const MobileAlbumCoverFullImage = styled("img")({
     animation: "mobile-album-cover-reveal 420ms ease-out both",
