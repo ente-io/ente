@@ -69,6 +69,7 @@ pub struct Request {
     path: Vec<Uuid>,
     question: String,
     enabled_stable_ids: Vec<String>,
+    enabled_note_collection_ids: Vec<String>,
     cancellation_epoch: u64,
     candidates: Option<core::GroundingCandidates>,
 }
@@ -124,6 +125,11 @@ pub async fn conversation_resolve_followup(
             },
         );
     }
+    let sources = Arc::new(super::knowledge::SourceSelection::new(
+        input.enabled_stable_ids,
+        input.enabled_note_collection_ids,
+    ));
+    let searched_sources = Arc::clone(&sources);
     let work_db = db.clone();
     let check_work = check.clone();
     let (snapshot, mut selection, references) = async_runtime::spawn_blocking(move || {
@@ -140,11 +146,12 @@ pub async fn conversation_resolve_followup(
         }
         check_work()?;
         let evidence = snapshot.evidence();
-        let (searched, max_utf8_bytes) = input
+        let (mut searched, max_utf8_bytes) = input
             .candidates
             .map_or((Vec::new(), core::MAX_GROUNDING_BYTES), |fresh| {
                 (fresh.searched, fresh.max_utf8_bytes)
             });
+        searched.retain(|excerpt| searched_sources.allows(&excerpt.locator));
         let candidates = core::GroundingCandidates::new(Vec::new(), searched, max_utf8_bytes)
             .map_err(|cause| error(cause.to_string()))?;
         let references = core::direct_followup_references(
@@ -165,14 +172,7 @@ pub async fn conversation_resolve_followup(
     .map_err(|_| error("Source selection task failed"))??;
     for reference in references {
         check()?;
-        match super::knowledge::reload_for_followup(
-            &app,
-            reference,
-            input.enabled_stable_ids.clone(),
-            expected,
-        )
-        .await
-        {
+        match super::knowledge::reload_for_followup(&app, reference, &sources, expected).await {
             Ok(Some(passage)) => selection.candidates.referenced.push(passage),
             Ok(None) => {}
             Err(error) if error.name == Some("cancelled") => return Err(error),

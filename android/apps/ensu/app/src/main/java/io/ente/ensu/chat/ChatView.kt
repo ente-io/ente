@@ -75,6 +75,11 @@ fun ChatView(
     onOverflowTrim: () -> Unit,
     onOverflowCancel: () -> Unit,
     onVoiceInputJob: (Job) -> Unit,
+    onOpenPacks: () -> Unit,
+    onOpenNotes: () -> Unit,
+    hasSeenSourceIntroduction: Boolean,
+    onCompleteSourceIntroduction: () -> Unit,
+    onRetrySources: () -> Unit,
 ) {
     val density = LocalDensity.current
     val context = LocalContext.current
@@ -82,6 +87,8 @@ fun ChatView(
     val latestMessageText by rememberUpdatedState(chatState.messageText)
     val latestOnMessageChange by rememberUpdatedState(onMessageChange)
     val sessionKey = chatState.currentSessionId ?: "new-session"
+    var introductionSeen by
+        remember(hasSeenSourceIntroduction) { mutableStateOf(hasSeenSourceIntroduction) }
     val latestSessionKey by rememberUpdatedState(sessionKey)
     val unsupportedCapability =
         chatState.deviceCapability as? ChatDeviceCapability.UnsupportedLowMemory
@@ -149,8 +156,17 @@ fun ChatView(
     var focusRequestId by remember { mutableIntStateOf(0) }
     var wasDrawerOpen by remember { mutableStateOf(false) }
 
+    val showIntroduction =
+        !introductionSeen &&
+            chatState.isModelDownloaded &&
+            !chatState.isDownloading &&
+            !chatState.isGenerating &&
+            !isChatUnsupported &&
+            !isDrawerOpen
+
     val shouldAutoFocusInput =
-        chatState.isModelDownloaded &&
+        !showIntroduction &&
+            chatState.isModelDownloaded &&
             !showDownloadOnboarding &&
             !isChatUnsupported &&
             !chatState.isDownloading &&
@@ -189,6 +205,17 @@ fun ChatView(
     LaunchedEffect(sessionKey) {
         pendingVoiceSessionKey = null
         voiceController.cancelActiveVoiceInput()
+    }
+
+    if (showIntroduction) {
+        SourceIntroductionSheet(
+            onDismiss = {
+                onCompleteSourceIntroduction()
+                introductionSeen = true
+            },
+            onOpenPacks = onOpenPacks,
+            onOpenNotes = onOpenNotes,
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -279,6 +306,9 @@ fun ChatView(
                     isProcessingAttachments = chatState.isProcessingAttachments,
                     isGenerating = chatState.isGenerating,
                     isDownloading = chatState.isDownloading,
+                    sourcesReady = chatState.sourceSelectionReady,
+                    sourcesError = chatState.sourceSelectionError,
+                    onRetrySources = onRetrySources,
                     onMessageChange = onMessageChange,
                     onSend = {
                         focusManager.clearFocus()

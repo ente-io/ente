@@ -138,8 +138,14 @@ actor LlmProvider {
         return llmHasRequiredWorkReserve(availableBytes: headroom)
     }
 
-    func setChatForeground(_ active: Bool) {
+    func setChatForeground(_ active: Bool) async {
         chatForeground = active
+        if !active {
+            try? await modelLoadGate.withLock {
+                guard !chatForeground else { return }
+                unloadModel()
+            }
+        }
     }
 
     func setAppForeground(_ active: Bool) async {

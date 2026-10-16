@@ -6,6 +6,8 @@ import io.ente.ensu.llm.DownloadPhase
 data class ChatState(
     val sessions: List<ChatSession> = emptyList(),
     val currentSessionId: String? = null,
+    val sourceSelectionReady: Boolean = false,
+    val sourceSelectionError: String? = null,
     val messages: List<ChatMessage> = emptyList(),
     val streamingResponse: String = "",
     val streamingParentId: String? = null,

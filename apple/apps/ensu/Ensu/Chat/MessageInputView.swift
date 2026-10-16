@@ -27,8 +27,9 @@ struct MessageInputView: View {
     @Binding var isFocused: Bool
 
     @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var showPhotos = false
 
-    private let placeholder = "Write a message..."
+    private let placeholder = "Ask Ensu"
 
     private var canSend: Bool {
         !isGenerating && isSendEnabled
@@ -76,7 +77,7 @@ struct MessageInputView: View {
                                 attachmentFlowLayout
                             }
                         }
-                        .padding(.horizontal, EnsuSpacing.pageHorizontal)
+                        .padding(.horizontal, EnsuSpacing.sm)
                     }
 
                     if isProcessingAttachments {
@@ -88,7 +89,7 @@ struct MessageInputView: View {
                                 .foregroundStyle(EnsuColor.textMuted)
                             Spacer()
                         }
-                        .padding(.horizontal, EnsuSpacing.pageHorizontal)
+                        .padding(.horizontal, EnsuSpacing.sm)
                     }
 
                     if let voiceStatus = voiceInputState.statusText {
@@ -117,10 +118,39 @@ struct MessageInputView: View {
                                         ? EnsuColor.stopButton : EnsuColor.textMuted)
                             Spacer()
                         }
-                        .padding(.horizontal, EnsuSpacing.pageHorizontal)
+                        .padding(.horizontal, EnsuSpacing.sm)
                     }
 
-                    HStack(alignment: .bottom, spacing: EnsuSpacing.sm) {
+                    HStack(alignment: .bottom, spacing: EnsuSpacing.xs) {
+                        ActionButton(
+                            icon: "ImagePlusIcon", tooltip: "Add photos",
+                            color: EnsuColor.textPrimary, size: 32
+                        ) {
+                            dismissInput()
+                            showPhotos = true
+                        }
+                        .disabled(
+                            editingMessage != nil || !supportsImageAttachments
+                                || isGenerating || isSendPending || isDownloading
+                                || isImageAttachmentLimitReached
+                        )
+                        .photosPicker(
+                            isPresented: $showPhotos, selection: $selectedPhotoItem,
+                            matching: .images
+                        )
+                        .onChange(of: selectedPhotoItem) { item in
+                            guard let item, !isImageAttachmentLimitReached else {
+                                selectedPhotoItem = nil; return
+                            }
+                            Task {
+                                let data = try? await item.loadTransferable(type: Data.self)
+                                await MainActor.run {
+                                    if let data { onAddImage(data, nil) }
+                                    selectedPhotoItem = nil
+                                }
+                            }
+                        }
+
                         MessageTextView(
                             text: $text,
                             isFocused: $isFocused,
@@ -151,45 +181,6 @@ struct MessageInputView: View {
                             }
                         }
 
-                        if editingMessage == nil && supportsImageAttachments {
-                            let canUseAttachment =
-                                !isGenerating && !isDownloading && !isImageAttachmentLimitReached
-                            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                                Image("Upload01Icon")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: attachmentIconSize, height: attachmentIconSize)
-                                    .frame(width: 32, height: 32, alignment: .center)
-                            }
-                            .disabled(!canUseAttachment)
-                            .foregroundStyle(
-                                canUseAttachment ? EnsuColor.textPrimary : EnsuColor.textMuted
-                            )
-                            .simultaneousGesture(
-                                TapGesture().onEnded {
-                                    if canUseAttachment {
-                                        hapticTap()
-                                    }
-                                }
-                            )
-                            .onChange(of: selectedPhotoItem) { newItem in
-                                guard let newItem else { return }
-                                guard !isImageAttachmentLimitReached else {
-                                    selectedPhotoItem = nil
-                                    return
-                                }
-                                Task {
-                                    let data = try? await newItem.loadTransferable(type: Data.self)
-                                    await MainActor.run {
-                                        if let data {
-                                            onAddImage(data, nil)
-                                        }
-                                        selectedPhotoItem = nil
-                                    }
-                                }
-                            }
-                        }
-
                         if editingMessage == nil {
                             let isVoiceBusy = voiceInputState.isTranscriptionBusy
                             let canUseVoice =
@@ -216,17 +207,15 @@ struct MessageInputView: View {
                                         .resizable()
                                         .scaledToFit()
                                         .frame(
-                                            width: attachmentIconSize, height: attachmentIconSize
+                                            width: composerIconSize, height: composerIconSize
                                         )
-                                        .foregroundStyle(EnsuColor.stopButton)
+                                        .foregroundStyle(EnsuColor.sendButton)
                                         .frame(width: 32, height: 32)
                                 } else {
                                     Image("Mic02Icon")
                                         .resizable()
                                         .scaledToFit()
-                                        .frame(
-                                            width: attachmentIconSize, height: attachmentIconSize
-                                        )
+                                        .frame(width: composerIconSize, height: composerIconSize)
                                         .foregroundStyle(
                                             canUseVoice
                                                 ? EnsuColor.textPrimary : EnsuColor.textMuted
@@ -235,6 +224,7 @@ struct MessageInputView: View {
                                 }
                             }
                             .disabled(!canUseVoice)
+                            .padding(.leading, EnsuSpacing.xs)
                         }
 
                         Button {
@@ -249,37 +239,19 @@ struct MessageInputView: View {
                                 onDismissKeyboard()
                             }
                         } label: {
-                            if sendIcon == "StopIcon" {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(
-                                            width: attachmentIconSize + 6,
-                                            height: attachmentIconSize + 6)
-                                    Image(sendIcon)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(
-                                            width: attachmentIconSize - 4,
-                                            height: attachmentIconSize - 4
-                                        )
-                                        .foregroundStyle(EnsuColor.stopButton)
-                                }
+                            Image(sendIcon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: composerIconSize, height: composerIconSize)
+                                .rotationEffect(
+                                    sendIcon == "Navigation06Icon" ? .degrees(90) : .zero
+                                )
+                                .foregroundStyle(sendColor)
                                 .frame(width: 32, height: 32)
-                            } else {
-                                Image(sendIcon)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: attachmentIconSize, height: attachmentIconSize)
-                                    .rotationEffect(
-                                        sendIcon == "Navigation06Icon" ? .degrees(90) : .zero
-                                    )
-                                    .foregroundStyle(sendColor)
-                                    .frame(width: 32, height: 32)
-                            }
                         }
                         .accessibilityLabel(isGenerating ? "Stop response" : "Send message")
                         .disabled(isDownloading || (!canSend && !isGenerating))
+                        .padding(.leading, EnsuSpacing.xs)
                     }
                     .padding(.horizontal, EnsuSpacing.inputHorizontal)
                     .padding(.vertical, inputVerticalPadding)
@@ -309,7 +281,7 @@ struct MessageInputView: View {
                             .offset(y: -(32 + EnsuSpacing.sm))
                         }
                     }
-                    .padding(.horizontal, EnsuSpacing.pageHorizontal)
+                    .padding(.horizontal, EnsuSpacing.sm)
                     .padding(.bottom, bottomPadding)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -324,7 +296,12 @@ struct MessageInputView: View {
         .padding(.top, EnsuSpacing.sm)
     }
 
-    private let attachmentIconSize: CGFloat = 16
+    private let composerIconSize: CGFloat = 16
+    private func dismissInput() {
+        isFocused = false
+        hideKeyboard()
+        onDismissKeyboard()
+    }
 
     private var keyboardDismissIconName: String {
         UIImage(systemName: "keyboard.chevron.compact.down") != nil
@@ -369,9 +346,9 @@ struct MessageInputView: View {
 
     private var sendColor: Color {
         if isGenerating {
-            return EnsuColor.stopButton
+            return EnsuColor.sendButton
         }
-        return isSendEnabled ? EnsuColor.textPrimary : EnsuColor.textMuted
+        return isSendEnabled ? EnsuColor.sendButton : EnsuColor.sendButtonInactive
     }
 
     private func editBanner(for message: RenderedChatMessage) -> some View {
@@ -417,7 +394,7 @@ struct MessageInputView: View {
                 .frame(width: 3),
             alignment: .leading
         )
-        .padding(.horizontal, EnsuSpacing.pageHorizontal)
+        .padding(.horizontal, EnsuSpacing.sm)
     }
 }
 

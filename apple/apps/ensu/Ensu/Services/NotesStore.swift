@@ -25,6 +25,9 @@ final class NotesStore: ObservableObject, ModelMaintenance {
     @Published private(set) var collections: [NoteCollectionState] = []
     @Published var operationError: String?
     @Published var preview: NotesPreview?
+    @Published private(set) var disabledIDs: Set<String>
+    private let sourceDefaults: UserDefaults
+    private static let disabledDefaultsKey = "ensu.notes.disabledByDefault"
 
     private struct Pending {
         let generation: UInt64
@@ -53,10 +56,22 @@ final class NotesStore: ObservableObject, ModelMaintenance {
     private var wake: Task<Void, Never>?
     private static let emptyNotes = "No supported non-empty UTF-8 notes were found"
 
-    init(provider: LlmProvider, notesProvider: NotesProvider = NotesProvider()) {
+    init(
+        provider: LlmProvider, notesProvider: NotesProvider = NotesProvider(),
+        defaults: UserDefaults = .standard
+    ) {
+        sourceDefaults = defaults
+        disabledIDs = Set(defaults.stringArray(forKey: Self.disabledDefaultsKey) ?? [])
         modelProvider = provider
         self.provider = notesProvider
     }
+
+    func setEnabled(_ id: String, enabled: Bool) {
+        if enabled { disabledIDs.remove(id) } else { disabledIDs.insert(id) }
+        sourceDefaults.set(Array(disabledIDs), forKey: Self.disabledDefaultsKey)
+    }
+
+    var inventoryReady: Bool { loaded }
 
     func bootstrap() async {
         if let bootstrapTask {
@@ -84,6 +99,8 @@ final class NotesStore: ObservableObject, ModelMaintenance {
                     }
                 }
                 loaded = true
+                disabled = false
+                operationError = nil
                 scans.formUnion(records.map(\.id))
                 pump()
             } catch {
@@ -93,6 +110,7 @@ final class NotesStore: ObservableObject, ModelMaintenance {
         }
         bootstrapTask = task
         await task.value
+        if !loaded { bootstrapTask = nil }
     }
 
     func setForeground(_ value: Bool) {
@@ -133,7 +151,10 @@ final class NotesStore: ObservableObject, ModelMaintenance {
             do {
                 try await withMaintenanceSuspended {
                     let record = try await provider.add(url)
-                    collections.append(NoteCollectionState(id: record.id, label: record.label))
+                    if !collections.contains(where: { $0.id == record.id }) {
+                        setEnabled(record.id, enabled: true)
+                        collections.append(NoteCollectionState(id: record.id, label: record.label))
+                    }
                     operationError = nil
                     enqueue(record.id, due: .distantPast)
                 }
@@ -181,9 +202,10 @@ final class NotesStore: ObservableObject, ModelMaintenance {
         pump()
     }
 
-    func retrieve(query: [Float]) async throws -> [NotesHit] {
+    func retrieve(query: [Float], collectionIDs: Set<String>) async throws -> [NotesHit] {
         var hits: [NotesHit] = []
-        for collection in collections where collection.eligible {
+        for collection in collections
+        where collection.eligible && collectionIDs.contains(collection.id) {
             try Task.checkCancellation()
             do {
                 hits += try await provider.search(collection.id, query: query)
@@ -198,8 +220,11 @@ final class NotesStore: ObservableObject, ModelMaintenance {
         return hits
     }
 
-    func reload(_ locator: NotePassageLocator) async throws -> GroundedExcerpt? {
-        guard collections.contains(where: { $0.id == locator.collectionId && $0.eligible })
+    func reload(_ locator: NotePassageLocator, collectionIDs: Set<String>) async throws
+        -> GroundedExcerpt?
+    {
+        guard collectionIDs.contains(locator.collectionId),
+            collections.contains(where: { $0.id == locator.collectionId && $0.eligible })
         else { return nil }
         do {
             guard let hit = try await provider.reload(locator) else { return nil }
