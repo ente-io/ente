@@ -1,1 +1,1 @@
-- Added a transparency grid background for photos in viewer.
+- Added a transparency grid background for photos in viewer (@mohdsultan18).

@@ -259,7 +259,7 @@
 
 .pswp-ente .pswp__img {
     cursor: auto;
-    background-image: repeating-conic-gradient(#666666 0% 25%, #777777 0% 50%);
+    background-image: repeating-conic-gradient(#999999 0% 25%, #777777 0% 50%);
     background-size: 24px 24px;
 }
 
