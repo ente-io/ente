@@ -6,14 +6,14 @@ data class WhatsNewEntry(
 )
 
 object WhatsNewContent {
-    const val VERSION: Int = 3
+    const val VERSION: Int = 4
 
     val entries: List<WhatsNewEntry> =
         listOf(
             WhatsNewEntry(
-                title = "Keep the conversation going",
+                title = "Faster on all devices",
                 description =
-                    "Ensu now keeps better track of the details that matter in longer chats, so you can ask follow-up questions with less need to repeat yourself.",
+                    "Ensu is now way faster when it comes to responses. You no longer need to wait minutes for your answers.",
             )
         )
 }
