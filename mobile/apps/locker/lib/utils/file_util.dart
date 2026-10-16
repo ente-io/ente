@@ -21,6 +21,7 @@ import 'package:locker/ui/components/locker_progress_dialog.dart';
 import "package:locker/ui/pages/account_credentials_page.dart";
 import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
+import "package:locker/ui/pages/image_viewer_page.dart";
 import "package:locker/ui/pages/pdf_viewer_page.dart";
 import "package:locker/ui/pages/personal_note_page.dart";
 import "package:locker/ui/pages/physical_records_page.dart";
@@ -399,31 +400,50 @@ class FileUtil {
       file,
       fallbackPath: localFile.path,
     ).toLowerCase();
-    if (context == null ||
-        !context.mounted ||
-        extension != ".pdf" ||
-        !FeatureFlagService.instance.pdfViewer) {
+    final flags = FeatureFlagService.instance;
+    final isPdf = extension == ".pdf" && flags.pdfViewer;
+    final isImage = _imageExtensions.contains(extension) && flags.imageViewer;
+    if (context == null || !context.mounted || !(isPdf || isImage)) {
       return _openExternally(context, localFile, file);
     }
     final canShare =
         file is! TrashFile &&
         file.ownerID == Configuration.instance.getUserID();
+    Future<void> openExternally(BuildContext viewerContext) =>
+        _openExternally(viewerContext, localFile, file);
+    Future<void> download(BuildContext viewerContext) =>
+        downloadFile(viewerContext, file);
+    Future<void> share(BuildContext viewerContext) =>
+        FileActions.shareFileLink(viewerContext, file);
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PdfViewerPage(
-          localFile: localFile,
-          fileName: file.displayName,
-          onOpenExternally: (viewerContext) =>
-              _openExternally(viewerContext, localFile, file),
-          onDownload: (viewerContext) => downloadFile(viewerContext, file),
-          onShare: canShare
-              ? (viewerContext) =>
-                    FileActions.shareFileLink(viewerContext, file)
-              : null,
-        ),
+        builder: (_) => isPdf
+            ? PdfViewerPage(
+                localFile: localFile,
+                fileName: file.displayName,
+                onOpenExternally: openExternally,
+                onDownload: download,
+                onShare: canShare ? share : null,
+              )
+            : ImageViewerPage(
+                localFile: localFile,
+                fileName: file.displayName,
+                onOpenExternally: openExternally,
+                onDownload: download,
+                onShare: canShare ? share : null,
+              ),
       ),
     );
   }
+
+  static const _imageExtensions = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".heic",
+    ".heif",
+  };
 
   static Future<void> _openExternally(
     BuildContext? context,
