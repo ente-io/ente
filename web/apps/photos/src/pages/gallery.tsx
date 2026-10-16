@@ -61,7 +61,6 @@ import exportService from "@/services/export";
 import { processPendingAlbumJoin } from "@/services/join-album";
 import {
     albumFilters,
-    filterAlbumSummaries,
     visibleAlbumFilters,
     type AlbumFilter,
 } from "@/utils/album-filters";
@@ -130,8 +129,7 @@ import {
 import {
     haveOnlySystemCollections,
     PseudoCollectionID,
-    sortCollectionSummaries,
-    type CollectionsSortBy,
+    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import {
     updateFilesLocation,
@@ -224,8 +222,9 @@ const Page: React.FC = () => {
     });
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
     const [albumSearchQuery, setAlbumSearchQuery] = useState("");
-    const [collectionsSortBy, setCollectionsSortBy] =
-        useState<CollectionsSortBy>("updation-time-desc");
+    const [overviewAlbums, setOverviewAlbums] = useState<CollectionSummary[]>(
+        [],
+    );
     const createForAlbumOverview = useRef(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [peopleSortBy, setPeopleSortBy] =
@@ -570,26 +569,6 @@ const Page: React.FC = () => {
             : barMode == "archive-albums"
               ? state.archivedCollectionSummaries
               : state.normalCollectionSummaries;
-
-    const overviewAlbums = useMemo(() => {
-        const sorted = sortCollectionSummaries(
-            [...normalCollectionSummaries.values()].filter(
-                (cs) => !cs.attributes.has("system"),
-            ),
-            collectionsSortBy,
-        ).sort((a, b) => b.sortPriority - a.sortPriority);
-        return filterAlbumSummaries(
-            sorted,
-            overviewFilter ?? albumFilter,
-            albumSearchQuery,
-        );
-    }, [
-        normalCollectionSummaries,
-        collectionsSortBy,
-        overviewFilter,
-        albumFilter,
-        albumSearchQuery,
-    ]);
 
     useEffect(() => {
         if (barMode != "albums") setAlbumSearchQuery("");
@@ -2126,7 +2105,7 @@ const Page: React.FC = () => {
                               albumSearchQuery,
                               onAlbumSearchQueryChange: setAlbumSearchQuery,
                               onShowAlbumOverview: handleShowAlbumOverview,
-                              onCollectionsSortByChange: setCollectionsSortBy,
+                              onAlbumSummariesChange: setOverviewAlbums,
                               peopleSortBy,
                               onChangePeopleSortBy: setPeopleSortBy,
                               setFileListHeader,

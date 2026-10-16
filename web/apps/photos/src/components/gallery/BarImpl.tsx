@@ -1,10 +1,6 @@
 import { CollectionsSortOptions } from "@/components/CollectionsSortOptions";
 import { PeopleSortOptions } from "@/components/PeopleSortOptions";
-import {
-    filterAlbumSummaries,
-    visibleAlbumFilters as getVisibleAlbumFilters,
-    type AlbumFilter,
-} from "@/utils/album-filters";
+import type { AlbumFilter, albumFilters } from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
 import {
     Delete02Icon,
@@ -76,6 +72,7 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     onAlbumSearchQueryChange: (query: string) => void;
     onShowAlbumOverview: (filter: AlbumFilter) => void;
     collectionSummaries: CollectionSummary[];
+    visibleAlbumFilters: typeof albumFilters;
     normalCollectionSummaries: CollectionSummaries;
     uncategorizedCollectionSummaryID: number;
     onShowCollectionSummary: (
@@ -102,6 +99,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     onAlbumSearchQueryChange,
     onShowAlbumOverview,
     collectionSummaries,
+    visibleAlbumFilters,
     normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowCollectionSummary,
@@ -149,22 +147,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     useEffect(() => {
         setExpandedAlbumFilter(albumFilter);
     }, [albumFilter]);
-    const visibleAlbumFilters = useMemo(
-        () => getVisibleAlbumFilters(collectionSummaries),
-        [collectionSummaries],
-    );
-    const visibleCollectionSummaries = useMemo(
-        () =>
-            mode == "albums"
-                ? filterAlbumSummaries(
-                      collectionSummaries,
-                      albumFilter,
-                      albumSearchQuery,
-                  )
-                : collectionSummaries,
-        [mode, collectionSummaries, albumFilter, albumSearchQuery],
-    );
-
     useEffect(() => {
         setPeopleSearchQuery("");
     }, [mode]);
@@ -189,7 +171,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             case "albums":
             case "hidden-albums":
             case "archive-albums":
-                i = visibleCollectionSummaries.findIndex(
+                i = collectionSummaries.findIndex(
                     ({ id }) => id == activeCollectionID,
                 );
                 break;
@@ -202,7 +184,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         if (i != -1) listRef.current.scrollToItem(i, "smart");
     }, [
         mode,
-        visibleCollectionSummaries,
+        collectionSummaries,
         activeCollectionID,
         matchingPeople,
         activePerson,
@@ -220,7 +202,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             mode == "archive-albums"
                 ? {
                       type: "collections",
-                      collectionSummaries: visibleCollectionSummaries,
+                      collectionSummaries: collectionSummaries,
                       indented: mode == "albums",
                       activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
@@ -233,7 +215,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                   },
         [
             mode,
-            visibleCollectionSummaries,
+            collectionSummaries,
             activeCollectionID,
             onSelectCollectionID,
             matchingPeople,
