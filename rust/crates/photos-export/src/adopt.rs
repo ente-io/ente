@@ -228,8 +228,13 @@ fn parse_album(root: &Path, directory: &Path, retained: bool) -> Result<Option<A
     };
     let folder = directory
         .strip_prefix(root)?
-        .to_str()
-        .context("claimed Ente album path is not UTF-8")?;
+        .iter()
+        .map(|part| {
+            part.to_str()
+                .context("claimed Ente album path is not UTF-8")
+        })
+        .collect::<Result<Vec<_>>>()?
+        .join("/");
     names::check(root, &format!("{folder}/metadata.json"))?;
     let id = parse_id(identity, "albumID")?;
     let name = record["title"]
@@ -254,7 +259,7 @@ fn parse_album(root: &Path, directory: &Path, retained: bool) -> Result<Option<A
         "unsupported album visibility in {folder}"
     );
     ensure!(
-        retained || !names::reserved(folder, true),
+        retained || !names::reserved(&folder, true),
         "reserved active album path {folder}"
     );
     let album = Album {
@@ -266,7 +271,7 @@ fn parse_album(root: &Path, directory: &Path, retained: bool) -> Result<Option<A
         id,
         retained,
         name,
-        path: folder.into(),
+        path: folder,
     };
     let json = JsonRecord {
         owner: album.key.clone(),
