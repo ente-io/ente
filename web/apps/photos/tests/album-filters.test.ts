@@ -4,6 +4,7 @@ import type {
 } from "ente-new/photos/services/collection-summary";
 import { describe, expect, test } from "vitest";
 import {
+    filterAlbumSummaries,
     matchesAlbumFilter,
     visibleAlbumFilters,
     type AlbumFilter,
@@ -135,5 +136,44 @@ describe("album filters shared by the dialog and sidebar", () => {
         expect(visibleAlbumFilters([]).map(({ value }) => value)).toEqual([
             "ente",
         ]);
+    });
+});
+
+describe("album overview search", () => {
+    test("combines group membership and a trimmed case-insensitive name query", () => {
+        const owned = { ...album(1), name: "Summer holiday" };
+        const shared = {
+            ...album(2, ["sharedOutgoing"]),
+            name: "SUMMER with friends",
+        };
+        const received = {
+            ...album(3, ["sharedIncoming"]),
+            name: "Summer wedding",
+        };
+        expect(
+            filterAlbumSummaries(
+                [owned, shared, received],
+                "shared",
+                "  summer  ",
+            ),
+        ).toEqual([shared]);
+        expect(
+            filterAlbumSummaries(
+                [owned, shared, received],
+                "received",
+                "SUMMER",
+            ),
+        ).toEqual([received]);
+        expect(
+            filterAlbumSummaries([owned, shared], "ente", "missing"),
+        ).toEqual([]);
+    });
+
+    test("preserves the caller's shared sort order and excludes archived albums", () => {
+        const albums = [album(3), album(1), album(2, ["archived"])];
+        expect(
+            filterAlbumSummaries(albums, "ente", "").map(({ id }) => id),
+        ).toEqual([3, 1]);
+        expect(albums.map(({ id }) => id)).toEqual([3, 1, 2]);
     });
 });

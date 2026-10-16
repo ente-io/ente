@@ -34,6 +34,7 @@ import {
     SearchResultsHeader,
     type RemotePullOpts,
 } from "@/components/gallery";
+import { AlbumsOverview } from "@/components/gallery/AlbumsOverview";
 import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import { PeopleOverview } from "@/components/gallery/PeopleOverview";
@@ -58,7 +59,14 @@ import { useIsOffline } from "@/components/utils/use-is-offline";
 import { shouldShowWhatsNew } from "@/services/changelog";
 import exportService from "@/services/export";
 import { processPendingAlbumJoin } from "@/services/join-album";
+import {
+    albumFilters,
+    filterAlbumSummaries,
+    visibleAlbumFilters,
+    type AlbumFilter,
+} from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
+import { useCollectionsSortByLocalState } from "@/utils/use-collections-sort";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Link, Typography } from "@mui/material";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
@@ -123,6 +131,7 @@ import {
 import {
     haveOnlySystemCollections,
     PseudoCollectionID,
+    sortCollectionSummaries,
 } from "ente-new/photos/services/collection-summary";
 import {
     updateFilesLocation,
@@ -213,6 +222,11 @@ const Page: React.FC = () => {
         collectionID: 0,
         context: { mode: "albums", collectionID: PseudoCollectionID.all },
     });
+    const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
+    const [albumSearchQuery, setAlbumSearchQuery] = useState("");
+    const [collectionsSortBy, setCollectionsSortBy] =
+        useCollectionsSortByLocalState("updation-time-desc");
+    const createForAlbumOverview = useRef(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [peopleSortBy, setPeopleSortBy] =
         useState<PeopleSortBy>("count-desc");
@@ -419,19 +433,29 @@ const Page: React.FC = () => {
         filteredFiles,
     } = state;
 
-    const barMode = state.view?.type ?? "albums";
+    const isAlbumOverview = state.view?.type == "album-overview";
+    const barMode =
+        state.view?.type == "album-overview"
+            ? "albums"
+            : (state.view?.type ?? "albums");
+    const overviewFilter =
+        state.view?.type == "album-overview"
+            ? state.view.albumFilter
+            : undefined;
     const quickLinkVisibility =
         barMode == "hidden-albums"
             ? ItemVisibility.hidden
             : ItemVisibility.visible;
     const activeCollectionID =
-        state.view?.type == "people"
+        state.view?.type == "people" || state.view?.type == "album-overview"
             ? undefined
             : state.view?.activeCollectionSummaryID;
     const activeCollection =
-        state.view?.type == "people" ? undefined : state.view?.activeCollection;
+        state.view?.type == "people" || state.view?.type == "album-overview"
+            ? undefined
+            : state.view?.activeCollection;
     const activeCollectionSummary =
-        state.view?.type == "people"
+        state.view?.type == "people" || state.view?.type == "album-overview"
             ? undefined
             : state.view?.activeCollectionSummary;
     const activePerson =
@@ -546,6 +570,46 @@ const Page: React.FC = () => {
             : barMode == "archive-albums"
               ? state.archivedCollectionSummaries
               : state.normalCollectionSummaries;
+
+    const overviewAlbums = useMemo(() => {
+        const sorted = sortCollectionSummaries(
+            [...normalCollectionSummaries.values()].filter(
+                (cs) => !cs.attributes.has("system"),
+            ),
+            collectionsSortBy,
+        ).sort((a, b) => b.sortPriority - a.sortPriority);
+        return filterAlbumSummaries(
+            sorted,
+            overviewFilter ?? albumFilter,
+            albumSearchQuery,
+        );
+    }, [
+        normalCollectionSummaries,
+        collectionsSortBy,
+        overviewFilter,
+        albumFilter,
+        albumSearchQuery,
+    ]);
+
+    useEffect(() => {
+        if (barMode != "albums") setAlbumSearchQuery("");
+    }, [barMode]);
+
+    useEffect(() => {
+        if (activeCollectionID == PseudoCollectionID.all)
+            setAlbumSearchQuery("");
+    }, [activeCollectionID]);
+
+    useEffect(() => {
+        if (!overviewFilter) return;
+        const available = visibleAlbumFilters([
+            ...normalCollectionSummaries.values(),
+        ]);
+        if (!available.some(({ value }) => value == overviewFilter)) {
+            setAlbumFilter("ente");
+            dispatch({ type: "showAlbumOverview", albumFilter: "ente" });
+        }
+    }, [normalCollectionSummaries, overviewFilter]);
 
     const router = useRouter();
 
@@ -666,17 +730,20 @@ const Page: React.FC = () => {
     }, [state.user, userDetails]);
 
     useEffect(() => {
-        if (typeof activeCollectionID == "undefined" || !router.isReady) {
+        if (
+            (!isAlbumOverview && typeof activeCollectionID == "undefined") ||
+            !router.isReady
+        ) {
             return;
         }
         let collectionURL = "";
-        if (activeCollectionID !== PseudoCollectionID.all) {
+        if (!isAlbumOverview && activeCollectionID !== PseudoCollectionID.all) {
             // TODO: Is this URL param even used?
             collectionURL = `?collection=${activeCollectionID}`;
         }
         const href = `/gallery${collectionURL}`;
         void router.push(href, undefined, { shallow: true });
-    }, [activeCollectionID, router.isReady]);
+    }, [activeCollectionID, isAlbumOverview, router.isReady]);
 
     useEffect(() => {
         if (!activeCollectionSummary) closeCollectionMap();
@@ -1072,6 +1139,16 @@ const Page: React.FC = () => {
                     ? await createHiddenAlbum(name)
                     : await createAlbum(name);
 
+                if (createForAlbumOverview.current) {
+                    await remotePull();
+                    showNotification({
+                        color: "primary",
+                        title: t("album_created"),
+                    });
+                    createForAlbumOverview.current = false;
+                    return;
+                }
+
                 if (pendingSingleFileAdd.current) {
                     await performCollectionOp(
                         "add",
@@ -1107,7 +1184,7 @@ const Page: React.FC = () => {
                 pendingSingleFileAdd.current = undefined;
             }
         },
-        [createOnSelectForCollectionOp, remotePull],
+        [createOnSelectForCollectionOp, remotePull, showNotification],
     );
 
     const handleFavoriteFileOp = async (
@@ -1509,12 +1586,19 @@ const Page: React.FC = () => {
         return true;
     };
 
+    const handleShowAlbumOverview = (filter: AlbumFilter) => {
+        setCleanupView(undefined);
+        clearSelection();
+        setAlbumFilter(filter);
+        dispatch({ type: "showAlbumOverview", albumFilter: filter });
+    };
+
     const handleChangeBarMode = (mode: GalleryBarMode) => {
         if (mode == "people") {
             return handleShowPeople();
         }
         setCleanupView(undefined);
-        dispatch({ type: "showAlbums" });
+        handleShowAlbumOverview("ente");
         return true;
     };
 
@@ -2038,6 +2122,12 @@ const Page: React.FC = () => {
                               activeCollection: activeCollection!,
                               activeCollectionID: activeCollectionID!,
                               activePerson,
+                              albumFilter,
+                              albumSearchQuery,
+                              onAlbumSearchQueryChange: setAlbumSearchQuery,
+                              onShowAlbumOverview: handleShowAlbumOverview,
+                              collectionsSortBy,
+                              onChangeCollectionsSortBy: setCollectionsSortBy,
                               peopleSortBy,
                               onChangePeopleSortBy: setPeopleSortBy,
                               setFileListHeader,
@@ -2129,6 +2219,23 @@ const Page: React.FC = () => {
                     <GalleryEmptyState
                         isUploadInProgress={uploadManager.isUploadInProgress()}
                         onUpload={openUploader}
+                    />
+                ) : !isInSearchMode && !isFirstLoad && isAlbumOverview ? (
+                    <AlbumsOverview
+                        albums={overviewAlbums}
+                        title={(
+                            albumFilters.find(
+                                ({ value }) => value == overviewFilter,
+                            ) ?? albumFilters[0]!
+                        ).title()}
+                        filter={overviewFilter!}
+                        hasSearchQuery={!!albumSearchQuery.trim()}
+                        onSelectAlbum={handleShowCollectionSummaryWithID}
+                        onCreateAlbum={() => {
+                            createForAlbumOverview.current = true;
+                            postCreateAlbumHidden.current = false;
+                            showAlbumNameInput();
+                        }}
                     />
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
@@ -2320,6 +2427,7 @@ const Page: React.FC = () => {
                     // Do not leak a cancelled add into the next album creation.
                     pendingSingleFileAdd.current = undefined;
                     postCreateAlbumHidden.current = false;
+                    createForAlbumOverview.current = false;
                     albumNameInputVisibilityProps.onClose();
                 }}
                 onSubmit={handleAlbumNameSubmit}
