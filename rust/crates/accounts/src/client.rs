@@ -384,11 +384,7 @@ impl AccountsClient {
             .send()
             .await?
             .error_for_code()
-            .await
-            .map_err(|error| match error.status_code() {
-                Some(400 | 401) => Error::IncorrectTotp,
-                _ => error.into(),
-            })?;
+            .await?;
         Ok(())
     }
 

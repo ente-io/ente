@@ -316,17 +316,28 @@ pub async fn totp(
             writeln!(std::io::stdout(), "{}", secret.as_str()).map_err(Into::into)
         };
     }
-    let code = Zeroizing::new(match input {
-        Some(mut input) => std::mem::take(&mut input.totp),
-        None => {
-            eprintln!("Add this secret to your authenticator: {}", secret.as_str());
-            Password::new()
-                .with_prompt("Authenticator code")
-                .interact_on(&Term::stderr())?
-        }
-    });
     let setup = TwoFactorSetup::from_secret(secret.to_string(), &account.identity.recovery_key);
-    setup.enable(&client, &code).await?;
+    if let Some(input) = input {
+        setup.enable(&client, &input.totp).await?;
+    } else {
+        eprintln!("Add this secret to your authenticator: {}", secret.as_str());
+        loop {
+            let code = Zeroizing::new(
+                Password::new()
+                    .with_prompt("Authenticator code")
+                    .interact_on(&Term::stderr())?,
+            );
+            match setup.enable(&client, &code).await {
+                Err(ente_accounts::Error::IncorrectTotp) => {
+                    eprintln!("Incorrect authenticator code. Try again.")
+                }
+                result => {
+                    result?;
+                    break;
+                }
+            }
+        }
+    }
     output::action(
         options.json,
         &json!({"enabled": true}),

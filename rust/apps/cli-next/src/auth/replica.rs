@@ -1,9 +1,10 @@
 use anyhow::{Context, Result, ensure};
 use ente_auth::{WrappedKey, record};
 use ente_core::Session;
+use uuid::Uuid;
 use zeroize::Zeroizing;
 
-use crate::core_db::{Db, OptionalExtension, params};
+use crate::core_db::{Db, OptionalExtension, params, params_from_iter};
 
 pub const SCHEMA: &str = "
     CREATE TABLE auth_sync (
@@ -113,37 +114,23 @@ pub async fn refresh(db: &mut Db, session: &Session) -> Result<()> {
         }
         ensure!(
             next > cursor,
-            "Auth diff timestamp boundary did not advance; no new backup was written"
+            "Auth diff timestamp boundary did not advance"
         );
         cursor = next;
     }
 }
 
 pub fn read_payload(db: &Db, session: &Session) -> Result<Payload> {
-    let state = sync_state(db)?.context("no local Auth data; run export online first")?;
-    ensure!(
-        state.complete,
-        "Auth refresh is incomplete; run export online first"
-    );
     let mut payload = Payload {
         bytes: Zeroizing::new(Vec::new()),
         records: 0,
         failed: 0,
         failed_ids: Vec::new(),
     };
-    let Some(wrapped) = state.key else {
-        return Ok(payload);
-    };
-    let key = ente_auth::open_key(&wrapped, &session.master_key)?;
-    db.read(|db| {
-        let mut statement =
-            db.prepare("SELECT id, encrypted_data, header FROM auth_entities ORDER BY id")?;
-        let mut rows = statement.query([])?;
-        while let Some(row) = rows.next()? {
-            let id: String = row.get(0)?;
-            let encrypted_data: Option<String> = row.get(1)?;
-            let header: Option<String> = row.get(2)?;
-            match record::uri_line(encrypted_data.as_deref(), header.as_deref(), &key) {
+    read(db, session, None, |rows| {
+        for row in rows {
+            let (id, record) = row?;
+            match record {
                 Ok(line) => {
                     payload.bytes.extend_from_slice(line.as_bytes());
                     payload.records += 1;
@@ -159,4 +146,41 @@ pub fn read_payload(db: &Db, session: &Session) -> Result<Payload> {
         Ok(())
     })?;
     Ok(payload)
+}
+
+type Record = (String, ente_auth::Result<Zeroizing<String>>);
+
+pub fn read<T>(
+    db: &Db,
+    session: &Session,
+    id: Option<Uuid>,
+    visit: impl FnOnce(&mut dyn Iterator<Item = Result<Record>>) -> Result<T>,
+) -> Result<T> {
+    let state = sync_state(db)?.context("no local Auth data; run the command online first")?;
+    ensure!(
+        state.complete,
+        "Auth refresh is incomplete; run the command online first"
+    );
+    let Some(wrapped) = state.key else {
+        return visit(&mut std::iter::empty());
+    };
+    let key = ente_auth::open_key(&wrapped, &session.master_key)?;
+    db.read(|db| {
+        let mut statement = db.prepare(if id.is_some() {
+            "SELECT id, encrypted_data, header FROM auth_entities WHERE id=?1"
+        } else {
+            "SELECT id, encrypted_data, header FROM auth_entities ORDER BY id"
+        })?;
+        let id = id.map(|id| id.to_string());
+        let rows = statement.query_map(params_from_iter(id.iter()), |row| {
+            let id = row.get(0)?;
+            let encrypted_data: Option<String> = row.get(1)?;
+            let header: Option<String> = row.get(2)?;
+            Ok((
+                id,
+                record::uri_line(encrypted_data.as_deref(), header.as_deref(), &key),
+            ))
+        })?;
+        Ok(visit(&mut rows.map(|row| row.map_err(Into::into))))
+    })?
 }

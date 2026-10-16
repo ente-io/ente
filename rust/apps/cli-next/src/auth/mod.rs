@@ -1,3 +1,4 @@
+mod code;
 mod output;
 pub mod replica;
 
@@ -18,6 +19,7 @@ use output::Destination;
 pub async fn run(command: AuthCommand, selected: Option<&str>, options: &Options) -> Result<()> {
     match command {
         AuthCommand::Api(args) => api::run(App::Auth, args, selected, options).await,
+        AuthCommand::Code { command } => code::run(command, selected, options).await,
         AuthCommand::Export(args) => export(args, selected, options).await,
         AuthCommand::Decrypt { input, output } => {
             let destination = Destination::file(output.unwrap_or_else(|| PathBuf::from("-")));

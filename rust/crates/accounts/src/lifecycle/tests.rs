@@ -64,13 +64,41 @@ async fn setup_two_factor_encrypts_secret_with_recovery_key() {
     let result = TwoFactorSetup::start(&client, &master_key, &key_attributes)
         .await
         .unwrap();
-    result.enable(&client, "123123").await.unwrap();
+    assert!(matches!(
+        result.enable(&client, "invalid").await,
+        Err(Error::IncorrectTotp)
+    ));
+    result
+        .enable(
+            &client,
+            &ente_test_support::account_fixture::current_totp(&result.secret_code).unwrap(),
+        )
+        .await
+        .unwrap();
 
     assert_eq!(result.secret_code, "JBSWY3DPEHPK3PXP");
     assert_eq!(result.recovery_key, recovery_key);
 
     setup.assert_async().await;
     enable.assert_async().await;
+}
+
+#[test]
+fn enrollment_verifies_the_supplied_secret_and_window() {
+    let secret = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ";
+    for code in ["755224", "287082", "359152"] {
+        verify_totp(secret, code, 59).unwrap();
+    }
+    for code in ["969429", "28708", "0287082", "invalid"] {
+        assert!(matches!(
+            verify_totp(secret, code, 59),
+            Err(Error::IncorrectTotp)
+        ));
+    }
+    assert!(matches!(
+        verify_totp("MY", "287082", 59),
+        Err(Error::IncorrectTotp)
+    ));
 }
 
 #[tokio::test]

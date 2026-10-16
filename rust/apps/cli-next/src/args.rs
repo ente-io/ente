@@ -14,8 +14,10 @@ use serde::{Deserialize, Serialize};
   ente-cli-next photos album list
   ente-cli-next photos file list --album <ID>
   ente-cli-next photos export <DIR>
-Auth backups:
+Auth:
   ente-cli-next account login --app auth
+  ente-cli-next auth code list
+  ente-cli-next auth code view <CODE>
   ente-cli-next auth export <DIR>
 Paste:
   ente-cli-next paste create --input <PATH>
@@ -229,6 +231,11 @@ With --json: {\"text\": \"...\"}. --raw affects plain terminal output only. Requ
 pub enum AuthCommand {
     #[command(about = "Make an authenticated API request", after_help = API_HELP)]
     Api(ApiArgs),
+    #[command(about = "Find saved Auth codes and show their current values")]
+    Code {
+        #[command(subcommand)]
+        command: CodeCommand,
+    },
     #[command(about = "Export your Auth codes; encrypted by default")]
     #[command(
         after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
@@ -253,6 +260,54 @@ Writes readable URI lines to stdout, or a new --output file. --json only formats
         )]
         output: Option<PathBuf>,
     },
+}
+
+#[derive(Subcommand)]
+pub enum CodeCommand {
+    #[command(about = "List saved codes without their secrets or current values")]
+    #[command(
+        after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
+Search matches an ID, a displayed name, or words across issuer and account name, ignoring case.
+Codes in Trash are not listed.
+JSON fields: id, name, issuer, accountName, type (totp, hotp or steam)."
+    )]
+    List {
+        #[arg(
+            long,
+            value_name = "TEXT",
+            help = "Find codes by ID, displayed name or search words",
+            value_parser = nonempty_query
+        )]
+        search: Option<String>,
+        #[command(flatten)]
+        list: ListArgs,
+    },
+    #[command(about = "Show one current TOTP or Steam code and its expiry")]
+    #[command(
+        after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
+An ID selects exactly. Otherwise match a name shown by list, or search words across issuer and account name.
+Matching ignores case, and every search word must occur in either field.
+Several matches fail and list candidates; narrow the search or use an ID.
+Quote queries containing spaces.
+A code in Trash must be restored in Ente Auth first.
+JSON fields: id, name, issuer, accountName, type, otp, validUntil (UTC).
+HOTP values are not supported yet."
+    )]
+    View {
+        #[arg(
+            help = "Code ID, displayed name or search words",
+            value_parser = nonempty_query
+        )]
+        code: String,
+    },
+}
+
+fn nonempty_query(query: &str) -> Result<String, String> {
+    if query.trim().is_empty() {
+        Err("supply a code ID or search text".into())
+    } else {
+        Ok(query.to_owned())
+    }
 }
 
 #[derive(Args)]

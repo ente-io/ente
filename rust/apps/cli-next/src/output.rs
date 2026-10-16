@@ -1,6 +1,6 @@
-use std::io::Write;
+use std::{fmt::Display, io::Write};
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use chrono::{DateTime, SecondsFormat};
 use dialoguer::console::{Alignment, measure_text_width, pad_str};
 use ente_accounts::admin::{Subscription, User, UserDetails};
@@ -16,6 +16,8 @@ use crate::{
     args::{App, DEFAULT_LIST_LIMIT, ListArgs},
     vault::Account,
 };
+
+pub const MAX_CANDIDATES: usize = 10;
 
 #[derive(Serialize)]
 pub struct AccountView<'a> {
@@ -406,7 +408,36 @@ fn write_fields(fields: &[(&str, String)]) -> Result<()> {
     Ok(())
 }
 
-fn list<T: Serialize, const N: usize>(
+pub fn select<T, I: Display>(
+    mut matches: Vec<T>,
+    selector: &str,
+    kind: &str,
+    hint: &str,
+    identity: impl Fn(&T) -> (I, String),
+) -> Result<T> {
+    if matches.len() > 1 {
+        let candidates = matches
+            .iter()
+            .take(MAX_CANDIDATES)
+            .map(|item| {
+                let (id, name) = identity(item);
+                format!("  {id}  {name:?}")
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        let more = if matches.len() > MAX_CANDIDATES {
+            "\nMore matches omitted."
+        } else {
+            ""
+        };
+        bail!("{kind} {selector:?} is ambiguous:\n{candidates}{more}\n{hint}");
+    }
+    matches
+        .pop()
+        .with_context(|| format!("no {kind} matches {selector:?}"))
+}
+
+pub(crate) fn list<T: Serialize, const N: usize>(
     mut items: impl Iterator<Item = Result<T>>,
     args: &ListArgs,
     as_json: bool,

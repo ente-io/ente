@@ -2,10 +2,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use ente_accounts::auth::{SrpSession, generate_srp_setup_with_login_key};
 use ente_accounts::{AccountsClient, AccountsClientConfig, KeyAttributes, models::SetupSrpRequest};
-use ente_core::b64;
 use ente_core::crypto::{Key, SecretKey, kdf, secretbox};
-use hmac::{Hmac, KeyInit, Mac};
-use sha1::Sha1;
+use ente_core::{b64, otp};
 use uuid::Uuid;
 
 use crate::{HARDCODED_OTT, HARDCODED_OTT_EMAIL_SUFFIX, TestResult};
@@ -116,37 +114,13 @@ pub async fn create_account(endpoint: &str, email_prefix: &str) -> TestResult<Te
 }
 
 pub fn current_totp(secret: &str) -> TestResult<String> {
-    let key = decode_base32(secret)?;
-    let counter = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs() / 30;
-    let mut mac = Hmac::<Sha1>::new_from_slice(&key)?;
-    mac.update(&counter.to_be_bytes());
-    let digest = mac.finalize().into_bytes();
-    let offset = (digest[19] & 0x0f) as usize;
-    let binary = ((digest[offset] as u32 & 0x7f) << 24)
-        | ((digest[offset + 1] as u32) << 16)
-        | ((digest[offset + 2] as u32) << 8)
-        | digest[offset + 3] as u32;
-    Ok(format!("{:06}", binary % 1_000_000))
-}
-
-fn decode_base32(secret: &str) -> TestResult<Vec<u8>> {
-    let mut output = Vec::new();
-    let mut buffer = 0u32;
-    let mut bits = 0u8;
-    for ch in secret.chars().filter(|ch| *ch != '=') {
-        let value = match ch {
-            'A'..='Z' => ch as u8 - b'A',
-            '2'..='7' => ch as u8 - b'2' + 26,
-            _ => return Err(format!("invalid base32 character: {ch}").into()),
-        } as u32;
-        buffer = (buffer << 5) | value;
-        bits += 5;
-        while bits >= 8 {
-            bits -= 8;
-            output.push(((buffer >> bits) & 0xff) as u8);
-        }
-    }
-    Ok(output)
+    Ok(otp::totp(
+        &otp::decode_secret(secret)?,
+        SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs(),
+        30,
+        6,
+        otp::Algorithm::Sha1,
+    )?)
 }
 
 fn pad_left(data: &[u8], len: usize) -> Vec<u8> {
