@@ -445,6 +445,33 @@ async fn exercise(origin: String) -> TestResult {
     let shared_file = home.json(&["photos", "file", "view", &file_id]);
     assert_eq!(shared_file["ownerId"], alice_id);
     let shared_export = output_dir.path().join("shared-export");
+    for flag in ["--exclude-shared", "--exclude-hidden"] {
+        let result = home.json(&[
+            "photos",
+            "export",
+            shared_export.to_str().unwrap(),
+            "--album",
+            "Monsoon 🌧",
+            flag,
+        ]);
+        assert_eq!(result["copies"]["expected"], 0);
+        assert!(!shared_export.join("Monsoon 🌧").exists());
+    }
+    let owned_export = output_dir.path().join("owned-export");
+    assert_eq!(
+        home.json(&[
+            "photos",
+            "export",
+            owned_export.to_str().unwrap(),
+            "--account",
+            "work",
+            "--album",
+            "Monsoon 🌧",
+            "--exclude-shared",
+            "--exclude-hidden"
+        ])["copies"]["completed"],
+        1
+    );
     home.json(&[
         "photos",
         "export",
@@ -503,6 +530,14 @@ async fn exercise(origin: String) -> TestResult {
         .unwrap()
         .error_for_status()
         .unwrap();
+    for flag in ["--exclude-shared", "--exclude-hidden"] {
+        let result = adopted.json(&["photos", "export", shared_export.to_str().unwrap(), flag]);
+        assert_eq!(result["changes"]["retained"], 0);
+        assert_eq!(
+            fs::read(shared_export.join("Monsoon 🌧/original.jpg")).unwrap(),
+            original
+        );
+    }
     adopted.json(&[
         "photos",
         "export",

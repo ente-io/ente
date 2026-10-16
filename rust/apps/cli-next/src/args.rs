@@ -315,7 +315,20 @@ pub struct PhotosExportArgs {
     pub exclude_album: Vec<String>,
     #[arg(
         long,
-        help = "Take over an old CLI/Desktop export or reconnect an existing one"
+        help = "Exclude albums owned by other accounts",
+        long_help = "Exclude albums owned by other accounts, including albums explicitly included with --album. Albums you own remain included when shared with others. Excluded output is left alone. Removed albums use their last known category; an unknown category is reported as incomplete. Applies only to this invocation."
+    )]
+    pub exclude_shared: bool,
+    #[arg(
+        long,
+        help = "Exclude hidden albums, including the Hidden album",
+        long_help = "Exclude albums hidden for this account, including the Hidden album and albums explicitly included with --album. Archived albums and individually hidden files in included albums remain included. Excluded output is left alone. Removed albums use their last known category; an unknown category is reported as incomplete. Applies only to this invocation."
+    )]
+    pub exclude_hidden: bool,
+    #[arg(
+        long,
+        help = "Take over an old CLI/Desktop export or reconnect an existing one",
+        long_help = "Take over an old CLI/Desktop export or reconnect an existing one. Taking over an old export requires filters to select exactly its recorded albums. Reconnecting a native export associates the whole export, then applies filters to this invocation."
     )]
     pub adopt: bool,
     #[arg(

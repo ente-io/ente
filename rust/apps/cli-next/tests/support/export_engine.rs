@@ -10,6 +10,8 @@ pub(super) struct Catalog {
     pub user: i64,
     pub key: Key,
     pub albums: BTreeMap<i64, String>,
+    pub categories: BTreeMap<i64, (bool, bool)>,
+    pub unreadable_album: Option<i64>,
     pub files: BTreeMap<(i64, i64), Value>,
     pub failed_album: Option<i64>,
 }
@@ -17,6 +19,7 @@ pub(super) struct Catalog {
 impl Catalog {
     fn album(&self, id: i64) -> CollectionEntry {
         let name = self.albums[&id].clone();
+        let (shared, hidden) = self.categories.get(&id).copied().unwrap_or_default();
         CollectionEntry {
             id,
             name: Some(name.clone()),
@@ -27,8 +30,12 @@ impl Catalog {
                     key: Key::from_bytes(*self.key.as_bytes()),
                     name,
                     kind: collections::Kind::Album,
-                    visibility: collections::Visibility::Visible,
-                    owner_id: self.user,
+                    visibility: if hidden {
+                        collections::Visibility::Hidden
+                    } else {
+                        collections::Visibility::Visible
+                    },
+                    owner_id: self.user + i64::from(shared),
                     updated_at_micros: 100,
                 },
                 Documents {
@@ -62,7 +69,13 @@ impl Source for Catalog {
             .keys()
             .copied()
             .filter(|id| *id > after)
-            .map(|id| self.album(id))
+            .map(|id| {
+                let mut entry = self.album(id);
+                if self.unreadable_album == Some(id) {
+                    entry.value = Err(anyhow::anyhow!("fixture unreadable album"));
+                }
+                entry
+            })
             .collect())
     }
     async fn refresh_album(&mut self, _: &Session, id: i64) -> Result<CollectionEntry> {
@@ -124,6 +137,8 @@ impl Engine {
         Options {
             albums: albums.iter().map(|s| (*s).into()).collect(),
             exclude_albums: Vec::new(),
+            exclude_shared: false,
+            exclude_hidden: false,
             adopt,
             hardlinks: self.hardlinks,
             jobs: std::num::NonZeroUsize::new(1).unwrap(),

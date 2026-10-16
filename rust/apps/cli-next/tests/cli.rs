@@ -33,6 +33,8 @@ fn completion_prints_scripts_without_storage() {
             "account",
             "paste",
             "hardlinks",
+            "exclude-shared",
+            "exclude-hidden",
             "completion",
             "admin",
             "update-subscription",
@@ -66,6 +68,8 @@ fn reads_do_not_initialize_storage() {
         assert!(help.contains(&format!("=== {binary} photos file download ===")));
         assert!(help.contains(&format!("=== {binary} vault key generate ===")));
         assert!(help.contains("--hardlinks"));
+        assert!(help.contains("--exclude-shared"));
+        assert!(help.contains("--exclude-hidden"));
         assert!(help.contains("Linked files share contents, timestamps and permissions."));
         assert!(help.contains(&format!("=== {binary} paste create ===")));
         assert!(help.contains(&format!("=== {binary} paste consume ===")));

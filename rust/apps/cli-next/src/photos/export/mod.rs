@@ -41,6 +41,8 @@ async fn run_locked(args: PhotosExportArgs, selected: Option<&str>, as_json: boo
         ente_photos_export::Options {
             albums: args.album,
             exclude_albums: args.exclude_album,
+            exclude_shared: args.exclude_shared,
+            exclude_hidden: args.exclude_hidden,
             adopt: args.adopt,
             hardlinks: args.hardlinks,
             jobs: args.jobs,

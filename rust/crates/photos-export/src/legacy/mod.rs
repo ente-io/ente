@@ -62,10 +62,18 @@ impl Failures {
     }
 }
 
-pub fn scope(store: &Store, options: &Options, index: Option<&Index>) -> Result<()> {
-    let explicit = !options.albums.is_empty() || !options.exclude_albums.is_empty();
+pub fn scope(
+    store: &Store,
+    options: &Options,
+    index: Option<&Index>,
+    report: &(dyn Fn(&str) + Sync),
+) -> Result<()> {
+    let explicit = !options.albums.is_empty()
+        || !options.exclude_albums.is_empty()
+        || options.exclude_shared
+        || options.exclude_hidden;
     if explicit {
-        crate::select(store, options)?;
+        crate::select(store, options, index, report)?;
     }
     let (db, table) = match index {
         Some(index) => (&index.db, "adoption_album"),
