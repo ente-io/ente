@@ -1,6 +1,7 @@
 import type {
     SearchOption,
     SearchSuggestion,
+    SidebarActionID,
 } from "ente-new/photos/services/search/types";
 import { describe, expect, test } from "vitest";
 import {
@@ -8,7 +9,7 @@ import {
     matchesSearchCategory,
     searchCategories,
     searchCategoryCounts,
-    searchCategoryForType,
+    searchCategoryForSuggestion,
     type SearchCategory,
 } from "../src/services/search/search-categories";
 
@@ -28,19 +29,29 @@ const categoriesByType = {
     clip: "photos",
 } satisfies Record<SearchSuggestion["type"], Exclude<SearchCategory, "all">>;
 
+const sidebarOption = (actionID: SidebarActionID): SearchOption => ({
+    suggestion: { type: "sidebarAction", actionID, label: actionID, path: [] },
+    fileCount: 0,
+    previewFiles: [],
+});
+
 const option = (type: SearchSuggestion["type"], fileCount = 100) =>
-    ({
-        suggestion: { type, label: type },
-        fileCount,
-        previewFiles: [],
-    }) as SearchOption;
+    type === "sidebarAction"
+        ? sidebarOption("utility.preferences")
+        : ({
+              suggestion: { type, label: type },
+              fileCount,
+              previewFiles: [],
+          } as SearchOption);
 
 describe("search categories", () => {
     test.each(Object.entries(categoriesByType))(
         "maps %s to %s",
         (type, category) => {
             expect(
-                searchCategoryForType(type as SearchSuggestion["type"]),
+                searchCategoryForSuggestion(
+                    option(type as SearchSuggestion["type"]).suggestion,
+                ),
             ).toBe(category);
         },
     );
@@ -115,4 +126,53 @@ test("groups results in tab order while preserving rows within each category", (
     ]);
     expect(options).toEqual([firstPhoto, setting, place, secondPhoto, album]);
     expect(groupSearchOptions([])).toEqual([]);
+});
+
+const albumShortcuts = [
+    "shortcuts.uncategorized",
+    "shortcuts.archive",
+    "shortcuts.hidden",
+    "shortcuts.trash",
+] as const;
+
+test.each(albumShortcuts)("categorizes %s as Albums", (actionID) => {
+    const shortcut = sidebarOption(actionID);
+    expect(searchCategoryForSuggestion(shortcut.suggestion)).toBe("albums");
+    expect(matchesSearchCategory(shortcut, "albums")).toBe(true);
+    expect(matchesSearchCategory(shortcut, "settings")).toBe(false);
+    expect(matchesSearchCategory(shortcut, "all")).toBe(true);
+});
+
+test("counts and groups album shortcuts alongside collections", () => {
+    const shortcuts = albumShortcuts.map(sidebarOption);
+    const album = option("collection");
+    const settings = [
+        sidebarOption("utility.preferences"),
+        sidebarOption("account.subscription"),
+        sidebarOption("preferences.theme"),
+        sidebarOption("help.support"),
+        sidebarOption("freeUpSpace.largeFiles"),
+    ];
+    const options = [
+        settings[0]!,
+        shortcuts[0]!,
+        album,
+        ...shortcuts.slice(1),
+        ...settings.slice(1),
+    ];
+    expect(searchCategoryCounts(options)).toEqual({
+        all: 10,
+        albums: 5,
+        people: 0,
+        places: 0,
+        photos: 0,
+        settings: 5,
+    });
+    expect(groupSearchOptions(options)).toEqual([
+        {
+            label: "albums",
+            options: [shortcuts[0], album, ...shortcuts.slice(1)],
+        },
+        { label: "settings", options: settings },
+    ]);
 });

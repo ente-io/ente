@@ -4,10 +4,11 @@ import {
     matchesSearchCategory,
     searchCategories,
     searchCategoryCounts,
+    searchCategoryForSuggestion,
     type SearchCategory,
 } from "@/services/search/search-categories";
 import { sidebarSearchOptionsForString } from "@/services/search/sidebar-search-registry";
-import { Search01Icon } from "@hugeicons/core-free-icons";
+import { Album02Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
@@ -659,7 +660,12 @@ const iconForOption = (option: SearchOption | undefined) => {
         case "cameraModel":
             return <CameraIcon />;
         case "sidebarAction":
-            return <SettingsIcon />;
+            return searchCategoryForSuggestion(option.suggestion) ===
+                "albums" ? (
+                <HugeiconsIcon icon={Album02Icon} />
+            ) : (
+                <SettingsIcon />
+            );
         case "location":
         case "city":
             return <LocationIcon />;
@@ -906,6 +912,8 @@ const labelForOption = (option: SearchOption) => {
             return t("people");
 
         case "sidebarAction":
-            return t("settings");
+            return searchCategoryForSuggestion(option.suggestion) === "albums"
+                ? t("album")
+                : t("settings");
     }
 };

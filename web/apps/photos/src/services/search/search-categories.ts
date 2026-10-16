@@ -14,10 +14,10 @@ export const searchCategories = [
 
 export type SearchCategory = (typeof searchCategories)[number];
 
-export const searchCategoryForType = (
-    type: SearchSuggestion["type"],
+export const searchCategoryForSuggestion = (
+    suggestion: SearchSuggestion,
 ): Exclude<SearchCategory, "all"> => {
-    switch (type) {
+    switch (suggestion.type) {
         case "collection":
             return "albums";
         case "person":
@@ -26,7 +26,15 @@ export const searchCategoryForType = (
         case "city":
             return "places";
         case "sidebarAction":
-            return "settings";
+            switch (suggestion.actionID) {
+                case "shortcuts.uncategorized":
+                case "shortcuts.archive":
+                case "shortcuts.hidden":
+                case "shortcuts.trash":
+                    return "albums";
+                default:
+                    return "settings";
+            }
         default:
             return "photos";
     }
@@ -37,7 +45,7 @@ export const matchesSearchCategory = (
     category: SearchCategory,
 ) =>
     category === "all" ||
-    searchCategoryForType(option.suggestion.type) === category;
+    searchCategoryForSuggestion(option.suggestion) === category;
 
 export const searchCategoryCounts = (options: readonly SearchOption[]) => {
     const counts = {
@@ -49,7 +57,7 @@ export const searchCategoryCounts = (options: readonly SearchOption[]) => {
         settings: 0,
     };
     for (const option of options)
-        counts[searchCategoryForType(option.suggestion.type)]++;
+        counts[searchCategoryForSuggestion(option.suggestion)]++;
     return counts;
 };
 
