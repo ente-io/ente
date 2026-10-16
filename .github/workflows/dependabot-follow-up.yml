@@ -112,6 +112,7 @@ jobs:
               env:
                   GH_TOKEN: ${{ github.token }}
                   CARGO_HOME: /tmp/cargo
+                  XDG_CACHE_HOME: /tmp/cache
               with:
                   codex-home: ${{ runner.temp }}/codex
                   prompt-file: ${{ runner.temp }}/prompt.md
