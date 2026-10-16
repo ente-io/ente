@@ -46,7 +46,12 @@ jobs:
                               comments.some(comment => comment.user.login !== "ente-agent[bot]" && comment.created_at > since &&
                                   (["OWNER", "MEMBER", "COLLABORATOR"].includes(comment.author_association) ||
                                       comment.user.login === "github-actions[bot]"))) {
-                              selected.push({ number: pr.number, head: pr.head.sha, reviewOnly: pr.head.ref.startsWith("dependabot/github_actions/") });
+                              const commits = await github.paginate(github.rest.pulls.listCommits, {
+                                  ...repo, pull_number: pr.number, per_page: 100,
+                              });
+                              const reviewOnly = pr.head.ref.startsWith("dependabot/github_actions/") ||
+                                  commits.filter(commit => commit.author?.login === "ente-agent[bot]").length >= 3;
+                              selected.push({ number: pr.number, head: pr.head.sha, reviewOnly });
                           }
                       }
                       return selected;
@@ -169,6 +174,7 @@ jobs:
               env:
                   PR_NUMBER: ${{ matrix.pr.number }}
                   PR_HEAD: ${{ matrix.pr.head }}
+                  REVIEW_ONLY: ${{ matrix.pr.reviewOnly }}
               with:
                   github-token: ${{ steps.app.outputs.token }}
                   script: |
@@ -183,7 +189,7 @@ jobs:
                           !/^dependabot\/(cargo|github_actions)\//.test(pr.head.ref)) return;
                       const result = `${process.env.RUNNER_TEMP}/result`;
                       const report = readFileSync(`${result}/report.md`, "utf8").trim();
-                      if (pr.head.ref.startsWith("dependabot/cargo/") && readFileSync(`${result}/changes.patch`).length) {
+                      if (process.env.REVIEW_ONLY === "false" && readFileSync(`${result}/changes.patch`).length) {
                           git("apply", "--index", `${result}/changes.patch`);
                           const { data: bot } = await github.rest.users.getByUsername({ username: "ente-agent[bot]" });
                           git("config", "user.name", bot.login);

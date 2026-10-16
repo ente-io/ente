@@ -12,4 +12,4 @@ Validate the changes with relevant builds and tests. Where existing coverage is 
 
 Keep the updates we can confidently accept. Leave out those requiring a human decision or further work, without blocking independent updates.
 
-The harness commits your changes and posts your final response as a PR comment. For each dependency, explain why it was accepted or withheld, link the supporting release notes or source, and state what was verified. If there’s nothing new to do or report, return an empty final response; the harness skips empty responses.
+The harness commits your changes and posts your final response as a PR comment. In your first report, for each dependency, explain why it was accepted or withheld, link the supporting release notes or source, and state what was verified. On follow-ups, report only new findings, changes, or validation results. If there’s nothing new to do or report, return an empty final response; the harness skips empty responses.
