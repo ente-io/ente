@@ -295,7 +295,7 @@
 					"$(SRCROOT)/Ensu/Generated",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 0.1.22;
+				MARKETING_VERSION = 0.1.23;
 				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/ensuFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -321,7 +321,7 @@
 					"$(SRCROOT)/Ensu/Generated",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 0.1.22;
+				MARKETING_VERSION = 0.1.23;
 				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Ensu/Generated/ensuFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -490,7 +490,7 @@
 					"$(inherited)",
 					"$(TARGET_TEMP_DIR)/ensu_rust",
 				);
-				MARKETING_VERSION = 0.1.22;
+				MARKETING_VERSION = 0.1.23;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -544,7 +544,7 @@
 					"$(inherited)",
 					"$(TARGET_TEMP_DIR)/ensu_rust",
 				);
-				MARKETING_VERSION = 0.1.22;
+				MARKETING_VERSION = 0.1.23;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
