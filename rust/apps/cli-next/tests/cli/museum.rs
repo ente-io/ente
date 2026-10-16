@@ -270,9 +270,28 @@ async fn exercise(origin: String) -> TestResult {
     )
     .await;
     let original = b"original photo bytes from Museum";
-    let file_id = upload_file(&origin, &alice, album, &key, original, Some(0))
-        .await
-        .to_string();
+    let (file_id, file_key) = upload_fixture(
+        &origin,
+        &alice,
+        album,
+        &key,
+        original,
+        json!({"title":"original.jpg","fileType":0,"creationTime":1_700_000_000_000_000i64,"modificationTime":1_700_000_000_000_000i64}),
+    )
+    .await;
+    let private = blob::encrypt_json(&json!({"visibility": 0}), &file_key)?;
+    reqwest::Client::new()
+        .put(format!("{origin}/files/magic-metadata"))
+        .header("x-auth-token", b64::encode_url_safe(&alice.secrets.token))
+        .header("x-client-package", "io.ente.photos")
+        .json(&json!({"metadataList":[{"id":file_id,"magicMetadata":{
+            "version":1,"count":1,"data":b64::encode(&private.encrypted_data),
+            "header":b64::encode(private.decryption_header.as_bytes())
+        }}]}))
+        .send()
+        .await?
+        .error_for_status()?;
+    let file_id = file_id.to_string();
 
     let home = TestHome::new();
     login(&home, "photos", &alice_email, &["--host", &origin]);
@@ -484,6 +503,13 @@ async fn exercise(origin: String) -> TestResult {
         "--album",
         "Monsoon 🌧",
     ]);
+    let owned_record: Value = serde_json::from_slice(&fs::read(
+        owned_export.join("Monsoon 🌧/metadata/original.jpg.json"),
+    )?)?;
+    assert_eq!(
+        owned_record["ente"]["magicMetadata"],
+        json!({"visibility": 0})
+    );
     let album_record: Value =
         serde_json::from_slice(&fs::read(shared_export.join("Monsoon 🌧/metadata.json")).unwrap())
             .unwrap();
@@ -493,7 +519,7 @@ async fn exercise(origin: String) -> TestResult {
     );
     let shared_sidecar = shared_export.join("Monsoon 🌧/metadata/original.jpg.json");
     let file_record: Value = serde_json::from_slice(&fs::read(&shared_sidecar).unwrap()).unwrap();
-    assert!(file_record["ente"].get("visibility").is_none());
+    assert!(file_record["ente"].get("magicMetadata").is_none());
     let adopted = TestHome::new();
     adopted.write_vault(&home.read_vault());
     let shared_original = shared_export.join("Monsoon 🌧/original.jpg");

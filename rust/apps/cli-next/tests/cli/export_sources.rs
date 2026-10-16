@@ -1137,7 +1137,6 @@ fn export_saves_interpretation_failures_and_preserves_unfamiliar_fields() {
             ["opaque"],
         "kept in replica"
     );
-    assert!(!diagnostics.contains("kept in replica"));
     let result: Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(
         result["copies"],

@@ -1019,31 +1019,22 @@ fn failure(output: &Output) -> String {
     String::from_utf8_lossy(&output.stderr).into_owned()
 }
 
-#[path = "support/account.rs"]
 mod account;
 
-#[path = "support/admin.rs"]
 mod admin;
 
 #[cfg(feature = "museum")]
-#[path = "support/admin_museum.rs"]
 mod admin_museum;
 
-#[path = "support/auth.rs"]
 mod auth;
 
-#[path = "support/export_process.rs"]
 mod export_process;
 
-#[path = "support/export_sources.rs"]
 mod export_sources;
 
-#[path = "support/files.rs"]
 mod files;
 
 #[cfg(feature = "museum")]
-#[path = "support/museum.rs"]
 mod museum;
 
-#[path = "support/paste.rs"]
 mod paste;
