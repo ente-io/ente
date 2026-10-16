@@ -34,7 +34,7 @@ jobs:
                       const selected = [];
                       for (const pr of await github.paginate(github.rest.pulls.list, { ...repo, state: "open", base: "main", per_page: 100 })) {
                           if (pr.draft || pr.user.login !== "dependabot[bot]" ||
-                              pr.head.repo?.full_name !== `${repo.owner}/${repo.repo}` || !pr.head.ref.startsWith("dependabot/cargo/")) continue;
+                              pr.head.repo?.full_name !== `${repo.owner}/${repo.repo}` || !/^dependabot\/(cargo|github_actions)\//.test(pr.head.ref)) continue;
                           const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
                               ...repo, workflow_id: "ci.yml", event: "pull_request", head_sha: pr.head.sha, per_page: 100,
                           });
@@ -46,7 +46,7 @@ jobs:
                               comments.some(comment => comment.user.login !== "ente-agent[bot]" && comment.created_at > since &&
                                   (["OWNER", "MEMBER", "COLLABORATOR"].includes(comment.author_association) ||
                                       comment.user.login === "github-actions[bot]"))) {
-                              selected.push({ number: pr.number, head: pr.head.sha });
+                              selected.push({ number: pr.number, head: pr.head.sha, reviewOnly: pr.head.ref.startsWith("dependabot/github_actions/") });
                           }
                       }
                       return selected;
@@ -75,6 +75,9 @@ jobs:
                   mkdir -p "$RUNNER_TEMP/codex" "$RUNNER_TEMP/result"
                   touch "$RUNNER_TEMP/result/report.md"
                   { printf '%s\n\n' "$PR_URL"; cat .github/scripts/dependencies.md; } > "$RUNNER_TEMP/prompt.md"
+                  if [[ "${{ matrix.pr.reviewOnly }}" == true ]]; then
+                      printf '\n%s\n' "Review only. Do not edit files; recommend any required fixes in your final report." >> "$RUNNER_TEMP/prompt.md"
+                  fi
                   cat > "$RUNNER_TEMP/codex/config.toml" <<EOF
                   project_doc_max_bytes = 0
                   [skills]
@@ -88,9 +91,10 @@ jobs:
                   [permissions.update.network]
                   enabled = true
                   EOF
-                  sudo rm -rf /usr/share/dotnet
-                  sudo apt-get update
-                  sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libvulkan-dev glslc libdbus-1-dev dbus gnome-keyring libglib2.0-bin
+
+            - name: Setup Linux for Rust
+              if: ${{ !matrix.pr.reviewOnly }}
+              uses: ./.github/actions/setup-rust-linux
 
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
@@ -176,10 +180,10 @@ jobs:
                       const { data: pr } = await github.rest.pulls.get({ ...repo, pull_number: Number(process.env.PR_NUMBER) });
                       if (pr.state !== "open" || pr.draft || pr.head.sha !== head || pr.base.ref !== "main" ||
                           pr.user.login !== "dependabot[bot]" || pr.head.repo?.full_name !== `${repo.owner}/${repo.repo}` ||
-                          !pr.head.ref.startsWith("dependabot/cargo/")) return;
+                          !/^dependabot\/(cargo|github_actions)\//.test(pr.head.ref)) return;
                       const result = `${process.env.RUNNER_TEMP}/result`;
                       const report = readFileSync(`${result}/report.md`, "utf8").trim();
-                      if (readFileSync(`${result}/changes.patch`).length) {
+                      if (pr.head.ref.startsWith("dependabot/cargo/") && readFileSync(`${result}/changes.patch`).length) {
                           git("apply", "--index", `${result}/changes.patch`);
                           const { data: bot } = await github.rest.users.getByUsername({ username: "ente-agent[bot]" });
                           git("config", "user.name", bot.login);
