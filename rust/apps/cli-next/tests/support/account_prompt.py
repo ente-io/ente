@@ -1,11 +1,13 @@
 import base64
 import hashlib
 import hmac
+import json
 import os
 import pty
 import re
 import select
 import signal
+import subprocess
 import sys
 import termios
 import time
@@ -80,5 +82,24 @@ def enable(expect, send):
     send(f"{code:06d}".encode(), True)
 
 
+def login(expect, send, email_mfa):
+    expect(b"Password:")
+    send(b"wrong-password", True)
+    if email_mfa:
+        expect(b"Email verification code:")
+        send(b"123456", True)
+    expect(b"Incorrect password. Try again.")
+    expect(b"Password:")
+    send(b"disposable-password", True)
+    expect(b"Logged in")
+
+
 run([binary, "account", "create", "--host", origin], create)
+for email_mfa in [True, False]:
+    subprocess.run(
+        [binary, "photos", "api", "/users/email-mfa", "--method", "PUT", "--body", "-"],
+        input=json.dumps({"isEnabled": email_mfa}).encode(), check=True, capture_output=True,
+    )
+    run([binary, "account", "login", "--app", "photos", "--email", email],
+        lambda expect, send: login(expect, send, email_mfa))
 run([binary, "account", "totp", "enable"], enable)

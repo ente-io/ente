@@ -390,7 +390,7 @@ fn creation_enrollment_and_login_across_processes() -> ente_test_support::TestRe
 
 #[cfg(all(unix, feature = "museum"))]
 #[test]
-fn interactive_creation_and_enrollment() -> ente_test_support::TestResult {
+fn interactive_creation_password_retry_and_enrollment() -> ente_test_support::TestResult {
     ente_test_support::Museum::run_async(|origin| async move {
         let home = TestHome::new();
         let email = format!("cli-interactive-{}@example.org", uuid::Uuid::new_v4());

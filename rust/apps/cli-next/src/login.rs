@@ -9,7 +9,7 @@ use ente_accounts::{
 use ente_core::http::{Api, ApiConfig, Http};
 use serde::Deserialize;
 use uuid::Uuid;
-use zeroize::{ZeroizeOnDrop, Zeroizing};
+use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
 use crate::{
     api,
@@ -262,7 +262,19 @@ async fn authenticate(
                     Err(error) => return Err(error.into()),
                 }
             },
-            LoginStep::Password => flow.submit_password(client, &credentials.password).await?,
+            LoginStep::Password => loop {
+                match flow.submit_password(client, &credentials.password).await {
+                    Ok(next) => break next,
+                    Err(ente_accounts::Error::IncorrectPassword) if interactive => {
+                        eprintln!("Incorrect password. Try again.");
+                        credentials.password.zeroize();
+                        credentials.password = Password::new()
+                            .with_prompt("Password")
+                            .interact_on(&Term::stderr())?;
+                    }
+                    Err(error) => return Err(error.into()),
+                }
+            },
             LoginStep::SecondFactor { totp, passkey } => {
                 let use_passkey = match (totp, passkey) {
                     (true, true) if interactive => {
