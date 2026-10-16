@@ -11,7 +11,10 @@ import {
 } from "@mui/material";
 import { ItemCard } from "ente-new/photos/components/Tiles";
 import { UnstyledButton } from "ente-new/photos/components/UnstyledButton";
-import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
+import type {
+    CollectionSummary,
+    CollectionsSortBy,
+} from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import { useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -21,7 +24,8 @@ interface AlbumsOverviewProps {
     albums: CollectionSummary[];
     title: string;
     filter: AlbumFilter;
-    hasSearchQuery: boolean;
+    searchQuery: string;
+    sortBy: CollectionsSortBy;
     onSelectAlbum: (id: number) => void;
     onCreateAlbum: () => void;
 }
@@ -30,7 +34,8 @@ export const AlbumsOverview = ({
     albums,
     title,
     filter,
-    hasSearchQuery,
+    searchQuery,
+    sortBy,
     onSelectAlbum,
     onCreateAlbum,
 }: AlbumsOverviewProps) => {
@@ -49,7 +54,8 @@ export const AlbumsOverview = ({
         observer.observe(listElement);
         return () => observer.disconnect();
     }, [listElement]);
-    const showCreate = filter == "ente" && !hasSearchQuery;
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    const showCreate = filter == "ente" && !normalizedSearchQuery;
     const tileWidth = compact ? 104 : 140;
     const columnGap = compact ? 12 : 22;
     const rowGap = compact ? 16 : 24;
@@ -63,7 +69,7 @@ export const AlbumsOverview = ({
 
     useEffect(() => {
         listRef.current?.scrollTo(0);
-    }, [filter, albums]);
+    }, [filter, normalizedSearchQuery, sortBy]);
 
     return (
         <Stack

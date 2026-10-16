@@ -55,7 +55,10 @@ export type GalleryBarAndListHeaderProps = Omit<
     | "onShowAllAlbums"
     | "onShowAllPeople"
 > & {
-    onAlbumSummariesChange: (albums: CollectionSummary[]) => void;
+    onAlbumSummariesChange: (
+        albums: CollectionSummary[],
+        sortBy: CollectionsSortBy,
+    ) => void;
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
     allPeople: Person[];
@@ -189,8 +192,16 @@ export const GalleryBarAndListHeader: React.FC<
 
     useEffect(() => {
         if (mode == "albums")
-            onAlbumSummariesChange(visibleCollectionSummaries);
-    }, [mode, visibleCollectionSummaries, onAlbumSummariesChange]);
+            onAlbumSummariesChange(
+                visibleCollectionSummaries,
+                collectionsSortBy,
+            );
+    }, [
+        mode,
+        visibleCollectionSummaries,
+        collectionsSortBy,
+        onAlbumSummariesChange,
+    ]);
 
     const sortedPeople = useMemo(
         () => sortPeople(people, peopleSortBy),

@@ -129,6 +129,7 @@ import {
 import {
     haveOnlySystemCollections,
     PseudoCollectionID,
+    type CollectionsSortBy,
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import {
@@ -223,6 +224,15 @@ const Page: React.FC = () => {
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
     const [albumSearchQuery, setAlbumSearchQuery] = useState("");
     const [overviewAlbums, setOverviewAlbums] = useState<CollectionSummary[]>(
+        [],
+    );
+    const [overviewSortBy, setOverviewSortBy] =
+        useState<CollectionsSortBy>("updation-time-desc");
+    const handleAlbumSummariesChange = useCallback(
+        (albums: CollectionSummary[], sortBy: CollectionsSortBy) => {
+            setOverviewAlbums(albums);
+            setOverviewSortBy(sortBy);
+        },
         [],
     );
     const [blockingLoad, setBlockingLoad] = useState(false);
@@ -2100,7 +2110,8 @@ const Page: React.FC = () => {
                               albumSearchQuery,
                               onAlbumSearchQueryChange: setAlbumSearchQuery,
                               onShowAlbumOverview: handleShowAlbumOverview,
-                              onAlbumSummariesChange: setOverviewAlbums,
+                              onAlbumSummariesChange:
+                                  handleAlbumSummariesChange,
                               peopleSortBy,
                               onChangePeopleSortBy: setPeopleSortBy,
                               setFileListHeader,
@@ -2202,7 +2213,8 @@ const Page: React.FC = () => {
                             ) ?? albumFilters[0]!
                         ).title()}
                         filter={overviewFilter!}
-                        hasSearchQuery={!!albumSearchQuery.trim()}
+                        searchQuery={albumSearchQuery}
+                        sortBy={overviewSortBy}
                         onSelectAlbum={handleShowCollectionSummaryWithID}
                         onCreateAlbum={() => {
                             setPostCreateAlbumOp(undefined);
