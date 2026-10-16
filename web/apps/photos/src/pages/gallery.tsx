@@ -225,7 +225,6 @@ const Page: React.FC = () => {
     const [overviewAlbums, setOverviewAlbums] = useState<CollectionSummary[]>(
         [],
     );
-    const createForAlbumOverview = useRef(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [peopleSortBy, setPeopleSortBy] =
         useState<PeopleSortBy>("count-desc");
@@ -292,9 +291,9 @@ const Page: React.FC = () => {
     );
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
-    const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
-        undefined,
-    );
+    const [postCreateAlbumOp, setPostCreateAlbumOp] = useState<
+        CollectionOp | undefined
+    >(undefined);
     const postCreateAlbumHidden = useRef(false);
     const [pendingSidebarAction, setPendingSidebarAction] = useState<
         SidebarActionID | undefined
@@ -1114,16 +1113,6 @@ const Page: React.FC = () => {
                     ? await createHiddenAlbum(name)
                     : await createAlbum(name);
 
-                if (createForAlbumOverview.current) {
-                    await remotePull();
-                    showNotification({
-                        color: "primary",
-                        title: t("album_created"),
-                    });
-                    createForAlbumOverview.current = false;
-                    return;
-                }
-
                 if (pendingSingleFileAdd.current) {
                     await performCollectionOp(
                         "add",
@@ -1148,18 +1137,28 @@ const Page: React.FC = () => {
                     return;
                 }
 
-                setPostCreateAlbumOp((postCreateAlbumOp) => {
-                    createOnSelectForCollectionOp(postCreateAlbumOp!)(
-                        collection,
-                    );
-                    return undefined;
-                });
+                if (postCreateAlbumOp === undefined) {
+                    await remotePull();
+                    showNotification({
+                        color: "primary",
+                        title: t("album_created"),
+                    });
+                    return;
+                }
+
+                createOnSelectForCollectionOp(postCreateAlbumOp)(collection);
+                setPostCreateAlbumOp(undefined);
                 postCreateAlbumHidden.current = false;
             } finally {
                 pendingSingleFileAdd.current = undefined;
             }
         },
-        [createOnSelectForCollectionOp, remotePull, showNotification],
+        [
+            createOnSelectForCollectionOp,
+            postCreateAlbumOp,
+            remotePull,
+            showNotification,
+        ],
     );
 
     const handleFavoriteFileOp = async (
@@ -2206,7 +2205,7 @@ const Page: React.FC = () => {
                         hasSearchQuery={!!albumSearchQuery.trim()}
                         onSelectAlbum={handleShowCollectionSummaryWithID}
                         onCreateAlbum={() => {
-                            createForAlbumOverview.current = true;
+                            setPostCreateAlbumOp(undefined);
                             postCreateAlbumHidden.current = false;
                             showAlbumNameInput();
                         }}
@@ -2401,7 +2400,7 @@ const Page: React.FC = () => {
                     // Do not leak a cancelled add into the next album creation.
                     pendingSingleFileAdd.current = undefined;
                     postCreateAlbumHidden.current = false;
-                    createForAlbumOverview.current = false;
+                    setPostCreateAlbumOp(undefined);
                     albumNameInputVisibilityProps.onClose();
                 }}
                 onSubmit={handleAlbumNameSubmit}
