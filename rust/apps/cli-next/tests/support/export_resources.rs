@@ -75,10 +75,7 @@ fn export_recovers_after_real_disk_full() -> TestResult {
             export(&home, &root, &[]);
             assert_eq!(fs::metadata(root.join("Album/After.bin"))?.len(), size);
             assert_eq!(
-                b64::encode(&hash::hash_reader(
-                    &mut fs::File::open(root.join("Album/After.bin"))?,
-                    Some(64)
-                )?),
+                digest(fs::File::open(root.join("Album/After.bin"))?)?,
                 repeat_hash(31, size)
             );
             assert_eq!(
@@ -144,8 +141,7 @@ fn export_large_original_and_live_photo_with_bounded_memory() -> TestResult {
             ] {
                 let path = root.join("Large").join(name);
                 assert_eq!(fs::metadata(&path)?.len(), length);
-                let actual = b64::encode(&hash::hash_reader(&mut fs::File::open(path)?, Some(64))?);
-                assert_eq!(actual, expected);
+                assert_eq!(digest(fs::File::open(path)?)?, expected);
             }
             let reads = museum.object_store().reads();
             assert_eq!(reads, 2);
@@ -219,7 +215,20 @@ fn export_many_records_unchanged_resource_check() -> TestResult {
 }
 
 fn repeat_hash(byte: u8, size: u64) -> String {
-    b64::encode(&hash::hash_reader(&mut std::io::repeat(byte).take(size), Some(64)).unwrap())
+    digest(std::io::repeat(byte).take(size)).unwrap()
+}
+
+fn digest(mut reader: impl Read) -> TestResult<String> {
+    let mut state = hash::HashState::new(Some(64), None)?;
+    let mut bytes = vec![0u8; 64 * 1024];
+    loop {
+        let read = reader.read(&mut bytes)?;
+        if read == 0 {
+            break;
+        }
+        state.update(&bytes[..read]);
+    }
+    Ok(b64::encode(&state.finalize()))
 }
 
 fn measure(home: &TestHome, root: &Path, label: &str) -> TestResult<Value> {
