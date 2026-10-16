@@ -866,7 +866,7 @@ fn export_keeps_live_names_occupied_until_every_component_and_sidecar_moves() {
         assert_eq!(fs::read(root.join("Live").join(name)).unwrap(), bytes);
         assert_eq!(
             read_json(&root.join(format!("Live/metadata/{name}.json")))["title"],
-            name
+            "RENAMED.heic"
         );
     }
     downloaded.assert();
@@ -2610,7 +2610,7 @@ fn export_reports_progress_and_keeps_account_storage_while_workers_run() {
 }
 
 #[test]
-fn export_only_file_metadata_does_not_break_common_commands() {
+fn export_preserves_native_fields_unused_by_common_commands() {
     let mut server = mockito::Server::new();
     let home = TestHome::new();
     home.seed(&server.url());
@@ -2622,23 +2622,16 @@ fn export_only_file_metadata_does_not_break_common_commands() {
             collection(2, "Healthy", &key)
         ]),
     );
-    let (file, _) = source(10, &key, b"unused", "Original.jpg");
-    let file = public(
-        file,
-        &key,
-        json!({
-            "editedName":"Export metadata.jpg", "cameraMake":17, "cameraModel":17,
-            "uploaderName":17, "mediaType":"broken", "mvi":"broken"
-        }),
-        10,
-    );
+    let (file, bytes) = source(10, &key, b"original", "Original.jpg");
+    let native = json!({
+        "editedName":"Export metadata.jpg", "cameraMake":17, "cameraModel":17,
+        "uploaderName":17, "mediaType":"broken", "mvi":"broken"
+    });
+    let file = public(file, &key, native.clone(), 10);
+    let file_download = download(&mut server, 10, &bytes, 1);
     let (healthy, bytes) = source(20, &key, b"healthy", "Healthy.jpg");
     page(&mut server, 1, 0, json!([file]), false).create();
     page(&mut server, 2, 0, json!([healthy]), false).create();
-    let no_download = server
-        .mock("GET", "/files/download/v3/10")
-        .expect(0)
-        .create();
     let downloaded = download(&mut server, 20, &bytes, 1);
     let listed = home.json(&["photos", "file", "list"]);
     assert_eq!(listed.as_array().unwrap().len(), 2);
@@ -2648,41 +2641,33 @@ fn export_only_file_metadata_does_not_break_common_commands() {
     let destination = tempfile::tempdir().unwrap();
     let root = destination.path().join("photos");
     let output = home.run(&["photos", "export", root.to_str().unwrap(), "--json"]);
-    let error = failure(&output);
-    assert!(
-        error.contains("file:1:10: invalid public file metadata"),
-        "{error}"
-    );
-    let result: Value = serde_json::from_slice(&output.stdout).unwrap();
-    assert_eq!(result["complete"], false);
+    let result: Value = serde_json::from_slice(&success(output).stdout).unwrap();
     assert_eq!(
         result["copies"],
-        json!({"expected":2,"completed":1,"pending":1})
+        json!({"expected":2,"completed":2,"pending":0})
     );
-    assert_eq!(result["failures"], 1);
     assert_component(&root, "Healthy", "Healthy.jpg", b"healthy");
-    assert!(!root.join("Affected/Export metadata.jpg").exists());
-    no_download.assert();
+    assert_component(&root, "Affected", "Export metadata.jpg", b"original");
+    let sidecar = root.join("Affected/metadata/Export metadata.jpg.json");
+    assert_eq!(read_json(&sidecar)["ente"]["pubMagicMetadata"], native);
+    file_download.assert();
     downloaded.assert();
 }
 
 #[test]
-fn export_only_album_metadata_preserves_common_commands_and_favorites() {
-    for (document, value, cause) in [
+fn export_preserves_album_documents_and_favorites() {
+    for (document, value) in [
         (
             "magicMetadata",
-            json!({"order":"broken"}),
-            "invalid album private metadata",
+            json!({"order":7,"extension":{"pinned":true}}),
         ),
         (
             "sharedMagicMetadata",
-            json!({"order":"broken","mute":"broken"}),
-            "invalid album sharee metadata",
+            json!({"order":9,"mute":true,"extension":{"pinned":false}}),
         ),
         (
             "pubMagicMetadata",
-            json!({"asc":"broken","coverID":"broken","layout":17,"caption":17}),
-            "invalid album public metadata",
+            json!({"asc":true,"sortBy":"fileName","coverID":10,"layout":"trip","caption":"Album"}),
         ),
     ] {
         let mut server = mockito::Server::new();
@@ -2730,16 +2715,15 @@ fn export_only_album_metadata_preserves_common_commands_and_favorites() {
         metadata["favorited"] = json!(false);
         fs::write(&sidecar, serde_json::to_vec(&metadata).unwrap()).unwrap();
         let output = home.run(&["photos", "export", root.to_str().unwrap(), "--json"]);
-        let error = failure(&output);
-        assert!(error.contains(&format!("album:5: {cause}")), "{error}");
-        assert!(!error.contains("favorite state is incomplete"), "{error}");
-        let result: Value = serde_json::from_slice(&output.stdout).unwrap();
-        assert_eq!(result["complete"], false);
-        assert_eq!(result["failures"], 1);
-        assert_eq!(result["changes"]["metadataUpdated"], 1);
+        let result: Value = serde_json::from_slice(&success(output).stdout).unwrap();
+        assert_eq!(result["complete"], true);
+        assert_eq!(result["copies"]["completed"], 2);
         assert_eq!(read_json(&sidecar)["favorited"], true);
         assert_component(&root, "Healthy", "Photo.jpg", b"original");
-        assert!(!root.join("Favorites").exists());
+        assert_eq!(
+            read_json(&root.join("Favorites/metadata.json"))["ente"][document],
+            value
+        );
         memberships.assert();
         downloaded.assert();
     }

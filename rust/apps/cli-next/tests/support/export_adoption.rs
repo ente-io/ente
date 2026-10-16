@@ -251,7 +251,7 @@ fn adoption_reuses_captured_producer_shapes_and_converts_current_names() {
                 "Family"
             );
             assert_eq!(
-                read_json(&root.join("Family(1)/metadata/Photo(1).jpg.json"))["ente"]["name"],
+                read_json(&root.join("Family(1)/metadata/Photo(1).jpg.json"))["title"],
                 "Photo.jpg"
             );
             let before = snapshot(&root);
@@ -307,7 +307,7 @@ fn adoption_preserves_desktop_paths_for_names_changed_before_takeover() {
         "Renamed"
     );
     assert_eq!(
-        read_json(&root.join("Family/metadata/Photo.jpg.json"))["ente"]["name"],
+        read_json(&root.join("Family/metadata/Photo.jpg.json"))["title"],
         "Portrait.jpg"
     );
     let before = snapshot(&root);

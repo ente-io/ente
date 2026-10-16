@@ -929,11 +929,6 @@ impl Run<'_> {
             };
             after = id;
             let source: AlbumSource = serde_json::from_str(&source)?;
-            for field in &source.warnings {
-                (self.report)(&format!(
-                    "album {id}: unfamiliar metadata field {field:?}; exporting supported fields"
-                ));
-            }
             if let Err(error) = self.maintain_album(id, &source.name, false, source.metadata) {
                 self.block(id, None, error)?;
             }
@@ -1083,12 +1078,6 @@ impl Run<'_> {
                     store::lock(self.store)?.clear_pending(&pending.owner)?;
                 }
             }
-        }
-        for field in &file.warnings {
-            (self.report)(&format!(
-                "file {}: unfamiliar metadata field {field:?}; exporting supported fields",
-                file.id
-            ));
         }
         after = 0;
         loop {
@@ -1527,7 +1516,6 @@ impl Run<'_> {
                 name: format!("metadata/{}.json", component.location.name),
             };
             let mut value = previous.value;
-            value["title"] = Value::String(component.location.name.clone());
             let mut layout: Vec<crate::metadata::Component> =
                 serde_json::from_value(value["ente"]["components"].clone())?;
             for identity in &mut layout {

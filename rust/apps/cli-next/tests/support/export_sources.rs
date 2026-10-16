@@ -1098,7 +1098,7 @@ fn export_page_and_recognized_failures_roll_back_together_on_storage_failure() {
 }
 
 #[test]
-fn export_saves_interpretation_failures_and_omits_unknown_field_values_from_diagnostics() {
+fn export_saves_interpretation_failures_and_preserves_unfamiliar_fields() {
     let mut server = mockito::Server::new();
     let home = TestHome::new();
     home.seed(&server.url());
@@ -1131,7 +1131,12 @@ fn export_saves_interpretation_failures_and_omits_unknown_field_values_from_diag
     let root = destination.path().join("photos");
     let output = home.run(&["photos", "export", root.to_str().unwrap(), "--json"]);
     let diagnostics = failure(&output);
-    assert!(diagnostics.contains("newAdditiveField"));
+    assert!(diagnostics.contains("unsupported visibility"));
+    assert_eq!(
+        read_json(&root.join("First/metadata/Good.jpg.json"))["ente"]["metadata"]["newAdditiveField"]
+            ["opaque"],
+        "kept in replica"
+    );
     assert!(!diagnostics.contains("kept in replica"));
     let result: Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(

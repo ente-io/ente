@@ -249,11 +249,7 @@ fn parse_album(root: &Path, directory: &Path, retained: bool) -> Result<Option<A
         .contains(&identity["type"].as_str().unwrap_or_default()),
         "unsupported album type in {folder}"
     );
-    ensure!(
-        ["visible", "archived", "hidden"]
-            .contains(&identity["visibility"].as_str().unwrap_or_default()),
-        "unsupported album visibility in {folder}"
-    );
+    crate::metadata::album_categories(&record)?;
     ensure!(
         retained || !names::reserved(&folder, true),
         "reserved active album path {folder}"
@@ -298,14 +294,13 @@ fn parse_sidecar(
         return Ok(None);
     };
     let file = parse_id(identity, "fileID")?;
-    let display_name = identity["name"]
+    let display_name = record["title"]
         .as_str()
-        .context("file record has no name")?;
-    chrono::DateTime::parse_from_rfc3339(
-        identity["creationTime"]
-            .as_str()
-            .context("file record has no creationTime")?,
-    )?;
+        .context("file record has no title")?;
+    ensure!(
+        identity["metadata"].is_object(),
+        "file record has no metadata"
+    );
     let kind = identity["type"]
         .as_str()
         .context("file record has no type")?;
@@ -351,8 +346,7 @@ fn parse_sidecar(
         .position(|c| c.role == own)
         .context("undeclared sidecar component")?;
     ensure!(
-        record["title"].as_str() == Some(components[index].path.as_str())
-            && name == format!("{}.json", components[index].path),
+        name == format!("{}.json", components[index].path),
         "contradictory sidecar location for file {file}"
     );
     let kind = if kind == "livePhoto" {
@@ -374,7 +368,6 @@ fn parse_sidecar(
         .map(|component| {
             let actual = component.role == own;
             let mut value = record.clone();
-            value["title"] = Value::String(component.path.clone());
             value["ente"]["component"] = serde_json::to_value(&component.role)?;
             json.push(JsonRecord {
                 owner: placement.id.clone(),

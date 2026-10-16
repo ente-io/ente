@@ -20,6 +20,9 @@ impl Catalog {
     fn album(&self, id: i64) -> CollectionEntry {
         let name = self.albums[&id].clone();
         let (shared, hidden) = self.categories.get(&id).copied().unwrap_or_default();
+        let metadata = self.categories.get(&id).map(|_| {
+            serde_json::to_vec(&json!({"visibility": if hidden { 2 } else { 0 }})).unwrap()
+        });
         CollectionEntry {
             id,
             owner_id: self.user + i64::from(shared),
@@ -42,8 +45,8 @@ impl Catalog {
                 Documents {
                     original: Vec::new(),
                     public: None,
-                    private: None,
-                    shared: None,
+                    private: if shared { None } else { metadata.clone() },
+                    shared: if shared { metadata } else { None },
                 },
             )),
         }
