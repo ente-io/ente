@@ -139,6 +139,8 @@ func (repo *CommentsRepository) GetByID(ctx context.Context, id string) (*social
 	return comment, nil
 }
 
+// Never split a version across pages. Results may be smaller or larger than
+// limit so every row with the boundary timestamp stays together.
 func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64, since int64, limit int, fileID *int64) ([]socialentity.Comment, bool, error) {
 	query := `
         SELECT id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
@@ -153,9 +155,44 @@ func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64,
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
 	}
-	defer rows.Close()
+	comments, err := scanComments(rows)
+	if err != nil {
+		return nil, false, stacktrace.Propagate(err, "")
+	}
+	if len(comments) <= limit {
+		return comments, false, nil
+	}
+	lastUpdatedAt := comments[limit].UpdatedAt
+	for len(comments) > 0 && comments[len(comments)-1].UpdatedAt == lastUpdatedAt {
+		comments = comments[:len(comments)-1]
+	}
+	if len(comments) > 0 {
+		return comments, true, nil
+	}
+	comments, err = repo.getCommentsWithUpdatedAt(ctx, collectionID, lastUpdatedAt, fileID)
+	if err != nil {
+		return nil, false, stacktrace.Propagate(err, "")
+	}
+	return comments, true, nil
+}
 
-	comments := make([]socialentity.Comment, 0, limit+1)
+func (repo *CommentsRepository) getCommentsWithUpdatedAt(ctx context.Context, collectionID int64, updatedAt int64, fileID *int64) ([]socialentity.Comment, error) {
+	rows, err := repo.DB.QueryContext(ctx, `
+        SELECT id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
+        FROM comments
+        WHERE collection_id = $1
+          AND updated_at = $2
+          AND ($3::BIGINT IS NULL OR file_id IS NOT DISTINCT FROM $3::BIGINT)
+    `, collectionID, updatedAt, fileID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return scanComments(rows)
+}
+
+func scanComments(rows *sql.Rows) ([]socialentity.Comment, error) {
+	defer rows.Close()
+	comments := make([]socialentity.Comment, 0)
 	for rows.Next() {
 		var (
 			file    sql.NullInt64
@@ -178,7 +215,7 @@ func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64,
 			&comment.CreatedAt,
 			&comment.UpdatedAt,
 		); err != nil {
-			return nil, false, stacktrace.Propagate(err, "")
+			return nil, stacktrace.Propagate(err, "")
 		}
 		if file.Valid {
 			comment.FileID = &file.Int64
@@ -198,15 +235,9 @@ func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64,
 		comments = append(comments, comment)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, false, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-
-	hasMore := false
-	if len(comments) > limit {
-		hasMore = true
-		comments = comments[:limit]
-	}
-	return comments, hasMore, nil
+	return comments, nil
 }
 
 func (repo *CommentsRepository) CountActiveByCollection(ctx context.Context, collectionIDs []int64) (map[int64]int64, error) {

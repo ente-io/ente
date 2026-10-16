@@ -130,6 +130,8 @@ func (repo *ReactionsRepository) GetByID(ctx context.Context, id string) (*socia
 	return reaction, nil
 }
 
+// Never split a version across pages. Results may be smaller or larger than
+// limit so every row with the boundary timestamp stays together.
 func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64, since int64, limit int, fileID *int64, commentID *string) ([]socialentity.Reaction, bool, error) {
 	query := `
         SELECT id, collection_id, file_id, comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
@@ -149,9 +151,49 @@ func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
 	}
-	defer rows.Close()
+	reactions, err := scanReactions(rows)
+	if err != nil {
+		return nil, false, stacktrace.Propagate(err, "")
+	}
+	if len(reactions) <= limit {
+		return reactions, false, nil
+	}
+	lastUpdatedAt := reactions[limit].UpdatedAt
+	for len(reactions) > 0 && reactions[len(reactions)-1].UpdatedAt == lastUpdatedAt {
+		reactions = reactions[:len(reactions)-1]
+	}
+	if len(reactions) > 0 {
+		return reactions, true, nil
+	}
+	reactions, err = repo.getReactionsWithUpdatedAt(ctx, collectionID, lastUpdatedAt, fileID, commentID)
+	if err != nil {
+		return nil, false, stacktrace.Propagate(err, "")
+	}
+	return reactions, true, nil
+}
 
-	reactions := make([]socialentity.Reaction, 0, limit+1)
+func (repo *ReactionsRepository) getReactionsWithUpdatedAt(ctx context.Context, collectionID int64, updatedAt int64, fileID *int64, commentID *string) ([]socialentity.Reaction, error) {
+	rows, err := repo.DB.QueryContext(ctx, `
+        SELECT id, collection_id, file_id, comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
+        FROM reactions
+        WHERE collection_id = $1
+          AND updated_at = $2
+          AND (
+              $3::bigint IS NULL
+              OR file_id = $3::bigint
+              OR comment_id IN (SELECT id FROM comments WHERE collection_id = $1 AND file_id = $3::bigint)
+          )
+          AND ($4::text IS NULL OR comment_id = $4::text)
+    `, collectionID, updatedAt, fileID, commentID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return scanReactions(rows)
+}
+
+func scanReactions(rows *sql.Rows) ([]socialentity.Reaction, error) {
+	defer rows.Close()
+	reactions := make([]socialentity.Reaction, 0)
 	for rows.Next() {
 		var (
 			file     sql.NullInt64
@@ -174,7 +216,7 @@ func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64
 			&reaction.CreatedAt,
 			&reaction.UpdatedAt,
 		); err != nil {
-			return nil, false, stacktrace.Propagate(err, "")
+			return nil, stacktrace.Propagate(err, "")
 		}
 		if file.Valid {
 			reaction.FileID = &file.Int64
@@ -194,15 +236,9 @@ func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64
 		reactions = append(reactions, reaction)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, false, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-
-	hasMore := false
-	if len(reactions) > limit {
-		hasMore = true
-		reactions = reactions[:limit]
-	}
-	return reactions, hasMore, nil
+	return reactions, nil
 }
 
 func (repo *ReactionsRepository) CountActiveByCollection(ctx context.Context, collectionIDs []int64) (map[int64]int64, error) {
