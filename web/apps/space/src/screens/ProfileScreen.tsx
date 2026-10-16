@@ -856,11 +856,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             : profileCoverBackground,
                         borderBottomLeftRadius: profileCoverRadius,
                         borderBottomRightRadius: profileCoverRadius,
-                        height: profileCoverHeight,
+                        height: `calc(${profileCoverHeight}px + var(--space-profile-safe-area-top))`,
                         insetInline: 0,
                         overflow: "hidden",
                         position: "absolute",
-                        top: "var(--space-profile-safe-area-top)",
+                        top: 0,
                         width: "100%",
                         zIndex: 0,
                     }}
@@ -901,7 +901,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                         aria-hidden
                         sx={{
                             background: profileCoverTopShadow,
-                            height: profileHeaderHeight + 8,
+                            height: `calc(${profileHeaderHeight + 8}px + var(--space-profile-safe-area-top))`,
                             insetInline: 0,
                             pointerEvents: "none",
                             position: "absolute",
@@ -919,11 +919,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             bgcolor: "transparent",
                             border: 0,
                             cursor: "pointer",
-                            height: profileCoverHeight,
+                            height: `calc(${profileCoverHeight}px + var(--space-profile-safe-area-top))`,
                             insetInline: 0,
                             p: 0,
                             position: "absolute",
-                            top: "var(--space-profile-safe-area-top)",
+                            top: 0,
                             width: "100%",
                             zIndex: 2,
                             "&:focus-visible": {
