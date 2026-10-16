@@ -1,1 +1,1 @@
-- Added a built-in image viewer with pinch and double-tap zoom.
+- (i) Added a built-in image viewer with pinch and double-tap zoom.
