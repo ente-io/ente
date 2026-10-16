@@ -387,16 +387,21 @@ async fn exercise(origin: String) -> TestResult {
         &home,
         "photos",
         &alice_email,
-        &["other-server", "--host", &alias_origin],
+        &["--account", "other-server", "--host", &alias_origin],
     );
     success(home.run(&["account", "rename", &alice_email, "work"]));
     assert_eq!(home.read_vault()["accounts"][0]["storage_id"], first_id);
 
-    login(&home, "auth", &bob_email, &[&bob_email, "--host", &origin]);
+    login(
+        &home,
+        "auth",
+        &bob_email,
+        &["--account", &bob_email, "--host", &origin],
+    );
     assert!(
         failure(&home.run(&["photos", "album", "list"])).contains("is not logged into Ente Photos")
     );
-    login(&home, "locker", &alice_email, &["work"]);
+    login(&home, "locker", &alice_email, &["--account", "work"]);
     let accounts = home.json(&["account", "list"]);
     assert!(
         accounts
@@ -579,7 +584,7 @@ async fn exercise(origin: String) -> TestResult {
         0
     );
 
-    login(&home, "photos", &alice_email, &["work"]);
+    login(&home, "photos", &alice_email, &["--account", "work"]);
     success(home.run(&["account", "switch", "work"]));
     let added_original = b"added after the first sync";
     let added_file = upload_file(&origin, &alice, album, &key, added_original, None)
@@ -648,7 +653,9 @@ async fn exercise(origin: String) -> TestResult {
     let before = fs::read(home.dir.path().join("vault.json")).unwrap();
     for name in [Some("work"), None] {
         let mut args = vec!["account", "login", "--app", "photos", "--input", "-"];
-        args.extend(name);
+        if let Some(name) = name {
+            args.extend(["--account", name]);
+        }
         assert!(
             failure(&home.with_input(&args, &credentials(&bob_email)))
                 .contains("identity does not match")
@@ -676,7 +683,7 @@ async fn exercise(origin: String) -> TestResult {
     assert_eq!(response.status(), reqwest::StatusCode::UNAUTHORIZED);
     failure(&home.run(&["photos", "album", "list"]));
     assert_eq!(
-        home.json(&["account", "view", "work"])["apps"],
+        home.json(&["account", "view", "--account", "work"])["apps"],
         json!(["locker"])
     );
     let account_dir = home
@@ -685,7 +692,7 @@ async fn exercise(origin: String) -> TestResult {
         .join("accounts")
         .join(first_id.as_str().unwrap());
     assert!(account_dir.join("data.db").is_file());
-    success(home.run(&["account", "logout", "work", "--local"]));
+    success(home.run(&["account", "logout", "--account", "work", "--local"]));
     assert!(!account_dir.exists());
     assert!(!account_dir.with_extension("lock").exists());
 
@@ -725,6 +732,7 @@ pub(super) fn login(home: &TestHome, app: &str, email: &str, options: &[&str]) {
         home.json(&[
             "account",
             "view",
+            "--account",
             result["account"]["name"].as_str().unwrap()
         ])
     );

@@ -104,27 +104,34 @@ fn admin_list_and_app_selection() {
 }
 
 #[test]
-fn admin_mutations_require_confirmation_and_use_resolved_target() {
-    for (command, method, path, response, field) in [
-        (
-            "delete",
-            "DELETE",
-            "/admin/user/delete",
-            json!({"isSubscriptionCancelled": false}),
-            "deleted",
-        ),
-        (
-            "disable-totp",
-            "POST",
-            "/admin/user/disable-2fa",
-            json!({}),
-            "totpEnabled",
-        ),
+fn admin_deletion_uses_email_and_reports_deleted_id() {
+    let mut server = Server::new();
+    let home = TestHome::new();
+    home.seed(&server.url());
+    let delete = server
+        .mock("DELETE", "/admin/user/delete")
+        .match_query(Matcher::UrlEncoded("email".into(), EMAIL.into()))
+        .with_body(json!({"userID": USER_ID, "isSubscriptionCancelled": false}).to_string())
+        .expect(1)
+        .create();
+    let mut args = vec!["admin", "user", "delete", EMAIL, "--no-input"];
+    assert!(failure(&home.run(&args)).contains("supply --yes"));
+    args.push("--yes");
+    assert_eq!(
+        home.json(&args),
+        json!({"user": {"id": USER_ID.to_string(), "email": EMAIL}, "deleted": true,
+            "cleanupScheduled": true, "subscriptionCancelled": false})
+    );
+    delete.assert();
+}
+
+#[test]
+fn admin_security_mutations_require_confirmation_and_use_resolved_target() {
+    for (command, path, field) in [
+        ("disable-totp", "/admin/user/disable-2fa", "totpEnabled"),
         (
             "remove-passkeys",
-            "POST",
             "/admin/user/disable-passkeys",
-            json!({}),
             "passkeysRemoved",
         ),
     ] {
@@ -138,26 +145,18 @@ fn admin_mutations_require_confirmation_and_use_resolved_target() {
             .with_body(details().to_string())
             .expect(1)
             .create();
-        let mut change = server
-            .mock(method, path)
-            .with_body(response.to_string())
-            .expect(1);
-        change = if method == "DELETE" {
-            change.match_query(Matcher::UrlEncoded("email".into(), EMAIL.into()))
-        } else {
-            change.match_body(Matcher::Json(json!({"userID": USER_ID})))
-        };
-        let change = change.create();
+        let change = server
+            .mock("POST", path)
+            .match_body(Matcher::Json(json!({"userID": USER_ID})))
+            .with_body("{}")
+            .expect(1)
+            .create();
         let mut args = vec!["admin", "user", command, &id, "--no-input"];
         assert!(failure(&home.run(&args)).contains("supply --yes"));
         args.push("--yes");
         let result = home.json(&args);
         assert_eq!(result["user"]["email"], EMAIL);
         assert_eq!(result[field], command != "disable-totp");
-        if command == "delete" {
-            assert_eq!(result["cleanupScheduled"], true);
-            assert_eq!(result["subscriptionCancelled"], false);
-        }
         get.assert();
         change.assert();
     }
@@ -277,7 +276,7 @@ fn admin_failures_do_not_all_recommend_login() {
         let output = home.run(&["admin", "user", "list", "--json", "--no-input"]);
         let error = failure(&output);
         assert_eq!(
-            error.contains("account login \"fixture\" --app photos"),
+            error.contains("account login --account \"fixture\" --app photos"),
             stale,
             "{error}"
         );

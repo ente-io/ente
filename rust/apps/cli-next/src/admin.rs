@@ -1,15 +1,12 @@
 use anyhow::{Context, Result, ensure};
 use chrono::{DateTime, Months, NaiveDate, NaiveTime, Utc};
 use dialoguer::{Confirm, Input, Select, console::Term};
-use ente_accounts::{AccountsClient, admin::User};
+use ente_accounts::AccountsClient;
 use serde_json::json;
 
 use crate::{
     api,
-    args::{
-        AdminCommand, AdminEmailCommand, AdminTarget, AdminUserCommand, App, Options,
-        SubscriptionArgs,
-    },
+    args::{AdminCommand, AdminEmailCommand, AdminUserCommand, App, Options, SubscriptionArgs},
     output::{self, AdminUserView, SubscriptionView},
     vault::{Account, State},
 };
@@ -22,10 +19,14 @@ pub async fn run(
 ) -> Result<()> {
     ensure!(!options.offline, "admin commands require network access");
     if let AdminCommand::User { command } = &command {
-        let target = match command {
-            AdminUserCommand::Delete(target)
-            | AdminUserCommand::DisableTotp(target)
-            | AdminUserCommand::RemovePasskeys(target) => Some(target),
+        let yes = match command {
+            AdminUserCommand::Delete { email, yes } => {
+                ensure!(email.contains('@'), "supply an email address for deletion");
+                Some(*yes)
+            }
+            AdminUserCommand::DisableTotp(target) | AdminUserCommand::RemovePasskeys(target) => {
+                Some(target.yes)
+            }
             AdminUserCommand::UpdateSubscription(args) => {
                 ensure!(
                     args.no_limit
@@ -34,37 +35,27 @@ pub async fn run(
                         || options.can_prompt(),
                     "supply --no-limit, --storage or --expires when running without interactive prompts"
                 );
-                Some(&args.target)
+                Some(args.target.yes)
             }
             _ => None,
         };
-        if let Some(target) = target {
+        if let Some(yes) = yes {
             ensure!(
-                target.yes || options.can_prompt(),
+                yes || options.can_prompt(),
                 "this change requires confirmation; supply --yes when running without interactive prompts"
             );
         }
     }
     let state = State::load()?;
     let account = &state.accounts[state.resolve(selected)?];
-    let mut saved_apps = account.sessions.keys();
-    let app = match (app, saved_apps.next(), saved_apps.next()) {
-        (Some(app), _, _) | (None, Some(&app), None) => app,
-        _ => {
-            ensure!(
-                account.sessions.contains_key(&App::Photos),
-                "multiple apps are saved without Photos; select one with --app"
-            );
-            App::Photos
-        }
-    };
+    let app = account.app(app)?;
     let client = api::accounts_client(&account.origin, app)?;
     client.set_auth_token(Some(ente_core::b64::encode_url_safe(account.token(app)?)));
     execute(command, &client, account, options).await.map_err(|error| {
         if matches!(error.downcast_ref::<ente_accounts::Error>(),
             Some(ente_accounts::Error::Http(ente_core::http::Error::Api { status: 400, message: Some(message), .. }))
                 if message == "Token is too old") {
-            error.context(format!("administrator login is too old; run account login {:?} --app {} and retry", account.name, app.name()))
+            error.context(format!("administrator login is too old; run account login --account {:?} --app {} and retry", account.name, app.name()))
         } else {
             error
         }
@@ -110,11 +101,28 @@ async fn execute(
         AdminUserCommand::UpdateSubscription(args) => {
             update_subscription(client, account, args, options).await
         }
+        AdminUserCommand::Delete { email, yes } => {
+            let target = output::escape_controls(&email);
+            confirm(
+                "Delete the account currently registered to",
+                &target,
+                yes,
+                account,
+            )?;
+            let result = client.admin_delete_user(&email).await?;
+            output::action(
+                options.json,
+                &json!({"user": {"id": result.user_id.to_string(), "email": email},
+                    "deleted": true, "cleanupScheduled": true,
+                    "subscriptionCancelled": result.is_subscription_cancelled}),
+                &format!(
+                    "{target} ({}): Account deleted; data cleanup scheduled. Subscription cancelled: {}.",
+                    result.user_id, result.is_subscription_cancelled
+                ),
+            )
+        }
         command => {
             let (target, action) = match &command {
-                AdminUserCommand::Delete(target) => {
-                    (target, "Delete account and schedule data cleanup for")
-                }
                 AdminUserCommand::DisableTotp(target) => (
                     target,
                     "Disable authenticator-code two-factor authentication for",
@@ -123,45 +131,27 @@ async fn execute(
                 _ => unreachable!(),
             };
             let user = client.admin_user(&target.user).await?.user;
-            confirm(action, target, &user, account)?;
+            let description = format!("{} ({})", output::escape_controls(&user.email), user.id);
+            confirm(action, &description, target.yes, account)?;
             let view = AdminUserView::new(&user)?;
             let (value, message) = match command {
-                AdminUserCommand::Delete(_) => {
-                    let result = client.admin_delete_user(&user.email).await?;
-                    (
-                        json!({"user": view, "deleted": true, "cleanupScheduled": true,
-                        "subscriptionCancelled": result.is_subscription_cancelled}),
-                        format!(
-                            "Account deleted; data cleanup scheduled. Subscription cancelled: {}.",
-                            result.is_subscription_cancelled
-                        ),
-                    )
-                }
                 AdminUserCommand::DisableTotp(_) => {
                     client.admin_disable_totp(user.id).await?;
                     (
                         json!({"user": view, "totpEnabled": false}),
-                        "Authenticator-code two-factor authentication disabled.".into(),
+                        "Authenticator-code two-factor authentication disabled.",
                     )
                 }
                 AdminUserCommand::RemovePasskeys(_) => {
                     client.admin_remove_passkeys(user.id).await?;
                     (
                         json!({"user": view, "passkeysRemoved": true}),
-                        "All passkeys removed.".into(),
+                        "All passkeys removed.",
                     )
                 }
                 _ => unreachable!(),
             };
-            output::action(
-                options.json,
-                &value,
-                &format!(
-                    "{} ({}): {message}",
-                    output::escape_controls(&user.email),
-                    user.id
-                ),
-            )
+            output::action(options.json, &value, &format!("{description}: {message}"))
         }
     }
 }
@@ -227,8 +217,12 @@ async fn update_subscription(
     );
     confirm(
         "Update subscription for",
-        &args.target,
-        &details.user,
+        &format!(
+            "{} ({})",
+            output::escape_controls(&details.user.email),
+            details.user.id
+        ),
+        args.target.yes,
         account,
     )?;
     client
@@ -237,13 +231,11 @@ async fn update_subscription(
     output::admin_user(&details, options.json)
 }
 
-fn confirm(action: &str, target: &AdminTarget, user: &User, account: &Account) -> Result<()> {
-    if !target.yes {
+fn confirm(action: &str, target: &str, yes: bool, account: &Account) -> Result<()> {
+    if !yes {
         let accepted = Confirm::new()
             .with_prompt(format!(
-                "{action} {} ({}) on {} as {} ({})?",
-                output::escape_controls(&user.email),
-                user.id,
+                "{action} {target} on {} as {} ({})?",
                 account.origin,
                 output::escape_controls(&account.email),
                 account.user_id

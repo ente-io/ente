@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use zeroize::{ZeroizeOnDrop, Zeroizing};
 
-use crate::{args::App, home, parse_json};
+use crate::{account::PendingCreation, args::App, home, parse_json};
 
 const SCHEMA_VERSION: u8 = 1;
 const VAULT_FILE: &str = "vault.json";
@@ -36,6 +36,8 @@ pub(crate) struct VaultAccess {
 pub struct State {
     pub accounts: Vec<Account>,
     pub selected: Option<Uuid>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub creations: Vec<PendingCreation>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -205,13 +207,27 @@ impl State {
 }
 
 impl Account {
+    pub fn app(&self, requested: Option<App>) -> Result<App> {
+        let mut apps = self.sessions.keys();
+        match (requested, apps.next(), apps.next()) {
+            (Some(app), _, _) | (None, Some(&app), None) => Ok(app),
+            _ => {
+                ensure!(
+                    self.sessions.contains_key(&App::Photos),
+                    "multiple apps are saved without Photos; select one with --app"
+                );
+                Ok(App::Photos)
+            }
+        }
+    }
+
     pub fn token(&self, app: App) -> Result<&[u8]> {
         self.sessions
             .get(&app)
             .map(|s| s.token.as_slice())
             .with_context(|| {
                 format!(
-                    "account {:?} is not logged into {}; use account login {:?} --app {}",
+                    "account {:?} is not logged into {}; use account login --account {:?} --app {}",
                     self.name,
                     app.display_name(),
                     self.name,

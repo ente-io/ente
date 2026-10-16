@@ -22,6 +22,7 @@ impl Catalog {
         let (shared, hidden) = self.categories.get(&id).copied().unwrap_or_default();
         CollectionEntry {
             id,
+            owner_id: self.user + i64::from(shared),
             name: Some(name.clone()),
             favorites: false,
             value: Ok((

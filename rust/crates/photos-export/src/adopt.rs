@@ -228,13 +228,9 @@ fn parse_album(root: &Path, directory: &Path, retained: bool) -> Result<Option<A
     };
     let folder = directory
         .strip_prefix(root)?
-        .iter()
-        .map(|part| {
-            part.to_str()
-                .context("claimed Ente album path is not UTF-8")
-        })
-        .collect::<Result<Vec<_>>>()?
-        .join("/");
+        .to_str()
+        .context("claimed Ente album path is not UTF-8")?
+        .replace(std::path::MAIN_SEPARATOR, "/");
     names::check(root, &format!("{folder}/metadata.json"))?;
     let id = parse_id(identity, "albumID")?;
     let name = record["title"]

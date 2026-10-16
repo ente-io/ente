@@ -357,8 +357,14 @@ pub enum LockerCommand {
 
 #[derive(Args)]
 pub struct LoginArgs {
-    #[arg(help = "Local account name; creates an entry if it does not exist")]
+    #[arg(
+        long = "account",
+        value_name = "NAME",
+        help = "Local account name; creates an entry if it does not exist"
+    )]
     pub name: Option<String>,
+    #[arg(long, help = "Email address to log in with")]
+    pub email: Option<String>,
     #[arg(long, value_enum, help = "App to log in to")]
     pub app: App,
     #[arg(
@@ -371,6 +377,37 @@ pub struct LoginArgs {
         help = "Read login credentials as JSON from this file, or from stdin with -"
     )]
     pub input: Option<PathBuf>,
+}
+
+#[derive(Args)]
+pub struct CreateArgs {
+    #[arg(
+        long = "account",
+        value_name = "NAME",
+        help = "Local name for the new account; defaults to its email"
+    )]
+    pub name: Option<String>,
+    #[arg(long, help = "Email address for the new account")]
+    pub email: Option<String>,
+    #[arg(long, value_enum, default_value = "photos", help = "App to log in to")]
+    pub app: App,
+    #[arg(long, help = "Ente server; defaults to api.ente.com")]
+    pub host: Option<String>,
+    #[arg(
+        long,
+        value_name = "PATH|-",
+        help = "Read creation credentials as JSON from a file or stdin"
+    )]
+    pub input: Option<PathBuf>,
+    #[arg(long, help = "Accept Ente's terms and privacy policy")]
+    pub accept_terms: bool,
+}
+
+#[derive(Clone, Copy, ValueEnum, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VerificationPurpose {
+    Create,
+    Login,
 }
 
 const API_HELP: &str = "The response body is written unchanged, including when --json is set.";
@@ -456,32 +493,74 @@ pub enum AccountCommand {
     #[command(
         about = "Log an account into an app",
         after_long_help = "An existing name requires matching credentials; a new name creates a local entry.
-Omit NAME to use the selected account, or the only saved account.
+Omit --account to use the selected account, or the only saved account.
 With no saved accounts, creates an entry named after the authenticated email.
-With several accounts and none selected, supply NAME or use account switch.
+With several accounts and none selected, supply --account or use account switch.
 A new entry becomes selected; logging into an existing entry keeps the selection.
 
 Non-interactive login reads JSON from --input:
   {\"email\": \"...\", \"password\": \"...\", \"otp\": \"123456\", \"totp\": \"654321\"}
 
-All fields are strings. otp is the email code; totp is the authenticator code. Supply them when required.
+All fields are strings. --email can supply the email instead. otp is the email code; totp is the authenticator code.
+Request an email code with account request-otp --email EMAIL --purpose login.
 With --no-input, supply email and password through --input PATH or --input -.
 For unattended vault access, set ENTE_CLI_VAULT_KEY (see vault --help)."
     )]
     Login(LoginArgs),
+    #[command(
+        about = "Request an email verification code",
+        after_long_help = "Requests one email and returns; success means the server accepted the request.
+Use the same email, app and server when completing creation or login.
+Defaults to creation; use --purpose login for an existing account."
+    )]
+    RequestOtp {
+        #[arg(long, help = "Email address to verify")]
+        email: Option<String>,
+        #[arg(
+            long,
+            value_enum,
+            default_value = "photos",
+            help = "App requesting verification"
+        )]
+        app: App,
+        #[arg(long, help = "Ente server; defaults to api.ente.com")]
+        host: Option<String>,
+        #[arg(
+            long,
+            value_enum,
+            default_value = "create",
+            help = "Reason for verification"
+        )]
+        purpose: VerificationPurpose,
+    },
+    #[command(
+        about = "Create an Ente account",
+        after_long_help = "Creates and selects a new account, named after its email unless --account is supplied.
+Prompts for email, consent, verification code and password.
+Unattended creation requires --accept-terms and --input with email, password and otp strings.
+--email can supply the email instead. Request the code first with account request-otp.
+Repeating an unfinished creation resumes with its saved keys and the same password.
+Terms: https://ente.io/terms  Privacy: https://ente.io/privacy
+Print the recovery key later with account recovery-key."
+    )]
+    Create(CreateArgs),
     #[command(about = "List accounts on this device")]
     #[command(after_long_help = ACCOUNT_HELP)]
     List,
     #[command(about = "Show an account")]
     #[command(after_long_help = ACCOUNT_HELP)]
     View {
-        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        #[arg(
+            long = "account",
+            value_name = "NAME",
+            help = "Account name; defaults to the selected or only saved account"
+        )]
         name: Option<String>,
     },
     #[command(about = "Print the saved API token for an account")]
     #[command(
-        after_long_help = "Uses NAME, otherwise the selected account, otherwise the only saved account.
-With several accounts and none selected, supply NAME or use account switch.
+        after_long_help = "Uses --account, otherwise the selected account, otherwise the only saved account.
+With several accounts and none selected, supply --account or use account switch.
 --app is required and selects that account's saved login.
 Reads the saved token from the local vault without contacting the server or refreshing it.
 This prints a secret and does not check whether the server still accepts it.
@@ -489,7 +568,11 @@ Plain output is padded URL-safe Base64 followed by a newline.
 With --json, returns {\"token\":\"...\"}."
     )]
     Token {
-        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        #[arg(
+            long = "account",
+            value_name = "NAME",
+            help = "Account name; defaults to the selected or only saved account"
+        )]
         name: Option<String>,
         #[arg(long, value_enum, help = "App whose token to print")]
         app: App,
@@ -499,12 +582,18 @@ With --json, returns {\"token\":\"...\"}."
         #[arg(help = "Account name")]
         name: String,
     },
-    #[command(about = "Change an account's local name")]
+    #[command(
+        about = "Change an account's local name",
+        after_help = "With one name, renames the selected or only account. With two, renames OLD_NAME to NEW_NAME."
+    )]
     Rename {
-        #[arg(value_name = "OLD_NAME", help = "Current local name")]
+        #[arg(
+            value_name = "NAME",
+            help = "New name, or current name when supplying two names"
+        )]
         name: String,
         #[arg(value_name = "NEW_NAME", help = "New local name")]
-        new_name: String,
+        new_name: Option<String>,
     },
     #[command(
         about = "Log out of an app, or every app when --app is omitted",
@@ -513,7 +602,11 @@ Without --app, logs out of all this account's saved app logins on this device.
 --local removes the account and its cached data without contacting the server."
     )]
     Logout {
-        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        #[arg(
+            long = "account",
+            value_name = "NAME",
+            help = "Account name; defaults to the selected or only saved account"
+        )]
         name: Option<String>,
         #[arg(
             long,
@@ -528,6 +621,56 @@ Without --app, logs out of all this account's saved app logins on this device.
         )]
         local: bool,
     },
+    #[command(
+        about = "Set up authenticator protection for your Ente account",
+        after_long_help = "Protects account login, separate from codes stored in Ente Auth.
+Use enable interactively, or setup then enable --input with secret and totp strings.
+Setup secrets expire after ten minutes. If confirmation is interrupted, check status.
+--app chooses a saved login: the only app, otherwise Photos. Requires network access."
+    )]
+    Totp {
+        #[command(flatten)]
+        selector: AccountSelector,
+        #[arg(
+            long,
+            global = true,
+            value_enum,
+            help = "Saved app login to authenticate with"
+        )]
+        app: Option<App>,
+        #[command(subcommand)]
+        command: TotpCommand,
+    },
+    #[command(
+        about = "Print the saved 24-word recovery key",
+        after_long_help = "Prints a secret from the local vault without network access.
+With --json, returns {\"recoveryKey\":\"...\"}."
+    )]
+    RecoveryKey {
+        #[arg(
+            long = "account",
+            value_name = "NAME",
+            help = "Account name; defaults to the selected or only saved account"
+        )]
+        name: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum TotpCommand {
+    #[command(about = "Print a new authenticator setup secret")]
+    Setup,
+    #[command(about = "Confirm and enable authenticator protection")]
+    Enable {
+        #[arg(
+            long,
+            value_name = "PATH|-",
+            help = "Read secret and totp strings as JSON from a file or stdin"
+        )]
+        input: Option<PathBuf>,
+    },
+    #[command(about = "Show whether authenticator protection is enabled")]
+    Status,
 }
 
 #[derive(Subcommand)]
@@ -547,7 +690,7 @@ pub enum KeyCommand {
 
 const ADMIN_HELP: &str =
     "Uses the selected account's server and saved login; the server grants administrator access.
-Log in with: ente-cli-next account login NAME --app photos --host URL
+Log in with: ente-cli-next account login --account NAME --app photos --host URL
 --account selects a saved account by name; otherwise uses the selected or sole account.
 --app selects its session; otherwise uses the sole saved app, then Photos.
 With multiple apps and no Photos login, supply --app.
@@ -601,9 +744,15 @@ IDs are strings; timestamps are RFC3339; storageBytes is an integer."
     },
     #[command(
         about = "Delete an account and schedule its data cleanup",
-        after_long_help = "Requires a login less than ten minutes old. Reports whether the server cancelled the subscription."
+        after_long_help = "Deletes the account registered to the supplied email when the server processes the request.
+Requires a login less than ten minutes old. Reports the deleted account's ID and whether the server cancelled the subscription."
     )]
-    Delete(AdminTarget),
+    Delete {
+        #[arg(help = "Email address of the account to delete")]
+        email: String,
+        #[arg(long, help = "Approve this change without prompting")]
+        yes: bool,
+    },
     #[command(
         about = "Disable authenticator-code two-factor authentication",
         after_long_help = "Requires a login less than ten minutes old. Leaves passkeys enabled."

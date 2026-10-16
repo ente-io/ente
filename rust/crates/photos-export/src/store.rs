@@ -568,11 +568,7 @@ impl Store {
     }
 
     pub fn desired_album(&self, entry: &CollectionEntry, user_id: i64) -> Result<()> {
-        let shared = entry
-            .value
-            .as_ref()
-            .ok()
-            .map(|(album, _)| album.owner_id != user_id);
+        let shared = entry.owner_id != user_id;
         let hidden = entry
             .value
             .as_ref()
@@ -582,27 +578,30 @@ impl Store {
             "INSERT INTO desired_albums(id,name,present,favorites,shared,hidden) VALUES(?1,?2,1,?3,?4,?5) ON CONFLICT(id) DO UPDATE SET name=excluded.name,present=1,favorites=excluded.favorites,shared=excluded.shared,hidden=excluded.hidden",
             params![entry.id, entry.name, entry.favorites, shared, hidden],
         )?;
-        if let Ok((album, _)) = &entry.value {
-            let mut source: AlbumSource = json(
-                &self.db,
-                "SELECT record FROM album_sources WHERE id=?1",
-                [entry.id],
-            )?
-            .unwrap_or(AlbumSource {
-                name: album.name.clone(),
-                shared: None,
-                hidden: None,
-                metadata: Value::Null,
-                warnings: Vec::new(),
-            });
-            source.shared = shared;
-            source.hidden = hidden;
-            self.save_album_source(entry.id, &source)?;
-        }
-        Ok(())
+        let mut source: AlbumSource = json(
+            &self.db,
+            "SELECT record FROM album_sources WHERE id=?1",
+            [entry.id],
+        )?
+        .unwrap_or(AlbumSource {
+            name: entry.name.clone().unwrap_or_default(),
+            shared: None,
+            hidden: None,
+            metadata: Value::Null,
+            warnings: Vec::new(),
+        });
+        source.shared = Some(shared);
+        source.hidden = hidden.or(source.hidden);
+        self.save_album_source(entry.id, &source)
     }
 
-    pub fn recover_album(&self, id: i64, name: &str, metadata: Value) -> Result<()> {
+    pub fn recover_album(
+        &self,
+        id: i64,
+        name: &str,
+        metadata: Value,
+        shared: Option<bool>,
+    ) -> Result<()> {
         let mut source: AlbumSource = json(
             &self.db,
             "SELECT record FROM album_sources WHERE id=?1",
@@ -615,6 +614,7 @@ impl Store {
             metadata: Value::Null,
             warnings: Vec::new(),
         });
+        source.shared = source.shared.or(shared);
         source.hidden = source.hidden.or_else(|| {
             metadata["ente"]["visibility"]
                 .as_str()

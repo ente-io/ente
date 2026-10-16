@@ -34,6 +34,8 @@ pub struct Subscription {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Deletion {
+    #[serde(rename = "userID")]
+    pub user_id: i64,
     pub is_subscription_cancelled: bool,
 }
 

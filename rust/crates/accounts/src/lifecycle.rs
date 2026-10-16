@@ -89,6 +89,14 @@ pub struct TwoFactorSetup {
 }
 
 impl TwoFactorSetup {
+    pub fn from_secret(secret_code: String, recovery_key: &[u8]) -> Self {
+        Self {
+            secret_code,
+            qr_code: String::new(),
+            recovery_key: hex::encode(recovery_key),
+        }
+    }
+
     pub async fn start(
         client: &AccountsClient,
         master_key: &[u8],

@@ -198,6 +198,24 @@ fn engine_category_filters_recheck_recovered_metadata() {
         fs::read(engine.root().join("Second/Photo.jpg")).unwrap(),
         b"original"
     );
+    engine.catalog.categories.insert(2, (true, false));
+    engine.catalog.unreadable_album = Some(2);
+    for disappeared in [false, true] {
+        if disappeared {
+            engine.catalog.albums.remove(&2);
+        }
+        let mut options = engine.options(false, &[]);
+        options.exclude_shared = true;
+        options.exclude_hidden = true;
+        let export = engine.prepare(options).unwrap();
+        assert!(engine.execute(export).unwrap().complete);
+        assert!(engine.root().join("Second/Photo.jpg").exists());
+    }
+    let mut options = engine.options(false, &[]);
+    options.exclude_hidden = true;
+    let export = engine.prepare(options).unwrap();
+    assert!(engine.execute(export).unwrap().complete);
+    assert!(engine.root().join("Trash/Second/Photo.jpg").exists());
     fetched.assert();
 }
 

@@ -399,7 +399,14 @@ fn account_replica_is_encrypted_and_available_offline() {
             .contains("unable to open database file")
     );
     assert!(!other_directory.join("data.db").exists());
-    home.json(&["accounts", "logout", "renamed", "--local", "--offline"]);
+    home.json(&[
+        "accounts",
+        "logout",
+        "--account",
+        "renamed",
+        "--local",
+        "--offline",
+    ]);
     assert!(!directory.exists());
     assert!(!lock_path.exists());
 }
