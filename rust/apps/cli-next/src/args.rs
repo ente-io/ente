@@ -744,9 +744,15 @@ IDs are strings; timestamps are RFC3339; storageBytes is an integer."
     },
     #[command(
         about = "Delete an account and schedule its data cleanup",
-        after_long_help = "Requires a login less than ten minutes old. Reports whether the server cancelled the subscription."
+        after_long_help = "Deletes the account registered to the supplied email when the server processes the request.
+Requires a login less than ten minutes old. Reports the deleted account's ID and whether the server cancelled the subscription."
     )]
-    Delete(AdminTarget),
+    Delete {
+        #[arg(help = "Email address of the account to delete")]
+        email: String,
+        #[arg(long, help = "Approve this change without prompting")]
+        yes: bool,
+    },
     #[command(
         about = "Disable authenticator-code two-factor authentication",
         after_long_help = "Requires a login less than ten minutes old. Leaves passkeys enabled."
