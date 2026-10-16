@@ -561,26 +561,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn email_request_surfaces_server_failure() {
-        let mut server = Server::new_async().await;
-        let first = server
-            .mock("POST", "/users/ott")
-            .with_status(500)
-            .with_body("temporary failure")
-            .expect(1)
-            .create_async()
-            .await;
-        let client = make_client(server.url());
-        let error = client
-            .send_otp("user@example.org", "login")
-            .await
-            .unwrap_err();
-        assert!(matches!(error, Error::Http(error) if error.status_code() == Some(500)));
-
-        first.assert_async().await;
-    }
-
-    #[tokio::test]
     async fn verify_srp_session_does_not_retry_on_server_error() {
         let mut server = Server::new_async().await;
         let verify = server

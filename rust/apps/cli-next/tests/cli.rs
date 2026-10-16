@@ -1042,7 +1042,7 @@ mod export_sources;
 mod files;
 
 #[cfg(feature = "museum")]
-#[path = "support/museum.rs"]
+#[path = "cli/museum.rs"]
 mod museum;
 
 #[path = "support/paste.rs"]
