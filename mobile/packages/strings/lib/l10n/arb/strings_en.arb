@@ -63,9 +63,6 @@
   "addAlbumWidgetPrompt": "Add an album widget to your home screen to customize it here.",
   "addANameAndPhoto": "Add a name and photo",
   "addAnyway": "Add anyway",
-  "@addAnyway": {
-    "description": "Action to add shared photos despite a warning that their locations may be missing."
-  },
   "addCode": "Add code",
   "addedAMemoryTo": "added a memory to {albumName}",
   "@addedAMemoryTo": {
