@@ -1517,19 +1517,6 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
                 <LoadingThumbnail />
             )}
             <MobileAlbumCoverGradient $isPlaceholder={isPlaceholder} />
-            <Box
-                component="img"
-                src="/images/album-cover-scrim.svg"
-                alt=""
-                aria-hidden
-                sx={{
-                    position: "absolute",
-                    left: "50%",
-                    top: "38px",
-                    transform: "translateX(-50%)",
-                    pointerEvents: "none",
-                }}
-            />
             <MobileAlbumCoverContent>
                 {dateRange && (
                     <Typography
