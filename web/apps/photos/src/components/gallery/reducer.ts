@@ -1,3 +1,4 @@
+import type { AlbumFilter } from "@/utils/album-filters";
 import type { LocalUser } from "ente-accounts/services/user";
 import {
     groupFilesByCollectionID,
@@ -50,6 +51,7 @@ export type GalleryBarMode =
     "albums" | "hidden-albums" | "archive-albums" | "people";
 
 type GalleryView =
+    | { type: "album-overview"; albumFilter: AlbumFilter }
     | {
           type: "albums" | "hidden-albums" | "archive-albums";
           activeCollectionSummaryID: number;
@@ -152,6 +154,7 @@ type GalleryAction =
     | { type: "clearUnsyncedState" }
     | { type: "showAll" }
     | { type: "showHidden" }
+    | { type: "showAlbumOverview"; albumFilter: AlbumFilter }
     | { type: "showAlbums" }
     | { type: "showCollectionSummary"; collectionSummaryID: number | undefined }
     | { type: "showPeople" }
@@ -162,7 +165,7 @@ type GalleryAction =
     | { type: "exitSearch"; shouldExitSearchMode?: boolean }
     | { type: "setSearchSortOrder"; asc: boolean | undefined };
 
-const initialGalleryState: GalleryState = {
+export const initialGalleryState: GalleryState = {
     user: undefined,
     familyData: undefined,
     collections: [],
@@ -204,7 +207,7 @@ const initialGalleryState: GalleryState = {
     searchSortAsc: undefined,
 };
 
-const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
+export const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     state,
     action,
 ) => {
@@ -708,6 +711,22 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                         state.hiddenCollectionSummaries.get(
                             PseudoCollectionID.hiddenItems,
                         )!,
+                },
+                isInSearchMode: false,
+            });
+
+        case "showAlbumOverview":
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                selectedCollectionSummaryID: undefined,
+                extraVisiblePerson: undefined,
+                searchSuggestion: undefined,
+                searchResults: undefined,
+                isRecomputingSearchResults: false,
+                pendingSearchSuggestions: [],
+                view: {
+                    type: "album-overview",
+                    albumFilter: action.albumFilter,
                 },
                 isInSearchMode: false,
             });
@@ -1663,6 +1682,8 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
             state.user?.id,
         );
         return { ...state, filteredFiles };
+    } else if (state.view?.type == "album-overview") {
+        return { ...state, filteredFiles: [] };
     } else if (state.view?.type == "people") {
         const filteredFiles = derivePeopleFilteredFiles(
             state.collectionFiles,

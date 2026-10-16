@@ -12,6 +12,10 @@ import {
     type GalleryBarImplProps,
 } from "@/components/gallery/BarImpl";
 import { PeopleHeader } from "@/components/gallery/PeopleHeader";
+import {
+    filterAlbumSummaries,
+    visibleAlbumFilters as getVisibleAlbumFilters,
+} from "@/utils/album-filters";
 import { sortPeople } from "@/utils/people-sort";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import {
@@ -30,6 +34,7 @@ import {
     sortCollectionSummaries,
     type CollectionsSortBy,
     type CollectionSummaries,
+    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
 import { includes } from "ente-utils/type-guards";
@@ -43,12 +48,17 @@ import {
 export type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
+    | "visibleAlbumFilters"
     | "onSelectCollectionID"
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
     | "onShowAllAlbums"
     | "onShowAllPeople"
 > & {
+    onAlbumSummariesChange: (
+        albums: CollectionSummary[],
+        sortBy: CollectionsSortBy,
+    ) => void;
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
     allPeople: Person[];
@@ -89,6 +99,11 @@ export const GalleryBarAndListHeader: React.FC<
     people,
     peopleSortBy,
     onChangePeopleSortBy,
+    onAlbumSummariesChange,
+    albumFilter,
+    albumSearchQuery,
+    onAlbumSearchQueryChange,
+    onShowAlbumOverview,
     onSelectPerson,
     allPeople,
     saveGroups,
@@ -143,6 +158,51 @@ export const GalleryBarAndListHeader: React.FC<
             ).sort((a, b) => b.sortPriority - a.sortPriority),
         [collectionsSortBy, toShowCollectionSummaries],
     );
+    const eligibleCollectionSummaries = useMemo(
+        () =>
+            sortedCollectionSummaries.filter(
+                (cs) =>
+                    cs.id !== uncategorizedCollectionSummaryID &&
+                    cs.id !== PseudoCollectionID.hiddenItems &&
+                    cs.id !== PseudoCollectionID.archiveItems &&
+                    cs.id !== PseudoCollectionID.trash &&
+                    (mode == "albums"
+                        ? !cs.attributes.has("system") ||
+                          (cs.id > 0 && cs.type == "uncategorized")
+                        : !cs.attributes.has("hideFromCollectionBar") &&
+                          !cs.attributes.has("quickLink")),
+            ),
+        [sortedCollectionSummaries, uncategorizedCollectionSummaryID, mode],
+    );
+    const visibleAlbumFilters = useMemo(
+        () => getVisibleAlbumFilters(eligibleCollectionSummaries),
+        [eligibleCollectionSummaries],
+    );
+    const visibleCollectionSummaries = useMemo(
+        () =>
+            mode == "albums"
+                ? filterAlbumSummaries(
+                      eligibleCollectionSummaries,
+                      albumFilter,
+                      albumSearchQuery,
+                  )
+                : eligibleCollectionSummaries,
+        [eligibleCollectionSummaries, mode, albumFilter, albumSearchQuery],
+    );
+
+    useEffect(() => {
+        if (mode == "albums")
+            onAlbumSummariesChange(
+                visibleCollectionSummaries,
+                collectionsSortBy,
+            );
+    }, [
+        mode,
+        visibleCollectionSummaries,
+        collectionsSortBy,
+        onAlbumSummariesChange,
+    ]);
+
     const sortedPeople = useMemo(
         () => sortPeople(people, peopleSortBy),
         [people, peopleSortBy],
@@ -260,6 +320,10 @@ export const GalleryBarAndListHeader: React.FC<
             <GalleryBarImpl
                 {...{
                     mode,
+                    albumFilter,
+                    albumSearchQuery,
+                    onAlbumSearchQueryChange,
+                    onShowAlbumOverview,
                     activeCollectionID,
                     people: sortedPeople,
                     activePerson,
@@ -277,18 +341,8 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangePeopleSortBy={onChangePeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
-                collectionSummaries={sortedCollectionSummaries.filter(
-                    (cs) =>
-                        cs.id !== uncategorizedCollectionSummaryID &&
-                        cs.id !== PseudoCollectionID.hiddenItems &&
-                        cs.id !== PseudoCollectionID.archiveItems &&
-                        cs.id !== PseudoCollectionID.trash &&
-                        (mode == "albums"
-                            ? !cs.attributes.has("system") ||
-                              (cs.id > 0 && cs.type == "uncategorized")
-                            : !cs.attributes.has("hideFromCollectionBar") &&
-                              !cs.attributes.has("quickLink")),
-                )}
+                collectionSummaries={visibleCollectionSummaries}
+                visibleAlbumFilters={visibleAlbumFilters}
             />
 
             <AllAlbums

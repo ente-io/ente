@@ -79,3 +79,17 @@ export const visibleAlbumFilters = (collectionSummaries: CollectionSummary[]) =>
         }
         return collectionSummaries.some((cs) => matchesAlbumFilter(cs, value));
     });
+
+export const filterAlbumSummaries = (
+    summaries: CollectionSummary[],
+    filter: AlbumFilter,
+    query: string,
+) => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return summaries.filter(
+        (cs) =>
+            matchesAlbumFilter(cs, filter) &&
+            (!normalizedQuery ||
+                cs.name.toLowerCase().includes(normalizedQuery)),
+    );
+};

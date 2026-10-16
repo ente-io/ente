@@ -94,7 +94,9 @@ export const PhotosNavigationShell: React.FC<
         if (
             galleryBarProps &&
             !props.isInSearchMode &&
-            (props.mode == mode || reopeningSection)
+            ((props.mode == mode &&
+                galleryBarProps.activeCollectionID != PseudoCollectionID.all) ||
+                reopeningSection)
         ) {
             if (mobile) {
                 if (mobileDrawerProps.open) closeMobileNavigation();
