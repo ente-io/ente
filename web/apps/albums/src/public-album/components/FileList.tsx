@@ -457,6 +457,7 @@ export const FileList: React.FC<FileListProps> = ({
                                                 (index >= hoverIndex &&
                                                     index <= rangeStartIndex))
                                         }
+                                        bottomMargin={layoutParams.gap}
                                         showPlaceholder={isScrolling}
                                         onClick={() => onItemClick(index)}
                                         onSelect={handleSelect(file, index)}
@@ -477,6 +478,7 @@ export const FileList: React.FC<FileListProps> = ({
         },
         [
             checkedTimelineDateStrings,
+            layoutParams.gap,
             handleRangeSelect,
             handleSelect,
             hoverIndex,
@@ -1134,6 +1136,7 @@ type FileThumbnailProps = {
     onSelect: (checked: boolean) => void;
     onHover: () => void;
     onRangeSelect: () => void;
+    bottomMargin?: number;
     isMasonry?: boolean;
     style?: React.CSSProperties;
 } & Pick<FileListProps, "enableSelect">;
@@ -1151,6 +1154,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     onHover,
     onRangeSelect,
     isMasonry,
+    bottomMargin = thumbnailGap,
     style,
 }) => {
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
@@ -1225,7 +1229,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!imageURL}
-            $disableBottomMargin={!!isMasonry}
+            $bottomMargin={isMasonry ? 0 : bottomMargin}
             style={style}
             {...(enableSelect && longPressHandlers)}
         >
@@ -1267,12 +1271,11 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 
 const FileThumbnail_ = styled("div")<{
     disabled: boolean;
-    $disableBottomMargin: boolean;
+    $bottomMargin: number;
 }>`
     display: flex;
     width: fit-content;
-    margin-bottom: ${({ $disableBottomMargin }) =>
-        $disableBottomMargin ? "0px" : `${thumbnailGap}px`};
+    margin-bottom: ${({ $bottomMargin }) => `${$bottomMargin}px`};
     min-width: 100%;
     overflow: hidden;
     position: relative;

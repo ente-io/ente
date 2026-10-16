@@ -1650,10 +1650,8 @@ const MobileAlbumCoverTitle = styled(Typography)({
     textAlign: "center",
     width: "100%",
     maxWidth: "100%",
-    overflowWrap: "anywhere",
-    display: "-webkit-box",
-    WebkitBoxOrient: "vertical",
-    WebkitLineClamp: 2,
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
     overflow: "hidden",
 });
 
