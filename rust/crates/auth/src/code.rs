@@ -82,7 +82,9 @@ impl Code {
         }
         let display = query
             .get("codeDisplay")
-            .map(|value| serde_json::from_str::<Option<Display>>(value))
+            .map(|value| {
+                Option::<Display>::deserialize(&mut serde_json::Deserializer::from_str(value))
+            })
             .transpose()
             .map_err(|_| Error::InvalidRecord)?
             .flatten()
@@ -164,9 +166,16 @@ mod tests {
     fn saved_forms_preserve_labels_and_generate_with_stored_parameters() {
         let uri = "otpauth://totp/Work:alice%2B%252C#tag?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&digits=8&period=60&algorithm=Algorithm.SHA1";
         let key = Key::generate();
-        for value in [
-            json!(uri),
-            json!({"rawData": uri, "display": {"note": "literal%2C"}}),
+        for (value, trashed) in [
+            (json!(uri), false),
+            (
+                json!({"rawData": uri, "display": {"note": "literal%2C"}}),
+                false,
+            ),
+            (
+                json!(format!("{uri}&codeDisplay={{\"trashed\":true}}#suffix")),
+                true,
+            ),
         ] {
             let encrypted = blob::encrypt(&serde_json::to_vec(&value).unwrap(), &key).unwrap();
             let line = crate::record::uri_line(
@@ -177,6 +186,7 @@ mod tests {
             .unwrap();
             let code = Code::from_uri(&line).unwrap();
             assert_eq!(code.name(), "Work (alice+%2C#tag)");
+            assert_eq!(code.trashed, trashed);
             assert_eq!(
                 code.generate(2_222_222_219).unwrap(),
                 ("07081804".into(), 2_222_222_220)

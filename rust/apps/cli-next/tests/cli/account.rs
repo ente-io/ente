@@ -339,10 +339,11 @@ fn creation_enrollment_and_login_across_processes() -> ente_test_support::TestRe
             home.json(&["account", "totp", "status"]),
             json!({"enabled": false})
         );
-        failure(&home.with_input(
+        let error = failure(&home.with_input(
             &["account", "totp", "enable", "--input", "-"],
             &serde_json::to_vec(&json!({"secret": secret, "totp": "invalid"}))?,
         ));
+        assert!(error.contains("Code not accepted."));
         let output = success(home.with_input(
             &["account", "totp", "enable", "--input", "-", "--json"],
             &serde_json::to_vec(&json!({"secret": secret, "totp": current_totp(secret)?}))?,

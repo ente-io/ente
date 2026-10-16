@@ -58,7 +58,7 @@ fn code_reads_refresh_select_and_render_without_a_backup() {
         vec![
             entity(1, 10, &uri("GitHub:alice@example.com"), &key),
             entity(2, 10, &uri("GitHub:bob@example.com"), &key),
-            entity(3, 10, &json!(URI), &key),
+            entity(3, 10, &json!(format!("{URI}#suffix")), &key),
             entity(4, 10, &json!("otpauth://totp/Steam:alice?secret=MY"), &key),
             entity(
                 5,
