@@ -33,6 +33,7 @@ impl<'a> ReplicaSource<'a> {
             .or(name);
         CollectionEntry {
             id,
+            owner_id: record.remote.owner.id,
             name,
             favorites,
             value,

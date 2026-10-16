@@ -658,7 +658,10 @@ fn adoption_relocates_an_unavailable_go_album_named_trash_without_inventing_nati
             fs::write(root.join("Trash/user.txt"), b"keep").unwrap();
         }
         fs::write(root.join("Trash/Photo.jpg"), b"historical local edit").unwrap();
-        assert!(engine.run(true, &[]).unwrap().complete);
+        let mut options = engine.options(true, &[]);
+        options.exclude_shared = true;
+        let export = engine.prepare(options).unwrap();
+        assert!(engine.execute(export).unwrap().complete);
         assert_eq!(
             fs::read(root.join("Trash/Trash-1/Photo.jpg")).unwrap(),
             b"historical local edit"
