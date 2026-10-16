@@ -45,6 +45,232 @@ fn page(server: &mut Server, since: i64, rows: Vec<Value>) -> Mock {
 }
 
 #[test]
+fn code_reads_refresh_select_and_render_without_a_backup() {
+    let mut server = Server::new();
+    let home = TestHome::new();
+    seed(&home, &server.url());
+    let key = Key::generate();
+    let key_request = key_response(&mut server, &key);
+    let uri = |name: &str| json!(format!("otpauth://totp/{name}?secret=MY"));
+    let initial = page(
+        &mut server,
+        0,
+        vec![
+            entity(1, 10, &uri("GitHub:alice@example.com"), &key),
+            entity(2, 10, &uri("GitHub:bob@example.com"), &key),
+            entity(3, 10, &json!(URI), &key),
+            entity(4, 10, &json!("otpauth://totp/Steam:alice?secret=MY"), &key),
+            entity(
+                5,
+                10,
+                &json!({"rawData": "otpauth://hotp/Work:a%2B%252C#tag?secret=MY&counter=7"}),
+                &key,
+            ),
+        ],
+    );
+    let listed = success(home.run(&["auth", "code", "list", "--limit", "1", "--json"]));
+    let rows: Value = serde_json::from_slice(&listed.stdout).unwrap();
+    assert_eq!(
+        rows,
+        json!([{"id": Uuid::from_u128(1), "name": "GitHub (alice@example.com)",
+        "issuer": "GitHub", "accountName": "alice@example.com", "type": "totp"}])
+    );
+    assert!(String::from_utf8_lossy(&listed.stderr).contains("Showing first 1"));
+    initial.assert();
+    initial.remove();
+    let view = |query: &str| {
+        home.json(&[
+            "auth",
+            "code",
+            "view",
+            query,
+            "--offline",
+            "--account",
+            "fixture",
+        ])
+    };
+    for query in [
+        "BOB gitHUB",
+        "GitHub (bob@example.com)",
+        &Uuid::from_u128(2).to_string(),
+    ] {
+        let result = view(query);
+        assert_eq!(result["id"], Uuid::from_u128(2).to_string());
+        assert_eq!(result["otp"].as_str().unwrap().len(), 6);
+        let expiry =
+            chrono::DateTime::parse_from_rfc3339(result["validUntil"].as_str().unwrap()).unwrap();
+        assert_eq!(expiry.timestamp() % 30, 0);
+        assert!(result["validUntil"].as_str().unwrap().ends_with('Z'));
+    }
+    let ambiguous = home.run(&["auth", "code", "view", "github", "--offline"]);
+    let error = failure(&ambiguous);
+    assert!(
+        error.contains("code \"github\" is ambiguous")
+            && error.contains("GitHub (alice@example.com)")
+            && error.contains(&Uuid::from_u128(2).to_string())
+    );
+    assert!(ambiguous.stdout.is_empty());
+    let missing = home.run(&["auth", "code", "view", "missing", "--offline"]);
+    assert!(failure(&missing).contains("no code matches \"missing\""));
+    assert!(missing.stdout.is_empty());
+    let all = home.json(&["auth", "code", "list", "--all", "--offline"]);
+    assert_eq!(all.as_array().unwrap().len(), 4);
+    assert_eq!(all[2]["type"], "steam");
+    assert_eq!(all[3]["name"], "Work (a+%2C#tag)");
+    assert_eq!(view("steam")["otp"].as_str().unwrap().len(), 5);
+    assert!(
+        failure(&home.run(&["auth", "code", "view", "Work", "--offline"]))
+            .contains("HOTP code generation is not supported")
+    );
+    assert!(
+        failure(&home.run(&[
+            "auth",
+            "code",
+            "view",
+            &Uuid::from_u128(3).to_string(),
+            "--offline"
+        ]))
+        .contains("in Trash")
+    );
+    let text = success(home.run(&["auth", "code", "view", "alice github", "--offline"]));
+    let text = String::from_utf8(text.stdout).unwrap();
+    assert!(text.starts_with("GitHub (alice@example.com)\n"));
+    assert!(text.contains("\nValid until "));
+
+    let changed = page(
+        &mut server,
+        9,
+        vec![
+            entity(2, 20, &uri("Work:bob@example.com"), &key),
+            entity(6, 20, &uri("GitHub:(alice@example.com)"), &key),
+        ],
+    );
+    assert_eq!(
+        home.json(&["auth", "code", "view", "bob work"])["name"],
+        "Work (bob@example.com)"
+    );
+    changed.assert();
+    changed.remove();
+    let copied = home.run(&[
+        "auth",
+        "code",
+        "view",
+        "GitHub (alice@example.com)",
+        "--offline",
+    ]);
+    assert!(failure(&copied).contains("code \"GitHub (alice@example.com)\" is ambiguous"));
+    assert_eq!(
+        home.json(&[
+            "auth",
+            "code",
+            "list",
+            "--search",
+            "GitHub (alice@example.com)",
+            "--offline"
+        ])
+        .as_array()
+        .unwrap()
+        .len(),
+        2
+    );
+    assert_eq!(
+        home.json(&[
+            "auth",
+            "code",
+            "list",
+            "--search",
+            "BOB work",
+            "--limit",
+            "1",
+            "--offline"
+        ])[0]["id"],
+        Uuid::from_u128(2).to_string()
+    );
+    let unavailable = server
+        .mock("GET", "/authenticator/entity/diff")
+        .match_query(Matcher::Any)
+        .with_status(400)
+        .create();
+    let failed = home.run(&["auth", "code", "view", "bob"]);
+    failure(&failed);
+    assert!(failed.stdout.is_empty());
+    unavailable.assert();
+    key_request.assert();
+    drop(server);
+    assert_eq!(view("bob")["name"], "Work (bob@example.com)");
+}
+
+#[test]
+fn unreadable_codes_block_text_selection_but_not_ids_or_list_limits() {
+    let mut server = Server::new();
+    let home = TestHome::new();
+    seed(&home, &server.url());
+    let key = Key::generate();
+    let key_request = key_response(&mut server, &key);
+    let initial = page(
+        &mut server,
+        0,
+        vec![
+            entity(1, 10, &json!("private-secret"), &key),
+            entity(2, 10, &json!("otpauth://totp/GitHub:alice?secret=MY"), &key),
+            entity(3, 10, &json!("otpauth://totp/Work:bob?secret=MY"), &key),
+        ],
+    );
+    let listed = home.run(&["auth", "code", "list", "--limit", "1", "--json"]);
+    let error = failure(&listed);
+    assert!(
+        error.contains("Auth code list is incomplete")
+            && error.contains("1 unreadable Auth code")
+            && error.contains(&Uuid::from_u128(1).to_string())
+    );
+    assert!(!error.contains("private-secret"));
+    assert_eq!(
+        serde_json::from_slice::<Value>(&listed.stdout).unwrap()[0]["id"],
+        Uuid::from_u128(2).to_string()
+    );
+    for query in ["GitHub (alice)", "github", "missing"] {
+        let output = home.run(&["auth", "code", "view", query, "--offline"]);
+        let error = failure(&output);
+        assert!(error.contains("unreadable Auth code"));
+        assert!(error.contains(&format!(
+            "cannot resolve code {query:?}; select a known code ID"
+        )));
+        assert!(output.stdout.is_empty());
+    }
+    let id = Uuid::from_u128(1).to_string();
+    let unreadable = home.run(&["auth", "code", "view", &id, "--offline"]);
+    assert!(
+        failure(&unreadable).contains(&format!("cannot read code {id:?}: 1 unreadable Auth code"))
+    );
+    assert!(unreadable.stdout.is_empty());
+    let result = home.json(&[
+        "auth",
+        "code",
+        "view",
+        &Uuid::from_u128(2).to_string(),
+        "--offline",
+    ]);
+    assert_eq!(result["name"], "GitHub (alice)");
+    assert_eq!(
+        home.json(&[
+            "auth",
+            "code",
+            "list",
+            "--search",
+            &Uuid::from_u128(2).to_string(),
+            "--offline"
+        ])[0]["name"],
+        "GitHub (alice)"
+    );
+    assert!(
+        failure(&home.run(&["auth", "code", "view", "  ", "--offline"]))
+            .contains("supply a code ID or search text")
+    );
+    initial.assert();
+    key_request.assert();
+}
+
+#[test]
 fn refresh_keeps_progress_and_refuses_unreadable_codes_until_updated() {
     let mut server = Server::new();
     let home = TestHome::new();

@@ -75,6 +75,9 @@ def create(expect, send):
 def enable(expect, send):
     text = expect(b"Authenticator code:")
     secret = re.search(rb"authenticator: ([A-Z2-7]+)", text)[1]
+    send(b"invalid", True)
+    expect(b"Incorrect authenticator code. Try again.")
+    expect(b"Authenticator code:")
     key = base64.b32decode(secret + b"=" * (-len(secret) % 8))
     digest = hmac.new(key, (int(time.time()) // 30).to_bytes(8, "big"), hashlib.sha1).digest()
     offset = digest[-1] & 15
