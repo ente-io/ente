@@ -47,24 +47,14 @@ pub async fn run(
     }
     let state = State::load()?;
     let account = &state.accounts[state.resolve(selected)?];
-    let mut saved_apps = account.sessions.keys();
-    let app = match (app, saved_apps.next(), saved_apps.next()) {
-        (Some(app), _, _) | (None, Some(&app), None) => app,
-        _ => {
-            ensure!(
-                account.sessions.contains_key(&App::Photos),
-                "multiple apps are saved without Photos; select one with --app"
-            );
-            App::Photos
-        }
-    };
+    let app = account.app(app)?;
     let client = api::accounts_client(&account.origin, app)?;
     client.set_auth_token(Some(ente_core::b64::encode_url_safe(account.token(app)?)));
     execute(command, &client, account, options).await.map_err(|error| {
         if matches!(error.downcast_ref::<ente_accounts::Error>(),
             Some(ente_accounts::Error::Http(ente_core::http::Error::Api { status: 400, message: Some(message), .. }))
                 if message == "Token is too old") {
-            error.context(format!("administrator login is too old; run account login {:?} --app {} and retry", account.name, app.name()))
+            error.context(format!("administrator login is too old; run account login --account {:?} --app {} and retry", account.name, app.name()))
         } else {
             error
         }

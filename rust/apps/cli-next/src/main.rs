@@ -1,3 +1,4 @@
+mod account;
 mod admin;
 mod api;
 mod args;
@@ -112,6 +113,43 @@ fn vault_key(json_output: bool) -> Result<()> {
 
 async fn account_command(command: AccountCommand, options: &Options) -> Result<()> {
     match command {
+        AccountCommand::RequestOtp {
+            email,
+            app,
+            host,
+            purpose,
+        } => account::request_otp(email, app, host, purpose, options).await,
+        AccountCommand::Create(args) => {
+            let app = args.app;
+            let (state, index) = account::create(args, options).await?;
+            let account = AccountView::new(&state.accounts[index], state.selected);
+            output::action(
+                options.json,
+                &json!({"account": account, "app": app, "created": true}),
+                &format!(
+                    "Created {} and signed into {}.",
+                    output::escape_controls(&state.accounts[index].name),
+                    app.display_name()
+                ),
+            )
+        }
+        AccountCommand::Totp {
+            selector,
+            app,
+            command,
+        } => account::totp(command, selector.account.as_deref(), app, options).await,
+        AccountCommand::RecoveryKey { name } => {
+            let state = State::load()?;
+            let account = &state.accounts[state.resolve(name.as_deref())?];
+            let key = Zeroizing::new(ente_accounts::auth::recovery_key_to_mnemonic(
+                &account.identity.recovery_key,
+            )?);
+            if options.json {
+                output::json(&json!({"recoveryKey": key.as_str()}))
+            } else {
+                writeln!(std::io::stdout(), "{}", key.as_str()).map_err(Into::into)
+            }
+        }
         AccountCommand::Login(args) => {
             ensure!(!options.offline, "login requires network access");
             let app = args.app;
@@ -165,8 +203,11 @@ async fn account_command(command: AccountCommand, options: &Options) -> Result<(
         AccountCommand::Rename { name, new_name } => {
             let mut vault = Vault::open()?;
             let state = &mut vault.state;
-            let index = state.named(&name)?;
-            if name != new_name {
+            let (index, new_name) = match new_name {
+                Some(new_name) => (state.named(&name)?, new_name),
+                None => (state.resolve(None)?, name),
+            };
+            if state.accounts[index].name != new_name {
                 state.check_name(&new_name)?;
                 state.accounts[index].name = new_name;
                 vault.save()?;

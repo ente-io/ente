@@ -183,17 +183,14 @@ impl AccountsClient {
             email: email.to_string(),
             purpose: purpose.to_string(),
         };
-        Ok(http::retry(|| async {
-            self.api
-                .post("/users/ott")
-                .json(&request)
-                .send()
-                .await?
-                .error_for_code()
-                .await?;
-            Ok(())
-        })
-        .await?)
+        self.api
+            .post("/users/ott")
+            .json(&request)
+            .send()
+            .await?
+            .error_for_code()
+            .await?;
+        Ok(())
     }
 
     pub async fn verify_email(
@@ -564,7 +561,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn send_otp_retries_on_server_error() {
+    async fn email_request_surfaces_server_failure() {
         let mut server = Server::new_async().await;
         let first = server
             .mock("POST", "/users/ott")
@@ -573,18 +570,14 @@ mod tests {
             .expect(1)
             .create_async()
             .await;
-        let second = server
-            .mock("POST", "/users/ott")
-            .with_status(200)
-            .expect(1)
-            .create_async()
-            .await;
-
         let client = make_client(server.url());
-        client.send_otp("user@example.org", "login").await.unwrap();
+        let error = client
+            .send_otp("user@example.org", "login")
+            .await
+            .unwrap_err();
+        assert!(matches!(error, Error::Http(error) if error.status_code() == Some(500)));
 
         first.assert_async().await;
-        second.assert_async().await;
     }
 
     #[tokio::test]

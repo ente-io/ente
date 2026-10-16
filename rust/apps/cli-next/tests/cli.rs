@@ -91,7 +91,7 @@ fn reads_do_not_initialize_storage() {
         assert_eq!(success(output).stdout, b"No accounts on this device.\n");
         for args in [
             vec!["accounts", "list", "--json"],
-            vec!["accounts", "view", "missing"],
+            vec!["accounts", "view", "--account", "missing"],
             vec!["account", "token", "--app", "photos"],
             vec!["photos", "album", "list"],
             vec!["photos", "album", "view", "missing"],
@@ -461,7 +461,7 @@ fn private_json_errors_do_not_echo_values() {
         );
         assert!(output.stdout.is_empty());
         let error = failure(&output);
-        assert!(error.contains("login input must contain"), "{error}");
+        assert!(error.contains("input must contain"), "{error}");
         errors.push(error);
     }
     assert_eq!(fs::read_dir(home.dir.path()).unwrap().count(), 0);
@@ -523,7 +523,7 @@ fn logout_reconciles_remote_and_local_session_state() {
     let home = TestHome::new();
     home.seed(&server.url());
     let mut state = home.read_vault();
-    let mut account = home.json(&["account", "view", "fixture"]);
+    let mut account = home.json(&["account", "view", "--account", "fixture"]);
     assert_eq!(
         success(home.run(&["account", "logout", "--app", "photos"])).stdout,
         b"Logged out of Ente Photos. Removed account \"fixture\" from this device.\n"
@@ -543,7 +543,10 @@ fn logout_reconciles_remote_and_local_session_state() {
         home.json(&["account", "logout", "--app", "photos"]),
         json!({"account": account, "app": "photos", "remoteLogout": true})
     );
-    assert_eq!(home.json(&["account", "view", "fixture"]), account);
+    assert_eq!(
+        home.json(&["account", "view", "--account", "fixture"]),
+        account
+    );
     state["accounts"][0]["sessions"]
         .as_object_mut()
         .unwrap()
@@ -583,7 +586,7 @@ fn account_logout_revokes_every_app_before_removing_the_account() {
     state["accounts"][0]["sessions"]["locker"] = json!({"token": [1]});
     state["accounts"][0]["sessions"]["auth"] = json!({"token": [2]});
     home.write_vault(&state);
-    let mut account = home.json(&["account", "view", "fixture"]);
+    let mut account = home.json(&["account", "view", "--account", "fixture"]);
     account["apps"] = json!([]);
     account["selected"] = json!(false);
     let photos = server
@@ -608,29 +611,36 @@ fn account_logout_revokes_every_app_before_removing_the_account() {
         .create();
 
     assert_eq!(
-        success(home.run(&["account", "logout", "fixture"])).stdout,
+        success(home.run(&["account", "logout", "--account", "fixture"])).stdout,
         b"Logged out of Ente Photos, Ente Locker, and Ente Auth. Removed account \"fixture\" from this device.\n"
     );
     assert_eq!(home.read_vault(), json!({"accounts": [], "selected": null}));
     home.write_vault(&state);
     assert_eq!(
-        home.json(&["account", "logout", "fixture"]),
+        home.json(&["account", "logout", "--account", "fixture"]),
         json!({"account": account, "apps": ["photos", "locker", "auth"], "remoteLogout": true})
     );
     home.write_vault(&state);
     assert_eq!(
-        home.json(&["account", "logout", "fixture", "--local", "--offline"]),
+        home.json(&[
+            "account",
+            "logout",
+            "--account",
+            "fixture",
+            "--local",
+            "--offline"
+        ]),
         json!({"account": account, "apps": ["photos", "locker", "auth"], "remoteLogout": false})
     );
     state["accounts"][0]["sessions"] = json!({});
     home.write_vault(&state);
     assert_eq!(
-        home.json(&["account", "logout", "fixture"]),
+        home.json(&["account", "logout", "--account", "fixture"]),
         json!({"account": account, "apps": [], "remoteLogout": true})
     );
     home.write_vault(&state);
     assert_eq!(
-        success(home.run(&["account", "logout", "fixture", "--local"])).stdout,
+        success(home.run(&["account", "logout", "--account", "fixture", "--local"])).stdout,
         b"Removed account \"fixture\" from this device.\n"
     );
     assert_eq!(home.read_vault(), json!({"accounts": [], "selected": null}));
@@ -663,7 +673,7 @@ fn account_logout_preserves_sessions_that_it_could_not_revoke() {
         .expect(0)
         .create();
 
-    let output = home.run(&["account", "logout", "fixture"]);
+    let output = home.run(&["account", "logout", "--account", "fixture"]);
     assert!(output.stdout.is_empty());
     let error = failure(&output);
     assert!(error.contains("cannot log out of Ente Locker for \"fixture\": HTTP 403"));
@@ -675,7 +685,7 @@ fn account_logout_preserves_sessions_that_it_could_not_revoke() {
     assert!(sessions.get("auth").is_some());
 
     assert_eq!(
-        success(home.run(&["account", "logout", "fixture", "--local"])).stdout,
+        success(home.run(&["account", "logout", "--account", "fixture", "--local"])).stdout,
         b"Removed account \"fixture\" from this device. Server logout was skipped.\n"
     );
     assert_eq!(home.read_vault(), json!({"accounts": [], "selected": null}));
@@ -689,7 +699,7 @@ fn account_updates_preserve_identity_and_selection() {
     let home = TestHome::new();
     home.seed("http://localhost:8080");
     assert_eq!(
-        success(home.run(&["account", "view", "fixture"])).stdout,
+        success(home.run(&["account", "view", "--account", "fixture"])).stdout,
         b"Name       fixture\nEmail      fixture@example.org\nHost       http://localhost:8080\nLogged in  photos\nSelected   yes\nID         9007199254740993\n"
     );
     let account = json!({
@@ -697,7 +707,10 @@ fn account_updates_preserve_identity_and_selection() {
         "host": "http://localhost:8080", "apps": ["photos"], "selected": true
     });
     assert_eq!(home.json(&["account", "list"]), json!([account]));
-    assert_eq!(home.json(&["accounts", "view", "fixture"]), account);
+    assert_eq!(
+        home.json(&["accounts", "view", "--account", "fixture"]),
+        account
+    );
     assert_eq!(home.json(&["account", "view"]), account);
     let mut state = home.read_vault();
     let mut second = state["accounts"][0].clone();
@@ -707,7 +720,7 @@ fn account_updates_preserve_identity_and_selection() {
     state["accounts"].as_array_mut().unwrap().push(second);
     home.write_vault(&state);
 
-    success(home.run(&["account", "rename", "fixture", "renamed"]));
+    success(home.run(&["account", "rename", "renamed"]));
     success(home.run(&["account", "rename", "second", "other"]));
     state["accounts"][0]["name"] = json!("renamed");
     state["accounts"][1]["name"] = json!("other");
@@ -779,20 +792,31 @@ fn account_token_reads_the_requested_saved_login() {
         json!({"token": "AQ=="})
     );
     assert_eq!(
-        home.json(&["account", "token", "fixture", "--app", "auth"]),
+        home.json(&["account", "token", "--account", "fixture", "--app", "auth"]),
         json!({"token": "_w=="})
     );
     let missing_login = home.run(&args);
     assert!(failure(&missing_login).contains(
-        "account \"other\" is not logged into Ente Photos; use account login \"other\" --app photos"
+        "account \"other\" is not logged into Ente Photos; use account login --account \"other\" --app photos"
     ));
     assert!(missing_login.stdout.is_empty());
-    let explicit_login = home.run(&["account", "token", "--app", "locker", "fixture"]);
+    let explicit_login = home.run(&[
+        "account",
+        "token",
+        "--app",
+        "locker",
+        "--account",
+        "fixture",
+    ]);
     assert!(failure(&explicit_login).contains(
-        "account \"fixture\" is not logged into Ente Locker; use account login \"fixture\" --app locker"
+        "account \"fixture\" is not logged into Ente Locker; use account login --account \"fixture\" --app locker"
     ));
     assert!(explicit_login.stdout.is_empty());
-    let missing_account = home.command(&args).arg("missing").output().unwrap();
+    let missing_account = home
+        .command(&args)
+        .args(["--account", "missing"])
+        .output()
+        .unwrap();
     assert!(failure(&missing_account).contains("no account named \"missing\"; use account list"));
     assert!(missing_account.stdout.is_empty());
     assert_eq!(fs::read(&vault).unwrap(), before);
@@ -811,7 +835,7 @@ fn account_token_reads_the_requested_saved_login() {
     drop(reader);
     let write_failure = home
         .command(&args)
-        .arg("fixture")
+        .args(["--account", "fixture"])
         .stdout(writer)
         .output()
         .unwrap();
@@ -873,7 +897,7 @@ fn native_keyring_survives_separate_processes() {
                 .unwrap(),
         );
         let output = success(
-            home.command(&["account", "view", "native", "--json"])
+            home.command(&["account", "view", "--account", "native", "--json"])
                 .env_remove("ENTE_CLI_VAULT_KEY")
                 .output()
                 .unwrap(),
@@ -994,6 +1018,9 @@ fn failure(output: &Output) -> String {
     assert!(!output.status.success(), "command unexpectedly succeeded");
     String::from_utf8_lossy(&output.stderr).into_owned()
 }
+
+#[path = "support/account.rs"]
+mod account;
 
 #[path = "support/admin.rs"]
 mod admin;

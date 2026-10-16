@@ -277,7 +277,7 @@ fn admin_failures_do_not_all_recommend_login() {
         let output = home.run(&["admin", "user", "list", "--json", "--no-input"]);
         let error = failure(&output);
         assert_eq!(
-            error.contains("account login \"fixture\" --app photos"),
+            error.contains("account login --account \"fixture\" --app photos"),
             stale,
             "{error}"
         );

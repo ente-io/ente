@@ -58,10 +58,11 @@ async fn checkpoints_preserve_keys_and_reconcile_an_accepted_upload() {
         prepared.recovery_key().unwrap(),
         recovered.recovery_key().unwrap()
     );
-    let retried = recovered
-        .prepare(&client, "different-password")
-        .await
-        .unwrap();
+    assert!(matches!(
+        recovered.prepare(&client, "different-password").await,
+        Err(Error::IncorrectPassword)
+    ));
+    let retried = recovered.prepare(&client, "signup-password").await.unwrap();
     assert!(serde_json::to_vec(&retried).unwrap() == serde_json::to_vec(&recovered).unwrap());
     let keys = recovered.keys.as_ref().unwrap();
     empty.assert_async().await;

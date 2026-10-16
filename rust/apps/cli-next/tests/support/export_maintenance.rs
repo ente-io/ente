@@ -2525,8 +2525,8 @@ fn export_reports_progress_and_keeps_account_storage_while_workers_run() {
         .join(state["accounts"][0]["storage_id"].as_str().unwrap());
     let revoke = server.mock("POST", "/users/logout").expect(0).create();
     for args in [
-        vec!["account", "logout", "fixture", "--local"],
-        vec!["account", "logout", "fixture"],
+        vec!["account", "logout", "--account", "fixture", "--local"],
+        vec!["account", "logout", "--account", "fixture"],
         vec!["account", "logout", "--app", "photos"],
     ] {
         let output = ExportChild::spawn(&mut home.command(&args))
@@ -2586,15 +2586,20 @@ fn export_reports_progress_and_keeps_account_storage_while_workers_run() {
         .open(account.with_extension("lock"))
         .unwrap();
     lock.lock().unwrap();
-    let output =
-        ExportChild::spawn(&mut home.command(&["account", "logout", "fixture", "--local"]))
-            .unwrap()
-            .wait_with_output()
-            .unwrap();
+    let output = ExportChild::spawn(&mut home.command(&[
+        "account",
+        "logout",
+        "--account",
+        "fixture",
+        "--local",
+    ]))
+    .unwrap()
+    .wait_with_output()
+    .unwrap();
     assert!(failure(&output).contains("account is in use"));
     assert!(home.read_vault()["accounts"][0]["sessions"]["locker"].is_object());
     drop(lock);
-    success(home.run(&["account", "logout", "fixture", "--local"]));
+    success(home.run(&["account", "logout", "--account", "fixture", "--local"]));
     assert!(!account.exists());
     assert_eq!(
         fs::read_dir(home.dir.path().join("accounts"))

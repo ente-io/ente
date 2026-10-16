@@ -454,7 +454,14 @@ fn slow_stdout_releases_account_storage_before_publication() {
     let mut stdout = child.stdout.take().unwrap();
     let mut first = [0];
     stdout.read_exact(&mut first).unwrap();
-    success(home.run(&["accounts", "logout", "fixture", "--local", "--offline"]));
+    success(home.run(&[
+        "accounts",
+        "logout",
+        "--account",
+        "fixture",
+        "--local",
+        "--offline",
+    ]));
     let mut rest = Vec::new();
     stdout.read_to_end(&mut rest).unwrap();
     success(child.wait_with_output().unwrap());

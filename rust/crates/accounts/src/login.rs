@@ -31,9 +31,16 @@ pub struct LoginFlow {
 
 impl LoginFlow {
     pub async fn start(client: &AccountsClient, email: String) -> Result<(Self, LoginStep)> {
+        let (flow, step) = Self::prepare(client, email).await?;
+        if matches!(step, LoginStep::EmailCode) {
+            flow.resend_code(client).await?;
+        }
+        Ok((flow, step))
+    }
+
+    pub async fn prepare(client: &AccountsClient, email: String) -> Result<(Self, LoginStep)> {
         let attributes = client.get_srp_attributes(&email).await?;
         let (state, step) = if attributes.is_email_mfa_enabled {
-            client.send_otp(&email, "login").await?;
             (State::EmailCode, LoginStep::EmailCode)
         } else {
             (State::Password(None), LoginStep::Password)
