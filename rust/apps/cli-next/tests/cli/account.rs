@@ -397,10 +397,7 @@ fn interactive_creation_password_retry_and_enrollment() -> ente_test_support::Te
         success(
             Command::new("python3")
                 .args([
-                    concat!(
-                        env!("CARGO_MANIFEST_DIR"),
-                        "/tests/support/account_prompt.py"
-                    ),
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/tests/cli/account_prompt.py"),
                     env!("CARGO_BIN_EXE_ente-cli-next"),
                     &origin,
                     &email,

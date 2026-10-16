@@ -963,5 +963,5 @@ async fn set_album_metadata(
         .unwrap();
 }
 
-#[path = "../support/export.rs"]
+#[path = "export.rs"]
 mod export;

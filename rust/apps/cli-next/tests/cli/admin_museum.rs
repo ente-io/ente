@@ -280,7 +280,7 @@ fn admin_interactive_subscription() -> TestResult {
             let output = Command::new("python3")
                 .env_clear()
                 .args([
-                    concat!(env!("CARGO_MANIFEST_DIR"), "/tests/support/admin_prompt.py"),
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/tests/cli/admin_prompt.py"),
                     env!("CARGO_BIN_EXE_ente-cli-next"),
                     &email,
                     mode,
