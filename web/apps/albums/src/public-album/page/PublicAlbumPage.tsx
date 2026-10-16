@@ -20,6 +20,7 @@ import { ActiveDownloadStatusNotifications } from "@/public-album/download/compo
 import { downloadManager } from "@/public-album/download/services/download-manager";
 import { thumbnailManager } from "@/public-album/media/thumbnails/thumbnail-manager";
 import type { UploadProps } from "@/public-album/upload/components/Upload";
+import { albumCaptureDateRangeForFiles } from "@/public-album/utils/album-date-range";
 import {
     getSelectedFiles,
     type SelectedState,
@@ -75,7 +76,6 @@ import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
-    AlbumDescription,
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
@@ -593,22 +593,21 @@ export default function PublicAlbumPage() {
     }, []);
 
     const hasSelection = selected.count > 0;
-    const viewportWidth = useViewportWidth();
     const publicAlbumLayout = normalizedPublicAlbumLayout(
         publicCollection?.pubMagicMetadata?.data.layout,
     );
     const isMobileHeaderLayout = useMediaQuery("(width < 720px)");
-    const showMobileMasonryCover =
-        isMobileHeaderLayout && publicAlbumLayout === "masonry";
+    const showMobileAlbumCover =
+        isMobileHeaderLayout && publicAlbumLayout !== "trip";
     const albumDescription =
         publicCollection?.pubMagicMetadata?.data.caption?.trim();
-    const hasSummaryDescription = !!albumDescription && !showMobileMasonryCover;
+    const hasSummaryDescription = !!albumDescription && !showMobileAlbumCover;
     const [descriptionHeight, setDescriptionHeight] = useState(0);
 
     const fileListHeaderHeightForViewport =
         (isMobileHeaderLayout
-            ? showMobileMasonryCover
-                ? mobileMasonryFileListHeaderHeight(viewportWidth)
+            ? showMobileAlbumCover
+                ? mobileAlbumCoverHeight + thumbnailGap
                 : fileListHeaderHeightMobile
             : fileListHeaderHeight) +
         (hasSummaryDescription ? descriptionHeight : 0);
@@ -630,12 +629,13 @@ export default function PublicAlbumPage() {
                                       : undefined,
                                   addPhotosDisabled: isUploadInProgress,
                                   hasSelection,
-                                  showMobileMasonryCover,
+                                  showMobileAlbumCover,
                               }}
                               onDescriptionHeightChange={setDescriptionHeight}
                           />
                       ),
                       height: fileListHeaderHeightForViewport,
+                      extendToInlineEdges: showMobileAlbumCover,
                   }
                 : undefined,
         [
@@ -648,13 +648,13 @@ export default function PublicAlbumPage() {
             onAddPhotos,
             isUploadInProgress,
             hasSelection,
-            showMobileMasonryCover,
+            showMobileAlbumCover,
             fileListHeaderHeightForViewport,
         ],
     );
 
-    const fileListFooterHeightForViewport = showMobileMasonryCover
-        ? mobileMasonryFileListFooterHeight
+    const fileListFooterHeightForViewport = showMobileAlbumCover
+        ? mobileAlbumFileListFooterHeight
         : fileListFooterHeight;
 
     const fileListFooter = useMemo<FileListHeaderOrFooter>(
@@ -753,7 +753,7 @@ export default function PublicAlbumPage() {
                                 px: "24px",
                                 "@media (width < 720px)": {
                                     px: "12px",
-                                    ...(showMobileMasonryCover
+                                    ...(showMobileAlbumCover
                                         ? { borderBottom: "none" }
                                         : {}),
                                 },
@@ -880,32 +880,8 @@ const normalizedPublicAlbumLayout = (
     return "masonry";
 };
 
-const useViewportWidth = () => {
-    const [viewportWidth, setViewportWidth] = useState<number | undefined>(
-        undefined,
-    );
-
-    useEffect(() => {
-        if (typeof window === "undefined") return;
-
-        const update = () => setViewportWidth(window.innerWidth);
-        update();
-
-        window.addEventListener("resize", update);
-        return () => window.removeEventListener("resize", update);
-    }, []);
-
-    return viewportWidth;
-};
-
-const mobileMasonryFileListHeaderHeight = (viewportWidth: number | undefined) =>
-    Math.round(mobileMasonryCoverHeight(viewportWidth) + thumbnailGap);
-
-const mobileMasonryCoverHeight = (viewportWidth: number | undefined) => {
-    const width = Math.max(320, Math.min(viewportWidth ?? 390, 719));
-    const coverWidth = width - 2 * 4;
-    return coverWidth * (4 / 3);
-};
+// The native cover height excludes the system status bar.
+const mobileAlbumCoverHeight = 441;
 
 const publicAlbumCoverFile = (
     collection: Collection,
@@ -1041,6 +1017,7 @@ const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
             <FocusVisibleButton
                 color="secondary"
                 sx={navbarActionButtonSx}
+                aria-label={t("add_photos")}
                 onClick={onAddPhotos}
                 disabled={addPhotosDisabled}
             >
@@ -1122,7 +1099,7 @@ interface FileListHeaderProps {
     onShowFeed?: () => void;
     addPhotosDisabled: boolean;
     hasSelection: boolean;
-    showMobileMasonryCover: boolean;
+    showMobileAlbumCover: boolean;
     onDescriptionHeightChange?: (height: number) => void;
 }
 
@@ -1139,7 +1116,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     onShowFeed,
     addPhotosDisabled,
     hasSelection,
-    showMobileMasonryCover,
+    showMobileAlbumCover,
     onDescriptionHeightChange,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
@@ -1204,7 +1181,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
             addPhotosDisabled={addPhotosDisabled}
             hasSelection={hasSelection}
             onShare={handleShare}
-            align={showMobileMasonryCover ? "start" : "end"}
+            align={showMobileAlbumCover ? "start" : "end"}
         />
     );
 
@@ -1224,7 +1201,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
 
     return (
         <>
-            {showMobileMasonryCover ? (
+            {showMobileAlbumCover ? (
                 <GalleryItemsHeaderAdapter
                     sx={{ pt: 0, mb: `${thumbnailGap}px` }}
                 >
@@ -1232,10 +1209,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                         coverFile={coverFile}
                         title={publicCollection.name}
                         description={albumDescription}
-                        fileCount={publicFiles.length}
-                        dateRange={
-                            isQuickLinkAlbum ? undefined : memoriesDateRange
-                        }
+                        dateRange={albumCaptureDateRangeForFiles(publicFiles)}
                         actions={coverActions}
                     />
                 </GalleryItemsHeaderAdapter>
@@ -1356,6 +1330,7 @@ const FileListHeaderActions: React.FC<FileListHeaderActionsProps> = ({
     >
         {onShowFeed && (
             <IconButton
+                aria-label={t("activity")}
                 onClick={onShowFeed}
                 disabled={hasSelection}
                 sx={actionButtonSx(variant)}
@@ -1365,6 +1340,7 @@ const FileListHeaderActions: React.FC<FileListHeaderActionsProps> = ({
         )}
         {downloadEnabled && (
             <IconButton
+                aria-label={t("download")}
                 onClick={onDownloadAll}
                 disabled={hasSelection}
                 sx={actionButtonSx(variant)}
@@ -1374,6 +1350,7 @@ const FileListHeaderActions: React.FC<FileListHeaderActionsProps> = ({
         )}
         {onAddPhotos && (
             <IconButton
+                aria-label={t("add_photos")}
                 onClick={onAddPhotos}
                 disabled={addPhotosDisabled || hasSelection}
                 sx={actionButtonSx(variant)}
@@ -1382,6 +1359,7 @@ const FileListHeaderActions: React.FC<FileListHeaderActionsProps> = ({
             </IconButton>
         )}
         <IconButton
+            aria-label={t("share_action")}
             onClick={onShare}
             disabled={hasSelection}
             sx={actionButtonSx(variant)}
@@ -1394,10 +1372,10 @@ const FileListHeaderActions: React.FC<FileListHeaderActionsProps> = ({
 const actionButtonSx = (variant: "default" | "cover") =>
     variant === "cover"
         ? {
-              width: 46,
-              height: 46,
+              width: 42,
+              height: 42,
               color: "common.white",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              backgroundColor: "rgba(0, 0, 0, 0.3)",
               "& svg": { color: "inherit" },
               "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.5)" },
               "&.Mui-disabled": {
@@ -1411,7 +1389,6 @@ interface PublicAlbumCoverHeroProps {
     coverFile: EnteFile | undefined;
     title: string;
     description?: string;
-    fileCount: number;
     dateRange?: string;
     actions?: React.ReactNode;
 }
@@ -1420,7 +1397,6 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
     coverFile,
     title,
     description,
-    fileCount,
     dateRange,
     actions,
 }) => {
@@ -1513,12 +1489,13 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
         !coverFile || coverFile.metadata.hasStaticThumbnail || !thumbnailURL;
 
     return (
-        <MobileMasonryCover $isPlaceholder={isPlaceholder}>
+        <MobileAlbumCover $isPlaceholder={isPlaceholder}>
             {coverFile?.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={coverFile.metadata.fileType} />
             ) : thumbnailURL ? (
                 <>
-                    <MobileMasonryCoverPreviewImage
+                    <MobileAlbumCoverPreviewImage
+                        data-cover-photo
                         src={thumbnailURL}
                         alt={title}
                         decoding="async"
@@ -1526,7 +1503,8 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
                         fetchPriority="high"
                     />
                     {fullImageURL && fullImageURL !== thumbnailURL && (
-                        <MobileMasonryCoverFullImage
+                        <MobileAlbumCoverFullImage
+                            data-cover-photo
                             src={fullImageURL}
                             alt=""
                             aria-hidden
@@ -1538,67 +1516,63 @@ const PublicAlbumCoverHero: React.FC<PublicAlbumCoverHeroProps> = ({
             ) : (
                 <LoadingThumbnail />
             )}
-            <MobileMasonryCoverGradient $isPlaceholder={isPlaceholder} />
-            <MobileMasonryCoverContent>
-                <MobileMasonryCoverTitle>{title}</MobileMasonryCoverTitle>
-                <AlbumDescription
-                    description={description}
-                    sx={{
-                        maxWidth: "100%",
-                        mt: "-6px",
-                        opacity: 0.8,
-                        textAlign: "center",
-                    }}
-                />
-                <Typography
-                    variant="small"
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                        gap: "6px",
-                        fontSize: "16px",
-                        lineHeight: 1.2,
-                        minWidth: 0,
-                    }}
-                >
-                    <Box component="span" sx={{ opacity: 0.72, flexShrink: 0 }}>
-                        {t("photos_count", { count: fileCount })}
-                    </Box>
-                    {dateRange && (
-                        <Box
-                            component="span"
-                            sx={{
-                                opacity: 0.72,
-                                display: "inline-flex",
-                                alignItems: "center",
-                                minWidth: 0,
-                            }}
-                        >
-                            <Box
-                                component="span"
-                                sx={{ flexShrink: 0, mr: "6px" }}
-                            >
-                                {"\u00b7"}
-                            </Box>
-                            <Box
-                                component="span"
-                                sx={{
-                                    minWidth: 0,
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                }}
-                            >
-                                {dateRange}
-                            </Box>
-                        </Box>
-                    )}
-                </Typography>
-                {actions}
-            </MobileMasonryCoverContent>
-        </MobileMasonryCover>
+            <MobileAlbumCoverGradient $isPlaceholder={isPlaceholder} />
+            <Box
+                component="img"
+                src="/images/album-cover-scrim.svg"
+                alt=""
+                aria-hidden
+                sx={{
+                    position: "absolute",
+                    left: "50%",
+                    top: "38px",
+                    transform: "translateX(-50%)",
+                    pointerEvents: "none",
+                }}
+            />
+            <MobileAlbumCoverContent>
+                {dateRange && (
+                    <Typography
+                        variant="small"
+                        sx={{
+                            mb: "14px",
+                            px: "12px",
+                            py: "8px",
+                            borderRadius: "27px",
+                            backgroundColor: "rgba(0, 0, 0, 0.32)",
+                            color: "rgba(255, 255, 255, 0.82)",
+                            fontSize: "10px",
+                            fontWeight: 500,
+                            lineHeight: "12px",
+                            textTransform: "uppercase",
+                        }}
+                    >
+                        {dateRange}
+                    </Typography>
+                )}
+                <MobileAlbumCoverTitle>{title}</MobileAlbumCoverTitle>
+                {description && (
+                    <Typography
+                        title={description}
+                        sx={{
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            maxWidth: "307px",
+                            fontSize: "12px",
+                            fontWeight: 500,
+                            lineHeight: "16px",
+                            color: "rgba(255, 255, 255, 0.92)",
+                            WebkitLineClamp: 2,
+                            textAlign: "center",
+                        }}
+                    >
+                        {description}
+                    </Typography>
+                )}
+                <Box sx={{ mt: "14px", width: "100%" }}>{actions}</Box>
+            </MobileAlbumCoverContent>
+        </MobileAlbumCover>
     );
 };
 
@@ -1618,21 +1592,20 @@ const preloadImage = async (url: string) => {
     await image.decode().catch(() => undefined);
 };
 
-const mobileMasonryCoverImageGradient =
-    "linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.18) 42%, rgba(0, 0, 0, 0.74) 100%)";
+const mobileAlbumCoverImageGradient =
+    "linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent 75px), linear-gradient(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.24))";
 
-const mobileMasonryCoverPlaceholderGradient =
+const mobileAlbumCoverPlaceholderGradient =
     "linear-gradient(to bottom, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.08) 42%, rgba(0, 0, 0, 0.42) 100%)";
 
-const MobileMasonryCover = styled(Box, {
+const MobileAlbumCover = styled(Box, {
     shouldForwardProp: (prop) => prop !== "$isPlaceholder",
 })<{ $isPlaceholder: boolean }>(({ theme, $isPlaceholder }) => ({
     position: "relative",
     overflow: "hidden",
-    borderRadius: "4px",
-    aspectRatio: "3 / 4",
+    height: mobileAlbumCoverHeight,
     backgroundColor: $isPlaceholder ? "#F4F4F4" : "#1b1b1b",
-    "& > img": {
+    "& > img[data-cover-photo]": {
         position: "absolute",
         inset: 0,
         width: "100%",
@@ -1642,58 +1615,66 @@ const MobileMasonryCover = styled(Box, {
     ...theme.applyStyles("dark", { backgroundColor: "#1b1b1b" }),
 }));
 
-const MobileMasonryCoverPreviewImage = styled("img")({
-    filter: "blur(3px) saturate(1.08) brightness(0.94)",
+const MobileAlbumCoverPreviewImage = styled("img")({
+    filter: "blur(3px)",
 });
 
-const MobileMasonryCoverFullImage = styled("img")({
-    animation: "mobile-masonry-cover-reveal 420ms ease-out both",
-    "@keyframes mobile-masonry-cover-reveal": {
+const MobileAlbumCoverFullImage = styled("img")({
+    animation: "mobile-album-cover-reveal 420ms ease-out both",
+    "@keyframes mobile-album-cover-reveal": {
         from: { opacity: 0 },
         to: { opacity: 1 },
     },
 });
 
-const MobileMasonryCoverGradient = styled(Box, {
+const MobileAlbumCoverGradient = styled(Box, {
     shouldForwardProp: (prop) => prop !== "$isPlaceholder",
 })<{ $isPlaceholder: boolean }>(({ theme, $isPlaceholder }) => ({
     position: "absolute",
     inset: 0,
     background: $isPlaceholder
-        ? mobileMasonryCoverPlaceholderGradient
-        : mobileMasonryCoverImageGradient,
-    ...theme.applyStyles("dark", {
-        background: mobileMasonryCoverImageGradient,
-    }),
+        ? mobileAlbumCoverPlaceholderGradient
+        : mobileAlbumCoverImageGradient,
+    "&::after": {
+        content: '""',
+        position: "absolute",
+        inset: "auto 0 0",
+        height: "100px",
+        background: `linear-gradient(to bottom, transparent, ${theme.vars.palette.background.default})`,
+    },
 }));
 
-const MobileMasonryCoverContent = styled(Box)({
+const MobileAlbumCoverContent = styled(Box)({
     position: "absolute",
     inset: 0,
     display: "flex",
     flexDirection: "column",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
-    gap: "14px",
-    padding: "18px 18px 32px",
+    gap: "8px",
+    padding: "80px 16px 46px",
     color: "white",
 });
 
-const MobileMasonryCoverTitle = styled(Typography)({
-    fontSize: "36px",
+const MobileAlbumCoverTitle = styled(Typography)({
+    fontFamily: '"Outfit Variable", Outfit, sans-serif',
+    fontSize: "32px",
     fontWeight: 600,
-    lineHeight: 1.2,
-    letterSpacing: "-0.03em",
+    lineHeight: "40px",
     textAlign: "center",
     width: "100%",
     maxWidth: "100%",
     overflowWrap: "anywhere",
+    display: "-webkit-box",
+    WebkitBoxOrient: "vertical",
+    WebkitLineClamp: 2,
+    overflow: "hidden",
 });
 
 const fileListFooterHeight = 24;
 
-const mobileMasonryFileListFooterHeight = thumbnailGap;
+const mobileAlbumFileListFooterHeight = thumbnailGap;
 
 const FileListFooter: React.FC<{ height: number }> = ({ height }) => (
     <Box sx={{ height }} />

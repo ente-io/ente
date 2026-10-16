@@ -146,10 +146,20 @@ export const FileList: React.FC<FileListProps> = ({
     const listRef = useRef<VariableSizeList | null>(null);
     const outerRef = useRef<HTMLDivElement | null>(null);
 
-    const layoutParams = useMemo(
-        () => computeThumbnailGridLayoutParams(width),
-        [width],
-    );
+    const layoutParams = useMemo(() => {
+        const params = computeThumbnailGridLayoutParams(width);
+        if (width >= 720) return params;
+        const gap = 2;
+        const itemWidth = Math.max(0, (width - 3 * gap) / 4);
+        return {
+            ...params,
+            paddingInline: 0,
+            columns: 4,
+            gap,
+            itemWidth,
+            itemHeight: itemWidth,
+        };
+    }, [width]);
     const shouldUseMasonry = layout === "masonry";
 
     useEffect(() => {
@@ -1044,6 +1054,11 @@ const DateListItem = styled(GridSpanListItem)(
     text-overflow: ellipsis;
     height: ${dateListItemHeight}px;
     color: ${theme.vars.palette.text.muted};
+    @media (width < 720px) {
+        padding-inline: 16px;
+        font-size: 12px;
+        line-height: 16px;
+    }
 `,
 );
 
