@@ -80,7 +80,7 @@ export const visibleAlbumFilters = (collectionSummaries: CollectionSummary[]) =>
         return collectionSummaries.some((cs) => matchesAlbumFilter(cs, value));
     });
 
-/** The sidebar and overview must display exactly the same album membership. */
+// The sidebar and overview must display exactly the same album membership.
 export const filterAlbumSummaries = (
     summaries: CollectionSummary[],
     filter: AlbumFilter,

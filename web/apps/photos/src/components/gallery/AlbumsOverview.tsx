@@ -26,7 +26,7 @@ interface AlbumsOverviewProps {
     onCreateAlbum: () => void;
 }
 
-/** Uses the People overview's virtualized rows with the ZIP's fixed album tiles. */
+// Uses the People overview's virtualized rows with the ZIP's fixed album tiles.
 export const AlbumsOverview = ({
     albums,
     title,
