@@ -1206,8 +1206,6 @@ export const getRenamedExportedCollections = (
                 collection.id,
             )!;
 
-            // Export folder names are sanitized, so compare against the
-            // sanitized form of the album name.
             const collectionExportName = sanitizeFilename(
                 collectionUserFacingName(collection),
             );
