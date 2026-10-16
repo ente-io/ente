@@ -25,11 +25,14 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
+    collectionsSortBy,
     PseudoCollectionID,
     sortCollectionSummaries,
+    type CollectionsSortBy,
     type CollectionSummaries,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
+import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {
@@ -41,9 +44,12 @@ export type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
     | "onSelectCollectionID"
+    | "collectionsSortBy"
+    | "onChangeCollectionsSortBy"
     | "onShowAllAlbums"
     | "onShowAllPeople"
 > & {
+    onCollectionsSortByChange: (by: CollectionsSortBy) => void;
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
     allPeople: Person[];
@@ -84,8 +90,7 @@ export const GalleryBarAndListHeader: React.FC<
     people,
     peopleSortBy,
     onChangePeopleSortBy,
-    collectionsSortBy,
-    onChangeCollectionsSortBy,
+    onCollectionsSortByChange,
     albumFilter,
     albumSearchQuery,
     onAlbumSearchQueryChange,
@@ -132,6 +137,13 @@ export const GalleryBarAndListHeader: React.FC<
         setCollectionShareIntent(undefined);
         collectionShareVisibilityProps.onClose();
     }, [collectionShareVisibilityProps]);
+
+    const [collectionsSortBy, setCollectionsSortBy] =
+        useCollectionsSortByLocalState("updation-time-desc");
+
+    useEffect(() => {
+        onCollectionsSortByChange(collectionsSortBy);
+    }, [collectionsSortBy, onCollectionsSortByChange]);
 
     const sortedCollectionSummaries = useMemo(
         () =>
@@ -275,7 +287,7 @@ export const GalleryBarAndListHeader: React.FC<
                 }}
                 onSelectCollectionID={selectCollection}
                 onSelectPerson={selectPerson}
-                onChangeCollectionsSortBy={onChangeCollectionsSortBy}
+                onChangeCollectionsSortBy={setCollectionsSortBy}
                 onChangePeopleSortBy={onChangePeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
@@ -299,7 +311,7 @@ export const GalleryBarAndListHeader: React.FC<
                     (cs) => !cs.attributes.has("system"),
                 )}
                 onSelectCollectionID={selectCollection}
-                onChangeCollectionsSortBy={onChangeCollectionsSortBy}
+                onChangeCollectionsSortBy={setCollectionsSortBy}
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
                 isInArchiveSection={mode == "archive-albums"}
@@ -340,4 +352,22 @@ export const GalleryBarAndListHeader: React.FC<
             )}
         </>
     );
+};
+
+const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
+    const key = "collectionsSortBy";
+
+    const [value, setValue] = useState(initialValue);
+
+    useEffect(() => {
+        const value = localStorage.getItem(key);
+        if (value && includes(collectionsSortBy, value)) setValue(value);
+    }, []);
+
+    const setter = (value: CollectionsSortBy) => {
+        localStorage.setItem(key, value);
+        setValue(value);
+    };
+
+    return [value, setter] as const;
 };

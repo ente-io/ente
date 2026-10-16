@@ -66,7 +66,6 @@ import {
     type AlbumFilter,
 } from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
-import { useCollectionsSortByLocalState } from "@/utils/use-collections-sort";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Link, Typography } from "@mui/material";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
@@ -132,6 +131,7 @@ import {
     haveOnlySystemCollections,
     PseudoCollectionID,
     sortCollectionSummaries,
+    type CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
 import {
     updateFilesLocation,
@@ -225,7 +225,7 @@ const Page: React.FC = () => {
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
     const [albumSearchQuery, setAlbumSearchQuery] = useState("");
     const [collectionsSortBy, setCollectionsSortBy] =
-        useCollectionsSortByLocalState("updation-time-desc");
+        useState<CollectionsSortBy>("updation-time-desc");
     const createForAlbumOverview = useRef(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [peopleSortBy, setPeopleSortBy] =
@@ -2126,8 +2126,7 @@ const Page: React.FC = () => {
                               albumSearchQuery,
                               onAlbumSearchQueryChange: setAlbumSearchQuery,
                               onShowAlbumOverview: handleShowAlbumOverview,
-                              collectionsSortBy,
-                              onChangeCollectionsSortBy: setCollectionsSortBy,
+                              onCollectionsSortByChange: setCollectionsSortBy,
                               peopleSortBy,
                               onChangePeopleSortBy: setPeopleSortBy,
                               setFileListHeader,
