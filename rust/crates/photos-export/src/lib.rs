@@ -191,22 +191,29 @@ impl Export {
             ))
         })? {
             let (id, name, metadata) = row?;
-            store.recover_album(id, &name, serde_json::from_str(&metadata)?)?;
+            store.recover_album(id, &name, serde_json::from_str(&metadata)?, None)?;
         }
         drop(albums);
         if let Some(index) = &index {
-            let mut albums = index.db.prepare("SELECT id,json_extract(record,'$.album.name'),json_extract(record,'$.json.value') FROM adoption_album ORDER BY retained")?;
+            let mut albums = index.db.prepare("SELECT id,json_extract(record,'$.album.name'),json_extract(record,'$.json.value'),json_extract(record,'$.legacy.owner') FROM adoption_album ORDER BY retained")?;
             for row in albums.query_map([], |r| {
                 Ok((
                     r.get::<_, i64>(0)?,
                     r.get::<_, String>(1)?,
                     r.get::<_, Option<String>>(2)?,
+                    r.get::<_, Option<i64>>(3)?,
                 ))
             })? {
-                let (id, name, metadata) = row?;
-                if let Some(metadata) = metadata {
-                    store.recover_album(id, &name, serde_json::from_str(&metadata)?)?;
-                }
+                let (id, name, metadata, owner) = row?;
+                store.recover_album(
+                    id,
+                    &name,
+                    metadata
+                        .map(|metadata| serde_json::from_str(&metadata))
+                        .transpose()?
+                        .unwrap_or(Value::Null),
+                    owner.map(|owner| owner != session.user_id),
+                )?;
                 store.db.execute(
                     "INSERT OR IGNORE INTO desired_albums(id,name) VALUES(?1,?2)",
                     params![id, name],
