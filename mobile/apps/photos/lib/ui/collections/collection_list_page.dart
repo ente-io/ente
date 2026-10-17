@@ -4,6 +4,7 @@ import "package:ente_components/ente_components.dart";
 import "package:ente_strings/ente_strings.dart";
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/collection_meta_event.dart";
@@ -304,12 +305,24 @@ class _CollectionListPageState extends State<CollectionListPage> {
     }
     if (widget.sectionType == UISectionType.archivedCollections) {
       final collectionsToOrder = collections!;
-      final sortedCollections = await CollectionsService.instance
-          .orderCollectionsForAlbums(collectionsToOrder);
+      final sortedCollections = collectionsToOrder.toList();
+      await CollectionsService.instance.sortCollectionsByAlbumPreferences(
+        sortedCollections,
+        sortKey: sortKey,
+        sortDirection: albumSortDirection,
+      );
       if (!mounted || !identical(collections, collectionsToOrder)) {
         return;
       }
-      collections = sortedCollections;
+      final userID = Configuration.instance.getUserID();
+      bool isPinnedForCurrentUser(Collection collection) =>
+          userID != null && !collection.isOwner(userID)
+          ? collection.hasShareePinned()
+          : collection.isPinned;
+      collections = [
+        ...sortedCollections.where(isPinnedForCurrentUser),
+        ...sortedCollections.where((c) => !isPinnedForCurrentUser(c)),
+      ];
     } else if (widget.sectionType == UISectionType.hiddenCollections) {
       await CollectionsService.instance.sortCollectionsByAlbumPreferences(
         collections!,
