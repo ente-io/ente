@@ -958,6 +958,23 @@ const FeedItem: React.FC<FeedItemProps> = ({
     React.useEffect(() => {
         const carousel = carouselRef.current;
         if (!carousel || feedPhotos.length < 2) return;
+        const preventSwipeScroll = (event: TouchEvent) => {
+            if (
+                swipeRef.current?.dragging &&
+                event.touches.length == 1 &&
+                event.cancelable
+            )
+                event.preventDefault();
+        };
+        carousel.addEventListener("touchmove", preventSwipeScroll, {
+            passive: false,
+        });
+        return () =>
+            carousel.removeEventListener("touchmove", preventSwipeScroll);
+    }, [feedPhotos.length]);
+    React.useEffect(() => {
+        const carousel = carouselRef.current;
+        if (!carousel || feedPhotos.length < 2) return;
         let delta = 0;
         let advanced = false;
         let wheelEndTimeout: ReturnType<typeof setTimeout>;
