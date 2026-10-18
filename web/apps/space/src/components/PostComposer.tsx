@@ -132,13 +132,6 @@ const SpacePostComposer: React.FC<{
         controllers.forEach((controller, id) =>
             preparingRef.current.set(id, controller),
         );
-        if (pending.some((draft) => isSpaceVideoFile(draft.file))) {
-            void import("utils/video-encoding/web")
-                .then(({ preloadVideoEncoderWeb }) => preloadVideoEncoderWeb())
-                .catch((error: unknown) =>
-                    log.warn("Failed to preload video encoder", error),
-                );
-        }
         void (async () => {
             for (const draft of pending) {
                 if (!isActiveDraft(draft.id)) continue;
