@@ -13,6 +13,7 @@ export interface SpaceVideoInfo {
     duration: number;
     width: number;
     height: number;
+    startTime: number;
 }
 
 export const maxSpaceVideoDuration = 10;

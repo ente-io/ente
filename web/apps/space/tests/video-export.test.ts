@@ -280,6 +280,7 @@ test("rejects a file without video and releases the input", async () => {
 });
 
 test("canceling an active export closes the codecs and allows the next job to run", async () => {
+    vi.stubGlobal("navigator", { userAgent: "Firefox/144.0" });
     mocks.execute.mockImplementationOnce(() => new Promise(() => undefined));
     const run = await exporter();
     const controller = new AbortController();
@@ -294,6 +295,7 @@ test("canceling an active export closes the codecs and allows the next job to ru
     expect(mocks.conversions[0]!.cancel).toHaveBeenCalledOnce();
     expect(mocks.outputs[0]!.cancel).toHaveBeenCalled();
     expect(mocks.inputs[0]!.dispose).toHaveBeenCalled();
+    expect(mocks.softwareExport).not.toHaveBeenCalled();
 });
 
 test("canceling a queued export returns promptly without canceling the active export", async () => {
@@ -324,6 +326,7 @@ test("canceling a queued export returns promptly without canceling the active ex
 });
 
 test("a stalled conversion times out and releases the queue", async () => {
+    vi.stubGlobal("navigator", { userAgent: "Firefox/144.0" });
     vi.useFakeTimers();
     mocks.execute.mockImplementationOnce(() => new Promise(() => undefined));
     const run = await exporter();
@@ -335,6 +338,7 @@ test("a stalled conversion times out and releases the queue", async () => {
     await timedOut;
     expect(await run(file(), edit)).toEqual(new Uint8Array([1, 2, 3]));
     expect(mocks.conversions[0]!.cancel).toHaveBeenCalledOnce();
+    expect(mocks.softwareExport).not.toHaveBeenCalled();
 });
 
 test("a conversion failure releases its resources and permits retry", async () => {
@@ -344,6 +348,7 @@ test("a conversion failure releases its resources and permits retry", async () =
     expect(mocks.outputs[0]!.cancel).toHaveBeenCalled();
     expect(mocks.inputs[0]!.dispose).toHaveBeenCalled();
     await expect(run(file(), edit)).resolves.toBeDefined();
+    expect(mocks.softwareExport).not.toHaveBeenCalled();
 });
 
 test("reads oriented metadata without requiring a video decoder", async () => {
@@ -354,6 +359,7 @@ test("reads oriented metadata without requiring a video decoder", async () => {
         duration: 10.833333,
         width: 1080,
         height: 1920,
+        startTime: 0,
     });
     expect(mocks.track.canDecode).not.toHaveBeenCalled();
     expect(mocks.inputs[0]!.dispose).toHaveBeenCalled();
@@ -542,3 +548,203 @@ test("muted and silent videos do not load an AAC encoder", async () => {
     expect(mocks.canEncodeAudio).not.toHaveBeenCalled();
     expect(mocks.registerAacEncoder).not.toHaveBeenCalled();
 });
+
+test.each([5, -0.1])(
+    "metadata, covers, and native trim share a zero-based timeline with first timestamp %s",
+    async (firstTimestamp) => {
+        mocks.track.getFirstTimestamp.mockResolvedValue(firstTimestamp);
+        mocks.track.computeDuration.mockResolvedValue(15);
+        const {
+            determineVideoInfoWeb,
+            extractVideoFramesWeb,
+            transcodeVideoWeb,
+        } = await import("../src/utils/video-encoding/web");
+        const start = Math.max(0, firstTimestamp);
+        expect(await determineVideoInfoWeb(file())).toMatchObject({
+            startTime: start,
+            duration: 15 - start,
+        });
+        await extractVideoFramesWeb(file(), [0, 1, 20], 160);
+        expect(mocks.frames.mock.calls[0]![0]).toEqual([
+            start,
+            start + 1,
+            14.999,
+        ]);
+        await transcodeVideoWeb(file(), edit);
+        expect(mocks.init.mock.calls[0]![0]).toMatchObject({
+            trim: { start: start + edit.start, end: start + edit.end },
+        });
+        expect(mocks.init.mock.calls[1]![0]).toMatchObject({
+            trim: { start: 0, end: edit.end - edit.start },
+        });
+    },
+);
+
+test("software processing receives the same absolute timestamps as native processing", async () => {
+    vi.stubGlobal("navigator", { userAgent: "Firefox/144.0" });
+    mocks.track.getFirstTimestamp.mockResolvedValue(5);
+    mocks.track.computeDuration.mockResolvedValue(15);
+    mocks.track.canDecode.mockResolvedValue(false);
+    const { extractVideoFramesWeb, transcodeVideoWeb } =
+        await import("../src/utils/video-encoding/web");
+    const source = file();
+    await extractVideoFramesWeb(source, [0, 1, 20], 160);
+    expect(mocks.softwareFrames).toHaveBeenCalledWith(
+        source,
+        [5, 6, 14.999],
+        160,
+        false,
+        expect.any(AbortSignal),
+    );
+    await transcodeVideoWeb(source, edit);
+    expect(mocks.softwareExport).toHaveBeenCalledWith(
+        source,
+        { ...edit, start: 6.125, end: 14.875 },
+        false,
+        expect.any(AbortSignal),
+    );
+});
+
+test.each(["init", "encode", "remux"])(
+    "a native %s failure releases resources before one software export",
+    async (stage) => {
+        vi.stubGlobal("navigator", { userAgent: "Firefox/144.0" });
+        const failure = new Error("Hardware codec failed");
+        if (stage === "init") mocks.init.mockRejectedValueOnce(failure);
+        else if (stage === "encode")
+            mocks.execute.mockRejectedValueOnce(failure);
+        else
+            mocks.execute
+                .mockResolvedValueOnce(undefined)
+                .mockRejectedValueOnce(failure);
+        mocks.softwareExport.mockImplementationOnce(() => {
+            expect(
+                mocks.outputs.every((output) =>
+                    ["canceled", "finalized"].includes(output.state),
+                ),
+            ).toBe(true);
+            expect(
+                mocks.inputs.every(
+                    (input) => input.dispose.mock.calls.length > 0,
+                ),
+            ).toBe(true);
+            return Promise.resolve(new Uint8Array([4, 5, 6]));
+        });
+        expect(await (await exporter())(file(), edit)).toEqual(
+            new Uint8Array([4, 5, 6]),
+        );
+        expect(mocks.softwareExport).toHaveBeenCalledOnce();
+    },
+);
+
+test("a failed software retry is reported without starting another retry", async () => {
+    vi.stubGlobal("navigator", { userAgent: "Firefox/144.0" });
+    mocks.execute.mockRejectedValueOnce(new Error("Native failed"));
+    mocks.softwareExport.mockRejectedValueOnce(new Error("Software failed"));
+    await expect((await exporter())(file(), edit)).rejects.toThrow(
+        "Software failed",
+    );
+    expect(mocks.softwareExport).toHaveBeenCalledOnce();
+});
+
+test.each(["throw", "empty"])(
+    "a native frame %s failure discards partial results and retries the entire batch",
+    async (failure) => {
+        vi.stubGlobal("navigator", { userAgent: "Firefox/144.0" });
+        mocks.frames.mockImplementationOnce(function* () {
+            yield { canvas: { width: 90, height: 160 } };
+            if (failure === "throw") throw new Error("Decoder failed");
+            yield null;
+        });
+        const softwareFrames = [
+            { width: 80, height: 120 },
+            { width: 80, height: 120 },
+        ];
+        mocks.softwareFrames.mockImplementationOnce(() => {
+            expect(mocks.inputs[0]!.dispose).toHaveBeenCalled();
+            return Promise.resolve(softwareFrames);
+        });
+        const { extractVideoFramesWeb } =
+            await import("../src/utils/video-encoding/web");
+        const source = file();
+        expect(await extractVideoFramesWeb(source, [0, 1], 160)).toBe(
+            softwareFrames,
+        );
+        expect(mocks.softwareFrames).toHaveBeenCalledExactlyOnceWith(
+            source,
+            [0, 1],
+            160,
+            false,
+            expect.any(AbortSignal),
+        );
+    },
+);
+
+test("iPhone never retries a native frame failure with full FFmpeg", async () => {
+    mocks.frames.mockImplementationOnce(() => {
+        throw new Error("Decoder failed");
+    });
+    const { extractVideoFramesWeb } =
+        await import("../src/utils/video-encoding/web");
+    await expect(extractVideoFramesWeb(file(), [0], 160)).rejects.toThrow(
+        "Decoder failed",
+    );
+    expect(mocks.softwareFrames).not.toHaveBeenCalled();
+});
+
+test.each(["AbortError", "TimeoutError"])(
+    "%s from native codecs does not start a software retry",
+    async (name) => {
+        vi.stubGlobal("navigator", { userAgent: "Firefox/144.0" });
+        mocks.init.mockRejectedValueOnce(new DOMException("Stopped", name));
+        mocks.frames.mockImplementationOnce(() => {
+            throw new DOMException("Stopped", name);
+        });
+        const { extractVideoFramesWeb, transcodeVideoWeb } =
+            await import("../src/utils/video-encoding/web");
+        await expect(transcodeVideoWeb(file(), edit)).rejects.toMatchObject({
+            name,
+        });
+        await expect(
+            extractVideoFramesWeb(file(), [0], 160),
+        ).rejects.toMatchObject({ name });
+        expect(mocks.softwareExport).not.toHaveBeenCalled();
+        expect(mocks.softwareFrames).not.toHaveBeenCalled();
+    },
+);
+
+test.each(["cancel", "timeout"])(
+    "a frame %s disposes the native input without retrying in software",
+    async (action) => {
+        vi.stubGlobal("navigator", { userAgent: "Firefox/144.0" });
+        if (action === "timeout") vi.useFakeTimers();
+        mocks.frames.mockImplementationOnce(async function* () {
+            await new Promise((_, reject) => {
+                mocks.inputs[0]!.dispose.mockImplementation(() =>
+                    reject(new Error("Decoder disposed")),
+                );
+            });
+            yield null;
+        });
+        const { extractVideoFramesWeb } =
+            await import("../src/utils/video-encoding/web");
+        const controller = new AbortController();
+        const pending = extractVideoFramesWeb(
+            file(),
+            [0],
+            160,
+            controller.signal,
+        );
+        const rejected = expect(pending).rejects.toMatchObject({
+            name: action === "cancel" ? "AbortError" : "TimeoutError",
+        });
+        if (action === "timeout") await vi.advanceTimersByTimeAsync(60_000);
+        else {
+            await vi.waitFor(() => expect(mocks.frames).toHaveBeenCalled());
+            controller.abort();
+        }
+        await rejected;
+        expect(mocks.softwareFrames).not.toHaveBeenCalled();
+        expect(mocks.inputs[0]!.dispose).toHaveBeenCalled();
+    },
+);

@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     terminate: vi.fn(),
     closeBitmap: vi.fn(),
     rejectPending: undefined as ((error: Error) => void) | undefined,
+    packetTimes: [0],
 }));
 
 vi.mock("ente-base/log-web", () => ({ logToDisk: vi.fn() }));
@@ -22,8 +23,9 @@ vi.mock("@ffmpeg/ffmpeg", () => ({
             Promise.resolve(
                 path.endsWith("json")
                     ? JSON.stringify({
-                          format: { start_time: 0 },
-                          packets: [{ pts_time: 0 }],
+                          packets: mocks.packetTimes.map((pts_time) => ({
+                              pts_time,
+                          })),
                       })
                     : new Uint8Array([1, 2, 3]),
             ),
@@ -39,6 +41,7 @@ vi.mock("@ffmpeg/ffmpeg", () => ({
 beforeEach(() => {
     vi.clearAllMocks();
     mocks.rejectPending = undefined;
+    mocks.packetTimes = [0];
     mocks.load.mockResolvedValue(true);
     mocks.exec.mockResolvedValue(0);
     vi.stubGlobal("document", {
@@ -101,7 +104,9 @@ test.each([false, true])(
             ),
         ).resolves.toEqual(new Uint8Array([1, 2, 3]));
         const args = mocks.exec.mock.calls[0]![0] as string[];
-        expect(args.slice(0, 6)).toEqual([
+        expect(args.slice(0, 8)).toEqual([
+            "-seek_timestamp",
+            "1",
             "-ss",
             "1.125",
             "-i",
@@ -159,4 +164,26 @@ test("a canceled request does not load FFmpeg, and a failed load releases the wo
     ).rejects.toThrow("Unavailable");
     expect(mocks.terminate).toHaveBeenCalledOnce();
     expect(mocks.mount).not.toHaveBeenCalled();
+});
+
+test("software cover seeking uses absolute packet timestamps for offset videos", async () => {
+    mocks.packetTimes = [5, 6, 7];
+    const { extractSoftwareVideoFrames } =
+        await import("../src/utils/video-encoding/software");
+    await extractSoftwareVideoFrames(
+        file,
+        [6],
+        160,
+        false,
+        new AbortController().signal,
+    );
+    const args = mocks.exec.mock.calls[0]![0] as string[];
+    expect(args.slice(0, 6)).toEqual([
+        "-seek_timestamp",
+        "1",
+        "-ss",
+        "5.999999",
+        "-i",
+        "/input/video",
+    ]);
 });

@@ -29,7 +29,7 @@ export const extractSoftwareVideoFrames = (
                 "-read_intervals",
                 `${time}%${time + 1}`,
                 "-show_entries",
-                "packet=pts_time:format=start_time",
+                "packet=pts_time",
                 "-of",
                 "json",
                 "-o",
@@ -43,17 +43,13 @@ export const extractSoftwareVideoFrames = (
                 throw new Error("Expected video timestamps.");
             const probe = z
                 .object({
-                    format: z.object({
-                        start_time: z.coerce.number().optional(),
-                    }),
                     packets: z
                         .array(z.object({ pts_time: z.coerce.number() }))
                         .nonempty(),
                 })
                 .parse(JSON.parse(json));
-            const start = probe.format.start_time ?? 0;
             const frameTime = probe.packets
-                .map((packet) => packet.pts_time - start)
+                .map((packet) => packet.pts_time)
                 .reduce((closest, timestamp) =>
                     Math.abs(timestamp - time) < Math.abs(closest - time)
                         ? timestamp
@@ -62,6 +58,8 @@ export const extractSoftwareVideoFrames = (
             const bytes = await execute(
                 ffmpeg,
                 [
+                    "-seek_timestamp",
+                    "1",
                     "-ss",
                     String(Math.max(0, frameTime - 0.000001)),
                     "-i",
@@ -115,6 +113,8 @@ export const transcodeSoftwareVideo = (
         execute(
             ffmpeg,
             [
+                "-seek_timestamp",
+                "1",
                 "-ss",
                 String(edit.start),
                 "-i",
