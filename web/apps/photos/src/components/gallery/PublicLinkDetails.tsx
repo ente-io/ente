@@ -28,6 +28,7 @@ import type { RemotePullOpts } from ".";
 
 interface PublicLinkDetailsProps {
     collection: Collection;
+    fileCount: number;
     coverFile?: EnteFile;
     files: EnteFile[];
     user: LocalUser;
@@ -36,6 +37,7 @@ interface PublicLinkDetailsProps {
 
 export const PublicLinkDetails = ({
     collection,
+    fileCount,
     coverFile,
     files,
     user,
@@ -76,9 +78,39 @@ export const PublicLinkDetails = ({
                 flex: 1,
                 minHeight: 0,
                 overflow: "auto",
-                p: { xs: "24px", md: "36px" },
+                px: "24px",
+                pt: { xs: "12px", md: 0 },
+                pb: { xs: "24px", md: "36px" },
             }}
         >
+            <Stack
+                component="header"
+                sx={{ minWidth: 0, minHeight: 54, gap: "2px", mb: "24px" }}
+            >
+                <Typography
+                    component="h1"
+                    noWrap
+                    title={collection.name}
+                    sx={{
+                        fontFamily: '"Outfit Variable", Outfit, sans-serif',
+                        fontSize: 24,
+                        fontWeight: 600,
+                        lineHeight: "32px",
+                    }}
+                >
+                    {collection.name}
+                </Typography>
+                <Typography
+                    sx={{
+                        color: "text.muted",
+                        fontSize: 14,
+                        fontWeight: 500,
+                        lineHeight: "20px",
+                    }}
+                >
+                    {t("photos_count", { count: fileCount })}
+                </Typography>
+            </Stack>
             <Stack sx={{ width: "100%", maxWidth: 364, gap: "14px" }}>
                 <Box sx={{ position: "relative" }}>
                     <Box role="img" aria-label={collection.name}>

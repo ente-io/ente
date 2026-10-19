@@ -490,6 +490,8 @@ const Page: React.FC = () => {
         [quickLinks, normalCollectionSummaries],
     );
     const selectedLink = quickLinks.find(({ id }) => id === selectedLinkID);
+    const selectedLinkSummary =
+        selectedLink && linkSummaries.get(selectedLink.id);
     const selectedLinkFiles = useMemo(
         () =>
             selectedLinkID === undefined
@@ -2266,12 +2268,14 @@ const Page: React.FC = () => {
                         <PublicLinkDetails
                             key={selectedLink.id}
                             collection={selectedLink}
+                            fileCount={
+                                selectedLinkSummary?.fileCount ??
+                                selectedLinkFiles.length
+                            }
                             files={selectedLinkFiles}
                             user={user}
                             onRemotePull={remotePull}
-                            coverFile={
-                                linkSummaries.get(selectedLink.id)?.coverFile
-                            }
+                            coverFile={selectedLinkSummary?.coverFile}
                         />
                     ) : null
                 ) : !isInSearchMode &&
