@@ -562,8 +562,6 @@ const Page: React.FC = () => {
         filteredFiles.length > 0 &&
         selectedFilesInView.length === filteredFiles.length;
 
-    const isInArchiveSection = barMode == "archive-albums";
-
     const barCollectionSummaries =
         barMode == "hidden-albums"
             ? state.hiddenCollectionSummaries
@@ -2120,7 +2118,6 @@ const Page: React.FC = () => {
                               onChangePeopleSortBy: setPeopleSortBy,
                               setFileListHeader,
                               saveGroups,
-                              canCreateAlbum: !isInArchiveSection,
                               onAddSaveGroup,
                               onEditAlbumDetails: showEditAlbumDetails,
                               onShowMap: handleShowCollectionMap,

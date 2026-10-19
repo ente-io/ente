@@ -23,7 +23,6 @@ import React, { useState } from "react";
 
 interface CreateAlbumDialogProps extends ModalVisibilityProps {
     isHidden: boolean;
-    onSubmit: () => void;
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onSelectCollectionID: (id: number) => void;
 }
@@ -33,7 +32,6 @@ export const CreateAlbumDialog: React.FC<CreateAlbumDialogProps> = ({
     open,
     onClose,
     isHidden,
-    onSubmit,
     onRemotePull,
     onSelectCollectionID,
 }) => {
@@ -45,8 +43,6 @@ export const CreateAlbumDialog: React.FC<CreateAlbumDialogProps> = ({
     }>({ open: false });
 
     const handleCreateAlbum = (albumName: string) => {
-        onSubmit();
-
         void (async () => {
             try {
                 const newAlbum = isHidden
