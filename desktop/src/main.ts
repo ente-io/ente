@@ -41,6 +41,19 @@ export const allowWindowClose = (): void => {
 };
 
 const main = () => {
+    // Photos should not take macOS media keys away from music players. Pausing
+    // a video (or detaching its slide) does not release Chromium's media session.
+    if (process.platform == "darwin") {
+        const disabledFeatures =
+            app.commandLine.getSwitchValue("disable-features");
+        app.commandLine.appendSwitch(
+            "disable-features",
+            [disabledFeatures, "HardwareMediaKeyHandling"]
+                .filter(Boolean)
+                .join(","),
+        );
+    }
+
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
         app.quit();
