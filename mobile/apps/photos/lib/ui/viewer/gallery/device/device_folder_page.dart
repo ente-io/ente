@@ -36,12 +36,16 @@ class DeviceFolderPage extends StatefulWidget {
 class _DeviceFolderPageState extends State<DeviceFolderPage> {
   final _logger = Logger("_DeviceFolderPageState");
   final _selectedFiles = SelectedFiles();
+  final _coverAppBarKey = GlobalKey();
   late bool _shouldBackup;
+  EnteFile? _cover;
+  int _loadGeneration = 0;
 
   @override
   void initState() {
     super.initState();
     _shouldBackup = widget.deviceCollection.shouldBackup;
+    _cover = widget.deviceCollection.thumbnail;
   }
 
   Future<FileLoadResult> _loadFiles(
@@ -51,7 +55,8 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
     bool? asc,
   }) async {
     final int? userID = Configuration.instance.getUserID();
-    return FilesDB.instance.getFilesInDeviceCollection(
+    final generation = ++_loadGeneration;
+    final result = await FilesDB.instance.getFilesInDeviceCollection(
       widget.deviceCollection,
       userID,
       creationStartTime,
@@ -59,6 +64,10 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
       limit: limit,
       asc: asc,
     );
+    if (mounted && generation == _loadGeneration) {
+      setState(() => _cover = result.files.firstOrNull);
+    }
+    return result;
   }
 
   @override
@@ -68,8 +77,11 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
       GalleryType.localFolder,
       widget.deviceCollection.name,
       _selectedFiles,
+      coverAppBarKey: _coverAppBarKey,
       subtitle: _shouldBackup ? l10n.backedUpAutomatically : l10n.notBackedUp,
       deviceCollection: widget.deviceCollection,
+      cover: _cover,
+      coverHeroTag: "device_folder:${widget.deviceCollection.id}",
       isDeviceFolderBackedUp: _shouldBackup,
       onDisableDeviceFolderBackup: () async {
         await _updateBackupStatus(false);
@@ -85,7 +97,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
-      tagPrefix: "device_folder:${widget.deviceCollection.name}",
+      tagPrefix: "device_folder_files:${widget.deviceCollection.id}",
       galleryType: GalleryType.localFolder,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()

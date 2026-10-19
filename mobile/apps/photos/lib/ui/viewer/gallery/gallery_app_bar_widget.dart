@@ -84,7 +84,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     PreferredSizeWidget? bottom,
     bool showOverflowMenu = true,
   }) {
-    assert(cover == null || collection != null);
+    assert(cover == null || collection != null || deviceCollection != null);
     return GalleryAppBarConfig(
       extendBodyForCollapse: cover != null && bottom == null,
       sliverBuilder: (_) => GalleryAppBarWidget._(
@@ -367,8 +367,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final strings = context.strings;
     return AlbumCoverAppBar(
       key: widget.coverAppBarKey,
-      collection: widget.collection!,
+      collection: widget.collection,
       cover: widget.cover!,
+      subtitle: widget.subtitle,
       heroTag: widget.coverHeroTag,
       title: _appBarTitle,
       backgroundColor: GalleryAppBarWidget.backgroundColor(context),
@@ -1027,7 +1028,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             size: IconSizes.small,
           ),
         ),
-      if (_isAlbumSlideshowAvailable && !onCover) _slideshowMenuOption(strings),
+      if (_isAlbumSlideshowAvailable &&
+          (!onCover || widget.deviceCollection != null))
+        _slideshowMenuOption(strings),
       if (canAutoAdd)
         _menuOption(
           AlbumPopupAction.autoAddPhotos,
