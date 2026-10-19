@@ -27,7 +27,6 @@ import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton"
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
-import { isDevBuild } from "ente-base/env";
 import { ut } from "ente-base/i18n";
 import { thumbnailGridPadding } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
@@ -345,7 +344,7 @@ const NormalNavigationRail: React.FC<
         />
         {(["albums", "people", "links"] as const).map((item) =>
             (item == "people" && !isMLSupported) ||
-            (item == "links" && !isInternalUser && !isDevBuild) ? null : (
+            (item == "links" && !isInternalUser) ? null : (
                 <Tooltip key={item} title={t(item)}>
                     <FocusVisibleButton
                         color="secondary"
