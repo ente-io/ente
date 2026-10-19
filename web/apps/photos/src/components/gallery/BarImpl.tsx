@@ -355,13 +355,40 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     sx={{
                         flex: 1,
                         minWidth: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
                         fontFamily: '"Outfit Variable", Outfit, sans-serif',
                         fontSize: mobile ? 20 : 24,
                         fontWeight: 600,
                         lineHeight: mobile ? "26px" : "32px",
                     }}
                 >
-                    {title}
+                    <Box
+                        component="span"
+                        title={title}
+                        sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        {title}
+                    </Box>
+                    {mode != "people" && (
+                        <Typography
+                            component="span"
+                            sx={{
+                                flexShrink: 0,
+                                fontSize: 14,
+                                fontWeight: 500,
+                                color: "text.muted",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            · {collectionSummaries.length.toLocaleString()}
+                        </Typography>
+                    )}
                 </Typography>
                 {mode != "people" ? (
                     <CollectionsSortOptions
