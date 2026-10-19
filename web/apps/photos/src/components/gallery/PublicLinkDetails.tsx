@@ -1,3 +1,4 @@
+import { ManagePublicShareOptions } from "@/components/Collections/CollectionShare";
 import { PickCoverPhotoDialog } from "@/components/Collections/PickCoverPhotoDialog";
 import { usePublicLinkURL } from "@/components/utils/use-public-link-url";
 import { Copy01Icon, Edit03Icon } from "@hugeicons/core-free-icons";
@@ -16,7 +17,7 @@ import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton"
 import { useClipboardCopy } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import type { Collection } from "ente-media/collection";
+import type { Collection, PublicURL } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { ItemCard } from "ente-new/photos/components/Tiles";
@@ -24,6 +25,7 @@ import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapsh
 import { updateCollectionDetails } from "ente-new/photos/services/collection";
 import { openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
+import { useState } from "react";
 import type { RemotePullOpts } from ".";
 
 interface PublicLinkDetailsProps {
@@ -32,6 +34,7 @@ interface PublicLinkDetailsProps {
     coverFile?: EnteFile;
     files: EnteFile[];
     user: LocalUser;
+    setBlockingLoad: (value: boolean) => void;
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
 }
 
@@ -41,15 +44,26 @@ export const PublicLinkDetails = ({
     coverFile,
     files,
     user,
+    setBlockingLoad,
     onRemotePull,
 }: PublicLinkDetailsProps) => {
     const { onGenericError } = useBaseContext();
     const { show: showPickCoverPhoto, props: pickCoverPhotoVisibilityProps } =
         useModalVisibility();
     const { customDomain } = useSettingsSnapshot();
+    const [shareState, setShareState] = useState({
+        collection,
+        publicURL: collection.publicURLs[0],
+    });
+    const publicURL =
+        shareState.collection === collection
+            ? shareState.publicURL
+            : collection.publicURLs[0];
+    const setPublicURL = (publicURL: PublicURL | undefined) =>
+        setShareState({ collection, publicURL });
     const { resolvedURL, isLoading, error } = usePublicLinkURL(
         collection,
-        collection.publicURLs[0],
+        publicURL,
         customDomain,
     );
     const canChangeCover =
@@ -111,117 +125,149 @@ export const PublicLinkDetails = ({
                     {t("photos_count", { count: fileCount })}
                 </Typography>
             </Stack>
-            <Stack sx={{ width: "100%", maxWidth: 364, gap: "14px" }}>
-                <Box sx={{ position: "relative" }}>
-                    <Box role="img" aria-label={collection.name}>
-                        <ItemCard
-                            key={`${collection.id}-${coverFile?.id ?? "empty"}`}
-                            TileComponent={Cover}
-                            coverFile={coverFile}
-                        />
+            <Stack
+                direction="row"
+                sx={{ flexWrap: "wrap", gap: "40px", alignItems: "flex-start" }}
+            >
+                <Stack sx={{ width: "100%", maxWidth: 364, gap: "14px" }}>
+                    <Box sx={{ position: "relative" }}>
+                        <Box role="img" aria-label={collection.name}>
+                            <ItemCard
+                                key={`${collection.id}-${coverFile?.id ?? "empty"}`}
+                                TileComponent={Cover}
+                                coverFile={coverFile}
+                            />
+                        </Box>
+                        {canChangeCover && (
+                            <Tooltip title={t("set_cover")}>
+                                <IconButton
+                                    aria-label={t("set_cover")}
+                                    onClick={showPickCoverPhoto}
+                                    sx={{
+                                        position: "absolute",
+                                        top: 16,
+                                        right: 16,
+                                        width: 38,
+                                        height: 38,
+                                        p: "10px",
+                                        borderRadius: "12px",
+                                        bgcolor: "background.paper",
+                                        color: "text.base",
+                                        "&:hover": {
+                                            bgcolor: "background.paper",
+                                        },
+                                    }}
+                                >
+                                    <HugeiconsIcon
+                                        icon={Edit03Icon}
+                                        size={18}
+                                        strokeWidth={1.5}
+                                    />
+                                </IconButton>
+                            </Tooltip>
+                        )}
                     </Box>
-                    {canChangeCover && (
-                        <Tooltip title={t("set_cover")}>
-                            <IconButton
-                                aria-label={t("set_cover")}
-                                onClick={showPickCoverPhoto}
-                                sx={{
-                                    position: "absolute",
-                                    top: 16,
-                                    right: 16,
-                                    width: 38,
-                                    height: 38,
-                                    p: "10px",
-                                    borderRadius: "12px",
-                                    bgcolor: "background.paper",
-                                    color: "text.base",
-                                    "&:hover": { bgcolor: "background.paper" },
-                                }}
-                            >
-                                <HugeiconsIcon
-                                    icon={Edit03Icon}
-                                    size={18}
-                                    strokeWidth={1.5}
-                                />
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                </Box>
-                <Stack
-                    direction="row"
-                    sx={(theme) => ({
-                        alignItems: "center",
-                        gap: "8px",
-                        height: 52,
-                        px: "16px",
-                        borderRadius: "16px",
-                        bgcolor: "fill.faint",
-                        ...theme.applyStyles("light", { bgcolor: "#F4F4F4" }),
-                    })}
-                >
+                    <Stack
+                        direction="row"
+                        sx={(theme) => ({
+                            alignItems: "center",
+                            gap: "8px",
+                            height: 52,
+                            px: "16px",
+                            borderRadius: "16px",
+                            bgcolor: "fill.faint",
+                            ...theme.applyStyles("light", {
+                                bgcolor: "#F4F4F4",
+                            }),
+                        })}
+                    >
+                        <Typography
+                            component="span"
+                            title={resolvedURL}
+                            aria-live="polite"
+                            sx={{
+                                flex: 1,
+                                minWidth: 0,
+                                fontSize: 14,
+                                fontWeight: 500,
+                                lineHeight: "20px",
+                                letterSpacing: 0,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            {resolvedURL?.replace(/^https?:\/\//, "") ??
+                                (error
+                                    ? t("generic_error")
+                                    : isLoading
+                                      ? t("loading")
+                                      : null)}
+                        </Typography>
+                        <CopyLinkButton
+                            key={resolvedURL ?? "pending"}
+                            url={resolvedURL}
+                        />
+                    </Stack>
                     <Typography
-                        component="span"
-                        title={resolvedURL}
-                        aria-live="polite"
                         sx={{
-                            flex: 1,
-                            minWidth: 0,
+                            color: "text.muted",
+                            fontSize: "11.5px",
+                            fontWeight: 400,
+                            lineHeight: 1.45,
+                            letterSpacing: 0,
+                        }}
+                    >
+                        {t("public_link_description")}
+                    </Typography>
+                    <FocusVisibleButton
+                        color="secondary"
+                        fullWidth
+                        disabled={!resolvedURL}
+                        onClick={() => {
+                            if (resolvedURL) openURL(resolvedURL);
+                        }}
+                        sx={(theme) => ({
+                            height: 52,
+                            px: "24px",
+                            py: "14px",
+                            borderRadius: "20px",
                             fontSize: 14,
                             fontWeight: 500,
                             lineHeight: "20px",
                             letterSpacing: 0,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                        }}
+                            ...theme.applyStyles("light", {
+                                bgcolor: "#EAEAEA",
+                                "&:hover": { bgcolor: "secondary.hover" },
+                            }),
+                        })}
                     >
-                        {resolvedURL?.replace(/^https?:\/\//, "") ??
-                            (error
-                                ? t("generic_error")
-                                : isLoading
-                                  ? t("loading")
-                                  : null)}
-                    </Typography>
-                    <CopyLinkButton
-                        key={resolvedURL ?? "pending"}
-                        url={resolvedURL}
-                    />
+                        {t("open_album")}
+                    </FocusVisibleButton>
                 </Stack>
-                <Typography
-                    sx={{
-                        color: "text.muted",
-                        fontSize: "11.5px",
-                        fontWeight: 400,
-                        lineHeight: 1.45,
-                        letterSpacing: 0,
-                    }}
-                >
-                    {t("public_link_description")}
-                </Typography>
-                <FocusVisibleButton
-                    color="secondary"
-                    fullWidth
-                    disabled={!resolvedURL}
-                    onClick={() => {
-                        if (resolvedURL) openURL(resolvedURL);
-                    }}
-                    sx={(theme) => ({
-                        height: 52,
-                        px: "24px",
-                        py: "14px",
-                        borderRadius: "20px",
-                        fontSize: 14,
-                        fontWeight: 500,
-                        lineHeight: "20px",
-                        letterSpacing: 0,
-                        ...theme.applyStyles("light", {
-                            bgcolor: "#EAEAEA",
-                            "&:hover": { bgcolor: "secondary.hover" },
-                        }),
-                    })}
-                >
-                    {t("open_album")}
-                </FocusVisibleButton>
+                {collection.owner.id === user.id &&
+                    publicURL &&
+                    resolvedURL && (
+                        <Box
+                            sx={{
+                                flex: "1 1 320px",
+                                minWidth: 0,
+                                maxWidth: 520,
+                            }}
+                        >
+                            <ManagePublicShareOptions
+                                variant="inline"
+                                {...{
+                                    collection,
+                                    publicURL,
+                                    setPublicURL,
+                                    resolvedURL,
+                                    setBlockingLoad,
+                                    onRemotePull,
+                                }}
+                            />
+                        </Box>
+                    )}
             </Stack>
             {canChangeCover && pickCoverPhotoVisibilityProps.open && (
                 <PickCoverPhotoDialog
