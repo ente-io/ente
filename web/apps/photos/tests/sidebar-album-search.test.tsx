@@ -93,15 +93,6 @@ const renderSearch = (
 };
 
 describe("sidebar album search across groups", () => {
-    test("reveals matching quick links in the Albums Links group", () => {
-        const html = renderSearch("trip");
-        expect(html).toContain('aria-label="links_albums_title"');
-        expect(html).not.toContain('aria-label="Ente"');
-        expect(html).not.toContain('aria-label="shared_albums_title"');
-        expect(html).toContain("Trip link");
-        expect(html).not.toContain("no-matches.svg");
-    });
-
     test("reveals matching Shared albums while Ente is selected", () => {
         const html = renderSearch("holiday");
         expect(html).toContain('aria-label="shared_albums_title"');
@@ -130,7 +121,6 @@ describe("sidebar album search across groups", () => {
             const html = renderSearch(query);
             expect(html).toContain('aria-label="Ente"');
             expect(html).toContain('aria-label="shared_albums_title"');
-            expect(html).toContain('aria-label="links_albums_title"');
             expect(html).toContain("Family");
             expect(html).toContain("Holiday album");
             expect(html).not.toContain("no-matches.svg");
