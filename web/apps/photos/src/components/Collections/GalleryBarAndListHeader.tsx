@@ -172,8 +172,22 @@ export const GalleryBarAndListHeader: React.FC<
         [sortedCollectionSummaries, uncategorizedCollectionSummaryID, mode],
     );
     const visibleAlbumFilters = useMemo(
-        () => getVisibleAlbumFilters(eligibleCollectionSummaries),
-        [eligibleCollectionSummaries],
+        () =>
+            getVisibleAlbumFilters(
+                eligibleCollectionSummaries,
+                albumSearchQuery,
+            ),
+        [eligibleCollectionSummaries, albumSearchQuery],
+    );
+    // Sidebar searches span groups; the overview still follows its selected group.
+    const sidebarCollectionSummaries = useMemo(
+        () =>
+            eligibleCollectionSummaries.filter((album) =>
+                album.name
+                    .toLowerCase()
+                    .includes(albumSearchQuery.trim().toLowerCase()),
+            ),
+        [eligibleCollectionSummaries, albumSearchQuery],
     );
     const visibleCollectionSummaries = useMemo(
         () =>
@@ -342,7 +356,11 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onChangePeopleSortBy={onChangePeopleSortBy}
                 onCreateAlbum={openAlbumCreation}
-                collectionSummaries={visibleCollectionSummaries}
+                collectionSummaries={
+                    mode == "albums"
+                        ? sidebarCollectionSummaries
+                        : visibleCollectionSummaries
+                }
                 visibleAlbumFilters={visibleAlbumFilters}
             />
 
