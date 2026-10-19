@@ -1,5 +1,4 @@
 // TODO: Audit this file
-import { collectionDialogBodyMutedSx as bodyMutedSx } from "@/components/CollectionDialog/styles";
 import { AllAlbums } from "@/components/Collections/AllAlbums";
 import { AllPeople } from "@/components/Collections/AllPeople";
 import {
@@ -18,18 +17,6 @@ import {
     visibleAlbumFilters as getVisibleAlbumFilters,
 } from "@/utils/album-filters";
 import { sortPeople } from "@/utils/people-sort";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CloseIcon from "@mui/icons-material/Close";
-import {
-    Box,
-    DialogTitle,
-    Paper,
-    Snackbar,
-    Stack,
-    Typography,
-} from "@mui/material";
-import { FilledIconButton } from "ente-base/components/mui";
-import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import {
     isSaveCancelled,
@@ -42,10 +29,6 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
-    createAlbum,
-    createHiddenAlbum,
-} from "ente-new/photos/services/collection";
-import {
     collectionsSortBy,
     PseudoCollectionID,
     sortCollectionSummaries,
@@ -54,21 +37,14 @@ import {
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
-import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { includes } from "ente-utils/type-guards";
-import { t } from "i18next";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {
     CollectionHeader,
     type CollectionHeaderProps,
 } from "./CollectionHeader";
+import { CreateAlbumDialog } from "./CreateAlbumDialog";
 
 export type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
@@ -151,41 +127,10 @@ export const GalleryBarAndListHeader: React.FC<
         useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
-    const [albumCreatedToast, setAlbumCreatedToast] = useState<{
-        open: boolean;
-        albumId?: number;
-        albumName?: string;
-    }>({ open: false });
-
-    const { showNotification } = usePhotosAppContext();
-    const createInHiddenSection = useRef(false);
+    const [createInHiddenSection, setCreateInHiddenSection] = useState(false);
     const openAlbumCreation = () => {
-        createInHiddenSection.current = mode == "hidden-albums";
+        setCreateInHiddenSection(mode == "hidden-albums");
         showAlbumNameInput();
-    };
-
-    const handleCreateAlbum = (albumName: string) => {
-        allAlbumsVisibilityProps.onClose();
-
-        void (async () => {
-            try {
-                const newAlbum = createInHiddenSection.current
-                    ? await createHiddenAlbum(albumName)
-                    : await createAlbum(albumName);
-                await onRemotePull();
-
-                setAlbumCreatedToast({
-                    open: true,
-                    albumId: newAlbum.id,
-                    albumName: albumName,
-                });
-            } catch {
-                showNotification({
-                    color: "critical",
-                    title: t("generic_error_retry"),
-                });
-            }
-        })();
     };
 
     const { show: showAllPeople, props: allPeopleVisibilityProps } =
@@ -425,74 +370,13 @@ export const GalleryBarAndListHeader: React.FC<
                 onCreateAlbum={openAlbumCreation}
                 onRemotePull={onRemotePull}
             />
-            <SingleInputDialog
+            <CreateAlbumDialog
                 {...albumNameInputVisibilityProps}
-                variant="v2"
-                title={t("new_album")}
-                label={t("album_name")}
-                submitButtonTitle={t("create")}
-                onSubmit={handleCreateAlbum}
+                isHidden={createInHiddenSection}
+                onSubmit={allAlbumsVisibilityProps.onClose}
+                onRemotePull={onRemotePull}
+                onSelectCollectionID={selectCollection}
             />
-            <Snackbar
-                open={albumCreatedToast.open}
-                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-            >
-                <Paper sx={{ width: "min(360px, 100svw)" }}>
-                    <DialogTitle>
-                        <Stack
-                            direction="row"
-                            sx={{
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                            }}
-                        >
-                            <Box>
-                                <Typography variant="h3">
-                                    {t("album_created")}
-                                </Typography>
-                                <Typography
-                                    sx={[bodyMutedSx, { marginTop: "4px" }]}
-                                >
-                                    {albumCreatedToast.albumName &&
-                                    albumCreatedToast.albumName.length > 16
-                                        ? albumCreatedToast.albumName.substring(
-                                              0,
-                                              16,
-                                          ) + "..."
-                                        : albumCreatedToast.albumName}
-                                </Typography>
-                            </Box>
-                            <Stack direction="row" sx={{ gap: 1 }}>
-                                <FilledIconButton
-                                    onClick={() => {
-                                        if (albumCreatedToast.albumId) {
-                                            selectCollection(
-                                                albumCreatedToast.albumId,
-                                            );
-                                        }
-                                        setAlbumCreatedToast((prev) => ({
-                                            ...prev,
-                                            open: false,
-                                        }));
-                                    }}
-                                >
-                                    <ArrowForwardIcon />
-                                </FilledIconButton>
-                                <FilledIconButton
-                                    onClick={() =>
-                                        setAlbumCreatedToast((prev) => ({
-                                            ...prev,
-                                            open: false,
-                                        }))
-                                    }
-                                >
-                                    <CloseIcon />
-                                </FilledIconButton>
-                            </Stack>
-                        </Stack>
-                    </DialogTitle>
-                </Paper>
-            </Snackbar>
             <AllPeople
                 {...allPeopleVisibilityProps}
                 people={sortedPeople}
