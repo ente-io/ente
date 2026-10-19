@@ -537,6 +537,18 @@ fn adoption_history_resumes_after_media_move_and_keeps_the_full_scope() {
     downloaded.assert();
     assert!(!root.join("export_status.json").exists());
     assert_eq!(count(&engine.db(), "SELECT bound FROM export"), 1);
+    engine.catalog.files.remove(&(FAMILY, PHOTO));
+    assert!(engine.run(false, &[]).unwrap().complete);
+    assert_eq!(
+        fs::read(root.join("Trash/Family/Pair.jpg")).unwrap(),
+        b"existing trash"
+    );
+    assert!(root.join("Trash/Family-1/Photo.jpg").is_file());
+    assert!(
+        root.join("Trash/Family-1/metadata/Photo.jpg.json")
+            .is_file()
+    );
+    assert!(engine.run(false, &[]).unwrap().complete);
 }
 
 #[test]

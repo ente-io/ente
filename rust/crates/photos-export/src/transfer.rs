@@ -85,7 +85,7 @@ fn source_changed(component: &Component, file: &FileSnapshot, signature: &str) -
             && component
                 .signature
                 .as_ref()
-                .is_some_and(|original| original != signature))
+                .is_none_or(|original| original != signature))
 }
 
 fn verify(
@@ -208,14 +208,8 @@ pub async fn prepare(run: &Run<'_>, session: &Session, file: &FileSnapshot) -> R
         before = rowid;
         let components = store::lock(run.store)?.components(&id)?;
         for component in components {
-            if !roles.contains(&component.role)
+            if source_changed(&component, file, &signature)
                 || reusable.iter().any(|source| source.role == component.role)
-                || expected_hash(file, &component.role).is_some_and(|hash| hash != component.hash)
-                || (expected_hash(file, &component.role).is_none()
-                    && component
-                        .signature
-                        .as_ref()
-                        .is_some_and(|original| original != &signature))
             {
                 continue;
             }

@@ -263,7 +263,7 @@ fn engine_preserves_native_dates_and_metadata_overrides() {
     }
     let encrypted = blob::encrypt_json(&uploaded, &file_key(&file, &key)).unwrap();
     file["metadata"] = json!({"encryptedData":b64::encode(&encrypted.encrypted_data),"decryptionHeader":b64::encode(encrypted.decryption_header.as_bytes())});
-    let fetched = download(&mut server, 10, &bytes, 1);
+    let fetched = download(&mut server, 10, &bytes, 4);
     let mut engine = new_engine(&server, key, file.clone());
     for (index, (edits, description, location, seconds)) in [
         (json!({"editedTime":null,"caption":null,"lat":0}), None, (12.0,34.0), "1700000000"),
@@ -380,6 +380,75 @@ fn engine_preserves_local_media_and_restores_missing_copies() {
         ),
         2
     );
+    fetched.assert();
+}
+
+#[test]
+fn engine_forgets_removed_photos_when_all_local_components_are_missing() {
+    for (live, interrupted) in [(false, false), (true, false), (true, true)] {
+        let mut server = mockito::Server::new();
+        let key = Key::generate();
+        let (file, bytes) = original_fixture(&key, b"original", live, true, 10);
+        let fetched = download(&mut server, 10, &bytes, 1);
+        let mut engine = new_engine(&server, key, file);
+        run(&mut engine, true);
+        let root = engine.root();
+        let db = engine.db();
+        engine.catalog.files.remove(&(1, 10));
+        if interrupted {
+            db.execute_batch("CREATE TRIGGER stop_retention BEFORE UPDATE ON pending WHEN old.album=1 AND old.retained=1 AND json_type(old.action,'$.Move') IS NOT NULL AND new.action='null' BEGIN SELECT RAISE(ABORT,'stop after retention move'); END;").unwrap();
+            run(&mut engine, false);
+            db.execute_batch("DROP TRIGGER stop_retention;").unwrap();
+        }
+        let folder = if interrupted { "Trash/First" } else { "First" };
+        let name = if live { "Motion.heic" } else { "Photo.jpg" };
+        fs::remove_file(root.join(folder).join(name)).unwrap();
+        if live {
+            run(&mut engine, false);
+            assert_eq!(
+                fs::read(root.join("First/Motion.mov")).unwrap(),
+                b"original"
+            );
+            fs::remove_file(root.join("First/Motion.mov")).unwrap();
+        }
+        for _ in 0..2 {
+            run(&mut engine, true);
+            for folder in ["First", "Trash/First"] {
+                for name in ["Photo.jpg", "Motion.heic", "Motion.mov"] {
+                    assert!(
+                        !root
+                            .join(folder)
+                            .join("metadata")
+                            .join(format!("{name}.json"))
+                            .exists()
+                    );
+                }
+            }
+            assert_component(&root, "Second", name, b"original");
+        }
+        fetched.assert();
+    }
+}
+
+#[test]
+fn engine_refetches_hashless_originals_after_database_loss() {
+    let mut server = mockito::Server::new();
+    let key = Key::generate();
+    let (old, bytes) = original_fixture(&key, b"old", false, false, 10);
+    let fetched = download(&mut server, 10, &bytes, 1);
+    let mut engine = new_engine(&server, key, old);
+    run(&mut engine, true);
+    fetched.assert();
+    fetched.remove();
+    let (new, bytes) = original_fixture(&engine.catalog.key, b"new", false, false, 30);
+    engine.catalog.files = BTreeMap::from([((1, 10), new.clone()), ((2, 10), new)]);
+    engine.database = "recovered.db".into();
+    let fetched = download(&mut server, 10, &bytes, 1);
+    assert!(engine.run(true, &[]).unwrap().complete);
+    run(&mut engine, true);
+    for folder in ["First", "Second"] {
+        assert_component(&engine.root(), folder, "Photo.jpg", b"new");
+    }
     fetched.assert();
 }
 

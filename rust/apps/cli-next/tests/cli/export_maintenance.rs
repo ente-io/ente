@@ -1063,8 +1063,7 @@ fn export_cancels_pending_retention_when_selected_membership_returns() {
     let root = destination.path().join("photos");
     run(&home, &root, &[], true);
     let db = export_database(&home);
-    fs::create_dir_all(root.join("Trash/First")).unwrap();
-    fs::write(root.join("Trash/First/notes"), b"unrelated album").unwrap();
+    db.execute_batch("CREATE TRIGGER stop_retention BEFORE UPDATE ON pending WHEN new.retained=1 AND json_type(new.action,'$.Directory') IS NOT NULL BEGIN SELECT RAISE(ABORT,'stop before retention directory'); END;").unwrap();
     let mut version = 10;
     for (step, remove, complete) in [
         (0, true, false),
@@ -1074,9 +1073,8 @@ fn export_cancels_pending_retention_when_selected_membership_returns() {
         (4, true, false),
         (5, false, true),
     ] {
-        if step == 2 {
-            fs::remove_file(root.join("Trash/First/notes")).unwrap();
-            fs::remove_dir(root.join("Trash/First")).unwrap();
+        if step == 1 {
+            db.execute_batch("DROP TRIGGER stop_retention;").unwrap();
         }
         if step == 4 {
             fs::write(root.join("Trash/First/Original-1.jpg"), b"unrelated file").unwrap();
@@ -1436,7 +1434,7 @@ fn export_adoption_ignores_unrelated_non_utf8_entries_but_rejects_claimed_paths(
 }
 
 #[test]
-fn export_missing_move_endpoints_require_active_repair_or_retained_recovery() {
+fn export_missing_move_endpoints_restore_active_media_and_finish_removal() {
     for retaining in [false, true] {
         let mut server = mockito::Server::new();
         let home = TestHome::new();
@@ -1476,11 +1474,10 @@ fn export_missing_move_endpoints_require_active_repair_or_retained_recovery() {
         assert!(!root.join("First/Photo.jpg").exists());
         db.execute_batch("DROP TRIGGER stop_move;").unwrap();
         if retaining {
-            run(&home, &root, &[], false);
-            assert!(!root.join("Trash/First/metadata/Photo.jpg.json").exists());
-            fs::write(root.join(moved), b"original").unwrap();
             run(&home, &root, &[], true);
-            assert_component(&root, "Trash/First", "Photo.jpg", b"original");
+            assert!(!root.join("First/metadata/Photo.jpg.json").exists());
+            assert!(!root.join("Trash/First/metadata/Photo.jpg.json").exists());
+            run(&home, &root, &[], true);
         } else {
             run(&home, &root, &[], true);
             assert_component(&root, "First", "Renamed.jpg", b"original");

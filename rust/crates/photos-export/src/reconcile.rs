@@ -1,4 +1,5 @@
 use std::{
+    collections::HashSet,
     fs as disk,
     fs::{File, OpenOptions},
     io::Write,
@@ -464,10 +465,6 @@ impl Run<'_> {
                         super::Conflict(format!("at {}: moved bytes differ", to.display()))
                     );
                 } else {
-                    ensure!(
-                        !target.retained || current_media,
-                        "retained original is missing at both move endpoints"
-                    );
                     return self.clear_action(target);
                 }
                 let store = store::lock(self.store)?;
@@ -791,13 +788,24 @@ impl Run<'_> {
     fn album_target(&self, album: i64, name: &str, retained: bool) -> Result<Pending> {
         let store = store::lock(self.store)?;
         let existing = store.album(album, retained)?;
+        let mut occupied = HashSet::new();
+        if retained && existing.is_none() {
+            let trash = names::check(self.root, "Trash")?;
+            if directory_exists(&trash)? {
+                for entry in disk::read_dir(trash)? {
+                    occupied.insert(names::folded(&entry?.file_name().to_string_lossy()));
+                }
+            }
+        }
         let owner = existing
             .as_ref()
             .map(|album| album.key.clone())
             .unwrap_or_else(|| format!("{}:{album}", if retained { "retained" } else { "active" }));
         if let Some(pending) = store.pending(&owner)? {
             ensure!(pending.action.is_none(), "album has unfinished action");
-            if pending.name == name || retained {
+            if (pending.name == name || retained)
+                && !occupied.contains(&names::folded(&pending.names[0]))
+            {
                 return Ok(pending);
             }
         }
@@ -810,6 +818,17 @@ impl Run<'_> {
             && names::available(&store, parent, &[name.to_owned()], &owner, "album")?
         {
             vec![name.to_owned()]
+        } else if !occupied.is_empty() {
+            let mut suffix = 0;
+            loop {
+                if let Some(candidates) = names::candidates(name, true, None, suffix)?
+                    && !occupied.contains(&names::folded(&candidates[0]))
+                    && names::available(&store, parent, &candidates, &owner, "album")?
+                {
+                    break candidates;
+                }
+                suffix += 1;
+            }
         } else {
             names::allocate(&store, parent, name, "album", None, &owner)?
         };
@@ -1481,6 +1500,45 @@ impl Run<'_> {
             |r| r.get(0),
         )?;
         let components = store::lock(self.store)?.components(&target.owner)?;
+        if !restoring {
+            let mut present = false;
+            for component in &components {
+                present |= Properties::optional(&self.path(&component.location)?)?.is_some();
+            }
+            if !present {
+                for component in &components {
+                    let record = store::lock(self.store)?
+                        .json_record(&target.owner, Some(&component.role))?;
+                    if let Some(record) = record
+                        && let Some(location) = record.location
+                    {
+                        self.start(
+                            target,
+                            Action::Remove {
+                                location,
+                                role: Some(component.role.clone()),
+                            },
+                            &[],
+                        )?;
+                        self.finish_action(target, false, None)?;
+                    }
+                }
+                let store = store::lock(self.store)?;
+                let transaction = store.db.unchecked_transaction()?;
+                store
+                    .db
+                    .execute("DELETE FROM components WHERE placement=?1", [&target.owner])?;
+                store
+                    .db
+                    .execute("DELETE FROM json_records WHERE owner=?1", [&target.owner])?;
+                store
+                    .db
+                    .execute("DELETE FROM placements WHERE id=?1", [&target.owner])?;
+                store.clear_pending(&target.owner)?;
+                transaction.commit()?;
+                return Ok(());
+            }
+        }
         for component in &components {
             let name = target_component(target, &component.role)?;
             let location = Location {

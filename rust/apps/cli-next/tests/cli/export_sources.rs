@@ -586,39 +586,19 @@ fn export_clears_deleted_adopted_album_rename_reservations() {
     fs::create_dir_all(root.join("Trash/First")).unwrap();
     let retained_blocker = root.join("Trash/First/notes.txt");
     fs::write(&retained_blocker, b"unrelated retention target").unwrap();
-    run(&fresh, &root, &["--album", "1"], false);
-    let retained = || {
-        db.query_row(
-            "SELECT name1 FROM pending WHERE owner='retained:1'",
-            [],
-            |r| r.get::<_, String>(0),
-        )
-        .unwrap()
-    };
-    let pending_retention = retained();
-    assert!(root.join("First/metadata.json").exists());
-    assert_eq!(pending_retention, "First");
-    run(&fresh, &root, &["--album", "1"], false);
-    assert_eq!(retained(), pending_retention);
-    assert!(!root.join("Trash/First-1").exists());
-    assert_eq!(
-        fs::read(root.join("First/Original.jpg")).unwrap(),
-        b"original"
-    );
+    run(&fresh, &root, &["--album", "1"], true);
     assert_eq!(
         fs::read(&retained_blocker).unwrap(),
         b"unrelated retention target"
     );
     assert_eq!(fs::read(&unrelated).unwrap(), b"unrelated rename target");
-    fs::remove_file(retained_blocker).unwrap();
-    fs::remove_dir(root.join("Trash/First")).unwrap();
     run(&fresh, &root, &["--album", "1"], true);
     assert_eq!(
-        fs::read(root.join("Trash/First/Original.jpg")).unwrap(),
+        fs::read(root.join("Trash/First-1/Original.jpg")).unwrap(),
         b"original"
     );
     assert_eq!(
-        read_json(&root.join("Trash/First/metadata/Original.jpg.json"))["ente"]["fileID"],
+        read_json(&root.join("Trash/First-1/metadata/Original.jpg.json"))["ente"]["fileID"],
         "10"
     );
     deletion.remove();
