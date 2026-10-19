@@ -2580,6 +2580,7 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
                 {...layoutOptionsVisibilityProps}
                 onRootClose={onRootClose}
                 title={t("album_layout")}
+                titleInline={variant == "inline"}
             >
                 <Stack sx={{ py: "20px", px: "8px" }}>
                     <RowButtonGroup>

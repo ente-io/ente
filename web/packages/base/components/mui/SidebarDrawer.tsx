@@ -124,6 +124,7 @@ type SidebarDrawerTitlebarProps = Pick<
     actionButton?: React.ReactNode;
     showRootCloseButton?: boolean;
     showBackButton?: boolean;
+    titleInline?: boolean;
 };
 
 export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
@@ -134,54 +135,74 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
     actionButton,
     showRootCloseButton = true,
     showBackButton = true,
-}) => (
-    <Stack sx={{ gap: "4px" }}>
+    titleInline = false,
+}) => {
+    const titleContent = (
         <Stack
-            direction="row"
             sx={{
-                justifyContent: showBackButton ? "space-between" : "flex-end",
+                pl: titleInline ? "8px" : "calc(16px + 0.5rem)",
+                pr: "16px",
+                gap: "4px",
+                ...(titleInline && { flex: 1, minWidth: 0 }),
             }}
         >
-            {showBackButton && (
-                <IconButton
-                    aria-label="Back"
-                    onClick={onClose}
-                    color="primary"
-                    sx={{ ml: "0.5rem" }}
-                >
-                    <ArrowBackIcon />
-                </IconButton>
-            )}
-            <Stack direction="row" sx={{ gap: "4px" }}>
-                {actionButton && actionButton}
-                {showRootCloseButton && (
-                    <IconButton
-                        aria-label="Close"
-                        onClick={onRootClose}
-                        color="secondary"
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                )}
-            </Stack>
-        </Stack>
-        <Stack sx={{ pl: "calc(16px + 0.5rem)", pr: "16px", gap: "4px" }}>
             <Typography variant="h3" sx={{ fontSize: "22px" }}>
                 {title}
             </Typography>
-            <Typography
-                variant="small"
+            {(!titleInline || caption) && (
+                <Typography
+                    variant="small"
+                    sx={{
+                        color: "text.muted",
+                        wordBreak: "break-all",
+                        minHeight: "17px",
+                    }}
+                >
+                    {caption}
+                </Typography>
+            )}
+        </Stack>
+    );
+
+    return (
+        <Stack sx={{ gap: "4px" }}>
+            <Stack
+                direction="row"
                 sx={{
-                    color: "text.muted",
-                    wordBreak: "break-all",
-                    minHeight: "17px",
+                    justifyContent: showBackButton
+                        ? "space-between"
+                        : "flex-end",
+                    ...(titleInline && { alignItems: "center" }),
                 }}
             >
-                {caption}
-            </Typography>
+                {showBackButton && (
+                    <IconButton
+                        aria-label="Back"
+                        onClick={onClose}
+                        color="primary"
+                        sx={{ ml: "0.5rem" }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+                )}
+                {titleInline && titleContent}
+                <Stack direction="row" sx={{ gap: "4px" }}>
+                    {actionButton && actionButton}
+                    {showRootCloseButton && (
+                        <IconButton
+                            aria-label="Close"
+                            onClick={onRootClose}
+                            color="secondary"
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    )}
+                </Stack>
+            </Stack>
+            {!titleInline && titleContent}
         </Stack>
-    </Stack>
-);
+    );
+};
 
 export const TitledNestedSidebarDrawer: React.FC<
     React.PropsWithChildren<
