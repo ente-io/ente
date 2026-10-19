@@ -68,8 +68,21 @@ export const matchesAlbumFilter = (
     }
 };
 
-export const visibleAlbumFilters = (collectionSummaries: CollectionSummary[]) =>
-    albumFilters.filter(({ value }) => {
+export const visibleAlbumFilters = (
+    collectionSummaries: CollectionSummary[],
+    query = "",
+) => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return albumFilters.filter(({ value }) => {
+        if (
+            normalizedQuery &&
+            !collectionSummaries.some(
+                (cs) =>
+                    matchesAlbumFilter(cs, value) &&
+                    cs.name.toLowerCase().includes(normalizedQuery),
+            )
+        )
+            return false;
         if (value == "ente") return true;
         if (value == "empty-albums") {
             return (
@@ -79,6 +92,7 @@ export const visibleAlbumFilters = (collectionSummaries: CollectionSummary[]) =>
         }
         return collectionSummaries.some((cs) => matchesAlbumFilter(cs, value));
     });
+};
 
 export const filterAlbumSummaries = (
     summaries: CollectionSummary[],
