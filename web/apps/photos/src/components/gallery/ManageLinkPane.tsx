@@ -1,10 +1,12 @@
 import { ManagePublicLinkSettings } from "@/components/Collections/CollectionShare";
 import type { RemotePullOpts } from "@/components/gallery";
-import { useResolvedPublicLinkURL } from "@/components/share/useResolvedPublicLinkURL";
 import { Stack, Typography } from "@mui/material";
 import { CenteredFill } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import log from "ente-base/log";
+import { resolveQuickLinkURL } from "ente-gallery/utils/quick-link";
 import type { Collection } from "ente-media/collection";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 
@@ -64,7 +66,38 @@ const SelectedLinkSettings = ({
     useEffect(() => {
         setPublicURL(collection.publicURLs[0]);
     }, [collection.publicURLs]);
-    const resolvedURL = useResolvedPublicLinkURL(collection, publicURL, true);
+    const { customDomain: domain } = useSettingsSnapshot();
+    const url = publicURL?.url;
+    const key = collection.key;
+    const [resolved, setResolved] = useState<{
+        url: string;
+        key: string;
+        domain: string | undefined;
+        value: string;
+    }>();
+
+    useEffect(() => {
+        if (!url) return;
+        let cancelled = false;
+        void resolveQuickLinkURL(url, key, domain)
+            .then((value) => {
+                if (!cancelled) setResolved({ url, key, domain, value });
+            })
+            .catch((e: unknown) =>
+                log.error("Could not resolve public link", e),
+            );
+        return () => {
+            cancelled = true;
+        };
+    }, [url, key, domain]);
+
+    const resolvedURL =
+        resolved &&
+        resolved.url === url &&
+        resolved.key === key &&
+        resolved.domain === domain
+            ? resolved.value
+            : undefined;
     const expired =
         publicURL &&
         publicURL.validTill > 0 &&

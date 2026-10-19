@@ -4,7 +4,6 @@ import Avatar from "@/components/Avatar";
 import type { RemotePullOpts } from "@/components/gallery";
 import { PublicLinkCreated } from "@/components/share/PublicLinkCreated";
 import { usePublicLinkManagement } from "@/components/share/usePublicLinkManagement";
-import { useResolvedPublicLinkURL } from "@/components/share/useResolvedPublicLinkURL";
 import { avatarTextColor } from "@/services/avatar";
 import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -58,6 +57,7 @@ import { isHTTPErrorWithStatus } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { useResolvedContactDisplay } from "ente-contacts";
+import { resolveQuickLinkURL } from "ente-gallery/utils/quick-link";
 import type {
     Collection,
     CollectionNewParticipantRole,
@@ -1426,11 +1426,39 @@ const PublicShare: React.FC<PublicShareProps> = ({
         setPublicURL(collection.publicURLs[0]);
     }, [collection]);
 
-    const resolvedURL = useResolvedPublicLinkURL(
-        collection,
-        publicURL,
-        canManage,
-    );
+    const { customDomain } = useSettingsSnapshot();
+    const domain = canManage ? customDomain : undefined;
+    const url = publicURL?.url;
+    const key = collection.key;
+    const [resolved, setResolved] = useState<{
+        url: string;
+        key: string;
+        domain: string | undefined;
+        value: string;
+    }>();
+
+    useEffect(() => {
+        if (!url) return;
+        let cancelled = false;
+        void resolveQuickLinkURL(url, key, domain)
+            .then((value) => {
+                if (!cancelled) setResolved({ url, key, domain, value });
+            })
+            .catch((e: unknown) =>
+                log.error("Could not resolve public link", e),
+            );
+        return () => {
+            cancelled = true;
+        };
+    }, [url, key, domain]);
+
+    const resolvedURL =
+        resolved &&
+        resolved.url === url &&
+        resolved.key === key &&
+        resolved.domain === domain
+            ? resolved.value
+            : undefined;
 
     const handleCopyLink = () => {
         if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);
