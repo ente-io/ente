@@ -2274,6 +2274,7 @@ const Page: React.FC = () => {
                             }
                             files={selectedLinkFiles}
                             user={user}
+                            setBlockingLoad={setBlockingLoad}
                             onRemotePull={remotePull}
                             coverFile={selectedLinkSummary?.coverFile}
                         />
