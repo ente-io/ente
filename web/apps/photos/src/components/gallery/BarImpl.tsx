@@ -300,6 +300,42 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         </Box>
     );
 
+    const searchEmptyState = (
+        <Stack
+            role="status"
+            sx={{
+                flex: 1,
+                minHeight: 0,
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "12px",
+                px: "16px",
+                py: "24px",
+                textAlign: "center",
+                overflowY: "auto",
+            }}
+        >
+            <Box
+                component="img"
+                src="/images/empty-state/no-matches.svg"
+                alt=""
+                draggable={false}
+                sx={{ width: 112, height: "auto", flexShrink: 0 }}
+            />
+            <Typography
+                sx={{
+                    color: "text.base",
+                    fontFamily: '"Outfit Variable", sans-serif',
+                    fontSize: 18,
+                    fontWeight: 600,
+                    lineHeight: "26px",
+                }}
+            >
+                {t("search_no_matches")}
+            </Typography>
+        </Stack>
+    );
+
     const navigation = (
         <Stack
             component="nav"
@@ -476,13 +512,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 )}
             </Stack>
-            {mode != "albums" && isSearching && !getItemCount(itemData) ? (
-                <Typography
-                    role="status"
-                    sx={{ px: "16px", color: "text.muted" }}
-                >
-                    {t("no_results")}
-                </Typography>
+            {isSearching && !getItemCount(itemData) ? (
+                searchEmptyState
             ) : mode == "albums" ? (
                 <Stack
                     role="group"
