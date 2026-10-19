@@ -1,6 +1,5 @@
 import { useDeleteEmptyAlbums } from "@/components/Collections/useDeleteEmptyAlbums";
 import type { RemotePullOpts } from "@/components/gallery";
-import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 import type { AlbumFilter } from "@/utils/album-filters";
 import { Delete02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -64,11 +63,8 @@ export const AlbumsOverview = ({
         return () => observer.disconnect();
     }, [listElement]);
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-    const {
-        handleDeleteEmptyAlbums,
-        hasEnoughEmptyAlbums,
-        deleteEmptyAlbumsDialogProps,
-    } = useDeleteEmptyAlbums(albums, onRemotePull);
+    const { handleDeleteEmptyAlbums, hasEnoughEmptyAlbums } =
+        useDeleteEmptyAlbums(albums, onRemotePull);
     const showDeleteEmptyAlbums =
         filter == "empty-albums" &&
         hasEnoughEmptyAlbums &&
@@ -91,7 +87,6 @@ export const AlbumsOverview = ({
 
     return (
         <>
-            <TrashFilesDialog {...deleteEmptyAlbumsDialogProps} />
             <Stack
                 sx={{
                     flex: 1,

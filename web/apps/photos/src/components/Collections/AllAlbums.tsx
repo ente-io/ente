@@ -1,4 +1,3 @@
-import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 // TODO: Audit this file.
 import {
     CreateAlbumTile,
@@ -105,11 +104,8 @@ export const AllAlbums: React.FC<AllAlbums> = ({
         onClose();
     };
 
-    const {
-        handleDeleteEmptyAlbums,
-        hasEnoughEmptyAlbums,
-        deleteEmptyAlbumsDialogProps,
-    } = useDeleteEmptyAlbums(collectionSummaries, onRemotePull);
+    const { handleDeleteEmptyAlbums, hasEnoughEmptyAlbums } =
+        useDeleteEmptyAlbums(collectionSummaries, onRemotePull);
 
     const showDeleteEmptyAlbums =
         showAlbumFilters &&
@@ -254,7 +250,6 @@ export const AllAlbums: React.FC<AllAlbums> = ({
                     </Box>
                 )}
             </Dialog>
-            <TrashFilesDialog {...deleteEmptyAlbumsDialogProps} />
         </>
     );
 };

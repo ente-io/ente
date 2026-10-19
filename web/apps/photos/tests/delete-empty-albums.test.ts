@@ -1,9 +1,10 @@
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { useDeleteEmptyAlbums } from "../src/components/Collections/useDeleteEmptyAlbums";
 
 const mocks = vi.hoisted(() => ({
-    candidateIDs: undefined as number[] | undefined,
+    showMiniDialog: vi.fn<(attributes: MiniDialogAttributes) => void>(),
     notify: vi.fn<
         (notification: { title: { key: string; opts?: unknown } }) => void
     >(),
@@ -12,13 +13,8 @@ const mocks = vi.hoisted(() => ({
     files: vi.fn(),
     remove: vi.fn(),
 }));
-vi.mock("react", () => ({
-    useState: () => [
-        mocks.candidateIDs,
-        (ids: number[] | undefined) => {
-            mocks.candidateIDs = ids;
-        },
-    ],
+vi.mock("ente-base/context", () => ({
+    useBaseContext: () => ({ showMiniDialog: mocks.showMiniDialog }),
 }));
 vi.mock("ente-new/photos/types/context", () => ({
     usePhotosAppContext: () => ({ showNotification: mocks.notify }),
@@ -60,12 +56,10 @@ const collection = (id: number) => ({
 const start = (ids = [1, 2, 3]) => {
     const result = useDeleteEmptyAlbums(ids.map(summary), mocks.pull);
     result.handleDeleteEmptyAlbums();
-    return useDeleteEmptyAlbums(ids.map(summary), mocks.pull)
-        .deleteEmptyAlbumsDialogProps;
+    return mocks.showMiniDialog.mock.calls.at(-1)![0];
 };
 beforeEach(() => {
     vi.resetAllMocks();
-    mocks.candidateIDs = undefined;
     mocks.pull.mockResolvedValue(undefined);
     mocks.collections.mockResolvedValue([1, 2, 3].map(collection));
     mocks.files.mockResolvedValue([]);
@@ -74,19 +68,20 @@ beforeEach(() => {
 describe("shared empty album deletion", () => {
     test("confirms the candidate count and does nothing until confirmed", () => {
         const dialog = start();
-        expect(dialog.open).toBe(true);
-        expect(dialog.count).toBe(3);
+        expect(mocks.showMiniDialog).toHaveBeenCalledOnce();
+        expect(dialog.illustration).toBeDefined();
+        expect(dialog.dismissOnRouteChange).toBe(true);
+        expect(dialog.continue?.text).toEqual({
+            key: "delete",
+            opts: undefined,
+        });
+        expect(dialog.continue?.color).toBe("critical");
         expect(dialog.message).toEqual({
             key: "delete_empty_albums_message",
             opts: { count: 3 },
         });
         expect(mocks.pull).not.toHaveBeenCalled();
         expect(mocks.remove).not.toHaveBeenCalled();
-        dialog.onClose();
-        expect(
-            useDeleteEmptyAlbums([summary(1)], mocks.pull)
-                .deleteEmptyAlbumsDialogProps.open,
-        ).toBe(false);
         expect(
             useDeleteEmptyAlbums([summary(1), summary(2)], mocks.pull)
                 .hasEnoughEmptyAlbums,
@@ -105,7 +100,7 @@ describe("shared empty album deletion", () => {
             collection(9),
         ]);
         mocks.files.mockResolvedValue([{ collectionID: 2 }]);
-        await start([1, 2, 3, 4, 5, 6, 7, 8]).onConfirm();
+        await start([1, 2, 3, 4, 5, 6, 7, 8]).continue?.action?.();
         expect(mocks.remove.mock.calls).toEqual([[1, { keepFiles: true }]]);
         expect(mocks.pull.mock.calls).toEqual([
             [{ strict: true }],
@@ -114,7 +109,7 @@ describe("shared empty album deletion", () => {
     });
     test("aborts on initial sync failure", async () => {
         mocks.pull.mockRejectedValueOnce(new Error("sync"));
-        await start().onConfirm();
+        await start().continue?.action?.();
         expect(mocks.remove).not.toHaveBeenCalled();
         expect(mocks.notify.mock.calls[0]![0].title).toEqual({
             key: "delete_empty_albums_failed",
@@ -123,7 +118,7 @@ describe("shared empty album deletion", () => {
     });
     test("continues after a deletion failure and reports the failed count", async () => {
         mocks.remove.mockRejectedValueOnce(new Error("delete"));
-        await start().onConfirm();
+        await start().continue?.action?.();
         expect(mocks.remove).toHaveBeenCalledTimes(3);
         expect(mocks.pull).toHaveBeenCalledTimes(2);
         expect(mocks.notify.mock.calls[0]![0].title).toEqual({
@@ -135,7 +130,7 @@ describe("shared empty album deletion", () => {
         mocks.pull
             .mockResolvedValueOnce(undefined)
             .mockRejectedValueOnce(new Error("refresh"));
-        await start().onConfirm();
+        await start().continue?.action?.();
         expect(mocks.notify.mock.calls[0]![0].title.key).toBe(
             "delete_empty_albums_refresh_failed",
         );

@@ -1,5 +1,6 @@
 import type { CollectionSelectorAttributes } from "@/components/CollectionSelector";
 import type { GalleryBarMode } from "@/components/gallery/reducer";
+import { DialogWarningIllustration } from "@/components/utils/DialogWarningIllustration";
 import {
     getAvailableFileActions,
     type FileContextAction,
@@ -114,6 +115,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleDeletePermanently = () =>
         showMiniDialog({
             title: t("delete_files_title"),
+            illustration: <DialogWarningIllustration color="red" />,
             message: t("delete_files_message"),
             continue: {
                 text: t("delete"),
