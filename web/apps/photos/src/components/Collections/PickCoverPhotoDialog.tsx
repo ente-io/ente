@@ -299,7 +299,6 @@ const backButtonSx = {
     flexShrink: 0,
     color: "text.base",
 };
-// Shared actions normally share a row; keep these stacked at their full height.
 const actionButtonSx = {
     flex: "none",
     minHeight: 52,
