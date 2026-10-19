@@ -2206,6 +2206,7 @@ const Page: React.FC = () => {
                     />
                 ) : !isInSearchMode && !isFirstLoad && isAlbumOverview ? (
                     <AlbumsOverview
+                        onRemotePull={remotePull}
                         albums={overviewAlbums}
                         title={(
                             albumFilters.find(
