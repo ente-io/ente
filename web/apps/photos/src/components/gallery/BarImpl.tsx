@@ -12,6 +12,7 @@ import {
     ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -82,6 +83,8 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     activeCollectionID: number | undefined;
     onSelectCollectionID: (collectionID: number) => void;
     onShowAllAlbums: () => void;
+    canCreateAlbum: boolean;
+    onCreateAlbum: () => void;
     onShowAllPeople: () => void;
     collectionsSortBy: CollectionsSortBy;
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
@@ -106,6 +109,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     activeCollectionID,
     onSelectCollectionID,
     onShowAllAlbums,
+    canCreateAlbum,
+    onCreateAlbum,
     onShowAllPeople,
     collectionsSortBy,
     onChangeCollectionsSortBy,
@@ -391,6 +396,21 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         <ExpandMoreIcon sx={{ fontSize: 20 }} />
                     </IconButton>
                 </Tooltip>
+                {canCreateAlbum &&
+                    (mode == "albums" || mode == "hidden-albums") && (
+                        <Tooltip title={t("new_album")}>
+                            <IconButton
+                                aria-label={t("new_album")}
+                                aria-haspopup="dialog"
+                                onClick={() => {
+                                    mobileDrawerProps.onClose();
+                                    onCreateAlbum();
+                                }}
+                            >
+                                <AddIcon sx={{ fontSize: 20 }} />
+                            </IconButton>
+                        </Tooltip>
+                    )}
                 {mobile && (
                     <IconButton
                         aria-label={t("close")}
