@@ -262,6 +262,63 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         },
     ];
 
+    const isTopShortcut = ({ id }: (typeof albumShortcuts)[number]) =>
+        id == uncategorizedCollectionSummaryID ||
+        id == PseudoCollectionID.trash;
+    const renderAlbumShortcut = (
+        { id, label, icon, active }: (typeof albumShortcuts)[number],
+        compact = false,
+    ) => (
+        <BarCard
+            key={id}
+            aria-label={label}
+            aria-current={active ? "true" : undefined}
+            onClick={() => {
+                void onShowCollectionSummary(
+                    id,
+                    id == PseudoCollectionID.hiddenItems,
+                ).then(async (success) => {
+                    if (!success || !mobile) return;
+                    if (id == PseudoCollectionID.hiddenItems) await wait(10);
+                    mobileDrawerProps.onClose();
+                });
+            }}
+            sx={{
+                flexShrink: 0,
+                ...(compact && {
+                    flex: 1,
+                    minWidth: 0,
+                    height: "auto",
+                    flexWrap: "wrap",
+                    gap: "8px",
+                    p: "12px",
+                    border: "1px solid",
+                    borderColor: active ? "stroke.base" : "stroke.faint",
+                    bgcolor: "var(--gallery-navigation-surface)",
+                }),
+            }}
+        >
+            <HugeiconsIcon icon={icon} size={20} aria-hidden />
+            {compact ? (
+                <Box sx={{ order: 1, width: "100%" }}>
+                    <CardText>{label}</CardText>
+                </Box>
+            ) : (
+                <CardText>{label}</CardText>
+            )}
+            {id == PseudoCollectionID.hiddenItems ? (
+                <LockOutlinedIcon sx={{ color: "text.muted", fontSize: 19 }} />
+            ) : (
+                <Typography
+                    variant="small"
+                    sx={{ color: "text.muted", ...(compact && { ml: "auto" }) }}
+                >
+                    {normalCollectionSummaries.get(id)?.fileCount}
+                </Typography>
+            )}
+        </BarCard>
+    );
+
     const albumListID = `${titleID}-albums`;
     const items = (
         <Box
@@ -476,6 +533,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 )}
             </Stack>
+            {mode != "people" && (
+                <Stack direction="row" sx={{ gap: "8px", flexShrink: 0 }}>
+                    {albumShortcuts
+                        .filter(isTopShortcut)
+                        .map((shortcut) => renderAlbumShortcut(shortcut, true))}
+                </Stack>
+            )}
             {mode != "albums" && isSearching && !getItemCount(itemData) ? (
                 <Typography
                     role="status"
@@ -554,43 +618,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                             opacity: 0.5,
                         }}
                     />
-                    {albumShortcuts.map(({ id, label, icon, active }) => (
-                        <BarCard
-                            key={id}
-                            aria-label={label}
-                            aria-current={active ? "true" : undefined}
-                            onClick={() => {
-                                void onShowCollectionSummary(
-                                    id,
-                                    id == PseudoCollectionID.hiddenItems,
-                                ).then(async (success) => {
-                                    if (!success || !mobile) return;
-                                    if (id == PseudoCollectionID.hiddenItems)
-                                        await wait(10);
-                                    mobileDrawerProps.onClose();
-                                });
-                            }}
-                            sx={{ flexShrink: 0 }}
-                        >
-                            <HugeiconsIcon icon={icon} size={20} aria-hidden />
-                            <CardText>{label}</CardText>
-                            {id == PseudoCollectionID.hiddenItems ? (
-                                <LockOutlinedIcon
-                                    sx={{ color: "text.muted", fontSize: 19 }}
-                                />
-                            ) : (
-                                <Typography
-                                    variant="small"
-                                    sx={{ color: "text.muted" }}
-                                >
-                                    {
-                                        normalCollectionSummaries.get(id)
-                                            ?.fileCount
-                                    }
-                                </Typography>
-                            )}
-                        </BarCard>
-                    ))}
+                    {albumShortcuts
+                        .filter((shortcut) => !isTopShortcut(shortcut))
+                        .map((shortcut) => renderAlbumShortcut(shortcut))}
                 </Stack>
             )}
         </Stack>
