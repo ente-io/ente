@@ -72,6 +72,7 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     albumSearchQuery: string;
     onAlbumSearchQueryChange: (query: string) => void;
     onShowAlbumOverview: (filter: AlbumFilter) => void;
+    onShowPeopleOverview: () => void;
     collectionSummaries: CollectionSummary[];
     visibleAlbumFilters: typeof albumFilters;
     normalCollectionSummaries: CollectionSummaries;
@@ -98,6 +99,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     albumSearchQuery,
     onAlbumSearchQueryChange,
     onShowAlbumOverview,
+    onShowPeopleOverview,
     collectionSummaries,
     visibleAlbumFilters,
     normalCollectionSummaries,
@@ -357,7 +359,30 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         lineHeight: mobile ? "26px" : "32px",
                     }}
                 >
-                    {title}
+                    {mode == "people" ? (
+                        <ButtonBase
+                            onClick={() => {
+                                setPeopleSearchQuery("");
+                                onShowPeopleOverview();
+                                mobileDrawerProps.onClose();
+                            }}
+                            sx={{
+                                font: "inherit",
+                                justifyContent: "flex-start",
+                                borderRadius: 1,
+                                "&:hover": { color: "text.muted" },
+                                "&.Mui-focusVisible": {
+                                    outline: "2px solid",
+                                    outlineColor: "primary.main",
+                                    outlineOffset: 2,
+                                },
+                            }}
+                        >
+                            {title}
+                        </ButtonBase>
+                    ) : (
+                        title
+                    )}
                 </Typography>
                 {mode != "people" ? (
                     <CollectionsSortOptions

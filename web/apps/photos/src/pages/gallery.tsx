@@ -2112,6 +2112,7 @@ const Page: React.FC = () => {
                               albumSearchQuery,
                               onAlbumSearchQueryChange: setAlbumSearchQuery,
                               onShowAlbumOverview: handleShowAlbumOverview,
+                              onShowPeopleOverview: handleShowPeople,
                               onAlbumSummariesChange:
                                   handleAlbumSummariesChange,
                               peopleSortBy,
