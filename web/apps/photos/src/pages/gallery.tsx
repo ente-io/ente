@@ -2136,10 +2136,6 @@ const Page: React.FC = () => {
                                   (state.view?.type == "people"
                                       ? state.view.visiblePeople
                                       : undefined) ?? [],
-                              allPeople:
-                                  (state.view?.type == "people"
-                                      ? state.view.people
-                                      : undefined) ?? [],
                               setBlockingLoad,
                               setActiveCollectionID:
                                   handleShowCollectionSummaryWithID,

@@ -83,7 +83,6 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     activeCollectionID: number | undefined;
     onSelectCollectionID: (collectionID: number) => void;
     onCreateAlbum: () => void;
-    onShowAllPeople: () => void;
     collectionsSortBy: CollectionsSortBy;
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     peopleSortBy: PeopleSortBy;
@@ -107,7 +106,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     activeCollectionID,
     onSelectCollectionID,
     onCreateAlbum,
-    onShowAllPeople,
     collectionsSortBy,
     onChangeCollectionsSortBy,
     peopleSortBy,
@@ -373,20 +371,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         activeSortBy={peopleSortBy}
                         onChangeSortBy={onChangePeopleSortBy}
                     />
-                )}
-                {mode == "people" && (
-                    <Tooltip title={t("people")}>
-                        <IconButton
-                            aria-label={t("people")}
-                            aria-haspopup="dialog"
-                            onClick={() => {
-                                mobileDrawerProps.onClose();
-                                onShowAllPeople();
-                            }}
-                        >
-                            <ExpandMoreIcon sx={{ fontSize: 20 }} />
-                        </IconButton>
-                    </Tooltip>
                 )}
                 {(mode == "albums" || mode == "hidden-albums") && (
                     <Tooltip title={t("new_album")}>
