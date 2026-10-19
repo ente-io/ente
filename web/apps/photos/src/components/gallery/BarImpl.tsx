@@ -608,9 +608,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     "aria-labelledby": titleID,
                     inert: !mobileDrawerProps.open,
                     sx: (theme) => ({
-                        width: "min(328px, 94vw)",
-                        borderRadius: "0 20px 20px 0",
-                        boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
+                        width: "100%",
+                        borderRadius: 0,
+                        boxShadow: "none",
                         bgcolor: "#F4F4F4",
                         ...theme.applyStyles("dark", { bgcolor: "#161616" }),
                     }),
@@ -875,16 +875,5 @@ const PersonCard: React.FC<PersonCardProps> = ({
                 <HugeiconsIcon icon={PinIcon} size={14} />
             </CollectionBarCardIcon_>
         )}
-        <Typography
-            component="span"
-            sx={{
-                flexShrink: 0,
-                fontSize: 12,
-                lineHeight: "20px",
-                color: "text.muted",
-            }}
-        >
-            {person.fileIDs.length.toLocaleString()}
-        </Typography>
     </BarCard>
 );

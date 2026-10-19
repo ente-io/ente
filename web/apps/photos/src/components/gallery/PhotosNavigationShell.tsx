@@ -80,7 +80,7 @@ export const PhotosNavigationShell: React.FC<
         if (!mobile) closeMobileNavigation();
     }, [mobile, closeMobileNavigation]);
     const handleChangeMode = (mode: GalleryBarMode) => {
-        if (mode == "people") {
+        if (mode == "people" && !mobile) {
             closeMobileNavigation();
             props.onChangeMode(mode);
             return;
