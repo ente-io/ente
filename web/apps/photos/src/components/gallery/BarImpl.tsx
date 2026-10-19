@@ -206,7 +206,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                       type: "collections",
                       collectionSummaries: collectionSummaries,
                       indented: mode == "albums",
-                      isLink: mode == "links",
                       activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
                   }
@@ -633,7 +632,6 @@ type ItemData =
           type: "collections";
           collectionSummaries: CollectionSummary[];
           indented: boolean;
-          isLink: boolean;
           activeCollectionID: number;
           onSelectCollectionID: (id: number) => void;
       }
@@ -689,7 +687,6 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
                         activeCollectionID,
                         onSelectCollectionID,
                     }}
-                    isLink={data.isLink}
                     indented={
                         data.indented &&
                         !collectionSummary.attributes.has("system")
@@ -718,7 +715,6 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
 interface CollectionBarCardProps {
     collectionSummary: CollectionSummary;
     indented: boolean;
-    isLink: boolean;
     activeCollectionID: number;
     onSelectCollectionID: (collectionID: number) => void;
 }
@@ -726,7 +722,6 @@ interface CollectionBarCardProps {
 const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
     collectionSummary,
     indented,
-    isLink,
     activeCollectionID,
     onSelectCollectionID,
 }: CollectionBarCardProps) => (
@@ -750,9 +745,7 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
             />
         </Box>
         <CardText>{collectionSummary.name}</CardText>
-        {!isLink && (
-            <CollectionBarCardIcon attributes={collectionSummary.attributes} />
-        )}
+        <CollectionBarCardIcon attributes={collectionSummary.attributes} />
     </BarCard>
 );
 
