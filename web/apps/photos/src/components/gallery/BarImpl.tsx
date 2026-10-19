@@ -262,40 +262,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         },
     ];
 
-    const renderAlbumShortcut = ({
-        id,
-        label,
-        icon,
-        active,
-    }: (typeof albumShortcuts)[number]) => (
-        <BarCard
-            key={id}
-            aria-label={label}
-            aria-current={active ? "true" : undefined}
-            onClick={() => {
-                void onShowCollectionSummary(
-                    id,
-                    id == PseudoCollectionID.hiddenItems,
-                ).then(async (success) => {
-                    if (!success || !mobile) return;
-                    if (id == PseudoCollectionID.hiddenItems) await wait(10);
-                    mobileDrawerProps.onClose();
-                });
-            }}
-            sx={{ flexShrink: 0 }}
-        >
-            <HugeiconsIcon icon={icon} size={20} aria-hidden />
-            <CardText>{label}</CardText>
-            {id == PseudoCollectionID.hiddenItems ? (
-                <LockOutlinedIcon sx={{ color: "text.muted", fontSize: 19 }} />
-            ) : (
-                <Typography variant="small" sx={{ color: "text.muted" }}>
-                    {normalCollectionSummaries.get(id)?.fileCount}
-                </Typography>
-            )}
-        </BarCard>
-    );
-
     const albumListID = `${titleID}-albums`;
     const items = (
         <Box
@@ -588,9 +554,43 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                             opacity: 0.5,
                         }}
                     />
-                    {albumShortcuts.map((shortcut) =>
-                        renderAlbumShortcut(shortcut),
-                    )}
+                    {albumShortcuts.map(({ id, label, icon, active }) => (
+                        <BarCard
+                            key={id}
+                            aria-label={label}
+                            aria-current={active ? "true" : undefined}
+                            onClick={() => {
+                                void onShowCollectionSummary(
+                                    id,
+                                    id == PseudoCollectionID.hiddenItems,
+                                ).then(async (success) => {
+                                    if (!success || !mobile) return;
+                                    if (id == PseudoCollectionID.hiddenItems)
+                                        await wait(10);
+                                    mobileDrawerProps.onClose();
+                                });
+                            }}
+                            sx={{ flexShrink: 0 }}
+                        >
+                            <HugeiconsIcon icon={icon} size={20} aria-hidden />
+                            <CardText>{label}</CardText>
+                            {id == PseudoCollectionID.hiddenItems ? (
+                                <LockOutlinedIcon
+                                    sx={{ color: "text.muted", fontSize: 19 }}
+                                />
+                            ) : (
+                                <Typography
+                                    variant="small"
+                                    sx={{ color: "text.muted" }}
+                                >
+                                    {
+                                        normalCollectionSummaries.get(id)
+                                            ?.fileCount
+                                    }
+                                </Typography>
+                            )}
+                        </BarCard>
+                    ))}
                 </Stack>
             )}
         </Stack>
