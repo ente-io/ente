@@ -7,6 +7,7 @@ import {
 import { patchCachedSpaceFeedPost } from "../src/services/feed-cache";
 import { ensureCurrentSpaceContext } from "../src/services/profile";
 import {
+    createCurrentComment,
     loadCurrentComments,
     loadCurrentFeedPage,
     loadCurrentSpaceProfilePostsPage,
@@ -25,6 +26,8 @@ vi.mock("services/profile", () => ({
 }));
 
 const context = {
+    createComment: vi.fn(),
+    getPost: vi.fn(),
     listComments: vi.fn(),
     listFeed: vi.fn(),
     listPosts: vi.fn(),
@@ -73,6 +76,96 @@ test("keeps the updated count after the viewer closes and reopens with an old po
     expect(snapshot.commentCount).toBe(0);
     expect(cachedCommentCount("viewer", snapshot.postId)).toBe(1);
 });
+
+test.each([undefined, "parent"])(
+    "updates the count when a send to %s finishes after the viewer closes",
+    async (replyToId) => {
+        context.listFeed.mockResolvedValue({ items: [post(0)] });
+        const feed = await loadCurrentFeedPage("viewer");
+        const updateViewer = vi.fn();
+        const closeViewer = subscribeToCommentCounts(updateViewer);
+        let finishSend!: () => void;
+        context.createComment.mockReturnValue(
+            new Promise<void>((resolve) => {
+                finishSend = resolve;
+            }),
+        );
+        context.getPost.mockResolvedValue(post(3));
+
+        const send = createCurrentComment(
+            "viewer",
+            "friend",
+            42,
+            "comment",
+            replyToId,
+            "Hello",
+        );
+        await vi.waitFor(() =>
+            expect(context.createComment).toHaveBeenCalled(),
+        );
+        expect(cachedCommentCount("viewer", 42)).toBe(0);
+        closeViewer();
+        finishSend();
+        await send;
+
+        expect(updateViewer).not.toHaveBeenCalled();
+        expect(feed.items[0]!.commentCount).toBe(0);
+        expect(cachedCommentCount("viewer", 42)).toBe(3);
+        expect(patchCachedSpaceFeedPost).toHaveBeenCalledWith("viewer", 42, {
+            commentCount: 3,
+        });
+        expect(context.getPost).toHaveBeenCalledWith("friend", 42n, "viewer");
+    },
+);
+
+test("keeps the count unchanged when sending fails", async () => {
+    context.listFeed.mockResolvedValue({ items: [post(2)] });
+    await loadCurrentFeedPage("viewer");
+    context.createComment.mockRejectedValue(new Error("Send failed"));
+
+    await expect(
+        createCurrentComment(
+            "viewer",
+            "friend",
+            42,
+            "comment",
+            undefined,
+            "Hi",
+        ),
+    ).rejects.toThrow("Send failed");
+
+    expect(cachedCommentCount("viewer", 42)).toBe(2);
+    expect(patchCachedSpaceFeedPost).not.toHaveBeenCalled();
+});
+
+test.each(["post", "cache"])(
+    "does not report a saved comment as failed when refreshing the %s fails",
+    async (failure) => {
+        context.getPost.mockResolvedValue(post(1));
+        if (failure == "post") {
+            context.getPost.mockRejectedValue(new Error("Offline"));
+        } else {
+            vi.mocked(patchCachedSpaceFeedPost).mockRejectedValue(
+                new Error("Storage unavailable"),
+            );
+        }
+
+        await expect(
+            createCurrentComment(
+                "viewer",
+                "friend",
+                42,
+                "comment",
+                undefined,
+                "Hi",
+            ),
+        ).resolves.toBeUndefined();
+        expect(context.getPost).toHaveBeenCalled();
+        if (failure == "cache") {
+            expect(cachedCommentCount("viewer", 42)).toBe(1);
+        }
+    },
+);
 
 test("counts replies across pages and removes deleted comments from the total", async () => {
     context.listComments

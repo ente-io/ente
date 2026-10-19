@@ -8,6 +8,8 @@ CREATE TABLE space_comments (
     created_at BIGINT NOT NULL DEFAULT now_utc_micro_seconds()
 );
 CREATE INDEX space_comments_post ON space_comments (post_id, created_at, comment_id);
+CREATE INDEX space_comments_author ON space_comments (author_space_id, post_id);
+CREATE INDEX space_comments_parent ON space_comments (parent_id);
 CREATE INDEX space_comments_reply_to ON space_comments (reply_to_id);
 CREATE TABLE space_comment_reactions (
     comment_id TEXT NOT NULL REFERENCES space_comments (comment_id) ON DELETE CASCADE,

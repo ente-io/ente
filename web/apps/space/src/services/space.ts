@@ -1743,6 +1743,15 @@ export const createCurrentComment = async (
             replyToId,
             normalizeSpaceMessageText(text),
         );
+        try {
+            const post = await ctx.getPost(postSpaceId, BigInt(postId), viewer);
+            rememberCommentCount(viewer, postId, post.commentCount);
+            await patchCachedSpaceFeedPost(viewer, postId, {
+                commentCount: post.commentCount,
+            });
+        } catch (error) {
+            log.warn("Failed to refresh comment count after sending", error);
+        }
     } finally {
         releaseCurrentSpaceContext(ctx);
     }
