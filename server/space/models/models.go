@@ -402,6 +402,7 @@ type PostResponse struct {
 	Objects          []PostObjectPayload `json:"objects,omitempty"`
 	CreatedAt        string              `json:"createdAt"`
 	ViewerLiked      bool                `json:"viewerLiked"`
+	CommentCount     int64               `json:"commentCount"`
 }
 
 type SpaceUnreadStatusResponse struct {
@@ -439,6 +440,10 @@ type ReadNotificationsRequest struct {
 }
 
 type NotificationResponse struct {
+	PostSpaceID     string               `json:"postSpaceId,omitempty"`
+	PostOwnerSlug   string               `json:"postOwnerSlug,omitempty"`
+	CommentID       string               `json:"commentId,omitempty"`
+	ReplyToID       string               `json:"replyToId,omitempty"`
 	NotificationID  string               `json:"notificationId"`
 	NotificationIDs []string             `json:"notificationIds"`
 	Kind            string               `json:"kind"`

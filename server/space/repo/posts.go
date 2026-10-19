@@ -48,7 +48,9 @@ func postRecordSelectSQL(viewerLikedExpr string) string {
 		       ` + spaceActorSelectColumns("w", "w_avatar", "author") + `,
 		       p.encrypted_post_key, p.caption_cipher,
 		       p.key_version, p.created_at,
-		       ` + viewerLikedExpr + ` AS viewer_liked`
+		       ` + viewerLikedExpr + ` AS viewer_liked,
+		       (SELECT COUNT(*) FROM space_comments c
+		        WHERE c.post_id = p.post_id AND ` + commentVisibleSQL + `) AS comment_count`
 }
 
 func scanPostRecords(rows *sql.Rows) ([]SpacePostRecord, error) {
@@ -420,7 +422,7 @@ func scanPostRecord(scanner interface{ Scan(dest ...any) error }) (*SpacePostRec
 	var rec SpacePostRecord
 	dest := []any{&rec.PostID, &rec.SpaceID, &rec.SpaceSlug, &rec.OwnerID}
 	dest = append(dest, spaceActorScanDest(&rec.Author)...)
-	dest = append(dest, &rec.EncryptedPostKey, &rec.CaptionCipher, &rec.KeyVersion, &rec.CreatedAt, &rec.ViewerLiked)
+	dest = append(dest, &rec.EncryptedPostKey, &rec.CaptionCipher, &rec.KeyVersion, &rec.CreatedAt, &rec.ViewerLiked, &rec.CommentCount)
 	if err := scanner.Scan(dest...); err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

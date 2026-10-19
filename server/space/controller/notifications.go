@@ -55,6 +55,7 @@ func spaceActivityActor(space *repo.SpaceRecord) SpaceActivityActor {
 }
 
 type SpaceActivityNotifier interface {
+	OnSpaceComment(actor SpaceActivityActor, recipientUserID int64, postOwner SpaceActivityActor, postID int64, commentID, kind string)
 	OnSpacePostCreated(actor SpaceActivityActor, postID int64)
 	OnSpacePostLiked(actor SpaceActivityActor, recipientUserID int64)
 	OnSpacePostReplied(actor SpaceActivityActor, recipientUserID int64)
@@ -414,4 +415,21 @@ func isPublicWebPushAddress(address net.IP) bool {
 		}
 	}
 	return true
+}
+
+func (n *SpaceWebPushSender) OnSpaceComment(actor SpaceActivityActor, recipientUserID int64, postOwner SpaceActivityActor, postID int64, commentID, kind string) {
+	post := "@" + postOwner.Slug + "'s post"
+	if recipientUserID == postOwner.UserID {
+		post = "your post"
+	} else if actor.SpaceID == postOwner.SpaceID {
+		post = "their post"
+	}
+	activity := "commented on " + post
+	switch kind {
+	case "comment_reply":
+		activity = "replied to your comment"
+	case "comment_reaction":
+		activity = "reacted to your comment"
+	}
+	n.sendAccountActivity(actor, activity, "View comments", "comment", fmt.Sprintf("/app/posts/%s/%d?comments=1&comment=%s", url.PathEscape(postOwner.SpaceID), postID, url.QueryEscape(commentID)), recipientUserID)
 }

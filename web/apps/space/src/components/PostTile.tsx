@@ -19,6 +19,7 @@ const green = "#08C225";
 export interface SpacePostTileItem {
     avatarUrl?: string | null;
     caption?: string;
+    commentCount?: number;
     friendID?: string;
     height?: number;
     id: string;

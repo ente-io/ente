@@ -370,7 +370,7 @@ impl AccountSpaceCtx {
         Ok(HydratedKeys { owned, friends })
     }
 
-    async fn decrypt_post_key_fields(
+    pub(super) async fn decrypt_post_key_fields(
         &self,
         space_id: &str,
         viewer_space_id: Option<&str>,
@@ -594,6 +594,7 @@ pub(super) fn opened_post(
         content,
         created_at: post.created_at,
         viewer_liked: post.viewer_liked,
+        comment_count: post.comment_count,
     }
 }
 
@@ -624,6 +625,7 @@ mod tests {
             }],
             created_at: format!("2026-08-0{post_id}T00:00:00Z"),
             viewer_liked: false,
+            comment_count: 0,
         }
     }
 

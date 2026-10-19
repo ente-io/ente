@@ -53,6 +53,7 @@ const viewerPhotoFromPost = (post: SpacePost) => ({
     alt: `${post.name} post`,
     avatarUrl: post.avatarUrl,
     caption: post.caption,
+    commentCount: post.commentCount,
     friendID: post.friendID,
     height: post.height,
     photos: post.photos,
@@ -78,6 +79,7 @@ const Page: React.FC = () => {
     const spaceId =
         valueFromQuery(router.query.spaceId) ?? pathParams.spaceId ?? "";
     const postId = postIdFromQuery(router.query.postId) ?? pathParams.postId;
+    const targetCommentId = valueFromQuery(router.query.comment);
     const photoId =
         valueFromQuery(router.query.photo) ??
         (typeof window == "undefined"
@@ -201,10 +203,12 @@ const Page: React.FC = () => {
         <>
             <SpacePageMeta themeColor={postBackground} />
             <SpaceFileViewer
-                key={`${post.postId}:${photoId ?? ""}`}
+                key={`${post.postId}:${photoId ?? ""}:${targetCommentId ?? ""}`}
                 photo={viewerPhotoFromPost(post)}
                 photos={photos}
                 initialPhotoIndex={photoIndex}
+                commentsOnOpen={router.query.comments == "1"}
+                targetCommentId={targetCommentId}
                 onLoadPhoto={loadCurrentSpacePostAssetURL}
                 postActionMode={isOwnPost ? "hidden" : "like-only"}
                 onClose={closePost}

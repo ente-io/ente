@@ -21,9 +21,11 @@ import {
 import { SpaceAvatarImage } from "components/AvatarImage";
 import { SpaceBottomSheetTransition } from "components/BottomSheetTransition";
 import { SpaceCaptionText } from "components/CaptionText";
+import { SpaceCommentsButton } from "components/CommentComposer";
 import { ConfirmationActionSheet } from "components/ConfirmationActionSheet";
 import { spacePostLikePopDurationMs } from "components/post-like-animation";
 import { paintStretchingDot } from "components/post-photos-dots";
+import { PostComments } from "components/PostComments";
 import { SpacePostPhotosDots } from "components/PostPhotosDots";
 import { SpacePostReplyControls } from "components/PostReplyControls";
 import { createSpaceVideoContent } from "components/PostVideoContent";
@@ -36,6 +38,8 @@ import {
     viewerOriginKey,
 } from "components/viewer-transition";
 import log from "ente-base/log";
+import { useCommentCount } from "hooks/use-comment-count";
+import { useCommentDraft } from "hooks/use-comment-draft";
 import { isSpaceIOS } from "hooks/use-pwa-install-prompt";
 import type PhotoSwipe from "photoswipe";
 import React from "react";
@@ -46,6 +50,7 @@ import type {
     SpacePostAssetURLLoader,
     SpacePostVideo,
 } from "services/space";
+import { useSpaceAppState } from "state/app-state";
 import {
     spaceControlBackground,
     spaceControlBackgroundHover,
@@ -144,6 +149,7 @@ export interface SpaceViewerPhoto {
     alt?: string;
     avatarUrl?: string | null;
     caption?: string;
+    commentCount?: number;
     friendID?: string;
     height?: number;
     imageUrl: string;
@@ -199,7 +205,10 @@ interface SpaceFileViewerProps {
     photoIndex?: number;
     initialPhotoIndex?: number;
     photos?: SpaceViewerPhoto[];
-    focusReplyOnOpen?: boolean;
+    commentsOnOpen?: boolean;
+    targetCommentId?: string;
+    focusCommentOnOpen?: boolean;
+    privateReplyOnOpen?: boolean;
     postActionMode?: SpaceViewerPostActionMode;
 }
 
@@ -405,16 +414,17 @@ const SpaceViewerPhotoOverlay: React.FC<{
             data-space-viewer-chrome="true"
             sx={{
                 alignItems: "center",
-                bottom: "14%",
                 display: "flex",
                 flexDirection: "column",
                 gap: "16px",
-                left: "50%",
+                bottom: {
+                    sm: "max(88px, calc(env(safe-area-inset-bottom) + 80px))",
+                },
+                left: { sm: "50%" },
                 pointerEvents: "none",
-                position: "fixed",
-                transform: "translateX(-50%)",
-                width: "78vw",
-                zIndex: 2,
+                position: { sm: "fixed" },
+                transform: { sm: "translateX(-50%)" },
+                width: { xs: "100%", sm: "78vw" },
             }}
         >
             <SpacePostPhotosDots
@@ -466,7 +476,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     headerHeight = 68,
     draftPhotoControls,
     onLoadPhoto,
-    focusReplyOnOpen = false,
+    commentsOnOpen = false,
+    targetCommentId,
+    focusCommentOnOpen = false,
+    privateReplyOnOpen = false,
     isDraftPostPreviewPending = false,
     onClose,
     onAddDraftPhoto,
@@ -487,6 +500,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     photos,
     postActionMode = "like-only",
 }) => {
+    const { profile } = useSpaceAppState();
+    const [commentsOpen, setCommentsOpen] = React.useState(false);
+    React.useEffect(() => {
+        if (commentsOnOpen) setCommentsOpen(true);
+    }, [commentsOnOpen]);
     const [localPhotoIndex, setLocalPhotoIndex] =
         React.useState(initialPhotoIndex);
     const [loadedPhotoURLs, setLoadedPhotoURLs] = React.useState<
@@ -537,6 +555,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         viewerPhotos.length - 1,
     );
     const activePhoto = viewerPhotos[activePhotoIndex] ?? photo;
+    const [commentDraft, setCommentDraft] = useCommentDraft(
+        profile?.spaceId,
+        activePhoto.postId,
+    );
     const draftPostPreparationError = isDraftPost
         ? activePhoto.preparationError
         : undefined;
@@ -601,8 +623,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     isCaptionEditingRef.current = isCaptionEditing;
     const [replyText, setReplyText] = React.useState("");
     const replyDraftsRef = React.useRef(new Map<string, string>());
-    const [isReplyFocused, setIsReplyFocused] =
-        React.useState(focusReplyOnOpen);
+    const [isReplyFocused, setIsReplyFocused] = React.useState(false);
     const [replyPhases, setReplyPhases] = React.useState<
         Record<string, SpaceActionPhase | null>
     >({});
@@ -645,6 +666,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     const captionInputRef = React.useRef<HTMLTextAreaElement | null>(null);
     const cancelKeyboardDismissWaitRef = React.useRef<() => void>(undefined);
     const replyInputRef = React.useRef<HTMLTextAreaElement | null>(null);
+    const replyControlsRef = React.useRef<HTMLDivElement | null>(null);
     const [actionsAnchor, setActionsAnchor] =
         React.useState<HTMLElement | null>(null);
     const [deleteSheetOpen, setDeleteSheetOpen] = React.useState(false);
@@ -671,6 +693,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     const canAddFriendForPostAction = Boolean(
         !isDraftPost && onAddFriendForPostAction,
     );
+    const canComment = Boolean(
+        !isDraftPost &&
+        !canAddFriendForPostAction &&
+        profile?.spaceId &&
+        activePhoto.postId &&
+        activePhoto.spaceId,
+    );
     const canReplyToPost = Boolean(
         !isDraftPost &&
         (canAddFriendForPostAction ||
@@ -680,8 +709,12 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 onReplyToPost)),
     );
     const isReplyMode =
-        canReplyToPost &&
-        (isReplyFocused || replyText.trim().length > 0 || isReplyActionRunning);
+        canReplyToPost && (isReplyFocused || isReplyActionRunning);
+    const commentCount = useCommentCount(
+        profile?.spaceId,
+        activePhoto.postId,
+        activePhoto.commentCount,
+    );
     const canSendReply =
         canReplyToPost &&
         !isReplyActionRunning &&
@@ -689,6 +722,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     const isSwipeBlockedRef = React.useRef(false);
     isSwipeBlockedRef.current =
         isActionsOpen ||
+        commentsOpen ||
         addFriendSheetOpen ||
         (canDeletePost && deleteSheetOpen) ||
         isDeleteExit ||
@@ -744,6 +778,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     requestCloseRef.current = (throwVelocity = { x: 0, y: 0 }) => {
         const motion = motionRef.current;
         if (motion.closing) return;
+        motion.closing = true;
         const root = viewerRootRef.current;
         const pswp = pswpRef.current;
         const item =
@@ -802,7 +837,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 startBackground,
             );
         }
-        motion.closing = true;
         onCloseRef.current();
     };
 
@@ -1072,6 +1106,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     };
 
     const handleReplyKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key == "Escape") {
+            event.stopPropagation();
+            replyInputRef.current?.blur();
+            return;
+        }
         if (
             canAddFriendForPostAction &&
             (event.key == "Enter" || event.key == " ")
@@ -1109,13 +1148,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         input.setSelectionRange(input.value.length, input.value.length);
     }, [isCaptionEditing]);
 
-    React.useLayoutEffect(() => {
-        if (!focusReplyOnOpen || !canReplyToPost) return;
-
-        setIsReplyFocused(true);
-        replyInputRef.current?.focus();
-    }, [canReplyToPost, focusReplyOnOpen, activePhoto.postId]);
-
     React.useEffect(() => {
         if (deleteActionPhase != "done") return;
 
@@ -1143,7 +1175,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
 
         const timeoutID = window.setTimeout(() => {
             setReplyActionPhase(null);
-            setIsReplyFocused(false);
+            if (!replyControlsRef.current?.contains(document.activeElement))
+                setIsReplyFocused(false);
         }, viewerActionDoneDurationMs);
 
         return () => window.clearTimeout(timeoutID);
@@ -1169,8 +1202,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
 
     React.useLayoutEffect(() => {
         setReplyText(replyDraftsRef.current.get(activeReplyKey) ?? "");
-        setIsReplyFocused(focusReplyOnOpen && canReplyToPost);
-    }, [activeReplyKey, canReplyToPost, focusReplyOnOpen]);
+        setIsReplyFocused(false);
+    }, [activeReplyKey]);
+
+    React.useLayoutEffect(() => {
+        if (privateReplyOnOpen && canReplyToPost)
+            replyInputRef.current?.focus();
+    }, [canReplyToPost, privateReplyOnOpen]);
 
     React.useEffect(() => {
         setPhotoLikePopID(0);
@@ -1260,7 +1298,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     }, [hasDraftPhotoControls]);
 
     React.useEffect(() => {
-        if (!isSpaceIOS() || !canReplyToPost) return;
+        if (!isSpaceIOS() || (!canReplyToPost && !canComment)) return;
         const viewport = window.visualViewport;
         if (!viewport) return;
 
@@ -1282,7 +1320,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             viewport.removeEventListener("resize", updateReplyViewport);
             viewport.removeEventListener("scroll", updateReplyViewport);
         };
-    }, [canReplyToPost]);
+    }, [canReplyToPost, canComment]);
 
     const handleDeleteSheetExited = () => {
         if (!isDeleteExit) return;
@@ -1323,7 +1361,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             if (!input || document.activeElement != input) return;
             if (
                 event.target instanceof Element &&
-                event.target.closest("[data-space-viewer-bottom='true']")
+                event.target.closest(
+                    "[data-space-viewer-bottom='true'], [data-space-viewer-close]",
+                )
             ) {
                 return;
             }
@@ -1802,7 +1842,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 "& > .pswp, & > header, & > [data-space-viewer-chrome='true']":
                     {
                         translate:
-                            isSpaceIOS() && canReplyToPost
+                            isSpaceIOS() && (canReplyToPost || canComment)
                                 ? "0 calc(-1 * var(--space-keyboard-inset, 0px))"
                                 : undefined,
                     },
@@ -2102,6 +2142,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                         data-space-viewer-close
                         disabled={isDraftPostActionRunning}
                         onClick={closeViewer}
+                        onPointerDown={
+                            isReplyFocused
+                                ? handleInputActionPointerDown
+                                : undefined
+                        }
                         sx={{ ...draftHeaderButtonSx, color: "#C0C0C0" }}
                     >
                         <HugeiconsIcon
@@ -2709,6 +2754,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             )}
             {!isDraftPost &&
                 (hasDisplayCaption ||
+                    canComment ||
                     showPhotoLikeButton ||
                     postPhotoCount > 1) &&
                 !isCaptionEditing && (
@@ -2721,7 +2767,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                 : "max(24px, calc(env(safe-area-inset-bottom) + 16px))",
                             display: "flex",
                             flexDirection: "column",
-                            gap: "12px",
+                            gap: "20px",
                             left: { xs: "16px", sm: "auto" },
                             maxWidth: { sm: 390 },
                             position: "fixed",
@@ -2741,14 +2787,34 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                 photoCount={postPhotoCount}
                             />
                         )}
-                        {showPhotoLikeButton && (
+                        {showPhotoLikeButton || canReplyToPost ? (
                             <SpacePostReplyControls
+                                ref={replyControlsRef}
                                 canSendReply={canSendReply}
+                                commentsButton={
+                                    canComment ? (
+                                        <SpaceCommentsButton
+                                            count={commentCount}
+                                            onClick={() =>
+                                                setCommentsOpen(true)
+                                            }
+                                        />
+                                    ) : undefined
+                                }
                                 isReplyMode={isReplyMode}
                                 liked={isPhotoLiked}
                                 likePopID={photoLikePopID}
                                 likeToggleID={photoLikeToggleID}
                                 postKey={activePostKey}
+                                onBlur={(event) => {
+                                    if (
+                                        !motionRef.current.closing &&
+                                        !event.currentTarget.contains(
+                                            event.relatedTarget,
+                                        )
+                                    )
+                                        setIsReplyFocused(false);
+                                }}
                                 onLike={handlePhotoLikeClick}
                                 onSendReply={sendReply}
                                 replyActionPhase={replyActionPhase}
@@ -2756,8 +2822,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                 replyInputProps={
                                     canReplyToPost
                                         ? {
-                                              onBlur: () =>
-                                                  setIsReplyFocused(false),
                                               onChange: (event) => {
                                                   const nextText =
                                                       clampSpaceMessageText(
@@ -2783,9 +2847,34 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                         : undefined
                                 }
                             />
-                        )}
+                        ) : canComment ? (
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                }}
+                            >
+                                <SpaceCommentsButton
+                                    count={commentCount}
+                                    onClick={() => setCommentsOpen(true)}
+                                />
+                            </Box>
+                        ) : null}
                     </Box>
                 )}
+            {commentsOpen && canComment && (
+                <PostComments
+                    key={activePhoto.postId}
+                    autoFocus={focusCommentOnOpen}
+                    targetCommentId={targetCommentId}
+                    viewer={profile!.spaceId!}
+                    postId={activePhoto.postId!}
+                    owner={activePhoto.spaceId!}
+                    draft={commentDraft}
+                    setDraft={setCommentDraft}
+                    onClose={() => setCommentsOpen(false)}
+                />
+            )}
             <Modal
                 open={isCaptionDialogOpen}
                 onClose={() => setIsCaptionDialogOpen(false)}

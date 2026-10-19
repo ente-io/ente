@@ -1,0 +1,1432 @@
+import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+    Box,
+    CircularProgress,
+    ClickAwayListener,
+    Dialog,
+    Grow,
+    Popper,
+    useMediaQuery,
+} from "@mui/material";
+import { SpaceAvatarImage } from "components/AvatarImage";
+import { SpaceBottomSheetTransition } from "components/BottomSheetTransition";
+import { SpaceCommentComposer } from "components/CommentComposer";
+import {
+    CopyIcon,
+    DeleteIcon,
+    MessageActionMenuItem,
+    MessageActionMenuList,
+    ReplyIcon,
+} from "components/MessageActionMenu";
+import {
+    MessageQuickReactions,
+    MessageReactionPicker,
+} from "components/MessageReactionPicker";
+import { ReplyComposerPreview } from "components/ReplyComposerPreview";
+import type { FriendProfile } from "data/friends";
+import log from "ente-base/log";
+import { useBrowserBackClose } from "hooks/use-browser-back-close";
+import { isSpaceIOS } from "hooks/use-pwa-install-prompt";
+import React from "react";
+import { flushSync } from "react-dom";
+import {
+    createCurrentComment,
+    deleteCurrentComment,
+    loadCurrentComments,
+    loadCurrentFriendAvatarURL,
+    markCurrentNotificationItemsRead,
+    removeCurrentCommentReaction,
+    setCurrentCommentReaction,
+    type SpaceComment,
+} from "services/space";
+import {
+    spaceControlBackgroundHover,
+    spaceDialogBackground,
+    spaceSurface,
+    spaceText,
+    spaceTextMuted,
+} from "styles/colors";
+import {
+    commentReactionPreview,
+    commentThreads,
+    groupCommentReactions,
+    validateCommentReplyTarget,
+    type CommentDraft,
+} from "utils/comments";
+import { firstNameFrom, formatSpaceDate } from "utils/display";
+import { useSpaceRouter } from "utils/route-transitions";
+import { spaceRoutes } from "utils/routes";
+
+const messageActionsTransitionDuration = { enter: 300, exit: 100 };
+
+const textActionSx = {
+    appearance: "none",
+    bgcolor: "transparent",
+    border: 0,
+    borderRadius: "8px",
+    color: spaceTextMuted,
+    cursor: "pointer",
+    font: "inherit",
+    fontSize: 12,
+    fontWeight: 500,
+    minHeight: 32,
+    p: 0,
+    "&:hover": { color: spaceText },
+    "&:disabled": { cursor: "default", opacity: 0.4 },
+    "&:focus-visible": { outline: "2px solid #08C225", outlineOffset: 3 },
+};
+
+const CommentIdentity: React.FC<{
+    actor: FriendProfile;
+    viewer: string;
+    inline?: boolean;
+}> = ({ actor, viewer, inline = false }) => {
+    const router = useSpaceRouter();
+    const [avatar, setAvatar] = React.useState<string | null>(null);
+    React.useEffect(() => {
+        let active = true;
+        setAvatar(null);
+        if (actor.avatarObjectID)
+            void loadCurrentFriendAvatarURL(actor, viewer)
+                .then((url) => {
+                    if (active) setAvatar(url);
+                })
+                .catch(() => {
+                    if (active) setAvatar(null);
+                });
+        return () => {
+            active = false;
+        };
+    }, [actor, viewer]);
+    return (
+        <Box
+            component="button"
+            type="button"
+            onClick={() =>
+                void router.push(
+                    spaceRoutes.friendPage,
+                    spaceRoutes.friend(actor.username),
+                )
+            }
+            sx={{
+                ...textActionSx,
+                alignItems: "center",
+                display: inline ? "inline-flex" : "flex",
+                fontSize: inline ? 13 : 14,
+                fontWeight: 600,
+                minHeight: inline ? 0 : 24,
+                lineHeight: inline ? "18px" : "20px",
+                color: spaceText,
+                p: 0,
+                minWidth: 0,
+                overflowWrap: "anywhere",
+                textAlign: "left",
+                textTransform: "none",
+                gap: 1,
+            }}
+        >
+            <Box
+                component="span"
+                sx={{
+                    display: "block",
+                    width: inline ? 28 : 22,
+                    height: inline ? 28 : 22,
+                    flexShrink: 0,
+                    ...(inline
+                        ? { position: "absolute", left: 0, top: 0 }
+                        : {}),
+                }}
+            >
+                <SpaceAvatarImage
+                    src={avatar ?? undefined}
+                    alt=""
+                    borderRadius="50%"
+                />
+            </Box>
+            {(inline ? firstNameFrom(actor.fullName) : actor.fullName) ||
+                `@${actor.username}`}
+        </Box>
+    );
+};
+
+const CommentRow: React.FC<{
+    comment: SpaceComment;
+    recipient?: SpaceComment;
+    viewer: string;
+    highlighted: boolean;
+    disabled: boolean;
+    onOpenActions: (
+        anchor: HTMLElement,
+        source: "touch" | "contextmenu",
+    ) => void;
+    onOpenReactions: () => void;
+}> = ({
+    comment,
+    recipient,
+    viewer,
+    highlighted,
+    disabled,
+    onOpenActions,
+    onOpenReactions,
+}) => {
+    const timer = React.useRef<number | undefined>(undefined);
+    const start = React.useRef<
+        { pointerId: number; x: number; y: number } | undefined
+    >(undefined);
+    const didOpen = React.useRef(false);
+    const canOpenActions = !disabled && !comment.deleted;
+    const hasReactions = !comment.deleted && comment.reactions.length > 0;
+    const topReactions = commentReactionPreview(comment.reactions);
+    const clearLongPress = React.useCallback(() => {
+        window.clearTimeout(timer.current);
+        timer.current = undefined;
+        start.current = undefined;
+    }, []);
+    React.useEffect(() => clearLongPress, [clearLongPress]);
+    const openActions = (
+        anchor: HTMLElement,
+        source: "touch" | "contextmenu",
+    ) => {
+        clearLongPress();
+        window.getSelection()?.removeAllRanges();
+        onOpenActions(anchor, source);
+    };
+    const isInteractiveTarget = (target: EventTarget | null) =>
+        target instanceof Element && Boolean(target.closest("a, button"));
+    return (
+        <Box
+            component="article"
+            id={`comment-${comment.commentId}`}
+            data-comment-id={comment.commentId}
+            data-comment-highlighted={highlighted || undefined}
+            tabIndex={canOpenActions ? 0 : undefined}
+            aria-label={`Comment by ${comment.author ? firstNameFrom(comment.author.fullName) || `@${comment.author.username}` : "deleted account"}`}
+            aria-haspopup={canOpenActions ? "menu" : undefined}
+            onContextMenu={(event) => {
+                if (!canOpenActions || isInteractiveTarget(event.target))
+                    return;
+                event.preventDefault();
+                event.stopPropagation();
+                openActions(event.currentTarget, "contextmenu");
+            }}
+            onKeyDown={(event) => {
+                if (!canOpenActions || isInteractiveTarget(event.target))
+                    return;
+                if (
+                    event.key == "ContextMenu" ||
+                    (event.shiftKey && event.key == "F10") ||
+                    event.key == "Enter" ||
+                    event.key == " "
+                ) {
+                    event.preventDefault();
+                    openActions(event.currentTarget, "contextmenu");
+                }
+            }}
+            onPointerDown={(event) => {
+                clearLongPress();
+                didOpen.current = false;
+                if (
+                    !canOpenActions ||
+                    event.button != 0 ||
+                    isInteractiveTarget(event.target)
+                )
+                    return;
+                start.current = {
+                    pointerId: event.pointerId,
+                    x: event.clientX,
+                    y: event.clientY,
+                };
+                const anchor = event.currentTarget;
+                anchor.setPointerCapture(event.pointerId);
+                timer.current = window.setTimeout(() => {
+                    didOpen.current = true;
+                    openActions(anchor, "touch");
+                }, 520);
+            }}
+            onPointerMove={(event) => {
+                if (start.current?.pointerId != event.pointerId) return;
+                if (
+                    Math.hypot(
+                        event.clientX - start.current.x,
+                        event.clientY - start.current.y,
+                    ) > 10
+                )
+                    clearLongPress();
+            }}
+            onPointerUp={(event) => {
+                clearLongPress();
+                if (didOpen.current) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            }}
+            onPointerCancel={clearLongPress}
+            onTouchEnd={(event) => {
+                if (!didOpen.current) return;
+                if (event.cancelable) event.preventDefault();
+                event.stopPropagation();
+            }}
+            onClickCapture={(event) => {
+                if (!didOpen.current) return;
+                event.preventDefault();
+                event.stopPropagation();
+                didOpen.current = false;
+            }}
+            sx={{
+                bgcolor: highlighted
+                    ? spaceControlBackgroundHover
+                    : "transparent",
+                transition: "background-color 400ms ease-out",
+                position: "relative",
+                py: 0.5,
+                px: 2,
+                flexShrink: 0,
+                cursor: canOpenActions ? "context-menu" : "default",
+                touchAction: "pan-y",
+                userSelect: "none",
+                WebkitTouchCallout: "none",
+                WebkitUserSelect: "none",
+                "&:focus-visible": {
+                    outline: "2px solid #08C225",
+                    outlineOffset: 2,
+                },
+                "@media (prefers-reduced-motion: reduce)": {
+                    transition: "none",
+                },
+            }}
+        >
+            <Box
+                sx={{
+                    position: "relative",
+                    display: "grid",
+                    gridTemplateColumns:
+                        "minmax(0, 1fr) minmax(80px, max-content)",
+                    columnGap: 1.5,
+                    pl: 4.5,
+                    ml: comment.parentId ? 4.5 : 0,
+                }}
+            >
+                <Box
+                    sx={{
+                        display: "flex",
+                        gridColumn: 1,
+                        alignItems: "baseline",
+                        flexWrap: "wrap",
+                        columnGap: 1,
+                        rowGap: 0.25,
+                        lineHeight: "18px",
+                        mt: "-2px",
+                    }}
+                >
+                    {comment.author ? (
+                        <CommentIdentity
+                            actor={comment.author}
+                            viewer={viewer}
+                            inline
+                        />
+                    ) : (
+                        <Box
+                            component="span"
+                            sx={{
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: spaceText,
+                            }}
+                        >
+                            Deleted account
+                        </Box>
+                    )}
+                    <Box
+                        component="time"
+                        dateTime={comment.createdAt}
+                        sx={{
+                            color: spaceTextMuted,
+                            fontSize: 11,
+                            fontWeight: 400,
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        {formatSpaceDate(Date.parse(comment.createdAt)).replace(
+                            / ago$/,
+                            "",
+                        )}
+                    </Box>
+                </Box>
+                <Box
+                    sx={{
+                        gridColumn: 1,
+                        whiteSpace: "pre-wrap",
+                        overflowWrap: "anywhere",
+                        fontSize: 13,
+                        fontWeight: 400,
+                        lineHeight: "20px",
+                        color: spaceText,
+                    }}
+                >
+                    {recipient?.author && !recipient.deleted && (
+                        <Box component="span" sx={{ color: spaceTextMuted }}>
+                            {`@${recipient.author.username} `}
+                        </Box>
+                    )}
+                    {comment.text ?? "Comment unavailable"}
+                </Box>
+                {hasReactions && (
+                    <Box
+                        component="button"
+                        type="button"
+                        aria-label={`View ${comment.reactions.length} ${comment.reactions.length == 1 ? "reaction" : "reactions"}`}
+                        onClick={onOpenReactions}
+                        sx={{
+                            ...textActionSx,
+                            "--reaction-stack-background": spaceSurface,
+                            alignItems: "center",
+                            bgcolor: "var(--reaction-stack-background)",
+                            borderRadius: "999px",
+                            boxSizing: "border-box",
+                            display: "flex",
+                            gap: "1px",
+                            justifyContent: "center",
+                            gridColumn: 2,
+                            gridRow: 2,
+                            alignSelf: "start",
+                            justifySelf: "end",
+                            minHeight: 28,
+                            minWidth: 28,
+                            my: "-4px",
+                            px: "5px",
+                            width: "max-content",
+                            "&:hover": {
+                                "--reaction-stack-background": "#383838",
+                                color: spaceText,
+                            },
+                            "&:active": {
+                                "--reaction-stack-background": "#484848",
+                            },
+                        }}
+                    >
+                        {topReactions.map((emoji, index) => (
+                            <Box
+                                component="span"
+                                key={`${emoji}-${index}`}
+                                aria-hidden
+                                sx={{
+                                    bgcolor: "inherit",
+                                    borderRadius: "50%",
+                                    boxShadow:
+                                        "0 0 0 1px var(--reaction-stack-background)",
+                                    display: "grid",
+                                    flexShrink: 0,
+                                    fontSize: 14,
+                                    height: 16,
+                                    lineHeight: "16px",
+                                    placeItems: "center",
+                                    position: "relative",
+                                    width: 16,
+                                    zIndex: topReactions.length - index,
+                                }}
+                            >
+                                {emoji}
+                            </Box>
+                        ))}
+                        <Box
+                            component="span"
+                            aria-hidden
+                            sx={{
+                                color: spaceTextMuted,
+                                fontSize: 12,
+                                fontVariantNumeric: "tabular-nums",
+                                lineHeight: "16px",
+                                ml: "4px",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            {comment.reactions.length}
+                        </Box>
+                    </Box>
+                )}
+            </Box>
+        </Box>
+    );
+};
+
+export const PostComments: React.FC<{
+    autoFocus?: boolean;
+    targetCommentId?: string;
+    viewer: string;
+    postId: number;
+    owner: string;
+    draft: CommentDraft;
+    setDraft: React.Dispatch<React.SetStateAction<CommentDraft>>;
+    onClose: () => void;
+}> = ({
+    autoFocus,
+    targetCommentId,
+    viewer,
+    postId,
+    owner,
+    draft,
+    setDraft,
+    onClose,
+}) => {
+    const prefersReducedMotion = useMediaQuery(
+        "(prefers-reduced-motion: reduce)",
+    );
+    const [comments, setComments] = React.useState<SpaceComment[]>([]);
+    const threads = commentThreads(comments);
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState<string>();
+    const [open, setOpen] = React.useState(true);
+    const [entered, setEntered] = React.useState(false);
+    const [highlightedCommentId, setHighlightedCommentId] =
+        React.useState<string>();
+    const handledTarget = React.useRef<string>(undefined);
+    const submittedCommentId = React.useRef<string>(undefined);
+    const list = React.useRef<HTMLDivElement>(null);
+    const acknowledged = React.useRef(new Set<string>());
+    const [action, setAction] = React.useState<
+        | {
+              type: "menu";
+              commentId: string;
+              anchor: HTMLElement;
+              open: boolean;
+          }
+        | { type: "react" | "reactions"; commentId: string }
+    >();
+    const ignoreMouseAwayUntil = React.useRef(0);
+    const dragStart = React.useRef<number | undefined>(undefined);
+    const [isDragging, setIsDragging] = React.useState(false);
+    const [dragOffset, setDragOffset] = React.useState(0);
+    const dragged = React.useRef(false);
+    const { replyTarget } = draft;
+    const reply = comments.find(
+        (comment) =>
+            replyTarget?.status == "selected" &&
+            comment.commentId == replyTarget.commentId,
+    );
+    const [mutating, setMutating] = React.useState(false);
+    const busy = mutating || Boolean(draft.sending);
+    const selectedComment = comments.find(
+        (comment) => comment.commentId == action?.commentId && !comment.deleted,
+    );
+    const reactionList =
+        action?.type == "reactions" ? selectedComment : undefined;
+    const generation = React.useRef(0);
+    const input = React.useRef<HTMLTextAreaElement>(null);
+    useBrowserBackClose({
+        open,
+        onClose: () => setOpen(false),
+        stateKey: "space-post-comments",
+    });
+    const refresh = React.useCallback(async () => {
+        const current = ++generation.current;
+        try {
+            const items = await loadCurrentComments(viewer, owner, postId);
+            if (current != generation.current) return;
+            setComments(items);
+            setError(undefined);
+            setDraft((value) => ({
+                ...value,
+                replyTarget: validateCommentReplyTarget(
+                    value.replyTarget,
+                    items,
+                ),
+            }));
+        } catch {
+            if (current != generation.current) return;
+            setComments([]);
+            setAction(undefined);
+            setError(
+                "Discussion unavailable. Access may have changed or the post may have been deleted.",
+            );
+        } finally {
+            if (current == generation.current) setLoading(false);
+        }
+    }, [viewer, owner, postId, setDraft]);
+    React.useEffect(() => {
+        if (draft.sending) return;
+        const requestGeneration = generation;
+        void refresh();
+        return () => {
+            requestGeneration.current++;
+        };
+    }, [refresh, draft.sending]);
+    React.useLayoutEffect(() => {
+        if (
+            loading ||
+            !targetCommentId ||
+            handledTarget.current == targetCommentId
+        )
+            return;
+        const container = list.current;
+        const target = Array.from(
+            container?.querySelectorAll<HTMLElement>("[data-comment-id]") ?? [],
+        ).find((row) => row.dataset.commentId == targetCommentId);
+        handledTarget.current = targetCommentId;
+        if (!container || !target) return;
+        const bounds = target.getBoundingClientRect();
+        container.scrollTo({
+            top:
+                container.scrollTop +
+                bounds.top -
+                container.getBoundingClientRect().top -
+                Math.max(12, (container.clientHeight - bounds.height) / 2),
+            behavior: "instant",
+        });
+        setHighlightedCommentId(targetCommentId);
+    }, [comments, loading, targetCommentId]);
+    React.useLayoutEffect(() => {
+        const container = list.current;
+        if (
+            !container ||
+            !open ||
+            reactionList ||
+            !comments.some(
+                (comment) => comment.commentId == submittedCommentId.current,
+            )
+        )
+            return;
+        submittedCommentId.current = undefined;
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: prefersReducedMotion ? "instant" : "smooth",
+        });
+    }, [comments, open, prefersReducedMotion, reactionList]);
+    React.useEffect(() => {
+        if (!highlightedCommentId) return;
+        const timer = window.setTimeout(
+            () => setHighlightedCommentId(undefined),
+            1800,
+        );
+        return () => window.clearTimeout(timer);
+    }, [highlightedCommentId]);
+    React.useEffect(() => {
+        const container = list.current;
+        if (!container || !entered || loading || !open || action) return;
+        const notifications = new Map(
+            comments
+                .filter(
+                    (comment) => !comment.deleted && comment.text !== undefined,
+                )
+                .map((comment) => [
+                    comment.commentId,
+                    comment.unreadNotificationIds,
+                ]),
+        );
+        const acknowledge = async (ids: string[]) => {
+            for (let offset = 0; offset < ids.length; offset += 100) {
+                const batch = ids
+                    .slice(offset, offset + 100)
+                    .filter((id) => !acknowledged.current.has(id));
+                if (batch.length == 0) continue;
+                batch.forEach((id) => acknowledged.current.add(id));
+                try {
+                    await markCurrentNotificationItemsRead(viewer, batch);
+                } catch (error) {
+                    batch.forEach((id) => acknowledged.current.delete(id));
+                    log.warn(
+                        "Failed to acknowledge comment notifications",
+                        error,
+                    );
+                }
+            }
+        };
+        let observer: IntersectionObserver | undefined;
+        const observe = () => {
+            observer?.disconnect();
+            if (
+                document.visibilityState != "visible" ||
+                container.clientHeight == 0
+            )
+                return;
+            const rows = Array.from(
+                container.querySelectorAll<HTMLElement>("[data-comment-id]"),
+            );
+            const threshold = [
+                ...new Set(
+                    rows.map((row) =>
+                        Math.min(
+                            0.5,
+                            container.clientHeight /
+                                (2 * row.getBoundingClientRect().height),
+                        ),
+                    ),
+                ),
+            ];
+            observer = new IntersectionObserver(
+                (entries) => {
+                    if (
+                        document.visibilityState != "visible" ||
+                        container.clientHeight == 0
+                    )
+                        return;
+                    const ids = entries
+                        .filter(
+                            (entry) =>
+                                entry.isIntersecting &&
+                                entry.intersectionRect.height >=
+                                    Math.min(
+                                        entry.boundingClientRect.height,
+                                        container.clientHeight,
+                                    ) /
+                                        2,
+                        )
+                        .flatMap(
+                            (entry) =>
+                                notifications.get(
+                                    (entry.target as HTMLElement).dataset
+                                        .commentId!,
+                                ) ?? [],
+                        );
+                    if (ids.length > 0) void acknowledge(ids);
+                },
+                { root: container, threshold },
+            );
+            rows.forEach((row) => observer!.observe(row));
+        };
+        observe();
+        const resize = new ResizeObserver(observe);
+        resize.observe(container);
+        document.addEventListener("visibilitychange", observe);
+        return () => {
+            observer?.disconnect();
+            resize.disconnect();
+            document.removeEventListener("visibilitychange", observe);
+        };
+    }, [action, comments, entered, loading, open, viewer]);
+    const mutate = async (action: () => Promise<void>) => {
+        setMutating(true);
+        try {
+            await action();
+            await refresh();
+        } catch {
+            await refresh();
+            setError("Couldn't save your change. Refresh and try again.");
+        } finally {
+            setMutating(false);
+        }
+    };
+    const react = (comment: SpaceComment, emoji: string) => {
+        void mutate(() =>
+            setCurrentCommentReaction(
+                viewer,
+                owner,
+                postId,
+                comment.commentId,
+                comment.reactions.some(
+                    (item) => item.isOwn && item.emoji == emoji,
+                )
+                    ? undefined
+                    : emoji,
+            ),
+        );
+    };
+    const closeActions = () =>
+        setAction((current) =>
+            current?.type == "menu" ? { ...current, open: false } : current,
+        );
+    const renderComment = (comment: SpaceComment) => (
+        <CommentRow
+            key={comment.commentId}
+            comment={comment}
+            recipient={comments.find(
+                (item) => item.commentId == comment.replyToId,
+            )}
+            viewer={viewer}
+            highlighted={highlightedCommentId == comment.commentId}
+            disabled={busy}
+            onOpenActions={(anchor, source) => {
+                ignoreMouseAwayUntil.current =
+                    source == "touch" ? Date.now() + 900 : 0;
+                setAction({
+                    type: "menu",
+                    commentId: comment.commentId,
+                    anchor,
+                    open: true,
+                });
+            }}
+            onOpenReactions={() =>
+                setAction({ type: "reactions", commentId: comment.commentId })
+            }
+        />
+    );
+    return (
+        <Dialog
+            open={open}
+            onClose={() => setOpen(false)}
+            maxWidth={false}
+            aria-label={reactionList ? "Reactions" : "Comments"}
+            slots={
+                prefersReducedMotion
+                    ? undefined
+                    : { transition: SpaceBottomSheetTransition }
+            }
+            transitionDuration={prefersReducedMotion ? 0 : undefined}
+            sx={{
+                "--space-dialog-backdrop": "rgba(0 0 0 / 0.64)",
+                "& .MuiDialog-container": {
+                    alignItems: "flex-end",
+                    pb: isSpaceIOS() ? "var(--space-keyboard-inset, 0px)" : 0,
+                },
+            }}
+            slotProps={{
+                paper: {
+                    style: {
+                        translate: `0 ${dragOffset}px`,
+                        transition:
+                            isDragging || prefersReducedMotion
+                                ? "none"
+                                : "translate 160ms ease-out",
+                    },
+                    sx: {
+                        bgcolor: spaceDialogBackground,
+                        color: spaceText,
+                        borderRadius: "28px 28px 0 0",
+                        boxShadow: "none",
+                        boxSizing: "border-box",
+                        display: "flex",
+                        flexDirection: "column",
+                        height: "min(72dvh, 640px)",
+                        m: 0,
+                        maxHeight: isSpaceIOS()
+                            ? "calc(100dvh - var(--space-keyboard-inset, 0px) - env(safe-area-inset-top) - 16px)"
+                            : "calc(100dvh - env(safe-area-inset-top) - 16px)",
+                        maxWidth: { xs: "none", sm: 480 },
+                        overflow: "hidden",
+                        width: "100%",
+                        fontFamily: '"Inter Variable", Inter, sans-serif',
+                    },
+                },
+                transition: {
+                    onEntered: () => setEntered(true),
+                    onExited: onClose,
+                },
+            }}
+        >
+            <Box
+                component="button"
+                type="button"
+                aria-label="Close comments"
+                onClick={(event) => {
+                    if (event.detail == 0 || !dragged.current) setOpen(false);
+                    dragged.current = false;
+                }}
+                onPointerDown={(event) => {
+                    if (event.button != 0) return;
+                    dragStart.current = event.clientY;
+                    dragged.current = false;
+                    setIsDragging(true);
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                }}
+                onPointerMove={(event) => {
+                    if (dragStart.current != undefined) {
+                        if (Math.abs(event.clientY - dragStart.current) > 4)
+                            dragged.current = true;
+                        setDragOffset(
+                            Math.max(0, event.clientY - dragStart.current),
+                        );
+                    }
+                }}
+                onPointerUp={(event) => {
+                    if (dragStart.current == undefined) return;
+                    const distance = event.clientY - dragStart.current;
+                    dragStart.current = undefined;
+                    setIsDragging(false);
+                    if (distance > 80) setOpen(false);
+                    else setDragOffset(0);
+                }}
+                onPointerCancel={() => {
+                    dragStart.current = undefined;
+                    dragged.current = true;
+                    setIsDragging(false);
+                    setDragOffset(0);
+                }}
+                sx={{
+                    ...textActionSx,
+                    alignItems: "center",
+                    cursor: isDragging ? "grabbing" : "grab",
+                    display: "flex",
+                    justifyContent: "center",
+                    minHeight: 32,
+                    flexShrink: 0,
+                    touchAction: "none",
+                    width: "100%",
+                    "&:focus-visible": {
+                        outline: "2px solid #08C225",
+                        outlineOffset: -2,
+                    },
+                }}
+            >
+                <Box
+                    component="span"
+                    sx={{
+                        bgcolor: "#686868",
+                        borderRadius: "999px",
+                        height: 4,
+                        width: 32,
+                    }}
+                />
+            </Box>
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    px: 2,
+                    pb: 2,
+                    flexShrink: 0,
+                    position: "relative",
+                }}
+            >
+                {reactionList && (
+                    <Box
+                        component="button"
+                        type="button"
+                        aria-label="Back to comments"
+                        onClick={() => setAction(undefined)}
+                        sx={{
+                            ...textActionSx,
+                            position: "absolute",
+                            left: 16,
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                    >
+                        <HugeiconsIcon
+                            icon={ArrowLeft02Icon}
+                            size={20}
+                            strokeWidth={1.8}
+                        />
+                    </Box>
+                )}
+                <Box
+                    component="h2"
+                    sx={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        lineHeight: "24px",
+                        m: 0,
+                    }}
+                >
+                    {reactionList ? "Reactions" : "Comments"}
+                </Box>
+            </Box>
+            <Box
+                ref={list}
+                sx={{
+                    py: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    overflowY: "auto",
+                    overscrollBehavior: "contain",
+                    flex: "1 1 auto",
+                    minHeight: 0,
+                }}
+            >
+                {reactionList ? (
+                    <>
+                        {reactionList.reactions.length == 0 && (
+                            <Box
+                                role="status"
+                                sx={{
+                                    alignItems: "center",
+                                    color: spaceTextMuted,
+                                    display: "flex",
+                                    flex: "1 1 auto",
+                                    fontSize: 13,
+                                    justifyContent: "center",
+                                    px: 2,
+                                    py: 3,
+                                }}
+                            >
+                                No reactions yet
+                            </Box>
+                        )}
+                        {groupCommentReactions(reactionList.reactions).map(
+                            (reaction) => (
+                                <Box
+                                    key={reaction.actor.id}
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 1.5,
+                                        px: 2,
+                                        py: 1,
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    <CommentIdentity
+                                        actor={reaction.actor}
+                                        viewer={viewer}
+                                    />
+                                    <Box
+                                        sx={{
+                                            ml: "auto",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 1.5,
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        {(reaction.isOwn ||
+                                            viewer == owner) && (
+                                            <Box
+                                                component="button"
+                                                type="button"
+                                                disabled={busy}
+                                                sx={{
+                                                    ...textActionSx,
+                                                    bgcolor: "#383838",
+                                                    borderRadius: "999px",
+                                                    color: spaceText,
+                                                    minHeight: 28,
+                                                    px: 1.5,
+                                                    "&:hover": {
+                                                        bgcolor: "#484848",
+                                                    },
+                                                    "&:active": {
+                                                        bgcolor: "#505050",
+                                                    },
+                                                }}
+                                                onClick={() =>
+                                                    void mutate(() =>
+                                                        removeCurrentCommentReaction(
+                                                            viewer,
+                                                            postId,
+                                                            reactionList.commentId,
+                                                            reaction.actor
+                                                                .spaceId!,
+                                                        ),
+                                                    )
+                                                }
+                                            >
+                                                Remove
+                                            </Box>
+                                        )}
+                                        <Box sx={{ fontSize: 18 }}>
+                                            {reaction.emoji}
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            ),
+                        )}
+                    </>
+                ) : (
+                    <>
+                        {!loading &&
+                            !error &&
+                            targetCommentId &&
+                            !comments.some(
+                                (comment) =>
+                                    comment.commentId == targetCommentId,
+                            ) && (
+                                <Box
+                                    role="status"
+                                    sx={{
+                                        px: 2,
+                                        py: 2,
+                                        color: spaceTextMuted,
+                                        fontSize: 13,
+                                    }}
+                                >
+                                    This comment is no longer available.
+                                </Box>
+                            )}
+                        {loading && (
+                            <Box
+                                sx={{
+                                    alignItems: "center",
+                                    display: "flex",
+                                    flex: "1 1 auto",
+                                    justifyContent: "center",
+                                    py: 3,
+                                }}
+                            >
+                                <CircularProgress
+                                    size={20}
+                                    sx={{ color: spaceTextMuted }}
+                                />
+                            </Box>
+                        )}
+                        {!loading && !error && threads.length == 0 && (
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    flex: "1 1 auto",
+                                    justifyContent: "center",
+                                    gap: 0.75,
+                                    px: 2,
+                                    py: 3,
+                                    textAlign: "center",
+                                }}
+                            >
+                                <Box
+                                    component="p"
+                                    sx={{ m: 0, fontSize: 15, fontWeight: 600 }}
+                                >
+                                    No comments yet
+                                </Box>
+                                <Box
+                                    component="p"
+                                    sx={{
+                                        m: 0,
+                                        color: spaceTextMuted,
+                                        fontSize: 13,
+                                    }}
+                                >
+                                    Be the first to comment
+                                </Box>
+                            </Box>
+                        )}
+                        {threads.map(({ comment, replies }, index) => (
+                            <Box
+                                key={comment.commentId}
+                                sx={{
+                                    flexShrink: 0,
+                                    py: 1,
+                                    mt: index > 0 ? 1 : 0,
+                                }}
+                            >
+                                {renderComment(comment)}
+                                {replies.length > 0 && (
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: 1,
+                                            mt: 1,
+                                        }}
+                                    >
+                                        {replies.map(renderComment)}
+                                    </Box>
+                                )}
+                            </Box>
+                        ))}
+                        {error && (
+                            <Box
+                                role="alert"
+                                sx={{
+                                    px: 2,
+                                    py: 2,
+                                    color: spaceTextMuted,
+                                    fontSize: 13,
+                                }}
+                            >
+                                {error}{" "}
+                                <Box
+                                    component="button"
+                                    type="button"
+                                    onClick={() => void refresh()}
+                                    sx={textActionSx}
+                                >
+                                    Refresh
+                                </Box>
+                            </Box>
+                        )}
+                    </>
+                )}
+            </Box>
+            <Box
+                sx={{
+                    display: reactionList ? "none" : "grid",
+                    gap: "8px",
+                    px: 2,
+                    pt: 2,
+                    pb: "max(16px, env(safe-area-inset-bottom))",
+                    flexShrink: 0,
+                }}
+            >
+                {replyTarget && (
+                    <ReplyComposerPreview
+                        tone="neutral"
+                        name={
+                            replyTarget.status == "unavailable"
+                                ? "Comment unavailable"
+                                : reply?.author?.spaceId == viewer
+                                  ? "You"
+                                  : reply?.author
+                                    ? firstNameFrom(reply.author.fullName) ||
+                                      `@${reply.author.username}`
+                                    : reply
+                                      ? "Deleted account"
+                                      : "Replying…"
+                        }
+                        text={
+                            replyTarget.status == "unavailable"
+                                ? "This comment or its thread is no longer available."
+                                : loading && !reply
+                                  ? "Loading comment…"
+                                  : (reply?.text ?? "Comment unavailable")
+                        }
+                        cancelLabel={
+                            replyTarget.status == "unavailable"
+                                ? "Comment instead"
+                                : "Cancel reply"
+                        }
+                        onCancel={() => {
+                            flushSync(() =>
+                                setDraft((value) => ({
+                                    ...value,
+                                    replyTarget: undefined,
+                                })),
+                            );
+                            input.current?.focus({ preventScroll: true });
+                        }}
+                    />
+                )}
+                <SpaceCommentComposer
+                    autoFocus={autoFocus}
+                    inputRef={input}
+                    text={draft.text}
+                    onTextChange={(text) =>
+                        setDraft((value) => ({ ...value, text }))
+                    }
+                    disabled={
+                        busy ||
+                        Boolean(error) ||
+                        replyTarget?.status == "unavailable"
+                    }
+                    sendDisabled={loading}
+                    placeholder={replyTarget ? "Reply…" : "Add a comment…"}
+                    onSend={async (text) => {
+                        setDraft((value) => ({ ...value, sending: true }));
+                        try {
+                            const commentId = crypto.randomUUID();
+                            await createCurrentComment(
+                                viewer,
+                                owner,
+                                postId,
+                                commentId,
+                                replyTarget?.status == "selected"
+                                    ? replyTarget.commentId
+                                    : undefined,
+                                text,
+                            );
+                            submittedCommentId.current =
+                                replyTarget?.status == "selected"
+                                    ? undefined
+                                    : commentId;
+                            setDraft({ text: "", sending: true });
+                        } finally {
+                            setDraft((value) => ({ ...value, sending: false }));
+                        }
+                    }}
+                />
+            </Box>
+            {action?.type == "react" && selectedComment && (
+                <MessageReactionPicker
+                    label="React to comment"
+                    selected={
+                        selectedComment.reactions.find((item) => item.isOwn)
+                            ?.emoji
+                    }
+                    onClose={() => setAction(undefined)}
+                    onSelect={(emoji) => react(selectedComment, emoji)}
+                />
+            )}
+            <Popper
+                anchorEl={action?.type == "menu" ? action.anchor : undefined}
+                open={
+                    open &&
+                    action?.type == "menu" &&
+                    action.open &&
+                    Boolean(selectedComment)
+                }
+                placement="bottom-start"
+                disablePortal
+                transition
+                modifiers={[
+                    { name: "offset", options: { offset: [0, 8] } },
+                    {
+                        name: "preventOverflow",
+                        options: {
+                            altAxis: true,
+                            boundary: list.current,
+                            padding: 8,
+                        },
+                    },
+                    {
+                        name: "flip",
+                        options: {
+                            boundary: list.current,
+                            padding: 8,
+                            fallbackPlacements: ["top-start"],
+                            flipVariations: false,
+                        },
+                    },
+                ]}
+                sx={{ outline: 0, zIndex: 1500 }}
+            >
+                {({ TransitionProps, placement }) => (
+                    <ClickAwayListener
+                        mouseEvent="onMouseDown"
+                        touchEvent="onTouchStart"
+                        onClickAway={(event) => {
+                            if (
+                                event instanceof MouseEvent &&
+                                Date.now() < ignoreMouseAwayUntil.current
+                            )
+                                return;
+                            closeActions();
+                        }}
+                    >
+                        <Grow
+                            {...(TransitionProps ?? {})}
+                            easing={{
+                                enter: "cubic-bezier(0.18, 0.9, 0.3, 1.18)",
+                                exit: "ease-in",
+                            }}
+                            style={{
+                                transformOrigin: `left ${placement.startsWith("top") ? "bottom" : "top"}`,
+                            }}
+                            timeout={
+                                prefersReducedMotion
+                                    ? 0
+                                    : messageActionsTransitionDuration
+                            }
+                            onExited={() => {
+                                TransitionProps?.onExited();
+                                setAction((current) =>
+                                    current?.type == "menu" && !current.open
+                                        ? undefined
+                                        : current,
+                                );
+                            }}
+                        >
+                            <Box
+                                inert={!TransitionProps?.in || busy}
+                                onKeyDown={(
+                                    event: React.KeyboardEvent<HTMLElement>,
+                                ) => {
+                                    if (event.key != "Escape") return;
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    closeActions();
+                                    if (action?.type == "menu")
+                                        action.anchor.focus({
+                                            preventScroll: true,
+                                        });
+                                }}
+                                sx={{
+                                    WebkitTapHighlightColor: "transparent",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "8px",
+                                    outline: 0,
+                                    "& > [role=group], & > [role=menu]": {
+                                        bgcolor: "#383838",
+                                        boxShadow: "none",
+                                    },
+                                    "& > [role=group] > button": {
+                                        "&:hover, &[aria-pressed=true]": {
+                                            bgcolor: "#505050",
+                                        },
+                                        "&:active": { bgcolor: "#606060" },
+                                    },
+                                }}
+                            >
+                                {selectedComment?.text !== undefined && (
+                                    <MessageQuickReactions
+                                        label="React to comment"
+                                        selected={
+                                            selectedComment.reactions.find(
+                                                (item) => item.isOwn,
+                                            )?.emoji
+                                        }
+                                        onSelect={(emoji) => {
+                                            closeActions();
+                                            react(selectedComment, emoji);
+                                        }}
+                                        onMore={() =>
+                                            setAction({
+                                                type: "react",
+                                                commentId:
+                                                    selectedComment.commentId,
+                                            })
+                                        }
+                                    />
+                                )}
+                                <MessageActionMenuList
+                                    aria-label="Comment actions"
+                                    onKeyDown={(event) => {
+                                        if (event.key != "Tab") return;
+                                        event.preventDefault();
+                                        closeActions();
+                                        if (action?.type == "menu")
+                                            action.anchor.focus({
+                                                preventScroll: true,
+                                            });
+                                    }}
+                                    autoFocus={
+                                        selectedComment?.text === undefined
+                                    }
+                                    variant="menu"
+                                >
+                                    {selectedComment && (
+                                        <MessageActionMenuItem
+                                            icon={<ReplyIcon />}
+                                            label="Reply"
+                                            onClick={() => {
+                                                flushSync(() => {
+                                                    closeActions();
+                                                    setDraft((value) => ({
+                                                        ...value,
+                                                        replyTarget: {
+                                                            status: "selected",
+                                                            commentId:
+                                                                selectedComment.commentId,
+                                                        },
+                                                    }));
+                                                });
+                                                input.current?.focus({
+                                                    preventScroll: true,
+                                                });
+                                            }}
+                                        />
+                                    )}
+                                    {selectedComment?.text !== undefined && (
+                                        <MessageActionMenuItem
+                                            icon={<CopyIcon />}
+                                            label="Copy"
+                                            onClick={() => {
+                                                closeActions();
+                                                void navigator.clipboard
+                                                    .writeText(
+                                                        selectedComment.text!,
+                                                    )
+                                                    .catch((error: unknown) =>
+                                                        log.error(
+                                                            "Failed to copy comment",
+                                                            error,
+                                                        ),
+                                                    );
+                                            }}
+                                        />
+                                    )}
+                                    {selectedComment?.canDelete && (
+                                        <MessageActionMenuItem
+                                            icon={<DeleteIcon />}
+                                            label="Delete"
+                                            tone="danger"
+                                            onClick={() => {
+                                                closeActions();
+                                                void mutate(() =>
+                                                    deleteCurrentComment(
+                                                        viewer,
+                                                        postId,
+                                                        selectedComment.commentId,
+                                                    ),
+                                                );
+                                            }}
+                                        />
+                                    )}
+                                </MessageActionMenuList>
+                            </Box>
+                        </Grow>
+                    </ClickAwayListener>
+                )}
+            </Popper>
+        </Dialog>
+    );
+};

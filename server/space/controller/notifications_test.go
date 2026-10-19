@@ -27,6 +27,8 @@ type recordedSpaceActivity struct {
 	actorSpaceID string
 	actorSlug    string
 	postID       int64
+	postOwner    SpaceActivityActor
+	commentID    string
 	recipientIDs []int64
 }
 
@@ -417,7 +419,7 @@ func TestPublicPostPushCarriesOnlyOpaqueLocalRouteTarget(t *testing.T) {
 	}, payload)
 }
 
-func TestFriendPushNotificationDestinations(t *testing.T) {
+func TestFriendAndDiscussionPushNotificationDestinations(t *testing.T) {
 	_, repos, ctx := setupPostsControllerTest(t)
 	recipientID := insertSpaceControllerUser(t, repos, "friend-push-recipient@example.com", "recipient-public")
 	sessionHash := []byte("friend-push-session")
@@ -432,11 +434,40 @@ func TestFriendPushNotificationDestinations(t *testing.T) {
 		return &http.Response{StatusCode: http.StatusCreated, Body: io.NopCloser(strings.NewReader(""))}, nil
 	}
 	sender := NewSpaceWebPushSender(repos.WebPush, newSpaceWebPushTestConfig(t))
-	actor := SpaceActivityActor{UserID: 1, SpaceID: "alice-space", Slug: "alice"}
+	actor := SpaceActivityActor{UserID: recipientID + 1, SpaceID: "alice-space", Slug: "alice"}
 	sender.OnSpaceFriendRequested(actor, recipientID)
 	require.Equal(t, spaceWebPushPayload{Title: "Ente Space", Body: "@alice sent you a friend request", Action: "Review request", URL: "/app/notifications"}, payload)
 	sender.OnSpaceFriendAdded(actor, recipientID)
 	require.Equal(t, spaceWebPushPayload{Title: "Ente Space", Body: "@alice accepted your friend request", Action: "Say hi", URL: "/app/messages/alice-space"}, payload)
+	recipientOwner := SpaceActivityActor{UserID: recipientID, SpaceID: "post-owner", Slug: "recipient"}
+	otherOwner := SpaceActivityActor{UserID: recipientID + 2, SpaceID: "post-owner", Slug: "bob"}
+	for _, test := range []struct {
+		name      string
+		kind      string
+		postOwner SpaceActivityActor
+		body      string
+	}{
+		{"comment-on-your-post", "comment", recipientOwner, "@alice commented on your post"},
+		{"comment-on-another-post", "comment", otherOwner, "@alice commented on @bob's post"},
+		{"comment-on-own-post", "comment", actor, "@alice commented on their post"},
+		{"reply-on-your-post", "comment_reply", recipientOwner, "@alice replied to your comment"},
+		{"reply-on-another-post", "comment_reply", otherOwner, "@alice replied to your comment"},
+		{"reply-on-own-post", "comment_reply", actor, "@alice replied to your comment"},
+		{"reaction-on-your-post", "comment_reaction", recipientOwner, "@alice reacted to your comment"},
+		{"reaction-on-another-post", "comment_reaction", otherOwner, "@alice reacted to your comment"},
+		{"reaction-on-own-post", "comment_reaction", actor, "@alice reacted to your comment"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			payload = spaceWebPushPayload{}
+			sender.OnSpaceComment(actor, recipientID, test.postOwner, 42, "comment/with space", test.kind)
+			require.Equal(t, spaceWebPushPayload{
+				Title:  "Ente Space",
+				Body:   test.body,
+				Action: "View comments",
+				URL:    "/app/posts/" + test.postOwner.SpaceID + "/42?comments=1&comment=comment%2Fwith+space",
+			}, payload)
+		})
+	}
 }
 
 func TestSpaceWebPushSendRateAppliesOncePerActivity(t *testing.T) {
@@ -467,4 +498,17 @@ func TestSpaceWebPushSendRateAppliesOncePerActivity(t *testing.T) {
 		subscriptions,
 	)
 	require.Equal(t, len(subscriptions), len(sent))
+}
+
+func (n *recordingSpaceActivityNotifier) OnSpaceComment(actor SpaceActivityActor, recipientUserID int64, postOwner SpaceActivityActor, postID int64, commentID, kind string) {
+	n.events <- recordedSpaceActivity{
+		event:        kind,
+		actorUserID:  actor.UserID,
+		actorSpaceID: actor.SpaceID,
+		actorSlug:    actor.Slug,
+		postID:       postID,
+		postOwner:    postOwner,
+		commentID:    commentID,
+		recipientIDs: []int64{recipientUserID},
+	}
 }
