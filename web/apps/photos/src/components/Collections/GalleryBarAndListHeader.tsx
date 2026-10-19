@@ -251,7 +251,7 @@ export const GalleryBarAndListHeader: React.FC<
     );
 
     useEffect(() => {
-        if (shouldHide) return;
+        if (shouldHide || mode == "links") return;
 
         const collectionSummary = toShowCollectionSummaries.get(
             activeCollectionID!,

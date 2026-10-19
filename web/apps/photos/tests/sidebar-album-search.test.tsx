@@ -37,24 +37,35 @@ const owned: CollectionSummary = {
     updationTime: undefined,
     sortPriority: 0,
 };
-const link: CollectionSummary = {
+const shared: CollectionSummary = {
     ...owned,
     id: 2,
-    name: "Holiday link",
-    attributes: new Set(["quickLink"]),
+    name: "Holiday album",
+    attributes: new Set(["sharedOutgoing"]),
 };
-const albums = [owned, link];
+const link: CollectionSummary = {
+    ...owned,
+    id: 3,
+    name: "Trip link",
+    attributes: new Set(["quickLink", "sharedViaLink"]),
+};
+const albums = [owned, shared, link];
 
-const renderSearch = (query: string, albumFilter = "ente") => {
+const renderSearch = (
+    query: string,
+    albumFilter: GalleryBarImplProps["albumFilter"] = "ente",
+    mode: GalleryBarImplProps["mode"] = "albums",
+) => {
     const normalizedQuery = query.trim().toLowerCase();
+    const summaries = mode == "links" ? [link] : albums;
     const props: GalleryBarImplProps = {
-        mode: "albums",
-        albumFilter: albumFilter as GalleryBarImplProps["albumFilter"],
+        mode,
+        albumFilter,
         albumSearchQuery: query,
-        collectionSummaries: albums.filter((album) =>
+        collectionSummaries: summaries.filter((album) =>
             album.name.toLowerCase().includes(normalizedQuery),
         ),
-        visibleAlbumFilters: visibleAlbumFilters(albums, query),
+        visibleAlbumFilters: visibleAlbumFilters(summaries, query),
         normalCollectionSummaries: new Map(),
         uncategorizedCollectionSummaryID: 99,
         activeCollectionID: undefined,
@@ -82,20 +93,19 @@ const renderSearch = (query: string, albumFilter = "ente") => {
 };
 
 describe("sidebar album search across groups", () => {
-    test("reveals matching Links albums while Ente is selected", () => {
+    test("reveals matching Shared albums while Ente is selected", () => {
         const html = renderSearch("holiday");
-        expect(html).toContain('aria-label="links_albums_title"');
+        expect(html).toContain('aria-label="shared_albums_title"');
         expect(html).toContain('aria-expanded="true"');
-        expect(html).toContain("Holiday link");
-        expect(html).not.toContain('aria-label="Ente"');
+        expect(html).toContain("Holiday album");
         expect(html).not.toContain("no-matches.svg");
     });
 
-    test("reveals matching Ente albums while Links is selected", () => {
-        const html = renderSearch("family", "links");
+    test("reveals matching Ente albums while Shared is selected", () => {
+        const html = renderSearch("family", "shared");
         expect(html).toContain('aria-label="Ente"');
         expect(html).toContain("Family");
-        expect(html).not.toContain('aria-label="links_albums_title"');
+        expect(html).not.toContain('aria-label="shared_albums_title"');
         expect(html).not.toContain("no-matches.svg");
     });
 
@@ -110,10 +120,27 @@ describe("sidebar album search across groups", () => {
         (query) => {
             const html = renderSearch(query);
             expect(html).toContain('aria-label="Ente"');
-            expect(html).toContain('aria-label="links_albums_title"');
+            expect(html).toContain('aria-label="shared_albums_title"');
             expect(html).toContain("Family");
-            expect(html).not.toContain("Holiday link");
+            expect(html).toContain("Holiday album");
             expect(html).not.toContain("no-matches.svg");
         },
     );
+});
+
+describe("Links sidebar search", () => {
+    test("shows matching links outside album groups", () => {
+        const html = renderSearch("  TRIP  ", "ente", "links");
+        expect(html).toContain("Trip link");
+        expect(html).toContain('aria-label="search_links"');
+        expect(html).not.toContain('aria-label="filter_albums"');
+        expect(html).not.toContain("no-matches.svg");
+    });
+
+    test("uses the illustrated empty state when no links match", () => {
+        const html = renderSearch("missing", "ente", "links");
+        expect(html).toContain("no-matches.svg");
+        expect(html).not.toContain("Trip link");
+        expect(html).not.toContain('aria-label="filter_albums"');
+    });
 });

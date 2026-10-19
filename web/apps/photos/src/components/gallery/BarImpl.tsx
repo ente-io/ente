@@ -196,6 +196,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             case "albums":
             case "hidden-albums":
             case "archive-albums":
+            case "links":
                 i = displayedCollectionSummaries.findIndex(
                     ({ id }) => id == activeCollectionID,
                 );
@@ -224,7 +225,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         () =>
             mode == "albums" ||
             mode == "hidden-albums" ||
-            mode == "archive-albums"
+            mode == "archive-albums" ||
+            mode == "links"
                 ? {
                       type: "collections",
                       collectionSummaries: displayedCollectionSummaries,
@@ -252,11 +254,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const title =
         mode == "people"
             ? t("people")
-            : mode == "hidden-albums"
-              ? t("hidden_albums")
-              : mode == "archive-albums"
-                ? t("section_archive")
-                : t("albums");
+            : mode == "links"
+              ? t("links")
+              : mode == "hidden-albums"
+                ? t("hidden_albums")
+                : mode == "archive-albums"
+                  ? t("section_archive")
+                  : t("albums");
 
     const albumShortcuts = [
         {
@@ -507,13 +511,17 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     placeholder={t(
                         mode == "people"
                             ? "people_search_hint"
-                            : "search_in_albums",
+                            : mode == "links"
+                              ? "search_links"
+                              : "search_in_albums",
                     )}
                     inputProps={{
                         "aria-label": t(
                             mode == "people"
                                 ? "people_search_hint"
-                                : "search_in_albums",
+                                : mode == "links"
+                                  ? "search_links"
+                                  : "search_in_albums",
                         ),
                     }}
                     value={searchQuery}
@@ -607,7 +615,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             ) : (
                 items
             )}
-            {mode != "people" && (
+            {mode != "people" && mode != "links" && (
                 <Stack sx={{ flexShrink: 0, gap: "2px", pb: "8px" }}>
                     <Divider
                         sx={{
