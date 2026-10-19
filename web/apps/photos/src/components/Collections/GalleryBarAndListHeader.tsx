@@ -404,7 +404,6 @@ export const GalleryBarAndListHeader: React.FC<
                 onSelectPerson={selectPerson}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onChangePeopleSortBy={onChangePeopleSortBy}
-                canCreateAlbum={canCreateAlbum}
                 onCreateAlbum={openAlbumCreation}
                 onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
