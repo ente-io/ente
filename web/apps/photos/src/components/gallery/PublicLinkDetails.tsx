@@ -1,5 +1,6 @@
+import { PickCoverPhotoDialog } from "@/components/Collections/PickCoverPhotoDialog";
 import { usePublicLinkURL } from "@/components/utils/use-public-link-url";
-import { Copy01Icon } from "@hugeicons/core-free-icons";
+import { Copy01Icon, Edit03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import DoneIcon from "@mui/icons-material/Done";
 import {
@@ -10,30 +11,64 @@ import {
     Typography,
     styled,
 } from "@mui/material";
+import type { LocalUser } from "ente-accounts/services/user";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useClipboardCopy } from "ente-base/components/utils/hooks";
+import { useModalVisibility } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
 import { ItemCard } from "ente-new/photos/components/Tiles";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import { updateCollectionDetails } from "ente-new/photos/services/collection";
 import { openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
+import type { RemotePullOpts } from ".";
 
 interface PublicLinkDetailsProps {
     collection: Collection;
     coverFile?: EnteFile;
+    files: EnteFile[];
+    user: LocalUser;
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
 }
 
 export const PublicLinkDetails = ({
     collection,
     coverFile,
+    files,
+    user,
+    onRemotePull,
 }: PublicLinkDetailsProps) => {
+    const { onGenericError } = useBaseContext();
+    const { show: showPickCoverPhoto, props: pickCoverPhotoVisibilityProps } =
+        useModalVisibility();
     const { customDomain } = useSettingsSnapshot();
     const { resolvedURL, isLoading, error } = usePublicLinkURL(
         collection,
         collection.publicURLs[0],
         customDomain,
     );
+    const canChangeCover =
+        collection.owner.id === user.id &&
+        files.length > 1 &&
+        files.some((file) => file.metadata.fileType !== FileType.video);
+
+    const updateCover = async (coverID: number) => {
+        try {
+            await updateCollectionDetails(collection, { coverID });
+            await onRemotePull({
+                silent: true,
+                source: "update-link-cover",
+                strict: true,
+            });
+            return true;
+        } catch (e) {
+            onGenericError(e);
+            return false;
+        }
+    };
 
     return (
         <Box
@@ -45,12 +80,40 @@ export const PublicLinkDetails = ({
             }}
         >
             <Stack sx={{ width: "100%", maxWidth: 364, gap: "14px" }}>
-                <Box role="img" aria-label={collection.name}>
-                    <ItemCard
-                        key={`${collection.id}-${coverFile?.id ?? "empty"}`}
-                        TileComponent={Cover}
-                        coverFile={coverFile}
-                    />
+                <Box sx={{ position: "relative" }}>
+                    <Box role="img" aria-label={collection.name}>
+                        <ItemCard
+                            key={`${collection.id}-${coverFile?.id ?? "empty"}`}
+                            TileComponent={Cover}
+                            coverFile={coverFile}
+                        />
+                    </Box>
+                    {canChangeCover && (
+                        <Tooltip title={t("set_cover")}>
+                            <IconButton
+                                aria-label={t("set_cover")}
+                                onClick={showPickCoverPhoto}
+                                sx={{
+                                    position: "absolute",
+                                    top: 16,
+                                    right: 16,
+                                    width: 38,
+                                    height: 38,
+                                    p: "10px",
+                                    borderRadius: "12px",
+                                    bgcolor: "background.paper",
+                                    color: "text.base",
+                                    "&:hover": { bgcolor: "background.paper" },
+                                }}
+                            >
+                                <HugeiconsIcon
+                                    icon={Edit03Icon}
+                                    size={18}
+                                    strokeWidth={1.5}
+                                />
+                            </IconButton>
+                        </Tooltip>
+                    )}
                 </Box>
                 <Stack
                     direction="row"
@@ -128,6 +191,19 @@ export const PublicLinkDetails = ({
                     {t("open_album")}
                 </FocusVisibleButton>
             </Stack>
+            {canChangeCover && pickCoverPhotoVisibilityProps.open && (
+                <PickCoverPhotoDialog
+                    {...pickCoverPhotoVisibilityProps}
+                    collection={collection}
+                    files={files}
+                    user={user}
+                    canResetToDefault={
+                        (collection.pubMagicMetadata?.data.coverID ?? 0) > 0
+                    }
+                    onUseSelectedPhoto={(file) => updateCover(file.id)}
+                    onResetToDefault={() => updateCover(0)}
+                />
+            )}
         </Box>
     );
 };
