@@ -60,6 +60,11 @@
         "rust/tools/codegen/**"
     ],
     "docs-verify-build": [".github/workflows/docs-verify-build.yml", "docs/**"],
+    "ensu-desktop-build": [
+        "rust/Cargo.lock",
+        "rust/apps/ensu/package-lock.json",
+        "web/package-lock.json"
+    ],
     "infra-lint-staff": [
         ".github/workflows/infra-lint-staff.yml",
         "infra/staff/**"
