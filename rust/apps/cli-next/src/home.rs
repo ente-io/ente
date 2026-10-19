@@ -50,16 +50,13 @@ pub fn application_home() -> Result<PathBuf> {
 
 pub fn create(path: &Path) -> io::Result<()> {
     #[cfg(unix)]
-    use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
+    use std::os::unix::fs::DirBuilderExt;
 
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
     #[cfg(unix)]
     builder.mode(0o700);
-    builder.create(path)?;
-    #[cfg(unix)]
-    fs::set_permissions(path, fs::Permissions::from_mode(0o700))?;
-    Ok(())
+    builder.create(path)
 }
 
 pub fn lock_account(id: Uuid, create: bool) -> Result<LockedAccountHome> {

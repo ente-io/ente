@@ -300,6 +300,11 @@ fn load_key(
 
 fn keyring_error(error: keyring::Error, exists: bool) -> anyhow::Error {
     let reason = match error {
+        keyring::Error::NoEntry if exists => {
+            return anyhow::anyhow!(
+                "no saved vault key for this CLI home; if you moved the directory, restore its previous location or supply the original ENTE_CLI_VAULT_KEY"
+            );
+        }
         keyring::Error::NoEntry => "the vault key is missing".to_owned(),
         keyring::Error::NoStorageAccess(error) => {
             format!("access to system secret storage was denied: {error}")

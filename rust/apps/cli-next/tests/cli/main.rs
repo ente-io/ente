@@ -332,7 +332,7 @@ fn deleted_collections_are_filtered_before_decryption() {
 
 #[cfg(unix)]
 #[test]
-fn reading_an_existing_vault_does_not_change_its_directory() {
+fn accessing_an_existing_vault_preserves_directory_permissions() {
     use std::os::unix::fs::PermissionsExt;
 
     let home = TestHome::new();
@@ -344,6 +344,13 @@ fn reading_an_existing_vault_does_not_change_its_directory() {
     assert_eq!(success(result).stdout, b"--8=\n");
     assert_eq!(mode, 0o500, "read changed the CLI home permissions");
     assert_eq!(fs::read_dir(home.dir.path()).unwrap().count(), 1);
+
+    fs::set_permissions(home.dir.path(), fs::Permissions::from_mode(0o755)).unwrap();
+    success(home.run(&["account", "switch", "fixture"]));
+    assert_eq!(
+        fs::metadata(home.dir.path()).unwrap().permissions().mode() & 0o777,
+        0o755
+    );
 }
 
 #[test]
