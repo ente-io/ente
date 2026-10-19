@@ -154,6 +154,7 @@ export const PeopleOverview = ({
                                     height={height}
                                     style={{ scrollbarGutter: "stable" }}
                                     itemCount={items.length}
+                                    estimatedItemSize={mobile ? 150 : 190}
                                     itemSize={(index) =>
                                         items[index]?.type != "people"
                                             ? 88
