@@ -28,7 +28,7 @@ interface CreateAlbumDialogProps extends ModalVisibilityProps {
     onSelectCollectionID: (id: number) => void;
 }
 
-/** Shared album creation flow, including refresh and success notification. */
+// Shared album creation flow, including refresh and success notification.
 export const CreateAlbumDialog: React.FC<CreateAlbumDialogProps> = ({
     open,
     onClose,
