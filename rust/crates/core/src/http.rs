@@ -100,18 +100,28 @@ impl From<reqwest::Error> for Error {
 #[derive(Clone)]
 pub struct Http {
     client: reqwest::Client,
+    api_client: reqwest::Client,
 }
 
 impl Http {
     pub fn new() -> Result<Self, Error> {
-        let builder = reqwest::Client::builder();
+        let builder = || {
+            let builder = reqwest::Client::builder();
+            #[cfg(not(target_arch = "wasm32"))]
+            let builder = builder
+                .connect_timeout(Duration::from_secs(15))
+                .read_timeout(Duration::from_secs(30));
+            builder
+        };
+        let client = builder().build()?;
         #[cfg(not(target_arch = "wasm32"))]
-        let builder = builder
-            .connect_timeout(Duration::from_secs(15))
-            .read_timeout(Duration::from_secs(30));
-        Ok(Http {
-            client: builder.build()?,
-        })
+        let api_client = builder()
+            .redirect(reqwest::redirect::Policy::none())
+            .build()?;
+        #[cfg(target_arch = "wasm32")]
+        let api_client = client.clone();
+
+        Ok(Http { client, api_client })
     }
 
     pub fn get(&self, url: &str) -> RequestBuilder {
@@ -273,7 +283,7 @@ impl Api {
     fn request(&self, method: Method, path: &str) -> RequestBuilder {
         let mut builder = self
             .http
-            .client
+            .api_client
             .request(method, api_url(&self.origin, path));
         if let Some(client_package) = &self.client_package {
             builder = builder.header(CLIENT_PACKAGE, client_package);
@@ -610,6 +620,50 @@ mod tests {
 
         unauthed.assert_async().await;
         authed.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn api_refuses_redirects_while_http_follows_them() {
+        let mut server = Server::new_async().await;
+        let mut destination = Server::new_async().await;
+        let redirect = server
+            .mock("GET", "/redirect")
+            .with_status(307)
+            .with_header("location", &format!("{}/file", destination.url()))
+            .expect(2)
+            .create_async()
+            .await;
+        let download = destination
+            .mock("GET", "/file")
+            .match_header("x-auth-token", Matcher::Missing)
+            .with_body("payload")
+            .expect(1)
+            .create_async()
+            .await;
+        let api = api(&server, Some(Auth::User("tok".into())));
+
+        let error = api
+            .get("/redirect")
+            .send()
+            .await
+            .unwrap()
+            .error_for_status()
+            .unwrap_err();
+        assert!(matches!(error, Error::Http { status: 307, .. }));
+        let body = api
+            .http()
+            .get(&format!("{}/redirect", server.url()))
+            .send()
+            .await
+            .unwrap()
+            .error_for_status()
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+        assert_eq!(body, "payload");
+        redirect.assert_async().await;
+        download.assert_async().await;
     }
 
     #[tokio::test]
