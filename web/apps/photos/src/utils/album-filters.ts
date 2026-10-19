@@ -4,7 +4,8 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 
-export type AlbumFilter = "ente" | "shared" | "received" | "empty-albums";
+export type AlbumFilter =
+    "ente" | "shared" | "received" | "links" | "empty-albums";
 
 export const albumFilters: {
     value: AlbumFilter;
@@ -21,6 +22,11 @@ export const albumFilters: {
         value: "received",
         label: () => t("received_albums_label"),
         title: () => t("received_albums_title"),
+    },
+    {
+        value: "links",
+        label: () => t("links_albums_label"),
+        title: () => t("links_albums_title"),
     },
     {
         value: "empty-albums",
@@ -55,6 +61,8 @@ export const matchesAlbumFilter = (
                 !cs.attributes.has("archived") &&
                 cs.attributes.has("sharedIncoming")
             );
+        case "links":
+            return cs.attributes.has("quickLink");
         case "empty-albums":
             return isBulkDeletableEmptyAlbum(cs);
     }

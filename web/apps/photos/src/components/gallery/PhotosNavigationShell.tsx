@@ -29,6 +29,7 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { ut } from "ente-base/i18n";
 import { thumbnailGridPadding } from "ente-new/photos/components/utils/thumbnail-grid-layout";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import { t } from "i18next";
@@ -67,6 +68,7 @@ export const PhotosNavigationShell: React.FC<
     children,
     ...props
 }) => {
+    const { isInternalUser } = useSettingsSnapshot();
     const [railOpen, setRailOpen] = useState(true);
     const [navigationCollapsed, setNavigationCollapsed] = useState(false);
     const toggleRail = () => setRailOpen((open) => !open);
@@ -176,6 +178,7 @@ export const PhotosNavigationShell: React.FC<
                         {showNormalNavigation && (
                             <NormalNavigationRail
                                 {...props}
+                                isInternalUser={isInternalUser}
                                 isHome={
                                     props.mode == "albums" &&
                                     !props.isInSearchMode &&
@@ -312,6 +315,7 @@ const NormalNavigationRail: React.FC<
         isHome: boolean;
         opensDialog: boolean;
         navigationOpen: boolean;
+        isInternalUser: boolean;
     }
 > = ({
     onSidebar,
@@ -321,6 +325,7 @@ const NormalNavigationRail: React.FC<
     isHome,
     opensDialog,
     navigationOpen,
+    isInternalUser,
     ...props
 }) => (
     <>
@@ -338,7 +343,8 @@ const NormalNavigationRail: React.FC<
             })}
         />
         {(["albums", "people", "links"] as const).map((item) =>
-            item == "people" && !isMLSupported ? null : (
+            (item == "people" && !isMLSupported) ||
+            (item == "links" && !isInternalUser) ? null : (
                 <Tooltip key={item} title={t(item)}>
                     <FocusVisibleButton
                         color="secondary"
