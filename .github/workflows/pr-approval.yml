@@ -34,7 +34,7 @@ jobs:
         steps:
             - name: Mint App token
               id: app_token
-              uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+              uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
               with:
                   client-id: ${{ secrets.ENTE_APPROVER_GH_CLIENT_ID }}
                   private-key: ${{ secrets.ENTE_APPROVER_GH_APP_PRIVATE_KEY }}
@@ -259,6 +259,8 @@ jobs:
                       The PR head ${{ github.event.pull_request.head.sha }} is checked out.
                       Review its changes from the merge base with:
                       git diff --no-ext-diff --no-textconv ${{ steps.review-context.outputs.merge-base }} ${{ github.event.pull_request.head.sha }}
+
+                      When reviewing tests, report negative assertions for removed code paths as unnecessary tests.
 
                       Read "${{ runner.temp }}/pr-metadata.json" for the PR title, description, and previous reviews.
                       Avoid repeating previously reported findings, but report fixed issues that have been reintroduced.

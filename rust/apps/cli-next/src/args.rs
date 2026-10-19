@@ -1,6 +1,7 @@
 use std::{io::IsTerminal, num::NonZeroUsize, path::PathBuf};
 
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{Arg, ArgAction, Args, CommandFactory, Parser, Subcommand, ValueEnum};
+use clap_complete::Shell;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -13,8 +14,10 @@ use serde::{Deserialize, Serialize};
   ente-cli-next photos album list
   ente-cli-next photos file list --album <ID>
   ente-cli-next photos export <DIR>
-Auth backups:
+Auth:
   ente-cli-next account login --app auth
+  ente-cli-next auth code list
+  ente-cli-next auth code view <CODE>
   ente-cli-next auth export <DIR>
 Paste:
   ente-cli-next paste create --input <PATH>
@@ -25,6 +28,15 @@ pub struct Cli {
     pub options: Options,
     #[command(subcommand)]
     pub command: Command,
+}
+
+pub fn command() -> clap::Command {
+    Cli::command().subcommand_required(false).arg(
+        Arg::new("help-all")
+            .long("help-all")
+            .action(ArgAction::SetTrue)
+            .help("Print help for all commands"),
+    )
 }
 
 #[derive(Args)]
@@ -53,7 +65,7 @@ pub struct ListArgs {
         long,
         default_value_t = DEFAULT_LIST_LIMIT,
         value_parser = clap::value_parser!(u32).range(1..),
-        help = "Maximum number of results; does not limit metadata refresh"
+        help = "Maximum number of results shown"
     )]
     pub limit: u32,
     #[arg(long, conflicts_with = "limit", help = "List every result")]
@@ -122,6 +134,40 @@ Keep the same home and key across unattended invocations."
         #[command(subcommand)]
         command: VaultCommand,
     },
+    #[command(
+        about = "Print a shell completion script",
+        after_help = "Enable completion in the current shell, or add the commands to its startup file:
+  Bash (~/.bashrc):
+    eval \"$(ente-cli-next completion bash)\"
+  Zsh (~/.zshrc):
+    autoload -Uz compinit; compinit
+    source <(ente-cli-next completion zsh)
+  PowerShell ($PROFILE):
+    ente-cli-next completion powershell | Out-String | Invoke-Expression
+  Elvish (~/.config/elvish/rc.elv):
+    eval (ente-cli-next completion elvish | slurp)
+
+Fish loads a saved script on demand. Write it once, and again after upgrading:
+  mkdir -p ~/.config/fish/completions
+  ente-cli-next completion fish > ~/.config/fish/completions/ente-cli-next.fish
+
+Prints the script to stdout, including when --json is set."
+    )]
+    Completion { shell: Shell },
+    #[command(about = "Administer an Ente server", after_long_help = ADMIN_HELP)]
+    Admin {
+        #[command(flatten)]
+        selector: AccountSelector,
+        #[arg(
+            long,
+            global = true,
+            value_enum,
+            help = "Saved app session; defaults to the sole app, otherwise Photos"
+        )]
+        app: Option<App>,
+        #[command(subcommand)]
+        command: AdminCommand,
+    },
 }
 
 #[derive(Subcommand)]
@@ -185,6 +231,11 @@ With --json: {\"text\": \"...\"}. --raw affects plain terminal output only. Requ
 pub enum AuthCommand {
     #[command(about = "Make an authenticated API request", after_help = API_HELP)]
     Api(ApiArgs),
+    #[command(about = "Find saved Auth codes and show their current values")]
+    Code {
+        #[command(subcommand)]
+        command: CodeCommand,
+    },
     #[command(about = "Export your Auth codes; encrypted by default")]
     #[command(
         after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
@@ -209,6 +260,55 @@ Writes readable URI lines to stdout, or a new --output file. --json only formats
         )]
         output: Option<PathBuf>,
     },
+}
+
+#[derive(Subcommand)]
+pub enum CodeCommand {
+    #[command(about = "List saved codes without their secrets or current values")]
+    #[command(
+        after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
+Search matches an ID, a displayed name, or words across issuer and account name, ignoring case.
+Codes in Trash are not listed.
+JSON fields: id, name, issuer, accountName, type (totp, hotp or steam)."
+    )]
+    List {
+        #[arg(
+            long,
+            value_name = "TEXT",
+            help = "Find codes by ID, displayed name or search words",
+            value_parser = nonempty_query
+        )]
+        search: Option<String>,
+        #[command(flatten)]
+        list: ListArgs,
+    },
+    #[command(about = "Show one current TOTP or Steam code and its expiry")]
+    #[command(
+        after_long_help = "Refreshes Auth data first; --offline uses previously synced data.
+An ID selects exactly. Otherwise match a name shown by list, or search words across issuer and account name.
+Matching ignores case, and every search word must occur in either field.
+Several matches fail and list candidates; narrow the search or use an ID.
+Quote queries containing spaces.
+A code in Trash must be restored in Ente Auth first.
+JSON fields: id, name, issuer, accountName, type, otp, validUntil (UTC).
+HOTP values are not supported yet.
+Codes use your computer's clock. Make sure its date and time are correct."
+    )]
+    View {
+        #[arg(
+            help = "Code ID, displayed name or search words",
+            value_parser = nonempty_query
+        )]
+        code: String,
+    },
+}
+
+fn nonempty_query(query: &str) -> Result<String, String> {
+    if query.trim().is_empty() {
+        Err("supply a code ID or search text".into())
+    } else {
+        Ok(query.to_owned())
+    }
 }
 
 #[derive(Args)]
@@ -271,7 +371,20 @@ pub struct PhotosExportArgs {
     pub exclude_album: Vec<String>,
     #[arg(
         long,
-        help = "Take over an old CLI/Desktop export or reconnect an existing one"
+        help = "Exclude albums owned by other accounts",
+        long_help = "Exclude albums owned by other accounts, including albums explicitly included with --album. Albums you own remain included when shared with others. Excluded output is left alone. Removed albums use their last known category; an unknown category is reported as incomplete. Applies only to this invocation."
+    )]
+    pub exclude_shared: bool,
+    #[arg(
+        long,
+        help = "Exclude hidden albums, including the Hidden album",
+        long_help = "Exclude albums hidden for this account, including the Hidden album and albums explicitly included with --album. Archived albums and individually hidden files in included albums remain included. Excluded output is left alone. Removed albums use their last known category; an unknown category is reported as incomplete. Applies only to this invocation."
+    )]
+    pub exclude_hidden: bool,
+    #[arg(
+        long,
+        help = "Take over an old CLI/Desktop export or reconnect an existing one",
+        long_help = "Take over an old CLI/Desktop export or reconnect an existing one. Taking over an old export requires filters to select exactly its recorded albums. Reconnecting a native export associates the whole export, then applies filters to this invocation."
     )]
     pub adopt: bool,
     #[arg(
@@ -300,8 +413,14 @@ pub enum LockerCommand {
 
 #[derive(Args)]
 pub struct LoginArgs {
-    #[arg(help = "Local account name; creates an entry if it does not exist")]
+    #[arg(
+        long = "account",
+        value_name = "NAME",
+        help = "Local account name; creates an entry if it does not exist"
+    )]
     pub name: Option<String>,
+    #[arg(long, help = "Email address to log in with")]
+    pub email: Option<String>,
     #[arg(long, value_enum, help = "App to log in to")]
     pub app: App,
     #[arg(
@@ -314,6 +433,37 @@ pub struct LoginArgs {
         help = "Read login credentials as JSON from this file, or from stdin with -"
     )]
     pub input: Option<PathBuf>,
+}
+
+#[derive(Args)]
+pub struct CreateArgs {
+    #[arg(
+        long = "account",
+        value_name = "NAME",
+        help = "Local name for the new account; defaults to its email"
+    )]
+    pub name: Option<String>,
+    #[arg(long, help = "Email address for the new account")]
+    pub email: Option<String>,
+    #[arg(long, value_enum, default_value = "photos", help = "App to log in to")]
+    pub app: App,
+    #[arg(long, help = "Ente server; defaults to api.ente.com")]
+    pub host: Option<String>,
+    #[arg(
+        long,
+        value_name = "PATH|-",
+        help = "Read creation credentials as JSON from a file or stdin"
+    )]
+    pub input: Option<PathBuf>,
+    #[arg(long, help = "Accept Ente's terms and privacy policy")]
+    pub accept_terms: bool,
+}
+
+#[derive(Clone, Copy, ValueEnum, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VerificationPurpose {
+    Create,
+    Login,
 }
 
 const API_HELP: &str = "The response body is written unchanged, including when --json is set.";
@@ -399,32 +549,74 @@ pub enum AccountCommand {
     #[command(
         about = "Log an account into an app",
         after_long_help = "An existing name requires matching credentials; a new name creates a local entry.
-Omit NAME to use the selected account, or the only saved account.
+Omit --account to use the selected account, or the only saved account.
 With no saved accounts, creates an entry named after the authenticated email.
-With several accounts and none selected, supply NAME or use account switch.
+With several accounts and none selected, supply --account or use account switch.
 A new entry becomes selected; logging into an existing entry keeps the selection.
 
 Non-interactive login reads JSON from --input:
   {\"email\": \"...\", \"password\": \"...\", \"otp\": \"123456\", \"totp\": \"654321\"}
 
-All fields are strings. otp is the email code; totp is the authenticator code. Supply them when required.
+All fields are strings. --email can supply the email instead. otp is the email code; totp is the authenticator code.
+Request an email code with account request-otp --email EMAIL --purpose login.
 With --no-input, supply email and password through --input PATH or --input -.
 For unattended vault access, set ENTE_CLI_VAULT_KEY (see vault --help)."
     )]
     Login(LoginArgs),
+    #[command(
+        about = "Request an email verification code",
+        after_long_help = "Requests one email and returns; success means the server accepted the request.
+Use the same email, app and server when completing creation or login.
+Defaults to creation; use --purpose login for an existing account."
+    )]
+    RequestOtp {
+        #[arg(long, help = "Email address to verify")]
+        email: Option<String>,
+        #[arg(
+            long,
+            value_enum,
+            default_value = "photos",
+            help = "App requesting verification"
+        )]
+        app: App,
+        #[arg(long, help = "Ente server; defaults to api.ente.com")]
+        host: Option<String>,
+        #[arg(
+            long,
+            value_enum,
+            default_value = "create",
+            help = "Reason for verification"
+        )]
+        purpose: VerificationPurpose,
+    },
+    #[command(
+        about = "Create an Ente account",
+        after_long_help = "Creates and selects a new account, named after its email unless --account is supplied.
+Prompts for email, consent, verification code and password.
+Unattended creation requires --accept-terms and --input with email, password and otp strings.
+--email can supply the email instead. Request the code first with account request-otp.
+Repeating an unfinished creation resumes with its saved keys and the same password.
+Terms: https://ente.io/terms  Privacy: https://ente.io/privacy
+Print the recovery key later with account recovery-key."
+    )]
+    Create(CreateArgs),
     #[command(about = "List accounts on this device")]
     #[command(after_long_help = ACCOUNT_HELP)]
     List,
     #[command(about = "Show an account")]
     #[command(after_long_help = ACCOUNT_HELP)]
     View {
-        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        #[arg(
+            long = "account",
+            value_name = "NAME",
+            help = "Account name; defaults to the selected or only saved account"
+        )]
         name: Option<String>,
     },
     #[command(about = "Print the saved API token for an account")]
     #[command(
-        after_long_help = "Uses NAME, otherwise the selected account, otherwise the only saved account.
-With several accounts and none selected, supply NAME or use account switch.
+        after_long_help = "Uses --account, otherwise the selected account, otherwise the only saved account.
+With several accounts and none selected, supply --account or use account switch.
 --app is required and selects that account's saved login.
 Reads the saved token from the local vault without contacting the server or refreshing it.
 This prints a secret and does not check whether the server still accepts it.
@@ -432,7 +624,11 @@ Plain output is padded URL-safe Base64 followed by a newline.
 With --json, returns {\"token\":\"...\"}."
     )]
     Token {
-        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        #[arg(
+            long = "account",
+            value_name = "NAME",
+            help = "Account name; defaults to the selected or only saved account"
+        )]
         name: Option<String>,
         #[arg(long, value_enum, help = "App whose token to print")]
         app: App,
@@ -442,12 +638,18 @@ With --json, returns {\"token\":\"...\"}."
         #[arg(help = "Account name")]
         name: String,
     },
-    #[command(about = "Change an account's local name")]
+    #[command(
+        about = "Change an account's local name",
+        after_help = "With one name, renames the selected or only account. With two, renames OLD_NAME to NEW_NAME."
+    )]
     Rename {
-        #[arg(value_name = "OLD_NAME", help = "Current local name")]
+        #[arg(
+            value_name = "NAME",
+            help = "New name, or current name when supplying two names"
+        )]
         name: String,
         #[arg(value_name = "NEW_NAME", help = "New local name")]
-        new_name: String,
+        new_name: Option<String>,
     },
     #[command(
         about = "Log out of an app, or every app when --app is omitted",
@@ -456,7 +658,11 @@ Without --app, logs out of all this account's saved app logins on this device.
 --local removes the account and its cached data without contacting the server."
     )]
     Logout {
-        #[arg(help = "Account name; defaults to the selected or only saved account")]
+        #[arg(
+            long = "account",
+            value_name = "NAME",
+            help = "Account name; defaults to the selected or only saved account"
+        )]
         name: Option<String>,
         #[arg(
             long,
@@ -471,6 +677,59 @@ Without --app, logs out of all this account's saved app logins on this device.
         )]
         local: bool,
     },
+    #[command(
+        about = "Set up authenticator protection for your Ente account",
+        after_long_help = "Protects account login, separate from codes stored in Ente Auth.
+Use enable interactively, or setup then enable --input with secret and totp strings.
+Setup secrets expire after ten minutes. If confirmation is interrupted, check status.
+--app chooses a saved login: the only app, otherwise Photos. Requires network access."
+    )]
+    Totp {
+        #[command(flatten)]
+        selector: AccountSelector,
+        #[arg(
+            long,
+            global = true,
+            value_enum,
+            help = "Saved app login to authenticate with"
+        )]
+        app: Option<App>,
+        #[command(subcommand)]
+        command: TotpCommand,
+    },
+    #[command(
+        about = "Print the saved 24-word recovery key",
+        after_long_help = "Prints a secret from the local vault without network access.
+With --json, returns {\"recoveryKey\":\"...\"}."
+    )]
+    RecoveryKey {
+        #[arg(
+            long = "account",
+            value_name = "NAME",
+            help = "Account name; defaults to the selected or only saved account"
+        )]
+        name: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum TotpCommand {
+    #[command(about = "Print a new authenticator setup secret")]
+    Setup,
+    #[command(
+        about = "Confirm and enable authenticator protection",
+        after_long_help = "Verifying an authenticator code requires your computer's date and time to be correct."
+    )]
+    Enable {
+        #[arg(
+            long,
+            value_name = "PATH|-",
+            help = "Read secret and totp strings as JSON from a file or stdin"
+        )]
+        input: Option<PathBuf>,
+    },
+    #[command(about = "Show whether authenticator protection is enabled")]
+    Status,
 }
 
 #[derive(Subcommand)]
@@ -486,6 +745,130 @@ pub enum VaultCommand {
 pub enum KeyCommand {
     #[command(about = "Print a new vault key for ENTE_CLI_VAULT_KEY")]
     Generate,
+}
+
+const ADMIN_HELP: &str =
+    "Uses the selected account's server and saved login; the server grants administrator access.
+Log in with: ente-cli-next account login --account NAME --app photos --host URL
+--account selects a saved account by name; otherwise uses the selected or sole account.
+--app selects its session; otherwise uses the sole saved app, then Photos.
+With multiple apps and no Photos login, supply --app.
+Listing users, deleting users and disabling TOTP require a login less than ten minutes old.
+Changes to users require confirmation; --yes approves them, --no-input only disables prompts.
+All admin commands require network access. --json prints results, not prompts or errors.
+
+Examples:
+  ente-cli-next admin --account home user view alice@example.com
+  ente-cli-next admin --account home user update-subscription alice@example.com --no-limit
+  ente-cli-next admin --account home user list --all --no-input --json";
+
+#[derive(Subcommand)]
+pub enum AdminCommand {
+    #[command(about = "Inspect and manage users")]
+    User {
+        #[command(subcommand)]
+        command: AdminUserCommand,
+    },
+    #[command(about = "Test server email")]
+    Email {
+        #[command(subcommand)]
+        command: AdminEmailCommand,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum AdminUserCommand {
+    #[command(
+        about = "List users",
+        after_long_help = "Requires a login less than ten minutes old.
+Lists users in creation order. Fetches all users matching --since before applying --limit.
+--since accepts YYYY-MM-DD (midnight UTC) or RFC3339 with a timezone.
+JSON returns an array: id and email (strings), createdAt (RFC3339)."
+    )]
+    List {
+        #[command(flatten)]
+        list: ListArgs,
+        #[arg(long, value_name = "WHEN", value_parser = crate::admin::parse_date, help = "Include users created strictly after this instant")]
+        since: Option<i64>,
+    },
+    #[command(
+        about = "Show a user's ID and subscription",
+        after_long_help = "JSON returns id, email, createdAt and subscription.
+subscription contains productId, storageBytes and expiresAt, or null when unavailable.
+IDs are strings; timestamps are RFC3339; storageBytes is an integer."
+    )]
+    View {
+        #[arg(value_name = "USER", help = "User email or numeric ID")]
+        user: String,
+    },
+    #[command(
+        about = "Delete an account and schedule its data cleanup",
+        after_long_help = "Deletes the account registered to the supplied email when the server processes the request.
+Requires a login less than ten minutes old. Reports the deleted account's ID and whether the server cancelled the subscription."
+    )]
+    Delete {
+        #[arg(help = "Email address of the account to delete")]
+        email: String,
+        #[arg(long, help = "Approve this change without prompting")]
+        yes: bool,
+    },
+    #[command(
+        about = "Disable authenticator-code two-factor authentication",
+        after_long_help = "Requires a login less than ten minutes old. Leaves passkeys enabled."
+    )]
+    DisableTotp(AdminTarget),
+    #[command(
+        about = "Remove all of a user's passkeys",
+        after_long_help = "Leaves authenticator-code two-factor authentication enabled."
+    )]
+    RemovePasskeys(AdminTarget),
+    #[command(
+        about = "Change a free plan's storage or expiry",
+        after_long_help = "--no-limit sets 100 TB (100 × 1024^4 bytes) and expiry 100 calendar years from now.
+Alternatively supply --storage, --expires or both; omitted values stay unchanged.
+With neither, prompts to choose the preset or custom values. --no-input requires explicit values and --yes.
+Sizes accept MB, GB and TB, case-insensitive, using powers of 1024; fractions are allowed.
+Dates accept YYYY-MM-DD (00:00 UTC at the start of that date) or RFC3339 with a timezone.
+Shows old and new limits before confirmation. Paid plans are rejected."
+    )]
+    UpdateSubscription(SubscriptionArgs),
+}
+
+#[derive(Args)]
+pub struct AdminTarget {
+    #[arg(value_name = "USER", help = "User email or numeric ID")]
+    pub user: String,
+    #[arg(long, help = "Approve this change without prompting")]
+    pub yes: bool,
+}
+
+#[derive(Args)]
+pub struct SubscriptionArgs {
+    #[command(flatten)]
+    pub target: AdminTarget,
+    #[arg(long, conflicts_with_all = ["storage", "expires"], help = "Set 100 TB of storage and another 100 years")]
+    pub no_limit: bool,
+    #[arg(long, value_name = "SIZE", value_parser = crate::admin::parse_size, help = "Storage limit, e.g. 500GB or 1.5TB")]
+    pub storage: Option<i64>,
+    #[arg(long, value_name = "WHEN", value_parser = crate::admin::parse_date, help = "Expiry date or timestamp")]
+    pub expires: Option<i64>,
+}
+
+#[derive(Subcommand)]
+pub enum AdminEmailCommand {
+    #[command(
+        about = "Send a fixed test message through the server",
+        after_long_help = "Reports request acceptance, not delivery. An unconfigured server may accept without sending.
+The server's SMTP configuration can override the supplied sender."
+    )]
+    Test {
+        #[arg(long, help = "Recipient email")]
+        to: String,
+        #[arg(long, help = "Sender email")]
+        from: String,
+        #[arg(long, default_value = "Ente", help = "Sender name")]
+        from_name: String,
+    },
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, ValueEnum)]

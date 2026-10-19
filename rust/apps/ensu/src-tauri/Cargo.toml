@@ -1,6 +1,6 @@
 [package]
 name = "ensu-desktop"
-version = "0.1.22-beta"
+version = "0.1.23-beta"
 edition.workspace = true
 
 [build-dependencies]

@@ -16,7 +16,9 @@ class FeatureFlagService {
   late FlagService _flagService;
 
   bool get internalUser => _flagService.internalUser;
-  bool get documentScanner => true;
+  bool get multipartUpload => internalUser;
+  bool get pdfViewer => internalUser;
+  bool get imageViewer => internalUser;
   bool get isInternalUserDisabled =>
       _preferences.getBool(_internalUserDisabled) ?? false;
 

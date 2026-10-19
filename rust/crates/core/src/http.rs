@@ -38,6 +38,7 @@ pub enum Error {
         status: u16,
         path: String,
         code: String,
+        message: Option<String>,
     },
 
     #[error(transparent)]
@@ -351,6 +352,7 @@ impl Response {
                 status,
                 path,
                 code: envelope.code,
+                message: envelope.message,
             }),
             Err(_) => Err(Error::Http { status, path }),
         }
@@ -411,6 +413,7 @@ mod body_stream {
 #[derive(Deserialize)]
 struct ApiErrorEnvelope {
     code: String,
+    message: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -702,8 +705,8 @@ mod tests {
 
         assert!(matches!(
             &err,
-            Error::Api { status: 401, path, code }
-                if path == "/x" && code == "SESSION_EXPIRED"
+            Error::Api { status: 401, path, code, message }
+                if path == "/x" && code == "SESSION_EXPIRED" && message.as_deref() == Some("session expired")
         ));
         assert_eq!(err.to_string(), "HTTP 401 SESSION_EXPIRED at /x");
         assert_eq!(err.status_code(), Some(401));

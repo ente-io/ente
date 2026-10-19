@@ -1,1 +1,0 @@
-- Refreshed photo selection with an expandable actions sheet that collapses while browsing.

@@ -18,9 +18,11 @@ export const spaceActivityRowSx = {
     p: "8px",
     textAlign: "left",
     transition: "background-color 140ms ease",
+    userSelect: "none",
     width: "calc(100% + 16px)",
-    "&:active": { bgcolor: spaceSurface },
-    "&:hover": { bgcolor: spaceSurface },
+    "@media (hover: hover) and (pointer: fine)": {
+        "&:active, &:hover": { bgcolor: spaceSurface },
+    },
 } as const;
 
 export const spaceActivityPreviewSx = {

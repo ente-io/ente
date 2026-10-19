@@ -1,6 +1,9 @@
-use ente_core::b64;
 use ente_core::crypto::{self, SecretVec, secretbox};
-use std::fmt;
+use ente_core::{b64, otp};
+use std::{
+    fmt,
+    time::{SystemTime, UNIX_EPOCH},
+};
 use uuid::Uuid;
 use zeroize::{ZeroizeOnDrop, Zeroizing};
 
@@ -89,6 +92,14 @@ pub struct TwoFactorSetup {
 }
 
 impl TwoFactorSetup {
+    pub fn from_secret(secret_code: String, recovery_key: &[u8]) -> Self {
+        Self {
+            secret_code,
+            qr_code: String::new(),
+            recovery_key: hex::encode(recovery_key),
+        }
+    }
+
     pub async fn start(
         client: &AccountsClient,
         master_key: &[u8],
@@ -105,9 +116,25 @@ impl TwoFactorSetup {
     }
 
     pub async fn enable(&self, client: &AccountsClient, code: &str) -> Result<()> {
+        let time = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|_| Error::InvalidInput("system clock is before the Unix epoch".into()))?
+            .as_secs();
+        verify_totp(&self.secret_code, code, time)?;
         let request = encrypt_two_factor_secret(&self.secret_code, &self.recovery_key, code)?;
         client.enable_two_factor(&request).await
     }
+}
+
+fn verify_totp(secret: &str, code: &str, time: u64) -> Result<()> {
+    let secret = otp::decode_secret(secret)?;
+    for time in [time.saturating_sub(30), time, time + 30] {
+        let expected = Zeroizing::new(otp::totp(&secret, time, 30, 6, otp::Algorithm::Sha1)?);
+        if expected.as_str() == code {
+            return Ok(());
+        }
+    }
+    Err(Error::IncorrectTotp)
 }
 
 pub async fn change_password(

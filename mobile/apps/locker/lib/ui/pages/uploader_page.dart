@@ -124,7 +124,6 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
               completed: 0,
               total: filesToUpload.length,
             ),
-            useNewUi: useNewUploader,
           );
           didShowDialog = progressDialog.didShow;
         }

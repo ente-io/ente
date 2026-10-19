@@ -1508,14 +1508,22 @@
       }
     }
   },
-  "memoryLaneCaptionNow": "{name} now",
+  "memoryLaneCaptionNow": "{name} {now}",
   "@memoryLaneCaptionNow": {
-    "description": "Memory Lane caption for a photo taken less than a year ago, without a number.",
+    "description": "Memory Lane caption for a photo taken less than a year ago, without a number. Keep both placeholders in the natural word order for your language.",
     "placeholders": {
       "name": {
         "type": "String"
+      },
+      "now": {
+        "type": "String",
+        "description": "The localized word for now, rendered in a handwritten style. Keep this placeholder rather than writing the word directly."
       }
     }
+  },
+  "memoryLaneNow": "now",
+  "@memoryLaneNow": {
+    "description": "The current moment in a Memory Lane caption, such as Ashil now. This word is styled separately from the person's name."
   },
   "facesTimelinePlaybackPause": "Pause",
   "@facesTimelinePlaybackPause": {
@@ -1815,10 +1823,12 @@
   "@forgotPassword": {
     "description": "Forgot password link label"
   },
+  "forgotPasswordPrompt": "Forgot password?",
   "forgotRecoveryKey": "Forgot recovery key?",
   "free10GB": "10GB free on <bold-green>ente</bold-green> Photos",
   "freeStorageOffer": "10% off on <bold-green>ente</bold-green> photos",
   "freeStorageOfferDescription": "Use code \"AUTH\" to get 10% off first year",
+  "free": "Free",
   "freeTrial": "Free trial",
   "freeUpAmount": "Free up {sizeInMBorGB}",
   "@freeUpAmount": {
@@ -2682,6 +2692,7 @@
   "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for",
   "moments": "Moments",
   "month": "month",
+  "mostPopular": "Most popular",
   "monthly": "Monthly",
   "@monthly": {
     "description": "The text to display for monthly plans",
@@ -2945,6 +2956,7 @@
   "openAlbumInBrowser": "Open album in browser",
   "openAlbumInBrowserTitle": "Please use the web app to add photos to this album",
   "openFile": "Open file",
+  "openInAnotherApp": "Open in another app",
   "openLink": "Open link",
   "openSettings": "Open settings",
   "openstreetmapContributors": "OpenStreetMap contributors",
@@ -3030,6 +3042,8 @@
       }
     }
   },
+  "pdfNeedsPassword": "This PDF needs a password",
+  "pdfPasswordNotSupportedOnDevice": "This device cannot unlock password-protected PDFs. Open it in another app.",
   "pending": "Pending",
   "pendingSync": "Pending sync",
   "pendingSyncs": "Warning",
@@ -3995,6 +4009,10 @@
   "@send": {
     "description": "Label for send button"
   },
+  "sendACopy": "Send a copy",
+  "@sendACopy": {
+    "description": "Share a copy of the current photo or video using the system share sheet, as opposed to sending a viewing link"
+  },
   "sendCountInvites": "{count, plural, =0{Send invites} one{Send {count} invite} other{Send {count} invites}}",
   "@sendCountInvites": {
     "placeholders": {
@@ -4003,6 +4021,10 @@
         "example": "2"
       }
     }
+  },
+  "sendFileToAnotherApp": "Send the file to another app",
+  "@sendFileToAnotherApp": {
+    "description": "Subtitle for sending a copy of the current photo or video from the file viewer"
   },
   "sendInvite": "Send invite",
   "sendLink": "Send link",
@@ -4114,6 +4136,10 @@
   "shareKey": "Share key",
   "shareLegacyDescription": "Send each card to the person it's for. No single card works alone.",
   "shareLink": "Share link",
+  "shareLinkToThisItem": "Share a link to this item",
+  "@shareLinkToThisItem": {
+    "description": "Subtitle for sending a viewing link to the current photo or video from the file viewer"
+  },
   "shareMemory": "Share memory",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.com.",
   "@shareMyVerificationID": {
@@ -4608,6 +4634,7 @@
   "@unlock": {
     "description": "Short action label used as the system authentication reason when unlocking the app"
   },
+  "unlockPdf": "Unlock",
   "unnamedCollection": "Unnamed collection",
   "unnamedPeopleDoingSomethingTogether": "Doing it together",
   "unnamedPeopleSpotlight": "A familiar face",
@@ -4734,6 +4761,10 @@
   "@useRecoveryKey": {
     "description": "Use recovery key button label"
   },
+  "useTwoFactorInstead": "Use 2FA instead",
+  "@useTwoFactorInstead": {
+    "description": "Link on the passkey verification screen to verify with an authenticator code instead"
+  },
   "username": "Username",
   "usernameHint": "Login ID or email",
   "useSelectedPhoto": "Use selected photo",
@@ -4745,6 +4776,10 @@
         "example": "20 GB"
       }
     }
+  },
+  "validEmailAddress": "Valid email address",
+  "@validEmailAddress": {
+    "description": "Success message under the email field once the address is valid"
   },
   "validTill": "Valid till {endDate}",
   "@validTill": {
@@ -4879,6 +4914,10 @@
     "placeholders": {
       "count": {}
     }
+  },
+  "year": "year",
+  "@year": {
+    "description": "Billing period suffix on the pricing page (/year)"
   },
   "yearShort": "yr",
   "@yearShort": {

@@ -1,12 +1,17 @@
+import "dart:async";
 import "dart:convert";
 import "dart:io";
+import "dart:typed_data";
+import "dart:ui" as ui;
 
 import "package:dio/dio.dart";
 import "package:ente_components/ente_components.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/components/loading_widget.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:flutter_test/flutter_test.dart";
@@ -17,9 +22,11 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
+import "package:photos/gateways/entity/models/type.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
@@ -27,24 +34,42 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/ignored_file.dart";
+import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/metadata/collection_magic.dart";
+import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/hierarchical/camera_filter.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/module/download/thumbnail.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/app_navigation_service.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/entity_service.dart";
 import "package:photos/services/favorites_service.dart";
 import "package:photos/services/ignored_files_service.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/settings/local_settings.dart";
+import "package:photos/src/rust/frb_generated.dart";
 import "package:photos/ui/collections/album/row_item.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/components/bottom_action_bar/action_bar_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_sheet.dart";
+import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/component/album_cover_app_bar.dart";
+import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
+import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
+import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
+import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
+import "package:photos/utils/face/face_thumbnail_cache.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 void main() {
@@ -143,6 +168,160 @@ void main() {
     expect(find.text("Album route"), findsNothing);
     expect(find.text("Open album"), findsOneWidget);
   });
+
+  testWidgets("paints the pinned date flush with the album app bar", (
+    tester,
+  ) async {
+    const pixelRatio = 2.8125;
+    tester.view.devicePixelRatio = pixelRatio;
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.padding = const FakeViewPadding(top: 95, bottom: 135);
+    addTearDown(tester.view.reset);
+    final files = List.generate(100, (index) => _file(index + 1));
+    await tester.runAsync(() => FilesDB.instance.insertMultiple(files));
+    final boundaryKey = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: boundaryKey,
+        child: MaterialApp(
+          theme: darkThemeData,
+          localizationsDelegates: StringsLocalizations.localizationsDelegates,
+          supportedLocales: StringsLocalizations.supportedLocales,
+          home: CollectionPage(
+            CollectionWithThumbnail(_collection(), files.last),
+          ),
+        ),
+      ),
+    );
+    await _expectCover(tester, files.last, count: files.length);
+    final pinned = tester.widget<PinnedGroupHeader>(
+      find.byType(PinnedGroupHeader),
+    );
+    pinned.scrollController.jumpTo(pinned.scrollOffsetBase + 80);
+    await tester.pumpAndSettle();
+    final header = find.byWidgetPredicate(
+      (widget) => widget is GroupHeaderWidget && widget.isPinnedHeader,
+    );
+    expect(header, findsOneWidget);
+    final top = tester.getTopLeft(header).dy * pixelRatio;
+    final background = GalleryAppBarWidget.backgroundColor(
+      tester.element(header),
+    );
+    final boundary =
+        boundaryKey.currentContext!.findRenderObject()!
+            as RenderRepaintBoundary;
+    final image = (await tester.runAsync(
+      () => boundary.toImage(pixelRatio: pixelRatio),
+    ))!;
+    addTearDown(image.dispose);
+    final pixels = (await tester.runAsync(
+      () => image.toByteData(format: ui.ImageByteFormat.rawRgba),
+    ))!;
+    final backgroundArgb = background.toARGB32();
+    for (var y = top.floor() - 1; y <= top.ceil(); y++) {
+      final offset = (y * image.width + 4) * 4;
+      expect(
+        pixels.buffer.asUint8List(offset, 3),
+        [
+          (backgroundArgb >> 16) & 0xff,
+          (backgroundArgb >> 8) & 0xff,
+          backgroundArgb & 0xff,
+        ],
+        reason:
+            "The album/date boundary must hide the photos at physical row $y",
+      );
+    }
+    await _disposeAlbum(tester);
+  });
+
+  for (final fileCount in [1, 30]) {
+    testWidgets("anchors $fileCount photos through album cover collapse", (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(402, 874);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      final previousLayout = localSettings.getGalleryLayoutType();
+      final previousGridSize = localSettings.getPhotoGridSize();
+      addTearDown(() async {
+        await localSettings.setGalleryLayoutType(previousLayout);
+        await localSettings.setPhotoGridSize(previousGridSize);
+      });
+      await localSettings.setGalleryLayoutType(GalleryLayoutType.justified);
+      await localSettings.setPhotoGridSize(5);
+      final collection = _collection();
+      final files = List.generate(
+        fileCount,
+        (index) => _file(index + 1)..pubMmdEncodedJson = '{"w":400,"h":600}',
+      );
+      await tester.runAsync(() async {
+        await FilesDB.instance.insertMultiple(files);
+        await CollectionsService.instance.getCover(collection);
+      });
+      await _pumpAlbum(tester, collection);
+      await _expectCover(tester, files.last, count: fileCount);
+      final boundaries = tester.state<GalleryBoundariesProviderState>(
+        find.byType(GalleryBoundariesProvider),
+      );
+      final position = boundaries.scrollControllerNotifier.value!.position;
+      final header = tester.widget<AlbumCoverAppBar>(
+        find.byType(AlbumCoverAppBar),
+      );
+      final geometry = AlbumCoverAppBar.resolveGeometry(
+        tester.element(find.byType(AlbumCoverAppBar)),
+        collapsedHeight: header.collapsedHeight,
+        bottomHeight: header.bottom?.preferredSize.height ?? 0,
+      );
+      if (fileCount == 1) {
+        expect(
+          position.maxScrollExtent,
+          closeTo(geometry.collapseExtent, 0.01),
+        );
+      }
+      for (final fraction in [0.0, 0.5, 1.0]) {
+        final offset = geometry.collapseExtent * fraction;
+        position.jumpTo(offset);
+        await tester.pumpAndSettle();
+        final tileRect = tester.getRect(find.byType(GalleryFileWidget).first);
+        final viewport = tester.getRect(find.byType(CustomScrollView));
+        final focalPoint = tileRect.intersect(viewport).center;
+        final first = await tester.startGesture(
+          focalPoint - const Offset(30, 0),
+          pointer: 1,
+        );
+        final second = await tester.startGesture(
+          focalPoint + const Offset(30, 0),
+          pointer: 2,
+        );
+        await tester.pump();
+        final overlayTile = find.byKey(
+          const ValueKey(("gallery-grid-zoom-tile", 0)),
+        );
+        expect(overlayTile, findsOneWidget);
+        expect(
+          tester.getRect(overlayTile),
+          rectMoreOrLessEquals(tileRect, epsilon: 0.01),
+        );
+        await second.up();
+        await first.up();
+        await tester.pumpAndSettle();
+        expect(position.pixels, closeTo(offset, 0.01));
+      }
+      if (fileCount == 1) {
+        position.jumpTo(0);
+        await tester.pump();
+        await tester.drag(
+          find.byType(CustomScrollView),
+          Offset(0, -geometry.collapseExtent * 1.5),
+        );
+        await tester.pumpAndSettle();
+        expect(position.pixels, closeTo(geometry.collapseExtent, 0.01));
+      }
+      expect(tester.takeException(), isNull);
+      await _disposeAlbum(tester);
+    });
+  }
 
   testWidgets("uses a pending local photo and excludes ignored photos", (
     tester,
@@ -420,6 +599,44 @@ void main() {
     },
   );
 
+  testWidgets("album selection controls align and fill the bottom safe area", (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(bottom: 34);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightThemeData,
+        localizationsDelegates: StringsLocalizations.localizationsDelegates,
+        supportedLocales: StringsLocalizations.supportedLocales,
+        home: CollectionListPage([
+          _collection(),
+        ], sectionType: UISectionType.archivedCollections),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final selected = tester
+        .widget<AlbumSelectionOverlayBar>(find.byType(AlbumSelectionOverlayBar))
+        .selectedAlbums;
+    selected.select({_collection()});
+    await tester.pumpAndSettle();
+    final material = find.descendant(
+      of: find.byType(SelectionActionSheet),
+      matching: find.byType(Material),
+    );
+    expect(tester.getBottomRight(material).dy, 812);
+    expect(
+      tester.getTopLeft(find.byType(SelectAllAlbumsButton)).dx,
+      tester.getTopLeft(material).dx + Spacing.sm,
+    );
+    await tester.tap(find.bySemanticsLabel(RegExp("Cancel,")));
+    await tester.pumpAndSettle();
+    expect(selected.albums, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets("anchors the selection sheet during interrupted resizing", (
     tester,
   ) async {
@@ -544,7 +761,88 @@ void main() {
           (widget) => widget is Hero && widget.tag == heroTag,
         ),
       );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 75));
+      final headerHero = find.descendant(
+        of: find.byType(AlbumCoverAppBar),
+        matching: find.byType(Hero),
+      );
+      final provider = InheritedSearchFilterData.of(
+        tester.element(headerHero),
+      ).searchFilterDataProvider!;
+      void refreshRecommendations() => provider.clearAndAddRecommendations([
+        FaceFilter(
+          personId: null,
+          clusterId: "hero-cluster",
+          faceName: "Person",
+          faceFile: newest,
+          occurrence: 2,
+        ),
+        for (var i = 0; i < 12; i++)
+          CameraFilter(cameraModel: "Camera ${i % 10}", occurrence: 1),
+      ]);
+      var notifications = 0;
+      provider.addListener(
+        toRecommended: true,
+        listener: () => notifications++,
+      );
+      refreshRecommendations();
+      expect(notifications, 1);
+      await tester.pump();
+      final carousel = find.byType(AppBarFilterChips);
+      final face = find.byType(PersonFaceWidget);
+      final faceElement = tester.element(face);
+      final coverImage = find.descendant(
+        of: headerHero,
+        matching: find.byType(Image, skipOffstage: false),
+        skipOffstage: false,
+      );
+      final coverImageElement = tester.element(coverImage);
+      expect(
+        find.descendant(of: headerHero, matching: find.byType(Image)),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: flightClip, matching: carousel),
+        findsOneWidget,
+      );
+      final carouselFade = find
+          .descendant(of: carousel, matching: find.byType(FadeTransition))
+          .first;
+      expect(tester.widget<FadeTransition>(carouselFade).opacity.value, 0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        tester.widget<FadeTransition>(carouselFade).opacity.value,
+        inExclusiveRange(0, 1),
+      );
+      final shuttleFade = find
+          .ancestor(of: flightClip, matching: find.byType(FadeTransition))
+          .first;
+      expect(tester.widget<FadeTransition>(shuttleFade).opacity.value, 1);
       await tester.pumpAndSettle();
+      expect(tester.element(coverImage), same(coverImageElement));
+      expect(tester.element(face), same(faceElement));
+      final beforeRefresh = notifications;
+      refreshRecommendations();
+      expect(notifications, beforeRefresh + 1);
+      await tester.pumpAndSettle();
+      expect(tester.element(face), same(faceElement));
+      final carouselScroll = tester.state<ScrollableState>(
+        find.descendant(of: carousel, matching: find.byType(Scrollable)),
+      );
+      carouselScroll.position.jumpTo(60);
+      final galleryScroll = tester
+          .state<GalleryBoundariesProviderState>(
+            find.byType(GalleryBoundariesProvider),
+          )
+          .scrollControllerNotifier
+          .value!;
+      for (final offset in [galleryScroll.position.maxScrollExtent, 0.0]) {
+        galleryScroll.jumpTo(offset);
+        await tester.pump();
+        expect(tester.element(face), same(faceElement));
+        expect(carouselScroll.position.pixels, 60);
+      }
       await _expectCover(tester, newest, count: 2);
       expect(
         find.descendant(
@@ -553,10 +851,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      final headerHero = find.descendant(
-        of: find.byType(AlbumCoverAppBar),
-        matching: find.byType(Hero),
-      );
+
       expect(tester.widget<Hero>(headerHero).tag, heroTag);
 
       collection.pubMagicMetadata = CollectionPubMagicMetadata(asc: true);
@@ -584,10 +879,171 @@ void main() {
       );
       expect(tester.widget<Hero>(albumHero).tag, heroTag);
 
+      await tester.timedDragFrom(
+        const Offset(1, 300),
+        const Offset(80, 0),
+        const Duration(seconds: 1),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.element(face), same(faceElement));
+      expect(carouselScroll.position.pixels, 60);
       Navigator.of(tester.element(find.byType(CollectionPage))).pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        find.descendant(of: flightClip, matching: carousel),
+        findsOneWidget,
+      );
+      expect(tester.element(face), same(faceElement));
+      expect(
+        tester.widget<ClipSmoothRect>(flightClip).radius.topLeft.x,
+        inExclusiveRange(0, 20),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(AlbumRowItemWidget), findsOneWidget);
       expect(tester.takeException(), isNull);
+      await _disposeAlbum(tester);
+    },
+  );
+  testWidgets(
+    "retries failed faces on refresh without reloading loaded faces",
+    (tester) async {
+      EntePhotosRust.initMock(api: _FakePhotosRustApi());
+      MLDataDB.initialize(preferRust: false);
+      Future<void> cacheFace(String cluster, int id) async {
+        final face = Face.empty(id);
+        await cachedFaceCropPath(
+          face.faceID,
+          false,
+        ).writeAsBytes(base64Decode(_onePixelPng));
+        await getCachedFaceCrops(
+          _file(id),
+          [face],
+          personOrClusterID: cluster,
+          useTempCache: false,
+        );
+      }
+
+      await tester.runAsync(() => cacheFace("loaded-cluster", 901));
+      final provider = SearchFilterDataProvider(
+        initialGalleryFilter: CameraFilter(
+          cameraModel: "initial",
+          occurrence: 100,
+        ),
+      );
+      addTearDown(provider.dispose);
+      void refresh([String missing = "failed-cluster"]) =>
+          provider.clearAndAddRecommendations([
+            for (final cluster in ["loaded-cluster", missing])
+              FaceFilter(
+                personId: cluster == "pending-person" ? cluster : null,
+                clusterId: cluster == "pending-person" ? null : cluster,
+                faceName: null,
+                faceFile: null,
+                occurrence: 1,
+              ),
+          ]);
+      refresh();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: lightThemeData,
+          localizationsDelegates: StringsLocalizations.localizationsDelegates,
+          supportedLocales: StringsLocalizations.supportedLocales,
+          home: Scaffold(
+            body: InheritedSearchFilterData(
+              searchFilterDataProvider: provider,
+              child: const AppBarFilterChips(animateRecommendations: true),
+            ),
+          ),
+        ),
+      );
+      Finder face(String cluster) => find.byWidgetPredicate(
+        (widget) =>
+            widget is PersonFaceWidget &&
+            (widget.clusterID == cluster || widget.personId == cluster),
+      );
+      Future<Uint8List?>? future(String cluster) => tester
+          .widget<FutureBuilder<Uint8List?>>(
+            find.descendant(
+              of: face(cluster),
+              matching: find.byType(FutureBuilder<Uint8List?>),
+            ),
+          )
+          .future;
+      Future<void> settleFaces(int imageCount) async {
+        await tester.runAsync(() async {
+          for (var i = 0; i < 100; i++) {
+            await tester.pump();
+            final images = tester.widgetList<RawImage>(find.byType(RawImage));
+            if (find.byType(EnteLoadingWidget).evaluate().isEmpty &&
+                images.length == imageCount &&
+                images.every((image) => image.image != null)) {
+              return;
+            }
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+          }
+        });
+        expect(find.byType(EnteLoadingWidget), findsNothing);
+        expect(find.byType(RawImage), findsNWidgets(imageCount));
+      }
+
+      await settleFaces(1);
+      final loadedElement = tester.element(face("loaded-cluster"));
+      final loadedFuture = future("loaded-cluster");
+      final failedFuture = future("failed-cluster");
+      final loadedImage = tester.widget<RawImage>(find.byType(RawImage)).image;
+      await tester.runAsync(() => cacheFace("failed-cluster", 902));
+      refresh();
+      await tester.pump();
+      expect(tester.element(face("loaded-cluster")), same(loadedElement));
+      expect(future("loaded-cluster"), same(loadedFuture));
+      expect(future("failed-cluster"), isNot(same(failedFuture)));
+      expect(
+        tester
+            .widget<RawImage>(
+              find.descendant(
+                of: face("loaded-cluster"),
+                matching: find.byType(RawImage),
+              ),
+            )
+            .image,
+        same(loadedImage),
+      );
+      await settleFaces(2);
+      final recoveredFuture = future("failed-cluster");
+      refresh();
+      await tester.pump();
+      expect(future("loaded-cluster"), same(loadedFuture));
+      expect(future("failed-cluster"), same(recoveredFuture));
+      expect(
+        tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+        1,
+      );
+      final entities = _PendingEntityService();
+      PersonService.init(
+        entities,
+        MLDataDB.instance,
+        await SharedPreferences.getInstance(),
+      );
+      refresh("pending-person");
+      await tester.pump();
+      final pendingFuture = future("pending-person");
+      expect(entities.lookups, 1);
+      await tester.runAsync(() => cacheFace("pending-person", 903));
+      for (var i = 0; i < 3; i++) {
+        refresh("pending-person");
+        await tester.pump();
+        expect(future("pending-person"), same(pendingFuture));
+        expect(future("loaded-cluster"), same(loadedFuture));
+        expect(entities.lookups, 1);
+      }
+      entities.firstLookup.complete(null);
+      await settleFaces(2);
+      expect(entities.lookups, 2);
+      expect(tester.element(face("loaded-cluster")), same(loadedElement));
+      refresh("pending-person");
+      await tester.pump();
+      expect(entities.lookups, 2);
       await _disposeAlbum(tester);
     },
   );
@@ -715,3 +1171,28 @@ class _FakePathProvider extends PathProviderPlatform {
 
 const _onePixelPng =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+class _FakePhotosRustApi extends Fake implements EntePhotosRustApi {
+  @override
+  bool crateApiMlDbApiDecideMlDbBackend({required bool preferRust}) => false;
+}
+
+class _PendingEntityService extends Fake implements EntityService {
+  final firstLookup = Completer<LocalEntityData?>();
+  int lookups = 0;
+
+  @override
+  int lastSyncTime(EntityType type) => 0;
+
+  @override
+  Future<LocalEntityData?> getEntity(EntityType type, String id) async {
+    if (++lookups == 1) return firstLookup.future;
+    return LocalEntityData(
+      id: id,
+      type: type,
+      data: jsonEncode(PersonData(name: "Person").toJson()),
+      ownerID: 1,
+      updatedAt: 1,
+    );
+  }
+}

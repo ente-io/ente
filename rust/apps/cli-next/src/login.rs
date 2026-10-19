@@ -9,7 +9,7 @@ use ente_accounts::{
 use ente_core::http::{Api, ApiConfig, Http};
 use serde::Deserialize;
 use uuid::Uuid;
-use zeroize::{ZeroizeOnDrop, Zeroizing};
+use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
 use crate::{
     api,
@@ -27,6 +27,13 @@ pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)>
         credentials.is_some() || interactive,
         "login requires email and password; supply --input <file> or --input -"
     );
+    let email = email(
+        args.email,
+        credentials
+            .as_ref()
+            .and_then(|input| input.email.as_deref()),
+        interactive,
+    )?;
     let vault = Vault::open()?;
     let index = if let Some(name) = args.name.as_deref() {
         vault
@@ -63,10 +70,17 @@ pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)>
         .context("cannot reach the selected Ente server")?;
     let mut credentials = match credentials {
         Some(credentials) => credentials,
-        None => Credentials::prompt()?,
+        None => Credentials {
+            email: None,
+            password: Password::new()
+                .with_prompt("Password")
+                .interact_on(&Term::stderr())?,
+            otp: None,
+            totp: None,
+        },
     };
     let client = api::accounts_client(&origin, app)?;
-    let mut authenticated = authenticate(&client, &mut credentials, interactive).await?;
+    let mut authenticated = authenticate(&client, email, &mut credentials, interactive).await?;
     client.set_auth_token(Some(ente_core::b64::encode_url_safe(
         &authenticated.secrets.token,
     )));
@@ -92,20 +106,7 @@ pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)>
                 "authenticated identity does not match the saved account"
             );
         }
-        let recovery_key = Zeroizing::new(
-            authenticated
-                .recovery_key
-                .take()
-                .context("account has no recovery key")?,
-        );
-        let identity = AccountKeys {
-            master_key: std::mem::take(&mut authenticated.secrets.master_key),
-            recovery_key: auth::recovery_key_from_mnemonic_or_hex(&recovery_key)?.into_vec(),
-            secret_key: std::mem::take(&mut authenticated.secrets.secret_key),
-        };
-        let session = StoredSession {
-            token: std::mem::take(&mut authenticated.secrets.token),
-        };
+        let (identity, session) = saved_keys(&mut authenticated)?;
         let index = if let Some(index) = existing {
             ensure!(
                 expected.is_some() || args.name.is_none(),
@@ -158,39 +159,89 @@ pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)>
 
 #[derive(Deserialize, ZeroizeOnDrop)]
 #[serde(deny_unknown_fields)]
-struct Credentials {
-    email: String,
-    password: String,
-    otp: Option<String>,
-    totp: Option<String>,
+pub(crate) struct Credentials {
+    pub email: Option<String>,
+    #[serde(default)]
+    pub password: String,
+    pub otp: Option<String>,
+    pub totp: Option<String>,
 }
 
 impl Credentials {
-    fn read(path: &Path) -> Result<Self> {
-        parse_json(&read_input(path, u64::MAX)?)
-            .context("login input must contain email and password, with optional otp and totp")
+    pub fn read(path: &Path) -> Result<Self> {
+        let input: Self = parse_json(&read_input(path, u64::MAX)?)
+            .context("input must contain email and password strings, with optional otp and totp; --email can supply email")?;
+        ensure!(
+            !input.password.is_empty(),
+            "supply a nonempty password in --input"
+        );
+        Ok(input)
     }
+}
 
-    fn prompt() -> Result<Self> {
-        Ok(Self {
-            email: Input::new()
+pub(crate) fn email(
+    flag: Option<String>,
+    input: Option<&str>,
+    interactive: bool,
+) -> Result<String> {
+    ensure!(
+        flag.as_deref()
+            .zip(input)
+            .is_none_or(|(flag, input)| flag.trim().to_lowercase() == input.trim().to_lowercase()),
+        "--email differs from email in --input"
+    );
+    let email = match flag.or_else(|| input.map(str::to_owned)) {
+        Some(email) => email,
+        None => {
+            ensure!(interactive, "supply email through --email or --input");
+            Input::new()
                 .with_prompt("Email")
-                .interact_on(&Term::stderr())?,
-            password: Password::new()
-                .with_prompt("Password")
-                .interact_on(&Term::stderr())?,
-            otp: None,
-            totp: None,
-        })
-    }
+                .interact_on(&Term::stderr())?
+        }
+    };
+    let email = email.trim().to_lowercase();
+    ensure!(!email.is_empty(), "email cannot be empty");
+    Ok(email)
+}
+
+pub(crate) fn saved_keys(
+    authenticated: &mut AuthenticatedAccount,
+) -> Result<(AccountKeys, StoredSession)> {
+    let recovery_key = Zeroizing::new(
+        authenticated
+            .recovery_key
+            .take()
+            .context("account has no recovery key")?,
+    );
+    Ok((
+        AccountKeys {
+            master_key: std::mem::take(&mut authenticated.secrets.master_key),
+            recovery_key: auth::recovery_key_from_mnemonic_or_hex(&recovery_key)?.into_vec(),
+            secret_key: std::mem::take(&mut authenticated.secrets.secret_key),
+        },
+        StoredSession {
+            token: std::mem::take(&mut authenticated.secrets.token),
+        },
+    ))
 }
 
 async fn authenticate(
     client: &AccountsClient,
+    email: String,
     credentials: &mut Credentials,
     interactive: bool,
 ) -> Result<AuthenticatedAccount> {
-    let (mut flow, mut step) = LoginFlow::start(client, credentials.email.clone()).await?;
+    let (mut flow, mut step) = LoginFlow::prepare(client, email).await?;
+    if matches!(step, LoginStep::EmailCode) {
+        if interactive {
+            flow.resend_code(client).await?;
+        } else {
+            ensure!(
+                credentials.otp.is_some(),
+                "login requires otp in --input; request it with account request-otp --email EMAIL --purpose login"
+            );
+        }
+    }
     loop {
         step = match step {
             LoginStep::EmailCode => loop {
@@ -211,7 +262,19 @@ async fn authenticate(
                     Err(error) => return Err(error.into()),
                 }
             },
-            LoginStep::Password => flow.submit_password(client, &credentials.password).await?,
+            LoginStep::Password => loop {
+                match flow.submit_password(client, &credentials.password).await {
+                    Ok(next) => break next,
+                    Err(ente_accounts::Error::IncorrectPassword) if interactive => {
+                        eprintln!("Incorrect password. Try again.");
+                        credentials.password.zeroize();
+                        credentials.password = Password::new()
+                            .with_prompt("Password")
+                            .interact_on(&Term::stderr())?;
+                    }
+                    Err(error) => return Err(error.into()),
+                }
+            },
             LoginStep::SecondFactor { totp, passkey } => {
                 let use_passkey = match (totp, passkey) {
                     (true, true) if interactive => {

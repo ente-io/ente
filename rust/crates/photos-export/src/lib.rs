@@ -42,6 +42,8 @@ struct Cancelled;
 pub struct Options {
     pub albums: Vec<String>,
     pub exclude_albums: Vec<String>,
+    pub exclude_shared: bool,
+    pub exclude_hidden: bool,
     pub adopt: bool,
     pub hardlinks: bool,
     pub jobs: NonZeroUsize,
@@ -180,6 +182,44 @@ impl Export {
                 )?;
             }
         }
+        let mut albums = store.db.prepare("SELECT a.id,a.name,j.value FROM albums a JOIN json_records j ON j.owner=a.key AND j.role='' LEFT JOIN album_sources s ON s.id=a.id WHERE json_extract(s.record,'$.shared') IS NULL OR json_extract(s.record,'$.hidden') IS NULL ORDER BY a.retained")?;
+        for row in albums.query_map([], |r| {
+            Ok((
+                r.get::<_, i64>(0)?,
+                r.get::<_, String>(1)?,
+                r.get::<_, String>(2)?,
+            ))
+        })? {
+            let (id, name, metadata) = row?;
+            store.recover_album(id, &name, serde_json::from_str(&metadata)?, None)?;
+        }
+        drop(albums);
+        if let Some(index) = &index {
+            let mut albums = index.db.prepare("SELECT id,json_extract(record,'$.album.name'),json_extract(record,'$.json.value'),json_extract(record,'$.legacy.owner') FROM adoption_album ORDER BY retained")?;
+            for row in albums.query_map([], |r| {
+                Ok((
+                    r.get::<_, i64>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, Option<String>>(2)?,
+                    r.get::<_, Option<i64>>(3)?,
+                ))
+            })? {
+                let (id, name, metadata, owner) = row?;
+                store.recover_album(
+                    id,
+                    &name,
+                    metadata
+                        .map(|metadata| serde_json::from_str(&metadata))
+                        .transpose()?
+                        .unwrap_or(Value::Null),
+                    owner.map(|owner| owner != session.user_id),
+                )?;
+                store.db.execute(
+                    "INSERT OR IGNORE INTO desired_albums(id,name) VALUES(?1,?2)",
+                    params![id, name],
+                )?;
+            }
+        }
         report("Refreshing album metadata.");
         tokio::select! {
             result=source.refresh_catalog(session)=>result?,
@@ -194,7 +234,7 @@ impl Export {
             }
             for entry in entries {
                 after = entry.id;
-                store.desired_album(&entry)?;
+                store.desired_album(&entry, session.user_id)?;
             }
         }
         store
@@ -215,23 +255,12 @@ impl Export {
                 "INSERT OR IGNORE INTO desired_albums(id,name) SELECT album,name FROM pending WHERE file IS NULL AND retained=0",
                 [],
             )?;
-        if let Some(index) = &index {
-            let mut albums = index.db.prepare("SELECT id,json_extract(record,'$.album.name') FROM adoption_album ORDER BY retained")?;
-            for row in
-                albums.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?)))?
-            {
-                let (id, name) = row?;
-                store.db.execute(
-                    "INSERT OR IGNORE INTO desired_albums(id,name) VALUES(?1,?2)",
-                    params![id, name],
-                )?;
-            }
-        }
+        store.db.execute("UPDATE desired_albums SET shared=(SELECT json_extract(record,'$.shared') FROM album_sources WHERE id=desired_albums.id),hidden=(SELECT json_extract(record,'$.hidden') FROM album_sources WHERE id=desired_albums.id) WHERE present=0", [])?;
         if self.adopting {
-            legacy::scope(&store, &self.options, index.as_ref())?;
+            legacy::scope(&store, &self.options, index.as_ref(), report)?;
         } else {
             failures.finish()?;
-            select(&store, &self.options)?;
+            select(&store, &self.options, index.as_ref(), report)?;
         }
         if !self.adopting {
             if self.root_lock.is_none() {
@@ -244,12 +273,13 @@ impl Export {
             }
         }
         let refresh_cancel = cancel.clone();
-        let refreshed = tokio::select! {
-            result=refresh(&store,source,session,&refresh_cancel,report)=>result,
+        let mut refreshed = tokio::select! {
+            result=refresh(&store,source,session,&self.options,&refresh_cancel,report)=>result,
             _=cancel.changed()=>Err(Cancelled.into()),
         };
         if self.adopting {
             refreshed?;
+            legacy::scope(&store, &self.options, index.as_ref(), report)?;
             if let Some(index) = &index {
                 report("Verifying every existing active legacy original before adoption.");
                 legacy::Preflight {
@@ -269,12 +299,14 @@ impl Export {
                 legacy::move_leftovers(&self.destination, index, cancel)?;
                 adopt::accept(index, &store, false)?;
             }
-            self.prepared = Some((store, Ok(())));
-            return Ok(());
-        }
-        if let Some(index) = &index {
+            refreshed = Ok(());
+        } else if let Some(index) = &index {
             adopt::accept(index, &store, true)?;
         }
+        let refreshed = refreshed.and_then(|()| {
+            store.db.execute("DELETE FROM album_sources WHERE id NOT IN (SELECT id FROM desired_albums WHERE selected=1 AND ready=1 AND present=1 AND failure IS NULL) AND NOT EXISTS(SELECT 1 FROM albums WHERE albums.id=album_sources.id) AND NOT EXISTS(SELECT 1 FROM pending WHERE album=album_sources.id)", [])?;
+            Ok(())
+        });
         self.prepared = Some((store, refreshed));
         Ok(())
     }
@@ -407,7 +439,12 @@ fn initialize(destination: &Path, root: &Root, legacy: bool) -> Result<RootLock>
     Ok(lock)
 }
 
-fn select(store: &Store, options: &Options) -> Result<()> {
+fn select(
+    store: &Store,
+    options: &Options,
+    index: Option<&adopt::Index>,
+    report: &(dyn Fn(&str) + Sync),
+) -> Result<()> {
     if options.albums.is_empty() {
         store
             .db
@@ -443,6 +480,42 @@ fn select(store: &Store, options: &Options) -> Result<()> {
             )?;
         }
     }
+    store.db.execute(
+        "UPDATE desired_albums SET selected=0 WHERE (?1 AND shared=1) OR (?2 AND hidden=1)",
+        params![options.exclude_shared, options.exclude_hidden],
+    )?;
+    let mut unknown = store.db.prepare("SELECT id,CASE WHEN ?1 AND shared IS NULL AND ?2 AND hidden IS NULL THEN '--exclude-shared and --exclude-hidden' WHEN ?1 AND shared IS NULL THEN '--exclude-shared' ELSE '--exclude-hidden' END FROM desired_albums WHERE selected=1 AND present=0 AND ((?1 AND shared IS NULL) OR (?2 AND hidden IS NULL))")?;
+    for row in unknown.query_map(
+        params![options.exclude_shared, options.exclude_hidden],
+        |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?)),
+    )? {
+        let (id, flags) = row?;
+        store
+            .db
+            .execute("UPDATE desired_albums SET selected=0 WHERE id=?1", [id])?;
+        let work: bool = store.db.query_row("SELECT EXISTS(SELECT 1 FROM albums WHERE id=?1 AND retained=0) OR EXISTS(SELECT 1 FROM pending WHERE album=?1) OR EXISTS(SELECT 1 FROM temporaries WHERE album=?1)", [id], |r| r.get(0))?;
+        let importing = index
+            .map(|index| {
+                index.db.query_row(
+                    "SELECT EXISTS(SELECT 1 FROM adoption_album WHERE id=?1 AND retained=0)",
+                    [id],
+                    |r| r.get::<_, bool>(0),
+                )
+            })
+            .transpose()?
+            .unwrap_or(false);
+        let unit = format!("album:{id}");
+        if (work || importing)
+            && store
+                .db
+                .execute("INSERT OR IGNORE INTO outcomes VALUES(?1,0)", [&unit])?
+                != 0
+        {
+            report(&format!(
+                "{unit}: last known category is unavailable; use --exclude-album {id} or remove {flags}"
+            ));
+        }
+    }
     Ok(())
 }
 
@@ -450,6 +523,7 @@ async fn refresh(
     store: &Store,
     source: &mut impl Source,
     session: &ente_core::Session,
+    options: &Options,
     cancel: &watch::Receiver<bool>,
     report: &(dyn Fn(&str) + Sync),
 ) -> Result<()> {
@@ -471,7 +545,7 @@ async fn refresh(
                 |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
             )
             .optional()?;
-        let Some((id, selected, favorites)) = next else {
+        let Some((id, mut selected, favorites)) = next else {
             break;
         };
         after = id;
@@ -480,8 +554,18 @@ async fn refresh(
             favorites_known = false;
         }
         let result = refreshed.and_then(|entry| {
-            store.desired_album(&entry)?;
+            store.desired_album(&entry, session.user_id)?;
             let (album, documents) = entry.value?;
+            selected &= !(options.exclude_shared && album.owner_id != session.user_id
+                || options.exclude_hidden
+                    && matches!(
+                        album.visibility,
+                        ente_photos::collections::Visibility::Hidden
+                    ));
+            store.db.execute(
+                "UPDATE desired_albums SET selected=?1 WHERE id=?2",
+                params![selected, id],
+            )?;
             if selected {
                 store.snapshot_album(&album, &documents, session.user_id)?;
             }
@@ -600,18 +684,10 @@ async fn refresh(
         }
         transaction.commit()?;
     }
-    let transaction = store.db.unchecked_transaction()?;
     store.db.execute(
         "DELETE FROM sources WHERE file NOT IN (SELECT file FROM chosen_files)",
         [],
     )?;
-    store
-        .db
-        .execute(
-            "DELETE FROM album_sources WHERE id NOT IN (SELECT id FROM desired_albums WHERE selected=1 AND ready=1 AND present=1 AND failure IS NULL) AND NOT EXISTS(SELECT 1 FROM albums WHERE albums.id=album_sources.id) AND NOT EXISTS(SELECT 1 FROM pending WHERE album=album_sources.id)",
-            [],
-        )?;
-    transaction.commit()?;
     let mut query = store
         .db
         .prepare("SELECT album,file,failure FROM desired_files WHERE failure IS NOT NULL")?;

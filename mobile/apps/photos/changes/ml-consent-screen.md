@@ -1,1 +1,0 @@
-- Refreshed the machine learning consent screen and added a consent sheet for the home banner and People widgets. The People widget setup page now shows machine learning progress. Search now shows it when signed in too, and keeps the screen on while photos are processed.

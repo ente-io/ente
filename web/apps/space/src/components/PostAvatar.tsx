@@ -48,10 +48,10 @@ export const SpacePostAvatar: React.FC<SpacePostAvatarProps> = ({
         <Box
             aria-hidden
             sx={{
-                border: "1px solid rgba(255, 255, 255, 0.16)",
+                border: "1px solid rgba(255, 255, 255, 0.24)",
                 borderRadius: "50%",
                 boxShadow: "0 1px 4px rgba(0, 0, 0, 0.24)",
-                inset: 0,
+                inset: -1,
                 pointerEvents: "none",
                 position: "absolute",
             }}

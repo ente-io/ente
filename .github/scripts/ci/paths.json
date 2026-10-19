@@ -122,11 +122,13 @@
     ],
     "rust-lint": [
         ".github/actions/restore-rust-target/**",
+        ".github/actions/setup-rust-linux/**",
         ".github/workflows/rust-lint.yml",
         "rust/**"
     ],
     "rust-test": [
         ".github/actions/restore-rust-target/**",
+        ".github/actions/setup-rust-linux/**",
         ".github/workflows/rust-test.yml",
         "rust/**",
         "server/**"

@@ -1,3 +1,4 @@
+import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 // TODO: Audit this file.
 import {
     CreateAlbumTile,
@@ -19,6 +20,7 @@ import {
     collectionDialogSurfaceStrokeDark as surfaceStrokeDark,
     collectionDialogTitleSx as titleSx,
 } from "@/components/CollectionDialog/styles";
+import { useDeleteEmptyAlbums } from "@/components/Collections/useDeleteEmptyAlbums";
 import { CollectionsSortOptions } from "@/components/CollectionsSortOptions";
 import type { RemotePullOpts } from "@/components/gallery";
 import {
@@ -30,17 +32,13 @@ import {
 import { Delete02Icon, StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveIcon from "@mui/icons-material/Archive";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import {
     Box,
     Button,
     Dialog,
-    DialogTitle,
     IconButton,
-    Paper,
-    Snackbar,
     Stack,
     ToggleButton,
     ToggleButtonGroup,
@@ -50,30 +48,12 @@ import {
     type SxProps,
     type Theme,
 } from "@mui/material";
-import { ensureLocalUser } from "ente-accounts/services/user";
-import { FilledIconButton } from "ente-base/components/mui";
-import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
-import { useModalVisibility } from "ente-base/components/utils/modal";
-import { useBaseContext } from "ente-base/context";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
 import { ItemCard } from "ente-new/photos/components/Tiles";
-import {
-    createAlbum,
-    createHiddenAlbum,
-    deleteCollection,
-    isArchivedCollection,
-    isDefaultHiddenCollection,
-} from "ente-new/photos/services/collection";
-import {
-    isBulkDeletableEmptyAlbum,
-    type CollectionsSortBy,
-    type CollectionSummary,
+import type {
+    CollectionsSortBy,
+    CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
-import {
-    savedCollectionFiles,
-    savedCollections,
-} from "ente-new/photos/services/photos-fdb";
-import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -94,6 +74,7 @@ interface AllAlbums {
     isInHiddenSection: boolean;
     isInArchiveSection: boolean;
     canCreateAlbum: boolean;
+    onCreateAlbum: () => void;
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
 }
 
@@ -107,22 +88,13 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     isInHiddenSection,
     isInArchiveSection,
     canCreateAlbum,
+    onCreateAlbum,
     onRemotePull,
 }) => {
     const fullScreen = useMediaQuery(collectionDialogFullScreenQuery);
     const [searchTerm, setSearchTerm] = useState("");
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
     const showAlbumFilters = !isInHiddenSection && !isInArchiveSection;
-    const { showMiniDialog } = useBaseContext();
-    const { showNotification } = usePhotosAppContext();
-    const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
-        useModalVisibility();
-    const [albumCreatedToast, setAlbumCreatedToast] = useState<{
-        open: boolean;
-        albumId?: number;
-        albumName?: string;
-    }>({ open: false });
-
     const handleExited = () => {
         setSearchTerm("");
         setAlbumFilter("ente");
@@ -133,35 +105,11 @@ export const AllAlbums: React.FC<AllAlbums> = ({
         onClose();
     };
 
-    const handleCreateAlbum = (albumName: string) => {
-        onClose();
-
-        void (async () => {
-            try {
-                const newAlbum = isInHiddenSection
-                    ? await createHiddenAlbum(albumName)
-                    : await createAlbum(albumName);
-                await onRemotePull();
-
-                setAlbumCreatedToast({
-                    open: true,
-                    albumId: newAlbum.id,
-                    albumName: albumName,
-                });
-            } catch {
-                showNotification({
-                    color: "critical",
-                    title: t("generic_error_retry"),
-                });
-            }
-        })();
-    };
-
-    const emptyAlbumCandidates = useMemo(
-        () => collectionSummaries.filter(isBulkDeletableEmptyAlbum),
-        [collectionSummaries],
-    );
-    const hasEnoughEmptyAlbums = emptyAlbumCandidates.length >= 3;
+    const {
+        handleDeleteEmptyAlbums,
+        hasEnoughEmptyAlbums,
+        deleteEmptyAlbumsDialogProps,
+    } = useDeleteEmptyAlbums(collectionSummaries, onRemotePull);
 
     const showDeleteEmptyAlbums =
         showAlbumFilters &&
@@ -184,91 +132,6 @@ export const AllAlbums: React.FC<AllAlbums> = ({
             setAlbumFilter("ente");
         }
     }, [albumFilter, visibleAlbumFilters]);
-
-    const deleteEmptyAlbums = async (candidateIDs: number[]) => {
-        let failedCount = 0;
-        let confirmedCandidateIDs: number[];
-
-        try {
-            await onRemotePull({ strict: true });
-
-            const [collections, collectionFiles] = await Promise.all([
-                savedCollections(),
-                savedCollectionFiles(),
-            ]);
-            const candidateIDSet = new Set(candidateIDs);
-            const nonEmptyCollectionIDs = new Set(
-                collectionFiles.map((file) => file.collectionID),
-            );
-            const userID = ensureLocalUser().id;
-            confirmedCandidateIDs = collections
-                .filter(
-                    (collection) =>
-                        candidateIDSet.has(collection.id) &&
-                        !nonEmptyCollectionIDs.has(collection.id) &&
-                        (collection.type == "album" ||
-                            collection.type == "folder") &&
-                        collection.owner.id == userID &&
-                        !collection.sharees.length &&
-                        !collection.publicURLs.length &&
-                        !isArchivedCollection(collection) &&
-                        !isDefaultHiddenCollection(collection),
-                )
-                .map((collection) => collection.id);
-        } catch {
-            showNotification({
-                color: "critical",
-                title: t("delete_empty_albums_failed", {
-                    count: candidateIDs.length,
-                }),
-            });
-            return;
-        }
-
-        if (!confirmedCandidateIDs.length) return;
-
-        for (const id of confirmedCandidateIDs) {
-            try {
-                await deleteCollection(id, { keepFiles: true });
-            } catch {
-                failedCount++;
-            }
-        }
-
-        let refreshFailed = false;
-        try {
-            await onRemotePull({ strict: true });
-        } catch {
-            refreshFailed = true;
-        }
-
-        if (failedCount > 0) {
-            showNotification({
-                color: "critical",
-                title: t("delete_empty_albums_failed", { count: failedCount }),
-            });
-        } else if (refreshFailed) {
-            showNotification({
-                color: "critical",
-                title: t("delete_empty_albums_refresh_failed"),
-            });
-        }
-    };
-
-    const handleDeleteEmptyAlbums = () => {
-        const candidateIDs = emptyAlbumCandidates.map((cs) => cs.id);
-        showMiniDialog({
-            title: t("delete_empty_albums_title"),
-            message: t("delete_empty_albums_message", {
-                count: candidateIDs.length,
-            }),
-            continue: {
-                text: t("delete"),
-                color: "critical",
-                action: () => deleteEmptyAlbums(candidateIDs),
-            },
-        });
-    };
 
     const filteredCollectionSummaries = useMemo(() => {
         const albumFilteredCollectionSummaries = !showAlbumFilters
@@ -370,7 +233,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
                     onCollectionClick={onCollectionClick}
                     hasSearchQuery={!!searchTerm.trim()}
                     showCreateButton={showCreateButton}
-                    onCreateAlbum={showAlbumNameInput}
+                    onCreateAlbum={onCreateAlbum}
                     reserveFooterSpace={showDeleteEmptyAlbums}
                 />
                 {showDeleteEmptyAlbums && (
@@ -391,74 +254,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
                     </Box>
                 )}
             </Dialog>
-            <SingleInputDialog
-                {...albumNameInputVisibilityProps}
-                variant="v2"
-                title={t("new_album")}
-                label={t("album_name")}
-                submitButtonTitle={t("create")}
-                onSubmit={handleCreateAlbum}
-            />
-            <Snackbar
-                open={albumCreatedToast.open}
-                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-            >
-                <Paper sx={{ width: "min(360px, 100svw)" }}>
-                    <DialogTitle>
-                        <Stack
-                            direction="row"
-                            sx={{
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                            }}
-                        >
-                            <Box>
-                                <Typography variant="h3">
-                                    {t("album_created")}
-                                </Typography>
-                                <Typography
-                                    sx={[bodyMutedSx, { marginTop: "4px" }]}
-                                >
-                                    {albumCreatedToast.albumName &&
-                                    albumCreatedToast.albumName.length > 16
-                                        ? albumCreatedToast.albumName.substring(
-                                              0,
-                                              16,
-                                          ) + "..."
-                                        : albumCreatedToast.albumName}
-                                </Typography>
-                            </Box>
-                            <Stack direction="row" sx={{ gap: 1 }}>
-                                <FilledIconButton
-                                    onClick={() => {
-                                        if (albumCreatedToast.albumId) {
-                                            onSelectCollectionID(
-                                                albumCreatedToast.albumId,
-                                            );
-                                        }
-                                        setAlbumCreatedToast((prev) => ({
-                                            ...prev,
-                                            open: false,
-                                        }));
-                                    }}
-                                >
-                                    <ArrowForwardIcon />
-                                </FilledIconButton>
-                                <FilledIconButton
-                                    onClick={() =>
-                                        setAlbumCreatedToast((prev) => ({
-                                            ...prev,
-                                            open: false,
-                                        }))
-                                    }
-                                >
-                                    <CloseIcon />
-                                </FilledIconButton>
-                            </Stack>
-                        </Stack>
-                    </DialogTitle>
-                </Paper>
-            </Snackbar>
+            <TrashFilesDialog {...deleteEmptyAlbumsDialogProps} />
         </>
     );
 };

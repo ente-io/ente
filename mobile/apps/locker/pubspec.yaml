@@ -16,7 +16,6 @@ dependencies:
   dio: 5.9.2
   dots_indicator: 4.0.1
   dotted_border: 3.1.0
-  email_validator: 3.0.0
   ente_account_deletion:
     path: ../../packages/account_deletion
   ente_accounts:
@@ -53,6 +52,8 @@ dependencies:
     path: ../../packages/logging
   ente_network:
     path: ../../packages/network
+  ente_pdf_renderer:
+    path: ../../packages/ente_pdf_renderer
   ente_pure_utils:
     path: ../../packages/ente_pure_utils
   ente_sharing:

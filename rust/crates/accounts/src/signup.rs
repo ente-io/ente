@@ -6,8 +6,8 @@ use zeroize::ZeroizeOnDrop;
 use crate::{
     AccountSecrets, AccountsClient, AuthenticatedAccount, Error, KeyAttributes, Result,
     auth::{
-        KeyDerivationStrength, SrpSession, generate_keys_with_strength,
-        generate_srp_setup_with_login_key, get_recovery_key,
+        KeyDerivationStrength, SrpSession, decrypt_keys_only, derive_kek,
+        generate_keys_with_strength, generate_srp_setup_with_login_key, get_recovery_key,
     },
     models::{AuthResponse, SetupSrpRequest},
 };
@@ -67,7 +67,15 @@ impl Signup {
         password: &str,
         strength: KeyDerivationStrength,
     ) -> Result<Self> {
-        if self.keys.is_some() {
+        if let Some(keys) = &self.keys {
+            let attributes = &keys.attributes;
+            let kek = derive_kek(
+                password,
+                &attributes.kek_salt,
+                attributes.mem_limit,
+                attributes.ops_limit,
+            )?;
+            decrypt_keys_only(&kek, attributes)?;
             return Ok(self.clone());
         }
         self.authorize(client);

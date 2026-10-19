@@ -1,8 +1,11 @@
 import { tryParseTakeoutMetadataJSON } from "ente-gallery/services/upload/metadata-json";
+import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import exportService from "../src/services/export";
+import exportService, {
+    getRenamedExportedCollections,
+} from "../src/services/export";
 
 const { writeFile } = vi.hoisted(() => ({
     writeFile: vi.fn<(path: string, contents: string) => Promise<void>>(),
@@ -18,7 +21,9 @@ vi.mock("ente-gallery/services/download", () => ({
     downloadManager: { fileStream: vi.fn() },
 }));
 vi.mock("ente-gallery/utils/native-stream", () => ({ writeStream: vi.fn() }));
-vi.mock("ente-new/photos/services/collection", () => ({}));
+vi.mock("ente-new/photos/services/collection", () => ({
+    collectionUserFacingName: (collection: Collection) => collection.name,
+}));
 vi.mock("ente-new/photos/services/photos-fdb", () => ({}));
 
 const file = {
@@ -53,7 +58,6 @@ test.each(["A caption", "", undefined])(
         expect(path).toBe("/export/Album/metadata/photo.jpg.json");
         const metadata = JSON.parse(json) as Record<string, unknown>;
         expect(metadata.description).toBe(caption || undefined);
-        expect(metadata).not.toHaveProperty("caption");
         expect(
             (await tryParseTakeoutMetadataJSON(new File([json], path)))
                 ?.description,
@@ -86,3 +90,20 @@ test.each([
         expect(metadata.geoData).toEqual(expected);
     },
 );
+
+test.each([
+    ["Project: Alpha", "Project_ Alpha", false],
+    ["Project: Alpha", "Project_ Alpha(1)", false],
+    ["Trip?", "Trip_", false],
+    ["Architecture", "Architecture", false],
+    ["New name", "Old name", true],
+    ["Project: Beta", "Project_ Alpha", true],
+])("album %j exported as %j is renamed: %s", (name, exportName, renamed) => {
+    const collection = { id: 1, name } as Collection;
+    const exportRecord = {
+        collectionExportNames: { 1: exportName },
+    } as unknown as Parameters<typeof getRenamedExportedCollections>[1];
+    expect(getRenamedExportedCollections([collection], exportRecord)).toEqual(
+        renamed ? [collection] : [],
+    );
+});

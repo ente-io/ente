@@ -3,7 +3,7 @@ pub mod replica;
 
 use std::{io::Seek, path::Path};
 
-use anyhow::{Context, Result, bail, ensure};
+use anyhow::{Context, Result, ensure};
 use ente_core::Session;
 use ente_photos::files;
 use serde_json::json;
@@ -11,12 +11,11 @@ use serde_json::json;
 use crate::{
     api,
     args::{AlbumCommand, App, FileCommand, Options, PhotosCommand},
+    core_db::SqliteResult,
     db, home,
-    output::{self, AlbumView, FileView},
+    output::{self, AlbumView, FileView, MAX_CANDIDATES, select},
 };
 use replica::Replica;
-
-const MAX_CANDIDATES: usize = 10;
 
 pub async fn run(command: PhotosCommand, selected: Option<&str>, options: &Options) -> Result<()> {
     match command {
@@ -82,9 +81,13 @@ fn album(command: AlbumCommand, replica: &Replica<'_>, options: &Options) -> Res
         AlbumCommand::View { album } => {
             let album =
                 replica.collections(Some(&album), Some((MAX_CANDIDATES + 1) as i64), |rows| {
-                    select(rows.map(|album| Ok(album?)), &album, "album", |a| {
-                        (a.id, a.name.as_deref().unwrap_or("unavailable"))
-                    })
+                    select(
+                        rows.collect::<SqliteResult<Vec<_>>>()?,
+                        &album,
+                        "album",
+                        "Use an ID.",
+                        |a| (a.id, a.name.as_deref().unwrap_or("unavailable").to_owned()),
+                    )
                 })?;
             let album = album
                 .value
@@ -110,9 +113,13 @@ async fn file(
     let albums =
         replica.collections(album, album.map(|_| (MAX_CANDIDATES + 1) as i64), |rows| {
             if let Some(selector) = album {
-                let entry = select(rows.map(|album| Ok(album?)), selector, "album", |a| {
-                    (a.id, a.name.as_deref().unwrap_or("unavailable"))
-                })?;
+                let entry = select(
+                    rows.collect::<SqliteResult<Vec<_>>>()?,
+                    selector,
+                    "album",
+                    "Use an ID.",
+                    |a| (a.id, a.name.as_deref().unwrap_or("unavailable").to_owned()),
+                )?;
                 Ok(vec![
                     entry.value.with_context(|| format!("album {}", entry.id))?,
                 ])
@@ -149,9 +156,13 @@ async fn file(
             Some(selector),
             Some((MAX_CANDIDATES + 1) as i64),
             |rows| {
-                select(rows.map(|entry| Ok(entry?)), selector, "file", |e| {
-                    (e.id, e.name.as_deref().unwrap_or("unavailable"))
-                })
+                select(
+                    rows.collect::<SqliteResult<Vec<_>>>()?,
+                    selector,
+                    "file",
+                    "Use an ID.",
+                    |e| (e.id, e.name.as_deref().unwrap_or("unavailable").to_owned()),
+                )
             },
         )?;
         let file = entry.file.with_context(|| format!("file {}", entry.id))?;
@@ -226,33 +237,4 @@ async fn file(
     }?;
     ensure!(!incomplete, "file results are incomplete");
     Ok(())
-}
-
-fn select<T>(
-    items: impl Iterator<Item = Result<T>>,
-    selector: &str,
-    kind: &str,
-    identity: impl Fn(&T) -> (i64, &str),
-) -> Result<T> {
-    let mut matches = items.take(MAX_CANDIDATES + 1).collect::<Result<Vec<_>>>()?;
-    if matches.len() > 1 {
-        let candidates = matches
-            .iter()
-            .take(MAX_CANDIDATES)
-            .map(|item| {
-                let (id, name) = identity(item);
-                format!("  {id}  {name:?}")
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-        let more = if matches.len() > MAX_CANDIDATES {
-            "\nMore matches omitted; use an ID."
-        } else {
-            ""
-        };
-        bail!("{kind} {selector:?} is ambiguous:\n{candidates}{more}");
-    }
-    matches
-        .pop()
-        .with_context(|| format!("no {kind} matches {selector:?}"))
 }

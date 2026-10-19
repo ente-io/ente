@@ -1,10 +1,6 @@
 import { CollectionsSortOptions } from "@/components/CollectionsSortOptions";
 import { PeopleSortOptions } from "@/components/PeopleSortOptions";
-import {
-    visibleAlbumFilters as getVisibleAlbumFilters,
-    matchesAlbumFilter,
-    type AlbumFilter,
-} from "@/utils/album-filters";
+import type { AlbumFilter, albumFilters } from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
 import {
     Delete02Icon,
@@ -16,6 +12,7 @@ import {
     ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -71,7 +68,12 @@ export interface GalleryBarPresentationProps {
 
 export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     mode: GalleryBarMode;
+    albumFilter: AlbumFilter;
+    albumSearchQuery: string;
+    onAlbumSearchQueryChange: (query: string) => void;
+    onShowAlbumOverview: (filter: AlbumFilter) => void;
     collectionSummaries: CollectionSummary[];
+    visibleAlbumFilters: typeof albumFilters;
     normalCollectionSummaries: CollectionSummaries;
     uncategorizedCollectionSummaryID: number;
     onShowCollectionSummary: (
@@ -81,6 +83,7 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     activeCollectionID: number | undefined;
     onSelectCollectionID: (collectionID: number) => void;
     onShowAllAlbums: () => void;
+    onCreateAlbum: () => void;
     onShowAllPeople: () => void;
     collectionsSortBy: CollectionsSortBy;
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
@@ -93,13 +96,19 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     mode,
+    albumFilter,
+    albumSearchQuery,
+    onAlbumSearchQueryChange,
+    onShowAlbumOverview,
     collectionSummaries,
+    visibleAlbumFilters,
     normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowCollectionSummary,
     activeCollectionID,
     onSelectCollectionID,
     onShowAllAlbums,
+    onCreateAlbum,
     onShowAllPeople,
     collectionsSortBy,
     onChangeCollectionsSortBy,
@@ -115,75 +124,42 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const titleID = useId();
     const listRef = useRef<FixedSizeList | null>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
-    const [searchQuery, setSearchQuery] = useState("");
-    const isSearching = mode == "albums" && !!searchQuery.trim();
-    const matchingCollectionSummaries = useMemo(() => {
-        if (!isSearching) return collectionSummaries;
-        const search = searchQuery.trim().toLowerCase();
-        return collectionSummaries.filter((cs) =>
-            cs.name.toLowerCase().includes(search),
-        );
-    }, [collectionSummaries, searchQuery, isSearching]);
+    const [peopleSearchQuery, setPeopleSearchQuery] = useState("");
+    const searchQuery = mode == "albums" ? albumSearchQuery : peopleSearchQuery;
+    const setSearchQuery =
+        mode == "albums" ? onAlbumSearchQueryChange : setPeopleSearchQuery;
+    const canSearch = mode == "albums" || mode == "people";
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    const isSearching = canSearch && !!normalizedSearchQuery;
+    const matchingPeople = useMemo(
+        () =>
+            mode == "people" && isSearching
+                ? people.filter((person) =>
+                      person.name
+                          ?.toLowerCase()
+                          .includes(normalizedSearchQuery),
+                  )
+                : people,
+        [mode, people, isSearching, normalizedSearchQuery],
+    );
     const [viewportHeight, setViewportHeight] = useState(0);
-    const [albumFilter, setAlbumFilter] = useState<AlbumFilter | undefined>(
-        "ente",
-    );
-    const [searchAlbumFilter, setSearchAlbumFilter] = useState<
-        AlbumFilter | null | undefined
-    >(null);
-    const visibleAlbumFilters = useMemo(
-        () =>
-            getVisibleAlbumFilters(collectionSummaries).filter(
-                ({ value }) =>
-                    !isSearching ||
-                    matchingCollectionSummaries.some((cs) =>
-                        matchesAlbumFilter(cs, value),
-                    ),
-            ),
-        [collectionSummaries, isSearching, matchingCollectionSummaries],
-    );
-    const selectedAlbumFilter = isSearching
-        ? searchAlbumFilter === null
-            ? (albumFilter ?? visibleAlbumFilters[0]?.value)
-            : searchAlbumFilter
-        : albumFilter;
-    const activeAlbumFilter =
-        selectedAlbumFilter === undefined ||
-        visibleAlbumFilters.some(({ value }) => value == selectedAlbumFilter)
-            ? selectedAlbumFilter
-            : visibleAlbumFilters[0]?.value;
-    const setActiveAlbumFilter = isSearching
-        ? setSearchAlbumFilter
-        : setAlbumFilter;
-    const visibleCollectionSummaries = useMemo(
-        () =>
-            mode != "albums"
-                ? collectionSummaries
-                : matchingCollectionSummaries.filter(
-                      (cs) =>
-                          activeAlbumFilter !== undefined &&
-                          matchesAlbumFilter(cs, activeAlbumFilter),
-                  ),
-        [
-            mode,
-            collectionSummaries,
-            matchingCollectionSummaries,
-            activeAlbumFilter,
-        ],
-    );
+    const [expandedAlbumFilter, setExpandedAlbumFilter] = useState<
+        AlbumFilter | undefined
+    >(albumFilter);
 
     useEffect(() => {
-        if (!isSearching) setSearchAlbumFilter(null);
-        if (!isSearching && albumFilter != activeAlbumFilter)
-            setAlbumFilter(activeAlbumFilter);
-    }, [albumFilter, activeAlbumFilter, isSearching]);
+        setExpandedAlbumFilter(albumFilter);
+    }, [albumFilter]);
+    useEffect(() => {
+        setPeopleSearchQuery("");
+    }, [mode]);
 
     useEffect(() => {
         if (
-            mode != "albums" ||
+            mode == "people" &&
             (mobile ? !mobileDrawerProps.open : collapsed)
         ) {
-            setSearchQuery("");
+            setPeopleSearchQuery("");
         }
     }, [mode, mobile, mobileDrawerProps.open, collapsed]);
 
@@ -198,20 +174,22 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             case "albums":
             case "hidden-albums":
             case "archive-albums":
-                i = visibleCollectionSummaries.findIndex(
+                i = collectionSummaries.findIndex(
                     ({ id }) => id == activeCollectionID,
                 );
                 break;
             case "people":
-                i = people.findIndex(({ id }) => id == activePerson?.id);
+                i = matchingPeople.findIndex(
+                    ({ id }) => id == activePerson?.id,
+                );
                 break;
         }
         if (i != -1) listRef.current.scrollToItem(i, "smart");
     }, [
         mode,
-        visibleCollectionSummaries,
+        collectionSummaries,
         activeCollectionID,
-        people,
+        matchingPeople,
         activePerson,
         collapsed,
         mobile,
@@ -227,23 +205,23 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             mode == "archive-albums"
                 ? {
                       type: "collections",
-                      collectionSummaries: visibleCollectionSummaries,
+                      collectionSummaries: collectionSummaries,
                       indented: mode == "albums",
                       activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
                   }
                 : {
                       type: "people" as const,
-                      people,
+                      people: matchingPeople,
                       activePerson,
                       onSelectPerson,
                   },
         [
             mode,
-            visibleCollectionSummaries,
+            collectionSummaries,
             activeCollectionID,
             onSelectCollectionID,
-            people,
+            matchingPeople,
             activePerson,
             onSelectPerson,
         ],
@@ -328,7 +306,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             component="nav"
             aria-labelledby={titleID}
             onKeyDown={(event) => {
-                if (event.key == "Escape" && mode == "albums" && searchQuery) {
+                if (event.key == "Escape" && canSearch && searchQuery) {
                     event.stopPropagation();
                     setSearchQuery("");
                 }
@@ -416,6 +394,20 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         <ExpandMoreIcon sx={{ fontSize: 20 }} />
                     </IconButton>
                 </Tooltip>
+                {(mode == "albums" || mode == "hidden-albums") && (
+                    <Tooltip title={t("new_album")}>
+                        <IconButton
+                            aria-label={t("new_album")}
+                            aria-haspopup="dialog"
+                            onClick={() => {
+                                mobileDrawerProps.onClose();
+                                onCreateAlbum();
+                            }}
+                        >
+                            <AddIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                    </Tooltip>
+                )}
                 {mobile && (
                     <IconButton
                         aria-label={t("close")}
@@ -425,7 +417,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 )}
             </Stack>
-            {mode == "albums" && (
+            {canSearch && (
                 <Stack
                     direction="row"
                     sx={{
@@ -449,8 +441,18 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     <InputBase
                         inputRef={searchInputRef}
                         fullWidth
-                        placeholder={t("search_in_albums")}
-                        inputProps={{ "aria-label": t("search_in_albums") }}
+                        placeholder={t(
+                            mode == "people"
+                                ? "people_search_hint"
+                                : "search_in_albums",
+                        )}
+                        inputProps={{
+                            "aria-label": t(
+                                mode == "people"
+                                    ? "people_search_hint"
+                                    : "search_in_albums",
+                            ),
+                        }}
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
                         sx={{
@@ -477,7 +479,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     )}
                 </Stack>
             )}
-            {isSearching && !visibleAlbumFilters.length ? (
+            {mode == "people" && isSearching && !matchingPeople.length ? (
                 <Typography
                     role="status"
                     sx={{ px: "16px", color: "text.muted" }}
@@ -500,28 +502,30 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         <React.Fragment key={filter.value}>
                             <BarCard
                                 aria-label={filter.title()}
+                                aria-current={
+                                    activeCollectionID === undefined &&
+                                    albumFilter == filter.value
+                                        ? "page"
+                                        : undefined
+                                }
                                 aria-expanded={
-                                    activeAlbumFilter == filter.value
+                                    expandedAlbumFilter == filter.value
                                 }
                                 aria-controls={
-                                    activeAlbumFilter == filter.value
+                                    expandedAlbumFilter == filter.value
                                         ? albumListID
                                         : undefined
                                 }
-                                onClick={() =>
-                                    setActiveAlbumFilter(
-                                        activeAlbumFilter == filter.value
+                                onClick={() => {
+                                    setExpandedAlbumFilter((current) =>
+                                        current == filter.value
                                             ? undefined
                                             : filter.value,
-                                    )
-                                }
-                                sx={{
-                                    flexShrink: 0,
-                                    bgcolor:
-                                        activeAlbumFilter == filter.value
-                                            ? "var(--gallery-navigation-surface)"
-                                            : undefined,
+                                    );
+                                    onShowAlbumOverview(filter.value);
+                                    mobileDrawerProps.onClose();
                                 }}
+                                sx={{ flexShrink: 0 }}
                             >
                                 <CardText>{filter.label()}</CardText>
                                 <ExpandMoreIcon
@@ -529,13 +533,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                                         fontSize: 16,
                                         color: "text.muted",
                                         transform:
-                                            activeAlbumFilter == filter.value
+                                            expandedAlbumFilter == filter.value
                                                 ? undefined
                                                 : "rotate(-90deg)",
                                     }}
                                 />
                             </BarCard>
-                            {activeAlbumFilter == filter.value && items}
+                            {expandedAlbumFilter == filter.value && items}
                         </React.Fragment>
                     ))}
                 </Stack>
@@ -814,7 +818,7 @@ const BarCard = styled(ButtonBase)(({ theme }) => ({
     borderRadius: "12px",
     color: theme.vars.palette.text.base,
     textAlign: "left",
-    '&[aria-current="true"]': {
+    '&[aria-current="true"], &[aria-current="page"]': {
         backgroundColor: "var(--gallery-navigation-surface)",
     },
     "&:hover": { backgroundColor: "var(--gallery-navigation-hover)" },
@@ -868,11 +872,22 @@ const PersonCard: React.FC<PersonCardProps> = ({
                 coverFaceID={person.displayFaceID}
             />
         </Box>
-        {person.name && <CardText>{person.name}</CardText>}
+        <CardText>{person.name || t("unnamed_person")}</CardText>
         {person.isPinned && (
             <CollectionBarCardIcon_ aria-hidden>
                 <HugeiconsIcon icon={PinIcon} size={14} />
             </CollectionBarCardIcon_>
         )}
+        <Typography
+            component="span"
+            sx={{
+                flexShrink: 0,
+                fontSize: 12,
+                lineHeight: "20px",
+                color: "text.muted",
+            }}
+        >
+            {person.fileIDs.length.toLocaleString()}
+        </Typography>
     </BarCard>
 );

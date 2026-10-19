@@ -40,6 +40,8 @@ class AppStore(
     private val logRepository: FileLogRepository,
     clock: () -> Long = { System.currentTimeMillis() },
 ) {
+    private val sourcePreferences =
+        context.applicationContext.getSharedPreferences("ensu_chat_sources", Context.MODE_PRIVATE)
     private val _state = MutableStateFlow(AppState())
     val state: StateFlow<AppState> = _state.asStateFlow()
 
@@ -63,7 +65,7 @@ class AppStore(
             llmProvider = llmProvider,
             logRepository = logRepository,
             notesStore = notesStore,
-            awaitKnowledgeReady = knowledgeStore::awaitEnabledPacksReady,
+            awaitKnowledgeReady = knowledgeStore::awaitReady,
         )
     private val chatActions =
         ChatStoreActions(
@@ -79,7 +81,7 @@ class AppStore(
             modelSettingsActions = modelSettingsActions,
             configDefaults = configDefaults,
             notesStore = notesStore,
-            awaitKnowledgeReady = knowledgeStore::awaitEnabledPacksReady,
+            awaitKnowledgeReady = knowledgeStore::awaitReady,
         )
 
     fun bootstrap(scope: CoroutineScope) {
@@ -203,12 +205,25 @@ class AppStore(
 
     fun refreshModelDownloadInfo() = modelSettingsActions.refreshModelDownloadInfo()
 
-    fun downloadOrUpdateKnowledgePack(stableId: String) = knowledgeStore.downloadOrUpdate(stableId)
+    fun retrySourceInventory() {
+        knowledgeStore.retry()
+        notesStore.retryLoad()
+        chatActions.refreshSourceInventory()
+    }
 
-    fun cancelKnowledgePackDownload(stableId: String) = knowledgeStore.cancel(stableId)
+    fun downloadOrUpdateKnowledgePack(stableId: String) = knowledgeStore.downloadOrUpdate(stableId)
 
     fun setKnowledgePackEnabled(stableId: String, enabled: Boolean) =
         knowledgeStore.setEnabled(stableId, enabled)
+
+    fun hasSeenSourceIntroduction() =
+        sourcePreferences.getBoolean("sources_introduction_seen", false)
+
+    fun completeSourceIntroduction() {
+        sourcePreferences.edit().putBoolean("sources_introduction_seen", true).apply()
+    }
+
+    fun cancelKnowledgePackDownload(stableId: String) = knowledgeStore.cancel(stableId)
 
     fun cancelDownload() {
         chatActions.cancelGenerationForDownload()

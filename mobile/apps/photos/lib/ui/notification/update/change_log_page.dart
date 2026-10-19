@@ -56,7 +56,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
       actionsTopSpacing: Spacing.lg,
       content: _getChangeLog(),
       actions: [
-        if (isLocalGallery) continueButton,
+        continueButton,
         Theme(
           data: Theme.of(context).copyWith(
             extensions: [
@@ -103,7 +103,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             },
           ),
         ),
-        if (!isLocalGallery) continueButton,
       ],
     );
   }

@@ -1,10 +1,11 @@
 pub mod backup;
+pub mod code;
 pub mod record;
 
 use ente_core::{
     Session, b64,
     crypto::{self, Key, Nonce, secretbox},
-    http,
+    http, otp,
 };
 use serde::Deserialize;
 use uuid::Uuid;
@@ -18,10 +19,16 @@ pub enum Error {
     Http(#[from] http::Error),
     #[error(transparent)]
     Crypto(#[from] crypto::Error),
+    #[error(transparent)]
+    Otp(#[from] otp::Error),
     #[error("invalid Auth base64 encoding")]
     Base64(#[from] b64::DecodeError),
     #[error("unreadable Auth record")]
     InvalidRecord,
+    #[error("invalid Auth code parameters")]
+    InvalidCodeParameters,
+    #[error("HOTP code generation is not supported yet")]
+    UnsupportedHotp,
     #[error("invalid encrypted Auth export")]
     InvalidBackup,
     #[error("unsupported Auth export version")]

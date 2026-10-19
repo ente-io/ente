@@ -6,14 +6,16 @@ import type { SpacePostPreview } from "services/space";
 import { spaceSurfaceHover, spaceTextMuted } from "styles/colors";
 
 export const SpacePostPreviewThumbnail = ({
+    borderRadius = "20%",
     post,
 }: {
+    borderRadius?: string;
     post?: SpacePostPreview;
 }) =>
     post?.imageUrl ? (
         <Box
             sx={{
-                borderRadius: "20%",
+                borderRadius,
                 height: 44,
                 isolation: "isolate",
                 position: "relative",
@@ -58,7 +60,7 @@ export const SpacePostPreviewThumbnail = ({
             sx={{
                 alignItems: "center",
                 bgcolor: spaceSurfaceHover,
-                borderRadius: "20%",
+                borderRadius,
                 color: spaceTextMuted,
                 display: "flex",
                 height: 44,

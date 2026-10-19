@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:io";
 
+import "package:ente_components/ente_components.dart" show AppBarCollapseSpacer;
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:ente_ui/components/loading_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -519,6 +520,36 @@ class GalleryState extends State<Gallery> {
         : 0;
   }
 
+  void revealFile(EnteFile file) {
+    if (!mounted || _scrollController.positions.length != 1) return;
+    final groups = galleryGroups;
+    final geometry = groups?.getGeometryOfFile(file);
+    if (groups == null || geometry == null) return;
+
+    final position = _scrollController.position;
+    final appBar = widget.appBar?.resolveGeometry(context);
+    final rowTop =
+        (appBar?.maxExtent ?? 0) + _headerHeight + geometry.rowOffset;
+    final topInset =
+        (appBar?.minExtent ?? 0) + _pinnedGroupHeaderExtent(groups);
+    final bottomInset = scrollbarBottomPaddingNotifier.value;
+    final visibleTop = position.pixels + topInset;
+    final visibleBottom =
+        position.pixels + position.viewportDimension - bottomInset;
+    if (rowTop >= visibleTop && rowTop + geometry.rowExtent <= visibleBottom) {
+      return;
+    }
+
+    final targetOffset =
+        rowTop -
+        topInset -
+        (visibleBottom - visibleTop - geometry.rowExtent) / 2;
+    // Jump during pop so the destination hero is laid out in its first frame.
+    _scrollController.jumpTo(
+      targetOffset.clamp(position.minScrollExtent, position.maxScrollExtent),
+    );
+  }
+
   int get _photoGridSize =>
       (widget.layoutTypeOverride ?? localSettings.getGalleryLayoutType()) ==
           GalleryLayoutType.justified
@@ -1006,6 +1037,9 @@ class GalleryState extends State<Gallery> {
         return box is RenderBox && box.hasSize ? box.size.height : 0;
       },
       appBarHeight: appBarPinnedHeight,
+      minimumScrollRange: (widget.appBar?.extendBodyForCollapse ?? false)
+          ? appBarCollapseExtent
+          : 0,
       pinHeaders: !widget.disablePinnedGroupHeader,
       enabled:
           !widget.disableScroll &&
@@ -1120,6 +1154,11 @@ class GalleryState extends State<Gallery> {
                                       child: widget.footer,
                                     ),
                                   ),
+                                  if (widget.appBar?.extendBodyForCollapse ??
+                                      false)
+                                    AppBarCollapseSpacer(
+                                      collapseExtent: appBarCollapseExtent,
+                                    ),
                                 ],
                               ),
                             );
@@ -1176,6 +1215,12 @@ class _GalleryAppBarScrollBody extends StatelessWidget {
       slivers: [
         appBarConfig.buildSliver(context),
         SliverFillRemaining(hasScrollBody: false, child: child),
+        if (appBarConfig.extendBodyForCollapse)
+          AppBarCollapseSpacer(
+            collapseExtent: appBarConfig
+                .resolveGeometry(context)
+                .collapseExtent,
+          ),
       ],
     );
   }
@@ -1382,6 +1427,13 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
+                    Positioned.fill(
+                      // Cover fractional-pixel gaps at the app bar boundary.
+                      top: widget.topOffset > 0
+                          ? -1 / MediaQuery.devicePixelRatioOf(context)
+                          : 0,
+                      child: ColoredBox(color: backgroundColor),
+                    ),
                     const Positioned.fill(
                       child: ClipRect(
                         clipper: _PinnedHeaderBottomShadowClipper(),

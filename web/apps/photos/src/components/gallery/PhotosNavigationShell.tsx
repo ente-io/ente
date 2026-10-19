@@ -41,7 +41,7 @@ type PhotosNavigationShellProps = SearchBarProps & {
     onUpload: () => void;
     onHome: () => void;
     mode: GalleryBarMode;
-    onChangeMode: (mode: GalleryBarMode) => void;
+    onChangeMode: (mode: GalleryBarMode) => boolean;
 };
 
 export const PhotosNavigationShell: React.FC<
@@ -80,6 +80,11 @@ export const PhotosNavigationShell: React.FC<
         if (!mobile) closeMobileNavigation();
     }, [mobile, closeMobileNavigation]);
     const handleChangeMode = (mode: GalleryBarMode) => {
+        if (mode == "people") {
+            closeMobileNavigation();
+            props.onChangeMode(mode);
+            return;
+        }
         const reopeningSection =
             mobile &&
             mode == "albums" &&
@@ -89,7 +94,9 @@ export const PhotosNavigationShell: React.FC<
         if (
             galleryBarProps &&
             !props.isInSearchMode &&
-            (props.mode == mode || reopeningSection)
+            ((props.mode == mode &&
+                galleryBarProps.activeCollectionID != PseudoCollectionID.all) ||
+                reopeningSection)
         ) {
             if (mobile) {
                 if (mobileDrawerProps.open) closeMobileNavigation();
@@ -99,8 +106,8 @@ export const PhotosNavigationShell: React.FC<
             }
             return;
         }
+        if (!props.onChangeMode(mode)) return;
         setNavigationCollapsed(false);
-        props.onChangeMode(mode);
         if (mobile) showMobileNavigation();
     };
     return (
@@ -208,7 +215,13 @@ export const PhotosNavigationShell: React.FC<
                             flex: 1,
                             minWidth: 0,
                             minHeight: 0,
-                            pt: showRail ? `${thumbnailGridPadding}px` : 0,
+                            pt: showRail
+                                ? {
+                                      xs: `${thumbnailGridPadding}px`,
+                                      md: "36px",
+                                  }
+                                : 0,
+                            px: showRail ? { xs: 0, md: "12px" } : 0,
                             ...(showRail && {
                                 "--mui-palette-background-default": "#FFFFFF",
                                 bgcolor: "background.default",
@@ -293,7 +306,8 @@ const NormalHeaderContents: React.FC<
 };
 
 const NormalNavigationRail: React.FC<
-    Omit<PhotosNavigationShellProps, "onUpload"> & {
+    Omit<PhotosNavigationShellProps, "onUpload" | "onChangeMode"> & {
+        onChangeMode: (mode: GalleryBarMode) => void;
         isHome: boolean;
         opensDialog: boolean;
         navigationOpen: boolean;

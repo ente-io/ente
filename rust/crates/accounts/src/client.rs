@@ -29,7 +29,7 @@ fn require_srp_m2(auth_response: &AuthResponse) -> Result<&str> {
 }
 
 pub struct AccountsClient {
-    api: Api,
+    pub(crate) api: Api,
     client_package: String,
 }
 
@@ -183,17 +183,14 @@ impl AccountsClient {
             email: email.to_string(),
             purpose: purpose.to_string(),
         };
-        Ok(http::retry(|| async {
-            self.api
-                .post("/users/ott")
-                .json(&request)
-                .send()
-                .await?
-                .error_for_code()
-                .await?;
-            Ok(())
-        })
-        .await?)
+        self.api
+            .post("/users/ott")
+            .json(&request)
+            .send()
+            .await?
+            .error_for_code()
+            .await?;
+        Ok(())
     }
 
     pub async fn verify_email(
@@ -387,11 +384,7 @@ impl AccountsClient {
             .send()
             .await?
             .error_for_code()
-            .await
-            .map_err(|error| match error.status_code() {
-                Some(400 | 401) => Error::IncorrectTotp,
-                _ => error.into(),
-            })?;
+            .await?;
         Ok(())
     }
 
@@ -561,30 +554,6 @@ mod tests {
                 .with_user_agent("ente-accounts-test"),
         )
         .unwrap()
-    }
-
-    #[tokio::test]
-    async fn send_otp_retries_on_server_error() {
-        let mut server = Server::new_async().await;
-        let first = server
-            .mock("POST", "/users/ott")
-            .with_status(500)
-            .with_body("temporary failure")
-            .expect(1)
-            .create_async()
-            .await;
-        let second = server
-            .mock("POST", "/users/ott")
-            .with_status(200)
-            .expect(1)
-            .create_async()
-            .await;
-
-        let client = make_client(server.url());
-        client.send_otp("user@example.org", "login").await.unwrap();
-
-        first.assert_async().await;
-        second.assert_async().await;
     }
 
     #[tokio::test]

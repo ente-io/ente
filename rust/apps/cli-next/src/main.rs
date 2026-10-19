@@ -1,3 +1,5 @@
+mod account;
+mod admin;
 mod api;
 mod args;
 mod auth;
@@ -17,7 +19,7 @@ use std::{
 };
 
 use anyhow::{Context, Result, bail, ensure};
-use clap::{Arg, ArgAction, CommandFactory, FromArgMatches};
+use clap::FromArgMatches;
 use ente_core::{b64, crypto::Key};
 use serde::de::DeserializeOwned;
 use serde_json::json;
@@ -29,12 +31,7 @@ use vault::{Account, State, Vault};
 
 #[tokio::main]
 async fn main() {
-    let mut command = Cli::command().subcommand_required(false).arg(
-        Arg::new("help-all")
-            .long("help-all")
-            .action(ArgAction::SetTrue)
-            .help("Print help for all commands"),
-    );
+    let mut command = args::command();
     let matches = command.get_matches_mut();
     let result = if matches.get_flag("help-all") {
         command.build();
@@ -91,6 +88,17 @@ async fn run(cli: Cli) -> Result<()> {
                     command: KeyCommand::Generate,
                 },
         } => vault_key(options.json),
+        Command::Completion { shell } => {
+            let mut command = args::command();
+            let name = command.get_name().to_owned();
+            clap_complete::generate(shell, &mut command, name, &mut std::io::stdout().lock());
+            Ok(())
+        }
+        Command::Admin {
+            selector,
+            app,
+            command,
+        } => admin::run(command, selector.account.as_deref(), app, &options).await,
     }
 }
 
@@ -105,6 +113,43 @@ fn vault_key(json_output: bool) -> Result<()> {
 
 async fn account_command(command: AccountCommand, options: &Options) -> Result<()> {
     match command {
+        AccountCommand::RequestOtp {
+            email,
+            app,
+            host,
+            purpose,
+        } => account::request_otp(email, app, host, purpose, options).await,
+        AccountCommand::Create(args) => {
+            let app = args.app;
+            let (state, index) = account::create(args, options).await?;
+            let account = AccountView::new(&state.accounts[index], state.selected);
+            output::action(
+                options.json,
+                &json!({"account": account, "app": app, "created": true}),
+                &format!(
+                    "Created {} and signed into {}.",
+                    output::escape_controls(&state.accounts[index].name),
+                    app.display_name()
+                ),
+            )
+        }
+        AccountCommand::Totp {
+            selector,
+            app,
+            command,
+        } => account::totp(command, selector.account.as_deref(), app, options).await,
+        AccountCommand::RecoveryKey { name } => {
+            let state = State::load()?;
+            let account = &state.accounts[state.resolve(name.as_deref())?];
+            let key = Zeroizing::new(ente_accounts::auth::recovery_key_to_mnemonic(
+                &account.identity.recovery_key,
+            )?);
+            if options.json {
+                output::json(&json!({"recoveryKey": key.as_str()}))
+            } else {
+                writeln!(std::io::stdout(), "{}", key.as_str()).map_err(Into::into)
+            }
+        }
         AccountCommand::Login(args) => {
             ensure!(!options.offline, "login requires network access");
             let app = args.app;
@@ -158,8 +203,11 @@ async fn account_command(command: AccountCommand, options: &Options) -> Result<(
         AccountCommand::Rename { name, new_name } => {
             let mut vault = Vault::open()?;
             let state = &mut vault.state;
-            let index = state.named(&name)?;
-            if name != new_name {
+            let (index, new_name) = match new_name {
+                Some(new_name) => (state.named(&name)?, new_name),
+                None => (state.resolve(None)?, name),
+            };
+            if state.accounts[index].name != new_name {
                 state.check_name(&new_name)?;
                 state.accounts[index].name = new_name;
                 vault.save()?;

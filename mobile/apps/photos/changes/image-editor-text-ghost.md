@@ -1,1 +1,0 @@
-- Fix a duplicate text preview when reopening enlarged or rotated text in the photo editor.

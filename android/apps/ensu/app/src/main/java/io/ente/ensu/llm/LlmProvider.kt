@@ -290,6 +290,14 @@ class LlmProvider(
             modelLoadMutex.withLock { if (chatWarmupOwner == owner) unloadModel() }
         }
 
+    internal suspend fun releaseInactiveChatResources(isPickerPending: () -> Boolean) =
+        withContext(ioDispatcher) {
+            releaseInactiveChatResources(modelLoadMutex, { chatForeground }, isPickerPending) {
+                unloadTranscriptionModelIfLoaded()
+                unloadModel()
+            }
+        }
+
     suspend fun ensureRequiredModelsReady(
         selection: LlmModelSelection,
         onProgress: (DownloadProgress) -> Unit,

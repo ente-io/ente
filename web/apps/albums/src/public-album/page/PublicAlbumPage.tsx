@@ -1126,9 +1126,9 @@ interface FileListHeaderProps {
     onDescriptionHeightChange?: (height: number) => void;
 }
 
-const fileListHeaderHeight = 84;
+const fileListHeaderHeight = 88;
 
-const fileListHeaderHeightMobile = 132;
+const fileListHeaderHeightMobile = 136;
 
 const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicCollection,

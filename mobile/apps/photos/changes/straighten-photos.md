@@ -1,1 +1,0 @@
-- Added a straighten control to the photo crop editor.

@@ -216,14 +216,14 @@ async fn hashes(
             Digest::new(cancel).map_err(io::Error::other)
         })?
         .into_iter()
-        .map(|(role, _, writer)| Ok((role, writer.finish()?)))
-        .collect::<Result<Vec<_>>>()?
+        .map(|(role, _, writer)| (role, writer.finish()))
+        .collect()
     } else {
         let download = files::download(session, file.id, &file.key, &file.header, || {
             Digest::new(cancel).map_err(io::Error::other)
         });
         let writer = tokio::select! { result=download=>result?, _=receiver.changed()=>return Err(crate::Cancelled.into()) };
-        vec![(Role::Original, writer.finish()?)]
+        vec![(Role::Original, writer.finish())]
     };
     Ok(hashes)
 }
@@ -240,8 +240,8 @@ impl Digest {
             cancel: cancel.clone(),
         })
     }
-    fn finish(self) -> Result<String> {
-        Ok(b64::encode(&self.state.finalize()?))
+    fn finish(self) -> String {
+        b64::encode(&self.state.finalize())
     }
 }
 
@@ -250,7 +250,7 @@ impl Write for Digest {
         if *self.cancel.borrow() {
             return Err(io::Error::other(crate::Cancelled));
         }
-        self.state.update(bytes).map_err(io::Error::other)?;
+        self.state.update(bytes);
         Ok(bytes.len())
     }
     fn flush(&mut self) -> io::Result<()> {

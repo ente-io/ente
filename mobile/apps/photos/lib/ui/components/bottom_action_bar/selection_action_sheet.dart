@@ -36,12 +36,14 @@ class SelectionActionSheet extends StatefulWidget {
     required this.actions,
     required this.selectionControls,
     this.backgroundColor,
+    this.backgroundScrollController,
     super.key,
   });
 
   final List<SelectionSheetAction> actions;
   final Widget selectionControls;
   final Color? backgroundColor;
+  final ScrollController? backgroundScrollController;
 
   @override
   State<SelectionActionSheet> createState() => _SelectionActionSheetState();
@@ -65,10 +67,22 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final boundaries = GalleryBoundariesProvider.of(context);
-    if (_boundaries != boundaries) {
+    if (_boundaries != boundaries ||
+        _galleryController !=
+            (widget.backgroundScrollController ??
+                boundaries?.scrollControllerNotifier.value)) {
       _boundaries?.scrollControllerNotifier.removeListener(_bindGallery);
       _boundaries = boundaries;
       _boundaries?.scrollControllerNotifier.addListener(_bindGallery);
+      _bindGallery();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant SelectionActionSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.backgroundScrollController !=
+        widget.backgroundScrollController) {
       _bindGallery();
     }
   }
@@ -77,7 +91,9 @@ class _SelectionActionSheetState extends State<SelectionActionSheet> {
     _galleryController?.removeListener(_onGalleryScroll);
     _galleryScrolling?.removeListener(_onGalleryActivityChanged);
     _gallerySwipeActive?.removeListener(_onGalleryActivityChanged);
-    _galleryController = _boundaries?.scrollControllerNotifier.value;
+    _galleryController =
+        widget.backgroundScrollController ??
+        _boundaries?.scrollControllerNotifier.value;
     _galleryController?.addListener(_onGalleryScroll);
     _galleryScrolling = _galleryController?.positions.length == 1
         ? _galleryController!.position.isScrollingNotifier

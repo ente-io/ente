@@ -24,6 +24,7 @@ import "package:photos/ui/viewer/file/gallery_photo_page_route.dart";
 import "package:photos/ui/viewer/file/hero_image.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
+import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_thumbnail_snapshot.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -373,6 +374,9 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         isLocalOnlyContext: isLocalOnlyContext,
         showGalleryFilmstrip: true,
         galleryType: galleryType,
+        onDismissed: context
+            .findAncestorStateOfType<GalleryState>()
+            ?.revealFile,
       ),
     );
     final isPhoto =

@@ -10,6 +10,7 @@ import io.ente.ensu.bindings.ConversationRequest
 import io.ente.ensu.bindings.DbException
 import io.ente.ensu.bindings.GroundedExcerpt
 import io.ente.ensu.bindings.GroundedSource
+import io.ente.ensu.bindings.KnowledgeDatasetConfig
 import io.ente.ensu.bindings.LlmException
 import io.ente.ensu.bindings.PassageLocator
 import io.ente.ensu.bindings.buildGroundedPromptContext
@@ -45,8 +46,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -67,6 +72,9 @@ internal class ChatStoreActions(
     private val notesStore: NotesStore,
     private val awaitKnowledgeReady: suspend () -> Unit,
 ) {
+    private val sourceInventoryReady: Boolean
+        get() = state.value.knowledge.inventoryReady && notesStore.state.value.inventoryReady
+
     private val branchSelections = mutableMapOf<String, MutableMap<String, String>>()
     private val sessionSummaries = mutableMapOf<String, String>()
     private val sessionAccessTimes = mutableMapOf<String, Long>()
@@ -91,6 +99,29 @@ internal class ChatStoreActions(
     fun bootstrap(scope: CoroutineScope) {
         this.scope = scope
 
+        refreshSourceInventory()
+        scope.launch {
+            combine(
+                    state.map { it.knowledge.inventoryReady },
+                    notesStore.state.map { it.inventoryReady },
+                ) { packsReady, notesReady ->
+                    packsReady && notesReady
+                }
+                .distinctUntilChanged()
+                .collect { ready ->
+                    state.update {
+                        it.copy(
+                            chat =
+                                it.chat.copy(
+                                    sourceSelectionReady = ready,
+                                    sourceSelectionError =
+                                        if (ready) null else it.chat.sourceSelectionError,
+                                )
+                        )
+                    }
+                }
+        }
+
         sessionSummaries.clear()
         scope.launch {
             val summaries = sessionPreferences.sessionSummaries.first()
@@ -112,7 +143,44 @@ internal class ChatStoreActions(
         }
     }
 
+    fun refreshSourceInventory() {
+        scope?.launch {
+            state.update { it.copy(chat = it.chat.copy(sourceSelectionError = null)) }
+            awaitKnowledgeReady()
+            notesStore.awaitReady()
+            state.update { appState ->
+                appState.copy(
+                    chat =
+                        appState.chat.copy(
+                            sourceSelectionReady = sourceInventoryReady,
+                            sourceSelectionError =
+                                if (sourceInventoryReady) null
+                                else "Couldn’t load sources. Try again.",
+                        )
+                )
+            }
+        }
+    }
+
+    private fun currentSourceSelection(): ChatSourceSelection =
+        ChatSourceSelection(
+            selectedPackIds =
+                state.value.knowledge.packs.values
+                    .filter {
+                        it.activeIdentity != null &&
+                            it.config.stableId !in state.value.knowledge.disabledIds
+                    }
+                    .map { it.config.stableId }
+                    .toSet(),
+            selectedFolderIds =
+                notesStore.state.value.collections
+                    .filter { it.id !in notesStore.state.value.disabledIds }
+                    .map { it.id }
+                    .toSet(),
+        )
+
     fun createNewSession(): String {
+        check(sourceInventoryReady)
         resetGenerationState()
 
         val session = chatRepository.createSession("New Chat")
@@ -322,6 +390,10 @@ internal class ChatStoreActions(
     }
 
     fun retryAssistantMessage(messageId: String) {
+        if (!sourceInventoryReady) {
+            refreshSourceInventory()
+            return
+        }
         val priorGeneration = generationJob
         val priorSummary = sessionSummaryJob
         if (state.value.chat.isGenerating) {
@@ -342,6 +414,7 @@ internal class ChatStoreActions(
                 messageStore[sessionId]?.firstOrNull { it.id == parentId }
             } ?: return
 
+        val sourceSelection = currentSourceSelection()
         priorGeneration?.cancel()
         priorSummary?.cancel()
         llmProvider.stopGeneration()
@@ -357,11 +430,12 @@ internal class ChatStoreActions(
             ) {
                 llmProvider.resetContext()
             }
-            startGeneration(sessionId, parent)
+            startGeneration(sessionId, parent, sourceSelection)
         }
     }
 
     fun sendMessage() {
+        if (!sourceInventoryReady) return
         val currentState = state.value
         if (currentState.chat.isGenerating || currentState.chat.isDownloading) return
         if (!currentState.chat.deviceCapability.isChatSupported()) return
@@ -440,7 +514,7 @@ internal class ChatStoreActions(
         overflowBypassMessageId = pending.messageId
         pendingOverflow = null
         clearOverflowDialog()
-        startGeneration(pending.sessionId, message)
+        startGeneration(pending.sessionId, message, pending.sourceSelection)
     }
 
     fun cancelOverflowDialog() {
@@ -501,9 +575,17 @@ internal class ChatStoreActions(
         }
     }
 
-    private fun startGeneration(sessionId: String, userMessage: ChatMessage) {
+    private fun startGeneration(
+        sessionId: String,
+        userMessage: ChatMessage,
+        sourceSelection: ChatSourceSelection = currentSourceSelection(),
+    ) {
         val scope = scope ?: return
         if (!state.value.chat.deviceCapability.isChatSupported()) return
+        if (!sourceInventoryReady) {
+            refreshSourceInventory()
+            return
+        }
         modelSettingsActions.cancelChatWarmup(releaseLoadedModel = false)
         val priorGeneration = generationJob
         val priorSummary = sessionSummaryJob
@@ -573,7 +655,15 @@ internal class ChatStoreActions(
             if (!isActive()) return@launch
             val progressTracker = DownloadProgressTracker()
             var embeddingAssetInvalid = false
-            val enabledDatasets = state.value.knowledge.enabledReadyDatasets
+            val enabledDatasets =
+                state.value.knowledge.readyDatasets.filter {
+                    sourceSelection.isPackEnabled(it.stableId)
+                }
+            val enabledFolderIds =
+                notesStore.state.value.collections
+                    .filter { it.eligible && sourceSelection.isFolderEnabled(it.id) }
+                    .map { it.id }
+                    .toSet()
             try {
                 if (prompt.imageFiles.isEmpty()) {
                     val messages = messageStore[sessionId].orEmpty()
@@ -619,8 +709,7 @@ internal class ChatStoreActions(
             val knowledgeHits =
                 if (
                     retrievalQuery.isNotBlank() &&
-                        (enabledDatasets.isNotEmpty() ||
-                            notesStore.state.value.collections.any { it.eligible })
+                        (enabledDatasets.isNotEmpty() || enabledFolderIds.isNotEmpty())
                 ) {
                     try {
                         val hits =
@@ -636,7 +725,7 @@ internal class ChatStoreActions(
                                         query = query,
                                         maxHits = configDefaults.knowledgeEmbedding.maxHits,
                                     )
-                                val notes = notesStore.retrieve(query)
+                                val notes = notesStore.retrieve(query, enabledFolderIds)
                                 notesStore.verify(
                                     selectMixedGroundingCandidates(
                                         packs,
@@ -693,7 +782,9 @@ internal class ChatStoreActions(
                                     turn.searchWithHistory(knowledgeHits)
                                 }
                             if (!isActive() || stopRequested) return@launch
-                            locators.mapNotNull { reloadPassage(it) }
+                            locators.mapNotNull {
+                                reloadPassage(it, enabledDatasets, enabledFolderIds)
+                            }
                         }
                         .orEmpty()
                 } catch (error: kotlinx.coroutines.CancellationException) {
@@ -802,6 +893,7 @@ internal class ChatStoreActions(
                     userMessage,
                     prompt,
                     selection,
+                    sourceSelection,
                     modelSettingsActions.resolveTemperature(settings),
                     knowledgeHits,
                     onModelProgress,
@@ -823,6 +915,7 @@ internal class ChatStoreActions(
         userMessage: ChatMessage,
         prompt: PromptResult,
         selection: LlmModelSelection,
+        sourceSelection: ChatSourceSelection,
         temperature: Float,
         knowledgeHits: List<GroundedExcerpt>,
         onModelProgress: (DownloadProgress) -> Unit,
@@ -859,7 +952,8 @@ internal class ChatStoreActions(
                             overflowBypassMessageId != userMessage.id
                     ) {
                         overflowBypassMessageId = null
-                        pendingOverflow = PendingOverflow(sessionId, userMessage.id)
+                        pendingOverflow =
+                            PendingOverflow(sessionId, userMessage.id, sourceSelection)
                         streamingParentId = null
                         state.update { appState ->
                             appState.copy(
@@ -1075,12 +1169,18 @@ internal class ChatStoreActions(
         return true
     }
 
-    private suspend fun reloadPassage(locator: PassageLocator): GroundedExcerpt? =
+    private suspend fun reloadPassage(
+        locator: PassageLocator,
+        enabledDatasets: List<KnowledgeDatasetConfig>,
+        enabledFolderIds: Set<String>,
+    ): GroundedExcerpt? =
         try {
             when (locator) {
-                is PassageLocator.EnsuPack ->
-                    knowledgeProvider.reload(locator, state.value.knowledge.enabledReadyDatasets)
-                is PassageLocator.LocalNote -> notesStore.reload(locator.locator)
+                is PassageLocator.EnsuPack -> knowledgeProvider.reload(locator, enabledDatasets)
+                is PassageLocator.LocalNote ->
+                    if (locator.locator.collectionId in enabledFolderIds)
+                        notesStore.reload(locator.locator)
+                    else null
             }
         } catch (error: kotlinx.coroutines.CancellationException) {
             throw error
@@ -1753,6 +1853,7 @@ internal class ChatStoreActions(
     private data class PendingOverflow(
         val sessionId: String,
         val messageId: String,
+        val sourceSelection: ChatSourceSelection,
     )
 
     private fun buildPrompt(text: String, attachments: List<Attachment>): PromptResult {

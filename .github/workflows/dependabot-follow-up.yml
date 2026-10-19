@@ -34,7 +34,7 @@ jobs:
                       const selected = [];
                       for (const pr of await github.paginate(github.rest.pulls.list, { ...repo, state: "open", base: "main", per_page: 100 })) {
                           if (pr.draft || pr.user.login !== "dependabot[bot]" ||
-                              pr.head.repo?.full_name !== `${repo.owner}/${repo.repo}` || !pr.head.ref.startsWith("dependabot/cargo/")) continue;
+                              pr.head.repo?.full_name !== `${repo.owner}/${repo.repo}` || !/^dependabot\/(cargo|github_actions)\//.test(pr.head.ref)) continue;
                           const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
                               ...repo, workflow_id: "ci.yml", event: "pull_request", head_sha: pr.head.sha, per_page: 100,
                           });
@@ -46,7 +46,12 @@ jobs:
                               comments.some(comment => comment.user.login !== "ente-agent[bot]" && comment.created_at > since &&
                                   (["OWNER", "MEMBER", "COLLABORATOR"].includes(comment.author_association) ||
                                       comment.user.login === "github-actions[bot]"))) {
-                              selected.push({ number: pr.number, head: pr.head.sha });
+                              const commits = await github.paginate(github.rest.pulls.listCommits, {
+                                  ...repo, pull_number: pr.number, per_page: 100,
+                              });
+                              const reviewOnly = pr.head.ref.startsWith("dependabot/github_actions/") ||
+                                  commits.filter(commit => commit.author?.login === "ente-agent[bot]").length >= 3;
+                              selected.push({ number: pr.number, head: pr.head.sha, reviewOnly });
                           }
                       }
                       return selected;
@@ -75,6 +80,9 @@ jobs:
                   mkdir -p "$RUNNER_TEMP/codex" "$RUNNER_TEMP/result"
                   touch "$RUNNER_TEMP/result/report.md"
                   { printf '%s\n\n' "$PR_URL"; cat .github/scripts/dependencies.md; } > "$RUNNER_TEMP/prompt.md"
+                  if [[ "${{ matrix.pr.reviewOnly }}" == true ]]; then
+                      printf '\n%s\n' "Review only. Do not edit files; recommend any required fixes in your final report." >> "$RUNNER_TEMP/prompt.md"
+                  fi
                   cat > "$RUNNER_TEMP/codex/config.toml" <<EOF
                   project_doc_max_bytes = 0
                   [skills]
@@ -88,9 +96,10 @@ jobs:
                   [permissions.update.network]
                   enabled = true
                   EOF
-                  sudo rm -rf /usr/share/dotnet
-                  sudo apt-get update
-                  sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libvulkan-dev glslc libdbus-1-dev dbus gnome-keyring libglib2.0-bin
+
+            - name: Setup Linux for Rust
+              if: ${{ !matrix.pr.reviewOnly }}
+              uses: ./.github/actions/setup-rust-linux
 
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
@@ -103,6 +112,7 @@ jobs:
               env:
                   GH_TOKEN: ${{ github.token }}
                   CARGO_HOME: /tmp/cargo
+                  XDG_CACHE_HOME: /tmp/cache
               with:
                   codex-home: ${{ runner.temp }}/codex
                   prompt-file: ${{ runner.temp }}/prompt.md
@@ -122,7 +132,7 @@ jobs:
                   git add -A
                   git diff --binary --no-ext-diff --no-textconv "$PR_HEAD" > "$RUNNER_TEMP/result/changes.patch"
 
-            - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+            - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
               with:
                   name: dependency-${{ matrix.pr.number }}
                   path: ${{ runner.temp }}/result
@@ -142,7 +152,7 @@ jobs:
             matrix:
                 pr: ${{ fromJSON(needs.find.outputs.prs) }}
         steps:
-            - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+            - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
               id: app
               with:
                   client-id: ${{ secrets.ENTE_AGENT_GH_CLIENT_ID }}
@@ -155,7 +165,7 @@ jobs:
                   ref: ${{ matrix.pr.head }}
                   token: ${{ steps.app.outputs.token }}
 
-            - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+            - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
               with:
                   name: dependency-${{ matrix.pr.number }}
                   path: ${{ runner.temp }}/result
@@ -165,6 +175,7 @@ jobs:
               env:
                   PR_NUMBER: ${{ matrix.pr.number }}
                   PR_HEAD: ${{ matrix.pr.head }}
+                  REVIEW_ONLY: ${{ matrix.pr.reviewOnly }}
               with:
                   github-token: ${{ steps.app.outputs.token }}
                   script: |
@@ -176,10 +187,10 @@ jobs:
                       const { data: pr } = await github.rest.pulls.get({ ...repo, pull_number: Number(process.env.PR_NUMBER) });
                       if (pr.state !== "open" || pr.draft || pr.head.sha !== head || pr.base.ref !== "main" ||
                           pr.user.login !== "dependabot[bot]" || pr.head.repo?.full_name !== `${repo.owner}/${repo.repo}` ||
-                          !pr.head.ref.startsWith("dependabot/cargo/")) return;
+                          !/^dependabot\/(cargo|github_actions)\//.test(pr.head.ref)) return;
                       const result = `${process.env.RUNNER_TEMP}/result`;
                       const report = readFileSync(`${result}/report.md`, "utf8").trim();
-                      if (readFileSync(`${result}/changes.patch`).length) {
+                      if (process.env.REVIEW_ONLY === "false" && readFileSync(`${result}/changes.patch`).length) {
                           git("apply", "--index", `${result}/changes.patch`);
                           const { data: bot } = await github.rest.users.getByUsername({ username: "ente-agent[bot]" });
                           git("config", "user.name", bot.login);

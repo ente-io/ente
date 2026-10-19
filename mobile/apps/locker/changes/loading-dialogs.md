@@ -1,1 +1,1 @@
-- Refreshed loading dialogs for internal users.
+- Refreshed loading dialogs for all users.

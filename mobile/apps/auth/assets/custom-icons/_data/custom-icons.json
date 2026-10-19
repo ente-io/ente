@@ -873,6 +873,11 @@
       ]
     },
     {
+      "title": "Enable Banking",
+      "slug": "enablebanking",
+      "hex": "000000"
+    },
+    {
       "title": "eneba"
     },
     {
@@ -2013,6 +2018,9 @@
     },
     {
       "title": "Porkbun"
+    },
+    {
+      "title": "Posteo"
     },
     {
       "title": "Postmark",

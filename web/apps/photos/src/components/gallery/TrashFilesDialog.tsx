@@ -18,6 +18,9 @@ import { useId, useState } from "react";
 
 type TrashFilesDialogProps = ModalVisibilityProps & {
     count: number;
+    title?: string;
+    message?: string;
+    confirmText?: string;
     onConfirm: () => void | Promise<void>;
 };
 
@@ -25,6 +28,9 @@ export const TrashFilesDialog: React.FC<TrashFilesDialogProps> = ({
     open,
     onClose,
     count,
+    title,
+    message,
+    confirmText,
     onConfirm,
 }) => {
     const [phase, setPhase] = useState<"loading" | "failed" | undefined>();
@@ -101,28 +107,30 @@ export const TrashFilesDialog: React.FC<TrashFilesDialogProps> = ({
                     id={titleID}
                     sx={{ "&&&": { p: 0, mt: 3 }, fontSize: 20 }}
                 >
-                    {t("trash_items_title", {
-                        count,
-                        fallbackLng: false,
-                        defaultValue: t(
-                            count === 1
-                                ? "trash_file_title"
-                                : "trash_files_title",
-                        ),
-                    })}
+                    {title ??
+                        t("trash_items_title", {
+                            count,
+                            fallbackLng: false,
+                            defaultValue: t(
+                                count === 1
+                                    ? "trash_file_title"
+                                    : "trash_files_title",
+                            ),
+                        })}
                 </DialogTitle>
             </Stack>
             <DialogContent sx={{ padding: "16px 28px 24px" }}>
                 <Typography id={messageID} sx={{ color: "text.muted" }}>
-                    {t("trash_items_message", {
-                        count,
-                        fallbackLng: false,
-                        defaultValue: t(
-                            count === 1
-                                ? "trash_file_message"
-                                : "trash_files_message",
-                        ),
-                    })}
+                    {message ??
+                        t("trash_items_message", {
+                            count,
+                            fallbackLng: false,
+                            defaultValue: t(
+                                count === 1
+                                    ? "trash_file_message"
+                                    : "trash_files_message",
+                            ),
+                        })}
                 </Typography>
                 <Stack sx={{ pt: 3, gap: 1 }}>
                     {phase === "failed" && <InlineErrorIndicator />}
@@ -132,7 +140,7 @@ export const TrashFilesDialog: React.FC<TrashFilesDialogProps> = ({
                         color="critical"
                         onClick={handleConfirm}
                     >
-                        {t("move_to_trash")}
+                        {confirmText ?? t("move_to_trash")}
                     </LoadingButton>
                     <FocusVisibleButton
                         fullWidth

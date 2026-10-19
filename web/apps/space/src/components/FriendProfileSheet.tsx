@@ -337,7 +337,7 @@ export const FriendProfileSheet: React.FC<FriendProfileSheetProps> = ({
                             friendSpaceId={friend.spaceId ?? friend.id}
                             headerRef={headerRef}
                             isPreview={!expanded}
-                            showPostLoadingIndicator
+                            showPostLoadingIndicator={expanded}
                             onBack={expanded ? onClose : dismiss}
                             username={friend.username}
                         />

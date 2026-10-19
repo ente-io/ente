@@ -1,1 +1,0 @@
-- Get notified when your first curated memories are ready.

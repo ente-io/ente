@@ -54,6 +54,7 @@ edition = "2024"
 anyhow = "1.0.104"
 chrono = { version = "0.4.45", default-features = false }
 clap = "4.6.7"
+clap_complete = "4.6.11"
 dialoguer = { version = "0.12.0", default-features = false }
 dirs = "7.0.0"
 ente-accounts = { path = "crates/accounts" }
@@ -125,7 +126,11 @@ wasm-bindgen = "0.2.125"
 wasm-bindgen-futures = "0.4.75"
 web-sys = "0.3.102"
 zeroize = { version = "1.9.0", features = ["derive"] }
-zip = { version = "8.6.0", default-features = false, features = ["deflate-flate2-zlib-rs"] }
+zip = { version = "9.0.4", default-features = false, features = ["deflate-flate2-zlib-rs"] }
+
+[patch.crates-io]
+# TODO: Remove after tauri-plugin-updater 2.14.1 ships the ZIP 9 fix.
+tauri-plugin-updater = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "ba98bfadc4c868c9a7e1a226c83af528e1f11b89" }
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "deny", check-cfg = ['cfg(frb_expand)'] }

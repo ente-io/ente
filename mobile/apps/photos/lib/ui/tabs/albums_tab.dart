@@ -1113,6 +1113,7 @@ class _AlbumsTabState extends State<AlbumsTab>
                 sectionType,
                 filteredCollections,
                 showSelectAllButton: true,
+                backgroundScrollController: _scrollController,
               );
             },
           ),

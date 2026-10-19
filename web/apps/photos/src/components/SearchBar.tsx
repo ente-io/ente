@@ -4,10 +4,11 @@ import {
     matchesSearchCategory,
     searchCategories,
     searchCategoryCounts,
+    searchCategoryForSuggestion,
     type SearchCategory,
 } from "@/services/search/search-categories";
 import { sidebarSearchOptionsForString } from "@/services/search/sidebar-search-registry";
-import { Search01Icon } from "@hugeicons/core-free-icons";
+import { Album02Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
@@ -68,7 +69,7 @@ export interface SearchBarProps {
         o: SearchOption | undefined,
         options?: { shouldExitSearchMode?: boolean },
     ) => void;
-    onSelectPeople: () => void;
+    onSelectPeople: (onNavigate: () => void) => void;
     onSelectPerson: (personID: string) => void;
 }
 
@@ -302,8 +303,7 @@ const SearchInput: React.FC<
     };
 
     const handleSelectPeople = () => {
-        resetSearch();
-        onSelectPeople();
+        onSelectPeople(resetSearch);
     };
 
     const handleSelectPerson = (personID: string) => {
@@ -660,7 +660,12 @@ const iconForOption = (option: SearchOption | undefined) => {
         case "cameraModel":
             return <CameraIcon />;
         case "sidebarAction":
-            return <SettingsIcon />;
+            return searchCategoryForSuggestion(option.suggestion) ===
+                "albums" ? (
+                <HugeiconsIcon icon={Album02Icon} />
+            ) : (
+                <SettingsIcon />
+            );
         case "location":
         case "city":
             return <LocationIcon />;
@@ -689,7 +694,7 @@ const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
 );
 
 const EmptyState: React.FC<
-    Pick<SearchBarProps, "onSelectPeople" | "onSelectPerson">
+    Pick<SearchBarProps, "onSelectPerson"> & { onSelectPeople: () => void }
 > = ({ onSelectPeople, onSelectPerson }) => {
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
@@ -718,12 +723,13 @@ const EmptyState: React.FC<
             break;
     }
 
-    const hasPeople = people && people.length > 0;
+    const hasPeople =
+        mlStatus?.phase != "disabled" && people && people.length > 0;
     if (!hasPeople && !label) return null;
 
     return (
         <Box sx={{ textAlign: "left" }}>
-            {people && people.length > 0 && (
+            {hasPeople && (
                 <>
                     <SearchPeopleHeader onClick={onSelectPeople} />
                     <SearchPeopleList {...{ people, onSelectPerson }} />
@@ -906,6 +912,8 @@ const labelForOption = (option: SearchOption) => {
             return t("people");
 
         case "sidebarAction":
-            return t("settings");
+            return searchCategoryForSuggestion(option.suggestion) === "albums"
+                ? t("album")
+                : t("settings");
     }
 };

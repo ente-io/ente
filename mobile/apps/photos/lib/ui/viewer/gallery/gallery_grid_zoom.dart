@@ -27,6 +27,7 @@ class GalleryGridZoom extends StatefulWidget {
     required this.sectionOrigin,
     required this.appBarHeight,
     this.trailingExtent,
+    this.minimumScrollRange = 0,
     required this.pinHeaders,
     required this.enabled,
     required this.onCommit,
@@ -43,6 +44,7 @@ class GalleryGridZoom extends StatefulWidget {
   final double Function() sectionOrigin;
   final double appBarHeight;
   final double Function()? trailingExtent;
+  final double minimumScrollRange;
   final bool pinHeaders;
   final bool enabled;
   final Future<void> Function(int columns, double scrollOffset) onCommit;
@@ -201,7 +203,7 @@ class _GalleryGridZoomState extends State<GalleryGridZoom>
           anchor.rect.top +
           fraction * (target.rect.height - anchor.rect.height);
       final maxScroll = math.max(
-        0.0,
+        widget.minimumScrollRange,
         origin +
             sourceScrollOffset +
             layout.totalExtent +

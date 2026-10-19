@@ -1,1 +1,0 @@
-- Smoothed gallery photo transitions and prevented thumbnail flicker when returning to the gallery.

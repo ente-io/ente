@@ -1,8 +1,20 @@
 {
-  "bringMemoriesTogether": "Bring deine Erinnerungen zusammen",
+  "bringMemoriesTogether": "Führe deine Erinnerungen zusammen",
+  "@bringMemoriesTogether": {
+    "description": "Title on the Local Gallery photo permission screen"
+  },
   "createMyAccount": "Mein Konto erstellen",
-  "localGalleryPermissionDesc": "Erteile die Berechtigung, auf deine Fotos zuzugreifen und sie mit Gesichtserkennung zu organisieren. Die gesamte Verarbeitung erfolgt auf deinem Gerät.",
-  "onboardingOrganizeDesc": "Organisiere deine Fotos und Videos. Alle Erinnerungen an einem Ort.",
+  "@createMyAccount": {
+    "description": "Create account button on the Photos onboarding screen"
+  },
+  "localGalleryPermissionDesc": "Erteile die Berechtigung, um auf Fotos zuzugreifen und mit Gesichtserkennung zu organisieren, vollständig auf deinem Gerät verarbeitet.",
+  "@localGalleryPermissionDesc": {
+    "description": "Photo permission explanation shown during Local Gallery onboarding"
+  },
+  "onboardingOrganizeDesc": "Organisiere deine Fotos und Videos. Jede Erinnerung, an einem einzigen Ort.",
+  "@onboardingOrganizeDesc": {
+    "description": "Description on the Photos onboarding screen"
+  },
   "wallpaper": "Hintergrundbild",
   "setWallpaper": "Hintergrundbild festlegen",
   "wallpaperHome": "Startbildschirm",
@@ -197,9 +209,25 @@
     }
   },
   "albumsOnDevicePermissionCta": "Zugriff erlauben",
+  "albumsOnDevicePermissionDescription": "Deine Fotos werden mit Gesichtserkennung organisiert, direkt auf deinem Gerät.",
+  "@albumsOnDevicePermissionDescription": {
+    "description": "Body of the on-device albums empty state shown before photo access is granted"
+  },
   "albumsOnEnteEmptyCta": "Alben zum Sichern auswählen",
+  "albumsOnEnteEmptyDescription": "Greife auf sie über jedes Gerät zu und teile sie mit deinen Liebsten.",
+  "@albumsOnEnteEmptyDescription": {
+    "description": "Body of the Ente albums empty state, under the title 'Back up your memories'"
+  },
   "albumsOnEnteEmptyTitle": "Sichere deine Erinnerungen",
-  "albumsReceivedEmptyTitle": "Zeige geteilte Erinnerungen mit dir",
+  "albumsReceivedEmptyDescription": "Mit dir geteilte Alben erscheinen hier, bereit zum Ansehen und Speichern.",
+  "@albumsReceivedEmptyDescription": {
+    "description": "Body of the received albums empty state"
+  },
+  "albumsReceivedEmptyTitle": "Mit dir geteilte Erinnerungen",
+  "albumsSharedEmptyDescription": "Deine Liebsten können ohne Konto ansehen, reagieren und Kommentare hinzufügen.",
+  "@albumsSharedEmptyDescription": {
+    "description": "Body of the shared albums and feed empty states, under the title 'Share your memories'"
+  },
   "albumsSharedEmptyTitle": "Teile deine Erinnerungen",
   "albumsWidgetDesc": "Wähle die Alben, die du auf der Startseite sehen möchtest.",
   "albumTitle": "Albumtitel",
@@ -288,7 +316,7 @@
       "versionValue": {}
     }
   },
-  "architecture": "Icons designen",
+  "architecture": "Ikonisches Design",
   "archive": "Archiv",
   "@archive": {
     "description": "Action of 'Archiving' an element"
@@ -823,6 +851,7 @@
   "credentialNotesHint": "Wiederherstellungsmethoden, Sicherheitsfragen, ...",
   "criticalUpdateAvailable": "Wichtige Aktualisierung verfügbar",
   "crop": "Zuschneiden",
+  "cropAndRotate": "Zuschneiden & Drehen",
   "curatedMemories": "Ausgewählte Erinnerungen",
   "currentBackupFolder": "Aktueller Sicherungsordner:",
   "currentlyRunning": "läuft gerade",
@@ -1467,62 +1496,22 @@
       }
     }
   },
-  "memoryLaneCaptionMonthsAgo": "{name} {count, plural, one{vor {number} Monat} other{vor {number} Monaten}}",
-  "@memoryLaneCaptionMonthsAgo": {
-    "description": "Memory Lane caption in elapsed months. Always keep the number, including for one.",
+  "memoryLaneCaptionNow": "{name} {now}",
+  "@memoryLaneCaptionNow": {
+    "description": "Memory Lane caption for a photo taken less than a year ago, without a number. Keep both placeholders in the natural word order for your language.",
     "placeholders": {
       "name": {
         "type": "String"
       },
-      "count": {
-        "type": "int"
-      },
-      "number": {
+      "now": {
         "type": "String",
-        "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
+        "description": "The localized word for now, rendered in a handwritten style. Keep this placeholder rather than writing the word directly."
       }
     }
   },
-  "memoryLaneCaptionWeeksAgo": "{name} {count, plural, one{vor {number} Woche} other{vor {number} Wochen}}",
-  "@memoryLaneCaptionWeeksAgo": {
-    "description": "Memory Lane caption in elapsed weeks. Always keep the number, including for one.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "number": {
-        "type": "String",
-        "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionDaysAgo": "{name} {count, plural, one{vor {number} Tag} other{vor {number} Tagen}}",
-  "@memoryLaneCaptionDaysAgo": {
-    "description": "Memory Lane caption in elapsed days. Always keep the number, including for one.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "number": {
-        "type": "String",
-        "description": "Placeholder rendered as a separate, larger number; retain in every plural form."
-      }
-    }
-  },
-  "memoryLaneCaptionToday": "{name} heute",
-  "@memoryLaneCaptionToday": {
-    "description": "Memory Lane caption for a photo taken today, without a number.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
+  "memoryLaneNow": "jetzt",
+  "@memoryLaneNow": {
+    "description": "The current moment in a Memory Lane caption, such as Ashil now. This word is styled separately from the person's name."
   },
   "facesTimelinePlaybackPlay": "Wiedergabe",
   "@facesTimelinePlaybackPlay": {
@@ -1825,15 +1814,48 @@
   "ignore": "Ignorieren",
   "ignored": "ignoriert",
   "ignorePerson": "Person ignorieren",
+  "imageEditorAlignCenter": "Zentrieren",
+  "imageEditorAlignLeft": "Links ausrichten",
+  "imageEditorAlignRight": "Rechts ausrichten",
+  "imageEditorBackgroundColor": "Hintergrundfarbe",
+  "imageEditorBlue": "Blau",
+  "imageEditorBold": "Fett",
   "imageEditorBrightness": "Helligkeit",
   "imageEditorContrast": "Kontrast",
+  "imageEditorCustomColor": "Benutzerdefinierte Farbe",
+  "imageEditorDuplicate": "Duplikat",
+  "imageEditorEnterText": "Text eingeben",
   "imageEditorExposure": "Belichtung",
   "imageEditorFade": "Überblenden",
+  "imageEditorGreen": "Grün",
   "imageEditorHue": "Farbton",
-  "imageEditorLuminance": "Leuchtdichte",
+  "imageEditorItalic": "Kursiv",
+  "imageEditorNoBackground": "Kein Hintergrund",
+  "@imageEditorNoBackground": {
+    "description": "Text background style with no visible background"
+  },
+  "imageEditorOrange": "Orange",
+  "imageEditorPink": "Pink",
+  "imageEditorPurple": "Lila",
+  "imageEditorRed": "Rot",
   "imageEditorSaturation": "Sättigung",
-  "imageEditorSharpness": "Schärfe",
+  "imageEditorSolidBackground": "Einfarbiger Hintergrund",
+  "@imageEditorSolidBackground": {
+    "description": "Text background style with a fully opaque color"
+  },
+  "imageEditorTeal": "Türkis",
   "imageEditorTemperature": "Temperatur",
+  "imageEditorText": "Text",
+  "@imageEditorText": {
+    "description": "Tool for adding text to a photo"
+  },
+  "imageEditorTextColor": "Textfarbe",
+  "imageEditorTint": "Farbton",
+  "imageEditorTranslucentBackground": "Transparenter Hintergrund",
+  "@imageEditorTranslucentBackground": {
+    "description": "Text background style with a half-transparent color"
+  },
+  "imageEditorWhite": "Weiß",
   "imageNotAnalyzed": "Bild nicht analysiert",
   "immediately": "Sofort",
   "@immediately": {
@@ -1850,6 +1872,15 @@
   "importEnteEncGuide": "Wählen Sie die von Ente exportierte, verschlüsselte JSON-Datei",
   "importEnterSetupKey": "Einen Setup-Schlüssel eingeben",
   "importFailureDesc": "Die ausgewählte Datei konnte nicht verarbeitet werden.",
+  "importFileTooLarge": "Die ausgewählte Datei ist zu groß. Maximale Größe: {size}.",
+  "@importFileTooLarge": {
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "10 MiB"
+      }
+    }
+  },
   "importFromGallery": "Aus Galerie importieren",
   "importInstruction": "Bitte wählen Sie eine Datei die Codes in folgendem Format beinhaltet",
   "importLabel": "Importieren",
@@ -2336,6 +2367,10 @@
   "@mediaManagementHintTitle": {
     "description": "Title of a sheet prompting Android users to enable media management permission."
   },
+  "meetEnteLocker": "Lerne Ente Locker kennen",
+  "@meetEnteLocker": {
+    "description": "Button in the Photos changelog that opens the Ente Locker website"
+  },
   "members": "Mitglieder",
   "memberStorageUsed": "{amount} verwendet",
   "@memberStorageUsed": {
@@ -2347,6 +2382,8 @@
     }
   },
   "memories": "Erinnerungen",
+  "memoriesReadyNotificationTitle": "Entdecke deine Erinnerungen wieder ✨",
+  "memoriesReadyNotificationBody": "Für dich zusammengestellt, auf deinem Handy",
   "memoriesWidgetDesc": "Wähle die Arten von Erinnerungen, die du auf der Startseite sehen möchtest.",
   "memoryCount": "{count, plural, =0{keine Erinnerungen} one{{formattedCount} Erinnerung} other{{formattedCount} Erinnerungen}}",
   "@memoryCount": {
@@ -2616,6 +2653,7 @@
   },
   "noResult": "Kein Ergebnis",
   "noResultsFound": "Keine Ergebnisse gefunden",
+  "noMatchingResultsFound": "Keine passenden Ergebnisse gefunden",
   "noSessionsFound": "Keine Sitzungen gefunden!",
   "noSimilarImagesFound": "Keine ähnlichen Bilder gefunden",
   "noSuggestionsForPerson": "Keine Vorschläge für {personName}",
@@ -3767,6 +3805,10 @@
   "sendInvite": "Einladung senden",
   "sendLink": "Link senden",
   "sendLogsDescription": "Dadurch werden Protokolle übermittelt, die uns bei der Behebung Ihres Problems helfen. Obwohl wir Vorkehrungen treffen, um sicherzustellen, dass keine sensiblen Informationen protokolliert werden, empfehlen wir Ihnen, diese Protokolle anzusehen, bevor Sie sie weitergeben.",
+  "sendPhoto": "Foto senden",
+  "@sendPhoto": {
+    "description": "Share a copy of the current photo using the system share sheet, as opposed to sending a viewing link"
+  },
   "sendQrCode": "QR-Code senden",
   "sendToEmail": "An {email} senden",
   "@sendToEmail": {
@@ -3776,6 +3818,10 @@
         "example": "support@ente.com"
       }
     }
+  },
+  "sendVideo": "Video senden",
+  "@sendVideo": {
+    "description": "Share a copy of the current video using the system share sheet, as opposed to sending a viewing link"
   },
   "serverEndpoint": "Server Endpunkt",
   "@serverEndpoint": {
@@ -3966,6 +4012,7 @@
   },
   "skip": "Überspringen",
   "skippedFiles": "Übersprungene Dateien",
+  "sharedFilesSkipped": "Einige freigegebene Dateien konnten nicht gelesen werden oder hatten den gleichen Namen. Sie wurden übersprungen.",
   "slideshow": "Präsentation",
   "slideshowSettings": "Einstellungen für die Präsentation",
   "smartMemories": "Smarte Erinnerungen",
@@ -4009,6 +4056,7 @@
   "sortNewestFirst": "Neueste zuerst",
   "sortOldestFirst": "Älteste zuerst",
   "sortZToA": "Z-A",
+  "speed": "Geschwindigkeit",
   "sportsAction": "Zocken",
   "sportsWithThem": "Sport mit {name}",
   "@sportsWithThem": {
@@ -4035,7 +4083,7 @@
       }
     }
   },
-  "startSnappingYourPhotosWillShowUpHere": "Fang an zu knipsen, deine Fotos werden hier erscheinen",
+  "startSnappingYourPhotosWillShowUpHere": "Fang an zu knipsen, deine Fotos werden hier erscheinen.",
   "startWithAddingPhotosOrFamiliarFaces": "Beginne mit dem Hinzufügen von\nFotos oder bekannten Gesichtern",
   "status": "Status",
   "sticker": "Aufkleber",
@@ -4071,6 +4119,7 @@
       }
     }
   },
+  "straighten": "Ausrichten",
   "streamDetails": "Stream-Details",
   "streetArt": "Straßenkunst-Geschichten",
   "streetFood": "Streetfood-Happen",
@@ -4685,7 +4734,7 @@
   "youAreViewer": "Du bist ein Zuschauer",
   "youAreCollaborator": "Du bist ein Bearbeiter",
   "youAreAdmin": "Du bist ein Administrator",
-  "emptyAlbumShareMessage": "Du hast dieses Album noch nicht mit jemandem geteilt.",
+  "emptyAlbumShareMessage": "Füge eine Person hinzu,\num dein Album mit ihr zu teilen",
   "addPeople": "Personen hinzufügen",
   "fromYourContacts": "Aus deinen Kontakten",
   "chooseAccess": "Zugriff auswählen",
