@@ -3,6 +3,7 @@ import {
     FileContextMenu,
     type ContextMenuPosition,
 } from "@/components/FileContextMenu";
+import { AlbumEmptyState } from "@/components/gallery/AlbumEmptyState";
 import type { GalleryBarMode } from "@/components/gallery/reducer";
 import {
     selectedFavoriteCount as countSelectedFavorites,
@@ -47,7 +48,6 @@ import {
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import { batch } from "ente-utils/array";
-import { t } from "i18next";
 import React, {
     memo,
     useCallback,
@@ -290,13 +290,14 @@ export const FileList: React.FC<FileListProps> = ({
 
         if (!annotatedFiles.length) {
             items.push({
-                height: height - 48,
+                height: Math.max(
+                    340,
+                    height - (header?.height ?? 0) - (footer?.height ?? 0),
+                ),
                 type: "span",
                 component: (
                     <NoFilesListItem>
-                        <Typography sx={{ color: "text.faint" }}>
-                            {t("nothing_here")}
-                        </Typography>
+                        <AlbumEmptyState />
                     </NoFilesListItem>
                 ),
             });
