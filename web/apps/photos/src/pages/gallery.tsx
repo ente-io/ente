@@ -39,6 +39,7 @@ import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import { PeopleOverview } from "@/components/gallery/PeopleOverview";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
+import { PublicLinkDetails } from "@/components/gallery/PublicLinkDetails";
 import {
     albumShortcutCollectionID,
     findCollectionCreatingIfNeeded,
@@ -79,7 +80,7 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
-import { CenteredFill, CenteredRow } from "ente-base/components/containers";
+import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
@@ -488,6 +489,7 @@ const Page: React.FC = () => {
             ),
         [quickLinks, normalCollectionSummaries],
     );
+    const selectedLink = quickLinks.find(({ id }) => id === selectedLinkID);
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
@@ -2241,11 +2243,15 @@ const Page: React.FC = () => {
                 ) : cleanupView === "large-files" ? (
                     <LargeFilesView onRemoteFilesPull={remoteFilesPull} />
                 ) : !isInSearchMode && barMode == "links" ? (
-                    <CenteredFill>
-                        <Typography variant="h3">
-                            {t("nothing_here")}
-                        </Typography>
-                    </CenteredFill>
+                    selectedLink ? (
+                        <PublicLinkDetails
+                            key={selectedLink.id}
+                            collection={selectedLink}
+                            coverFile={
+                                linkSummaries.get(selectedLink.id)?.coverFile
+                            }
+                        />
+                    ) : null
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
                   !state.collectionFiles.length &&
