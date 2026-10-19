@@ -159,6 +159,7 @@ type GalleryAction =
     | { type: "showAlbumOverview"; albumFilter: AlbumFilter }
     | { type: "showLinks"; collectionID?: number }
     | { type: "selectLink"; collectionID: number }
+    | { type: "publicLinkRemoved"; collectionID: number }
     | { type: "showAlbums" }
     | { type: "showCollectionSummary"; collectionSummaryID: number | undefined }
     | { type: "showPeople" }
@@ -334,6 +335,16 @@ export const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             };
         }
+
+        case "publicLinkRemoved":
+            return galleryReducer(state, {
+                type: "setCollections",
+                collections: state.collections.map((collection) =>
+                    collection.id === action.collectionID
+                        ? { ...collection, publicURLs: [] }
+                        : collection,
+                ),
+            });
 
         case "setCollections": {
             const collections = action.collections;

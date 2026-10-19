@@ -3,6 +3,8 @@
 import Avatar from "@/components/Avatar";
 import type { RemotePullOpts } from "@/components/gallery";
 import { PublicLinkCreated } from "@/components/share/PublicLinkCreated";
+import { usePublicLinkManagement } from "@/components/share/usePublicLinkManagement";
+import { useResolvedPublicLinkURL } from "@/components/share/useResolvedPublicLinkURL";
 import { avatarTextColor } from "@/services/avatar";
 import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -50,27 +52,22 @@ import {
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { deriveInteractiveKey } from "ente-base/crypto";
-import { isHTTPErrorWithStatus, isMuseumHTTPError } from "ente-base/http";
+import { isHTTPErrorWithStatus } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { useResolvedContactDisplay } from "ente-contacts";
-import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
 import type {
     Collection,
     CollectionNewParticipantRole,
+    CollectionUser,
     PublicURL,
 } from "ente-media/collection";
-import { CollectionSubType, type CollectionUser } from "ente-media/collection";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     createPublicURL,
-    deleteCollection,
-    deleteShareURL,
     getCollectionByID,
     shareCollection,
     unshareCollection,
-    updateCollectionLayout,
-    updatePublicURL,
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
 } from "ente-new/photos/services/collection";
@@ -1415,8 +1412,6 @@ const PublicShare: React.FC<PublicShareProps> = ({
     canManage,
     openManageLink,
 }) => {
-    const { customDomain } = useSettingsSnapshot();
-
     const {
         show: showPublicLinkCreated,
         props: publicLinkCreatedVisibilityProps,
@@ -1425,31 +1420,15 @@ const PublicShare: React.FC<PublicShareProps> = ({
     const [publicURL, setPublicURL] = useState<PublicURL | undefined>(
         undefined,
     );
-    const [resolvedURL, setResolvedURL] = useState<string | undefined>(
-        undefined,
-    );
-
     useEffect(() => {
         setPublicURL(collection.publicURLs[0]);
     }, [collection]);
 
-    useEffect(() => {
-        if (publicURL?.url) {
-            void appendCollectionKeyToShareURL(
-                publicURL.url,
-                collection.key,
-            ).then((url) =>
-                setResolvedURL(
-                    substituteCustomDomainIfNeeded(
-                        url,
-                        canManage ? customDomain : undefined,
-                    ),
-                ),
-            );
-        } else {
-            setResolvedURL(undefined);
-        }
-    }, [collection.key, publicURL, customDomain, canManage]);
+    const resolvedURL = useResolvedPublicLinkURL(
+        collection,
+        publicURL,
+        canManage,
+    );
 
     const handleCopyLink = () => {
         if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);
@@ -1486,16 +1465,6 @@ const PublicShare: React.FC<PublicShareProps> = ({
             />
         </>
     );
-};
-
-const substituteCustomDomainIfNeeded = (
-    url: string,
-    customDomain: string | undefined,
-) => {
-    if (!customDomain) return url;
-    const u = new URL(url);
-    u.host = customDomain;
-    return u.href;
 };
 
 type EnablePublicShareOptionsProps = {
@@ -1722,7 +1691,57 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     setBlockingLoad,
     onRemotePull,
 }) => {
-    const [errorMessage, setErrorMessage] = useState("");
+    return (
+        <TitledNestedSidebarDrawer
+            anchor="right"
+            {...{ open, onClose }}
+            onRootClose={() => {
+                onClose();
+                onRootClose();
+            }}
+            title={t("manage_link")}
+        >
+            <ManagePublicLinkSettings
+                key={`${collection.id}:${publicURL.url}`}
+                {...{
+                    onClose,
+                    onRootClose,
+                    collection,
+                    publicURL,
+                    setPublicURL,
+                    resolvedURL,
+                    setBlockingLoad,
+                    onRemotePull,
+                }}
+            />
+        </TitledNestedSidebarDrawer>
+    );
+};
+
+type ManagePublicLinkSettingsProps = Omit<
+    ManagePublicShareOptionsProps,
+    "open" | "setBlockingLoad"
+> & {
+    setBlockingLoad?: (value: boolean) => void;
+    onLinkRemoved?: (collectionID: number) => void;
+    inline?: boolean;
+};
+
+/** Settings shared by the sharing drawer and the inline Links pane. */
+export const ManagePublicLinkSettings: React.FC<
+    ManagePublicLinkSettingsProps
+> = ({
+    onClose,
+    onRootClose,
+    collection,
+    publicURL,
+    setPublicURL,
+    resolvedURL,
+    setBlockingLoad,
+    onRemotePull,
+    onLinkRemoved,
+    inline = false,
+}) => {
     const { embedURL: embedBaseURL } = useSettingsSnapshot();
 
     const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
@@ -1743,149 +1762,117 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         onRootClose();
     };
 
-    const handlePublicURLUpdate = async (
-        updates: UpdatePublicURLAttributes,
-    ) => {
-        setBlockingLoad(true);
-        setErrorMessage("");
-        try {
-            setPublicURL(await updatePublicURL(collection.id, updates));
-            void onRemotePull({ silent: true });
-        } catch (e) {
-            log.error("Could not update public link", e);
-            if (await isMuseumHTTPError(e, 403, "LINK_EDIT_NOT_ALLOWED")) {
-                setErrorMessage(t("link_edit_disabled_for_free_accounts"));
-            } else {
-                setErrorMessage(t("generic_error"));
-            }
-        } finally {
-            setBlockingLoad(false);
-        }
-    };
-    const handleRemovePublicLink = async () => {
-        setBlockingLoad(true);
-        setErrorMessage("");
-        try {
-            const isQuickLinkAlbum =
-                collection.magicMetadata?.data.subType ==
-                CollectionSubType.quicklink;
-            if (isQuickLinkAlbum && collection.sharees.length === 0) {
-                await deleteCollection(collection.id, { keepFiles: true });
-                setPublicURL(undefined);
-                void onRemotePull({ silent: true });
-                handleRootClose();
-                return;
-            }
-
-            await deleteShareURL(collection.id);
-            setPublicURL(undefined);
-            void onRemotePull({ silent: true });
-            onClose();
-        } catch (e) {
-            log.error("Failed to remove public link", e);
-            setErrorMessage(t("generic_error"));
-        } finally {
-            setBlockingLoad(false);
-        }
-    };
+    const { isSaving, errorMessage, onUpdate, onUpdateLayout, onRemoveLink } =
+        usePublicLinkManagement({
+            collection,
+            setPublicURL,
+            setBlockingLoad,
+            onRemotePull,
+            onLinkRemoved,
+            onRemove: (isQuickLink) =>
+                isQuickLink ? handleRootClose() : onClose(),
+        });
 
     return (
-        <TitledNestedSidebarDrawer
-            anchor="right"
-            {...{ open, onClose }}
-            onRootClose={handleRootClose}
-            title={t("manage_link")}
+        <Stack
+            component="fieldset"
+            disabled={isSaving}
+            aria-busy={isSaving}
+            sx={{
+                border: 0,
+                m: 0,
+                minWidth: 0,
+                gap: 3,
+                py: "20px",
+                px: "8px",
+                "&:disabled": { opacity: 0.6 },
+            }}
         >
-            <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
-                <ManageLayout
-                    {...{
-                        collection,
-                        onRootClose,
-                        onRemotePull,
-                        setBlockingLoad,
-                    }}
-                />
-                <ManagePublicCollect
-                    {...{ publicURL }}
-                    onUpdate={handlePublicURLUpdate}
-                />
-                <ManageLinkExpiry
+            <ManageLayout
+                {...{
+                    collection,
+                    onRootClose,
+                    onUpdate: onUpdateLayout,
+                    disabled: isSaving,
+                    errorMessage,
+                }}
+            />
+            <ManagePublicCollect {...{ publicURL }} onUpdate={onUpdate} />
+            <ManageLinkExpiry
+                disabled={isSaving}
+                {...{ onRootClose, publicURL }}
+                onUpdate={onUpdate}
+            />
+            <RowButtonGroup>
+                <ManageDeviceLimit
+                    disabled={isSaving}
                     {...{ onRootClose, publicURL }}
-                    onUpdate={handlePublicURLUpdate}
+                    onUpdate={onUpdate}
                 />
-                <RowButtonGroup>
-                    <ManageDeviceLimit
-                        {...{ onRootClose, publicURL }}
-                        onUpdate={handlePublicURLUpdate}
-                    />
-                    <RowButtonDivider />
-                    <ManageDownloadAccess
-                        {...{ publicURL }}
-                        onUpdate={handlePublicURLUpdate}
-                    />
-                    <RowButtonDivider />
-                    <ManageJoinAlbum
-                        {...{ publicURL }}
-                        onUpdate={handlePublicURLUpdate}
-                    />
-                    <RowButtonDivider />
-                    <ManageLinkPassword
-                        {...{ publicURL }}
-                        onUpdate={handlePublicURLUpdate}
-                    />
-                </RowButtonGroup>
-                <RowButtonGroup>
-                    <RowButton
-                        startIcon={
-                            copied ? (
-                                <DoneIcon sx={{ color: "accent.main" }} />
-                            ) : (
-                                <ContentCopyIcon />
-                            )
-                        }
-                        onClick={handleCopyLink}
-                        label={t("copy_link")}
-                    />
-                    <RowButtonDivider />
-                    <RowButton
-                        startIcon={
-                            embedCopied ? (
-                                <DoneIcon sx={{ color: "accent.main" }} />
-                            ) : (
-                                <CodeIcon />
-                            )
-                        }
-                        onClick={handleCopyEmbedLink}
-                        label={t("copy_embed_html")}
-                    />
-                </RowButtonGroup>
-                <RowButtonGroup>
-                    <RowButton
-                        color="critical"
-                        startIcon={<RemoveCircleOutlinedIcon />}
-                        onClick={handleRemovePublicLink}
-                        label={t("remove_link")}
-                    />
-                </RowButtonGroup>
-                {errorMessage && (
-                    <Typography
-                        variant="small"
-                        sx={{ color: "critical.main", textAlign: "center" }}
-                    >
-                        {errorMessage}
-                    </Typography>
-                )}
-            </Stack>
-        </TitledNestedSidebarDrawer>
+                <RowButtonDivider />
+                <ManageDownloadAccess {...{ publicURL }} onUpdate={onUpdate} />
+                <RowButtonDivider />
+                <ManageJoinAlbum {...{ publicURL }} onUpdate={onUpdate} />
+                <RowButtonDivider />
+                <ManageLinkPassword
+                    inSidebar={!inline}
+                    {...{ publicURL }}
+                    onUpdate={onUpdate}
+                />
+            </RowButtonGroup>
+            <RowButtonGroup>
+                <RowButton
+                    startIcon={
+                        copied ? (
+                            <DoneIcon sx={{ color: "accent.main" }} />
+                        ) : (
+                            <ContentCopyIcon />
+                        )
+                    }
+                    onClick={handleCopyLink}
+                    label={t("copy_link")}
+                />
+                <RowButtonDivider />
+                <RowButton
+                    startIcon={
+                        embedCopied ? (
+                            <DoneIcon sx={{ color: "accent.main" }} />
+                        ) : (
+                            <CodeIcon />
+                        )
+                    }
+                    onClick={handleCopyEmbedLink}
+                    label={t("copy_embed_html")}
+                />
+            </RowButtonGroup>
+            <RowButtonGroup>
+                <RowButton
+                    color="critical"
+                    startIcon={<RemoveCircleOutlinedIcon />}
+                    onClick={() => void onRemoveLink()}
+                    label={t("remove_link")}
+                />
+            </RowButtonGroup>
+            {errorMessage && (
+                <Typography
+                    variant="small"
+                    role="alert"
+                    sx={{ color: "critical.main", textAlign: "center" }}
+                >
+                    {errorMessage}
+                </Typography>
+            )}
+        </Stack>
     );
 };
 
 interface ManagePublicLinkSettingProps {
     publicURL: PublicURL;
-    onUpdate: (req: UpdatePublicURLAttributes) => Promise<void>;
+    onUpdate: (req: UpdatePublicURLAttributes) => Promise<boolean>;
 }
 
 type ManagePublicLinkSettingDrawerProps = ManagePublicLinkSettingProps & {
+    disabled: boolean;
     onRootClose: () => void;
 };
 
@@ -1922,6 +1909,7 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
 
 const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
     onRootClose,
+    disabled,
     publicURL,
     onUpdate,
 }) => {
@@ -1931,8 +1919,8 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
     const options = useMemo(() => shareExpiryOptions(), []);
 
     const changeShareExpiryValue = (value: number) => async () => {
-        await onUpdate({ validTill: value });
-        expiryOptionsVisibilityProps.onClose();
+        if (await onUpdate({ validTill: value }))
+            expiryOptionsVisibilityProps.onClose();
     };
 
     return (
@@ -1964,7 +1952,18 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
                 onRootClose={onRootClose}
                 title={t("link_expiry")}
             >
-                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                <Stack
+                    component="fieldset"
+                    disabled={disabled}
+                    sx={{
+                        border: 0,
+                        m: 0,
+                        minWidth: 0,
+                        gap: "32px",
+                        py: "20px",
+                        px: "8px",
+                    }}
+                >
                     <RowButtonGroup>
                         {options.map(({ label, value }, index) => (
                             <React.Fragment key={value()}>
@@ -2018,6 +2017,7 @@ const microsecsAfter = (after: "hour" | "day" | "week" | "month" | "year") => {
 
 const ManageDeviceLimit: React.FC<ManagePublicLinkSettingDrawerProps> = ({
     onRootClose,
+    disabled,
     publicURL,
     onUpdate,
 }) => {
@@ -2027,8 +2027,8 @@ const ManageDeviceLimit: React.FC<ManagePublicLinkSettingDrawerProps> = ({
     const options = useMemo(() => deviceLimitOptions(), []);
 
     const changeDeviceLimitValue = (value: number) => async () => {
-        await onUpdate({ deviceLimit: value });
-        deviceOptionsVisibilityProps.onClose();
+        if (await onUpdate({ deviceLimit: value }))
+            deviceOptionsVisibilityProps.onClose();
     };
 
     return (
@@ -2049,7 +2049,18 @@ const ManageDeviceLimit: React.FC<ManagePublicLinkSettingDrawerProps> = ({
                 onRootClose={onRootClose}
                 title={t("device_limit")}
             >
-                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                <Stack
+                    component="fieldset"
+                    disabled={disabled}
+                    sx={{
+                        border: 0,
+                        m: 0,
+                        minWidth: 0,
+                        gap: "32px",
+                        py: "20px",
+                        px: "8px",
+                    }}
+                >
                     <RowButtonGroup>
                         {options.map(({ label, value }, index) => (
                             <React.Fragment key={label}>
@@ -2090,12 +2101,12 @@ const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
                 continue: {
                     text: t("disable"),
                     color: "critical",
-                    action: () => onUpdate({ enableDownload: false }),
+                    action: async () => {
+                        await onUpdate({ enableDownload: false });
+                    },
                 },
             });
         } else {
-            // TODO: Various calls to onUpdate return promises. The UI should
-            // handle the in-progress states where needed.
             void onUpdate({ enableDownload: true });
         }
     };
@@ -2126,10 +2137,9 @@ const ManageJoinAlbum: React.FC<ManagePublicLinkSettingProps> = ({
     );
 };
 
-const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
-    publicURL,
-    onUpdate,
-}) => {
+const ManageLinkPassword: React.FC<
+    ManagePublicLinkSettingProps & { inSidebar: boolean }
+> = ({ inSidebar, publicURL, onUpdate }) => {
     const { showMiniDialog } = useBaseContext();
     const { show: showSetPassword, props: setPasswordVisibilityProps } =
         useModalVisibility();
@@ -2142,7 +2152,9 @@ const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
                 continue: {
                     text: t("disable"),
                     color: "critical",
-                    action: () => onUpdate({ disablePassword: true }),
+                    action: async () => {
+                        await onUpdate({ disablePassword: true });
+                    },
                 },
             });
         } else {
@@ -2159,24 +2171,29 @@ const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
             />
             <SetPublicLinkPassword
                 {...setPasswordVisibilityProps}
-                {...{ publicURL, onUpdate }}
+                {...{ publicURL, onUpdate, inSidebar }}
             />
         </>
     );
 };
 
 type SetPublicLinkPasswordProps = ModalVisibilityProps &
-    ManagePublicLinkSettingProps;
+    ManagePublicLinkSettingProps & { inSidebar: boolean };
 
 const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
+    inSidebar,
     open,
     onClose,
-    publicURL,
     onUpdate,
 }) => {
-    const savePassword: SingleInputFormProps["onSubmit"] = async (password) => {
-        await enablePublicUrlPassword(password);
-        publicURL.passwordEnabled = true;
+    const savePassword: SingleInputFormProps["onSubmit"] = async (
+        password,
+        setFieldError,
+    ) => {
+        if (!(await enablePublicUrlPassword(password))) {
+            setFieldError(t("generic_error"));
+            return;
+        }
         onClose();
         // Keep the submitting state through the close animation.
         return wait(1000);
@@ -2196,12 +2213,14 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     return (
         <Dialog
             {...{ open, onClose }}
-            disablePortal
+            disablePortal={inSidebar}
             slotProps={{
-                backdrop: { sx: { position: "absolute" } },
+                backdrop: {
+                    sx: inSidebar ? { position: "absolute" } : undefined,
+                },
                 paper: { sx: { "&&": { padding: "4px" } } },
             }}
-            sx={{ position: "absolute" }}
+            sx={inSidebar ? { position: "absolute" } : undefined}
             maxWidth={"sm"}
             fullWidth
         >
@@ -2225,17 +2244,20 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
 interface ManageLayoutProps {
     onRootClose: () => void;
     collection: Collection;
-    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+    onUpdate: (layout: string) => Promise<boolean>;
+    disabled: boolean;
+    errorMessage: string;
 }
 
 const ManageLayout: React.FC<ManageLayoutProps> = ({
     onRootClose,
     collection,
-    onRemotePull,
+    onUpdate,
+    disabled,
+    errorMessage,
 }) => {
     const { show: showLayoutOptions, props: layoutOptionsVisibilityProps } =
         useModalVisibility();
-    const [errorMessage, setErrorMessage] = useState("");
     const [loadingLayout, setLoadingLayout] = useState<string | null>(null);
     const [selectedLayout, setSelectedLayout] = useState<string | null>(null);
 
@@ -2245,19 +2267,17 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
         collection.pubMagicMetadata?.data?.layout,
     );
 
+    useEffect(() => {
+        setSelectedLayout(null);
+    }, [currentLayout]);
+
     const changeLayoutValue = (value: string) => async () => {
-        if (value === currentLayout) return;
+        if (disabled || value === currentLayout) return;
 
         setLoadingLayout(value);
         setSelectedLayout(value);
-        setErrorMessage("");
         try {
-            await updateCollectionLayout(collection, value);
-            await onRemotePull({ silent: true });
-        } catch (e) {
-            log.error("Could not update collection layout", e);
-            setErrorMessage(t("generic_error"));
-            setSelectedLayout(null);
+            if (!(await onUpdate(value))) setSelectedLayout(null);
         } finally {
             setLoadingLayout(null);
         }
@@ -2268,7 +2288,7 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
             <RowButtonGroup>
                 <RowButton
                     label={t("album_layout")}
-                    caption={layoutLabel(currentLayout)}
+                    caption={layoutLabel(selectedLayout ?? currentLayout)}
                     onClick={showLayoutOptions}
                     endIcon={<ChevronRightIcon />}
                 />
@@ -2279,7 +2299,11 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
                 onRootClose={onRootClose}
                 title={t("album_layout")}
             >
-                <Stack sx={{ py: "20px", px: "8px" }}>
+                <Stack
+                    component="fieldset"
+                    disabled={disabled}
+                    sx={{ border: 0, m: 0, minWidth: 0, py: "20px", px: "8px" }}
+                >
                     <RowButtonGroup>
                         {options.map(({ label, value }, index) => (
                             <React.Fragment key={value}>
@@ -2305,22 +2329,19 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
                             </React.Fragment>
                         ))}
                     </RowButtonGroup>
+                    {errorMessage && (
+                        <Typography
+                            role="alert"
+                            variant="small"
+                            sx={{ color: "critical.main", mt: 0.5 }}
+                        >
+                            {errorMessage}
+                        </Typography>
+                    )}
                     {currentLayout === "trip" && !loadingLayout && (
                         <RowButtonGroupHint>
                             {t("maps_privacy_notice")}
                         </RowButtonGroupHint>
-                    )}
-                    {errorMessage && (
-                        <Typography
-                            variant="small"
-                            sx={{
-                                color: "critical.main",
-                                mt: 0.5,
-                                textAlign: "center",
-                            }}
-                        >
-                            {errorMessage}
-                        </Typography>
                     )}
                 </Stack>
             </TitledNestedSidebarDrawer>

@@ -145,6 +145,48 @@ describe("Links navigation", () => {
         expect(state.view).toEqual({ type: "links", selectedLinkID: 1 });
     });
 
+    test("selects the next link immediately after successful removal", () => {
+        let state = galleryReducer(mounted(), { type: "showLinks" });
+        state = galleryReducer(state, {
+            type: "publicLinkRemoved",
+            collectionID: 2,
+        });
+        expect(state.view).toEqual({ type: "links", selectedLinkID: 1 });
+        expect(
+            visibleQuickLinks(
+                state.collections,
+                1,
+                state.hiddenCollectionIDs,
+            ).map(({ id }) => id),
+        ).toEqual([1]);
+        state = galleryReducer(state, {
+            type: "publicLinkRemoved",
+            collectionID: 1,
+        });
+        expect(state.view).toEqual({
+            type: "links",
+            selectedLinkID: undefined,
+        });
+    });
+
+    test("completion of a removal does not overwrite a newer selection or navigate away", () => {
+        let state = galleryReducer(mounted([link(1), link(2), link(3)]), {
+            type: "selectLink",
+            collectionID: 1,
+        });
+        state = galleryReducer(state, {
+            type: "publicLinkRemoved",
+            collectionID: 2,
+        });
+        expect(state.view).toEqual({ type: "links", selectedLinkID: 1 });
+        state = galleryReducer(state, { type: "showPeople" });
+        state = galleryReducer(state, {
+            type: "publicLinkRemoved",
+            collectionID: 3,
+        });
+        expect(state.view?.type).toBe("people");
+    });
+
     test("supports returning to Home and People", () => {
         let state = galleryReducer(mounted(), { type: "showLinks" });
         state = galleryReducer(state, { type: "showAll" });

@@ -37,6 +37,7 @@ import {
 import { AlbumsOverview } from "@/components/gallery/AlbumsOverview";
 import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
+import { ManageLinkPane } from "@/components/gallery/ManageLinkPane";
 import { PeopleOverview } from "@/components/gallery/PeopleOverview";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
 import {
@@ -79,7 +80,7 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
-import { CenteredFill, CenteredRow } from "ente-base/components/containers";
+import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
@@ -2241,11 +2242,19 @@ const Page: React.FC = () => {
                 ) : cleanupView === "large-files" ? (
                     <LargeFilesView onRemoteFilesPull={remoteFilesPull} />
                 ) : !isInSearchMode && barMode == "links" ? (
-                    <CenteredFill>
-                        <Typography variant="h3">
-                            {t("nothing_here")}
-                        </Typography>
-                    </CenteredFill>
+                    <ManageLinkPane
+                        collection={quickLinks.find(
+                            ({ id }) => id === selectedLinkID,
+                        )}
+                        loading={isFirstLoad}
+                        onRemotePull={remotePull}
+                        onLinkRemoved={(collectionID) =>
+                            dispatch({
+                                type: "publicLinkRemoved",
+                                collectionID,
+                            })
+                        }
+                    />
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
                   !state.collectionFiles.length &&

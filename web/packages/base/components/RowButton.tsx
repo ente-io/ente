@@ -218,7 +218,10 @@ export const RowSwitch: React.FC<RowSwitchProps> = ({
         <Typography sx={{ py: "14px", px: "2px", fontWeight: "medium" }}>
             {label}
         </Typography>
-        <EnteSwitch {...{ checked, onClick }} />
+        <EnteSwitch
+            {...{ checked, onClick }}
+            slotProps={{ input: { "aria-label": label } }}
+        />
     </Stack>
 );
 

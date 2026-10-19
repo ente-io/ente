@@ -781,6 +781,8 @@
     "shared_albums_label": "Shared",
     "received_albums_label": "Received",
     "links": "Links",
+    "links_empty_title": "No public links",
+    "links_empty_description": "Create a public link from your photos and it will appear here.",
     "search_links": "Search links",
     "links_albums_label": "Links",
     "empty_albums": "Empty",
