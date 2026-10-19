@@ -31,6 +31,9 @@ use vault::{Account, State, Vault};
 
 #[tokio::main]
 async fn main() {
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn"))
+        .format(|out, record| writeln!(out, "{}", record.args()))
+        .init();
     let mut command = args::command();
     let matches = command.get_matches_mut();
     let result = if matches.get_flag("help-all") {

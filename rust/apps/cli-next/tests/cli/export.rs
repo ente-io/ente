@@ -895,7 +895,12 @@ fn export_live_pairs_retry_and_reuse_without_rewriting_unchanged_output() -> Tes
             let destination = tempfile::tempdir()?;
             let root = destination.path().join("export");
             objects.interrupt_reads(1);
-            let result = export(&home, &root, &[]);
+            let output = success(
+                home.command(&["photos", "export", root.to_str().unwrap(), "--json"])
+                    .output()?,
+            );
+            assert!(String::from_utf8_lossy(&output.stderr).contains("retrying in "));
+            let result: Value = serde_json::from_slice(&output.stdout)?;
             assert_eq!(result["copies"]["completed"], 3);
             assert_eq!(objects.reads(), 3);
             for folder in ["Live", "Copies"] {
@@ -1331,6 +1336,9 @@ fn export_names_are_portable_and_stable() -> TestResult {
             ("IMG-1.jpg", Some(0), "IMG-1-1.jpg"),
             ("CON.jpg", Some(0), "CON-1.jpg"),
             ("CON.extra.jpg", Some(0), "CON-1.extra.jpg"),
+            ("CONIN$.jpg", Some(0), "CONIN$-1.jpg"),
+            ("CONOUT$.jpg", Some(0), "CONOUT$-1.jpg"),
+            ("NUL .jpg", Some(0), "NUL -1.jpg"),
             ("bad:name.jpg", Some(0), "bad_name.jpg"),
             ("bad_name.jpg", Some(0), "bad_name-1.jpg"),
             ("Straße.jpg", Some(0), "Straße.jpg"),

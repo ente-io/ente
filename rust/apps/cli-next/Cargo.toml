@@ -21,7 +21,9 @@ ente-core.workspace = true
 ente-paste.workspace = true
 ente-photos.workspace = true
 ente-photos-export.workspace = true
+env_logger.workspace = true
 keyring = { workspace = true, features = ["apple-native", "windows-native", "linux-native-sync-persistent", "crypto-rust"] }
+open.workspace = true
 reqwest.workspace = true
 rusqlite = { workspace = true, features = ["bundled-sqlcipher"] }
 serde.workspace = true

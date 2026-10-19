@@ -454,13 +454,17 @@ where
     retry_with_delays(&profile.delays(), operation).await
 }
 
-pub async fn retry_if<T, E, F, Fut>(operation: F, should_retry: impl Fn(&E) -> bool) -> Result<T, E>
+pub async fn retry_if<T, E, F, Fut>(
+    profile: RetryProfile,
+    operation: F,
+    should_retry: impl Fn(&E) -> bool,
+) -> Result<T, E>
 where
     E: std::fmt::Display,
     F: FnMut() -> Fut,
     Fut: Future<Output = Result<T, E>>,
 {
-    retry_operation(&RetryProfile::Interactive.delays(), operation, should_retry).await
+    retry_operation(&profile.delays(), operation, should_retry).await
 }
 
 async fn retry_with_delays<T, F, Fut>(delays: &[Duration], mut operation: F) -> Result<T, Error>

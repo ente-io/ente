@@ -96,6 +96,7 @@ impl AccountSpaceCtx {
         };
         let path = format!("/spaces/{space_id}/posts");
         let response = http::retry_if(
+            http::RetryProfile::Interactive,
             || async {
                 self.api()
                     .post(&path)
