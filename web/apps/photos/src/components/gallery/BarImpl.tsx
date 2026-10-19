@@ -328,7 +328,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 flex: 1,
                 minHeight: 0,
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "safe center",
                 gap: "12px",
                 px: "16px",
                 py: "24px",
