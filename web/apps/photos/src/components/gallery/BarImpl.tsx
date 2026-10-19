@@ -608,12 +608,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     "aria-labelledby": titleID,
                     inert: !mobileDrawerProps.open,
                     sx: (theme) => ({
-                        width: mode == "people" ? "min(328px, 94vw)" : "100%",
-                        borderRadius: mode == "people" ? "0 20px 20px 0" : 0,
-                        boxShadow:
-                            mode == "people"
-                                ? "0 24px 60px rgba(0,0,0,0.3)"
-                                : "none",
+                        width: "100%",
+                        borderRadius: 0,
+                        boxShadow: "none",
                         bgcolor: "#F4F4F4",
                         ...theme.applyStyles("dark", { bgcolor: "#161616" }),
                     }),
