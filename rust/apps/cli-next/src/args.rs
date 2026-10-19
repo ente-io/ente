@@ -515,7 +515,8 @@ Fields: id, name, type, ownerId (strings); albumIds (string array);
 createdAt, updatedAt (RFC3339 timestamp strings).
 Nullable fields: modifiedAt (RFC3339 string); location ({latitude, longitude}, numbers);
 caption, hash, dateTime, offsetTime, visibility (strings); durationSeconds, width, height (integers).
-dateTime and offsetTime retain the stored metadata strings.";
+dateTime and offsetTime retain the stored metadata strings.
+hash comes from Ente's stored metadata. For Live Photos, it can contain the image and video hashes separated by a colon.";
 
 #[derive(Subcommand)]
 pub enum FileCommand {
