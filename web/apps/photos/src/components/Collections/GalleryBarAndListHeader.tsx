@@ -173,8 +173,7 @@ export const GalleryBarAndListHeader: React.FC<
                     (mode == "albums"
                         ? !cs.attributes.has("system") ||
                           (cs.id > 0 && cs.type == "uncategorized")
-                        : !cs.attributes.has("hideFromCollectionBar") &&
-                          !cs.attributes.has("quickLink")),
+                        : !cs.attributes.has("hideFromCollectionBar")),
             ),
         [sortedCollectionSummaries, uncategorizedCollectionSummaryID, mode],
     );
