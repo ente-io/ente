@@ -875,16 +875,5 @@ const PersonCard: React.FC<PersonCardProps> = ({
                 <HugeiconsIcon icon={PinIcon} size={14} />
             </CollectionBarCardIcon_>
         )}
-        <Typography
-            component="span"
-            sx={{
-                flexShrink: 0,
-                fontSize: 12,
-                lineHeight: "20px",
-                color: "text.muted",
-            }}
-        >
-            {person.fileIDs.length.toLocaleString()}
-        </Typography>
     </BarCard>
 );
