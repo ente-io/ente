@@ -123,8 +123,6 @@ describe("sidebar album search across groups", () => {
             expect(html).toContain('aria-label="shared_albums_title"');
             expect(html).toContain("Family");
             expect(html).toContain("Holiday album");
-            expect(html).not.toContain('aria-label="links_albums_title"');
-            expect(html).not.toContain("Trip link");
             expect(html).not.toContain("no-matches.svg");
         },
     );

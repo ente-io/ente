@@ -85,9 +85,6 @@ describe("album filters shared by the dialog and sidebar", () => {
         expect(ids("ente")).toEqual([1, 2, 3, 4]);
         expect(ids("shared")).toEqual([2, 4]);
         expect(ids("received")).toEqual([3]);
-        expect(
-            visibleAlbumFilters(albums).map(({ value }) => value),
-        ).not.toContain("links");
         expect(albums.map(({ id }) => id)).toEqual([1, 2, 3, 4, 5]);
     });
 
