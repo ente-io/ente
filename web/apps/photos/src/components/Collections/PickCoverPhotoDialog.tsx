@@ -1,32 +1,41 @@
-import { fileTimelineDateString, type SelectedState } from "@/utils/file";
-import CloseIcon from "@mui/icons-material/Close";
+import {
+    ArrowLeft02Icon,
+    Cancel01Icon,
+    Tick02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
     Box,
     Dialog,
-    DialogActions,
-    DialogContent,
     IconButton,
     Stack,
     Typography,
+    styled,
+    type Theme,
 } from "@mui/material";
-import type { LocalUser } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
-import { ut } from "ente-base/i18n";
+import {
+    uploadSheetMediaQuery,
+    uploadSheetPaperSx,
+    useIsUploadSheet,
+} from "ente-gallery/components/upload-progress/bottom-sheet";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
+import { ItemCard } from "ente-new/photos/components/Tiles";
+import { FocusVisibleUnstyledButton } from "ente-new/photos/components/UnstyledButton";
+import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { FileList, type FileListAnnotatedFile } from "../FileList";
+import { FixedSizeList, type ListChildComponentProps } from "react-window";
 
 interface PickCoverPhotoDialogProps {
     open: boolean;
     onClose: () => void;
     collection: Collection;
     files: EnteFile[];
-    user: LocalUser;
+    currentCoverID: number | undefined;
     canResetToDefault: boolean;
     onUseSelectedPhoto: (file: EnteFile) => Promise<boolean>;
     onResetToDefault: () => Promise<boolean>;
@@ -39,265 +48,349 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
     onClose,
     collection,
     files,
-    user,
+    currentCoverID,
     canResetToDefault,
     onUseSelectedPhoto,
     onResetToDefault,
 }) => {
-    const isFullScreen = useIsSmallWidth();
+    const isSheet = useIsUploadSheet();
     const titleID = useId();
-    const descriptionID = useId();
-    const [submittingAction, setSubmittingAction] = useState<
-        SubmittingAction | undefined
-    >();
-    const [selected, setSelected] = useState<SelectedState>(
-        createEmptySelection(collection.id),
-    );
+    const [submittingAction, setSubmittingAction] =
+        useState<SubmittingAction>();
+    const [selectedID, setSelectedID] = useState<number>();
     const isSubmitting = Boolean(submittingAction);
+    const coverFiles = useMemo(
+        () =>
+            open
+                ? files.filter(
+                      (file) => file.metadata.fileType !== FileType.video,
+                  )
+                : [],
+        [open, files],
+    );
+    const selectedFile = coverFiles.find(({ id }) => id === selectedID);
 
     useEffect(() => {
         if (open) {
-            setSelected(createEmptySelection(collection.id));
+            setSelectedID(currentCoverID);
             setSubmittingAction(undefined);
         }
-    }, [open, collection.id]);
-
-    const annotatedFiles = useMemo((): FileListAnnotatedFile[] => {
-        if (!open) return [];
-
-        return files
-            .filter((file) => file.metadata.fileType !== FileType.video)
-            .map((file) => ({
-                file,
-                timelineDateString: fileTimelineDateString(file),
-            }));
-    }, [open, files]);
-
-    const selectedFile = useMemo(() => {
-        if (!open) return undefined;
-
-        for (const [key, value] of Object.entries(selected)) {
-            if (typeof value !== "boolean" || !value) continue;
-            const selectedFileID = Number(key);
-            return files.find(({ id }) => id === selectedFileID);
-        }
-        return undefined;
-    }, [open, selected, files]);
-
-    const handleItemClick = useCallback(
-        (index: number) => {
-            const file = annotatedFiles[index]?.file;
-            if (!file) return;
-            setSelected(createSingleSelection(file, collection.id, user.id));
-        },
-        [annotatedFiles, collection.id, user.id],
-    );
+    }, [open, collection.id, currentCoverID]);
 
     const handleUseSelectedPhoto = useCallback(async () => {
-        if (!selectedFile) return;
-
+        if (!selectedFile || isSubmitting) return;
         setSubmittingAction("use-selected-photo");
         try {
-            const didUpdate = await onUseSelectedPhoto(selectedFile);
-            if (didUpdate) onClose();
+            if (await onUseSelectedPhoto(selectedFile)) onClose();
         } finally {
             setSubmittingAction(undefined);
         }
-    }, [onUseSelectedPhoto, onClose, selectedFile]);
+    }, [onUseSelectedPhoto, onClose, selectedFile, isSubmitting]);
 
     const handleResetToDefault = useCallback(async () => {
+        if (isSubmitting) return;
         setSubmittingAction("reset-to-default");
         try {
-            const didReset = await onResetToDefault();
-            if (didReset) onClose();
+            if (await onResetToDefault()) onClose();
         } finally {
             setSubmittingAction(undefined);
         }
-    }, [onResetToDefault, onClose]);
-
-    const actionButtonSx = isFullScreen
-        ? { flex: 1, minHeight: "44px" }
-        : { minHeight: "44px" };
-    const headerIconButtonSx = {
-        width: "46px",
-        height: "46px",
-        borderRadius: "50%",
-        color: "fixed.white",
-        backgroundColor: "fill.faint",
-        transition: "background-color 150ms ease",
-        "& > svg": { opacity: 0.72, transition: "opacity 150ms ease" },
-        "&:hover": {
-            backgroundColor: "fill.faintHover",
-            "& > svg": { opacity: 1 },
-        },
-    };
+    }, [onResetToDefault, onClose, isSubmitting]);
 
     return (
         <Dialog
             open={open}
             onClose={isSubmitting ? undefined : onClose}
             aria-labelledby={titleID}
-            aria-describedby={descriptionID}
-            fullWidth
-            fullScreen={isFullScreen}
-            slotProps={{
-                paper: {
-                    sx: !isFullScreen
-                        ? {
-                              width: "min(980px, calc(100vw - 64px))",
-                              height: "min(760px, calc(100vh - 64px))",
-                              borderRadius: "12px",
-                          }
-                        : undefined,
-                },
-            }}
+            maxWidth={false}
+            slots={isSheet ? { transition: SlideUpTransition } : undefined}
+            slotProps={{ paper: { sx: [paperSx, uploadSheetPaperSx] } }}
         >
-            <Stack
-                sx={{ width: "100%", height: "100%" }}
-                aria-busy={isSubmitting}
-            >
+            <Stack sx={contentSx} aria-busy={isSubmitting}>
                 <Stack
-                    sx={{
-                        px: 2,
-                        pt: 2,
-                        pb: 2,
-                        gap: 1,
-                        borderBottom: 1,
-                        borderColor: "divider",
-                    }}
+                    direction="row"
+                    sx={{ alignItems: "center", gap: "8px" }}
                 >
-                    <Stack
-                        direction="row"
-                        sx={{ alignItems: "center", gap: 1 }}
+                    <IconButton
+                        aria-label={t("go_back")}
+                        onClick={onClose}
+                        disabled={isSubmitting}
+                        sx={backButtonSx}
                     >
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography id={titleID} variant="h5">
-                                {t("select_cover_photo")}
-                            </Typography>
-                            <Typography
-                                id={descriptionID}
-                                variant="small"
-                                sx={{
-                                    color: "text.muted",
-                                    fontWeight: "regular",
+                        <HugeiconsIcon icon={ArrowLeft02Icon} size={24} />
+                    </IconButton>
+                    <Typography id={titleID} sx={titleSx}>
+                        {t("choose_cover")}
+                    </Typography>
+                    <IconButton
+                        aria-label={t("close")}
+                        onClick={onClose}
+                        disabled={isSubmitting}
+                        sx={closeButtonSx}
+                    >
+                        <HugeiconsIcon icon={Cancel01Icon} size={18} />
+                    </IconButton>
+                </Stack>
+                <Stack sx={{ flex: 1, minHeight: 0, gap: "24px" }}>
+                    <Box sx={{ flex: 1, minHeight: 0 }}>
+                        {coverFiles.length ? (
+                            <AutoSizer>
+                                {({ width, height }) => {
+                                    if (width <= 0 || height <= 0) return <></>;
+                                    const columns = width < 400 ? 3 : 4;
+                                    const itemSize =
+                                        (width - (columns - 1) * 10) / columns;
+                                    return (
+                                        <FixedSizeList<CoverRowData>
+                                            key={collection.id}
+                                            width={width}
+                                            height={height}
+                                            itemCount={Math.ceil(
+                                                coverFiles.length / columns,
+                                            )}
+                                            itemSize={itemSize + 10}
+                                            itemData={{
+                                                files: coverFiles,
+                                                columns,
+                                                itemSize,
+                                                selectedID,
+                                                setSelectedID,
+                                                disabled: isSubmitting,
+                                            }}
+                                            overscanCount={2}
+                                            useIsScrolling
+                                        >
+                                            {CoverRow}
+                                        </FixedSizeList>
+                                    );
                                 }}
-                                noWrap
-                            >
-                                {collection.name}
+                            </AutoSizer>
+                        ) : (
+                            <Typography sx={{ color: "text.muted" }}>
+                                {t("no_photos_found_here")}
                             </Typography>
-                        </Box>
-                        <Stack
-                            direction="row"
-                            sx={{ alignItems: "center", gap: 1 }}
+                        )}
+                    </Box>
+                    <Stack sx={{ gap: "12px", flexShrink: 0 }}>
+                        <LoadingButton
+                            fullWidth
+                            color="accent"
+                            onClick={handleUseSelectedPhoto}
+                            loading={submittingAction === "use-selected-photo"}
+                            disabled={!selectedFile || isSubmitting}
+                            sx={[
+                                actionButtonSx,
+                                primaryButtonSx,
+                                ...(submittingAction === "use-selected-photo"
+                                    ? [primaryButtonBusySx]
+                                    : []),
+                            ]}
                         >
-                            <IconButton
-                                aria-label={t("close")}
-                                onClick={onClose}
+                            {t("set_as_cover")}
+                        </LoadingButton>
+                        {canResetToDefault && (
+                            <LoadingButton
+                                fullWidth
+                                color="secondary"
+                                onClick={handleResetToDefault}
+                                loading={
+                                    submittingAction === "reset-to-default"
+                                }
                                 disabled={isSubmitting}
-                                sx={headerIconButtonSx}
+                                sx={[actionButtonSx, secondaryButtonSx]}
                             >
-                                <CloseIcon fontSize="medium" />
-                            </IconButton>
-                        </Stack>
+                                {t("reset_to_default")}
+                            </LoadingButton>
+                        )}
                     </Stack>
                 </Stack>
-
-                <DialogContent
-                    sx={{
-                        px: 2,
-                        py: 0,
-                        flex: 1,
-                        minHeight: 0,
-                        display: "flex",
-                    }}
-                >
-                    <AutoSizer>
-                        {({ width, height }) =>
-                            width > 0 && height > 0 ? (
-                                <FileList
-                                    {...{
-                                        width,
-                                        height,
-                                        user,
-                                        annotatedFiles,
-                                        selected,
-                                        setSelected,
-                                    }}
-                                    mode="albums"
-                                    enableSelect={false}
-                                    activeCollectionID={collection.id}
-                                    onItemClick={handleItemClick}
-                                />
-                            ) : (
-                                <></>
-                            )
-                        }
-                    </AutoSizer>
-                </DialogContent>
-
-                <DialogActions
-                    sx={{
-                        px: 2,
-                        py: 1.5,
-                        gap: 1,
-                        borderTop: 1,
-                        borderColor: "divider",
-                        flexWrap: isFullScreen ? "wrap" : undefined,
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                    }}
-                >
-                    {!isFullScreen && <Box sx={{ flex: 1 }} />}
-                    {canResetToDefault && (
-                        <LoadingButton
-                            color="secondary"
-                            onClick={handleResetToDefault}
-                            loading={submittingAction === "reset-to-default"}
-                            disabled={
-                                isSubmitting &&
-                                submittingAction !== "reset-to-default"
-                            }
-                            sx={actionButtonSx}
-                        >
-                            {t("reset_to_default")}
-                        </LoadingButton>
-                    )}
-                    <LoadingButton
-                        variant="contained"
-                        color="primary"
-                        onClick={handleUseSelectedPhoto}
-                        loading={submittingAction === "use-selected-photo"}
-                        disabled={
-                            !selectedFile ||
-                            (isSubmitting &&
-                                submittingAction !== "use-selected-photo")
-                        }
-                        autoFocus={Boolean(selectedFile)}
-                        sx={actionButtonSx}
-                    >
-                        {ut("Confirm")}
-                    </LoadingButton>
-                </DialogActions>
             </Stack>
         </Dialog>
     );
 };
 
-const createEmptySelection = (collectionID: number): SelectedState => ({
-    ownCount: 0,
-    count: 0,
-    collectionID,
-    context: { mode: "albums", collectionID },
+interface CoverRowData {
+    files: EnteFile[];
+    columns: number;
+    itemSize: number;
+    selectedID: number | undefined;
+    setSelectedID: (id: number) => void;
+    disabled: boolean;
+}
+
+const CoverRow = ({
+    index,
+    style,
+    data,
+    isScrolling,
+}: ListChildComponentProps<CoverRowData>) => (
+    <Box style={style} sx={{ display: "flex", gap: "10px" }}>
+        {data.files
+            .slice(index * data.columns, (index + 1) * data.columns)
+            .map((file) => {
+                const isSelected = file.id === data.selectedID;
+                return (
+                    <FocusVisibleUnstyledButton
+                        key={file.id}
+                        type="button"
+                        aria-label={file.metadata.title}
+                        aria-pressed={isSelected}
+                        disabled={data.disabled}
+                        onClick={() => data.setSelectedID(file.id)}
+                        sx={{
+                            position: "relative",
+                            width: data.itemSize,
+                            height: data.itemSize,
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            flexShrink: 0,
+                            "&:focus-visible, &:active": {
+                                borderRadius: "12px",
+                            },
+                            "&:disabled": { cursor: "default" },
+                        }}
+                    >
+                        <ItemCard
+                            TileComponent={CoverTile}
+                            coverFile={file}
+                            isScrolling={isScrolling}
+                        />
+                        {isSelected && (
+                            <Box sx={selectionSx}>
+                                <Box sx={checkSx}>
+                                    <HugeiconsIcon
+                                        icon={Tick02Icon}
+                                        size={13}
+                                    />
+                                </Box>
+                            </Box>
+                        )}
+                    </FocusVisibleUnstyledButton>
+                );
+            })}
+    </Box>
+);
+
+const CoverTile = styled("div")({
+    display: "flex",
+    width: "100%",
+    height: "100%",
+    overflow: "hidden",
+    "& > img": {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        pointerEvents: "none",
+    },
 });
 
-const createSingleSelection = (
-    file: EnteFile,
-    collectionID: number,
-    userID: number,
-): SelectedState => ({
-    [file.id]: true,
-    ownCount: file.ownerID === userID ? 1 : 0,
-    count: 1,
-    collectionID,
-    context: { mode: "albums", collectionID },
+const green = "#08c225";
+const paperSx = (theme: Theme) => ({
+    width: "min(714px, calc(100svw - 32px))",
+    maxWidth: "714px",
+    height: "656px",
+    maxHeight: "calc(100dvh - 32px)",
+    m: 2,
+    borderRadius: "20px",
+    border: "1px solid #e0e0e0",
+    backgroundColor: "#f4f4f4",
+    backgroundImage: "none",
+    boxShadow: "none",
+    color: "text.base",
+    ...theme.applyStyles("dark", {
+        borderColor: "rgba(255 255 255 / 0.12)",
+        backgroundColor: "#1b1b1b",
+    }),
 });
+const contentSx = {
+    p: "20px",
+    gap: "36px",
+    height: "100%",
+    minHeight: 0,
+    [uploadSheetMediaQuery]: {
+        p: "12px 16px",
+        pb: "calc(20px + env(safe-area-inset-bottom, 0px))",
+    },
+};
+const titleSx = {
+    flex: 1,
+    minWidth: 0,
+    fontFamily: "'Outfit Variable', sans-serif",
+    fontSize: 24,
+    lineHeight: "32px",
+    fontWeight: 600,
+    overflowWrap: "anywhere",
+};
+const backButtonSx = {
+    width: 38,
+    height: 38,
+    p: 0,
+    flexShrink: 0,
+    color: "text.base",
+};
+const closeButtonSx = (theme: Theme) => ({
+    ...backButtonSx,
+    backgroundColor: "background.paper",
+    "&:hover": { backgroundColor: "fill.faintHover" },
+    ...theme.applyStyles("dark", {
+        backgroundColor: "rgba(255 255 255 / 0.12)",
+    }),
+});
+const selectionSx = {
+    position: "absolute",
+    inset: 0,
+    border: `3px solid ${green}`,
+    borderRadius: "12px",
+    pointerEvents: "none",
+};
+const checkSx = {
+    position: "absolute",
+    top: 9,
+    right: 9,
+    width: 26,
+    height: 26,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "50%",
+    border: "2px solid #fff",
+    backgroundColor: green,
+    color: "#fff",
+};
+const actionButtonSx = {
+    minHeight: 52,
+    px: "24px",
+    py: "14px",
+    borderRadius: "20px",
+    fontSize: 14,
+    lineHeight: "20px",
+    fontWeight: 500,
+    textTransform: "none",
+    boxShadow: "none",
+};
+const primaryButtonSx = (theme: Theme) => ({
+    color: "#fff",
+    backgroundColor: green,
+    "&:hover": { backgroundColor: "#07ad21", boxShadow: "none" },
+    "&.Mui-disabled": {
+        color: "#d6d6d6",
+        backgroundColor: "#eaeaea",
+        ...theme.applyStyles("dark", {
+            color: "rgba(255 255 255 / 0.3)",
+            backgroundColor: "rgba(255 255 255 / 0.12)",
+        }),
+    },
+});
+const secondaryButtonSx = (theme: Theme) => ({
+    color: "text.base",
+    backgroundColor: "#eaeaea",
+    "&:hover": { backgroundColor: "#e0e0e0", boxShadow: "none" },
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#282828",
+        "&:hover": { backgroundColor: "#333" },
+    }),
+});
+
+const primaryButtonBusySx = {
+    "&.Mui-disabled": { color: "#fff", backgroundColor: green, opacity: 0.7 },
+};

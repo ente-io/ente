@@ -456,6 +456,8 @@
     "rename_file": "Rename file",
     "album_cover": "Album cover",
     "set_cover": "Set cover",
+    "choose_cover": "Choose cover",
+    "set_as_cover": "Set as cover",
     "select_cover_photo": "Select cover photo",
     "reset_to_default": "Reset to default",
     "delete_album": "Delete album",
