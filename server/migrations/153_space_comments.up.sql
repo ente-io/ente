@@ -8,6 +8,7 @@ CREATE TABLE space_comments (
     created_at BIGINT NOT NULL DEFAULT now_utc_micro_seconds()
 );
 CREATE INDEX space_comments_post ON space_comments (post_id, created_at, comment_id);
+CREATE INDEX space_comments_reply_to ON space_comments (reply_to_id);
 CREATE TABLE space_comment_reactions (
     comment_id TEXT NOT NULL REFERENCES space_comments (comment_id) ON DELETE CASCADE,
     actor_space_id TEXT NOT NULL REFERENCES spaces (space_id) ON DELETE CASCADE,
@@ -25,6 +26,7 @@ ALTER TABLE space_notifications ADD CONSTRAINT chk_space_notifications_target CH
     OR (kind IN ('comment', 'comment_reply', 'comment_reaction') AND comment_id IS NOT NULL AND post_like_id IS NULL AND friend_request_id IS NULL AND poke_id IS NULL)
 );
 CREATE UNIQUE INDEX space_comment_notification ON space_notifications (recipient_space_id, actor_space_id, kind, comment_id) WHERE comment_id IS NOT NULL;
+CREATE INDEX space_notifications_comment ON space_notifications (comment_id) WHERE comment_id IS NOT NULL;
 
 CREATE FUNCTION space_comment_author_deleted() RETURNS TRIGGER AS $$
 BEGIN

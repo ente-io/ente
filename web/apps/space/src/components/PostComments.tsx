@@ -1018,7 +1018,8 @@ export const PostComments: React.FC<{
                             targetCommentId &&
                             !comments.some(
                                 (comment) =>
-                                    comment.commentId == targetCommentId,
+                                    comment.commentId == targetCommentId &&
+                                    !comment.deleted,
                             ) && (
                                 <Box
                                     role="status"
