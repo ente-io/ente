@@ -74,7 +74,8 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
     const isI18nReady = useSetupI18n();
     const isChangingRoute = useIsRouteChangeInProgress();
     const router = useRouter();
-    const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
+    const { showMiniDialog, miniDialogProps, dismissRouteScopedMiniDialog } =
+        useAttributedMiniDialog();
     const { showNotification, notificationProps } = useNotification();
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
 
@@ -82,6 +83,13 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
     const logout = useCallback(() => void photosLogout(), []);
+
+    useEffect(() => {
+        router.events.on("routeChangeStart", dismissRouteScopedMiniDialog);
+        return () => {
+            router.events.off("routeChangeStart", dismissRouteScopedMiniDialog);
+        };
+    }, [router.events, dismissRouteScopedMiniDialog]);
 
     useEffect(() => {
         logStartupBanner(savedLocalUser()?.id);

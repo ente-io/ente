@@ -7,6 +7,7 @@ export const trashFilesDialogAttributes = (
     count: number,
     onConfirm: () => void | Promise<void>,
 ): MiniDialogAttributes => ({
+    dismissOnRouteChange: true,
     title: t("trash_items_title", {
         count,
         fallbackLng: false,

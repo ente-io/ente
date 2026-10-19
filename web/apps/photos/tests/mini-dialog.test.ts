@@ -8,6 +8,42 @@ vi.mock("i18next", () => ({
 }));
 
 describe("mini dialog lifecycle", () => {
+    test("navigation clears the trash confirmation and its captured action", () => {
+        const action = vi.fn();
+        const prompt = miniDialogReducer(
+            { open: false, id: 0 },
+            { type: "show", attributes: trashFilesDialogAttributes(3, action) },
+        );
+        const dismissed = miniDialogReducer(prompt, { type: "routeChange" });
+        expect(dismissed.open).toBe(false);
+        expect(dismissed.attributes).toBeUndefined();
+        expect(dismissed.id).not.toBe(prompt.id);
+        expect(action).not.toHaveBeenCalled();
+
+        const next = miniDialogReducer(dismissed, {
+            type: "show",
+            attributes: { title: "Another page" },
+        });
+        expect(miniDialogReducer(next, { type: "close", id: prompt.id })).toBe(
+            next,
+        );
+    });
+
+    test("navigation preserves app-wide prompts, including session expiry", () => {
+        const prompt = miniDialogReducer(
+            { open: false, id: 0 },
+            {
+                type: "show",
+                attributes: {
+                    title: "Session expired",
+                    nonClosable: true,
+                    nonReplaceable: true,
+                },
+            },
+        );
+        expect(miniDialogReducer(prompt, { type: "routeChange" })).toBe(prompt);
+    });
+
     test("an earlier action cannot close a follow-up notice", () => {
         const first = miniDialogReducer(
             { open: false, id: 0 },
@@ -61,6 +97,7 @@ describe("trash confirmation attributes", () => {
             expect(attributes.title).toBe(`trash_items_title:${count}`);
             expect(attributes.message).toBe(`trash_items_message:${count}`);
             expect(attributes.illustration).toBeDefined();
+            expect(attributes.dismissOnRouteChange).toBe(true);
             expect(attributes.continue?.color).toBe("critical");
             expect(attributes.continue?.text).toBe("move_to_trash");
         },

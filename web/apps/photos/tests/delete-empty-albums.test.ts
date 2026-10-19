@@ -70,6 +70,7 @@ describe("shared empty album deletion", () => {
         const dialog = start();
         expect(mocks.showMiniDialog).toHaveBeenCalledOnce();
         expect(dialog.illustration).toBeDefined();
+        expect(dialog.dismissOnRouteChange).toBe(true);
         expect(dialog.continue?.text).toEqual({
             key: "delete",
             opts: undefined,

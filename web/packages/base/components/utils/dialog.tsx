@@ -21,8 +21,13 @@ export const useAttributedMiniDialog = () => {
         dispatch({ type: "close", id: dialog.id });
     }, [dialog.id]);
 
+    const dismissRouteScopedMiniDialog = useCallback(() => {
+        dispatch({ type: "routeChange" });
+    }, []);
+
     return {
         showMiniDialog,
+        dismissRouteScopedMiniDialog,
         miniDialogProps: {
             dialogID: dialog.id,
             open: dialog.open,

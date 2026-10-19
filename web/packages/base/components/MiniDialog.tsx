@@ -25,6 +25,7 @@ export interface MiniDialogAttributes {
     message?: React.ReactNode;
     nonClosable?: boolean;
     nonReplaceable?: boolean;
+    dismissOnRouteChange?: boolean;
     continue?: {
         text?: string;
         color?: ButtonProps["color"];
