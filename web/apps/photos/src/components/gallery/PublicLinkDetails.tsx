@@ -29,7 +29,6 @@ export const PublicLinkDetails = ({
     coverFile,
 }: PublicLinkDetailsProps) => {
     const { customDomain } = useSettingsSnapshot();
-    // Links navigation only contains the user's own quick links.
     const { resolvedURL, isLoading, error } = usePublicLinkURL(
         collection,
         collection.publicURLs[0],

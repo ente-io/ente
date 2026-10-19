@@ -2,7 +2,6 @@ import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
 import type { Collection, PublicURL } from "ente-media/collection";
 import { useEffect, useMemo, useState } from "react";
 
-/** Resolve a share URL without exposing a previous selection's URL while loading. */
 export const usePublicLinkURL = (
     collection: Pick<Collection, "id" | "key">,
     publicURL: PublicURL | undefined,
