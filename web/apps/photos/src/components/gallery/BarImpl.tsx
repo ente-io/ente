@@ -149,6 +149,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const [expandedAlbumFilter, setExpandedAlbumFilter] = useState<
         AlbumFilter | undefined
     >(albumFilter);
+    const lastAlbumFilter = useRef(albumFilter);
     const displayedAlbumFilter =
         isSearching &&
         expandedAlbumFilter !== undefined &&
@@ -168,6 +169,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     useEffect(() => {
+        // Heading clicks already set expansion; sync other group navigation.
+        if (lastAlbumFilter.current == albumFilter) return;
+        lastAlbumFilter.current = albumFilter;
         setExpandedAlbumFilter(albumFilter);
     }, [albumFilter]);
     useEffect(() => {
@@ -569,6 +573,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                                         : undefined
                                 }
                                 onClick={() => {
+                                    lastAlbumFilter.current = filter.value;
                                     setExpandedAlbumFilter(
                                         displayedAlbumFilter == filter.value
                                             ? undefined
