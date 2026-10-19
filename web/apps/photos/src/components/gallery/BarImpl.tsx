@@ -262,13 +262,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         },
     ];
 
-    const isTopShortcut = ({ id }: (typeof albumShortcuts)[number]) =>
-        id == uncategorizedCollectionSummaryID ||
-        id == PseudoCollectionID.trash;
-    const renderAlbumShortcut = (
-        { id, label, icon, active }: (typeof albumShortcuts)[number],
-        compact = false,
-    ) => (
+    const renderAlbumShortcut = ({
+        id,
+        label,
+        icon,
+        active,
+    }: (typeof albumShortcuts)[number]) => (
         <BarCard
             key={id}
             aria-label={label}
@@ -283,36 +282,14 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     mobileDrawerProps.onClose();
                 });
             }}
-            sx={{
-                flexShrink: 0,
-                ...(compact && {
-                    flex: 1,
-                    minWidth: 0,
-                    height: "auto",
-                    flexWrap: "wrap",
-                    gap: "8px",
-                    p: "12px",
-                    border: "1px solid",
-                    borderColor: active ? "stroke.base" : "stroke.faint",
-                    bgcolor: "var(--gallery-navigation-surface)",
-                }),
-            }}
+            sx={{ flexShrink: 0 }}
         >
             <HugeiconsIcon icon={icon} size={20} aria-hidden />
-            {compact ? (
-                <Box sx={{ order: 1, width: "100%" }}>
-                    <CardText>{label}</CardText>
-                </Box>
-            ) : (
-                <CardText>{label}</CardText>
-            )}
+            <CardText>{label}</CardText>
             {id == PseudoCollectionID.hiddenItems ? (
                 <LockOutlinedIcon sx={{ color: "text.muted", fontSize: 19 }} />
             ) : (
-                <Typography
-                    variant="small"
-                    sx={{ color: "text.muted", ...(compact && { ml: "auto" }) }}
-                >
+                <Typography variant="small" sx={{ color: "text.muted" }}>
                     {normalCollectionSummaries.get(id)?.fileCount}
                 </Typography>
             )}
@@ -533,13 +510,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 )}
             </Stack>
-            {mode != "people" && (
-                <Stack direction="row" sx={{ gap: "8px", flexShrink: 0 }}>
-                    {albumShortcuts
-                        .filter(isTopShortcut)
-                        .map((shortcut) => renderAlbumShortcut(shortcut, true))}
-                </Stack>
-            )}
             {mode != "albums" && isSearching && !getItemCount(itemData) ? (
                 <Typography
                     role="status"
@@ -618,9 +588,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                             opacity: 0.5,
                         }}
                     />
-                    {albumShortcuts
-                        .filter((shortcut) => !isTopShortcut(shortcut))
-                        .map((shortcut) => renderAlbumShortcut(shortcut))}
+                    {albumShortcuts.map((shortcut) =>
+                        renderAlbumShortcut(shortcut),
+                    )}
                 </Stack>
             )}
         </Stack>
