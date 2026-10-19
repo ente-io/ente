@@ -13,7 +13,7 @@
         "@tauri-apps/plugin-fs": "2.7.1",
         "@tauri-apps/plugin-opener": "2.7.1",
         "@tauri-apps/plugin-process": "2.4.0",
-        "@tauri-apps/plugin-updater": "2.13.1",
+        "@tauri-apps/plugin-updater": "2.14.0",
         "@wllama/wllama": "2.4.0",
         "ente-base": "*",
         "ente-ensu-wasm": "*",
