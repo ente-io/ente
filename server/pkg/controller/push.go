@@ -3,7 +3,7 @@ package controller
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
+	"crypto/hpke"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,7 +18,6 @@ import (
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/pkg/repo"
 	"github.com/ente/museum/pkg/utils/config"
-	"github.com/ente/museum/pkg/utils/crypto"
 	"github.com/ente/museum/pkg/utils/time"
 	"github.com/ente/stacktrace"
 	log "github.com/sirupsen/logrus"
@@ -103,7 +102,7 @@ func newFCMClient() (*fcmClient, error) {
 
 func (c *PushController) AddToken(userID int64, sessionTokenHash []byte, token ente.PushTokenRequest) error {
 	if token.NotificationKey != nil {
-		if err := crypto.ValidateSealedBoxPublicKey(base64.StdEncoding.EncodeToString(token.NotificationKey)); err != nil {
+		if _, err := hpke.MLKEM768X25519().NewPublicKey(token.NotificationKey); err != nil {
 			return ente.NewBadRequestWithMessage("invalid notification public key")
 		}
 	}
