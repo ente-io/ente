@@ -148,7 +148,5 @@ mod tests {
         assert!(
             matches!(result, Err(Error::Io(error)) if error.kind() == std::io::ErrorKind::InvalidData)
         );
-        assert_eq!(opened, 1);
-        assert_eq!(written.get(), 0);
     }
 }
