@@ -1,4 +1,3 @@
-import { DialogWarningIllustration } from "@/components/utils/DialogWarningIllustration";
 // TODO: Audit this file (the code here is mostly fine, but needs revisiting
 // the file it depends on have been audited and their interfaces fixed).
 /* eslint-disable react-hooks/exhaustive-deps */
@@ -1812,7 +1811,7 @@ const Page: React.FC = () => {
                 case "deletePermanently":
                     showMiniDialog({
                         title: t("delete_files_title"),
-                        illustration: <DialogWarningIllustration color="red" />,
+                        kind: "warning",
                         message: t("delete_files_message"),
                         continue: {
                             text: t("delete"),

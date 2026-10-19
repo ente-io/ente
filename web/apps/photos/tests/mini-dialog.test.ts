@@ -96,7 +96,7 @@ describe("trash confirmation attributes", () => {
             const attributes = trashFilesDialogAttributes(count, vi.fn());
             expect(attributes.title).toBe(`trash_items_title:${count}`);
             expect(attributes.message).toBe(`trash_items_message:${count}`);
-            expect(attributes.illustration).toBeDefined();
+            expect(attributes.kind).toBe("warning");
             expect(attributes.dismissOnRouteChange).toBe(true);
             expect(attributes.continue?.color).toBe("critical");
             expect(attributes.continue?.text).toBe("move_to_trash");
