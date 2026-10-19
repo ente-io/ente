@@ -119,7 +119,7 @@ fn admin_deletion_uses_email_and_reports_deleted_id() {
     args.push("--yes");
     assert_eq!(
         home.json(&args),
-        json!({"user": {"id": USER_ID.to_string(), "email": EMAIL}, "deleted": true,
+        json!({"user": {"id": USER_ID.to_string(), "email": EMAIL},
             "cleanupScheduled": true, "subscriptionCancelled": false})
     );
     delete.assert();
@@ -127,13 +127,9 @@ fn admin_deletion_uses_email_and_reports_deleted_id() {
 
 #[test]
 fn admin_security_mutations_require_confirmation_and_use_resolved_target() {
-    for (command, path, field) in [
-        ("disable-totp", "/admin/user/disable-2fa", "totpEnabled"),
-        (
-            "remove-passkeys",
-            "/admin/user/disable-passkeys",
-            "passkeysRemoved",
-        ),
+    for (command, path) in [
+        ("disable-totp", "/admin/user/disable-2fa"),
+        ("remove-passkeys", "/admin/user/disable-passkeys"),
     ] {
         let mut server = Server::new();
         let home = TestHome::new();
@@ -156,7 +152,6 @@ fn admin_security_mutations_require_confirmation_and_use_resolved_target() {
         args.push("--yes");
         let result = home.json(&args);
         assert_eq!(result["user"]["email"], EMAIL);
-        assert_eq!(result[field], command != "disable-totp");
         get.assert();
         change.assert();
     }

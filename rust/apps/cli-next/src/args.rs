@@ -5,38 +5,43 @@ use clap_complete::Shell;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
-#[command(
-    version,
-    about = "Use Ente from the command line",
-    override_usage = "ente-cli-next [OPTIONS] <COMMAND>",
-    after_help = "Photos:
-  ente-cli-next account login --app photos
-  ente-cli-next photos album list
-  ente-cli-next photos file list --album <ID>
-  ente-cli-next photos export <DIR>
-Auth:
-  ente-cli-next account login --app auth
-  ente-cli-next auth code list
-  ente-cli-next auth code view <CODE>
-  ente-cli-next auth export <DIR>
-Paste:
-  ente-cli-next paste create --input <PATH>
-  ente-cli-next paste consume <URL>"
-)]
+#[command(version, about = "Ente client for terminals and agents")]
 pub struct Cli {
-    #[command(flatten)]
+    #[command(flatten, next_help_heading = "Global options")]
     pub options: Options,
     #[command(subcommand)]
     pub command: Command,
 }
 
 pub fn command() -> clap::Command {
-    Cli::command().subcommand_required(false).arg(
-        Arg::new("help-all")
-            .long("help-all")
-            .action(ArgAction::SetTrue)
-            .help("Print help for all commands"),
-    )
+    let command = Cli::command().disable_help_subcommand(true);
+    let help = help_command(&command)
+        .name("help")
+        .about("Print help for a command or topic")
+        .disable_help_flag(false)
+        .arg(
+            Arg::new("all")
+                .long("all")
+                .action(ArgAction::SetTrue)
+                .help("Print help for all commands"),
+        )
+        .subcommand(clap::Command::new("migration").about("Show changes from earlier CLI versions"))
+        .subcommand(clap::Command::new("help").about("Show help options and topics"));
+    command
+        // Restore nested help after Clap propagates the root's setting.
+        .mut_subcommands(|child| child.defer(|child| child.disable_help_subcommand(false)))
+        .subcommand(help)
+}
+
+fn help_command(command: &clap::Command) -> clap::Command {
+    clap::Command::new(command.get_name().to_owned())
+        .about(command.get_about().cloned().unwrap_or_default())
+        .aliases(command.get_all_aliases().map(str::to_owned))
+        .hide(command.is_hide_set())
+        .display_order(command.get_display_order())
+        .disable_help_subcommand(true)
+        .disable_help_flag(true)
+        .subcommands(command.get_subcommands().map(help_command))
 }
 
 #[derive(Args)]
@@ -112,7 +117,7 @@ pub enum Command {
         #[command(subcommand)]
         command: AuthCommand,
     },
-    #[command(about = "Share and consume one-time encrypted text without an account")]
+    #[command(about = "Share text through one-time encrypted links")]
     Paste {
         #[command(subcommand)]
         command: PasteCommand,
@@ -162,7 +167,7 @@ Prints the script to stdout, including when --json is set."
             long,
             global = true,
             value_enum,
-            help = "Saved app session; defaults to the sole app, otherwise Photos"
+            help = "Saved app login; defaults to the only app, otherwise Photos"
         )]
         app: Option<App>,
         #[command(subcommand)]
@@ -176,11 +181,14 @@ pub enum PasteCommand {
         about = "Create a one-time encrypted paste",
         after_long_help = "Supply TEXT or --input PATH; --input - reads stdin verbatim.
 With neither, reads piped stdin.
-Text must be nonblank and at most 4,000 Unicode scalar values.
+Text cannot be blank. Limit: 4,000 characters; some emoji count as more than one.
 Pastes expire after 24 hours.
 With --password, uses ENTE_CLI_PASSWORD when set; otherwise prompts for a paste password and confirmation.
 With --password --no-input, ENTE_CLI_PASSWORD is required.
-Prints the paste URL. With --json: {\"url\": \"...\"}. Requires network access."
+Prints the paste URL. With --json: {\"url\": \"...\"}. Requires network access.
+
+Example:
+  ente-cli-next paste create --input notes.txt"
     )]
     Create {
         #[arg(
@@ -207,10 +215,10 @@ Prints the paste URL. With --json: {\"url\": \"...\"}. Requires network access."
         paste_origin: url::Url,
     },
     #[command(
-        about = "Consume a paste and permanently remove its server copy",
+        about = "Read a paste and delete it from the server",
         after_long_help = "Supply a URL including its #key fragment, or TOKEN --key KEY.
 Protected pastes use ENTE_CLI_PASSWORD when set; otherwise prompt for the paste password.
-Consumes the paste before decryption, even with a wrong password or key.
+Deletes the server copy before decryption, even if the password or key is wrong.
 A wrong ENTE_CLI_PASSWORD fails immediately; prompted retries work only while this command stays running.
 Prints the text without adding a newline. Terminal controls are escaped except tabs and newlines.
 With --json: {\"text\": \"...\"}. --raw affects plain terminal output only. Requires network access."
@@ -242,14 +250,19 @@ pub enum AuthCommand {
 Encrypted export uses ENTE_CLI_PASSWORD when set; otherwise prompts for an export password.
 With --no-input, encrypted export requires ENTE_CLI_PASSWORD.
 DIR receives dated backups. --output writes a new file, or backup bytes to stdout with -.
---json formats file/directory summaries; stdout backups contain only the artifact."
+JSON summary fields: output, codes, failures.total. --json does not change backup contents.
+Backups written to stdout have no summary.
+
+Examples:
+  ente-cli-next auth export ~/Backups/Auth
+  ente-cli-next auth export --plaintext --output codes.txt"
     )]
     Export(AuthExportArgs),
     #[command(about = "Decrypt an Auth export without an account")]
     #[command(after_long_help = "Reads a backup without network access.
 Uses ENTE_CLI_PASSWORD as the export password when set; otherwise prompts.
 With --no-input, ENTE_CLI_PASSWORD is required.
-Writes readable URI lines to stdout, or a new --output file. --json only formats the file summary.")]
+Writes the decrypted backup to stdout, or a new --output file. --json only formats the file summary.")]
     Decrypt {
         #[arg(value_name = "PATH", help = "Encrypted Auth backup to decrypt")]
         input: PathBuf,
@@ -292,7 +305,11 @@ Quote queries containing spaces.
 A code in Trash must be restored in Ente Auth first.
 JSON fields: id, name, issuer, accountName, type, otp, validUntil (UTC).
 HOTP values are not supported yet.
-Codes use your computer's clock. Make sure its date and time are correct."
+Codes use your computer's clock. Make sure its date and time are correct.
+
+Examples:
+  ente-cli-next auth code view github
+  ente-cli-next auth code view \"GitHub (alice@example.com)\""
     )]
     View {
         #[arg(
@@ -326,7 +343,7 @@ pub struct AuthExportArgs {
         help = "Write to a new file, or stdout with -"
     )]
     pub output: Option<PathBuf>,
-    #[arg(long, help = "Export readable URI lines without encryption")]
+    #[arg(long, help = "Export unencrypted otpauth:// links, one per line")]
     pub plaintext: bool,
 }
 
@@ -337,7 +354,15 @@ pub enum PhotosCommand {
     #[command(about = "Maintain an independent copy of your Photos library")]
     #[command(
         after_long_help = "Refreshes metadata and downloads originals to DESTINATION; requires network access.
-Progress goes to stderr; the result goes to stdout. Use --json for a structured result."
+Progress goes to stderr; the result goes to stdout. Use --json for a structured result.
+JSON fields: output, complete, files, copies, changes, failures.
+files counts distinct photos and videos; copies counts album copies (expected, completed, pending).
+files and copies are null when the full export size could not be determined.
+changes contains exported, metadataUpdated, renamed and movedToTrash counts; failures contains total and conflicts.
+
+Examples:
+  ente-cli-next photos export ~/Pictures/Ente
+  ente-cli-next photos export ~/Pictures/Ente --album Holidays --account personal"
     )]
     Export(PhotosExportArgs),
     #[command(about = "Manage albums")]
@@ -372,19 +397,19 @@ pub struct PhotosExportArgs {
     #[arg(
         long,
         help = "Exclude albums owned by other accounts",
-        long_help = "Exclude albums owned by other accounts, including albums explicitly included with --album. Albums you own remain included when shared with others. Excluded output is left alone. Removed albums use their last known category; an unknown category is reported as incomplete. Applies only to this invocation."
+        long_help = "Exclude albums owned by other accounts, including albums explicitly included with --album. Albums you own remain included when shared with others. Existing files in excluded albums are left unchanged. For removed albums, uses their last known ownership; if unknown, reports the export as incomplete. Applies only to this invocation."
     )]
     pub exclude_shared: bool,
     #[arg(
         long,
         help = "Exclude hidden albums, including the Hidden album",
-        long_help = "Exclude albums hidden for this account, including the Hidden album and albums explicitly included with --album. Archived albums and individually hidden files in included albums remain included. Excluded output is left alone. Removed albums use their last known category; an unknown category is reported as incomplete. Applies only to this invocation."
+        long_help = "Exclude albums hidden for this account, including the Hidden album and albums explicitly included with --album. Archived albums and individually hidden files in included albums remain included. Existing files in excluded albums are left unchanged. For removed albums, uses whether they were last seen as hidden; if unknown, reports the export as incomplete. Applies only to this invocation."
     )]
     pub exclude_hidden: bool,
     #[arg(
         long,
-        help = "Take over an old CLI/Desktop export or reconnect an existing one",
-        long_help = "Take over an old CLI/Desktop export or reconnect an existing one. Taking over an old export requires filters to select exactly its recorded albums. Reconnecting a native export associates the whole export, then applies filters to this invocation."
+        help = "Take over an export from an earlier CLI or Ente Desktop, or reconnect one",
+        long_help = "Take over an export made by an earlier CLI version or Ente Desktop, or reconnect an export after moving it or losing this CLI's local data. Taking over an earlier export requires filters to select exactly its recorded albums. Reconnecting checks the whole export before applying filters."
     )]
     pub adopt: bool,
     #[arg(
@@ -515,7 +540,8 @@ Fields: id, name, type, ownerId (strings); albumIds (string array);
 createdAt, updatedAt (RFC3339 timestamp strings).
 Nullable fields: modifiedAt (RFC3339 string); location ({latitude, longitude}, numbers);
 caption, hash, dateTime, offsetTime, visibility (strings); durationSeconds, width, height (integers).
-dateTime and offsetTime retain the stored metadata strings.";
+dateTime and offsetTime retain the stored metadata strings.
+hash comes from Ente's stored metadata. For Live Photos, it can contain the image and video hashes separated by a colon.";
 
 #[derive(Subcommand)]
 pub enum FileCommand {
@@ -557,10 +583,16 @@ A new entry becomes selected; logging into an existing entry keeps the selection
 Non-interactive login reads JSON from --input:
   {\"email\": \"...\", \"password\": \"...\", \"otp\": \"123456\", \"totp\": \"654321\"}
 
-All fields are strings. --email can supply the email instead. otp is the email code; totp is the authenticator code.
-Request an email code with account request-otp --email EMAIL --purpose login.
-With --no-input, supply email and password through --input PATH or --input -.
-For unattended vault access, set ENTE_CLI_VAULT_KEY (see vault --help)."
+All fields are strings. Supply password and email; --email can supply the email instead.
+Supply otp (email code) or totp (authenticator code) only when required.
+Request an email code with account request-otp --email EMAIL --app APP --purpose login [--host URL].
+Use the same email, app and server as login.
+With --no-input, supply credentials through --input PATH or --input -.
+For unattended vault access, set ENTE_CLI_VAULT_KEY (see vault --help).
+
+Examples:
+  ente-cli-next account login --app photos
+  ente-cli-next account login --app auth --account personal"
     )]
     Login(LoginArgs),
     #[command(
@@ -594,7 +626,8 @@ Defaults to creation; use --purpose login for an existing account."
         after_long_help = "Creates and selects a new account, named after its email unless --account is supplied.
 Prompts for email, consent, verification code and password.
 Unattended creation requires --accept-terms and --input with email, password and otp strings.
---email can supply the email instead. Request the code first with account request-otp.
+--email can supply the email instead.
+Request the code first with account request-otp --email EMAIL [--app APP] [--host URL], using the same app and server as creation.
 Repeating an unfinished creation resumes with its saved keys and the same password.
 Terms: https://ente.io/terms  Privacy: https://ente.io/privacy
 Print the recovery key later with account recovery-key."
@@ -679,10 +712,7 @@ Without --app, logs out of all this account's saved app logins on this device.
     },
     #[command(
         about = "Set up authenticator protection for your Ente account",
-        after_long_help = "Protects account login, separate from codes stored in Ente Auth.
-Use enable interactively, or setup then enable --input with secret and totp strings.
-Setup secrets expire after ten minutes. If confirmation is interrupted, check status.
---app chooses a saved login: the only app, otherwise Photos. Requires network access."
+        after_long_help = "Protects account login, separate from codes stored in Ente Auth."
     )]
     Totp {
         #[command(flatten)]
@@ -691,7 +721,7 @@ Setup secrets expire after ten minutes. If confirmation is interrupted, check st
             long,
             global = true,
             value_enum,
-            help = "Saved app login to authenticate with"
+            help = "Saved app login; defaults to the only app, otherwise Photos"
         )]
         app: Option<App>,
         #[command(subcommand)]
@@ -714,11 +744,18 @@ With --json, returns {\"recoveryKey\":\"...\"}."
 
 #[derive(Subcommand)]
 pub enum TotpCommand {
-    #[command(about = "Print a new authenticator setup secret")]
+    #[command(
+        about = "Print a new authenticator setup secret",
+        after_long_help = "Requires network access. The secret expires after ten minutes.
+Add it to your authenticator, then run account totp enable --input PATH|- with secret and totp strings."
+    )]
     Setup,
     #[command(
         about = "Confirm and enable authenticator protection",
-        after_long_help = "Verifying an authenticator code requires your computer's date and time to be correct."
+        after_long_help = "Without --input, creates a setup secret and prompts for an authenticator code.
+With --input, reads JSON containing secret from account totp setup and totp from your authenticator.
+Requires network access. If confirmation is interrupted, run account totp status.
+Verifying an authenticator code requires your computer's date and time to be correct."
     )]
     Enable {
         #[arg(
@@ -728,7 +765,11 @@ pub enum TotpCommand {
         )]
         input: Option<PathBuf>,
     },
-    #[command(about = "Show whether authenticator protection is enabled")]
+    #[command(
+        about = "Show whether authenticator protection is enabled",
+        after_long_help = "Checks the current setting on the server; requires network access.
+JSON field: totpEnabled (boolean)."
+    )]
     Status,
 }
 
@@ -751,16 +792,10 @@ const ADMIN_HELP: &str =
     "Uses the selected account's server and saved login; the server grants administrator access.
 Log in with: ente-cli-next account login --account NAME --app photos --host URL
 --account selects a saved account by name; otherwise uses the selected or sole account.
---app selects its session; otherwise uses the sole saved app, then Photos.
+--app selects its saved login; otherwise uses the only saved app, then Photos.
 With multiple apps and no Photos login, supply --app.
-Listing users, deleting users and disabling TOTP require a login less than ten minutes old.
 Changes to users require confirmation; --yes approves them, --no-input only disables prompts.
-All admin commands require network access. --json prints results, not prompts or errors.
-
-Examples:
-  ente-cli-next admin --account home user view alice@example.com
-  ente-cli-next admin --account home user update-subscription alice@example.com --no-limit
-  ente-cli-next admin --account home user list --all --no-input --json";
+All admin commands require network access. --json prints results, not prompts or errors.";
 
 #[derive(Subcommand)]
 pub enum AdminCommand {
@@ -783,7 +818,10 @@ pub enum AdminUserCommand {
         after_long_help = "Requires a login less than ten minutes old.
 Lists users in creation order. Fetches all users matching --since before applying --limit.
 --since accepts YYYY-MM-DD (midnight UTC) or RFC3339 with a timezone.
-JSON returns an array: id and email (strings), createdAt (RFC3339)."
+JSON returns an array: id and email (strings), createdAt (RFC3339).
+
+Example:
+  ente-cli-next admin --account home user list --all --no-input --json"
     )]
     List {
         #[command(flatten)]
@@ -795,7 +833,10 @@ JSON returns an array: id and email (strings), createdAt (RFC3339)."
         about = "Show a user's ID and subscription",
         after_long_help = "JSON returns id, email, createdAt and subscription.
 subscription contains productId, storageBytes and expiresAt, or null when unavailable.
-IDs are strings; timestamps are RFC3339; storageBytes is an integer."
+IDs are strings; timestamps are RFC3339; storageBytes is an integer.
+
+Example:
+  ente-cli-next admin --account home user view alice@example.com"
     )]
     View {
         #[arg(value_name = "USER", help = "User email or numeric ID")]
@@ -814,12 +855,12 @@ Requires a login less than ten minutes old. Reports the deleted account's ID and
     },
     #[command(
         about = "Disable authenticator-code two-factor authentication",
-        after_long_help = "Requires a login less than ten minutes old. Leaves passkeys enabled."
+        after_long_help = "Requires a login less than ten minutes old. Does not change passkeys."
     )]
     DisableTotp(AdminTarget),
     #[command(
         about = "Remove all of a user's passkeys",
-        after_long_help = "Leaves authenticator-code two-factor authentication enabled."
+        after_long_help = "Does not change authenticator-code two-factor authentication."
     )]
     RemovePasskeys(AdminTarget),
     #[command(
@@ -829,7 +870,10 @@ Alternatively supply --storage, --expires or both; omitted values stay unchanged
 With neither, prompts to choose the preset or custom values. --no-input requires explicit values and --yes.
 Sizes accept MB, GB and TB, case-insensitive, using powers of 1024; fractions are allowed.
 Dates accept YYYY-MM-DD (00:00 UTC at the start of that date) or RFC3339 with a timezone.
-Shows old and new limits before confirmation. Paid plans are rejected."
+Shows old and new limits before confirmation. Paid plans are rejected.
+
+Example:
+  ente-cli-next admin --account home user update-subscription alice@example.com --no-limit"
     )]
     UpdateSubscription(SubscriptionArgs),
 }

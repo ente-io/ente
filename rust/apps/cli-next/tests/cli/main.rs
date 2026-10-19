@@ -29,7 +29,7 @@ fn completion_prints_scripts_without_storage() {
         let script = String::from_utf8(output.stdout).unwrap();
         assert!(serde_json::from_str::<Value>(&script).is_err(), "{shell}");
         for item in [
-            "help-all",
+            "migration",
             "account",
             "paste",
             "hardlinks",
@@ -46,6 +46,60 @@ fn completion_prints_scripts_without_storage() {
 }
 
 #[test]
+fn migration_hints_respect_command_and_argument_boundaries() {
+    let binary = format!("ente-cli-next{}", std::env::consts::EXE_SUFFIX);
+    let home = TestHome::new();
+    let path = home.dir.path().join("unused");
+    for (args, suggestion) in [
+        ("export", "photos export DIR"),
+        ("--offline account --json add", "account login --app"),
+        ("accounts --no-input get-token", "account token --app"),
+        (
+            "auth decrypt in.json out.txt",
+            "auth decrypt INPUT --output OUTPUT",
+        ),
+        (
+            "admin disable-2fa --user person@example.org",
+            "admin user disable-totp",
+        ),
+    ] {
+        let output = home
+            .command(&args.split_whitespace().collect::<Vec<_>>())
+            .env("ENTE_CLI_HOME", &path)
+            .env("ENTE_CLI_VAULT_KEY", "invalid")
+            .output()
+            .unwrap();
+        let error = failure(&output);
+        assert!(error.contains(suggestion), "{args}: {error}");
+        assert!(
+            error.contains(&format!("\n  {binary} help migration\n")),
+            "{args}: {error}"
+        );
+        assert!(
+            error.lines().all(|line| line == line.trim_end()),
+            "{args}: {error}"
+        );
+        assert_eq!(output.status.code(), Some(2));
+        assert!(output.stdout.is_empty());
+    }
+    for args in [
+        "paste create export --unknown",
+        "photos --account export album view version --unknown",
+        "auth decrypt --output version in.json --unknown",
+        "paste create -- version export",
+    ] {
+        let output = home
+            .command(&args.split_whitespace().collect::<Vec<_>>())
+            .env("ENTE_CLI_HOME", &path)
+            .output()
+            .unwrap();
+        let error = failure(&output);
+        assert!(!error.contains("help migration"), "{args}: {error}");
+    }
+    assert!(!path.exists());
+}
+
+#[test]
 fn reads_do_not_initialize_storage() {
     let binary = format!("ente-cli-next{}", std::env::consts::EXE_SUFFIX);
     for existing_home in [false, true] {
@@ -55,7 +109,7 @@ fn reads_do_not_initialize_storage() {
             fs::create_dir(&path).unwrap();
         }
         let help = success(
-            home.command(&["--help-all"])
+            home.command(&["help", "--all"])
                 .env("ENTE_CLI_HOME", &path)
                 .env("ENTE_CLI_VAULT_KEY", "invalid")
                 .output()
@@ -64,7 +118,7 @@ fn reads_do_not_initialize_storage() {
         assert!(help.stderr.is_empty());
         let help = String::from_utf8(help.stdout).unwrap();
         assert!(help.contains(&format!("=== {binary} ===")));
-        assert!(help.contains("Usage: ente-cli-next [OPTIONS] <COMMAND>"));
+        assert!(help.contains(&format!("Usage: {binary} [OPTIONS] <COMMAND>")));
         assert!(help.contains(&format!("=== {binary} photos file download ===")));
         assert!(help.contains(&format!("=== {binary} vault key generate ===")));
         assert!(help.contains("--hardlinks"));
@@ -74,6 +128,64 @@ fn reads_do_not_initialize_storage() {
         assert!(help.contains(&format!("=== {binary} paste create ===")));
         assert!(help.contains(&format!("=== {binary} paste consume ===")));
         assert!(help.contains(&format!("=== {binary} account token ===")));
+        let migration = success(
+            home.command(&["help", "migration", "--json", "--offline", "--no-input"])
+                .env("ENTE_CLI_HOME", &path)
+                .env("ENTE_CLI_VAULT_KEY", "invalid")
+                .output()
+                .unwrap(),
+        );
+        assert!(migration.stderr.is_empty());
+        let migration = String::from_utf8(migration.stdout).unwrap();
+        assert!(migration.contains("account login --app"));
+        assert!(migration.lines().all(|line| line == line.trim_end()));
+        for commands in [
+            vec![],
+            vec!["help"],
+            vec!["photos", "file", "view"],
+            vec!["accounts", "login"],
+        ] {
+            let mut topic = vec!["help"];
+            topic.extend(&commands);
+            let mut flag = commands;
+            flag.push("--help");
+            let read_help = |args: &[&str]| {
+                let output = success(
+                    home.command(args)
+                        .env("ENTE_CLI_HOME", &path)
+                        .env("ENTE_CLI_VAULT_KEY", "invalid")
+                        .output()
+                        .unwrap(),
+                );
+                assert!(output.stderr.is_empty());
+                String::from_utf8(output.stdout).unwrap()
+            };
+            let expected = read_help(&flag);
+            assert_eq!(
+                read_help(&topic).split_whitespace().collect::<Vec<_>>(),
+                expected.split_whitespace().collect::<Vec<_>>()
+            );
+            if topic.len() > 2 {
+                topic.swap(0, 1);
+                assert_eq!(
+                    read_help(&topic).split_whitespace().collect::<Vec<_>>(),
+                    expected.split_whitespace().collect::<Vec<_>>()
+                );
+            }
+        }
+        for args in [
+            vec!["help", "photos", "unknown"],
+            vec!["help", "--all", "migration"],
+        ] {
+            let output = home
+                .command(&args)
+                .env("ENTE_CLI_HOME", &path)
+                .output()
+                .unwrap();
+            assert_eq!(output.status.code(), Some(2));
+            assert!(output.stdout.is_empty());
+        }
+        assert_eq!(path.exists(), existing_home);
         for command in ["login", "token"] {
             let missing_app = home
                 .command(&["account", command])
@@ -220,7 +332,7 @@ fn deleted_collections_are_filtered_before_decryption() {
 
 #[cfg(unix)]
 #[test]
-fn reading_an_existing_vault_does_not_change_its_directory() {
+fn accessing_an_existing_vault_preserves_directory_permissions() {
     use std::os::unix::fs::PermissionsExt;
 
     let home = TestHome::new();
@@ -232,6 +344,13 @@ fn reading_an_existing_vault_does_not_change_its_directory() {
     assert_eq!(success(result).stdout, b"--8=\n");
     assert_eq!(mode, 0o500, "read changed the CLI home permissions");
     assert_eq!(fs::read_dir(home.dir.path()).unwrap().count(), 1);
+
+    fs::set_permissions(home.dir.path(), fs::Permissions::from_mode(0o755)).unwrap();
+    success(home.run(&["account", "switch", "fixture"]));
+    assert_eq!(
+        fs::metadata(home.dir.path()).unwrap().permissions().mode() & 0o777,
+        0o755
+    );
 }
 
 #[test]
@@ -325,7 +444,7 @@ fn vault_schema_version_is_checked_after_decryption() {
     home.write_vault_document(&json!({"schema_version": 2, "state": Value::Null}));
     let original = fs::read(home.dir.path().join("vault.json")).unwrap();
     let error = failure(&home.run(&["account", "list"]));
-    assert!(error.contains("unsupported CLI vault schema 2; this build supports 1."));
+    assert!(error.contains("cannot read CLI vault format 2; this CLI supports 1."));
     assert!(error.contains(&format!(
         "To start fresh, move {} aside, then log in again.",
         home.dir.path().canonicalize().unwrap().join("vault.json").display(),

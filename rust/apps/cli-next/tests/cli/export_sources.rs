@@ -114,7 +114,7 @@ fn export_preserves_failed_records_and_advances_the_page_atomically() {
         initial["copies"],
         json!({"expected":4,"completed":2,"pending":2})
     );
-    assert_eq!(initial["failures"], 2);
+    assert_eq!(initial["failures"]["total"], 2);
     assert_eq!(fs::read(root.join("First/Good.jpg")).unwrap(), b"good");
     assert_eq!(fs::read(root.join("First/Later.jpg")).unwrap(), b"later");
     let db = database(&home);
@@ -174,7 +174,7 @@ fn export_preserves_failed_records_and_advances_the_page_atomically() {
     page(&mut server, 2, 10, json!([removed]), false).create();
     let result = run(&home, &root, &["--album", "Second"], true);
     assert_eq!(result["copies"]["expected"], 0);
-    assert_eq!(result["failures"], 0);
+    assert_eq!(result["failures"]["total"], 0);
     assert_eq!(
         db.query_row(
             "SELECT count(*) FROM photos_files WHERE collection_id=2 AND id=11",
@@ -186,7 +186,7 @@ fn export_preserves_failed_records_and_advances_the_page_atomically() {
     );
     assert!(!root.join("Second/Broken.jpg").exists());
     assert_eq!(
-        run(&home, &root, &["--album", "Second"], true)["failures"],
+        run(&home, &root, &["--album", "Second"], true)["failures"]["total"],
         0
     );
 }
@@ -449,7 +449,10 @@ fn export_releases_a_deleted_album_reservation_before_its_first_association() {
         .with_body(json!({"collections":[album]}).to_string())
         .create();
     page(&mut server, 1, 0, json!([]), false).create();
-    assert_eq!(run(&home, &root, &["--album", "1"], false)["conflicts"], 1);
+    assert_eq!(
+        run(&home, &root, &["--album", "1"], false)["failures"]["conflicts"],
+        1
+    );
     let db = export_database(&home);
     let reservation = || {
         db.query_row(
@@ -462,7 +465,7 @@ fn export_releases_a_deleted_album_reservation_before_its_first_association() {
     let pending = reservation();
     assert_eq!(pending, "Family");
     assert_eq!(
-        run(&home, &root, &["--album", "Family"], false)["conflicts"],
+        run(&home, &root, &["--album", "Family"], false)["failures"]["conflicts"],
         1
     );
     run(&home, &root, &["--exclude-album", "Family"], true);
@@ -556,7 +559,7 @@ fn export_clears_deleted_adopted_album_rename_reservations() {
         .match_query(mockito::Matcher::Any)
         .with_body(json!({"collections":[renamed]}).to_string())
         .create();
-    assert_eq!(run(&fresh, &root, &[], false)["conflicts"], 2);
+    assert_eq!(run(&fresh, &root, &[], false)["failures"]["conflicts"], 2);
     let reservation = || {
         db.query_row("SELECT name1 FROM pending WHERE owner=?1", [&owner], |r| {
             r.get::<_, String>(0)
@@ -583,39 +586,19 @@ fn export_clears_deleted_adopted_album_rename_reservations() {
     fs::create_dir_all(root.join("Trash/First")).unwrap();
     let retained_blocker = root.join("Trash/First/notes.txt");
     fs::write(&retained_blocker, b"unrelated retention target").unwrap();
-    run(&fresh, &root, &["--album", "1"], false);
-    let retained = || {
-        db.query_row(
-            "SELECT name1 FROM pending WHERE owner='retained:1'",
-            [],
-            |r| r.get::<_, String>(0),
-        )
-        .unwrap()
-    };
-    let pending_retention = retained();
-    assert!(root.join("First/metadata.json").exists());
-    assert_eq!(pending_retention, "First");
-    run(&fresh, &root, &["--album", "1"], false);
-    assert_eq!(retained(), pending_retention);
-    assert!(!root.join("Trash/First-1").exists());
-    assert_eq!(
-        fs::read(root.join("First/Original.jpg")).unwrap(),
-        b"original"
-    );
+    run(&fresh, &root, &["--album", "1"], true);
     assert_eq!(
         fs::read(&retained_blocker).unwrap(),
         b"unrelated retention target"
     );
     assert_eq!(fs::read(&unrelated).unwrap(), b"unrelated rename target");
-    fs::remove_file(retained_blocker).unwrap();
-    fs::remove_dir(root.join("Trash/First")).unwrap();
     run(&fresh, &root, &["--album", "1"], true);
     assert_eq!(
-        fs::read(root.join("Trash/First/Original.jpg")).unwrap(),
+        fs::read(root.join("Trash/First-1/Original.jpg")).unwrap(),
         b"original"
     );
     assert_eq!(
-        read_json(&root.join("Trash/First/metadata/Original.jpg.json"))["ente"]["fileID"],
+        read_json(&root.join("Trash/First-1/metadata/Original.jpg.json"))["ente"]["fileID"],
         "10"
     );
     deletion.remove();
@@ -672,7 +655,7 @@ fn export_rejects_offline_early_and_reports_path_conflicts() {
         fs::write(&target, b"outside export").unwrap();
         fs::remove_file(root.join("First/Good.jpg")).unwrap();
         std::os::unix::fs::symlink(&target, root.join("First/Good.jpg")).unwrap();
-        assert_eq!(run(&home, &root, &[], false)["conflicts"], 1);
+        assert_eq!(run(&home, &root, &[], false)["failures"]["conflicts"], 1);
         assert_eq!(fs::read(&target).unwrap(), b"outside export");
         assert!(
             fs::symlink_metadata(root.join("First/Good.jpg"))
@@ -682,13 +665,13 @@ fn export_rejects_offline_early_and_reports_path_conflicts() {
         fs::remove_file(root.join("First/Good.jpg")).unwrap();
         let external_metadata = tempfile::tempdir().unwrap();
         std::os::unix::fs::symlink(external_metadata.path(), root.join("First/metadata")).unwrap();
-        assert_eq!(run(&home, &root, &[], false)["conflicts"], 1);
+        assert_eq!(run(&home, &root, &[], false)["failures"]["conflicts"], 1);
         assert_eq!(fs::read_dir(external_metadata.path()).unwrap().count(), 0);
         fs::remove_file(root.join("First/metadata")).unwrap();
         fs::write(root.join("First/Good.jpg"), b"unrelated").unwrap();
     }
     let result = run(&home, &root, &[], false);
-    assert_eq!(result["conflicts"], 1);
+    assert_eq!(result["failures"]["conflicts"], 1);
     assert_eq!(result["copies"]["pending"], 1);
     assert_eq!(fs::read(root.join("First/Good.jpg")).unwrap(), b"unrelated");
     assert!(!root.join("First/Good-1.jpg").exists());
@@ -714,7 +697,7 @@ fn export_rejects_offline_early_and_reports_path_conflicts() {
     let allocated = reservation();
     assert_eq!(allocated, "Good.jpg");
     let unchanged = page(&mut server, 1, 10, json!([]), false).create();
-    assert_eq!(run(&home, &root, &[], false)["conflicts"], 1);
+    assert_eq!(run(&home, &root, &[], false)["failures"]["conflicts"], 1);
     assert_eq!(reservation(), allocated);
     assert_eq!(fs::read(root.join("First/Good.jpg")).unwrap(), b"unrelated");
     unchanged.remove();
@@ -736,7 +719,7 @@ fn export_rejects_offline_early_and_reports_path_conflicts() {
         result["copies"],
         json!({"expected":2,"completed":1,"pending":1})
     );
-    assert_eq!(result["conflicts"], 1);
+    assert_eq!(result["failures"]["conflicts"], 1);
     assert_eq!(reservation(), allocated);
     assert_eq!(fs::read(root.join("First/Good.jpg")).unwrap(), b"unrelated");
     assert_eq!(
@@ -1062,7 +1045,7 @@ fn export_page_and_recognized_failures_roll_back_together_on_storage_failure() {
     broken["metadata"]["encryptedData"] = json!("broken");
     page(&mut server, 1, 0, json!([good, broken]), false).create();
     let result = run_failure(&home, &root, &[], "fixture storage failure");
-    assert_eq!(result["failures"], 2);
+    assert_eq!(result["failures"]["total"], 2);
     assert!(result["files"].is_null());
     assert_eq!(
         db.query_row("SELECT count(*) FROM photos_files", [], |r| r

@@ -147,7 +147,7 @@ fn export_large_original_and_live_photo_with_bounded_memory() -> TestResult {
             assert_eq!(reads, 2);
             assert_eq!(
                 measure(&home, &root, "large media unchanged")?["changes"],
-                json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0})
+                json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0})
             );
             assert_eq!(museum.object_store().reads(), reads);
             Ok(())
@@ -203,7 +203,7 @@ fn export_many_records_unchanged_resource_check() -> TestResult {
             assert_eq!(result["copies"]["completed"], 2000);
             assert_eq!(
                 result["changes"],
-                json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0})
+                json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0})
             );
             assert_eq!(museum.object_store().reads(), reads);
             for (path, modified) in observed {

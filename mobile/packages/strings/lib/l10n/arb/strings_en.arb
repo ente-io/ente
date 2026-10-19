@@ -3830,6 +3830,7 @@
   "searchLocationEmptySection": "Group photos that are taken within some radius of a photo",
   "searchPeopleEmptySection": "Invite people, and you'll see all photos shared by them here",
   "searchPersonsEmptySection": "People will be shown here once processing and syncing is complete",
+  "searchPhotosPeoplePlaces": "Search photos, people, places...",
   "searchResultCameraMake": "Camera make",
   "@searchResultCameraMake": {
     "description": "Search result subtitle label for camera make matches"

@@ -232,7 +232,7 @@ pub fn albums(
             [
                 album.id,
                 escape_controls(&album.name),
-                album.kind.to_owned(),
+                type_label(album.kind).to_owned(),
                 album.visibility.to_owned(),
                 album.owner_id,
                 album.updated_at,
@@ -244,7 +244,7 @@ pub fn albums(
 pub fn album(album: &AlbumView) -> Result<()> {
     write_fields(&[
         ("Name", escape_controls(&album.name)),
-        ("Type", album.kind.to_owned()),
+        ("Type", type_label(album.kind).to_owned()),
         ("Visibility", album.visibility.to_owned()),
         ("Owner", album.owner_id.clone()),
         ("Updated", album.updated_at.clone()),
@@ -267,7 +267,7 @@ pub fn files(
             [
                 file.id,
                 escape_controls(&file.name),
-                file.kind.to_owned(),
+                type_label(file.kind).to_owned(),
                 file.created_at,
                 file.album_ids.join(","),
             ]
@@ -278,7 +278,7 @@ pub fn files(
 pub fn file(file: &FileView) -> Result<()> {
     let mut fields = vec![
         ("Name", escape_controls(&file.name)),
-        ("Type", file.kind.to_owned()),
+        ("Type", type_label(file.kind).to_owned()),
         (
             "Visibility",
             file.visibility.unwrap_or("unavailable").to_owned(),
@@ -369,6 +369,15 @@ pub fn storage_size(bytes: i64) -> String {
         }
     }
     format!("{bytes} bytes")
+}
+
+fn type_label(kind: &str) -> &str {
+    match kind {
+        "defaultHidden" => "hidden album",
+        "quicklink" => "quick link",
+        "livephoto" => "live photo",
+        _ => kind,
+    }
 }
 
 fn timestamp(micros: i64) -> Result<String> {

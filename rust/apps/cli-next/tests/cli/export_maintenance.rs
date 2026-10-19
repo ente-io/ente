@@ -364,13 +364,13 @@ fn export_local_inventory_failure_preserves_output_and_reports_unknown_totals() 
     let result = run_failure(&home, &root, &[], "missing field `remote`");
     assert!(result["files"].is_null());
     assert!(result["copies"].is_null());
-    assert_eq!(result["failures"], 1);
+    assert_eq!(result["failures"]["total"], 1);
     let output = home.run(&["photos", "export", root.to_str().unwrap()]);
     assert!(failure(&output).contains("missing field `remote`"));
     assert!(
         String::from_utf8(output.stdout)
             .unwrap()
-            .contains("inventory incomplete")
+            .contains("could not determine the full export size")
     );
     for (path, bytes) in published {
         assert_eq!(fs::read(root.join(path)).unwrap(), bytes);
@@ -449,7 +449,7 @@ fn export_snapshot_uses_current_healthy_memberships_and_preserves_raw_bytes() {
     assert_eq!(unchanged["copies"], result["copies"]);
     assert_eq!(
         unchanged["changes"],
-        json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0})
+        json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0})
     );
     for table in ["sources", "album_sources"] {
         for action in ["INSERT", "UPDATE", "DELETE"] {
@@ -549,7 +549,10 @@ fn export_keeps_latest_deleted_album_selector_without_rewriting_retained_history
         json!([revision(collection(2, "Travel", &key), 70)]),
     );
     page(&mut server, 2, 0, json!([]), false).create();
-    assert_eq!(run(&home, &root, &["--album", "2"], false)["conflicts"], 1);
+    assert_eq!(
+        run(&home, &root, &["--album", "2"], false)["failures"]["conflicts"],
+        1
+    );
     assert_eq!(
         fs::read(root.join("Travel/notes.txt")).unwrap(),
         b"local addition"
@@ -584,7 +587,10 @@ fn export_discards_failed_downloads_and_services_other_albums() {
         let file = revision(file, 30);
         page(&mut server, 1, 0, json!([file]), false).create();
         let staged = download(&mut server, 10, &bytes, 1);
-        assert_eq!(run(&home, &root, &["-j", "1"], false)["conflicts"], 1);
+        assert_eq!(
+            run(&home, &root, &["-j", "1"], false)["failures"]["conflicts"],
+            1
+        );
         let db = export_database(&home);
         assert_eq!(count(&db, "SELECT count(*) FROM temporaries"), 0);
         run(&home, &root, &["--album", "Second", "-j", "1"], true);
@@ -1057,8 +1063,7 @@ fn export_cancels_pending_retention_when_selected_membership_returns() {
     let root = destination.path().join("photos");
     run(&home, &root, &[], true);
     let db = export_database(&home);
-    fs::create_dir_all(root.join("Trash/First")).unwrap();
-    fs::write(root.join("Trash/First/notes"), b"unrelated album").unwrap();
+    db.execute_batch("CREATE TRIGGER stop_retention BEFORE UPDATE ON pending WHEN new.retained=1 AND json_type(new.action,'$.Directory') IS NOT NULL BEGIN SELECT RAISE(ABORT,'stop before retention directory'); END;").unwrap();
     let mut version = 10;
     for (step, remove, complete) in [
         (0, true, false),
@@ -1068,9 +1073,8 @@ fn export_cancels_pending_retention_when_selected_membership_returns() {
         (4, true, false),
         (5, false, true),
     ] {
-        if step == 2 {
-            fs::remove_file(root.join("Trash/First/notes")).unwrap();
-            fs::remove_dir(root.join("Trash/First")).unwrap();
+        if step == 1 {
+            db.execute_batch("DROP TRIGGER stop_retention;").unwrap();
         }
         if step == 4 {
             fs::write(root.join("Trash/First/Original-1.jpg"), b"unrelated file").unwrap();
@@ -1430,7 +1434,7 @@ fn export_adoption_ignores_unrelated_non_utf8_entries_but_rejects_claimed_paths(
 }
 
 #[test]
-fn export_missing_move_endpoints_require_active_repair_or_retained_recovery() {
+fn export_missing_move_endpoints_restore_active_media_and_finish_removal() {
     for retaining in [false, true] {
         let mut server = mockito::Server::new();
         let home = TestHome::new();
@@ -1470,11 +1474,10 @@ fn export_missing_move_endpoints_require_active_repair_or_retained_recovery() {
         assert!(!root.join("First/Photo.jpg").exists());
         db.execute_batch("DROP TRIGGER stop_move;").unwrap();
         if retaining {
-            run(&home, &root, &[], false);
-            assert!(!root.join("Trash/First/metadata/Photo.jpg.json").exists());
-            fs::write(root.join(moved), b"original").unwrap();
             run(&home, &root, &[], true);
-            assert_component(&root, "Trash/First", "Photo.jpg", b"original");
+            assert!(!root.join("First/metadata/Photo.jpg.json").exists());
+            assert!(!root.join("Trash/First/metadata/Photo.jpg.json").exists());
+            run(&home, &root, &[], true);
         } else {
             run(&home, &root, &[], true);
             assert_component(&root, "First", "Renamed.jpg", b"original");
@@ -1608,7 +1611,12 @@ fn export_first_publication_requires_ownership_and_recovers_renamed_bytes() {
             } else {
                 fs::create_dir_all(path.parent().unwrap()).unwrap();
                 fs::write(&path, b"unrelated").unwrap();
-                assert!(run(&home, &root, &[], false)["conflicts"].as_i64().unwrap() > 0);
+                assert!(
+                    run(&home, &root, &[], false)["failures"]["conflicts"]
+                        .as_i64()
+                        .unwrap()
+                        > 0
+                );
                 assert_eq!(fs::read(&path).unwrap(), b"unrelated");
                 fs::remove_file(&path).unwrap();
             }
@@ -1936,7 +1944,7 @@ fn export_restores_missing_cross_album_publications_and_preserves_edits() {
         page(&mut fixture.server, 2, 50, json!([]), false).create();
         if !missing {
             let result = run(&fixture.home, root, &["--album", "Renamed"], false);
-            assert!(result["conflicts"].as_i64().unwrap() > 0);
+            assert!(result["failures"]["conflicts"].as_i64().unwrap() > 0);
             assert_eq!(fs::read(root.join("Renamed/Photo.jpg")).unwrap(), b"wrong");
             fs::remove_file(root.join("Renamed/Photo.jpg")).unwrap();
         }
@@ -2135,7 +2143,10 @@ fn export_reports_selected_cleanup_failures_without_changing_completed_counts() 
             result["copies"]["completed"],
             if selected_owner { 2 } else { 1 }
         );
-        assert_eq!(result["failures"].as_i64().unwrap() > 0, selected_owner);
+        assert_eq!(
+            result["failures"]["total"].as_i64().unwrap() > 0,
+            selected_owner
+        );
         assert_eq!(count(&db, "SELECT count(*) FROM temporaries"), 1);
         assert_eq!(
             fs::read(root.join("First/.ente-cleanup.part")).unwrap(),
@@ -2201,7 +2212,7 @@ fn export_leaves_unselected_pending_and_temporary_rows_untouched() {
     page(&mut server, 2, 0, json!([revision(other, 50)]), false).create();
     let other_get = download(&mut server, 20, &other_bytes, 1);
     let result = run(&home, &root, &["--album", "Renamed", "-j", "1"], true);
-    assert_eq!(result["failures"], 0);
+    assert_eq!(result["failures"]["total"], 0);
     assert_eq!(count(&db, "SELECT count(*) FROM temporaries"), 4);
     assert_eq!(
         db.query_row("SELECT action FROM pending WHERE file=10", [], |r| r
@@ -2406,7 +2417,7 @@ fn export_recovers_empty_initial_directories_without_claiming_unrelated_contents
             let rerun = run(&home, &root, &[], true);
             assert_eq!(
                 rerun["changes"],
-                json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0})
+                json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0})
             );
             assert_eq!(fs::read(&history).unwrap(), bytes);
             fetched.assert();
@@ -2415,7 +2426,7 @@ fn export_recovers_empty_initial_directories_without_claiming_unrelated_contents
         let notes = folder.join("notes.txt");
         fs::write(&notes, b"unrelated").unwrap();
         let result = run(&home, &root, &[], false);
-        assert!(result["conflicts"].as_i64().unwrap() > 0);
+        assert!(result["failures"]["conflicts"].as_i64().unwrap() > 0);
         assert_eq!(fs::read(&notes).unwrap(), b"unrelated");
         assert!(!folder.join("metadata.json").exists());
         assert_eq!(

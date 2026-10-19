@@ -7,6 +7,7 @@ mod core_db;
 mod db;
 mod home;
 mod login;
+mod migration;
 mod output;
 mod password;
 mod paste;
@@ -31,11 +32,20 @@ use vault::{Account, State, Vault};
 
 #[tokio::main]
 async fn main() {
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn"))
+        .format(|out, record| writeln!(out, "{}", record.args()))
+        .init();
     let mut command = args::command();
-    let matches = command.get_matches_mut();
-    let result = if matches.get_flag("help-all") {
+    let arguments: Vec<_> = std::env::args_os().collect();
+    let matches = command
+        .try_get_matches_from_mut(&arguments)
+        .unwrap_or_else(|mut error| {
+            migration::hint(&command, &arguments, &mut error);
+            error.exit()
+        });
+    let result = if let Some(help) = matches.subcommand_matches("help") {
         command.build();
-        print_all_help(&mut command, &mut std::io::stdout().lock())
+        print_help(&mut command, help, &mut std::io::stdout().lock())
     } else {
         let cli = Cli::from_arg_matches(&matches)
             .unwrap_or_else(|error| error.format(&mut command).exit());
@@ -45,6 +55,41 @@ async fn main() {
         eprintln!("Error: {error:#}");
         std::process::exit(1);
     }
+}
+
+fn print_help(
+    command: &mut clap::Command,
+    mut matches: &clap::ArgMatches,
+    output: &mut impl Write,
+) -> Result<()> {
+    if matches.get_flag("all") {
+        if matches.subcommand_name().is_some() {
+            command
+                .find_subcommand_mut("help")
+                .context("missing help command")?
+                .error(
+                    clap::error::ErrorKind::ArgumentConflict,
+                    "help --all cannot be combined with a command or topic",
+                )
+                .exit();
+        }
+        return print_all_help(command, output);
+    }
+    if matches.subcommand_name() == Some("migration") {
+        return migration::print(
+            command.get_bin_name().unwrap_or_else(|| command.get_name()),
+            output,
+        );
+    }
+    let mut target = command;
+    while let Some((name, child)) = matches.subcommand() {
+        target = target
+            .find_subcommand_mut(name)
+            .context("unknown help command")?;
+        matches = child;
+    }
+    write!(output, "{}", target.render_long_help())?;
+    Ok(())
 }
 
 fn print_all_help(command: &mut clap::Command, output: &mut impl Write) -> Result<()> {
@@ -125,7 +170,7 @@ async fn account_command(command: AccountCommand, options: &Options) -> Result<(
             let account = AccountView::new(&state.accounts[index], state.selected);
             output::action(
                 options.json,
-                &json!({"account": account, "app": app, "created": true}),
+                &json!({"account": account, "app": app}),
                 &format!(
                     "Created {} and signed into {}.",
                     output::escape_controls(&state.accounts[index].name),
