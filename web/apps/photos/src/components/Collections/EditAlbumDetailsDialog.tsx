@@ -1,4 +1,3 @@
-import { DialogWarningIllustration } from "@/components/utils/DialogWarningIllustration";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -114,7 +113,7 @@ export const EditAlbumDetailsDialog: React.FC<EditAlbumDetailsDialogProps> = ({
         if (hasChanges) {
             showMiniDialog({
                 title: t("discard_changes"),
-                illustration: <DialogWarningIllustration color="red" />,
+                kind: "warning",
                 message: t("discard_changes_confirm_message"),
                 continue: {
                     text: t("discard"),

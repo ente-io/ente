@@ -1,5 +1,4 @@
 import type { RemotePullOpts } from "@/components/gallery";
-import { DialogWarningIllustration } from "@/components/utils/DialogWarningIllustration";
 import { downloadAndSaveCollectionFiles } from "@/services/save";
 import {
     CleanIcon,
@@ -196,7 +195,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         if (hasAlbumFiles) {
             showMiniDialog({
                 title: t("delete_album_title"),
-                illustration: <DialogWarningIllustration />,
+                kind: "info",
                 message: (
                     <Trans
                         i18nKey={"delete_album_message"}
@@ -226,7 +225,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         showMiniDialog({
             title: t("delete_album_title"),
-            illustration: <DialogWarningIllustration />,
+            kind: "info",
             message: (
                 <Trans
                     i18nKey={"delete_album_message_no_photos"}
@@ -263,7 +262,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const confirmEmptyTrash = () =>
         showMiniDialog({
             title: t("empty_trash_title"),
-            illustration: <DialogWarningIllustration color="red" />,
+            kind: "warning",
             message: t("empty_trash_message"),
             continue: {
                 text: t("empty_trash"),

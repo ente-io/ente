@@ -16,9 +16,7 @@ import {
 } from "ente-new/photos/services/photos-fdb";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
-import { createElement } from "react";
 import { trashFilesDialogAttributes } from "../utils/dialog-attributes";
-import { DialogWarningIllustration } from "../utils/DialogWarningIllustration";
 
 export const useDeleteEmptyAlbums = (
     collectionSummaries: CollectionSummary[],
@@ -108,7 +106,7 @@ export const useDeleteEmptyAlbums = (
         showMiniDialog({
             ...attributes,
             title: t("delete_empty_albums_title"),
-            illustration: createElement(DialogWarningIllustration),
+            kind: "info",
             message: t("delete_empty_albums_message", {
                 count: candidateIDs.length,
             }),

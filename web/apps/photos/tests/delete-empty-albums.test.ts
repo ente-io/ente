@@ -69,7 +69,7 @@ describe("shared empty album deletion", () => {
     test("confirms the candidate count and does nothing until confirmed", () => {
         const dialog = start();
         expect(mocks.showMiniDialog).toHaveBeenCalledOnce();
-        expect(dialog.illustration).toBeDefined();
+        expect(dialog.kind).toBe("info");
         expect(dialog.dismissOnRouteChange).toBe(true);
         expect(dialog.continue?.text).toEqual({
             key: "delete",
