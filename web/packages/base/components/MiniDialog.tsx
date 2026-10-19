@@ -41,7 +41,7 @@ export interface MiniDialogAttributes {
 
 type MiniDialogProps = Pick<DialogProps, "open" | "sx"> & {
     appearance?: "default" | "centered";
-    /** A new request remounts the content to reset pending/error state. */
+    // A new request remounts the content to reset pending/error state.
     dialogID?: number;
     onClose: () => void;
     attributes?: MiniDialogAttributes;
@@ -172,7 +172,19 @@ const MiniDialogContent: React.FC<React.PropsWithChildren<MiniDialogProps>> = ({
                               borderRadius: "24px",
                               position: "relative",
                               textAlign: "center",
+                              fontFamily: '"Inter Variable", sans-serif',
+                              "& .MuiDialogContent-root, & .MuiDialogContent-root .MuiTypography-root":
+                                  {
+                                      fontSize: "14px",
+                                      lineHeight: "20px",
+                                      fontWeight: 500,
+                                      letterSpacing: 0,
+                                  },
                               "& .MuiButton-root": {
+                                  fontFamily: "inherit",
+                                  fontSize: "14px",
+                                  lineHeight: "20px",
+                                  letterSpacing: 0,
                                   fontWeight: 500,
                                   minHeight: "48px",
                                   padding: "14px 24px",
@@ -224,7 +236,14 @@ const MiniDialogContent: React.FC<React.PropsWithChildren<MiniDialogProps>> = ({
                     {attributes.title && (
                         <DialogTitle
                             id={titleID}
-                            sx={{ "&&&": { p: 0 }, fontSize: 20 }}
+                            sx={{
+                                "&&&": { p: 0 },
+                                fontFamily: '"Outfit Variable", sans-serif',
+                                fontSize: "24px",
+                                lineHeight: "32px",
+                                fontWeight: 600,
+                                letterSpacing: 0,
+                            }}
                         >
                             {attributes.title}
                         </DialogTitle>

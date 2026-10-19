@@ -1,6 +1,6 @@
 import type { MiniDialogAttributes } from "../MiniDialog";
 
-export interface MiniDialogState {
+interface MiniDialogState {
     open: boolean;
     attributes?: MiniDialogAttributes;
     id: number;
