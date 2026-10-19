@@ -1,7 +1,6 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 
-/** The empty state shared by regular, hidden, and archived album views. */
 export function AlbumEmptyState() {
     return (
         <Stack sx={{ alignItems: "center", gap: "30.31px", px: 3, py: 3 }}>
