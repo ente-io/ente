@@ -133,6 +133,7 @@
       "count": {}
     }
   },
+  "addItems": "Elemente hinzufügen",
   "addLocation": "Ort hinzufügen",
   "addLocationButton": "Hinzufügen",
   "addMember": "Mitglied hinzufügen",
@@ -168,6 +169,7 @@
   "addTo": "Hinzufügen zu",
   "addToAlbum": "Zum Album hinzufügen",
   "addToCollection": "Zur Sammlung hinzufügen",
+  "addToCollections": "Zu Sammlungen hinzufügen",
   "addToEnte": "Zu Ente hinzufügen",
   "addToHiddenAlbum": "Zum versteckten Album hinzufügen",
   "addToPerson": "Zur Person hinzufügen",
@@ -435,6 +437,10 @@
   "backupFailed": "Sicherung fehlgeschlagen",
   "backupFile": "Datei sichern",
   "backupFolderLabel": "Sicherungsordner:",
+  "backupLatestPhotos": "Neueste Fotos sichern",
+  "@backupLatestPhotos": {
+    "description": "Button on the photo permission screen that backs up only recent photos"
+  },
   "backupLocationChoiceDescription": "Wo möchten sie ihre Backups speichern?",
   "backupMode": "Sicherungsmodus",
   "backupModeBackingUpItems": "{count, plural, one{Sichere ein Element} other{Sichere {formattedCount} Elemente}}",
@@ -595,6 +601,10 @@
   "checkStatus": "Status überprüfen",
   "@checkStatus": {
     "description": "Check status button label"
+  },
+  "chooseAlbumsToBackup": "Alben zum Sichern auswählen",
+  "@chooseAlbumsToBackup": {
+    "description": "Button on the photo permission screen that opens album selection for backup"
   },
   "chooseARecoveryTime": "Wiederherstellungszeit auswählen",
   "chooseBackupLocation": "Sicherungsort festlegen",
@@ -1084,6 +1094,8 @@
   "disablingTwofactorAuthentication": "Zwei-Faktor-Authentifizierung (2FA) wird deaktiviert...",
   "discardChanges": "Verwerfen",
   "discardEditsQuestion": "Änderungen verwerfen?",
+  "discardUploadMessage": "Die ausgewählten Elemente werden nicht gespeichert.",
+  "discardUploadTitle": "Upload verwerfen?",
   "discover": "Entdecken",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -1480,7 +1492,7 @@
       }
     }
   },
-  "memoryLaneCaptionYearsAgo": "{name} {count, plural, one{vor {number} Jahr} other{vor {number} Jahren}}",
+  "memoryLaneCaptionYearsAgo": "{name} {count, plural, one{vor einem Jahr} other{vor {number} Jahren}}",
   "@memoryLaneCaptionYearsAgo": {
     "description": "Memory Lane caption in elapsed years. Always keep the number, including for one.",
     "placeholders": {
@@ -1716,10 +1728,12 @@
   "@forgotPassword": {
     "description": "Forgot password link label"
   },
+  "forgotPasswordPrompt": "Passwort vergessen?",
   "forgotRecoveryKey": "Wiederherstellungsschlüssel vergessen?",
   "free10GB": "10GB kostenlos auf <bold-green>ente</bold-green> Fotos",
   "freeStorageOffer": "10% Rabatt für <bold-green>ente</bold-green> Photos",
   "freeStorageOfferDescription": "Verwende den Code \"AUTH\", um 10% im ersten Jahr zu sparen",
+  "free": "Kostenlos",
   "freeTrial": "Kostenlose Testphase",
   "freeUpAmount": "{sizeInMBorGB} freigeben",
   "@freeUpAmount": {
@@ -1760,6 +1774,9 @@
   "grantPermissionDesc": "Bitte erlaube Ente, auf deine Bibliothek zuzugreifen, damit wir sie mit Gesichtserkennung organisieren können. Die gesamte Verarbeitung findet auf deinem Gerät statt.",
   "greenery": "Im Grünen",
   "grid": "Raster",
+  "photosInOriginalProportions": "Fotos im ursprünglichen Seitenverhältnis",
+  "squarePhotos": "Quadratische Fotos",
+  "photosPerRow": "Fotos pro Zeile",
   "groupBy": "Gruppieren nach",
   "groupByDay": "Tag",
   "groupByMonth": "Monat",
@@ -1980,6 +1997,7 @@
       }
     }
   },
+  "itemsLabel": "Elemente",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an",
   "itemsWillBeDeletedFromAllCollections": "{count, plural, one{Dieses Element wird aus allen Sammlungen gelöscht. Du kannst es aus dem Papierkorb wiederherstellen.} other{Diese Elemente werden aus allen Sammlungen gelöscht. Du kannst sie aus dem Papierkorb wiederherstellen.}}",
   "@itemsWillBeDeletedFromAllCollections": {
@@ -2457,7 +2475,10 @@
   "mlConsent": "Maschinelles Lernen aktivieren",
   "mlConsentConfirmation": "Ich verstehe und möchte das maschinelle Lernen aktivieren",
   "mlConsentDescription": "Wenn du das maschinelle Lernen aktivierst, wird Ente Informationen wie etwa Gesichtsgeometrie aus Dateien extrahieren, einschließlich derjenigen, die mit dir geteilt werden.\n\nDies geschieht auf deinem Gerät und alle erzeugten biometrischen Informationen werden Ende-zu-Ende-verschlüsselt.",
-  "mlConsentPrivacy": "Bitte klicke hier für weitere Details zu dieser Funktion in unserer Datenschutzerklärung",
+  "mlConsentPrivacyDetails": "Bitte <policy>klicke hier</policy> für weitere Details zu dieser Funktion in unserer Datenschutzerklärung",
+  "@mlConsentPrivacyDetails": {
+    "description": "Machine learning consent screen sentence; only the text inside the policy tags is tappable and opens the privacy policy"
+  },
   "mlCouldNotProcessItems": "{count, plural, one{Konnte ein Element nicht verarbeiten} other{Konnte {count} Elemente nicht verarbeiten}}",
   "@mlCouldNotProcessItems": {
     "description": "Title shown when machine learning could not process one or more items",
@@ -2501,6 +2522,7 @@
   "modifyYourQueryOrTrySearchingFor": "Ändere deine Suchanfrage oder suche nach",
   "moments": "Momente",
   "month": "Monat",
+  "mostPopular": "Am beliebtesten",
   "monthly": "Monatlich",
   "@monthly": {
     "description": "The text to display for monthly plans",
@@ -2764,6 +2786,7 @@
   "openAlbumInBrowser": "Album im Browser öffnen",
   "openAlbumInBrowserTitle": "Bitte nutze die Web-App, um Fotos zu diesem Album hinzuzufügen",
   "openFile": "Datei öffnen",
+  "openInAnotherApp": "In einer anderen App öffnen",
   "openLink": "Link öffnen",
   "openSettings": "Einstellungen öffnen",
   "openstreetmapContributors": "OpenStreetMap-Beitragende",
@@ -2849,6 +2872,8 @@
       }
     }
   },
+  "pdfNeedsPassword": "Dieses PDF benötigt ein Passwort",
+  "pdfPasswordNotSupportedOnDevice": "Dieses Gerät kann passwortgeschützte PDFs nicht entsperren. Öffne es in einer anderen App.",
   "pending": "Ausstehend",
   "pendingSync": "Synchronisation anstehend",
   "pendingSyncs": "Warnung",
@@ -3046,6 +3071,7 @@
     }
   },
   "publicLink": "Öffentlicher Link",
+  "publicCollectionLinkAccessDescription": "Jeder mit dem Link kann die Sammlung ohne Ente-Account öffnen.",
   "publicLinkAccessDescription": "Jeder mit dem Link kann das Album ohne Ente-Account öffnen.",
   "publicLinkCollectDescription": "Jeder mit diesem Link kann Fotos zu deinem Album hinzufügen.",
   "publicLinkEnabled": "Öffentlicher Link aktiviert",
@@ -3793,6 +3819,10 @@
   "@send": {
     "description": "Label for send button"
   },
+  "sendACopy": "Kopie senden",
+  "@sendACopy": {
+    "description": "Share a copy of the current photo or video using the system share sheet, as opposed to sending a viewing link"
+  },
   "sendCountInvites": "{count, plural, =0{Einladungen versenden} one{Versende eine Einladung} other{Versende {count} Einladungen}}",
   "@sendCountInvites": {
     "placeholders": {
@@ -3801,6 +3831,10 @@
         "example": "2"
       }
     }
+  },
+  "sendFileToAnotherApp": "Sendet die Datei an eine andere App",
+  "@sendFileToAnotherApp": {
+    "description": "Subtitle for sending a copy of the current photo or video from the file viewer"
   },
   "sendInvite": "Einladung senden",
   "sendLink": "Link senden",
@@ -3912,6 +3946,10 @@
   "shareKey": "Schlüssel teilen",
   "shareLegacyDescription": "Senden Sie jede Karte an die Person, für die sie bestimmt ist. Keine einzelne Karte funktioniert allein.",
   "shareLink": "Link teilen",
+  "shareLinkToThisItem": "Teilt einen Link zu diesem Element",
+  "@shareLinkToThisItem": {
+    "description": "Subtitle for sending a viewing link to the current photo or video from the file viewer"
+  },
   "shareMemory": "Erinnerung teilen",
   "shareMyVerificationID": "Hier ist meine Verifizierungs-ID: {verificationID} für ente.com.",
   "@shareMyVerificationID": {
@@ -4055,6 +4093,7 @@
   "sortAToZ": "A-Z",
   "sortNewestFirst": "Neueste zuerst",
   "sortOldestFirst": "Älteste zuerst",
+  "sortPhotos": "Fotos sortieren",
   "sortZToA": "Z-A",
   "speed": "Geschwindigkeit",
   "sportsAction": "Zocken",
@@ -4379,6 +4418,7 @@
   "unavailableReferralCode": "Dieser Code wurde bereits verwendet",
   "uncategorized": "Unkategorisiert",
   "uncategorizedItemsWillShowUpHere": "Unkategorisierte Elemente werden hier angezeigt",
+  "uncategorizedUploadHint": "Wenn du dies überspringst, landen die Elemente in Unkategorisiert",
   "undo": "Rückgängig",
   "unhide": "Einblenden",
   "unhideToAlbum": "Im Album anzeigen",
@@ -4389,6 +4429,7 @@
   "@unlock": {
     "description": "Short action label used as the system authentication reason when unlocking the app"
   },
+  "unlockPdf": "Entsperren",
   "unnamedCollection": "Unbenannte Sammlung",
   "unnamedPeopleDoingSomethingTogether": "Gemeinsam machen",
   "unnamedPeopleSpotlight": "Ein vertrautes Gesicht",
@@ -4475,6 +4516,7 @@
     }
   },
   "uploadingSingleMemory": "Sichere ein Erinnerungsstück...",
+  "uploadItemsRemoved": "Keine Elemente mehr zum Hochladen",
   "uploadIsIgnoredDueToIgnorereason": "Upload wird aufgrund von {ignoreReason} ignoriert",
   "@uploadIsIgnoredDueToIgnorereason": {
     "placeholders": {
@@ -4498,6 +4540,10 @@
   "usedYourCode": "nutzte deinen Code",
   "useMLToFindSimilarImages": "Entferne Elemente, die ähnlich aussehen",
   "useOffline": "Ohne Backup verwenden",
+  "useTwoFactorInstead": "Stattdessen 2FA verwenden",
+  "@useTwoFactorInstead": {
+    "description": "Link on the passkey verification screen to verify with an authenticator code instead"
+  },
   "username": "Benutzername",
   "usernameHint": "Login-ID oder E-Mail",
   "useSelectedPhoto": "Ausgewähltes Foto verwenden",
@@ -4509,6 +4555,10 @@
         "example": "20 GB"
       }
     }
+  },
+  "validEmailAddress": "Gültige E-Mail-Adresse",
+  "@validEmailAddress": {
+    "description": "Success message under the email field once the address is valid"
   },
   "validTill": "Gültig bis {endDate}",
   "@validTill": {
@@ -4623,6 +4673,10 @@
     "placeholders": {
       "count": {}
     }
+  },
+  "year": "Jahr",
+  "@year": {
+    "description": "Billing period suffix on the pricing page (/year)"
   },
   "yearShort": "Jahr",
   "@yearShort": {

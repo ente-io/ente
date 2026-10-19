@@ -724,7 +724,6 @@
   "mlConsent": "Aktifkan pemelajaran mesin",
   "mlConsentConfirmation": "Saya memahami, dan bersedia mengaktifkan pemelajaran mesin",
   "mlConsentDescription": "Jika kamu mengaktifkan pemelajaran mesin, Ente akan memproses informasi seperti geometri wajah dari file yang ada, termasuk file yang dibagikan kepadamu.\n\nIni dijalankan pada perangkatmu, dan setiap informasi biometrik yang dibuat akan terenkripsi ujung ke ujung.",
-  "mlConsentPrivacy": "Klik di sini untuk detail lebih lanjut tentang fitur ini pada kebijakan privasi kami",
   "moderateStrength": "Sedang",
   "@moderateStrength": {
     "description": "Moderate password strength label"

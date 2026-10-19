@@ -1,8 +1,4 @@
 {
-  "bringMemoriesTogether": "Reúna suas memórias",
-  "createMyAccount": "Criar minha conta",
-  "localGalleryPermissionDesc": "Conceda permissão para acessar e organizar suas fotos com reconhecimento facial. Todo o processamento é feito no seu dispositivo.",
-  "onboardingOrganizeDesc": "Organize suas fotos e vídeos. Todas as memórias em um só lugar.",
   "about": "Sobre",
   "acceptTrustInvite": "Aceitar convite",
   "account": "Conta",
@@ -186,7 +182,6 @@
   "albumsOnDevicePermissionCta": "Permitir",
   "albumsOnEnteEmptyCta": "Selecione os álbuns para backup",
   "albumsOnEnteEmptyTitle": "Fazer backup de suas memórias",
-  "albumsReceivedEmptyTitle": "Veja memórias compartilhadas com você",
   "albumsSharedEmptyTitle": "Compartilhe suas memórias",
   "albumsWidgetDesc": "Selecione os álbuns que deseja ver na tela inicial.",
   "albumTitle": "Título do álbum",
@@ -2118,7 +2113,6 @@
   "mlConsent": "Ativar",
   "mlConsentConfirmation": "Concordo e desejo ativar",
   "mlConsentDescription": "Se você ativar a aprendizagem automática, Ente extrairá informações como a geometria facial dos arquivos, incluindo os compartilhados com você.\n\nIsso acontecerá no seu dispositivo, qualquer informação biométrica gerada será criptografada de ponta a ponta.",
-  "mlConsentPrivacy": "Clique aqui para mais detalhes sobre este recurso na política de privacidade",
   "mlIndexingDescription": "Por favor, tome em conta que a aprendizagem automática resultará em maior largura de banda e consumo de bateria até que tudo seja processado. Recomendamos usar o aplicativo para desktop para processamento mais rápido, e todos os resultados serão sincronizados automaticamente.",
   "mlProgressBannerDescription": "Suas fotos estão sendo processadas no dispositivo para detectar rostos, objetos e mais.",
   "mlProgressBannerStatus": "{indexed} de {total} fotos processadas",
@@ -2191,7 +2185,6 @@
   "nextTotpTitle": "próximo",
   "nightLights": "Noites de néon",
   "no": "Não",
-  "noAlbumsOnThisDevice": "Nenhum álbum no dispositivo",
   "noDefaultBackupFolder": "Não foi possível criar uma pasta de backup padrão.",
   "noDeleteSuggestion": "Nenhuma sugestão para exclusão",
   "noDeviceFound": "Nenhum dispositivo encontrado",
@@ -3351,7 +3344,6 @@
       }
     }
   },
-  "startSnappingYourPhotosWillShowUpHere": "Comece a arrastar, suas fotos aparecerão aqui",
   "startWithAddingPhotosOrFamiliarFaces": "Comece adicionando\nfotos ou rostos familiares",
   "status": "Estado",
   "sticker": "Figurinha",
