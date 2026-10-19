@@ -76,6 +76,7 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     albumSearchQuery: string;
     onAlbumSearchQueryChange: (query: string) => void;
     onShowAlbumOverview: (filter: AlbumFilter) => void;
+    onShowPeopleOverview: () => void;
     collectionSummaries: CollectionSummary[];
     visibleAlbumFilters: typeof albumFilters;
     normalCollectionSummaries: CollectionSummaries;
@@ -86,9 +87,7 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     ) => Promise<boolean>;
     activeCollectionID: number | undefined;
     onSelectCollectionID: (collectionID: number) => void;
-    onShowAllAlbums: () => void;
     onCreateAlbum: () => void;
-    onShowAllPeople: () => void;
     collectionsSortBy: CollectionsSortBy;
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     peopleSortBy: PeopleSortBy;
@@ -104,6 +103,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     albumSearchQuery,
     onAlbumSearchQueryChange,
     onShowAlbumOverview,
+    onShowPeopleOverview,
     collectionSummaries,
     visibleAlbumFilters,
     normalCollectionSummaries,
@@ -111,9 +111,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     onShowCollectionSummary,
     activeCollectionID,
     onSelectCollectionID,
-    onShowAllAlbums,
     onCreateAlbum,
-    onShowAllPeople,
     collectionsSortBy,
     onChangeCollectionsSortBy,
     peopleSortBy,
@@ -422,7 +420,30 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         lineHeight: mobile ? "26px" : "32px",
                     }}
                 >
-                    {title}
+                    {mode == "people" ? (
+                        <ButtonBase
+                            onClick={() => {
+                                setPeopleSearchQuery("");
+                                onShowPeopleOverview();
+                                mobileDrawerProps.onClose();
+                            }}
+                            sx={{
+                                font: "inherit",
+                                justifyContent: "flex-start",
+                                borderRadius: 1,
+                                "&:hover": { color: "text.muted" },
+                                "&.Mui-focusVisible": {
+                                    outline: "2px solid",
+                                    outlineColor: "primary.main",
+                                    outlineOffset: 2,
+                                },
+                            }}
+                        >
+                            {title}
+                        </ButtonBase>
+                    ) : (
+                        title
+                    )}
                 </Typography>
                 {mode != "people" ? (
                     <CollectionsSortOptions
@@ -437,23 +458,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         onChangeSortBy={onChangePeopleSortBy}
                     />
                 )}
-                <Tooltip
-                    title={mode == "people" ? t("people") : t("all_albums")}
-                >
-                    <IconButton
-                        aria-label={
-                            mode == "people" ? t("people") : t("all_albums")
-                        }
-                        aria-haspopup="dialog"
-                        onClick={() => {
-                            mobileDrawerProps.onClose();
-                            if (mode == "people") onShowAllPeople();
-                            else onShowAllAlbums();
-                        }}
-                    >
-                        <ExpandMoreIcon sx={{ fontSize: 20 }} />
-                    </IconButton>
-                </Tooltip>
                 {(mode == "albums" || mode == "hidden-albums") && (
                     <Tooltip title={t("new_album")}>
                         <IconButton
@@ -668,9 +672,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     "aria-labelledby": titleID,
                     inert: !mobileDrawerProps.open,
                     sx: (theme) => ({
-                        width: "min(328px, 94vw)",
-                        borderRadius: "0 20px 20px 0",
-                        boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
+                        width: "100%",
+                        borderRadius: 0,
+                        boxShadow: "none",
                         bgcolor: "#F4F4F4",
                         ...theme.applyStyles("dark", { bgcolor: "#161616" }),
                     }),
@@ -935,16 +939,5 @@ const PersonCard: React.FC<PersonCardProps> = ({
                 <HugeiconsIcon icon={PinIcon} size={14} />
             </CollectionBarCardIcon_>
         )}
-        <Typography
-            component="span"
-            sx={{
-                flexShrink: 0,
-                fontSize: 12,
-                lineHeight: "20px",
-                color: "text.muted",
-            }}
-        >
-            {person.fileIDs.length.toLocaleString()}
-        </Typography>
     </BarCard>
 );

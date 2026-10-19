@@ -527,6 +527,7 @@
     "people_photo_count_other": "{{count, number}} photos",
     "show_less_faces": "Show fewer faces",
     "show_more_faces": "Show more faces",
+    "more_faces": "More faces",
     "indexing_scheduled": "Indexing is scheduled...",
     "indexing_photos": "Updating indexes...",
     "indexing_fetching": "Syncing indexes...",
