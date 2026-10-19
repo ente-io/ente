@@ -1,6 +1,5 @@
 import { CollectionSubType, type Collection } from "ente-media/collection";
 
-/** Quick links managed here must never expose collections in Hidden. */
 export const visibleQuickLinks = (
     collections: Collection[],
     userID: number,
