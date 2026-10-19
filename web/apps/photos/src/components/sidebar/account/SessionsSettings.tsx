@@ -1,3 +1,4 @@
+import { DialogWarningIllustration } from "@/components/utils/DialogWarningIllustration";
 import CheckIcon from "@mui/icons-material/Check";
 import DevicesIcon from "@mui/icons-material/Devices";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -119,6 +120,7 @@ const SessionsSettingsContents: React.FC<SessionsSettingsContentsProps> = ({
 
             showMiniDialog({
                 title: t("terminate_session"),
+                illustration: <DialogWarningIllustration />,
                 message: isCurrentDevice ? (
                     t("terminate_session_confirm_message_self")
                 ) : (
@@ -150,6 +152,9 @@ const SessionsSettingsContents: React.FC<SessionsSettingsContentsProps> = ({
                                 } else {
                                     showMiniDialog({
                                         title: t("error"),
+                                        illustration: (
+                                            <DialogWarningIllustration />
+                                        ),
                                         message: t("terminate_session_failed"),
                                     });
                                 }

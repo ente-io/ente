@@ -18,6 +18,7 @@ import log from "../log";
 import { InlineErrorIndicator } from "./ErrorIndicator";
 
 export interface MiniDialogAttributes {
+    kind?: "error";
     title?: React.ReactNode;
     icon?: React.ReactNode;
     illustration?: React.ReactNode;
@@ -41,6 +42,7 @@ export interface MiniDialogAttributes {
 
 type MiniDialogProps = Pick<DialogProps, "open" | "sx"> & {
     appearance?: "default" | "centered";
+    errorIllustration?: React.ReactNode;
     // A new request remounts the content to reset pending/error state.
     dialogID?: number;
     onClose: () => void;
@@ -58,6 +60,7 @@ const MiniDialogContent: React.FC<React.PropsWithChildren<MiniDialogProps>> = ({
     children,
     sx,
     appearance = "default",
+    errorIllustration,
 }) => {
     const titleID = useId();
     const messageID = useId();
@@ -71,7 +74,10 @@ const MiniDialogContent: React.FC<React.PropsWithChildren<MiniDialogProps>> = ({
 
     const centered = appearance === "centered";
     const busy = phase === "loading" || phase === "secondary-loading";
-    const artwork = attributes.illustration ?? attributes.icon;
+    const artwork =
+        attributes.illustration ??
+        (attributes.kind === "error" ? errorIllustration : undefined) ??
+        attributes.icon;
 
     const resetPhaseAndClose = () => {
         setPhase(undefined);

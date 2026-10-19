@@ -1,4 +1,5 @@
 import { Export } from "@/components/Export";
+import { DialogWarningIllustration } from "@/components/utils/DialogWarningIllustration";
 import { downloadAppDialogAttributes } from "@/components/utils/download";
 import exportService from "@/services/export";
 import { performSidebarAction as performSidebarRegistryAction } from "@/services/search/sidebar-search-registry";
@@ -176,6 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         () =>
             showMiniDialog({
                 message: t("logout_message"),
+                illustration: <DialogWarningIllustration />,
                 continue: {
                     text: t("logout"),
                     color: "critical",

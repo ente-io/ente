@@ -1,3 +1,4 @@
+import { DialogWarningIllustration } from "@/components/utils/DialogWarningIllustration";
 import { useWrapAsyncOperation } from "@/components/utils/use-wrap-async";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
@@ -617,6 +618,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         if (hasUnsavedChanges) {
             showMiniDialog({
                 message: t("discard_changes_confirm_message"),
+                illustration: <DialogWarningIllustration color="red" />,
                 continue: {
                     text: t("discard_changes"),
                     color: "critical",

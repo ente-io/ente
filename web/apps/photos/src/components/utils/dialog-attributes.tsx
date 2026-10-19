@@ -1,7 +1,7 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { Box } from "@mui/material";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { t } from "i18next";
+import { DialogWarningIllustration } from "./DialogWarningIllustration";
 
 export const trashFilesDialogAttributes = (
     count: number,
@@ -19,19 +19,7 @@ export const trashFilesDialogAttributes = (
             count === 1 ? "trash_file_message" : "trash_files_message",
         ),
     }),
-    illustration: (
-        <Box
-            component="img"
-            src="/images/warning-red.png"
-            alt=""
-            sx={{
-                width: 68,
-                height: 64,
-                objectFit: "contain",
-                display: "block",
-            }}
-        />
-    ),
+    illustration: <DialogWarningIllustration color="red" />,
     continue: {
         text: t("move_to_trash"),
         color: "critical",

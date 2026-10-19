@@ -40,6 +40,7 @@ export const errorDialogAttributes = (
     const message = optionalMessage ?? messageOrTitle;
 
     return {
+        kind: "error",
         title,
         icon: <ErrorOutlinedIcon />,
         message,

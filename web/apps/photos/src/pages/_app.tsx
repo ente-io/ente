@@ -1,6 +1,7 @@
 import { authPageConfig } from "@/auth-page-config";
 import { AppLockReauthenticationDialog } from "@/components/app-lock/AppLockReauthenticationDialog";
 import { AppLockSetupError } from "@/components/app-lock/LockScreenContents";
+import { DialogWarningIllustration } from "@/components/utils/DialogWarningIllustration";
 import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
@@ -170,7 +171,11 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
             <CssBaseline enableColorScheme />
 
             <ThemedLoadingBar ref={loadingBarRef} />
-            <AttributedMiniDialog {...miniDialogProps} appearance="centered" />
+            <AttributedMiniDialog
+                {...miniDialogProps}
+                appearance="centered"
+                errorIllustration={<DialogWarningIllustration />}
+            />
             <Notification {...notificationProps} />
 
             {isDesktop && (
