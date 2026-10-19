@@ -3,7 +3,6 @@
 import Avatar from "@/components/Avatar";
 import type { RemotePullOpts } from "@/components/gallery";
 import { PublicLinkCreated } from "@/components/share/PublicLinkCreated";
-import { usePublicLinkManagement } from "@/components/share/usePublicLinkManagement";
 import { avatarTextColor } from "@/services/avatar";
 import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -53,23 +52,28 @@ import { MenuComponent } from "ente-base/components/v2/MenuComponent";
 import { RowCard } from "ente-base/components/v2/RowCard";
 import { useBaseContext } from "ente-base/context";
 import { deriveInteractiveKey } from "ente-base/crypto";
-import { isHTTPErrorWithStatus } from "ente-base/http";
+import { isHTTPErrorWithStatus, isMuseumHTTPError } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { useResolvedContactDisplay } from "ente-contacts";
 import { resolveQuickLinkURL } from "ente-gallery/utils/quick-link";
-import type {
-    Collection,
-    CollectionNewParticipantRole,
-    CollectionUser,
-    PublicURL,
+import {
+    CollectionSubType,
+    type Collection,
+    type CollectionNewParticipantRole,
+    type CollectionUser,
+    type PublicURL,
 } from "ente-media/collection";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     createPublicURL,
+    deleteCollection,
+    deleteShareURL,
     getCollectionByID,
     shareCollection,
     unshareCollection,
+    updateCollectionLayout,
+    updatePublicURL,
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
 } from "ente-new/photos/services/collection";
@@ -1792,15 +1796,84 @@ export const ManagePublicLinkSettings: React.FC<
         onRootClose();
     };
 
-    const { isSaving, errorMessage, onUpdate, onUpdateLayout, onRemoveLink } =
-        usePublicLinkManagement({
-            collection,
-            setPublicURL,
-            setBlockingLoad,
-            onRemotePull,
-            onLinkRemoved,
-            onRemove: (isQuickLink) =>
-                isQuickLink ? handleRootClose() : onClose(),
+    const [isSaving, setIsSaving] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const inFlight = useRef(false);
+    const mounted = useRef(true);
+    useEffect(() => {
+        mounted.current = true;
+        return () => {
+            mounted.current = false;
+        };
+    }, []);
+
+    const isMounted = () => mounted.current;
+
+    const mutate = async (operation: () => Promise<void>) => {
+        if (inFlight.current || !mounted.current) return false;
+        inFlight.current = true;
+        setIsSaving(true);
+        setErrorMessage("");
+        setBlockingLoad?.(true);
+        try {
+            await operation();
+            // A failed refresh must not turn a successful mutation into a failure.
+            void onRemotePull({ silent: true }).catch((e: unknown) =>
+                log.error("Could not refresh public link settings", e),
+            );
+            return true;
+        } catch (e) {
+            log.error("Could not change public link settings", e);
+            const restricted = await isMuseumHTTPError(
+                e,
+                403,
+                "LINK_EDIT_NOT_ALLOWED",
+            );
+            if (isMounted()) {
+                setErrorMessage(
+                    t(
+                        restricted
+                            ? "link_edit_disabled_for_free_accounts"
+                            : "generic_error",
+                    ),
+                );
+            }
+            return false;
+        } finally {
+            inFlight.current = false;
+            if (isMounted()) setIsSaving(false);
+            setBlockingLoad?.(false);
+        }
+    };
+
+    const onUpdate = (updates: UpdatePublicURLAttributes) =>
+        mutate(async () => {
+            const result = await updatePublicURL(collection.id, updates);
+            if (isMounted()) setPublicURL(result);
+        });
+
+    const onUpdateLayout = (layout: string) =>
+        mutate(async () => {
+            await updateCollectionLayout(collection, layout);
+        });
+
+    const onRemoveLink = () =>
+        mutate(async () => {
+            const isQuickLink =
+                collection.magicMetadata?.data.subType ===
+                    CollectionSubType.quicklink &&
+                collection.sharees.length === 0;
+            if (isQuickLink) {
+                await deleteCollection(collection.id, { keepFiles: true });
+            } else {
+                await deleteShareURL(collection.id);
+            }
+            onLinkRemoved?.(collection.id);
+            if (isMounted()) {
+                setPublicURL(undefined);
+                if (isQuickLink) handleRootClose();
+                else onClose();
+            }
         });
 
     return (
