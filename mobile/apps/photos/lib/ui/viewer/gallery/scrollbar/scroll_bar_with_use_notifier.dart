@@ -291,8 +291,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   void updateScrollbarPainter() {
+    final thumbColor = _thumbColor.resolve(_states);
     scrollbarPainter
-      ..color = _thumbColor.resolve(_states)
+      ..color = thumbColor
       ..trackColor = _trackColor.resolve(_states)
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
@@ -308,7 +309,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..minLength = widget.minScrollbarLength
       ..padding = widget.scrollbarPadding ?? MediaQuery.paddingOf(context)
       ..scrollbarOrientation = widget.scrollbarOrientation
-      ..ignorePointer = !enableGestures;
+      ..ignorePointer = !enableGestures || thumbColor.a == 0;
   }
 
   @override
@@ -387,7 +388,7 @@ class _ThumbTargetScrollbarPainter extends ScrollbarPainter {
     if (super.hitTestOnlyThumbInteractive(position, kind)) {
       return true;
     }
-    if (kind != PointerDeviceKind.touch || color.a == 0) {
+    if (kind != PointerDeviceKind.touch) {
       return false;
     }
     final orientation =

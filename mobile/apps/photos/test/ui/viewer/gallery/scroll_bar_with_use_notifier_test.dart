@@ -22,6 +22,8 @@ void main() {
         WidgetTester tester, {
         VoidCallback? onPhotoTap,
         bool thumbVisibility = true,
+        bool? showThumb,
+        double contentHeight = 12000,
         TextDirection textDirection = TextDirection.ltr,
       }) async {
         await tester.pumpWidget(
@@ -39,6 +41,7 @@ void main() {
                   inUseNotifier: inUseNotifier,
                   interactive: true,
                   thumbVisibility: thumbVisibility,
+                  showThumb: showThumb,
                   minScrollbarLength: 36,
                   thickness: 8,
                   scrollbarPadding: const EdgeInsets.only(right: 3),
@@ -47,7 +50,7 @@ void main() {
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: onPhotoTap,
-                      child: const SizedBox(height: 12000, width: 400),
+                      child: SizedBox(height: contentHeight, width: 400),
                     ),
                   ),
                 ),
@@ -100,6 +103,41 @@ void main() {
           await tester.pumpAndSettle();
         },
       );
+
+      testWidgets("hidden thumb leaves short-gallery taps and swipes alone", (
+        tester,
+      ) async {
+        var photoTaps = 0;
+        await pumpScrollbar(
+          tester,
+          thumbVisibility: false,
+          showThumb: false,
+          contentHeight: 1500,
+          onPhotoTap: () => photoTaps++,
+        );
+        controller.jumpTo(300);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(painter(tester).fadeoutOpacityAnimation.value, 1);
+        expect(painter(tester).color.a, 0);
+
+        final gesture = await tester.startGesture(const Offset(392, 240));
+        await gesture.moveBy(const Offset(0, -20));
+        await tester.pump();
+        await gesture.moveBy(const Offset(0, -60));
+        await tester.pump();
+        expect(inUseNotifier.value, isFalse);
+        expect(controller.offset, greaterThan(300));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        controller.jumpTo(300);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.tapAt(const Offset(392, 240));
+        await tester.pump();
+        expect(photoTaps, 1);
+      });
 
       testWidgets(
         "inward target follows the thumb and keeps an acquired drag",
