@@ -40,7 +40,6 @@ import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import { PeopleOverview } from "@/components/gallery/PeopleOverview";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
 import { PublicLinkDetails } from "@/components/gallery/PublicLinkDetails";
-import { PublicLinkHeader } from "@/components/gallery/PublicLinkHeader";
 import {
     albumShortcutCollectionID,
     findCollectionCreatingIfNeeded,
@@ -2268,23 +2267,15 @@ const Page: React.FC = () => {
                     selectedLink ? (
                         <PublicLinkDetails
                             key={selectedLink.id}
-                            header={
-                                selectedLinkSummary && (
-                                    <PublicLinkHeader
-                                        name={selectedLink.name}
-                                        fileCount={
-                                            selectedLinkSummary.fileCount
-                                        }
-                                    />
-                                )
-                            }
                             collection={selectedLink}
+                            fileCount={
+                                selectedLinkSummary?.fileCount ??
+                                selectedLinkFiles.length
+                            }
                             files={selectedLinkFiles}
                             user={user}
                             onRemotePull={remotePull}
-                            coverFile={
-                                linkSummaries.get(selectedLink.id)?.coverFile
-                            }
+                            coverFile={selectedLinkSummary?.coverFile}
                         />
                     ) : null
                 ) : !isInSearchMode &&
