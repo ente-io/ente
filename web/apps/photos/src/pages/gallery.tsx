@@ -2451,6 +2451,7 @@ const Page: React.FC = () => {
                     collection={activeCollection}
                     files={activeCollectionFiles}
                     initialCoverFile={activeCollectionSummary?.coverFile}
+                    user={user}
                     onSubmit={handleEditAlbumDetails}
                 />
             )}

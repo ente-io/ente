@@ -12,6 +12,7 @@ import {
     type SxProps,
     type Theme,
 } from "@mui/material";
+import type { LocalUser } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     useModalVisibility,
@@ -48,6 +49,7 @@ type EditAlbumDetailsDialogProps = ModalVisibilityProps & {
     collection: Collection;
     files: EnteFile[];
     initialCoverFile: EnteFile | undefined;
+    user: LocalUser;
     onSubmit: (details: AlbumDetails) => Promise<void>;
 };
 
@@ -57,6 +59,7 @@ export const EditAlbumDetailsDialog: React.FC<EditAlbumDetailsDialogProps> = ({
     collection,
     files,
     initialCoverFile,
+    user,
     onSubmit,
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -281,7 +284,7 @@ export const EditAlbumDetailsDialog: React.FC<EditAlbumDetailsDialogProps> = ({
                     {...pickCoverPhotoVisibilityProps}
                     collection={collection}
                     files={files}
-                    currentCoverID={effectiveCoverFile?.id}
+                    user={user}
                     canResetToDefault={effectiveCoverID > 0}
                     onUseSelectedPhoto={handleUseSelectedPhoto}
                     onResetToDefault={handleResetToDefault}

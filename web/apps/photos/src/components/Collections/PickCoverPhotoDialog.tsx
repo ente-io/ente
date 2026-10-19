@@ -1,3 +1,4 @@
+import { fileTimelineDateString, type SelectedState } from "@/utils/file";
 import {
     ArrowLeft02Icon,
     Cancel01Icon,
@@ -10,9 +11,10 @@ import {
     IconButton,
     Stack,
     Typography,
-    styled,
     type Theme,
 } from "@mui/material";
+import type { LocalUser } from "ente-accounts/services/user";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     v2CancelButtonSx,
     v2CloseButtonSx,
@@ -20,7 +22,6 @@ import {
     v2SubmitButtonSx,
     v2TitleSx,
 } from "ente-base/components/SingleInput.styles";
-import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isSxArray } from "ente-base/components/utils/sx";
 import {
     uploadSheetMediaQuery,
@@ -30,20 +31,19 @@ import {
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
-import { ItemCard } from "ente-new/photos/components/Tiles";
-import { FocusVisibleUnstyledButton } from "ente-new/photos/components/UnstyledButton";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
+import type { ThumbnailGridLayoutParams } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList, type ListChildComponentProps } from "react-window";
+import { FileList, type FileListAnnotatedFile } from "../FileList";
 
 interface PickCoverPhotoDialogProps {
     open: boolean;
     onClose: () => void;
     collection: Collection;
     files: EnteFile[];
-    currentCoverID: number | undefined;
+    user: LocalUser;
     canResetToDefault: boolean;
     onUseSelectedPhoto: (file: EnteFile) => Promise<boolean>;
     onResetToDefault: () => Promise<boolean>;
@@ -56,54 +56,80 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
     onClose,
     collection,
     files,
-    currentCoverID,
+    user,
     canResetToDefault,
     onUseSelectedPhoto,
     onResetToDefault,
 }) => {
     const isSheet = useIsUploadSheet();
     const titleID = useId();
-    const [submittingAction, setSubmittingAction] =
-        useState<SubmittingAction>();
-    const [selectedID, setSelectedID] = useState<number>();
-    const isSubmitting = Boolean(submittingAction);
-    const coverFiles = useMemo(
-        () =>
-            open
-                ? files.filter(
-                      (file) => file.metadata.fileType !== FileType.video,
-                  )
-                : [],
-        [open, files],
+    const [submittingAction, setSubmittingAction] = useState<
+        SubmittingAction | undefined
+    >();
+    const [selected, setSelected] = useState<SelectedState>(
+        createEmptySelection(collection.id),
     );
-    const selectedFile = coverFiles.find(({ id }) => id === selectedID);
+    const isSubmitting = Boolean(submittingAction);
 
     useEffect(() => {
         if (open) {
-            setSelectedID(currentCoverID);
+            setSelected(createEmptySelection(collection.id));
             setSubmittingAction(undefined);
         }
-    }, [open, collection.id, currentCoverID]);
+    }, [open, collection.id]);
+
+    const annotatedFiles = useMemo((): FileListAnnotatedFile[] => {
+        if (!open) return [];
+
+        return files
+            .filter((file) => file.metadata.fileType !== FileType.video)
+            .map((file) => ({
+                file,
+                timelineDateString: fileTimelineDateString(file),
+            }));
+    }, [open, files]);
+
+    const selectedFile = useMemo(() => {
+        if (!open) return undefined;
+
+        for (const [key, value] of Object.entries(selected)) {
+            if (typeof value !== "boolean" || !value) continue;
+            const selectedFileID = Number(key);
+            return files.find(({ id }) => id === selectedFileID);
+        }
+        return undefined;
+    }, [open, selected, files]);
+
+    const handleItemClick = useCallback(
+        (index: number) => {
+            const file = annotatedFiles[index]?.file;
+            if (!file) return;
+            setSelected(createSingleSelection(file, collection.id, user.id));
+        },
+        [annotatedFiles, collection.id, user.id],
+    );
 
     const handleUseSelectedPhoto = useCallback(async () => {
-        if (!selectedFile || isSubmitting) return;
+        if (!selectedFile) return;
+
         setSubmittingAction("use-selected-photo");
         try {
-            if (await onUseSelectedPhoto(selectedFile)) onClose();
+            const didUpdate = await onUseSelectedPhoto(selectedFile);
+            if (didUpdate) onClose();
         } finally {
             setSubmittingAction(undefined);
         }
-    }, [onUseSelectedPhoto, onClose, selectedFile, isSubmitting]);
+    }, [onUseSelectedPhoto, onClose, selectedFile]);
 
     const handleResetToDefault = useCallback(async () => {
-        if (isSubmitting) return;
         setSubmittingAction("reset-to-default");
         try {
-            if (await onResetToDefault()) onClose();
+            const didReset = await onResetToDefault();
+            if (didReset) onClose();
         } finally {
             setSubmittingAction(undefined);
         }
-    }, [onResetToDefault, onClose, isSubmitting]);
+    }, [onResetToDefault, onClose]);
 
     return (
         <Dialog
@@ -149,37 +175,43 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                 </Stack>
                 <Stack sx={{ flex: 1, minHeight: 0, gap: "24px" }}>
                     <Box sx={{ flex: 1, minHeight: 0 }}>
-                        {coverFiles.length ? (
+                        {annotatedFiles.length ? (
                             <AutoSizer>
-                                {({ width, height }) => {
-                                    if (width <= 0 || height <= 0) return <></>;
-                                    const columns = width < 400 ? 3 : 4;
-                                    const itemSize =
-                                        (width - (columns - 1) * 10) / columns;
-                                    return (
-                                        <FixedSizeList<CoverRowData>
-                                            key={collection.id}
-                                            width={width}
-                                            height={height}
-                                            itemCount={Math.ceil(
-                                                coverFiles.length / columns,
-                                            )}
-                                            itemSize={itemSize + 10}
-                                            itemData={{
-                                                files: coverFiles,
-                                                columns,
-                                                itemSize,
-                                                selectedID,
-                                                setSelectedID,
-                                                disabled: isSubmitting,
+                                {({ width, height }) =>
+                                    width > 0 && height > 0 ? (
+                                        <FileList
+                                            {...{
+                                                width,
+                                                height,
+                                                user,
+                                                annotatedFiles,
+                                                selected,
+                                                setSelected,
                                             }}
-                                            overscanCount={2}
-                                            useIsScrolling
-                                        >
-                                            {CoverRow}
-                                        </FixedSizeList>
-                                    );
-                                }}
+                                            mode="albums"
+                                            enableSelect={false}
+                                            activeCollectionID={collection.id}
+                                            onItemClick={handleItemClick}
+                                            disableGrouping
+                                            thumbnailGridLayout={
+                                                coverThumbnailGridLayout
+                                            }
+                                            thumbnailSx={thumbnailSx}
+                                            selectedOverlay={
+                                                <Box sx={selectionSx}>
+                                                    <Box sx={checkSx}>
+                                                        <HugeiconsIcon
+                                                            icon={Tick02Icon}
+                                                            size={13}
+                                                        />
+                                                    </Box>
+                                                </Box>
+                                            }
+                                        />
+                                    ) : (
+                                        <></>
+                                    )
+                                }
                             </AutoSizer>
                         ) : (
                             <Typography sx={{ color: "text.muted" }}>
@@ -193,7 +225,12 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                             color="accent"
                             onClick={handleUseSelectedPhoto}
                             loading={submittingAction === "use-selected-photo"}
-                            disabled={!selectedFile || isSubmitting}
+                            disabled={
+                                !selectedFile ||
+                                (isSubmitting &&
+                                    submittingAction !== "use-selected-photo")
+                            }
+                            autoFocus={Boolean(selectedFile)}
                             sx={[
                                 v2SubmitButtonSx,
                                 actionButtonSx,
@@ -212,7 +249,10 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                                 loading={
                                     submittingAction === "reset-to-default"
                                 }
-                                disabled={isSubmitting}
+                                disabled={
+                                    isSubmitting &&
+                                    submittingAction !== "reset-to-default"
+                                }
                                 sx={[
                                     v2CancelButtonSx,
                                     actionButtonSx,
@@ -229,80 +269,40 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
     );
 };
 
-interface CoverRowData {
-    files: EnteFile[];
-    columns: number;
-    itemSize: number;
-    selectedID: number | undefined;
-    setSelectedID: (id: number) => void;
-    disabled: boolean;
-}
-
-const CoverRow = ({
-    index,
-    style,
-    data,
-    isScrolling,
-}: ListChildComponentProps<CoverRowData>) => (
-    <Box style={style} sx={{ display: "flex", gap: "10px" }}>
-        {data.files
-            .slice(index * data.columns, (index + 1) * data.columns)
-            .map((file) => {
-                const isSelected = file.id === data.selectedID;
-                return (
-                    <FocusVisibleUnstyledButton
-                        key={file.id}
-                        type="button"
-                        aria-label={file.metadata.title}
-                        aria-pressed={isSelected}
-                        disabled={data.disabled}
-                        onClick={() => data.setSelectedID(file.id)}
-                        sx={{
-                            position: "relative",
-                            width: data.itemSize,
-                            height: data.itemSize,
-                            borderRadius: "12px",
-                            overflow: "hidden",
-                            flexShrink: 0,
-                            "&:focus-visible, &:active": {
-                                borderRadius: "12px",
-                            },
-                            "&:disabled": { cursor: "default" },
-                        }}
-                    >
-                        <ItemCard
-                            TileComponent={CoverTile}
-                            coverFile={file}
-                            isScrolling={isScrolling}
-                        />
-                        {isSelected && (
-                            <Box sx={selectionSx}>
-                                <Box sx={checkSx}>
-                                    <HugeiconsIcon
-                                        icon={Tick02Icon}
-                                        size={13}
-                                    />
-                                </Box>
-                            </Box>
-                        )}
-                    </FocusVisibleUnstyledButton>
-                );
-            })}
-    </Box>
-);
-
-const CoverTile = styled("div")({
-    display: "flex",
-    width: "100%",
-    height: "100%",
-    overflow: "hidden",
-    "& > img": {
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        pointerEvents: "none",
-    },
+const createEmptySelection = (collectionID: number): SelectedState => ({
+    ownCount: 0,
+    count: 0,
+    collectionID,
+    context: { mode: "albums", collectionID },
 });
+
+const createSingleSelection = (
+    file: EnteFile,
+    collectionID: number,
+    userID: number,
+): SelectedState => ({
+    [file.id]: true,
+    ownCount: file.ownerID === userID ? 1 : 0,
+    count: 1,
+    collectionID,
+    context: { mode: "albums", collectionID },
+});
+
+const coverThumbnailGridLayout = (width: number): ThumbnailGridLayoutParams => {
+    const columns = width < 400 ? 3 : 4;
+    const gap = 10;
+    const itemSize = (width - (columns - 1) * gap) / columns;
+    return {
+        containerWidth: width,
+        isSmallerLayout: true,
+        paddingInline: 0,
+        columns,
+        itemWidth: itemSize,
+        itemHeight: itemSize,
+        gap,
+    };
+};
+const thumbnailSx = { borderRadius: "12px", mb: "10px" };
 
 const green = v2SubmitButtonSx.backgroundColor;
 const paperSx = {

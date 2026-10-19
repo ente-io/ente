@@ -23,7 +23,15 @@ import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
+import {
+    Box,
+    Checkbox,
+    Fab,
+    Typography,
+    styled,
+    type SxProps,
+    type Theme,
+} from "@mui/material";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
@@ -102,6 +110,10 @@ export interface FileListProps {
     height: number;
     width: number;
     listBorderRadius?: string;
+    // Optional presentation overrides for embedded pickers.
+    thumbnailGridLayout?: (width: number) => ThumbnailGridLayoutParams;
+    thumbnailSx?: SxProps<Theme>;
+    selectedOverlay?: React.ReactNode;
     annotatedFiles: FileListAnnotatedFile[];
     mode?: GalleryBarMode;
     modePlus?: GalleryBarMode | "search";
@@ -137,6 +149,9 @@ export const FileList: React.FC<FileListProps> = ({
     height,
     width,
     listBorderRadius,
+    thumbnailGridLayout,
+    thumbnailSx,
+    selectedOverlay,
     mode,
     modePlus,
     header,
@@ -187,8 +202,8 @@ export const FileList: React.FC<FileListProps> = ({
     const outerRef = useRef<HTMLDivElement | null>(null);
 
     const layoutParams = useMemo(
-        () => computeThumbnailGridLayoutParams(width),
-        [width],
+        () => (thumbnailGridLayout ?? computeThumbnailGridLayoutParams)(width),
+        [width, thumbnailGridLayout],
     );
 
     useEffect(() => {
@@ -663,6 +678,8 @@ export const FileList: React.FC<FileListProps> = ({
                                                 !suppressSelectionUI,
                                         }}
                                         file={file}
+                                        thumbnailSx={thumbnailSx}
+                                        selectedOverlay={selectedOverlay}
                                         selected={isFileSelected(file)}
                                         selectOnClick={haveSelection}
                                         isRangeSelectActive={
@@ -709,6 +726,8 @@ export const FileList: React.FC<FileListProps> = ({
         [
             activeCollectionID,
             checkedTimelineDateStrings,
+            thumbnailSx,
+            selectedOverlay,
             contextMenu,
             emailByUserID,
             favoriteFileIDs,
@@ -983,10 +1002,19 @@ type FileThumbnailProps = {
     onRangeSelect: () => void;
     onContextMenu?: (event: React.MouseEvent) => void;
     style?: React.CSSProperties;
-} & Pick<FileListProps, "user" | "emailByUserID" | "enableSelect">;
+} & Pick<
+    FileListProps,
+    | "user"
+    | "emailByUserID"
+    | "enableSelect"
+    | "thumbnailSx"
+    | "selectedOverlay"
+>;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
     file,
+    thumbnailSx,
+    selectedOverlay,
     user,
     enableSelect,
     selected,
@@ -1083,6 +1111,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onMouseEnter={handleHover}
             disabled={!imageURL}
             style={style}
+            sx={thumbnailSx}
             {...(enableSelect && longPressHandlers)}
         >
             {enableSelect && (
@@ -1110,7 +1139,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                     <VideoDurationOverlay duration={fileDurationString(file)} />
                 )
             )}
-            {selected && <SelectedOverlay />}
+            {selected && (selectedOverlay ?? <SelectedOverlay />)}
             {shouldShowAvatar(file, user) && (
                 <AvatarOverlay>
                     <Avatar {...{ user, file, emailByUserID }} />
