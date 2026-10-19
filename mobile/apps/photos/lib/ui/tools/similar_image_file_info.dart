@@ -15,6 +15,7 @@ class SimilarImageFileInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final size = fileSize;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,10 +26,17 @@ class SimilarImageFileInfo extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        if (fileSize case final size?) ...[
-          const SizedBox(height: 2),
-          Text(formatBytes(size), style: textTheme.miniMuted),
-        ],
+        const SizedBox(height: 2),
+        Text(
+          size == null ? "" : formatBytes(size),
+          style: textTheme.miniMuted,
+          strutStyle: StrutStyle.fromTextStyle(
+            textTheme.miniMuted,
+            forceStrutHeight: true,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }
