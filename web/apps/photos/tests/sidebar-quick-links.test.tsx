@@ -13,9 +13,6 @@ const { renderBar } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/components/gallery/BarImpl", () => ({ GalleryBarImpl: renderBar }));
-vi.mock("@/components/Collections/AllPeople", () => ({
-    AllPeople: () => null,
-}));
 vi.mock("@/components/Collections/CollectionShare", () => ({
     CollectionShare: () => null,
 }));
@@ -70,7 +67,6 @@ const renderSidebar = (
         barCollectionSummaries: new Map(summaries.map((cs) => [cs.id, cs])),
         uncategorizedCollectionSummaryID: 99,
         people: [],
-        allPeople: [],
         peopleSortBy: "name-asc",
         saveGroups: [],
         setActiveCollectionID: vi.fn(),

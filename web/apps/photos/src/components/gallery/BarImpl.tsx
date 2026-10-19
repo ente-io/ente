@@ -72,6 +72,7 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     albumSearchQuery: string;
     onAlbumSearchQueryChange: (query: string) => void;
     onShowAlbumOverview: (filter: AlbumFilter) => void;
+    onShowPeopleOverview: () => void;
     collectionSummaries: CollectionSummary[];
     visibleAlbumFilters: typeof albumFilters;
     normalCollectionSummaries: CollectionSummaries;
@@ -83,7 +84,6 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     activeCollectionID: number | undefined;
     onSelectCollectionID: (collectionID: number) => void;
     onCreateAlbum: () => void;
-    onShowAllPeople: () => void;
     collectionsSortBy: CollectionsSortBy;
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     peopleSortBy: PeopleSortBy;
@@ -99,6 +99,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     albumSearchQuery,
     onAlbumSearchQueryChange,
     onShowAlbumOverview,
+    onShowPeopleOverview,
     collectionSummaries,
     visibleAlbumFilters,
     normalCollectionSummaries,
@@ -107,7 +108,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     activeCollectionID,
     onSelectCollectionID,
     onCreateAlbum,
-    onShowAllPeople,
     collectionsSortBy,
     onChangeCollectionsSortBy,
     peopleSortBy,
@@ -359,7 +359,30 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         lineHeight: mobile ? "26px" : "32px",
                     }}
                 >
-                    {title}
+                    {mode == "people" ? (
+                        <ButtonBase
+                            onClick={() => {
+                                setPeopleSearchQuery("");
+                                onShowPeopleOverview();
+                                mobileDrawerProps.onClose();
+                            }}
+                            sx={{
+                                font: "inherit",
+                                justifyContent: "flex-start",
+                                borderRadius: 1,
+                                "&:hover": { color: "text.muted" },
+                                "&.Mui-focusVisible": {
+                                    outline: "2px solid",
+                                    outlineColor: "primary.main",
+                                    outlineOffset: 2,
+                                },
+                            }}
+                        >
+                            {title}
+                        </ButtonBase>
+                    ) : (
+                        title
+                    )}
                 </Typography>
                 {mode != "people" ? (
                     <CollectionsSortOptions
@@ -373,20 +396,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         activeSortBy={peopleSortBy}
                         onChangeSortBy={onChangePeopleSortBy}
                     />
-                )}
-                {mode == "people" && (
-                    <Tooltip title={t("people")}>
-                        <IconButton
-                            aria-label={t("people")}
-                            aria-haspopup="dialog"
-                            onClick={() => {
-                                mobileDrawerProps.onClose();
-                                onShowAllPeople();
-                            }}
-                        >
-                            <ExpandMoreIcon sx={{ fontSize: 20 }} />
-                        </IconButton>
-                    </Tooltip>
                 )}
                 {(mode == "albums" || mode == "hidden-albums") && (
                     <Tooltip title={t("new_album")}>

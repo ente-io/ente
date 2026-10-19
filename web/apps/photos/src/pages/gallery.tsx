@@ -2112,6 +2112,7 @@ const Page: React.FC = () => {
                               albumSearchQuery,
                               onAlbumSearchQueryChange: setAlbumSearchQuery,
                               onShowAlbumOverview: handleShowAlbumOverview,
+                              onShowPeopleOverview: handleShowPeople,
                               onAlbumSummariesChange:
                                   handleAlbumSummariesChange,
                               peopleSortBy,
@@ -2135,10 +2136,6 @@ const Page: React.FC = () => {
                               people:
                                   (state.view?.type == "people"
                                       ? state.view.visiblePeople
-                                      : undefined) ?? [],
-                              allPeople:
-                                  (state.view?.type == "people"
-                                      ? state.view.people
                                       : undefined) ?? [],
                               setBlockingLoad,
                               setActiveCollectionID:
