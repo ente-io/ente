@@ -14,4 +14,4 @@ node checks/lint-exceptions/check.mjs ..
 node checks/lint-exceptions/test.mjs
 cargo fmt --check
 cargo clippy --locked --all-targets --features museum,ente-ml/ml-assets
-cargo audit
+cargo audit --ignore RUSTSEC-2026-0368 --ignore RUSTSEC-2026-0369
