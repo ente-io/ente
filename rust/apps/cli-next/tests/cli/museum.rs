@@ -566,7 +566,7 @@ async fn exercise(origin: String) -> TestResult {
         .unwrap();
     for flag in ["--exclude-shared", "--exclude-hidden"] {
         let result = adopted.json(&["photos", "export", shared_export.to_str().unwrap(), flag]);
-        assert_eq!(result["changes"]["retained"], 0);
+        assert_eq!(result["changes"]["movedToTrash"], 0);
         assert_eq!(
             fs::read(shared_export.join("Monsoon 🌧/original.jpg")).unwrap(),
             original
@@ -591,7 +591,7 @@ async fn exercise(origin: String) -> TestResult {
         &album.to_string(),
     ]);
     assert_eq!(revoked["copies"]["expected"], 0);
-    assert_eq!(revoked["changes"]["retained"], 1);
+    assert_eq!(revoked["changes"]["movedToTrash"], 1);
     assert!(!shared_export.join("Monsoon 🌧/original.jpg").exists());
     assert_eq!(
         fs::read(shared_export.join("Trash/Monsoon 🌧/original.jpg")).unwrap(),
@@ -609,7 +609,7 @@ async fn exercise(origin: String) -> TestResult {
             shared_export.to_str().unwrap(),
             "--album",
             &album.to_string()
-        ])["changes"]["retained"],
+        ])["changes"]["movedToTrash"],
         0
     );
 

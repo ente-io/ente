@@ -331,7 +331,7 @@ fn refresh_keeps_progress_and_refuses_unreadable_codes_until_updated() {
     assert!(!stderr.contains("JBSWY3DPEHPK3PXP"));
     assert_eq!(
         serde_json::from_slice::<Value>(&failed.stdout).unwrap(),
-        json!({"output": null, "codes": 0, "failures": 2})
+        json!({"output": null, "codes": 0, "failures": {"total": 2}})
     );
     assert_eq!(fs::read_dir(output_dir.path()).unwrap().count(), 1);
     changed.assert();
@@ -459,7 +459,7 @@ fn key_resets_and_unadvanceable_pages_cannot_publish_stale_data() {
     let first = page(&mut server, 0, rows.clone());
     let stuck = page(&mut server, 9, rows);
     let failed = home.run(EXPORT);
-    assert!(failure(&failed).contains("boundary did not advance"));
+    assert!(failure(&failed).contains("the server's next page did not advance"));
     assert!(failed.stdout.is_empty());
     assert!(
         failure(&home.command(EXPORT).arg("--offline").output().unwrap()).contains("incomplete")
@@ -553,7 +553,7 @@ fn encrypted_export_and_independent_decrypt_keep_artifacts_separate_from_summari
     );
     let summary: Value = serde_json::from_slice(&result.stdout).unwrap();
     assert_eq!(summary["codes"], 1);
-    assert_eq!(summary["failures"], 0);
+    assert_eq!(summary["failures"]["total"], 0);
     let encoded = fs::read(&encrypted).unwrap();
     let stream = success(
         home.command(&["auth", "export", "--offline", "--output", "-", "--json"])

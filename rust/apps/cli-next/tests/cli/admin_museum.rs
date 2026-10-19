@@ -243,7 +243,6 @@ fn admin_user_lifecycle() -> TestResult {
             let deleted = home.json(&["admin", "user", "delete", &email, "--yes", "--no-input"]);
             assert_eq!(deleted["user"]["id"], id);
             assert_eq!(deleted["user"]["email"], email);
-            assert_eq!(deleted["deleted"], true);
             assert_eq!(deleted["cleanupScheduled"], true);
             assert_eq!(deleted["subscriptionCancelled"], true);
             assert!(failure(&home.run(&view)).contains("HTTP 404"));
@@ -365,17 +364,14 @@ fn admin_security_resets() -> TestResult {
                 .len(),
             2
         );
-        assert_eq!(
-            home.json(&[
-                "admin",
-                "user",
-                "remove-passkeys",
-                &email,
-                "--yes",
-                "--no-input"
-            ])["passkeysRemoved"],
-            true
-        );
+        home.json(&[
+            "admin",
+            "user",
+            "remove-passkeys",
+            &email,
+            "--yes",
+            "--no-input",
+        ]);
         assert!(api_json(&origin, token, "GET", "/passkeys", None).await["passkeys"].is_null());
         assert!(client.get_two_factor_status().await?);
         register_passkey(&origin, token).await;

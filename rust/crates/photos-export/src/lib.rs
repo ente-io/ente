@@ -169,7 +169,7 @@ impl Export {
             if self.root_lock.is_some() {
                 failures.record(
                     adopt::scan(&self.destination, index, desktop.as_ref()),
-                    "native records",
+                    "this CLI's export records",
                 )?;
             }
             if self.adopting {
@@ -281,7 +281,7 @@ impl Export {
             refreshed?;
             legacy::scope(&store, &self.options, index.as_ref(), report)?;
             if let Some(index) = &index {
-                report("Verifying every existing active legacy original before adoption.");
+                report("Checking the existing files before taking over this export.");
                 legacy::Preflight {
                     root: &self.destination,
                     store: &store,
@@ -518,7 +518,7 @@ fn select(
                 != 0
         {
             report(&format!(
-                "{unit}: last known category is unavailable; use --exclude-album {id} or remove {flags}"
+                "{unit}: cannot determine whether this album is excluded by {flags}; use --exclude-album {id} or remove {flags}"
             ));
         }
     }
@@ -898,7 +898,7 @@ fn summary(store: &Store, destination: &Path, prepared: bool) -> Result<Summary>
         .db
         .query_row("SELECT bound FROM export WHERE id=1", [], |r| r.get(0))?;
     let complete = bound && work_complete(store, prepared)?;
-    let result = json!({"output":destination.to_string_lossy(),"complete":complete,"files":if unknown {None}else{Some(files)},"copies":if unknown {None}else{Some(json!({"expected":expected,"completed":completed,"pending":expected-completed}))},"changes":{"exported":exported,"metadataUpdated":metadata_updated,"renamed":renamed,"retained":retained},"failures":failures,"conflicts":conflicts});
+    let result = json!({"output":destination.to_string_lossy(),"complete":complete,"files":if unknown {None}else{Some(files)},"copies":if unknown {None}else{Some(json!({"expected":expected,"completed":completed,"pending":expected-completed}))},"changes":{"exported":exported,"metadataUpdated":metadata_updated,"renamed":renamed,"movedToTrash":retained},"failures":{"total":failures,"conflicts":conflicts}});
     Ok(Summary {
         json: result,
         complete,

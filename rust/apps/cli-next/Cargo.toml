@@ -10,7 +10,7 @@ museum = []
 [dependencies]
 anyhow.workspace = true
 chrono = { workspace = true, features = ["std", "clock"] }
-clap = { workspace = true, features = ["derive"] }
+clap = { workspace = true, features = ["derive", "string"] }
 clap_complete.workspace = true
 dialoguer = { workspace = true, features = ["password"] }
 dirs.workspace = true

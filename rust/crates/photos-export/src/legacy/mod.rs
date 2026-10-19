@@ -28,7 +28,7 @@ impl Failures {
     pub fn record(&mut self, result: Result<()>, context: &str) -> Result<()> {
         if let Err(error) = result {
             if crate::fatal(&error) {
-                return Err(error.context(format!("adoption preflight incomplete: {context}")));
+                return Err(error.context(format!("cannot take over this export: {context}")));
             }
             self.count += 1;
             if self.examples.len() < 10 {
@@ -55,7 +55,7 @@ impl Failures {
     pub fn finish(&self) -> Result<()> {
         ensure!(
             self.count == 0,
-            "adoption preflight failed: {}",
+            "cannot take over this export: {}",
             self.message()
         );
         Ok(())
@@ -171,7 +171,7 @@ impl Preflight<'_> {
             if result.is_err() {
                 store.db.execute("UPDATE desired_albums SET failure='adoption album preflight failed' WHERE id=?1",[id])?;
             }
-            failures.record(result, &format!("album:{id}"))?;
+            failures.record(result, &format!("album {:?} (ID {id})", record.album.name))?;
         }
         let mut after = (0, String::new());
         let mut expected = None;
@@ -239,7 +239,10 @@ impl Preflight<'_> {
             .await;
             failures.record(
                 result,
-                &format!("file:{}:{}", item.placement.album, item.placement.file),
+                &format!(
+                    "file {:?} (ID {}, album {})",
+                    item.placement.name, item.placement.file, item.placement.album
+                ),
             )?;
         }
         failures.record((|| {
@@ -252,9 +255,9 @@ impl Preflight<'_> {
         if !self.matching_root && verified == 0 && failures.count == 0 {
             failures.record(
                 Err(anyhow::anyhow!(
-                    "at least one existing active original must verify"
+                    "no existing original could be matched to this account"
                 )),
-                "source association",
+                "account verification",
             )?;
         }
         failures.finish()

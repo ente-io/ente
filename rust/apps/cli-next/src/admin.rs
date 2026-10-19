@@ -113,7 +113,7 @@ async fn execute(
             output::action(
                 options.json,
                 &json!({"user": {"id": result.user_id.to_string(), "email": email},
-                    "deleted": true, "cleanupScheduled": true,
+                    "cleanupScheduled": true,
                     "subscriptionCancelled": result.is_subscription_cancelled}),
                 &format!(
                     "{target} ({}): Account deleted; data cleanup scheduled. Subscription cancelled: {}.",
@@ -144,10 +144,7 @@ async fn execute(
                 }
                 AdminUserCommand::RemovePasskeys(_) => {
                     client.admin_remove_passkeys(user.id).await?;
-                    (
-                        json!({"user": view, "passkeysRemoved": true}),
-                        "All passkeys removed.",
-                    )
+                    (json!({"user": view}), "All passkeys removed.")
                 }
                 _ => unreachable!(),
             };

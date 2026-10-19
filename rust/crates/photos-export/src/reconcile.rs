@@ -419,7 +419,10 @@ impl Run<'_> {
                     }
                     ensure!(
                         Properties::optional(&path)?.is_none() || owned,
-                        super::Conflict(format!("at {}: unrelated occupant", path.display()))
+                        super::Conflict(format!(
+                            "{} exists and is not part of this export",
+                            path.display()
+                        ))
                     );
                     disk::create_dir_all(path.parent().context("publication has no parent")?)?;
                     disk::rename(&source, &path)?;
@@ -430,7 +433,10 @@ impl Run<'_> {
                     if !matches {
                         ensure!(
                             !path.try_exists()? || owned,
-                            super::Conflict(format!("at {}: unrelated occupant", path.display()))
+                            super::Conflict(format!(
+                                "{} exists and is not part of this export",
+                                path.display()
+                            ))
                         );
                         self.clear_action(target)?;
                         self.discard(&temporary)?;
@@ -1194,7 +1200,10 @@ impl Run<'_> {
                     .unwrap_or(false);
                 ensure!(
                     Properties::optional(&path)?.is_none() || owned || renamed,
-                    super::Conflict(format!("at {}: unrelated occupant", path.display()))
+                    super::Conflict(format!(
+                        "{} exists and is not part of this export",
+                        path.display()
+                    ))
                 );
             }
             let location = Location {

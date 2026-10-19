@@ -606,7 +606,7 @@ fn adoption_requires_initial_presence_and_never_treats_a_failed_refresh_as_histo
             .err()
             .unwrap()
             .to_string()
-            .contains("at least one")
+            .contains("no existing original could be matched to this account")
     );
     assert_eq!(snapshot(&root), before);
 }
@@ -1074,7 +1074,7 @@ fn adoption_leaves_unmatched_old_rust_live_files_for_ordinary_conflict_handling(
                 format!("export fixture {PAIR} component 1").as_bytes(),
             );
         } else {
-            assert_eq!(result.json["conflicts"], 1);
+            assert_eq!(result.json["failures"]["conflicts"], 1);
             fs::remove_file(root.join("Family/Pair.mov")).unwrap();
             assert!(engine.run(false, &[]).unwrap().complete);
             assert_component(
