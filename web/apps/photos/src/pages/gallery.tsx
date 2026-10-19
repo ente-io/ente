@@ -490,6 +490,25 @@ const Page: React.FC = () => {
         [quickLinks, normalCollectionSummaries],
     );
     const selectedLink = quickLinks.find(({ id }) => id === selectedLinkID);
+    const selectedLinkFiles = useMemo(
+        () =>
+            selectedLinkID === undefined
+                ? []
+                : state.collectionFiles.filter(
+                      ({ id, collectionID }) =>
+                          collectionID === selectedLinkID &&
+                          !hiddenFileIDs.has(id) &&
+                          !tempDeletedFileIDs.has(id) &&
+                          !tempHiddenFileIDs.has(id),
+                  ),
+        [
+            selectedLinkID,
+            state.collectionFiles,
+            hiddenFileIDs,
+            tempDeletedFileIDs,
+            tempHiddenFileIDs,
+        ],
+    );
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
@@ -2247,6 +2266,9 @@ const Page: React.FC = () => {
                         <PublicLinkDetails
                             key={selectedLink.id}
                             collection={selectedLink}
+                            files={selectedLinkFiles}
+                            user={user}
+                            onRemotePull={remotePull}
                             coverFile={
                                 linkSummaries.get(selectedLink.id)?.coverFile
                             }
