@@ -338,18 +338,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
             <AttributedMiniDialog
                 {...downloadAppDialogProps}
-                sx={(theme) => ({
-                    "& .MuiDialog-paper": { borderRadius: "20px" },
-                    "& .MuiDialog-paper > .MuiStack-root": {
-                        p: "24px 24px 8px",
-                    },
-                    "& .MuiDialogContent-root": { p: "16px 24px 24px" },
-                    "& .MuiDialogTitle-root": theme.typography.h2,
-                    "& .MuiButton-root": {
-                        borderRadius: "12px",
-                        minHeight: 48,
-                    },
-                })}
+                appearance="centered"
             />
             {open && exportVisibilityProps.open && (
                 <Export

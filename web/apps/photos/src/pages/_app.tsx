@@ -170,7 +170,7 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
             <CssBaseline enableColorScheme />
 
             <ThemedLoadingBar ref={loadingBarRef} />
-            <AttributedMiniDialog {...miniDialogProps} />
+            <AttributedMiniDialog {...miniDialogProps} appearance="centered" />
             <Notification {...notificationProps} />
 
             {isDesktop && (

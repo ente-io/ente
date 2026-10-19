@@ -1,5 +1,43 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Box } from "@mui/material";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { t } from "i18next";
+
+export const trashFilesDialogAttributes = (
+    count: number,
+    onConfirm: () => void | Promise<void>,
+): MiniDialogAttributes => ({
+    title: t("trash_items_title", {
+        count,
+        fallbackLng: false,
+        defaultValue: t(count === 1 ? "trash_file_title" : "trash_files_title"),
+    }),
+    message: t("trash_items_message", {
+        count,
+        fallbackLng: false,
+        defaultValue: t(
+            count === 1 ? "trash_file_message" : "trash_files_message",
+        ),
+    }),
+    illustration: (
+        <Box
+            component="img"
+            src="/images/warning-red.png"
+            alt=""
+            sx={{
+                width: 68,
+                height: 64,
+                objectFit: "contain",
+                display: "block",
+            }}
+        />
+    ),
+    continue: {
+        text: t("move_to_trash"),
+        color: "critical",
+        action: onConfirm,
+    },
+});
 
 export const notifyOthersFilesDialogAttributes = () => ({
     title: t("note"),

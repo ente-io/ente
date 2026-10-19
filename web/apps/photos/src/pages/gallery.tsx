@@ -39,7 +39,6 @@ import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import { PeopleOverview } from "@/components/gallery/PeopleOverview";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
-import { TrashFilesDialog } from "@/components/gallery/TrashFilesDialog";
 import {
     albumShortcutCollectionID,
     findCollectionCreatingIfNeeded,
@@ -54,6 +53,7 @@ import { Sidebar } from "@/components/sidebar/Sidebar";
 import {
     notifyOthersFilesDialogAttributes,
     notifyUnsupportedSharedFavoritesDialogAttributes,
+    trashFilesDialogAttributes,
 } from "@/components/utils/dialog-attributes";
 import { useIsOffline } from "@/components/utils/use-is-offline";
 import { shouldShowWhatsNew } from "@/services/changelog";
@@ -205,14 +205,6 @@ const Page: React.FC = () => {
     const isCleanupViewOpen = cleanupView !== undefined;
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-    const [trashFilesDialog, setTrashFilesDialog] = useState<{
-        count: number;
-        onConfirm: () => void;
-    }>();
-    const {
-        show: showTrashFilesDialog,
-        props: trashFilesDialogVisibilityProps,
-    } = useModalVisibility();
     const [suppressContextSelectionBar, setSuppressContextSelectionBar] =
         useState(false);
     const [selected, setSelected] = useState<SelectedState>({
@@ -1247,7 +1239,7 @@ const Page: React.FC = () => {
 
     const createFileOpHandler =
         (op: FileOp, options?: { suppressSelectionBar?: boolean }) => () => {
-            void (async () => {
+            return (async () => {
                 if (options?.suppressSelectionBar) {
                     setSuppressContextSelectionBar(true);
                 }
@@ -1352,7 +1344,9 @@ const Page: React.FC = () => {
                     clearSelection();
                     await remotePull({ silent: true, source: `file-op:${op}` });
                 } catch (e) {
-                    if (op == "sendLink") {
+                    if (op == "trash") {
+                        throw e;
+                    } else if (op == "sendLink") {
                         onSendLinkError(e);
                     } else {
                         onGenericError(e);
@@ -1714,15 +1708,14 @@ const Page: React.FC = () => {
     const handleDeleteFiles = useCallback(
         (suppressSelectionBar = false) => {
             if (selectedOwnCount === 0) return;
-            setTrashFilesDialog({
-                count: selectedOwnCount,
-                onConfirm: createFileOpHandler("trash", {
-                    suppressSelectionBar,
-                }),
-            });
-            showTrashFilesDialog();
+            showMiniDialog(
+                trashFilesDialogAttributes(
+                    selectedOwnCount,
+                    createFileOpHandler("trash", { suppressSelectionBar }),
+                ),
+            );
         },
-        [selectedOwnCount, createFileOpHandler, showTrashFilesDialog],
+        [selectedOwnCount, createFileOpHandler, showMiniDialog],
     );
     const selectedFavoriteCount = useMemo(
         () => countSelectedFavorites(selected, favoriteFileIDs),
@@ -1773,32 +1766,44 @@ const Page: React.FC = () => {
             const suppressSelectionBar = !!meta?.isEphemeralSingleSelection;
             switch (action) {
                 case "sendLink":
-                    createFileOpHandler("sendLink", { suppressSelectionBar })();
+                    void createFileOpHandler("sendLink", {
+                        suppressSelectionBar,
+                    })();
                     break;
                 case "download":
-                    createFileOpHandler("download", { suppressSelectionBar })();
+                    void createFileOpHandler("download", {
+                        suppressSelectionBar,
+                    })();
                     break;
                 case "favorite":
-                    createFileOpHandler("favorite", { suppressSelectionBar })();
+                    void createFileOpHandler("favorite", {
+                        suppressSelectionBar,
+                    })();
                     break;
                 case "unfavorite":
-                    createFileOpHandler("unfavorite", {
+                    void createFileOpHandler("unfavorite", {
                         suppressSelectionBar,
                     })();
                     break;
                 case "archive":
-                    createFileOpHandler("archive", { suppressSelectionBar })();
+                    void createFileOpHandler("archive", {
+                        suppressSelectionBar,
+                    })();
                     break;
                 case "unarchive":
-                    createFileOpHandler("unarchive", {
+                    void createFileOpHandler("unarchive", {
                         suppressSelectionBar,
                     })();
                     break;
                 case "hide":
-                    createFileOpHandler("hide", { suppressSelectionBar })();
+                    void createFileOpHandler("hide", {
+                        suppressSelectionBar,
+                    })();
                     break;
                 case "fixTime":
-                    createFileOpHandler("fixTime", { suppressSelectionBar })();
+                    void createFileOpHandler("fixTime", {
+                        suppressSelectionBar,
+                    })();
                     break;
                 case "trash":
                     handleDeleteFiles(suppressSelectionBar);
@@ -2075,12 +2080,6 @@ const Page: React.FC = () => {
                 files={fixCreationTimeFiles}
                 onRemotePull={remotePull}
             />
-            {trashFilesDialog && (
-                <TrashFilesDialog
-                    {...trashFilesDialogVisibilityProps}
-                    {...trashFilesDialog}
-                />
-            )}
             <PhotosNavigationShell
                 showRail
                 showNormalNavigation={showNormalNavigation}

@@ -1,5 +1,6 @@
 import type { RemotePullOpts } from "@/components/gallery";
 import { ensureLocalUser } from "ente-accounts/services/user";
+import { useBaseContext } from "ente-base/context";
 import {
     deleteCollection,
     isArchivedCollection,
@@ -15,13 +16,13 @@ import {
 } from "ente-new/photos/services/photos-fdb";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
-import { useState } from "react";
+import { trashFilesDialogAttributes } from "../utils/dialog-attributes";
 
 export const useDeleteEmptyAlbums = (
     collectionSummaries: CollectionSummary[],
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>,
 ) => {
-    const [candidateIDs, setCandidateIDs] = useState<number[]>();
+    const { showMiniDialog } = useBaseContext();
     const { showNotification } = usePhotosAppContext();
     const emptyAlbumCandidates = collectionSummaries.filter(
         isBulkDeletableEmptyAlbum,
@@ -98,22 +99,22 @@ export const useDeleteEmptyAlbums = (
     };
 
     const handleDeleteEmptyAlbums = () => {
-        setCandidateIDs(emptyAlbumCandidates.map((cs) => cs.id));
+        const candidateIDs = emptyAlbumCandidates.map((cs) => cs.id);
+        const attributes = trashFilesDialogAttributes(candidateIDs.length, () =>
+            deleteEmptyAlbums(candidateIDs),
+        );
+        showMiniDialog({
+            ...attributes,
+            title: t("delete_empty_albums_title"),
+            message: t("delete_empty_albums_message", {
+                count: candidateIDs.length,
+            }),
+            continue: { ...attributes.continue, text: t("delete") },
+        });
     };
 
     return {
         handleDeleteEmptyAlbums,
-        deleteEmptyAlbumsDialogProps: {
-            open: candidateIDs !== undefined,
-            onClose: () => setCandidateIDs(undefined),
-            count: candidateIDs?.length ?? 0,
-            title: t("delete_empty_albums_title"),
-            message: t("delete_empty_albums_message", {
-                count: candidateIDs?.length ?? 0,
-            }),
-            confirmText: t("delete"),
-            onConfirm: () => deleteEmptyAlbums(candidateIDs ?? []),
-        },
         hasEnoughEmptyAlbums: emptyAlbumCandidates.length >= 3,
     };
 };
