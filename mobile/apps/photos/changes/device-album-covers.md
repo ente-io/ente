@@ -1,1 +1,1 @@
-- Added cover headers and smooth transitions to device albums, preserving backup status and gallery actions.
+- Added cover headers and smooth transitions to device albums, with slideshow and map actions, backup status, and contextual menus.

@@ -588,15 +588,22 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     final strings = context.strings;
     if (!Configuration.instance.hasConfiguredAccount()) {
-      if (widget.showOverflowMenu && widget.deviceCollection != null) {
+      if (!onCover &&
+          widget.showOverflowMenu &&
+          widget.deviceCollection != null) {
         actions.add(
           galleryAppBarPopupMenuAction<AlbumPopupAction>(
             tooltip: strings.more,
             icon: const HugeIcon(icon: HugeIcons.strokeRoundedMoreVertical),
-            optionsBuilder: () => [_slideshowMenuOption(strings)],
+            optionsBuilder: () => [
+              _slideshowMenuOption(strings),
+              _mapMenuOption(strings),
+            ],
             onSelected: (AlbumPopupAction value) async {
               if (value == AlbumPopupAction.albumSlideshow) {
                 await _startAlbumSlideshow();
+              } else if (value == AlbumPopupAction.map) {
+                await showOnMap();
               }
             },
           ),
@@ -681,7 +688,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final bool isHidden = widget.collection?.isHidden() ?? false;
 
     if (!widget.showOverflowMenu ||
-        !_hasOverflowMenuActions(userId, isArchived, isHidden)) {
+        !_hasOverflowMenuActions(
+          userId,
+          isArchived,
+          isHidden,
+          onCover: onCover,
+        )) {
       return actions;
     }
 
@@ -807,7 +819,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return actions;
   }
 
-  bool _hasOverflowMenuActions(int userId, bool isArchived, bool isHidden) {
+  bool _hasOverflowMenuActions(
+    int userId,
+    bool isArchived,
+    bool isHidden, {
+    required bool onCover,
+  }) {
+    if (widget.deviceCollection != null && onCover) {
+      return !_isICloudSharedAlbum || _canDisableDeviceFolderBackup;
+    }
     return galleryType.canEditDetails() ||
         galleryType == GalleryType.quickLink ||
         galleryType.showMap() ||
@@ -867,15 +887,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             size: IconSizes.small,
           ),
         ),
-      if (galleryType.showMap() && !onCover)
-        _menuOption(
-          AlbumPopupAction.map,
-          strings.map,
-          const HugeIcon(
-            icon: HugeIcons.strokeRoundedLocation01,
-            size: IconSizes.small,
-          ),
-        ),
+      if (galleryType.showMap() && !onCover) _mapMenuOption(strings),
       if (galleryType.canSort())
         _menuOption(
           AlbumPopupAction.sort,
@@ -1028,9 +1040,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             size: IconSizes.small,
           ),
         ),
-      if (_isAlbumSlideshowAvailable &&
-          (!onCover || widget.deviceCollection != null))
-        _slideshowMenuOption(strings),
+      if (_isAlbumSlideshowAvailable && !onCover) _slideshowMenuOption(strings),
       if (canAutoAdd)
         _menuOption(
           AlbumPopupAction.autoAddPhotos,
@@ -1109,6 +1119,19 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   bool get _isAlbumSlideshowAvailable =>
       widget.collection != null || widget.deviceCollection != null;
+
+  EntePopupMenuOption<AlbumPopupAction> _mapMenuOption(
+    StringsLocalizations strings,
+  ) {
+    return _menuOption(
+      AlbumPopupAction.map,
+      strings.map,
+      const HugeIcon(
+        icon: HugeIcons.strokeRoundedLocation01,
+        size: IconSizes.small,
+      ),
+    );
+  }
 
   EntePopupMenuOption<AlbumPopupAction> _slideshowMenuOption(
     StringsLocalizations strings,
@@ -1306,6 +1329,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         MaterialPageRoute(
           builder: (context) => MapScreen(
             filesFutureFn: () async {
+              if (widget.deviceCollection != null) {
+                return await _loadAllGalleryFiles() ?? [];
+              }
               return FilesDB.instance.getAllFilesCollection(
                 widget.collection!.id,
               );
