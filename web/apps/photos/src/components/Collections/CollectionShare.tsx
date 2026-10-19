@@ -24,6 +24,7 @@ import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import type { LocalUser } from "ente-accounts/services/user";
 import { EnteSwitch } from "ente-base/components/EnteSwitch";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
@@ -1401,34 +1402,37 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     );
 };
 
-type PublicShareProps = {
-    onRootClose: () => void;
-    canManage: boolean;
-    openManageLink: boolean;
-} & Pick<
+type PublicShareProps = Pick<
     CollectionShareProps,
-    "collection" | "setBlockingLoad" | "onRemotePull"
->;
+    "collection" | "onRemotePull"
+> &
+    (
+        | { inline: true; onLinkRemoved: (collectionID: number) => void }
+        | ({
+              inline?: false;
+              onRootClose: () => void;
+              canManage: boolean;
+              openManageLink: boolean;
+          } & Pick<CollectionShareProps, "setBlockingLoad">)
+    );
 
-const PublicShare: React.FC<PublicShareProps> = ({
+export const PublicShare: React.FC<PublicShareProps> = ({
     collection,
-    onRootClose,
-    setBlockingLoad,
     onRemotePull,
-    canManage,
-    openManageLink,
+    ...presentation
 }) => {
+    const canManage = presentation.inline || presentation.canManage;
     const {
         show: showPublicLinkCreated,
         props: publicLinkCreatedVisibilityProps,
     } = useModalVisibility();
 
     const [publicURL, setPublicURL] = useState<PublicURL | undefined>(
-        undefined,
+        collection.publicURLs[0],
     );
     useEffect(() => {
         setPublicURL(collection.publicURLs[0]);
-    }, [collection]);
+    }, [collection.publicURLs]);
 
     const { customDomain } = useSettingsSnapshot();
     const domain = canManage ? customDomain : undefined;
@@ -1467,6 +1471,71 @@ const PublicShare: React.FC<PublicShareProps> = ({
     const handleCopyLink = () => {
         if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);
     };
+
+    if (presentation.inline) {
+        const expired = publicURL && isLinkExpired(publicURL.validTill);
+        return (
+            <Stack
+                component="section"
+                aria-label={t("manage_link")}
+                sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    minHeight: 0,
+                    overflowY: "auto",
+                    px: { xs: "14px", md: "24px" },
+                    pb: { xs: "16px", md: "36px" },
+                }}
+            >
+                <Stack
+                    sx={{ width: "100%", maxWidth: 640, minWidth: 0, gap: 3 }}
+                >
+                    <Stack sx={{ gap: 0.5 }}>
+                        <Typography
+                            component="h1"
+                            variant="h3"
+                            sx={{ overflowWrap: "anywhere" }}
+                        >
+                            {collection.name}
+                        </Typography>
+                        <Typography
+                            variant="small"
+                            sx={{
+                                color: expired ? "critical.main" : "text.muted",
+                            }}
+                        >
+                            {expired ? t("link_expired") : t("active")}
+                        </Typography>
+                    </Stack>
+                    <Stack sx={{ minWidth: 0 }}>
+                        <Typography
+                            component="h2"
+                            sx={{ fontWeight: "medium", px: "8px" }}
+                        >
+                            {t("manage_link")}
+                        </Typography>
+                        {publicURL && resolvedURL ? (
+                            <ManagePublicLinkSettings
+                                key={publicURL.url}
+                                inline
+                                {...{
+                                    collection,
+                                    publicURL,
+                                    setPublicURL,
+                                    resolvedURL,
+                                    onRemotePull,
+                                    onLinkRemoved: presentation.onLinkRemoved,
+                                }}
+                            />
+                        ) : (
+                            <ActivityIndicator />
+                        )}
+                    </Stack>
+                </Stack>
+            </Stack>
+        );
+    }
+    const { onRootClose, setBlockingLoad, openManageLink } = presentation;
 
     return (
         <>
@@ -1754,17 +1823,17 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
 
 type ManagePublicLinkSettingsProps = Omit<
     ManagePublicShareOptionsProps,
-    "open" | "setBlockingLoad"
+    "open" | "setBlockingLoad" | "onClose" | "onRootClose"
 > & {
+    onClose?: () => void;
+    onRootClose?: () => void;
     setBlockingLoad?: (value: boolean) => void;
     onLinkRemoved?: (collectionID: number) => void;
     inline?: boolean;
 };
 
 /** Settings shared by the sharing drawer and the inline Links pane. */
-export const ManagePublicLinkSettings: React.FC<
-    ManagePublicLinkSettingsProps
-> = ({
+const ManagePublicLinkSettings: React.FC<ManagePublicLinkSettingsProps> = ({
     onClose,
     onRootClose,
     collection,
@@ -1792,8 +1861,8 @@ export const ManagePublicLinkSettings: React.FC<
     const [embedCopied, handleCopyEmbedLink] = useClipboardCopy(iframeHTML);
 
     const handleRootClose = () => {
-        onClose();
-        onRootClose();
+        onClose?.();
+        onRootClose?.();
     };
 
     const [isSaving, setIsSaving] = useState(false);
@@ -1872,7 +1941,7 @@ export const ManagePublicLinkSettings: React.FC<
             if (isMounted()) {
                 setPublicURL(undefined);
                 if (isQuickLink) handleRootClose();
-                else onClose();
+                else onClose?.();
             }
         });
 
@@ -1894,7 +1963,7 @@ export const ManagePublicLinkSettings: React.FC<
             <ManageLayout
                 {...{
                     collection,
-                    onRootClose,
+                    onRootClose: handleRootClose,
                     onUpdate: onUpdateLayout,
                     disabled: isSaving,
                     errorMessage,
@@ -1903,13 +1972,13 @@ export const ManagePublicLinkSettings: React.FC<
             <ManagePublicCollect {...{ publicURL }} onUpdate={onUpdate} />
             <ManageLinkExpiry
                 disabled={isSaving}
-                {...{ onRootClose, publicURL }}
+                {...{ onRootClose: handleRootClose, publicURL }}
                 onUpdate={onUpdate}
             />
             <Stack>
                 <ManageDeviceLimit
                     disabled={isSaving}
-                    {...{ onRootClose, publicURL }}
+                    {...{ onRootClose: handleRootClose, publicURL }}
                     onUpdate={onUpdate}
                 />
                 <ManageDownloadAccess {...{ publicURL }} onUpdate={onUpdate} />
