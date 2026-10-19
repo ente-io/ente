@@ -3,6 +3,7 @@
 import Avatar from "@/components/Avatar";
 import type { RemotePullOpts } from "@/components/gallery";
 import { PublicLinkCreated } from "@/components/share/PublicLinkCreated";
+import { usePublicLinkURL } from "@/components/utils/use-public-link-url";
 import { avatarTextColor } from "@/services/avatar";
 import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -54,7 +55,6 @@ import { isHTTPErrorWithStatus, isMuseumHTTPError } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { useResolvedContactDisplay } from "ente-contacts";
-import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
 import type {
     Collection,
     CollectionNewParticipantRole,
@@ -1422,34 +1422,21 @@ const PublicShare: React.FC<PublicShareProps> = ({
         props: publicLinkCreatedVisibilityProps,
     } = useModalVisibility();
 
-    const [publicURL, setPublicURL] = useState<PublicURL | undefined>(
-        undefined,
+    const [shareState, setShareState] = useState({
+        collection,
+        publicURL: collection.publicURLs[0],
+    });
+    const publicURL =
+        shareState.collection === collection
+            ? shareState.publicURL
+            : collection.publicURLs[0];
+    const setPublicURL = (publicURL: PublicURL | undefined) =>
+        setShareState({ collection, publicURL });
+    const { resolvedURL, isLoading, error } = usePublicLinkURL(
+        collection,
+        publicURL,
+        canManage ? customDomain : undefined,
     );
-    const [resolvedURL, setResolvedURL] = useState<string | undefined>(
-        undefined,
-    );
-
-    useEffect(() => {
-        setPublicURL(collection.publicURLs[0]);
-    }, [collection]);
-
-    useEffect(() => {
-        if (publicURL?.url) {
-            void appendCollectionKeyToShareURL(
-                publicURL.url,
-                collection.key,
-            ).then((url) =>
-                setResolvedURL(
-                    substituteCustomDomainIfNeeded(
-                        url,
-                        canManage ? customDomain : undefined,
-                    ),
-                ),
-            );
-        } else {
-            setResolvedURL(undefined);
-        }
-    }, [collection.key, publicURL, customDomain, canManage]);
 
     const handleCopyLink = () => {
         if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);
@@ -1474,6 +1461,14 @@ const PublicShare: React.FC<PublicShareProps> = ({
                 ) : (
                     <ReadOnlyPublicShare resolvedURL={resolvedURL} />
                 )
+            ) : publicURL ? (
+                <Typography role="status" color="text.muted">
+                    {error
+                        ? t("generic_error")
+                        : isLoading
+                          ? t("loading")
+                          : null}
+                </Typography>
             ) : canManage ? (
                 <EnablePublicShareOptions
                     {...{ collection, onRemotePull, setPublicURL }}
@@ -1486,16 +1481,6 @@ const PublicShare: React.FC<PublicShareProps> = ({
             />
         </>
     );
-};
-
-const substituteCustomDomainIfNeeded = (
-    url: string,
-    customDomain: string | undefined,
-) => {
-    if (!customDomain) return url;
-    const u = new URL(url);
-    u.host = customDomain;
-    return u.href;
 };
 
 type EnablePublicShareOptionsProps = {

@@ -748,6 +748,8 @@
     "share_link_section_title": "Or share a link",
     "remove_link": "Remove link",
     "link_created": "Link created",
+    "public_link_description": "Anyone with this link can open the album without an Ente account.",
+    "open_album": "Open album",
     "create_public_link": "Create public link",
     "public_link_created": "Public link created",
     "public_link_enabled": "Public link enabled",
