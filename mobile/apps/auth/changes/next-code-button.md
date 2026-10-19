@@ -1,0 +1,1 @@
+- Made it clearer that tapping the next code copies it.

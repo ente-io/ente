@@ -390,64 +390,45 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Widget _getBottomRow(StringsLocalizations l10n) {
+    final isTOTPCompatible = widget.code.type.isTOTPCompatible;
     return Container(
-      padding: const EdgeInsets.only(left: 16, right: 16),
+      // Next code button's padding replaces the gap and end inset, so it takes
+      // no room from the current code
+      padding: EdgeInsetsDirectional.only(
+        start: 16,
+        end: isTOTPCompatible ? 16 - _nextCodeButtonPadding.end : 16,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
-            child: ValueListenableBuilder<String>(
-              valueListenable: _currentCode,
-              builder: (context, value, child) {
-                return Material(
-                  type: MaterialType.transparency,
-                  child: AutoSizeText(
-                    _getFormattedCode(value),
-                    style: TextStyle(fontSize: widget.isCompactMode ? 14 : 24),
-                    maxLines: 1,
-                    textDirection: TextDirection.ltr,
-                  ),
-                );
-              },
+            child: Padding(
+              // Level with the next code inside the button
+              padding: EdgeInsets.only(
+                bottom: isTOTPCompatible ? _nextCodeButtonPadding.bottom : 0,
+              ),
+              child: ValueListenableBuilder<String>(
+                valueListenable: _currentCode,
+                builder: (context, value, child) {
+                  return Material(
+                    type: MaterialType.transparency,
+                    child: AutoSizeText(
+                      _getFormattedCode(value),
+                      style: TextStyle(
+                        fontSize: widget.isCompactMode ? 14 : 24,
+                      ),
+                      maxLines: 1,
+                      textDirection: TextDirection.ltr,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-          const SizedBox(width: 8),
-          widget.code.type.isTOTPCompatible
-              ? IgnorePointer(
-                  ignoring:
-                      CodeDisplayStore.instance.isSelectionModeActive.value,
-                  child: GestureDetector(
-                    onTap: () {
-                      _copyNextToClipboard();
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          l10n.nextTotpTitle,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        ValueListenableBuilder<String>(
-                          valueListenable: _nextCode,
-                          builder: (context, value, child) {
-                            return Material(
-                              type: MaterialType.transparency,
-                              child: Text(
-                                _getFormattedCode(value),
-                                style: TextStyle(
-                                  fontSize: widget.isCompactMode ? 12 : 18,
-                                  color: Colors.grey,
-                                ),
-                                textDirection: TextDirection.ltr,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                )
+          if (!isTOTPCompatible) const SizedBox(width: 8),
+          isTOTPCompatible
+              ? _getNextCodeButton(l10n)
               : IgnorePointer(
                   ignoring:
                       CodeDisplayStore.instance.isSelectionModeActive.value,
@@ -470,6 +451,74 @@ class _CodeWidgetState extends State<CodeWidget> {
                   ),
                 ),
         ],
+      ),
+    );
+  }
+
+  EdgeInsetsDirectional get _nextCodeButtonPadding =>
+      EdgeInsetsDirectional.symmetric(
+        horizontal: Spacing.sm,
+        vertical: widget.isCompactMode ? 2 : Spacing.xs,
+      );
+
+  Widget _getNextCodeButton(StringsLocalizations l10n) {
+    final colors = context.componentColors;
+    final isSelectionActive =
+        CodeDisplayStore.instance.isSelectionModeActive.value;
+    final borderRadius = BorderRadius.circular(Radii.sm);
+
+    return IgnorePointer(
+      ignoring: isSelectionActive,
+      child: Semantics(
+        button: true,
+        identifier: 'auth_next_code_button',
+        child: AnimatedContainer(
+          duration: Motion.standard,
+          curve: Curves.easeInOut,
+          decoration: BoxDecoration(
+            color: isSelectionActive
+                ? colors.fillLight.withValues(alpha: 0)
+                : colors.fillLight,
+            borderRadius: borderRadius,
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: borderRadius,
+              // One focus stop per card; N copies the focused card's next code
+              canRequestFocus: false,
+              onTap: _copyNextToClipboard,
+              child: Padding(
+                padding: _nextCodeButtonPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      l10n.nextTotpTitle,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    ValueListenableBuilder<String>(
+                      valueListenable: _nextCode,
+                      builder: (context, value, child) {
+                        return Material(
+                          type: MaterialType.transparency,
+                          child: Text(
+                            _getFormattedCode(value),
+                            style: TextStyle(
+                              fontSize: widget.isCompactMode ? 12 : 18,
+                              color: Colors.grey,
+                            ),
+                            textDirection: TextDirection.ltr,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
