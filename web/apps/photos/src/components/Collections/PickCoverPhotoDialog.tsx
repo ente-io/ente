@@ -1,9 +1,5 @@
 import { fileTimelineDateString, type SelectedState } from "@/utils/file";
-import {
-    ArrowLeft02Icon,
-    Cancel01Icon,
-    Tick02Icon,
-} from "@hugeicons/core-free-icons";
+import { ArrowLeft02Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
     Box,
@@ -32,7 +28,6 @@ import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
-import type { ThumbnailGridLayoutParams } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -193,20 +188,6 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                                             activeCollectionID={collection.id}
                                             onItemClick={handleItemClick}
                                             disableGrouping
-                                            thumbnailGridLayout={
-                                                coverThumbnailGridLayout
-                                            }
-                                            thumbnailSx={thumbnailSx}
-                                            selectedOverlay={
-                                                <Box sx={selectionSx}>
-                                                    <Box sx={checkSx}>
-                                                        <HugeiconsIcon
-                                                            icon={Tick02Icon}
-                                                            size={13}
-                                                        />
-                                                    </Box>
-                                                </Box>
-                                            }
                                         />
                                     ) : (
                                         <></>
@@ -288,23 +269,6 @@ const createSingleSelection = (
     context: { mode: "albums", collectionID },
 });
 
-const coverThumbnailGridLayout = (width: number): ThumbnailGridLayoutParams => {
-    const columns = width < 400 ? 3 : 4;
-    const gap = 10;
-    const itemSize = (width - (columns - 1) * gap) / columns;
-    return {
-        containerWidth: width,
-        isSmallerLayout: true,
-        paddingInline: 0,
-        columns,
-        itemWidth: itemSize,
-        itemHeight: itemSize,
-        gap,
-    };
-};
-const thumbnailSx = { borderRadius: "12px", mb: "10px" };
-
-const green = v2SubmitButtonSx.backgroundColor;
 const paperSx = {
     width: "min(714px, calc(100svw - 32px))",
     maxWidth: "714px",
@@ -334,27 +298,6 @@ const backButtonSx = {
     p: 0,
     flexShrink: 0,
     color: "text.base",
-};
-const selectionSx = {
-    position: "absolute",
-    inset: 0,
-    border: `3px solid ${green}`,
-    borderRadius: "12px",
-    pointerEvents: "none",
-};
-const checkSx = {
-    position: "absolute",
-    top: 9,
-    right: 9,
-    width: 26,
-    height: 26,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "50%",
-    border: "2px solid #fff",
-    backgroundColor: green,
-    color: "#fff",
 };
 // Shared actions normally share a row; keep these stacked at their full height.
 const actionButtonSx = {
