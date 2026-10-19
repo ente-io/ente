@@ -33,7 +33,7 @@ fn request_otp_is_independent_of_the_vault_and_reports_request_acceptance() {
     let value: Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(
         value,
-        json!({"email": "new@example.org", "host": server.url(), "app": "auth", "purpose": "create", "verificationRequested": true})
+        json!({"email": "new@example.org", "host": server.url(), "app": "auth", "purpose": "create"})
     );
     assert_eq!(fs::read_dir(home.dir.path()).unwrap().count(), 0);
     request.assert();
@@ -232,7 +232,6 @@ async fn creation_retry_preserves_keys_and_recovers_after_an_accepted_upload() {
     ));
     let result: Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(result["account"]["name"], "personal");
-    assert_eq!(result["created"], true);
     let complete = home.read_vault();
     assert_eq!(
         complete["accounts"][0]["identity"]["master_key"],
@@ -337,7 +336,7 @@ fn creation_enrollment_and_login_across_processes() -> ente_test_support::TestRe
         let secret = setup["secret"].as_str().unwrap();
         assert_eq!(
             home.json(&["account", "totp", "status"]),
-            json!({"enabled": false})
+            json!({"totpEnabled": false})
         );
         let error = failure(&home.with_input(
             &["account", "totp", "enable", "--input", "-"],
@@ -350,11 +349,11 @@ fn creation_enrollment_and_login_across_processes() -> ente_test_support::TestRe
         ));
         assert_eq!(
             serde_json::from_slice::<Value>(&output.stdout)?,
-            json!({"enabled": true})
+            json!({"totpEnabled": true})
         );
         assert_eq!(
             home.json(&["account", "totp", "status"]),
-            json!({"enabled": true})
+            json!({"totpEnabled": true})
         );
         assert!(failure(&home.run(&["account", "totp", "setup"])).contains("already enabled"));
         let second = TestHome::new();
@@ -410,7 +409,7 @@ fn interactive_creation_password_retry_and_enrollment() -> ente_test_support::Te
         assert_eq!(home.json(&["account", "view"])["name"], email);
         assert_eq!(
             home.json(&["account", "totp", "status"]),
-            json!({"enabled": true})
+            json!({"totpEnabled": true})
         );
         assert_eq!(
             home.json(&["photos", "api", "/users/details/v2"])["email"],

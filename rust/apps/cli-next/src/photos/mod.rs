@@ -219,10 +219,6 @@ async fn file(
             })
             .await
             .with_context(|| format!("cannot download file {}", file.id))?;
-            temporary
-                .as_file()
-                .sync_all()
-                .with_context(|| format!("cannot sync download to {}", output.display()))?;
             let bytes = temporary.as_file().metadata()?.len();
             temporary
                 .persist_noclobber(&output)

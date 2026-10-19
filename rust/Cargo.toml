@@ -82,6 +82,7 @@ ente-test-support = { path = "crates/test-support" }
 ente-uniffi-log = { path = "bindings/uniffi/log" }
 ente-vecdb = { path = "crates/vecdb" }
 ente-wasm-lib = { path = "bindings/wasm/lib" }
+env_logger = { version = "0.11.11", default-features = false }
 fast_image_resize = { version = "6.1.0", features = ["image"] }
 flate2 = "1.1.10"
 flutter_rust_bridge = "=2.13.0"
@@ -97,6 +98,7 @@ keyring = { version = "3.6.3", default-features = false }
 log = "0.4.34"
 md-5 = "0.11.0"
 mockito = "1.7.2"
+open = "5.4.4"
 ort = { version = "=2.0.0-rc.13", default-features = false }
 ort-sys = { version = "=2.0.0-rc.13", default-features = false }
 quick-xml = "0.42.0"

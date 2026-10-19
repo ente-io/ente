@@ -73,7 +73,7 @@ async fn export(args: AuthExportArgs, selected: Option<&str>, options: &Options)
         if !matches!(destination, Destination::Stdout) {
             crate::output::action(
                 options.json,
-                &json!({"output": null, "codes": 0, "failures": payload.failed}),
+                &json!({"output": null, "codes": 0, "failures": {"total": payload.failed}}),
                 &format!(
                     "{} unreadable Auth code{plural}; no new backup was written.",
                     payload.failed
@@ -93,7 +93,7 @@ async fn export(args: AuthExportArgs, selected: Option<&str>, options: &Options)
     if let Some(path) = destination.publish(&artifact)? {
         crate::output::action(
             options.json,
-            &json!({"output": path.to_string_lossy(), "codes": payload.records, "failures": 0}),
+            &json!({"output": path.to_string_lossy(), "codes": payload.records, "failures": {"total": 0}}),
             &format!(
                 "Exported {} code{} to {}.",
                 payload.records,

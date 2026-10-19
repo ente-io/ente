@@ -96,21 +96,24 @@ async fn run_locked(args: PhotosExportArgs, selected: Option<&str>, as_json: boo
     signal.abort();
     let summary = result?;
     let progress = if summary.json["copies"].is_null() {
-        "inventory incomplete".to_owned()
+        "could not determine the full export size".to_owned()
     } else {
-        format!("{}/{} copies complete", summary.completed, summary.expected)
+        format!(
+            "{}/{} album copies complete",
+            summary.completed, summary.expected
+        )
     };
     let changes = &summary.json["changes"];
     output::action(
         as_json,
         &summary.json,
         &format!(
-            "{}: {progress}, {} exported, {} retained, {} failures, {} conflicts.",
+            "{}: {progress}, {} exported, {} moved to Trash, {} failures ({} conflicts).",
             export.destination().display(),
             changes["exported"],
-            changes["retained"],
-            summary.json["failures"],
-            summary.json["conflicts"],
+            changes["movedToTrash"],
+            summary.json["failures"]["total"],
+            summary.json["failures"]["conflicts"],
         ),
     )?;
     ensure!(summary.complete, "export is incomplete");
