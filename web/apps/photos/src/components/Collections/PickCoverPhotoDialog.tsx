@@ -13,7 +13,15 @@ import {
     styled,
     type Theme,
 } from "@mui/material";
+import {
+    v2CancelButtonSx,
+    v2CloseButtonSx,
+    v2PaperSx,
+    v2SubmitButtonSx,
+    v2TitleSx,
+} from "ente-base/components/SingleInput.styles";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import { isSxArray } from "ente-base/components/utils/sx";
 import {
     uploadSheetMediaQuery,
     uploadSheetPaperSx,
@@ -104,7 +112,15 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
             aria-labelledby={titleID}
             maxWidth={false}
             slots={isSheet ? { transition: SlideUpTransition } : undefined}
-            slotProps={{ paper: { sx: [paperSx, uploadSheetPaperSx] } }}
+            slotProps={{
+                paper: {
+                    sx: [
+                        ...(isSxArray(v2PaperSx) ? v2PaperSx : [v2PaperSx]),
+                        paperSx,
+                        uploadSheetPaperSx,
+                    ],
+                },
+            }}
         >
             <Stack sx={contentSx} aria-busy={isSubmitting}>
                 <Stack
@@ -119,14 +135,14 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                     >
                         <HugeiconsIcon icon={ArrowLeft02Icon} size={24} />
                     </IconButton>
-                    <Typography id={titleID} sx={titleSx}>
+                    <Typography id={titleID} sx={[v2TitleSx, titleSx]}>
                         {t("choose_cover")}
                     </Typography>
                     <IconButton
                         aria-label={t("close")}
                         onClick={onClose}
                         disabled={isSubmitting}
-                        sx={closeButtonSx}
+                        sx={v2CloseButtonSx}
                     >
                         <HugeiconsIcon icon={Cancel01Icon} size={18} />
                     </IconButton>
@@ -179,11 +195,11 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                             loading={submittingAction === "use-selected-photo"}
                             disabled={!selectedFile || isSubmitting}
                             sx={[
+                                v2SubmitButtonSx,
                                 actionButtonSx,
-                                primaryButtonSx,
                                 ...(submittingAction === "use-selected-photo"
-                                    ? [primaryButtonBusySx]
-                                    : []),
+                                    ? []
+                                    : [primaryButtonDisabledSx]),
                             ]}
                         >
                             {t("set_as_cover")}
@@ -197,7 +213,11 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                                     submittingAction === "reset-to-default"
                                 }
                                 disabled={isSubmitting}
-                                sx={[actionButtonSx, secondaryButtonSx]}
+                                sx={[
+                                    v2CancelButtonSx,
+                                    actionButtonSx,
+                                    secondaryButtonSx,
+                                ]}
                             >
                                 {t("reset_to_default")}
                             </LoadingButton>
@@ -284,24 +304,14 @@ const CoverTile = styled("div")({
     },
 });
 
-const green = "#08c225";
-const paperSx = (theme: Theme) => ({
+const green = v2SubmitButtonSx.backgroundColor;
+const paperSx = {
     width: "min(714px, calc(100svw - 32px))",
     maxWidth: "714px",
     height: "656px",
     maxHeight: "calc(100dvh - 32px)",
-    m: 2,
-    borderRadius: "20px",
-    border: "1px solid #e0e0e0",
-    backgroundColor: "#f4f4f4",
-    backgroundImage: "none",
-    boxShadow: "none",
-    color: "text.base",
-    ...theme.applyStyles("dark", {
-        borderColor: "rgba(255 255 255 / 0.12)",
-        backgroundColor: "#1b1b1b",
-    }),
-});
+    boxSizing: "border-box",
+};
 const contentSx = {
     p: "20px",
     gap: "36px",
@@ -316,9 +326,6 @@ const titleSx = {
     flex: 1,
     minWidth: 0,
     fontFamily: "'Outfit Variable', sans-serif",
-    fontSize: 24,
-    lineHeight: "32px",
-    fontWeight: 600,
     overflowWrap: "anywhere",
 };
 const backButtonSx = {
@@ -328,14 +335,6 @@ const backButtonSx = {
     flexShrink: 0,
     color: "text.base",
 };
-const closeButtonSx = (theme: Theme) => ({
-    ...backButtonSx,
-    backgroundColor: "background.paper",
-    "&:hover": { backgroundColor: "fill.faintHover" },
-    ...theme.applyStyles("dark", {
-        backgroundColor: "rgba(255 255 255 / 0.12)",
-    }),
-});
 const selectionSx = {
     position: "absolute",
     inset: 0,
@@ -357,22 +356,19 @@ const checkSx = {
     backgroundColor: green,
     color: "#fff",
 };
+// Shared actions normally share a row; keep these stacked at their full height.
 const actionButtonSx = {
+    flex: "none",
     minHeight: 52,
     px: "24px",
     py: "14px",
-    borderRadius: "20px",
-    fontSize: 14,
-    lineHeight: "20px",
-    fontWeight: 500,
     textTransform: "none",
     boxShadow: "none",
+    "&:hover": { boxShadow: "none" },
 };
-const primaryButtonSx = (theme: Theme) => ({
-    color: "#fff",
-    backgroundColor: green,
-    "&:hover": { backgroundColor: "#07ad21", boxShadow: "none" },
+const primaryButtonDisabledSx = (theme: Theme) => ({
     "&.Mui-disabled": {
+        opacity: 1,
         color: "#d6d6d6",
         backgroundColor: "#eaeaea",
         ...theme.applyStyles("dark", {
@@ -382,15 +378,10 @@ const primaryButtonSx = (theme: Theme) => ({
     },
 });
 const secondaryButtonSx = (theme: Theme) => ({
-    color: "text.base",
-    backgroundColor: "#eaeaea",
-    "&:hover": { backgroundColor: "#e0e0e0", boxShadow: "none" },
+    "&:hover": { backgroundColor: "#e0e0e0" },
+    "&.Mui-disabled": { opacity: 1 },
     ...theme.applyStyles("dark", {
         backgroundColor: "#282828",
         "&:hover": { backgroundColor: "#333" },
     }),
 });
-
-const primaryButtonBusySx = {
-    "&.Mui-disabled": { color: "#fff", backgroundColor: green, opacity: 0.7 },
-};
