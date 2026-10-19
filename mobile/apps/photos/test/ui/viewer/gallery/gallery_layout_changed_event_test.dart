@@ -52,6 +52,7 @@ void main() {
     try {
       await Configuration.instance.init(preferences);
     } catch (_) {}
+    expect(flagService.internalUser, isTrue);
   });
 
   setUp(() async {

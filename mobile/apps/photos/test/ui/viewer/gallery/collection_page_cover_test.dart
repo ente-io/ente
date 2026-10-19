@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:convert";
 import "dart:io";
-import "dart:typed_data";
 import "dart:ui" as ui;
 
 import "package:dio/dio.dart";
@@ -270,6 +269,23 @@ void main() {
             "The album/date boundary must hide the photos at physical row $y",
       );
     }
+    await _disposeAlbum(tester);
+  });
+
+  testWidgets("shows caption indicators in an album gallery", (tester) async {
+    final file = _file(1)
+      ..pubMmdEncodedJson = '{"caption":"Album caption","mvi":1}'
+      ..pubMmdVersion = 1;
+    await tester.runAsync(() => FilesDB.instance.insertMultiple([file]));
+    await _pumpAlbum(tester, _collection());
+    await _expectCover(tester, file, count: 1);
+    expect(
+      find.descendant(
+        of: find.byType(GalleryFileWidget),
+        matching: find.byIcon(Icons.notes_rounded),
+      ),
+      findsOneWidget,
+    );
     await _disposeAlbum(tester);
   });
 
