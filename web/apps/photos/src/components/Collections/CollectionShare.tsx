@@ -21,10 +21,11 @@ import Photo, { default as PhotoIcon } from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
 import RemoveCircleOutlinedIcon from "@mui/icons-material/RemoveCircleOutlined";
 import WorkspacesIcon from "@mui/icons-material/Workspaces";
-import { Dialog, Stack, styled, Typography } from "@mui/material";
+import { Box, Dialog, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import type { LocalUser } from "ente-accounts/services/user";
+import { EnteSwitch } from "ente-base/components/EnteSwitch";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
@@ -39,7 +40,6 @@ import {
     RowButtonGroupHint,
     RowButtonGroupTitle,
     RowLabel,
-    RowSwitch,
 } from "ente-base/components/RowButton";
 import {
     SingleInputForm,
@@ -50,6 +50,8 @@ import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "ente-base/components/utils/modal";
+import { MenuComponent } from "ente-base/components/v2/MenuComponent";
+import { RowCard } from "ente-base/components/v2/RowCard";
 import { useBaseContext } from "ente-base/context";
 import { deriveInteractiveKey } from "ente-base/crypto";
 import { isHTTPErrorWithStatus } from "ente-base/http";
@@ -1782,7 +1784,7 @@ export const ManagePublicLinkSettings: React.FC<
                 border: 0,
                 m: 0,
                 minWidth: 0,
-                gap: 3,
+                gap: 1,
                 py: "20px",
                 px: "8px",
                 "&:disabled": { opacity: 0.6 },
@@ -1803,56 +1805,55 @@ export const ManagePublicLinkSettings: React.FC<
                 {...{ onRootClose, publicURL }}
                 onUpdate={onUpdate}
             />
-            <RowButtonGroup>
+            <Stack>
                 <ManageDeviceLimit
                     disabled={isSaving}
                     {...{ onRootClose, publicURL }}
                     onUpdate={onUpdate}
                 />
-                <RowButtonDivider />
                 <ManageDownloadAccess {...{ publicURL }} onUpdate={onUpdate} />
-                <RowButtonDivider />
                 <ManageJoinAlbum {...{ publicURL }} onUpdate={onUpdate} />
-                <RowButtonDivider />
                 <ManageLinkPassword
                     inSidebar={!inline}
                     {...{ publicURL }}
                     onUpdate={onUpdate}
                 />
-            </RowButtonGroup>
-            <RowButtonGroup>
-                <RowButton
-                    startIcon={
-                        copied ? (
-                            <DoneIcon sx={{ color: "accent.main" }} />
-                        ) : (
-                            <ContentCopyIcon />
-                        )
-                    }
-                    onClick={handleCopyLink}
-                    label={t("copy_link")}
-                />
-                <RowButtonDivider />
-                <RowButton
-                    startIcon={
-                        embedCopied ? (
-                            <DoneIcon sx={{ color: "accent.main" }} />
-                        ) : (
-                            <CodeIcon />
-                        )
-                    }
-                    onClick={handleCopyEmbedLink}
-                    label={t("copy_embed_html")}
-                />
-            </RowButtonGroup>
-            <RowButtonGroup>
-                <RowButton
-                    color="critical"
-                    startIcon={<RemoveCircleOutlinedIcon />}
-                    onClick={() => void onRemoveLink()}
-                    label={t("remove_link")}
-                />
-            </RowButtonGroup>
+            </Stack>
+            <RowCard
+                endIcon={
+                    copied ? (
+                        <DoneIcon sx={{ "&&": { color: "accent.main" } }} />
+                    ) : (
+                        <ContentCopyIcon />
+                    )
+                }
+                onClick={handleCopyLink}
+                title={t("copy_link")}
+            />
+            <RowCard
+                endIcon={
+                    embedCopied ? (
+                        <DoneIcon sx={{ "&&": { color: "accent.main" } }} />
+                    ) : (
+                        <CodeIcon />
+                    )
+                }
+                onClick={handleCopyEmbedLink}
+                title={t("copy_embed_html")}
+            />
+            <RowCard
+                title={
+                    <Box component="span" sx={{ color: "critical.main" }}>
+                        {t("remove_link")}
+                    </Box>
+                }
+                endIcon={
+                    <RemoveCircleOutlinedIcon
+                        sx={{ "&&": { color: "critical.main" } }}
+                    />
+                }
+                onClick={() => void onRemoveLink()}
+            />
             {errorMessage && (
                 <Typography
                     variant="small"
@@ -1890,19 +1891,30 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
 
     return (
         <Stack>
-            <RowButtonGroup>
-                <RowSwitch
-                    label={t("allow_adding_photos")}
-                    checked={publicURL.enableCollect}
-                    onClick={handleCollectSetting}
-                />
-                <RowButtonDivider />
-                <RowSwitch
-                    label={t("enable_comments")}
-                    checked={publicURL.enableComment}
-                    onClick={handleCommentSetting}
-                />
-            </RowButtonGroup>
+            <RowCard
+                title={t("allow_adding_photos")}
+                endIcon={
+                    <EnteSwitch
+                        checked={publicURL.enableCollect}
+                        onChange={handleCollectSetting}
+                        slotProps={{
+                            input: { "aria-label": t("allow_adding_photos") },
+                        }}
+                    />
+                }
+            />
+            <RowCard
+                title={t("enable_comments")}
+                endIcon={
+                    <EnteSwitch
+                        checked={publicURL.enableComment}
+                        onChange={handleCommentSetting}
+                        slotProps={{
+                            input: { "aria-label": t("enable_comments") },
+                        }}
+                    />
+                }
+            />
         </Stack>
     );
 };
@@ -1925,27 +1937,27 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
 
     return (
         <>
-            <RowButtonGroup>
-                <RowButton
-                    onClick={showExpiryOptions}
-                    endIcon={<ChevronRightIcon />}
-                    label={t("link_expiry")}
-                    color={
-                        isLinkExpired(publicURL.validTill)
-                            ? "critical"
-                            : "primary"
-                    }
-                    caption={
-                        isLinkExpired(publicURL.validTill)
-                            ? t("link_expired")
-                            : publicURL.validTill
-                              ? formattedDateTime(publicURL.validTill, {
-                                    omitWeekdayWhenYearIncluded: true,
-                                })
-                              : t("never")
-                    }
-                />
-            </RowButtonGroup>
+            <RowCard
+                onClick={showExpiryOptions}
+                title={
+                    isLinkExpired(publicURL.validTill) ? (
+                        <Box component="span" sx={{ color: "critical.main" }}>
+                            {t("link_expiry")}
+                        </Box>
+                    ) : (
+                        t("link_expiry")
+                    )
+                }
+                subtitle={
+                    isLinkExpired(publicURL.validTill)
+                        ? t("link_expired")
+                        : publicURL.validTill
+                          ? formattedDateTime(publicURL.validTill, {
+                                omitWeekdayWhenYearIncluded: true,
+                            })
+                          : t("never")
+                }
+            />
             <TitledNestedSidebarDrawer
                 anchor="right"
                 {...expiryOptionsVisibilityProps}
@@ -1964,20 +1976,19 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
                         px: "8px",
                     }}
                 >
-                    <RowButtonGroup>
+                    <Stack>
                         {options.map(({ label, value }, index) => (
-                            <React.Fragment key={value()}>
-                                <RowButton
-                                    fontWeight="regular"
-                                    onClick={changeShareExpiryValue(value())}
-                                    label={label}
-                                />
-                                {index != options.length - 1 && (
-                                    <RowButtonDivider />
-                                )}
-                            </React.Fragment>
+                            <MenuComponent
+                                key={label}
+                                title={label}
+                                onClick={changeShareExpiryValue(value())}
+                                disabled={disabled}
+                                selected={
+                                    publicURL.validTill === 0 && index === 0
+                                }
+                            />
                         ))}
-                    </RowButtonGroup>
+                    </Stack>
                 </Stack>
             </TitledNestedSidebarDrawer>
         </>
@@ -2033,15 +2044,14 @@ const ManageDeviceLimit: React.FC<ManagePublicLinkSettingDrawerProps> = ({
 
     return (
         <>
-            <RowButton
-                label={t("device_limit")}
-                caption={
+            <RowCard
+                title={t("device_limit")}
+                subtitle={
                     publicURL.deviceLimit == 0
                         ? t("none")
                         : publicURL.deviceLimit.toString()
                 }
                 onClick={showDeviceOptions}
-                endIcon={<ChevronRightIcon />}
             />
             <TitledNestedSidebarDrawer
                 anchor="right"
@@ -2061,20 +2071,17 @@ const ManageDeviceLimit: React.FC<ManagePublicLinkSettingDrawerProps> = ({
                         px: "8px",
                     }}
                 >
-                    <RowButtonGroup>
-                        {options.map(({ label, value }, index) => (
-                            <React.Fragment key={label}>
-                                <RowButton
-                                    fontWeight="regular"
-                                    onClick={changeDeviceLimitValue(value)}
-                                    label={label}
-                                />
-                                {index != options.length - 1 && (
-                                    <RowButtonDivider />
-                                )}
-                            </React.Fragment>
+                    <Stack>
+                        {options.map(({ label, value }) => (
+                            <MenuComponent
+                                key={label}
+                                title={label}
+                                onClick={changeDeviceLimitValue(value)}
+                                disabled={disabled}
+                                selected={publicURL.deviceLimit === value}
+                            />
                         ))}
-                    </RowButtonGroup>
+                    </Stack>
                 </Stack>
             </TitledNestedSidebarDrawer>
         </>
@@ -2112,10 +2119,17 @@ const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
     };
 
     return (
-        <RowSwitch
-            label={t("allow_downloads")}
-            checked={publicURL.enableDownload}
-            onClick={handleFileDownloadSetting}
+        <RowCard
+            title={t("allow_downloads")}
+            endIcon={
+                <EnteSwitch
+                    checked={publicURL.enableDownload}
+                    onChange={handleFileDownloadSetting}
+                    slotProps={{
+                        input: { "aria-label": t("allow_downloads") },
+                    }}
+                />
+            }
         />
     );
 };
@@ -2129,10 +2143,17 @@ const ManageJoinAlbum: React.FC<ManagePublicLinkSettingProps> = ({
     };
 
     return (
-        <RowSwitch
-            label={t("allow_joining_album")}
-            checked={publicURL.enableJoin}
-            onClick={handleJoinSetting}
+        <RowCard
+            title={t("allow_joining_album")}
+            endIcon={
+                <EnteSwitch
+                    checked={publicURL.enableJoin}
+                    onChange={handleJoinSetting}
+                    slotProps={{
+                        input: { "aria-label": t("allow_joining_album") },
+                    }}
+                />
+            }
         />
     );
 };
@@ -2164,10 +2185,17 @@ const ManageLinkPassword: React.FC<
 
     return (
         <>
-            <RowSwitch
-                label={t("password_lock")}
-                checked={publicURL.passwordEnabled}
-                onClick={handlePasswordChangeSetting}
+            <RowCard
+                title={t("password_lock")}
+                endIcon={
+                    <EnteSwitch
+                        checked={publicURL.passwordEnabled}
+                        onChange={handlePasswordChangeSetting}
+                        slotProps={{
+                            input: { "aria-label": t("password_lock") },
+                        }}
+                    />
+                }
             />
             <SetPublicLinkPassword
                 {...setPasswordVisibilityProps}
@@ -2285,14 +2313,11 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
 
     return (
         <>
-            <RowButtonGroup>
-                <RowButton
-                    label={t("album_layout")}
-                    caption={layoutLabel(selectedLayout ?? currentLayout)}
-                    onClick={showLayoutOptions}
-                    endIcon={<ChevronRightIcon />}
-                />
-            </RowButtonGroup>
+            <RowCard
+                title={t("album_layout")}
+                subtitle={layoutLabel(selectedLayout ?? currentLayout)}
+                onClick={showLayoutOptions}
+            />
             <TitledNestedSidebarDrawer
                 anchor="right"
                 {...layoutOptionsVisibilityProps}
@@ -2304,31 +2329,20 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
                     disabled={disabled}
                     sx={{ border: 0, m: 0, minWidth: 0, py: "20px", px: "8px" }}
                 >
-                    <RowButtonGroup>
-                        {options.map(({ label, value }, index) => (
-                            <React.Fragment key={value}>
-                                <RowButton
-                                    fontWeight="regular"
-                                    onClick={changeLayoutValue(value)}
-                                    label={label}
-                                    disabled={loadingLayout !== null}
-                                    endIcon={
-                                        loadingLayout === value ? (
-                                            <RowButtonEndActivityIndicator />
-                                        ) : (selectedLayout === null &&
-                                              currentLayout === value) ||
-                                          (selectedLayout === value &&
-                                              !loadingLayout) ? (
-                                            <DoneIcon />
-                                        ) : undefined
-                                    }
-                                />
-                                {index != options.length - 1 && (
-                                    <RowButtonDivider />
-                                )}
-                            </React.Fragment>
+                    <Stack>
+                        {options.map(({ label, value }) => (
+                            <MenuComponent
+                                key={value}
+                                title={label}
+                                onClick={changeLayoutValue(value)}
+                                disabled={disabled || loadingLayout !== null}
+                                loading={loadingLayout === value}
+                                selected={
+                                    (selectedLayout ?? currentLayout) === value
+                                }
+                            />
                         ))}
-                    </RowButtonGroup>
+                    </Stack>
                     {errorMessage && (
                         <Typography
                             role="alert"
