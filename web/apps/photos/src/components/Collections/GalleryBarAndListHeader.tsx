@@ -159,10 +159,8 @@ export const GalleryBarAndListHeader: React.FC<
             sortCollectionSummaries(
                 [...toShowCollectionSummaries.values()],
                 collectionsSortBy,
-            ).sort((a, b) =>
-                mode == "links" ? 0 : b.sortPriority - a.sortPriority,
-            ),
-        [collectionsSortBy, toShowCollectionSummaries, mode],
+            ).sort((a, b) => b.sortPriority - a.sortPriority),
+        [collectionsSortBy, toShowCollectionSummaries],
     );
     const eligibleCollectionSummaries = useMemo(
         () =>
@@ -172,12 +170,10 @@ export const GalleryBarAndListHeader: React.FC<
                     cs.id !== PseudoCollectionID.hiddenItems &&
                     cs.id !== PseudoCollectionID.archiveItems &&
                     cs.id !== PseudoCollectionID.trash &&
-                    (mode == "links"
-                        ? true
-                        : mode == "albums"
-                          ? !cs.attributes.has("system") ||
-                            (cs.id > 0 && cs.type == "uncategorized")
-                          : !cs.attributes.has("hideFromCollectionBar")),
+                    (mode == "albums"
+                        ? !cs.attributes.has("system") ||
+                          (cs.id > 0 && cs.type == "uncategorized")
+                        : !cs.attributes.has("hideFromCollectionBar")),
             ),
         [sortedCollectionSummaries, uncategorizedCollectionSummaryID, mode],
     );
