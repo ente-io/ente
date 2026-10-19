@@ -194,6 +194,113 @@ test("counts replies across pages and removes deleted comments from the total", 
     expect(cachedCommentCount("viewer", 42)).toBe(0);
 });
 
+test("returns loaded comments when persisting their count fails", async () => {
+    context.listComments.mockResolvedValue({
+        items: [
+            {
+                commentId: "comment",
+                text: "Hello",
+                deleted: false,
+                reactions: [],
+            },
+        ],
+    });
+    vi.mocked(patchCachedSpaceFeedPost).mockRejectedValue(
+        new Error("Storage unavailable"),
+    );
+
+    const comments = await loadCurrentComments("viewer", "friend", 42);
+
+    expect(comments).toMatchObject([{ commentId: "comment", text: "Hello" }]);
+    expect(cachedCommentCount("viewer", 42)).toBe(1);
+});
+
+test.each(["feed", "profile"])(
+    "keeps a count updated by sending when an older %s response arrives",
+    async (source) => {
+        const pending = Promise.withResolvers<{
+            items: ReturnType<typeof post>[];
+        }>();
+        const list = source == "feed" ? context.listFeed : context.listPosts;
+        list.mockReturnValueOnce(pending.promise);
+        const load = () =>
+            source == "feed"
+                ? loadCurrentFeedPage("viewer")
+                : loadCurrentSpaceProfilePostsPage("friend", "viewer");
+        const page = load();
+        await vi.waitFor(() => expect(list).toHaveBeenCalled());
+        context.getPost.mockResolvedValue(post(1));
+        await createCurrentComment(
+            "viewer",
+            "friend",
+            42,
+            "comment",
+            undefined,
+            "Hi",
+        );
+
+        pending.resolve({ items: [post(0)] });
+        expect((await page).items[0]!.commentCount).toBe(1);
+        expect(cachedCommentCount("viewer", 42)).toBe(1);
+
+        list.mockResolvedValue({ items: [post(0)] });
+        expect((await load()).items[0]!.commentCount).toBe(0);
+        expect(cachedCommentCount("viewer", 42)).toBe(0);
+    },
+);
+
+test("does not restore a deleted comment's count from an older feed response", async () => {
+    const pending = Promise.withResolvers<{
+        items: ReturnType<typeof post>[];
+    }>();
+    context.listFeed.mockReturnValueOnce(pending.promise);
+    const page = loadCurrentFeedPage("viewer");
+    await vi.waitFor(() => expect(context.listFeed).toHaveBeenCalled());
+    context.listComments.mockResolvedValue({ items: [] });
+    await loadCurrentComments("viewer", "friend", 42);
+
+    pending.resolve({ items: [post(1)] });
+    expect((await page).items[0]!.commentCount).toBe(0);
+    expect(cachedCommentCount("viewer", 42)).toBe(0);
+});
+
+test("keeps newer counts when an older comments request finishes", async () => {
+    const pending = Promise.withResolvers<{ items: [] }>();
+    context.listComments.mockReturnValueOnce(pending.promise);
+    const comments = loadCurrentComments("viewer", "friend", 42);
+    await vi.waitFor(() => expect(context.listComments).toHaveBeenCalled());
+    context.getPost.mockResolvedValue(post(1));
+    await createCurrentComment(
+        "viewer",
+        "friend",
+        42,
+        "comment",
+        undefined,
+        "Hi",
+    );
+
+    pending.resolve({ items: [] });
+    await comments;
+    expect(cachedCommentCount("viewer", 42)).toBe(1);
+    expect(patchCachedSpaceFeedPost).toHaveBeenLastCalledWith("viewer", 42, {
+        commentCount: 1,
+    });
+});
+
+test("does not repopulate shared counts from a request started before logout", async () => {
+    const pending = Promise.withResolvers<{
+        items: ReturnType<typeof post>[];
+    }>();
+    context.listFeed.mockReturnValueOnce(pending.promise);
+    const page = loadCurrentFeedPage("viewer");
+    await vi.waitFor(() => expect(context.listFeed).toHaveBeenCalled());
+    clearCommentCounts();
+
+    pending.resolve({ items: [post(1)] });
+    await page;
+    expect(cachedCommentCount("viewer", 42)).toBeUndefined();
+});
+
 test("uses fresh feed and profile counts after other people comment or delete", async () => {
     context.listComments.mockResolvedValue({ items: [] });
     await loadCurrentComments("viewer", "friend", 42);
