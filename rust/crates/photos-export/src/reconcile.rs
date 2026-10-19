@@ -379,11 +379,10 @@ impl Run<'_> {
                             !unrepairable,
                             "missing album contains originals that cannot be repaired"
                         );
-                        fs::create_directory(&destination)?;
+                        disk::create_dir_all(&destination)?;
                     }
-                    fs::sync_move(&source, &destination)?;
                 } else {
-                    fs::create_directory(&destination)?;
+                    disk::create_dir_all(&destination)?;
                     ensure!(
                         disk::read_dir(&destination)?.next().is_none(),
                         super::Conflict(format!(
@@ -391,14 +390,6 @@ impl Run<'_> {
                             destination.display()
                         ))
                     );
-                    fs::sync_parent(&destination)?;
-                    if target.retained {
-                        fs::sync_parent(
-                            destination
-                                .parent()
-                                .context("retained album has no parent")?,
-                        )?;
-                    }
                 }
                 let store = store::lock(self.store)?;
                 let transaction = store.db.unchecked_transaction()?;
@@ -430,7 +421,7 @@ impl Run<'_> {
                         Properties::optional(&path)?.is_none() || owned,
                         super::Conflict(format!("at {}: unrelated occupant", path.display()))
                     );
-                    fs::create_directory(path.parent().context("publication has no parent")?)?;
+                    disk::create_dir_all(path.parent().context("publication has no parent")?)?;
                     disk::rename(&source, &path)?;
                 } else {
                     let (size, hash) = output.identity();
@@ -447,7 +438,6 @@ impl Run<'_> {
                         return Ok(());
                     }
                 }
-                fs::sync_move(&source, &path)?;
                 self.acknowledge(target, &destination, &output, value)?;
             }
             Action::Move {
@@ -467,7 +457,6 @@ impl Run<'_> {
                             || fs::matches(&to, size, &hash, self.cancel)?,
                         super::Conflict(format!("at {}: moved bytes differ", to.display()))
                     );
-                    fs::sync_move(&from, &to)?;
                 } else {
                     ensure!(
                         !target.retained || current_media,
@@ -592,7 +581,6 @@ impl Run<'_> {
     ) -> Result<()> {
         let (temporary, mut file) = self.temporary(&location.folder, target.album, target.file)?;
         file.write_all(&json.bytes)?;
-        file.sync_all()?;
         drop(file);
         let output = Output::Json {
             role: role.clone(),
@@ -1285,7 +1273,7 @@ impl Run<'_> {
                     let (temporary, file) = self.temporary(&album.key, album_id, Some(file.id))?;
                     let mut writer = fs::HashWriter::new(file, self.cancel)?;
                     std::io::copy(&mut File::open(self.path(&source.location)?)?, &mut writer)?;
-                    let (_, size, hash) = writer.finish()?;
+                    let (_, size, hash) = writer.finish();
                     ensure!(
                         size == source.size && hash == source.hash,
                         "local original changed while copying"
@@ -1653,7 +1641,6 @@ impl Run<'_> {
             let path = names::check(self.root, &relative)?;
             if directory_exists(&path)? && disk::read_dir(&path)?.next().is_none() {
                 disk::remove_dir(&path)?;
-                fs::sync_parent(&path)?;
             }
         }
         let store = store::lock(self.store)?;

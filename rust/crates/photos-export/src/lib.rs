@@ -416,7 +416,7 @@ fn open_root(destination: &Path, expected: &Root) -> Result<Option<RootLock>> {
 }
 
 fn initialize(destination: &Path, root: &Root, legacy: bool) -> Result<RootLock> {
-    fs::create_directory(destination)?;
+    std::fs::create_dir_all(destination)?;
     let path = names::check(destination, "export.json")?;
     let file = OpenOptions::new()
         .read(true)
@@ -434,8 +434,6 @@ fn initialize(destination: &Path, root: &Root, legacy: bool) -> Result<RootLock>
     );
     serde_json::to_writer_pretty(&mut lock.0, root)?;
     lock.0.write_all(b"\n")?;
-    lock.0.sync_all()?;
-    fs::sync_parent(&path)?;
     Ok(lock)
 }
 

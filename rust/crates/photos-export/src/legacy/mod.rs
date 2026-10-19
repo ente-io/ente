@@ -288,7 +288,6 @@ pub fn move_leftovers(root: &Path, index: &Index, cancel: &watch::Receiver<bool>
                 }
                 fs::free_rename(&source, &destination)?;
                 disk::rename(&source, &destination)?;
-                fs::sync_move(&source, &destination)?;
                 record.album.path = name.clone();
                 adopt::save_album(index, &record)?;
                 break;
@@ -385,7 +384,7 @@ fn move_one(
     let source = names::check(root, source)?;
     let parent = names::check(root, directory)?;
     if Properties::optional(&source)?.is_none() {
-        return fs::sync_move(&source, &parent.join(name));
+        return Ok(());
     }
     for suffix in 0.. {
         ensure!(!*cancel.borrow(), crate::Cancelled);
@@ -459,7 +458,6 @@ pub fn finish(root: &Path, store: &Store, cancel: &watch::Receiver<bool>) -> Res
             }
             if disk::read_dir(&meta)?.next().is_none() {
                 disk::remove_dir(&meta)?;
-                fs::sync_parent(&meta)?;
             }
         }
         let absent: bool = store.db.query_row(
@@ -472,7 +470,6 @@ pub fn finish(root: &Path, store: &Store, cancel: &watch::Receiver<bool>) -> Res
                 let path = names::check(root, &relative)?;
                 if path.is_dir() && disk::read_dir(&path)?.next().is_none() {
                     disk::remove_dir(&path)?;
-                    fs::sync_parent(&path)?;
                 }
             }
         }

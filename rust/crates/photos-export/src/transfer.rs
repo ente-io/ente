@@ -279,7 +279,7 @@ pub async fn prepare(run: &Run<'_>, session: &Session, file: &FileSnapshot) -> R
         HashWriter::new(output, run.cancel).map_err(std::io::Error::other)
     });
     let writer = tokio::select! { result=download => result?, _=cancel.changed() => return Err(super::Cancelled.into()) };
-    let (archive, size, hash) = writer.finish()?;
+    let (archive, size, hash) = writer.finish();
     let components = if file.kind == "livephoto" {
         let mut temporaries = Vec::new();
         let extracted = crate::live_photo::extract(archive, |role, extension| {
@@ -292,7 +292,7 @@ pub async fn prepare(run: &Run<'_>, session: &Session, file: &FileSnapshot) -> R
         let mut components = Vec::with_capacity(2);
         for ((role, extension, writer), (_, _, temporary)) in extracted.into_iter().zip(temporaries)
         {
-            let (_, size, hash) = writer.finish()?;
+            let (_, size, hash) = writer.finish();
             if let Some(expected) = expected_hash(file, &role) {
                 ensure!(
                     hash == expected,

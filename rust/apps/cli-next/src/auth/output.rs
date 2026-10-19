@@ -46,17 +46,6 @@ impl Destination {
                 Ok(())
             }
             Self::Directory { path, .. } => {
-                let mut missing = Vec::new();
-                for directory in path.ancestors() {
-                    if directory.as_os_str().is_empty()
-                        || directory.try_exists().with_context(|| {
-                            format!("cannot inspect export directory {}", directory.display())
-                        })?
-                    {
-                        break;
-                    }
-                    missing.push(directory);
-                }
                 let mut builder = fs::DirBuilder::new();
                 builder.recursive(true);
                 #[cfg(unix)]
@@ -67,14 +56,6 @@ impl Destination {
                 builder.create(path).with_context(|| {
                     format!("cannot create export directory {}", path.display())
                 })?;
-                for directory in missing.into_iter().rev() {
-                    sync_directory(parent(directory)).with_context(|| {
-                        format!(
-                            "cannot sync parent of export directory {}",
-                            directory.display()
-                        )
-                    })?;
-                }
                 Ok(())
             }
         }
@@ -94,12 +75,6 @@ impl Destination {
                     .persist_noclobber(path)
                     .map_err(|error| error.error)
                     .with_context(|| format!("cannot publish {}", path.display()))?;
-                sync_directory(parent(path)).with_context(|| {
-                    format!(
-                        "{} was published, but cannot sync its directory",
-                        path.display()
-                    )
-                })?;
                 Ok(Some(path.clone()))
             }
             Self::Directory { path, extension } => {
@@ -120,14 +95,7 @@ fn parent(path: &Path) -> &Path {
 fn stage(directory: &Path, bytes: &[u8]) -> Result<tempfile::NamedTempFile> {
     let mut temporary = tempfile::NamedTempFile::new_in(directory)?;
     temporary.write_all(bytes)?;
-    temporary.as_file().sync_all()?;
     Ok(temporary)
-}
-
-fn sync_directory(_directory: &Path) -> io::Result<()> {
-    #[cfg(unix)]
-    fs::File::open(_directory)?.sync_all()?;
-    Ok(())
 }
 
 fn backup_sequence(name: &str, stem: &str, extension: &str) -> Option<u64> {
@@ -179,7 +147,6 @@ fn publish_directory(
             Err(error) => return Err(error.error).context("cannot publish Auth backup"),
         }
     };
-    sync_directory(directory).context("backup published, but cannot sync its directory")?;
     Ok(path)
 }
 
