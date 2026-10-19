@@ -1,9 +1,15 @@
+import { useDeleteEmptyAlbums } from "@/components/Collections/useDeleteEmptyAlbums";
+import type { RemotePullOpts } from "@/components/gallery";
 import type { AlbumFilter } from "@/utils/album-filters";
+import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import AddIcon from "@mui/icons-material/Add";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import {
     Box,
+    IconButton,
     Stack,
+    Tooltip,
     Typography,
     styled,
     useMediaQuery,
@@ -28,6 +34,7 @@ interface AlbumsOverviewProps {
     sortBy: CollectionsSortBy;
     onSelectAlbum: (id: number) => void;
     onCreateAlbum: () => void;
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
 }
 
 export const AlbumsOverview = ({
@@ -38,6 +45,7 @@ export const AlbumsOverview = ({
     sortBy,
     onSelectAlbum,
     onCreateAlbum,
+    onRemotePull,
 }: AlbumsOverviewProps) => {
     const compact = useMediaQuery(useTheme().breakpoints.down("md"));
     const listRef = useRef<FixedSizeList>(null);
@@ -55,6 +63,12 @@ export const AlbumsOverview = ({
         return () => observer.disconnect();
     }, [listElement]);
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    const { handleDeleteEmptyAlbums, hasEnoughEmptyAlbums } =
+        useDeleteEmptyAlbums(albums, onRemotePull);
+    const showDeleteEmptyAlbums =
+        filter == "empty-albums" &&
+        hasEnoughEmptyAlbums &&
+        !normalizedSearchQuery;
     const showCreate = filter == "ente" && !normalizedSearchQuery;
     const tileWidth = compact ? 104 : 140;
     const columnGap = compact ? 12 : 22;
@@ -86,30 +100,50 @@ export const AlbumsOverview = ({
                 sx={{
                     flexShrink: 0,
                     minHeight: 54,
-                    justifyContent: "center",
-                    gap: "2px",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: 2,
                 }}
             >
-                <Typography
-                    component="h1"
-                    sx={{
-                        fontFamily: '"Outfit Variable", Outfit, sans-serif',
-                        fontSize: { xs: 20, md: 24 },
-                        lineHeight: { xs: "26px", md: "32px" },
-                        fontWeight: 600,
-                    }}
-                >
-                    {displayTitle}
-                </Typography>
-                <Typography
-                    sx={{
-                        fontSize: { xs: 12, md: 14 },
-                        lineHeight: "20px",
-                        color: "text.muted",
-                    }}
-                >
-                    {t("album_overview_count", { count: albums.length })}
-                </Typography>
+                <Stack sx={{ minWidth: 0, gap: "2px" }}>
+                    <Typography
+                        component="h1"
+                        sx={{
+                            fontFamily: '"Outfit Variable", Outfit, sans-serif',
+                            fontSize: { xs: 20, md: 24 },
+                            lineHeight: { xs: "26px", md: "32px" },
+                            fontWeight: 600,
+                        }}
+                    >
+                        {displayTitle}
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontSize: { xs: 12, md: 14 },
+                            lineHeight: "20px",
+                            color: "text.muted",
+                        }}
+                    >
+                        {t("album_overview_count", { count: albums.length })}
+                    </Typography>
+                </Stack>
+                {showDeleteEmptyAlbums && (
+                    <Tooltip title={t("delete_empty_albums")}>
+                        <IconButton
+                            aria-label={t("delete_empty_albums")}
+                            onClick={handleDeleteEmptyAlbums}
+                            sx={{ flexShrink: 0, marginInlineStart: "auto" }}
+                        >
+                            <HugeiconsIcon
+                                icon={Delete02Icon}
+                                size={22}
+                                strokeWidth={1.5}
+                            />
+                        </IconButton>
+                    </Tooltip>
+                )}
             </Stack>
             {!albums.length && !showCreate ? (
                 <Typography
