@@ -236,6 +236,7 @@ struct GenerationJob<'a> {
 impl GenerationJob<'_> {
     fn run(
         &mut self,
+        model: &LlamaModel,
         ctx: &mut LlamaContext,
         sampler: &mut LlamaSampler,
         mut cached_tokens: Option<&mut Vec<LlamaToken>>,
@@ -253,7 +254,7 @@ impl GenerationJob<'_> {
             let token = sampler.sample(ctx, logits_index);
             check_cancelled(self.cancel_flag)?;
 
-            if ctx.model.vocab().is_eog(token) {
+            if model.vocab().is_eog(token) {
                 self.generated_tokens = self.generated_tokens.saturating_add(1);
                 self.finish_reason = FinishReason::Eog;
                 break;
@@ -264,7 +265,7 @@ impl GenerationJob<'_> {
             }
             self.generated_tokens = self.generated_tokens.saturating_add(1);
 
-            let bytes = ctx.model.vocab().token_to_piece(token, true, None);
+            let bytes = model.vocab().token_to_piece(token, true, None);
             let step = decoder.push_bytes(&bytes);
 
             if let Some(text) = step.text {
@@ -408,14 +409,14 @@ impl LocalContext {
                 "Text measurement does not count image positions",
             ));
         }
-        self.with_context_and_cache_mut(|ctx, _| {
+        self.with_context_and_cache_mut(|model, _, _| {
             let prompt = build_chat_prompt(
-                ctx.model,
+                model,
                 request.messages.clone(),
                 request.template_override.clone(),
                 request.add_assistant.unwrap_or(true),
             )?;
-            Ok(tokenize_text_prompt(ctx.model, &prompt)?.len())
+            Ok(tokenize_text_prompt(model, &prompt)?.len())
         })
     }
 
@@ -527,7 +528,7 @@ fn generate_chat_stream(
     };
 
     let result = match catch_unwind(AssertUnwindSafe(|| {
-        context.with_context_and_cache_mut(|ctx, cached_tokens| -> Result<(), Error> {
+        context.with_context_and_cache_mut(|model, ctx, cached_tokens| -> Result<(), Error> {
             let add_assistant = add_assistant.unwrap_or(true);
             let mut messages = messages;
             let image_paths = image_paths.unwrap_or_default();
@@ -565,7 +566,7 @@ fn generate_chat_stream(
                 }
             }
 
-            let prompt = build_chat_prompt(ctx.model, messages, template_override, add_assistant)?;
+            let prompt = build_chat_prompt(model, messages, template_override, add_assistant)?;
 
             let sampler_request = SamplingParams {
                 temperature,
@@ -579,7 +580,7 @@ fn generate_chat_stream(
             };
 
             if image_paths.is_empty() {
-                let prompt_tokens = tokenize_text_prompt(ctx.model, &prompt)?;
+                let prompt_tokens = tokenize_text_prompt(model, &prompt)?;
 
                 let n_ctx = ctx.n_ctx();
                 if prompt_tokens.len() as u32 > n_ctx {
@@ -641,11 +642,18 @@ fn generate_chat_stream(
                     token_offset = end;
                 }
 
-                let mut sampler = build_sampler(ctx.model, &sampler_request, ctx.n_ctx() as i32)?;
+                let mut sampler = build_sampler(model, &sampler_request, ctx.n_ctx() as i32)?;
                 sampler.accept_many(prompt_tokens.iter());
 
                 let pos = prompt_tokens.len() as i32;
-                job.run(ctx, &mut sampler, Some(cached_tokens), pos, logits_index)?;
+                job.run(
+                    model,
+                    ctx,
+                    &mut sampler,
+                    Some(cached_tokens),
+                    pos,
+                    logits_index,
+                )?;
 
                 return Ok(());
             }
@@ -655,7 +663,8 @@ fn generate_chat_stream(
                     "mmproj_path is required when image_paths are provided".to_string(),
                 )
             })?;
-            let mtmd_ctx = context.cached_mtmd_context(ctx.model, &mmproj_path, &marker)?;
+            let mtmd_ctx = context.cached_mtmd_context(model, &mmproj_path, &marker)?;
+            let mut mtmd_ctx = lock(&mtmd_ctx);
 
             let mut bitmaps = Vec::with_capacity(image_paths.len());
             for image_path in &image_paths {
@@ -680,7 +689,7 @@ fn generate_chat_stream(
             }
             let bitmap_refs = bitmaps.iter().collect::<Vec<_>>();
 
-            let add_special = should_add_bos(ctx.model, &prompt);
+            let add_special = should_add_bos(model, &prompt);
             let input_text = MtmdInputText {
                 text: prompt,
                 add_special,
@@ -723,14 +732,14 @@ fn generate_chat_stream(
             check_cancelled(&cancel_flag)?;
 
             let n_past = chunks
-                .eval_chunks(&mtmd_ctx, ctx, 0, 0, n_batch, true)
+                .eval_chunks(&mut mtmd_ctx, ctx, 0, 0, n_batch, true)
                 .map_err(|err| Error::Llama {
                     op: "Failed to evaluate multimodal prompt",
                     message: err.to_string(),
                 })?;
             check_cancelled(&cancel_flag)?;
 
-            let mut sampler = build_sampler(ctx.model, &sampler_request, ctx.n_ctx() as i32)?;
+            let mut sampler = build_sampler(model, &sampler_request, ctx.n_ctx() as i32)?;
             let mut prompt_tokens = Vec::new();
             for index in 0..chunks.len() {
                 if let Some(chunk) = chunks.get(index)
@@ -741,7 +750,7 @@ fn generate_chat_stream(
             }
             sampler.accept_many(prompt_tokens.iter());
 
-            job.run(ctx, &mut sampler, None, n_past, -1)?;
+            job.run(model, ctx, &mut sampler, None, n_past, -1)?;
 
             Ok(())
         })

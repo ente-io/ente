@@ -37,11 +37,8 @@ impl LocalContext {
             "Context is not configured for embeddings",
         ))?;
         let (batch_size, source_dim, dim) = (params.batch_size, params.source_dim, params.dim);
-        self.with_context_and_cache_mut(|context, cached_tokens| {
-            let tokens = context
-                .model
-                .vocab()
-                .tokenize(prompt.as_bytes(), true, true);
+        self.with_context_and_cache_mut(|model, context, cached_tokens| {
+            let tokens = model.vocab().tokenize(prompt.as_bytes(), true, true);
             if tokens.is_empty() {
                 return Err(Error::InvalidInput(
                     "embedding prompt produced no tokens".to_string(),

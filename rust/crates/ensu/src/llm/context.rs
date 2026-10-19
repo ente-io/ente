@@ -213,7 +213,7 @@ struct MtmdCacheKey {
 
 struct CachedMtmdContext {
     key: MtmdCacheKey,
-    context: Arc<MtmdContext>,
+    context: Arc<Mutex<MtmdContext>>,
 }
 
 struct ContextState {
@@ -254,14 +254,18 @@ impl LocalContext {
 
     pub(super) fn with_context_and_cache_mut<R>(
         &self,
-        func: impl for<'a, 'b> FnOnce(&'b mut LlamaContext<'a>, &'b mut Vec<LlamaToken>) -> R,
+        func: impl for<'a, 'b> FnOnce(
+            &'b LlamaModel,
+            &'b mut LlamaContext<'a>,
+            &'b mut Vec<LlamaToken>,
+        ) -> R,
     ) -> R {
         let mut state = lock(&self.state);
         let ContextState {
             cell,
             cached_tokens,
         } = &mut *state;
-        cell.with_dependent_mut(|_owner, context| func(context, cached_tokens))
+        cell.with_dependent_mut(|owner, context| func(owner.model(), context, cached_tokens))
     }
 
     pub(super) fn embedding_params(&self) -> Option<&EmbeddingContextParams> {
@@ -273,7 +277,7 @@ impl LocalContext {
         model: &LlamaModel,
         mmproj_path: &str,
         marker: &str,
-    ) -> Result<Arc<MtmdContext>, Error> {
+    ) -> Result<Arc<Mutex<MtmdContext>>, Error> {
         if !Path::new(mmproj_path).exists() {
             return Err(Error::NotFound {
                 what: "mmproj file",
@@ -290,16 +294,16 @@ impl LocalContext {
             return Ok(cached.context.clone());
         }
 
-        let mtmd_ctx = Arc::new(
+        let mtmd_ctx = Arc::new(Mutex::new(
             MtmdContext::init_from_file(mmproj_path, model, &params).map_err(|err| {
                 Error::Llama {
                     op: "Failed to initialize mmproj",
                     message: err.to_string(),
                 }
             })?,
-        );
+        ));
 
-        if !mtmd_ctx.support_vision() {
+        if !lock(&mtmd_ctx).support_vision() {
             return Err(Error::Unsupported("Model does not support vision input"));
         }
 
@@ -478,8 +482,8 @@ impl LocalContext {
         media_marker: Option<String>,
     ) -> Result<(), Error> {
         let marker = media_marker.unwrap_or_else(|| mtmd_default_marker().to_string());
-        self.with_context_and_cache_mut(|ctx, _| {
-            self.cached_mtmd_context(ctx.model, &mmproj_path, &marker)
+        self.with_context_and_cache_mut(|model, _, _| {
+            self.cached_mtmd_context(model, &mmproj_path, &marker)
                 .map(|_| ())
         })
     }
