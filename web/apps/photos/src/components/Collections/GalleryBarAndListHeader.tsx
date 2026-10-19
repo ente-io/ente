@@ -196,7 +196,11 @@ export const GalleryBarAndListHeader: React.FC<
                       albumFilter,
                       albumSearchQuery,
                   )
-                : eligibleCollectionSummaries,
+                : eligibleCollectionSummaries.filter((album) =>
+                      album.name
+                          .toLowerCase()
+                          .includes(albumSearchQuery.trim().toLowerCase()),
+                  ),
         [eligibleCollectionSummaries, mode, albumFilter, albumSearchQuery],
     );
 

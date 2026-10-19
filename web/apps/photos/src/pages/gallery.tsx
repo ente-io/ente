@@ -573,7 +573,11 @@ const Page: React.FC = () => {
               : state.normalCollectionSummaries;
 
     useEffect(() => {
-        if (barMode != "albums" || activeCollectionID == PseudoCollectionID.all)
+        setAlbumSearchQuery("");
+    }, [barMode]);
+
+    useEffect(() => {
+        if (barMode == "albums" && activeCollectionID == PseudoCollectionID.all)
             setAlbumSearchQuery("");
     }, [barMode, activeCollectionID]);
 

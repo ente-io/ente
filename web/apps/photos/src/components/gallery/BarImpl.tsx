@@ -125,12 +125,11 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const listRef = useRef<FixedSizeList | null>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const [peopleSearchQuery, setPeopleSearchQuery] = useState("");
-    const searchQuery = mode == "albums" ? albumSearchQuery : peopleSearchQuery;
+    const searchQuery = mode == "people" ? peopleSearchQuery : albumSearchQuery;
     const setSearchQuery =
-        mode == "albums" ? onAlbumSearchQueryChange : setPeopleSearchQuery;
-    const canSearch = mode == "albums" || mode == "people";
+        mode == "people" ? setPeopleSearchQuery : onAlbumSearchQueryChange;
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-    const isSearching = canSearch && !!normalizedSearchQuery;
+    const isSearching = !!normalizedSearchQuery;
     const matchingPeople = useMemo(
         () =>
             mode == "people" && isSearching
@@ -306,7 +305,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             component="nav"
             aria-labelledby={titleID}
             onKeyDown={(event) => {
-                if (event.key == "Escape" && canSearch && searchQuery) {
+                if (event.key == "Escape" && searchQuery) {
                     event.stopPropagation();
                     setSearchQuery("");
                 }
@@ -417,69 +416,67 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     </IconButton>
                 )}
             </Stack>
-            {canSearch && (
-                <Stack
-                    direction="row"
-                    sx={{
-                        alignItems: "center",
-                        flexShrink: 0,
-                        height: 52,
-                        gap: "10px",
-                        px: "16px",
-                        borderRadius: "12px",
-                        bgcolor: "var(--gallery-navigation-surface)",
-                        border: "1px solid",
-                        borderColor: "stroke.faint",
-                        "&:focus-within": {
-                            outline: "1px solid",
-                            outlineColor: "stroke.muted",
-                            outlineOffset: -1,
-                        },
-                    }}
-                >
-                    <SearchIcon sx={{ fontSize: 18, color: "text.muted" }} />
-                    <InputBase
-                        inputRef={searchInputRef}
-                        fullWidth
-                        placeholder={t(
+            <Stack
+                direction="row"
+                sx={{
+                    alignItems: "center",
+                    flexShrink: 0,
+                    height: 52,
+                    gap: "10px",
+                    px: "16px",
+                    borderRadius: "12px",
+                    bgcolor: "var(--gallery-navigation-surface)",
+                    border: "1px solid",
+                    borderColor: "stroke.faint",
+                    "&:focus-within": {
+                        outline: "1px solid",
+                        outlineColor: "stroke.muted",
+                        outlineOffset: -1,
+                    },
+                }}
+            >
+                <SearchIcon sx={{ fontSize: 18, color: "text.muted" }} />
+                <InputBase
+                    inputRef={searchInputRef}
+                    fullWidth
+                    placeholder={t(
+                        mode == "people"
+                            ? "people_search_hint"
+                            : "search_in_albums",
+                    )}
+                    inputProps={{
+                        "aria-label": t(
                             mode == "people"
                                 ? "people_search_hint"
                                 : "search_in_albums",
-                        )}
-                        inputProps={{
-                            "aria-label": t(
-                                mode == "people"
-                                    ? "people_search_hint"
-                                    : "search_in_albums",
-                            ),
+                        ),
+                    }}
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    sx={{
+                        fontSize: mobile ? 13 : 14,
+                        fontWeight: 500,
+                        color: "text.base",
+                        "& input::placeholder": {
+                            color: "text.muted",
+                            opacity: 1,
+                        },
+                    }}
+                />
+                {searchQuery && (
+                    <IconButton
+                        aria-label={t("clear_search")}
+                        onClick={() => {
+                            setSearchQuery("");
+                            searchInputRef.current?.focus();
                         }}
-                        value={searchQuery}
-                        onChange={(event) => setSearchQuery(event.target.value)}
-                        sx={{
-                            fontSize: mobile ? 13 : 14,
-                            fontWeight: 500,
-                            color: "text.base",
-                            "& input::placeholder": {
-                                color: "text.muted",
-                                opacity: 1,
-                            },
-                        }}
-                    />
-                    {searchQuery && (
-                        <IconButton
-                            aria-label={t("clear_search")}
-                            onClick={() => {
-                                setSearchQuery("");
-                                searchInputRef.current?.focus();
-                            }}
-                            size="small"
-                        >
-                            <CloseIcon sx={{ fontSize: 18 }} />
-                        </IconButton>
-                    )}
-                </Stack>
-            )}
-            {mode == "people" && isSearching && !matchingPeople.length ? (
+                        size="small"
+                    >
+                        <CloseIcon sx={{ fontSize: 18 }} />
+                    </IconButton>
+                )}
+            </Stack>
+            {mode != "albums" && isSearching && !getItemCount(itemData) ? (
                 <Typography
                     role="status"
                     sx={{ px: "16px", color: "text.muted" }}
