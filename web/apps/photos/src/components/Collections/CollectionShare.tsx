@@ -10,6 +10,7 @@ import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import DoneIcon from "@mui/icons-material/Done";
@@ -24,6 +25,8 @@ import WorkspacesIcon from "@mui/icons-material/Workspaces";
 import {
     Box,
     Dialog,
+    DialogTitle,
+    IconButton,
     Stack,
     styled,
     ThemeProvider,
@@ -54,6 +57,12 @@ import {
     RowLabel,
     RowSwitch,
 } from "ente-base/components/RowButton";
+import {
+    v2CloseButtonSx,
+    v2HeaderRowSx,
+    v2PaperSx,
+    v2TitleSx,
+} from "ente-base/components/SingleInput.styles";
 import {
     SingleInputForm,
     type SingleInputFormProps,
@@ -98,6 +107,7 @@ import React, {
     useCallback,
     useContext,
     useEffect,
+    useId,
     useMemo,
     useRef,
     useState,
@@ -2361,7 +2371,7 @@ const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
             />
             <SetPublicLinkPassword
                 {...setPasswordVisibilityProps}
-                {...{ publicURL, onUpdate }}
+                {...{ variant, publicURL, onUpdate }}
             />
         </>
     );
@@ -2389,12 +2399,14 @@ type SetPublicLinkPasswordProps = ModalVisibilityProps &
     ManagePublicLinkSettingProps;
 
 const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
+    variant,
     open,
     onClose,
     publicURL,
     onUpdate,
 }) => {
     const inPanel = !!useContext(SidebarPanelContext);
+    const titleID = useId();
     const savePassword: SingleInputFormProps["onSubmit"] = async (password) => {
         await enablePublicUrlPassword(password);
         publicURL.passwordEnabled = true;
@@ -2413,21 +2425,61 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
         });
     };
 
+    const passwordForm = (
+        <SingleInputForm
+            variant={variant == "inline" ? "people" : undefined}
+            inputType="password"
+            label={t("password")}
+            submitButtonColor="primary"
+            submitButtonTitle={t("lock")}
+            onCancel={onClose}
+            onSubmit={savePassword}
+        />
+    );
+
+    if (variant == "inline") {
+        return (
+            <Dialog
+                {...{ open, onClose }}
+                aria-labelledby={titleID}
+                maxWidth={false}
+                slotProps={{ paper: { sx: v2PaperSx } }}
+            >
+                <Stack sx={{ p: "20px", gap: "20px" }}>
+                    <Stack direction="row" sx={v2HeaderRowSx}>
+                        <DialogTitle
+                            id={titleID}
+                            sx={{
+                                ...v2TitleSx,
+                                fontSize: "20px",
+                                lineHeight: "28px",
+                                "&&": { p: 0 },
+                            }}
+                        >
+                            {t("password_lock")}
+                        </DialogTitle>
+                        <IconButton
+                            aria-label={t("close")}
+                            onClick={onClose}
+                            sx={v2CloseButtonSx}
+                        >
+                            <CloseIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                    </Stack>
+                    {passwordForm}
+                </Stack>
+            </Dialog>
+        );
+    }
+
     const form = (
         <Stack sx={{ gap: 3, p: 1.5 }}>
             {!inPanel && (
-                <Typography variant="h3" sx={{ px: 1, py: 0.5 }}>
+                <Typography id={titleID} variant="h3" sx={{ px: 1, py: 0.5 }}>
                     {t("password_lock")}
                 </Typography>
             )}
-            <SingleInputForm
-                inputType="password"
-                label={t("password")}
-                submitButtonColor="primary"
-                submitButtonTitle={t("lock")}
-                onCancel={onClose}
-                onSubmit={savePassword}
-            />
+            {passwordForm}
         </Stack>
     );
 
@@ -2447,6 +2499,7 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     return (
         <Dialog
             {...{ open, onClose }}
+            aria-labelledby={titleID}
             disablePortal
             slotProps={{
                 backdrop: { sx: { position: "absolute" } },
