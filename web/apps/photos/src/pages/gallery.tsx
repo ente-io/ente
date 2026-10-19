@@ -40,6 +40,7 @@ import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import { PeopleOverview } from "@/components/gallery/PeopleOverview";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
 import { PublicLinkDetails } from "@/components/gallery/PublicLinkDetails";
+import { PublicLinkHeader } from "@/components/gallery/PublicLinkHeader";
 import {
     albumShortcutCollectionID,
     findCollectionCreatingIfNeeded,
@@ -490,6 +491,8 @@ const Page: React.FC = () => {
         [quickLinks, normalCollectionSummaries],
     );
     const selectedLink = quickLinks.find(({ id }) => id === selectedLinkID);
+    const selectedLinkSummary =
+        selectedLink && linkSummaries.get(selectedLink.id);
     const selectedLinkFiles = useMemo(
         () =>
             selectedLinkID === undefined
@@ -2265,6 +2268,16 @@ const Page: React.FC = () => {
                     selectedLink ? (
                         <PublicLinkDetails
                             key={selectedLink.id}
+                            header={
+                                selectedLinkSummary && (
+                                    <PublicLinkHeader
+                                        name={selectedLink.name}
+                                        fileCount={
+                                            selectedLinkSummary.fileCount
+                                        }
+                                    />
+                                )
+                            }
                             collection={selectedLink}
                             files={selectedLinkFiles}
                             user={user}

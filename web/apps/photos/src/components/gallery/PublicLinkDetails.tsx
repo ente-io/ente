@@ -24,9 +24,11 @@ import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapsh
 import { updateCollectionDetails } from "ente-new/photos/services/collection";
 import { openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
+import type { ReactNode } from "react";
 import type { RemotePullOpts } from ".";
 
 interface PublicLinkDetailsProps {
+    header: ReactNode;
     collection: Collection;
     coverFile?: EnteFile;
     files: EnteFile[];
@@ -35,6 +37,7 @@ interface PublicLinkDetailsProps {
 }
 
 export const PublicLinkDetails = ({
+    header,
     collection,
     coverFile,
     files,
@@ -76,9 +79,12 @@ export const PublicLinkDetails = ({
                 flex: 1,
                 minHeight: 0,
                 overflow: "auto",
-                p: { xs: "24px", md: "36px" },
+                px: "24px",
+                pt: { xs: "12px", md: 0 },
+                pb: { xs: "24px", md: "36px" },
             }}
         >
+            {header}
             <Stack sx={{ width: "100%", maxWidth: 364, gap: "14px" }}>
                 <Box sx={{ position: "relative" }}>
                     <Box role="img" aria-label={collection.name}>
