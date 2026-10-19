@@ -17,7 +17,6 @@ import {
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 
-/** Shared confirmation and sync-validated deletion for empty album listings. */
 export const useDeleteEmptyAlbums = (
     collectionSummaries: CollectionSummary[],
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>,
