@@ -352,7 +352,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     lineHeight: "26px",
                 }}
             >
-                {t("search_no_matches")}
+                {t("no_results")}
             </Typography>
         </Stack>
     );
