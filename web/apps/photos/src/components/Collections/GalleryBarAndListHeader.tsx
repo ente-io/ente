@@ -151,16 +151,26 @@ export const GalleryBarAndListHeader: React.FC<
         collectionShareVisibilityProps.onClose();
     }, [collectionShareVisibilityProps]);
 
-    const [collectionsSortBy, setCollectionsSortBy] =
+    const [albumSortBy, setAlbumSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
+    const [linksSortBy, setLinksSortBy] =
+        useState<CollectionsSortBy>("updation-time-desc");
+    const collectionsSortBy = mode == "links" ? linksSortBy : albumSortBy;
+    const setCollectionsSortBy =
+        mode == "links" ? setLinksSortBy : setAlbumSortBy;
+    useEffect(() => {
+        if (mode == "links") setLinksSortBy("updation-time-desc");
+    }, [mode]);
 
     const sortedCollectionSummaries = useMemo(
         () =>
             sortCollectionSummaries(
                 [...toShowCollectionSummaries.values()],
                 collectionsSortBy,
-            ).sort((a, b) => b.sortPriority - a.sortPriority),
-        [collectionsSortBy, toShowCollectionSummaries],
+            ).sort((a, b) =>
+                mode == "links" ? 0 : b.sortPriority - a.sortPriority,
+            ),
+        [collectionsSortBy, toShowCollectionSummaries, mode],
     );
     const eligibleCollectionSummaries = useMemo(
         () =>
@@ -170,10 +180,12 @@ export const GalleryBarAndListHeader: React.FC<
                     cs.id !== PseudoCollectionID.hiddenItems &&
                     cs.id !== PseudoCollectionID.archiveItems &&
                     cs.id !== PseudoCollectionID.trash &&
-                    (mode == "albums"
-                        ? !cs.attributes.has("system") ||
-                          (cs.id > 0 && cs.type == "uncategorized")
-                        : !cs.attributes.has("hideFromCollectionBar")),
+                    (mode == "links"
+                        ? true
+                        : mode == "albums"
+                          ? !cs.attributes.has("system") ||
+                            (cs.id > 0 && cs.type == "uncategorized")
+                          : !cs.attributes.has("hideFromCollectionBar")),
             ),
         [sortedCollectionSummaries, uncategorizedCollectionSummaryID, mode],
     );
@@ -243,7 +255,7 @@ export const GalleryBarAndListHeader: React.FC<
     );
 
     useEffect(() => {
-        if (shouldHide) return;
+        if (shouldHide || mode == "links") return;
 
         const collectionSummary = toShowCollectionSummaries.get(
             activeCollectionID!,

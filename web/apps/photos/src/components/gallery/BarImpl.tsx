@@ -171,6 +171,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             case "albums":
             case "hidden-albums":
             case "archive-albums":
+            case "links":
                 i = collectionSummaries.findIndex(
                     ({ id }) => id == activeCollectionID,
                 );
@@ -199,11 +200,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         () =>
             mode == "albums" ||
             mode == "hidden-albums" ||
-            mode == "archive-albums"
+            mode == "archive-albums" ||
+            mode == "links"
                 ? {
                       type: "collections",
                       collectionSummaries: collectionSummaries,
                       indented: mode == "albums",
+                      isLink: mode == "links",
                       activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
                   }
@@ -227,11 +230,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const title =
         mode == "people"
             ? t("people")
-            : mode == "hidden-albums"
-              ? t("hidden_albums")
-              : mode == "archive-albums"
-                ? t("section_archive")
-                : t("albums");
+            : mode == "links"
+              ? t("links")
+              : mode == "hidden-albums"
+                ? t("hidden_albums")
+                : mode == "archive-albums"
+                  ? t("section_archive")
+                  : t("albums");
 
     const albumShortcuts = [
         {
@@ -437,13 +442,17 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     placeholder={t(
                         mode == "people"
                             ? "people_search_hint"
-                            : "search_in_albums",
+                            : mode == "links"
+                              ? "search_links"
+                              : "search_in_albums",
                     )}
                     inputProps={{
                         "aria-label": t(
                             mode == "people"
                                 ? "people_search_hint"
-                                : "search_in_albums",
+                                : mode == "links"
+                                  ? "search_links"
+                                  : "search_in_albums",
                         ),
                     }}
                     value={searchQuery}
@@ -538,7 +547,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             ) : (
                 items
             )}
-            {mode != "people" && (
+            {mode != "people" && mode != "links" && (
                 <Stack sx={{ flexShrink: 0, gap: "2px", pb: "8px" }}>
                     <Divider
                         sx={{
@@ -624,6 +633,7 @@ type ItemData =
           type: "collections";
           collectionSummaries: CollectionSummary[];
           indented: boolean;
+          isLink: boolean;
           activeCollectionID: number;
           onSelectCollectionID: (id: number) => void;
       }
@@ -679,6 +689,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
                         activeCollectionID,
                         onSelectCollectionID,
                     }}
+                    isLink={data.isLink}
                     indented={
                         data.indented &&
                         !collectionSummary.attributes.has("system")
@@ -707,6 +718,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
 interface CollectionBarCardProps {
     collectionSummary: CollectionSummary;
     indented: boolean;
+    isLink: boolean;
     activeCollectionID: number;
     onSelectCollectionID: (collectionID: number) => void;
 }
@@ -714,6 +726,7 @@ interface CollectionBarCardProps {
 const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
     collectionSummary,
     indented,
+    isLink,
     activeCollectionID,
     onSelectCollectionID,
 }: CollectionBarCardProps) => (
@@ -737,7 +750,9 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
             />
         </Box>
         <CardText>{collectionSummary.name}</CardText>
-        <CollectionBarCardIcon attributes={collectionSummary.attributes} />
+        {!isLink && (
+            <CollectionBarCardIcon attributes={collectionSummary.attributes} />
+        )}
     </BarCard>
 );
 

@@ -65,6 +65,7 @@ import {
     type AlbumFilter,
 } from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
+import { visibleQuickLinks } from "@/utils/quick-links";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Link, Typography } from "@mui/material";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
@@ -78,7 +79,7 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
-import { CenteredRow } from "ente-base/components/containers";
+import { CenteredFill, CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
@@ -447,17 +448,46 @@ const Page: React.FC = () => {
             ? ItemVisibility.hidden
             : ItemVisibility.visible;
     const activeCollectionID =
-        state.view?.type == "people" || state.view?.type == "album-overview"
+        state.view?.type == "people" ||
+        state.view?.type == "album-overview" ||
+        state.view?.type == "links"
             ? undefined
             : state.view?.activeCollectionSummaryID;
     const activeCollection =
-        state.view?.type == "people" || state.view?.type == "album-overview"
+        state.view?.type == "people" ||
+        state.view?.type == "album-overview" ||
+        state.view?.type == "links"
             ? undefined
             : state.view?.activeCollection;
     const activeCollectionSummary =
-        state.view?.type == "people" || state.view?.type == "album-overview"
+        state.view?.type == "people" ||
+        state.view?.type == "album-overview" ||
+        state.view?.type == "links"
             ? undefined
             : state.view?.activeCollectionSummary;
+    const selectedLinkID =
+        state.view?.type == "links" ? state.view.selectedLinkID : undefined;
+    const quickLinks = useMemo(
+        () =>
+            visibleQuickLinks(
+                state.collections,
+                user?.id ?? 0,
+                state.hiddenCollectionIDs,
+            ),
+        [state.collections, user?.id, state.hiddenCollectionIDs],
+    );
+    const linkSummaries = useMemo(
+        () =>
+            new Map(
+                quickLinks.flatMap((collection) => {
+                    const summary = normalCollectionSummaries.get(
+                        collection.id,
+                    );
+                    return summary ? [[collection.id, summary] as const] : [];
+                }),
+            ),
+        [quickLinks, normalCollectionSummaries],
+    );
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
@@ -563,11 +593,13 @@ const Page: React.FC = () => {
         selectedFilesInView.length === filteredFiles.length;
 
     const barCollectionSummaries =
-        barMode == "hidden-albums"
-            ? state.hiddenCollectionSummaries
-            : barMode == "archive-albums"
-              ? state.archivedCollectionSummaries
-              : state.normalCollectionSummaries;
+        barMode == "links"
+            ? linkSummaries
+            : barMode == "hidden-albums"
+              ? state.hiddenCollectionSummaries
+              : barMode == "archive-albums"
+                ? state.archivedCollectionSummaries
+                : state.normalCollectionSummaries;
 
     useEffect(() => {
         setAlbumSearchQuery("");
@@ -1574,6 +1606,12 @@ const Page: React.FC = () => {
     };
 
     const handleChangeBarMode = (mode: GalleryBarMode) => {
+        if (mode == "links") {
+            setCleanupView(undefined);
+            clearSelection();
+            dispatch({ type: "showLinks" });
+            return true;
+        }
         if (mode == "people") {
             return handleShowPeople();
         }
@@ -2106,7 +2144,9 @@ const Page: React.FC = () => {
                               // TODO: These are incorrect assertions, the types of the
                               // component need to be updated.
                               activeCollection: activeCollection!,
-                              activeCollectionID: activeCollectionID!,
+                              activeCollectionID: (barMode == "links"
+                                  ? selectedLinkID
+                                  : activeCollectionID)!,
                               activePerson,
                               albumFilter,
                               albumSearchQuery,
@@ -2142,7 +2182,13 @@ const Page: React.FC = () => {
                                       : undefined) ?? [],
                               setBlockingLoad,
                               setActiveCollectionID:
-                                  handleShowCollectionSummaryWithID,
+                                  barMode == "links"
+                                      ? (collectionID) =>
+                                            dispatch({
+                                                type: "selectLink",
+                                                collectionID,
+                                            })
+                                      : handleShowCollectionSummaryWithID,
                               hasActiveFileSelection,
                               onRemotePull: remotePull,
                               onSelectPerson: handleSelectPerson,
@@ -2197,6 +2243,12 @@ const Page: React.FC = () => {
                     <DuplicatesView onRemoteFilesPull={remoteFilesPull} />
                 ) : cleanupView === "large-files" ? (
                     <LargeFilesView onRemoteFilesPull={remoteFilesPull} />
+                ) : !isInSearchMode && barMode == "links" ? (
+                    <CenteredFill>
+                        <Typography variant="h3">
+                            {t("nothing_here")}
+                        </Typography>
+                    </CenteredFill>
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
                   !state.collectionFiles.length &&
