@@ -82,7 +82,6 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     ) => Promise<boolean>;
     activeCollectionID: number | undefined;
     onSelectCollectionID: (collectionID: number) => void;
-    onShowAllAlbums: () => void;
     onCreateAlbum: () => void;
     onShowAllPeople: () => void;
     collectionsSortBy: CollectionsSortBy;
@@ -107,7 +106,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     onShowCollectionSummary,
     activeCollectionID,
     onSelectCollectionID,
-    onShowAllAlbums,
     onCreateAlbum,
     onShowAllPeople,
     collectionsSortBy,
@@ -376,23 +374,20 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                         onChangeSortBy={onChangePeopleSortBy}
                     />
                 )}
-                <Tooltip
-                    title={mode == "people" ? t("people") : t("all_albums")}
-                >
-                    <IconButton
-                        aria-label={
-                            mode == "people" ? t("people") : t("all_albums")
-                        }
-                        aria-haspopup="dialog"
-                        onClick={() => {
-                            mobileDrawerProps.onClose();
-                            if (mode == "people") onShowAllPeople();
-                            else onShowAllAlbums();
-                        }}
-                    >
-                        <ExpandMoreIcon sx={{ fontSize: 20 }} />
-                    </IconButton>
-                </Tooltip>
+                {mode == "people" && (
+                    <Tooltip title={t("people")}>
+                        <IconButton
+                            aria-label={t("people")}
+                            aria-haspopup="dialog"
+                            onClick={() => {
+                                mobileDrawerProps.onClose();
+                                onShowAllPeople();
+                            }}
+                        >
+                            <ExpandMoreIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                    </Tooltip>
+                )}
                 {(mode == "albums" || mode == "hidden-albums") && (
                     <Tooltip title={t("new_album")}>
                         <IconButton

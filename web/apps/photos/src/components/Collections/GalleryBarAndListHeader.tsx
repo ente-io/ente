@@ -1,5 +1,4 @@
 // TODO: Audit this file
-import { AllAlbums } from "@/components/Collections/AllAlbums";
 import { AllPeople } from "@/components/Collections/AllPeople";
 import {
     CollectionShare,
@@ -54,7 +53,6 @@ export type GalleryBarAndListHeaderProps = Omit<
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
     | "onCreateAlbum"
-    | "onShowAllAlbums"
     | "onShowAllPeople"
 > & {
     onAlbumSummariesChange: (
@@ -69,7 +67,6 @@ export type GalleryBarAndListHeaderProps = Omit<
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     hasActiveFileSelection: boolean;
     saveGroups: SaveGroup[];
-    canCreateAlbum: boolean;
 } & Pick<
         CollectionHeaderProps,
         | "onRemotePull"
@@ -109,7 +106,6 @@ export const GalleryBarAndListHeader: React.FC<
     onSelectPerson,
     allPeople,
     saveGroups,
-    canCreateAlbum,
     hasActiveFileSelection,
     activePerson,
     emailByUserID,
@@ -123,8 +119,6 @@ export const GalleryBarAndListHeader: React.FC<
     collapsed,
     mobileDrawerProps,
 }) => {
-    const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
-        useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
     const [createInHiddenSection, setCreateInHiddenSection] = useState(false);
@@ -179,8 +173,7 @@ export const GalleryBarAndListHeader: React.FC<
                     (mode == "albums"
                         ? !cs.attributes.has("system") ||
                           (cs.id > 0 && cs.type == "uncategorized")
-                        : !cs.attributes.has("hideFromCollectionBar") &&
-                          !cs.attributes.has("quickLink")),
+                        : !cs.attributes.has("hideFromCollectionBar")),
             ),
         [sortedCollectionSummaries, uncategorizedCollectionSummaryID, mode],
     );
@@ -354,30 +347,14 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onChangePeopleSortBy={onChangePeopleSortBy}
                 onCreateAlbum={openAlbumCreation}
-                onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
                 collectionSummaries={visibleCollectionSummaries}
                 visibleAlbumFilters={visibleAlbumFilters}
             />
 
-            <AllAlbums
-                {...allAlbumsVisibilityProps}
-                collectionSummaries={sortedCollectionSummaries.filter(
-                    (cs) => !cs.attributes.has("system"),
-                )}
-                onSelectCollectionID={selectCollection}
-                onChangeCollectionsSortBy={setCollectionsSortBy}
-                collectionsSortBy={collectionsSortBy}
-                isInHiddenSection={mode == "hidden-albums"}
-                isInArchiveSection={mode == "archive-albums"}
-                canCreateAlbum={canCreateAlbum}
-                onCreateAlbum={openAlbumCreation}
-                onRemotePull={onRemotePull}
-            />
             <CreateAlbumDialog
                 {...albumNameInputVisibilityProps}
                 isHidden={createInHiddenSection}
-                onSubmit={allAlbumsVisibilityProps.onClose}
                 onRemotePull={onRemotePull}
                 onSelectCollectionID={selectCollection}
             />
