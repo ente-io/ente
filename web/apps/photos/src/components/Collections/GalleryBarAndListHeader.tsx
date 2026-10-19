@@ -151,16 +151,8 @@ export const GalleryBarAndListHeader: React.FC<
         collectionShareVisibilityProps.onClose();
     }, [collectionShareVisibilityProps]);
 
-    const [albumSortBy, setAlbumSortBy] =
+    const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
-    const [linksSortBy, setLinksSortBy] =
-        useState<CollectionsSortBy>("updation-time-desc");
-    const collectionsSortBy = mode == "links" ? linksSortBy : albumSortBy;
-    const setCollectionsSortBy =
-        mode == "links" ? setLinksSortBy : setAlbumSortBy;
-    useEffect(() => {
-        if (mode == "links") setLinksSortBy("updation-time-desc");
-    }, [mode]);
 
     const sortedCollectionSummaries = useMemo(
         () =>
