@@ -2230,6 +2230,7 @@ const Page: React.FC = () => {
                   !state.view.activePerson ? (
                     <PeopleOverview
                         people={state.view.visiblePeople}
+                        allPeople={state.view.people}
                         peopleSortBy={peopleSortBy}
                         onSelectPerson={handleSelectPerson}
                     />
