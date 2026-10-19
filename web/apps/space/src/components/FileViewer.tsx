@@ -315,13 +315,14 @@ const viewerSwipeStartsOnInteractiveTarget = (target: EventTarget | null) =>
         ),
     );
 
-export const SpaceViewerPostBackdrop: React.FC<{ exiting?: boolean }> = ({
-    exiting = false,
-}) => (
+export const SpaceViewerPostBackdrop: React.FC<{
+    exiting?: boolean;
+    backgroundColor?: string;
+}> = ({ exiting = false, backgroundColor = viewerBackground }) => (
     <Box
         aria-hidden
         sx={{
-            bgcolor: viewerBackground,
+            bgcolor: backgroundColor,
             bottom: "-100vh",
             left: 0,
             opacity: exiting ? 0 : 1,
@@ -1872,13 +1873,17 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 },
             }}
         >
-            {isSpaceIOS() && isReplyFocused && (
+            {isSpaceIOS() && (isReplyFocused || commentsOpen) && (
                 <Portal
                     container={() =>
                         viewerRootRef.current?.parentElement ?? null
                     }
                 >
-                    <SpaceViewerPostBackdrop />
+                    <SpaceViewerPostBackdrop
+                        backgroundColor={
+                            commentsOpen ? spaceDialogBackground : undefined
+                        }
+                    />
                 </Portal>
             )}
             {!isDraftPost && (

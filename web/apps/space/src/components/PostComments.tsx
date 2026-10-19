@@ -130,8 +130,8 @@ const CommentIdentity: React.FC<{
                 component="span"
                 sx={{
                     display: "block",
-                    width: inline ? 28 : 22,
-                    height: inline ? 28 : 22,
+                    width: 32,
+                    height: 32,
                     flexShrink: 0,
                     ...(inline
                         ? { position: "absolute", left: 0, top: 0 }
@@ -208,7 +208,10 @@ const CommentRow: React.FC<{
                     return;
                 event.preventDefault();
                 event.stopPropagation();
-                openActions(event.currentTarget, "contextmenu");
+                if (didOpen.current) return;
+                const source = start.current ? "touch" : "contextmenu";
+                didOpen.current = source == "touch";
+                openActions(event.currentTarget, source);
             }}
             onKeyDown={(event) => {
                 if (!canOpenActions || isInteractiveTarget(event.target))
@@ -303,8 +306,8 @@ const CommentRow: React.FC<{
                     gridTemplateColumns:
                         "minmax(0, 1fr) minmax(80px, max-content)",
                     columnGap: 1.5,
-                    pl: 4.5,
-                    ml: comment.parentId ? 4.5 : 0,
+                    pl: 5,
+                    ml: comment.parentId ? 5 : 0,
                 }}
             >
                 <Box
@@ -360,7 +363,7 @@ const CommentRow: React.FC<{
                         overflowWrap: "anywhere",
                         fontSize: 13,
                         fontWeight: 400,
-                        lineHeight: "20px",
+                        lineHeight: "18px",
                         color: spaceText,
                     }}
                 >
@@ -482,6 +485,7 @@ export const PostComments: React.FC<{
         React.useState<string>();
     const handledTarget = React.useRef<string>(undefined);
     const submittedCommentId = React.useRef<string>(undefined);
+    const dialogContainer = React.useRef<HTMLDivElement>(null);
     const list = React.useRef<HTMLDivElement>(null);
     const acknowledged = React.useRef(new Set<string>());
     const [action, setAction] = React.useState<
@@ -494,6 +498,27 @@ export const PostComments: React.FC<{
         | { type: "react" | "reactions"; commentId: string }
     >();
     const ignoreMouseAwayUntil = React.useRef(0);
+    const menuPointerTarget = React.useRef<Element | null>(null);
+    const actionAnchor = React.useMemo(() => {
+        if (action?.type != "menu") return undefined;
+        return {
+            contextElement: action.anchor,
+            getBoundingClientRect: () => {
+                const rect = action.anchor.getBoundingClientRect();
+                const bounds = list.current!.getBoundingClientRect();
+                const top = Math.max(rect.top, bounds.top);
+                return DOMRect.fromRect({
+                    x: rect.left,
+                    y: top,
+                    width: rect.width,
+                    height: Math.max(
+                        0,
+                        Math.min(rect.bottom, bounds.bottom) - top,
+                    ),
+                });
+            },
+        };
+    }, [action]);
     const dragStart = React.useRef<number | undefined>(undefined);
     const [isDragging, setIsDragging] = React.useState(false);
     const [dragOffset, setDragOffset] = React.useState(0);
@@ -736,6 +761,7 @@ export const PostComments: React.FC<{
             highlighted={highlightedCommentId == comment.commentId}
             disabled={busy}
             onOpenActions={(anchor, source) => {
+                menuPointerTarget.current = null;
                 ignoreMouseAwayUntil.current =
                     source == "touch" ? Date.now() + 900 : 0;
                 setAction({
@@ -770,6 +796,7 @@ export const PostComments: React.FC<{
                 },
             }}
             slotProps={{
+                container: { ref: dialogContainer },
                 paper: {
                     style: {
                         translate: `0 ${dragOffset}px`,
@@ -951,7 +978,7 @@ export const PostComments: React.FC<{
                                         alignItems: "center",
                                         gap: 1.5,
                                         px: 2,
-                                        py: 1,
+                                        py: 1.5,
                                         flexShrink: 0,
                                     }}
                                 >
@@ -1003,7 +1030,7 @@ export const PostComments: React.FC<{
                                                 Remove
                                             </Box>
                                         )}
-                                        <Box sx={{ fontSize: 18 }}>
+                                        <Box sx={{ fontSize: 22 }}>
                                             {reaction.emoji}
                                         </Box>
                                     </Box>
@@ -1227,7 +1254,7 @@ export const PostComments: React.FC<{
                 />
             )}
             <Popper
-                anchorEl={action?.type == "menu" ? action.anchor : undefined}
+                anchorEl={actionAnchor}
                 open={
                     open &&
                     action?.type == "menu" &&
@@ -1235,22 +1262,22 @@ export const PostComments: React.FC<{
                     Boolean(selectedComment)
                 }
                 placement="bottom-start"
-                disablePortal
+                container={() => dialogContainer.current}
                 transition
                 modifiers={[
                     { name: "offset", options: { offset: [0, 8] } },
                     {
                         name: "preventOverflow",
                         options: {
-                            altAxis: true,
-                            boundary: list.current,
+                            altAxis: false,
+                            boundary: dialogContainer.current,
                             padding: 8,
                         },
                     },
                     {
                         name: "flip",
                         options: {
-                            boundary: list.current,
+                            boundary: dialogContainer.current,
                             padding: 8,
                             fallbackPlacements: ["top-start"],
                             flipVariations: false,
@@ -1297,6 +1324,34 @@ export const PostComments: React.FC<{
                         >
                             <Box
                                 inert={!TransitionProps?.in || busy}
+                                onPointerDownCapture={(event) => {
+                                    menuPointerTarget.current =
+                                        event.target instanceof Element
+                                            ? event.target.closest(
+                                                  "button, [role=menuitem]",
+                                              )
+                                            : null;
+                                }}
+                                onPointerCancel={() => {
+                                    menuPointerTarget.current = null;
+                                }}
+                                onClickCapture={(event) => {
+                                    const target =
+                                        event.target instanceof Element
+                                            ? event.target.closest(
+                                                  "button, [role=menuitem]",
+                                              )
+                                            : null;
+                                    if (
+                                        event.detail &&
+                                        (!target ||
+                                            target != menuPointerTarget.current)
+                                    ) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    }
+                                    menuPointerTarget.current = null;
+                                }}
                                 onKeyDown={(
                                     event: React.KeyboardEvent<HTMLElement>,
                                 ) => {
@@ -1315,9 +1370,11 @@ export const PostComments: React.FC<{
                                     flexDirection: "column",
                                     gap: "8px",
                                     outline: 0,
+                                    position: "relative",
                                     "& > [role=group], & > [role=menu]": {
                                         bgcolor: "#383838",
                                         boxShadow: "none",
+                                        position: "relative",
                                     },
                                     "& > [role=group] > button": {
                                         "&:hover, &[aria-pressed=true]": {
@@ -1327,6 +1384,21 @@ export const PostComments: React.FC<{
                                     },
                                 }}
                             >
+                                <Box
+                                    component="button"
+                                    type="button"
+                                    aria-label="Close comment actions"
+                                    tabIndex={-1}
+                                    onClick={closeActions}
+                                    sx={{
+                                        position: "absolute",
+                                        inset: 0,
+                                        bgcolor: "transparent",
+                                        border: 0,
+                                        p: 0,
+                                        cursor: "pointer",
+                                    }}
+                                />
                                 {selectedComment?.text !== undefined && (
                                     <MessageQuickReactions
                                         label="React to comment"
