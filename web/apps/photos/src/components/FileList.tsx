@@ -48,7 +48,6 @@ import {
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import { batch } from "ente-utils/array";
-import { t } from "i18next";
 import React, {
     memo,
     useCallback,
@@ -290,27 +289,15 @@ export const FileList: React.FC<FileListProps> = ({
         }
 
         if (!annotatedFiles.length) {
-            const isAlbumEmptyState =
-                mode !== "people" && modePlus !== "search";
             items.push({
-                height: isAlbumEmptyState
-                    ? Math.max(
-                          340,
-                          height -
-                              (header?.height ?? 0) -
-                              (footer?.height ?? 0),
-                      )
-                    : height - 48,
+                height: Math.max(
+                    340,
+                    height - (header?.height ?? 0) - (footer?.height ?? 0),
+                ),
                 type: "span",
                 component: (
                     <NoFilesListItem>
-                        {isAlbumEmptyState ? (
-                            <AlbumEmptyState />
-                        ) : (
-                            <Typography sx={{ color: "text.faint" }}>
-                                {t("nothing_here")}
-                            </Typography>
-                        )}
+                        <AlbumEmptyState />
                     </NoFilesListItem>
                 ),
             });
@@ -340,8 +327,6 @@ export const FileList: React.FC<FileListProps> = ({
         annotatedFiles,
         disableGrouping,
         layoutParams,
-        mode,
-        modePlus,
     ]);
 
     useEffect(() => {
