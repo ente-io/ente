@@ -3,6 +3,7 @@ import {
     FileContextMenu,
     type ContextMenuPosition,
 } from "@/components/FileContextMenu";
+import { AlbumEmptyState } from "@/components/gallery/AlbumEmptyState";
 import type { GalleryBarMode } from "@/components/gallery/reducer";
 import {
     selectedFavoriteCount as countSelectedFavorites,
@@ -289,14 +290,27 @@ export const FileList: React.FC<FileListProps> = ({
         }
 
         if (!annotatedFiles.length) {
+            const isAlbumEmptyState =
+                mode !== "people" && modePlus !== "search";
             items.push({
-                height: height - 48,
+                height: isAlbumEmptyState
+                    ? Math.max(
+                          340,
+                          height -
+                              (header?.height ?? 0) -
+                              (footer?.height ?? 0),
+                      )
+                    : height - 48,
                 type: "span",
                 component: (
                     <NoFilesListItem>
-                        <Typography sx={{ color: "text.faint" }}>
-                            {t("nothing_here")}
-                        </Typography>
+                        {isAlbumEmptyState ? (
+                            <AlbumEmptyState />
+                        ) : (
+                            <Typography sx={{ color: "text.faint" }}>
+                                {t("nothing_here")}
+                            </Typography>
+                        )}
                     </NoFilesListItem>
                 ),
             });
@@ -326,6 +340,8 @@ export const FileList: React.FC<FileListProps> = ({
         annotatedFiles,
         disableGrouping,
         layoutParams,
+        mode,
+        modePlus,
     ]);
 
     useEffect(() => {
