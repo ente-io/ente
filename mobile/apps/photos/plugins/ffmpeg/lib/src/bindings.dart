@@ -66,9 +66,7 @@ final class Bindings {
 
   static DynamicLibrary _openLibrary() {
     if (Platform.isAndroid) return DynamicLibrary.open('libffmpeg_runtime.so');
-    if (Platform.isIOS) {
-      return DynamicLibrary.open('FFmpegRuntime.framework/FFmpegRuntime');
-    }
+    if (Platform.isIOS) return DynamicLibrary.process();
     throw UnsupportedError('FFmpeg supports Android and iOS.');
   }
 }
