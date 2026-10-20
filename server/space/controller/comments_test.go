@@ -61,12 +61,12 @@ func TestDiscussionCountsOnPostsAndFeed(t *testing.T) {
 	assertCount(0)
 }
 
-func TestDiscussionNotifiesPostOwnerAndPreviousParticipants(t *testing.T) {
+func TestDiscussionNotifiesPostOwnerParticipantsAndLikers(t *testing.T) {
 	_, repos, ctx := setupPostsControllerTest(t)
 	notifier := newRecordingSpaceActivityNotifier()
 	comments := NewModule(repos, nil, notifier, nil).Comments
 	spaces := make(map[string]*repo.SpaceRecord)
-	for _, name := range []string{"owner", "alice", "bob", "observer"} {
+	for _, name := range []string{"owner", "alice", "bob", "observer", "liker"} {
 		userID := insertSpaceControllerUser(t, repos, name+"-discussion@example.com", name+"-public")
 		space, err := testCreateSpace(ctx, repos, userID, name+"_discussion", "root", name+"-public", "secret", "nonce", "profile")
 		require.NoError(t, err)
@@ -80,6 +80,10 @@ func TestDiscussionNotifiesPostOwnerAndPreviousParticipants(t *testing.T) {
 	require.NoError(t, err)
 	otherPostID, err := testCreatePost(ctx, repos, owner.OwnerID, owner.SpaceID, "other-post-key", nil, 1, nil)
 	require.NoError(t, err)
+	liker := spaces["liker"]
+	require.NoError(t, testAddFriend(ctx, repos, liker.OwnerID, liker.SpaceID, spaces["alice"].SpaceID, "alice-share", 1, "liker-share", 1))
+	_, err = repos.Posts.SetLikeWithCreated(ctx, otherPostID, liker.SpaceID, true)
+	require.NoError(t, err)
 	for _, test := range []struct {
 		id         string
 		actor      string
@@ -88,19 +92,37 @@ func TestDiscussionNotifiesPostOwnerAndPreviousParticipants(t *testing.T) {
 		recipients map[string]string
 	}{
 		{"other-post", "observer", otherPostID, "", map[string]string{"owner": "comment"}},
-		{"first", "alice", postID, "", map[string]string{"owner": "comment"}},
-		{"repeat", "alice", postID, "", map[string]string{"owner": "comment"}},
+		{"before-like", "alice", postID, "", map[string]string{"owner": "comment"}},
+		{"first", "alice", postID, "", map[string]string{"owner": "comment", "liker": "comment"}},
+		{"repeat", "alice", postID, "", map[string]string{"owner": "comment", "liker": "comment"}},
 		{"second", "bob", postID, "first", map[string]string{"owner": "comment", "alice": "comment_reply"}},
-		{"new-comment", "alice", postID, "", map[string]string{"owner": "comment"}},
-		{"owner-reply", "owner", postID, "first", map[string]string{"alice": "comment_reply", "bob": "comment"}},
-		{"reply", "alice", postID, "second", map[string]string{"owner": "comment", "bob": "comment_reply"}},
+		{"new-comment", "alice", postID, "", map[string]string{"owner": "comment", "liker": "comment"}},
+		{"owner-reply", "owner", postID, "first", map[string]string{"alice": "comment_reply", "bob": "comment", "liker": "comment"}},
+		{"reply", "alice", postID, "second", map[string]string{"owner": "comment", "bob": "comment_reply", "liker": "comment"}},
 		{"reply-to-owner", "bob", postID, "owner-reply", map[string]string{"owner": "comment_reply"}},
+		{"after-unlike", "alice", postID, "", map[string]string{"owner": "comment"}},
+		{"after-relike", "alice", postID, "", map[string]string{"owner": "comment", "liker": "comment"}},
+		{"liker-comment", "liker", postID, "", map[string]string{"owner": "comment", "alice": "comment"}},
+		{"reply-to-liker", "alice", postID, "liker-comment", map[string]string{"owner": "comment", "liker": "comment_reply"}},
+		{"after-unlike-participant", "alice", postID, "", map[string]string{"owner": "comment", "liker": "comment"}},
+		{"after-liker-removal", "alice", postID, "", map[string]string{"owner": "comment"}},
 		{"after-friending", "alice", postID, "", map[string]string{"owner": "comment", "bob": "comment"}},
 		{"after-unfriending", "alice", postID, "", map[string]string{"owner": "comment"}},
 		{"after-removal", "owner", postID, "", map[string]string{"bob": "comment"}},
 		{"after-deletion", "owner", postID, "", map[string]string{}},
 	} {
 		t.Run(test.id, func(t *testing.T) {
+			switch test.id {
+			case "first", "after-relike", "after-liker-removal":
+				_, err := repos.Posts.SetLikeWithCreated(ctx, postID, liker.SpaceID, true)
+				require.NoError(t, err)
+			case "after-unlike", "after-unlike-participant":
+				_, err := repos.Posts.SetLikeWithCreated(ctx, postID, liker.SpaceID, false)
+				require.NoError(t, err)
+			}
+			if test.id == "after-liker-removal" {
+				require.NoError(t, repos.Friends.DeleteFriendship(ctx, owner.SpaceID, liker.SpaceID))
+			}
 			if test.id == "after-friending" {
 				require.NoError(t, testAddFriend(ctx, repos, spaces["alice"].OwnerID, spaces["alice"].SpaceID, spaces["bob"].SpaceID, "bob-share", 1, "alice-share", 1))
 			}
@@ -147,6 +169,13 @@ func TestDiscussionNotifiesPostOwnerAndPreviousParticipants(t *testing.T) {
 						require.Equal(t, owner.SpaceSlug, item.PostOwnerSlug)
 						require.Equal(t, test.postID, item.PostID.Int64)
 						kinds = append(kinds, item.Kind)
+						if name == "liker" && test.id == "first" {
+							require.Len(t, item.NotificationIDs, 1)
+						}
+						if name == "liker" && test.id == "owner-reply" {
+							require.Len(t, item.NotificationIDs, 4)
+							require.EqualValues(t, 2, item.ActorCount)
+						}
 					}
 				}
 				if kind, ok := test.recipients[name]; ok {

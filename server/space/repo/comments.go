@@ -217,6 +217,8 @@ func (r *CommentsRepository) Create(ctx context.Context, viewer string, postID i
             SELECT $1::text AS space_id
             UNION
             SELECT c.author_space_id FROM space_comments c WHERE c.post_id = $2 AND `+commentVisibleSQL+`
+            UNION
+            SELECT l.actor_space_id FROM space_post_likes l WHERE l.post_id = $2
         ) participant
         JOIN spaces s ON s.space_id = participant.space_id
         JOIN users u ON u.user_id = s.owner_id AND u.encrypted_email IS NOT NULL
