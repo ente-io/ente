@@ -1,1 +1,1 @@
-- Refreshed the Simple English Wikipedia, Wikibooks, and English Wikipedia knowledge packs with October 2026 data.
+- Refreshed Ensu Packs for October 2026
