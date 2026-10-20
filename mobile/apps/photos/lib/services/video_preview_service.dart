@@ -1423,6 +1423,16 @@ class VideoPreviewService {
         return;
       }
 
+      try {
+        isManual =
+            isManual || (await uploadLocksDB.getStreamQueue()).isNotEmpty;
+      } catch (error, stackTrace) {
+        _logger.warning(
+          "Failed to read manual preview queue",
+          error,
+          stackTrace,
+        );
+      }
       final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;
 

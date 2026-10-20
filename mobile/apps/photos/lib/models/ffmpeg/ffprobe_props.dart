@@ -182,16 +182,20 @@ class FFProbeProps {
           result.fps = _formatFPS(stream[key]);
           parsedData[key] = result.fps;
         } else if (key == FFProbeKeys.width || key == FFProbeKeys.codedWidth) {
-          final width =
-              stream[FFProbeKeys.width] ?? stream[FFProbeKeys.codedWidth];
+          var width = stream[FFProbeKeys.width];
+          if (width == null || width == 0) {
+            width = stream[FFProbeKeys.codedWidth];
+          }
           if (width != null && width != 0) {
             result._width = width.toString();
             parsedData[FFProbeKeys.width] = result._width;
           }
         } else if (key == FFProbeKeys.height ||
             key == FFProbeKeys.codedHeight) {
-          final height =
-              stream[FFProbeKeys.height] ?? stream[FFProbeKeys.codedHeight];
+          var height = stream[FFProbeKeys.height];
+          if (height == null || height == 0) {
+            height = stream[FFProbeKeys.codedHeight];
+          }
           if (height != null && height != 0) {
             result._height = height.toString();
             parsedData[FFProbeKeys.height] = result._height;
