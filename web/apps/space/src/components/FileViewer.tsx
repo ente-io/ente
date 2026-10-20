@@ -394,10 +394,11 @@ const viewerCaptionTextSx = {
 
 const SpaceViewerPhotoOverlay: React.FC<{
     caption: string;
+    isCaptionHidden: boolean;
     onOpenCaption: () => void;
     photoIndex: number;
     photoCount: number;
-}> = ({ caption, onOpenCaption, photoIndex, photoCount }) => {
+}> = ({ caption, isCaptionHidden, onOpenCaption, photoIndex, photoCount }) => {
     const [isCaptionTruncated, setIsCaptionTruncated] = React.useState(false);
 
     return (
@@ -442,6 +443,7 @@ const SpaceViewerPhotoOverlay: React.FC<{
                         overflowWrap: "break-word",
                         p: 0,
                         pointerEvents: isCaptionTruncated ? "auto" : "none",
+                        visibility: isCaptionHidden ? "hidden" : "visible",
                         width: "100%",
                         "&:focus-visible": {
                             outline: `2px solid ${green}`,
@@ -593,6 +595,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     );
     const [isCaptionEditing, setIsCaptionEditing] = React.useState(false);
     const [isCaptionDialogOpen, setIsCaptionDialogOpen] = React.useState(false);
+    const [hasCaptionDialogExited, setHasCaptionDialogExited] =
+        React.useState(true);
     const [captionUpdateActionPhase, setCaptionUpdateActionPhase] =
         React.useState<SpaceActionPhase | null>(null);
     const [hasCaptionUpdateError, setHasCaptionUpdateError] =
@@ -2734,6 +2738,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                             <SpaceViewerPhotoOverlay
                                 key={activePostKey}
                                 caption={displayCaption}
+                                isCaptionHidden={
+                                    isCaptionDialogOpen ||
+                                    !hasCaptionDialogExited
+                                }
                                 onOpenCaption={() =>
                                     setIsCaptionDialogOpen(true)
                                 }
@@ -2808,7 +2816,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             >
                 <CaptionTransition
                     in={isCaptionDialogOpen}
+                    onEnter={() => setHasCaptionDialogExited(false)}
                     onEntered={(node) => node.focus({ preventScroll: true })}
+                    onExited={() => setHasCaptionDialogExited(true)}
                 >
                     <Box
                         role="dialog"
