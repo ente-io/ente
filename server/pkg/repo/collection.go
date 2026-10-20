@@ -449,6 +449,14 @@ func (repo *CollectionRepository) GetCollectionsSharedWithOrByUser(userID int64)
 
 }
 
+func (repo *CollectionRepository) TouchCollectionsSharedWithOrByUser(ctx context.Context, userID int64) error {
+	_, err := repo.DB.ExecContext(ctx, `UPDATE collections SET updation_time = now_utc_micro_seconds()
+		WHERE is_deleted = FALSE AND collection_id IN (
+			SELECT collection_id FROM collection_shares
+			WHERE (to_user_id = $1 OR from_user_id = $1) AND is_deleted = FALSE)`, userID)
+	return stacktrace.Propagate(err, "failed to touch collections shared with or by user")
+}
+
 func (repo *CollectionRepository) GetCollectionIDsOwnedByUser(userID int64) (map[int64]bool, error) {
 	rows, err := repo.DB.Query(`
 		SELECT collection_id, is_deleted
