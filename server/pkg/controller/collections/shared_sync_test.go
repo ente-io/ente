@@ -196,3 +196,48 @@ func TestUnshareEmitsOneRedactedTombstone(t *testing.T) {
 		t.Fatalf("GetDiffV2() error = %v, want sql.ErrNoRows", err)
 	}
 }
+
+func TestSharingDetailsIncludeShareeMetadata(t *testing.T) {
+	db, collectionRepo, ownerID, shareeID := setupCollectionShareTest(t)
+	collectionID := createShareTestCollection(t, collectionRepo, ownerID)
+	addShareTestShare(t, collectionRepo, collectionID, ownerID, shareeID, ente.VIEWER)
+
+	sharedMetadata := ente.MagicMetadata{
+		Version: 2,
+		Count:   1,
+		Data:    "sharee-metadata",
+		Header:  "sharee-header",
+	}
+	if _, err := db.Exec(
+		`UPDATE collection_shares SET magic_metadata = $1, shared_at = 5
+		 WHERE collection_id = $2 AND to_user_id = $3`,
+		sharedMetadata,
+		collectionID,
+		shareeID,
+	); err != nil {
+		t.Fatal(err)
+	}
+	collection, err := collectionRepo.Get(collectionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	shareeView, err := collectionRepo.WithSharingDetailsForUser(collection, shareeID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if shareeView.SharedMagicMetadata == nil || *shareeView.SharedMagicMetadata != sharedMetadata {
+		t.Fatalf("sharee metadata = %+v, want %+v", shareeView.SharedMagicMetadata, sharedMetadata)
+	}
+	if shareeView.SharedAt == nil || *shareeView.SharedAt != 5 {
+		t.Fatalf("sharee sharedAt missing or wrong, want 5")
+	}
+
+	ownerView, err := collectionRepo.WithSharingDetailsForUser(collection, ownerID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ownerView.SharedMagicMetadata != nil || ownerView.SharedAt != nil {
+		t.Fatalf("owner view has sharee fields: metadata = %+v", ownerView.SharedMagicMetadata)
+	}
+}
