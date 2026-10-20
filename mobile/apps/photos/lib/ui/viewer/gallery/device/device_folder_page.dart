@@ -27,8 +27,9 @@ import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class DeviceFolderPage extends StatefulWidget {
   final DeviceCollection deviceCollection;
+  final String? coverHeroTag;
 
-  const DeviceFolderPage(this.deviceCollection, {super.key});
+  const DeviceFolderPage(this.deviceCollection, {this.coverHeroTag, super.key});
 
   @override
   State<DeviceFolderPage> createState() => _DeviceFolderPageState();
@@ -89,7 +90,8 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
       subtitle: _shouldBackup ? l10n.backedUpAutomatically : l10n.notBackedUp,
       deviceCollection: widget.deviceCollection,
       cover: _cover,
-      coverHeroTag: "device_folder:${widget.deviceCollection.id}",
+      coverHeroTag:
+          widget.coverHeroTag ?? "device_folder:${widget.deviceCollection.id}",
       isDeviceFolderBackedUp: _shouldBackup,
       onDisableDeviceFolderBackup: () async {
         await _updateBackupStatus(false);
