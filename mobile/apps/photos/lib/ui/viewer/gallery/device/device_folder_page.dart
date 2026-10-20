@@ -1,3 +1,4 @@
+import "package:collection/collection.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:flutter/material.dart";
@@ -65,7 +66,14 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
       asc: asc,
     );
     if (mounted && generation == _loadGeneration) {
-      setState(() => _cover = result.files.firstOrNull);
+      final thumbnail = widget.deviceCollection.thumbnail;
+      final cover =
+          result.files.firstWhereOrNull(
+            (file) => file.localID == thumbnail?.localID,
+          ) ??
+          (result.hasMore ? thumbnail : null) ??
+          result.files.firstOrNull;
+      setState(() => _cover = cover);
     }
     return result;
   }
