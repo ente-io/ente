@@ -394,10 +394,11 @@ const viewerCaptionTextSx = {
 
 const SpaceViewerPhotoOverlay: React.FC<{
     caption: string;
+    isCaptionHidden: boolean;
     onOpenCaption: () => void;
     photoIndex: number;
     photoCount: number;
-}> = ({ caption, onOpenCaption, photoIndex, photoCount }) => {
+}> = ({ caption, isCaptionHidden, onOpenCaption, photoIndex, photoCount }) => {
     const [isCaptionTruncated, setIsCaptionTruncated] = React.useState(false);
 
     return (
@@ -442,6 +443,7 @@ const SpaceViewerPhotoOverlay: React.FC<{
                         overflowWrap: "break-word",
                         p: 0,
                         pointerEvents: isCaptionTruncated ? "auto" : "none",
+                        visibility: isCaptionHidden ? "hidden" : "visible",
                         width: "100%",
                         "&:focus-visible": {
                             outline: `2px solid ${green}`,
@@ -2734,6 +2736,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                             <SpaceViewerPhotoOverlay
                                 key={activePostKey}
                                 caption={displayCaption}
+                                isCaptionHidden={isCaptionDialogOpen}
                                 onOpenCaption={() =>
                                     setIsCaptionDialogOpen(true)
                                 }
