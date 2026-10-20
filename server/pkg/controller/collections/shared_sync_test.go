@@ -63,6 +63,52 @@ func TestSharedCollectionSyncUsesShareAndCollectionChanges(t *testing.T) {
 	}
 }
 
+func TestDeletedCollectionWithActiveShareSyncsAsDeleted(t *testing.T) {
+	db, collectionRepo, ownerID, shareeID := setupCollectionShareTest(t)
+	collectionID := createShareTestCollection(t, collectionRepo, ownerID)
+	addShareTestShare(t, collectionRepo, collectionID, ownerID, shareeID, ente.VIEWER)
+
+	if _, err := db.Exec(`UPDATE collection_shares SET updation_time = 2 WHERE collection_id = $1`, collectionID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`UPDATE collections SET is_deleted = TRUE, updation_time = 3 WHERE collection_id = $1`, collectionID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`UPDATE users SET encrypted_email = NULL, email_decryption_nonce = NULL WHERE user_id = $1`, ownerID); err != nil {
+		t.Fatal(err)
+	}
+
+	changes, err := collectionRepo.GetCollectionsSharedWithUser(shareeID, 0, ente.Photos, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(changes) != 1 {
+		t.Fatalf("changes after collection deletion = %d, want 1", len(changes))
+	}
+	tombstone := changes[0]
+	if !tombstone.IsDeleted || tombstone.UpdationTime != 3 {
+		t.Fatalf("tombstone deletion state = %+v, want time 3", tombstone)
+	}
+	if tombstone.Owner.Email != "" || len(tombstone.Sharees) != 0 || len(tombstone.PublicURLs) != 0 {
+		t.Fatalf("deleted collection contains sharing details: %+v", tombstone)
+	}
+	var shareDeleted bool
+	if err := db.QueryRow(`SELECT is_deleted FROM collection_shares WHERE collection_id = $1 AND to_user_id = $2`, collectionID, shareeID).Scan(&shareDeleted); err != nil {
+		t.Fatal(err)
+	}
+	if shareDeleted {
+		t.Fatal("diff sync unexpectedly changed the share row")
+	}
+
+	changes, err = collectionRepo.GetCollectionsSharedWithUser(shareeID, 3, ente.Photos, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(changes) != 0 {
+		t.Fatalf("replayed tombstones = %d, want 0", len(changes))
+	}
+}
+
 func TestUnshareEmitsOneRedactedTombstone(t *testing.T) {
 	db, collectionRepo, ownerID, shareeID := setupCollectionShareTest(t)
 	collectionID := createShareTestCollection(t, collectionRepo, ownerID)
