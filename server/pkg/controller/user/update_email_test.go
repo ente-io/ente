@@ -8,6 +8,7 @@ import (
 	"github.com/ente/museum/internal/testutil"
 	"github.com/ente/museum/pkg/controller"
 	"github.com/ente/museum/pkg/repo"
+	"github.com/ente/museum/pkg/utils/time"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
@@ -24,6 +25,14 @@ func TestUpdateEmailRefreshesSharedCollections(t *testing.T) {
 	sharedWithSharee := createUpdateEmailTestCollection(t, collectionRepo, ownerID, &shareeID)
 	sharedBySharee := createUpdateEmailTestCollection(t, collectionRepo, shareeID, &ownerID)
 	notShared := createUpdateEmailTestCollection(t, collectionRepo, shareeID, nil)
+	futureUpdationTime := int64(4_102_444_800_000_000)
+	_, err := db.Exec(`UPDATE collections SET updation_time = $1 WHERE collection_id = $2`, futureUpdationTime, sharedBySharee)
+	require.NoError(t, err)
+	updationTime := func(collectionID int64) int64 {
+		var value int64
+		require.NoError(t, db.QueryRow(`SELECT updation_time FROM collections WHERE collection_id = $1`, collectionID).Scan(&value))
+		return value
+	}
 
 	c := &UserController{
 		UserRepo:               &repo.UserRepository{DB: db, SecretEncryptionKey: testutil.SecretEncryptionKey(), HashingKey: testutil.HashingKey()},
@@ -34,13 +43,12 @@ func TestUpdateEmailRefreshesSharedCollections(t *testing.T) {
 		HashingKey:             testutil.HashingKey(),
 	}
 	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	beforeUpdate := time.Microseconds()
 	require.NoError(t, c.UpdateEmail(ctx, shareeID, "new-sharee@example.com"))
 
-	for collectionID, wantRefreshed := range map[int64]bool{sharedWithSharee: true, sharedBySharee: true, notShared: false} {
-		var updationTime int64
-		require.NoError(t, db.QueryRow(`SELECT updation_time FROM collections WHERE collection_id = $1`, collectionID).Scan(&updationTime))
-		require.Equal(t, wantRefreshed, updationTime > 1, "collection %d", collectionID)
-	}
+	require.GreaterOrEqual(t, updationTime(sharedWithSharee), beforeUpdate)
+	require.Greater(t, updationTime(sharedBySharee), futureUpdationTime)
+	require.Equal(t, int64(1), updationTime(notShared))
 }
 
 func createUpdateEmailTestCollection(t *testing.T, collectionRepo *repo.CollectionRepository, ownerID int64, shareWith *int64) int64 {
