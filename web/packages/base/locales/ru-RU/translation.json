@@ -1165,5 +1165,7 @@
     "memory_lane_caption_years_ago_one": "{{name}} {{number}} год назад",
     "memory_lane_caption_years_ago_few": "{{name}} {{number}} года назад",
     "memory_lane_caption_years_ago_many": "{{name}} {{number}} лет назад",
-    "memory_lane_caption_years_ago_other": "{{name}} {{number}} года назад"
+    "memory_lane_caption_years_ago_other": "{{name}} {{number}} года назад",
+    "memory_lane_caption_now": "{{name}} {{now}}",
+    "memory_lane_now": "сейчас"
 }

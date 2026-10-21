@@ -2,6 +2,7 @@ import { createInstance } from "i18next";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import german from "../../../packages/base/locales/de-DE/translation.json";
 import english from "../../../packages/base/locales/en-US/translation.json";
+import russian from "../../../packages/base/locales/ru-RU/translation.json";
 import type { PublicMemoryShareMetadata } from "../src/services/public-memory";
 import {
     buildLaneCaptionModel,
@@ -21,6 +22,7 @@ beforeEach(async () => {
         resources: {
             "en-US": { translation: english },
             "de-DE": { translation: german },
+            "ru-RU": { translation: russian },
         },
         interpolation: { escapeValue: false },
     });
@@ -72,13 +74,37 @@ test("preserves age mode, including zero and a leap-day birthday", () => {
 test("personalizes legacy lane titles while preserving translated named titles", () => {
     for (const [memoryName, personName, expected] of [
         ["Memory lane", "Alice", "Alice's memory lane"],
+        ["Album", "Al", "Al's memory lane"],
         ["Erinnerungen", "Ashil", "Ashil's memory lane"],
         ["Ashils Erinnerungen", "Ashil", "Ashils Erinnerungen"],
         ["Kỷ niệm của Ashil", "Ashil", "Kỷ niệm của Ashil"],
+        ["Ashil님의 추억의 길", "Ashil", "Ashil님의 추억의 길"],
+        ["Alex (Dad)s Erinnerungen", "Alex (Dad)", "Alex (Dad)s Erinnerungen"],
         ["Erinnerungen", "", "Erinnerungen"],
     ] as const) {
         expect(buildLaneTitle({ memoryName, personName })).toBe(expected);
     }
+});
+
+test("keeps Russian captions localized through the transition to now", async () => {
+    await i18n.changeLanguage("ru-RU");
+    expect(
+        localizeLaneCaption(
+            caption(new Date(2024, 9, 16), { personName: "Алиса" }),
+            i18n.t,
+            "ru-RU",
+        ).label,
+    ).toBe("Алиса 2 года назад");
+    expect(
+        localizeLaneCaption(
+            caption(new Date(2026, 9, 16), { personName: "Алиса" }),
+            i18n.t,
+            "ru-RU",
+        ),
+    ).toMatchObject({ label: "Алиса сейчас", language: "ru-RU" });
+    expect(
+        localizeLaneCaption(caption(new Date(2026, 9, 16)), i18n.t, "ru-RU"),
+    ).toMatchObject({ label: "сейчас", language: "ru-RU" });
 });
 
 test("keeps translated word order and placeholders separate from names", async () => {

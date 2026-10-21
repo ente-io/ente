@@ -361,10 +361,18 @@ export const buildLaneTitle = ({
 }) => {
     const trimmedTitle = memoryName.trim();
     const trimmedPersonName = personName?.trim() ?? "";
-    if (
-        trimmedTitle &&
-        (!trimmedPersonName || trimmedTitle.includes(trimmedPersonName))
-    ) {
+    const escapedName = trimmedPersonName.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&",
+    );
+    // Mobile titles can join possessives and Korean honorifics to names.
+    const hasPersonalizedTitle =
+        !!trimmedPersonName &&
+        new RegExp(
+            `(?:^|[^\\p{L}\\p{M}\\p{N}])${escapedName}(?:s|['’]s?|님의)?(?=$|[^\\p{L}\\p{M}\\p{N}])`,
+            "u",
+        ).test(trimmedTitle);
+    if (trimmedTitle && (!trimmedPersonName || hasPersonalizedTitle)) {
         return trimmedTitle;
     }
     if (!trimmedPersonName) return "Memory lane";
