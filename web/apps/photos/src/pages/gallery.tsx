@@ -2194,86 +2194,48 @@ const Page: React.FC = () => {
                               activeCollectionID: galleryBarActiveCollectionID,
                               onSelectCollectionID: selectGalleryCollection,
                               onRemotePull: remotePull,
-                              renderGalleryBar: (presentationProps) => (
-                                  <>
-                                      {!isInSearchMode && (
-                                          <GalleryBarImpl
-                                              {...presentationProps}
-                                              {...{
-                                                  activePerson,
-                                                  albumFilter,
-                                                  albumSearchQuery,
-                                                  collectionsSortBy,
-                                                  onChangeCollectionsSortBy,
-                                                  normalCollectionSummaries,
-                                                  peopleSortBy,
-                                              }}
-                                              mode={barMode}
-                                              activeCollectionID={
-                                                  galleryBarActiveCollectionID
-                                              }
-                                              onAlbumSearchQueryChange={
-                                                  setAlbumSearchQuery
-                                              }
-                                              onShowAlbumOverview={
-                                                  handleShowAlbumOverview
-                                              }
-                                              onShowPeopleOverview={
-                                                  handleShowPeople
-                                              }
-                                              collectionSummaries={
-                                                  sidebarCollectionSummaries
-                                              }
-                                              visibleAlbumFilters={
-                                                  sidebarAlbumFilters
-                                              }
-                                              uncategorizedCollectionSummaryID={
-                                                  state.uncategorizedCollectionSummaryID
-                                              }
-                                              onShowCollectionSummary={
-                                                  showCollectionSummary
-                                              }
-                                              onChangePeopleSortBy={
-                                                  setPeopleSortBy
-                                              }
-                                              people={sortedPeople}
-                                          />
-                                      )}
-                                      <GalleryListHeader
+                              renderGalleryBar: (presentationProps) =>
+                                  !isInSearchMode && (
+                                      <GalleryBarImpl
+                                          {...presentationProps}
                                           {...{
-                                              user,
-                                              activeCollection,
                                               activePerson,
-                                              barCollectionSummaries,
-                                              people,
-                                              setBlockingLoad,
-                                              setFileListHeader,
-                                              hasActiveFileSelection,
-                                              isActiveCollectionDownloadInProgress,
-                                              onAddSaveGroup,
+                                              albumFilter,
+                                              albumSearchQuery,
+                                              collectionsSortBy,
+                                              onChangeCollectionsSortBy,
+                                              normalCollectionSummaries,
+                                              peopleSortBy,
                                           }}
                                           mode={barMode}
-                                          shouldHide={isInSearchMode}
                                           activeCollectionID={
                                               galleryBarActiveCollectionID
                                           }
-                                          setActiveCollectionID={
-                                              selectGalleryCollection
+                                          onAlbumSearchQueryChange={
+                                              setAlbumSearchQuery
                                           }
-                                          onSelectPerson={handleSelectPerson}
-                                          onEditAlbumDetails={
-                                              showEditAlbumDetails
+                                          onShowAlbumOverview={
+                                              handleShowAlbumOverview
                                           }
-                                          onShowMap={handleShowCollectionMap}
-                                          onCollectionSlideshow={startSlideshow}
-                                          emailByUserID={state.emailByUserID}
-                                          shareSuggestionEmails={
-                                              state.shareSuggestionEmails
+                                          onShowPeopleOverview={
+                                              handleShowPeople
                                           }
-                                          onRemotePull={remotePull}
+                                          collectionSummaries={
+                                              sidebarCollectionSummaries
+                                          }
+                                          visibleAlbumFilters={
+                                              sidebarAlbumFilters
+                                          }
+                                          uncategorizedCollectionSummaryID={
+                                              state.uncategorizedCollectionSummaryID
+                                          }
+                                          onShowCollectionSummary={
+                                              showCollectionSummary
+                                          }
+                                          onChangePeopleSortBy={setPeopleSortBy}
+                                          people={sortedPeople}
                                       />
-                                  </>
-                              ),
+                                  ),
                           }
                 }
                 alternateHeader={
@@ -2317,6 +2279,31 @@ const Page: React.FC = () => {
             >
                 {!isCleanupViewOpen && (
                     <>
+                        <GalleryListHeader
+                            {...{
+                                user,
+                                activeCollection,
+                                activePerson,
+                                barCollectionSummaries,
+                                people,
+                                setBlockingLoad,
+                                setFileListHeader,
+                                hasActiveFileSelection,
+                                isActiveCollectionDownloadInProgress,
+                                onAddSaveGroup,
+                            }}
+                            mode={barMode}
+                            shouldHide={isInSearchMode}
+                            activeCollectionID={galleryBarActiveCollectionID}
+                            setActiveCollectionID={selectGalleryCollection}
+                            onSelectPerson={handleSelectPerson}
+                            onEditAlbumDetails={showEditAlbumDetails}
+                            onShowMap={handleShowCollectionMap}
+                            onCollectionSlideshow={startSlideshow}
+                            emailByUserID={state.emailByUserID}
+                            shareSuggestionEmails={state.shareSuggestionEmails}
+                            onRemotePull={remotePull}
+                        />
                         {isFirstLoad && <FirstLoadMessage />}
                         {isOffline && <OfflineMessage />}
                     </>
