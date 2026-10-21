@@ -54,7 +54,12 @@ const date = new Date().toLocaleString("en-US", {
     year: "numeric",
     timeZone: "UTC",
 });
-const body = normalizeReleaseBodyIndent(process.env.RELEASE_BODY ?? "");
+const body = normalizeReleaseBodyIndent(process.env.RELEASE_BODY ?? "")
+    .replace(
+        /^[ \t]*https:\/\/github\.com\/user-attachments\/assets\/\S+[ \t]*$/gm,
+        "",
+    )
+    .trim();
 const section = `${heading} - ${date}\n\n${body}\n`;
 
 const at = content.search(/^## v/m);
