@@ -782,6 +782,8 @@ export function LaneMemoryViewer({
                                                 }
                                                 showLoadingOverlay={false}
                                                 thumbnailOnly={
+                                                    file.metadata.fileType ===
+                                                        FileType.video ||
                                                     Math.abs(slice.distance) > 1
                                                 }
                                             />
