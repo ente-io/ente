@@ -7,7 +7,7 @@ import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "../src/components/gallery/BarImpl";
-import { visibleAlbumFilters } from "../src/utils/album-filters";
+import { useAlbumNavigationData } from "../src/components/gallery/use-album-navigation-data";
 
 vi.mock("@/components/CollectionsSortOptions", () => ({
     CollectionsSortOptions: () => null,
@@ -56,16 +56,13 @@ const renderSearch = (
     albumFilter: GalleryBarImplProps["albumFilter"] = "ente",
     mode: GalleryBarImplProps["mode"] = "albums",
 ) => {
-    const normalizedQuery = query.trim().toLowerCase();
     const summaries = mode == "links" ? [link] : albums;
     const props: GalleryBarImplProps = {
         mode,
         albumFilter,
         albumSearchQuery: query,
-        collectionSummaries: summaries.filter((album) =>
-            album.name.toLowerCase().includes(normalizedQuery),
-        ),
-        visibleAlbumFilters: visibleAlbumFilters(summaries, query),
+        collectionSummaries: [],
+        visibleAlbumFilters: [],
         normalCollectionSummaries: new Map(),
         uncategorizedCollectionSummaryID: 99,
         activeCollectionID: undefined,
@@ -85,11 +82,22 @@ const renderSearch = (
         onChangePeopleSortBy: vi.fn(),
         onSelectPerson: vi.fn(),
     };
-    return renderToStaticMarkup(
-        <ThemeProvider theme={photosTheme}>
-            <GalleryBarImpl {...props} />
-        </ThemeProvider>,
-    );
+    const Sidebar = () => {
+        const data = useAlbumNavigationData({
+            ...props,
+            collectionSummaries: new Map(summaries.map((cs) => [cs.id, cs])),
+        });
+        return (
+            <ThemeProvider theme={photosTheme}>
+                <GalleryBarImpl
+                    {...props}
+                    {...data}
+                    collectionSummaries={data.sidebarCollectionSummaries}
+                />
+            </ThemeProvider>
+        );
+    };
+    return renderToStaticMarkup(<Sidebar />);
 };
 
 describe("sidebar album search across groups", () => {

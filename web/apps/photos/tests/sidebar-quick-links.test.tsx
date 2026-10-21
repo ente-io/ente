@@ -7,6 +7,7 @@ import {
     type GalleryBarAndListHeaderProps,
 } from "../src/components/collections/GalleryBarAndListHeader";
 import type { GalleryBarImplProps } from "../src/components/gallery/BarImpl";
+import { useAlbumNavigationData } from "../src/components/gallery/use-album-navigation-data";
 
 const { renderBar } = vi.hoisted(() => ({
     renderBar: vi.fn<(props: GalleryBarImplProps) => null>(() => null),
@@ -73,7 +74,20 @@ const renderSidebar = (
         onCreateAlbum: vi.fn(),
         mobileDrawerProps: { open: true, onClose: vi.fn() },
     } as unknown as GalleryBarAndListHeaderProps;
-    renderToStaticMarkup(<GalleryBarAndListHeader {...props} />);
+    const Sidebar = () => {
+        const data = useAlbumNavigationData({
+            ...props,
+            collectionSummaries: props.barCollectionSummaries,
+        });
+        return (
+            <GalleryBarAndListHeader
+                {...props}
+                {...data}
+                collectionSummaries={data.sidebarCollectionSummaries}
+            />
+        );
+    };
+    renderToStaticMarkup(<Sidebar />);
     return { props, bar: renderBar.mock.lastCall![0] };
 };
 
