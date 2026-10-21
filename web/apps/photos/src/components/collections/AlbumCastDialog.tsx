@@ -1,6 +1,7 @@
 import { publishCastPayload, revokeAllCastTokens } from "@/services/cast";
 import { loadCast } from "@/utils/chromecast-sender";
 import {
+    AlertCircleIcon,
     ArrowLeft02Icon,
     ArrowRight01Icon,
     Cancel01Icon,
@@ -15,8 +16,8 @@ import {
     Link,
     Stack,
     Typography,
+    type Theme,
 } from "@mui/material";
-import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
     v2CloseButtonSx,
@@ -137,32 +138,38 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
     );
 
     useEffect(() => {
+        let active = true;
+        const isActive = () => active;
         if (view == "auto") {
             void loadCast().then(async (cast) => {
+                if (!isActive()) return;
                 const instance = cast.framework.CastContext.getInstance();
                 try {
                     await instance.requestSession();
                 } catch (e) {
-                    setView("auto-cast-error");
+                    if (isActive()) setView("auto-cast-error");
                     log.error("Error requesting session", e);
                     return;
                 }
+                if (!isActive()) return;
                 const session = instance.getCurrentSession()!;
                 session.addMessageListener(
                     "urn:x-cast:pair-request",
                     (_, message) => {
+                        if (!isActive()) return;
                         const { code } = CastPairRequest.parse(
                             JSON.parse(message),
                         );
 
                         void publishCastPayload(code, collection)
                             .then(() => {
+                                if (!isActive()) return;
                                 setView("choose");
                                 onClose();
                             })
                             .catch((e: unknown) => {
                                 log.error("Error casting to TV", e);
-                                setView("auto-cast-error");
+                                if (isActive()) setView("auto-cast-error");
                             });
                     },
                 );
@@ -175,6 +182,9 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                     });
             });
         }
+        return () => {
+            active = false;
+        };
     }, [onClose, view, collection]);
 
     useEffect(() => {
@@ -217,69 +227,157 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                     />
                 </Stack>
             )}
-            {view == "auto" && (
-                <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
-                    <div>
-                        <ActivityIndicator />
-                    </div>
-                    <Typography>{t("choose_device_from_browser")}</Typography>
-                    <FocusVisibleButton
-                        color="secondary"
-                        onClick={() => setView("choose")}
+            {(view == "auto" || view == "auto-cast-error") && (
+                <Stack sx={{ gap: "16px" }}>
+                    <Stack
+                        sx={{
+                            alignItems: "center",
+                            textAlign: "center",
+                            pt: "6px",
+                            pb: "12px",
+                        }}
                     >
-                        {t("go_back")}
-                    </FocusVisibleButton>
-                </Stack>
-            )}
-            {view == "auto-cast-error" && (
-                <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
-                    <Typography>{t("cast_auto_pair_failed")}</Typography>
+                        <Box sx={castIconSx}>
+                            <HugeiconsIcon
+                                icon={
+                                    view == "auto" ? CastIcon : AlertCircleIcon
+                                }
+                                size={28}
+                                strokeWidth={1.5}
+                                aria-hidden
+                            />
+                        </Box>
+                        <Typography
+                            component="h3"
+                            sx={{
+                                fontFamily: "'Outfit Variable', sans-serif",
+                                fontSize: 20,
+                                lineHeight: "28px",
+                                fontWeight: 500,
+                                mb: 1,
+                            }}
+                        >
+                            {t(
+                                view == "auto"
+                                    ? "choose_cast_device"
+                                    : "cast_connection_failed",
+                            )}
+                        </Typography>
+                        <Typography sx={instructionSx}>
+                            {t(
+                                view == "auto"
+                                    ? "choose_device_from_browser"
+                                    : "cast_auto_pair_failed",
+                            )}
+                        </Typography>
+                    </Stack>
                     <FocusVisibleButton
-                        color="secondary"
-                        onClick={() => setView("choose")}
-                    >
-                        {t("go_back")}
-                    </FocusVisibleButton>
-                </Stack>
-            )}
-            {view == "pin" && (
-                <Stack sx={{ gap: "20px" }}>
-                    <FocusVisibleButton
-                        variant="text"
                         color="secondary"
                         startIcon={
                             <HugeiconsIcon
                                 icon={ArrowLeft02Icon}
-                                size={20}
+                                size={18}
                                 aria-hidden
                             />
                         }
                         onClick={() => setView("choose")}
-                        sx={{ alignSelf: "flex-start", p: 0 }}
+                        sx={secondaryButtonSx}
                     >
                         {t("go_back")}
                     </FocusVisibleButton>
-                    <Stack sx={{ gap: 2 }}>
-                        <Typography sx={{ color: "text.muted" }}>
-                            <Trans
-                                i18nKey="visit_cast_url"
-                                components={{
-                                    a: (
-                                        <Link
-                                            target="_blank"
-                                            rel="noopener"
-                                            href={castURL}
-                                        />
-                                    ),
-                                }}
-                                values={{ url: castHost }}
-                            />
+                    <Stack
+                        direction="row"
+                        sx={{
+                            justifyContent: "center",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            columnGap: "6px",
+                        }}
+                    >
+                        <Typography sx={{ fontSize: 12, color: "text.muted" }}>
+                            {t("cast_device_not_visible")}
                         </Typography>
-                        <Typography sx={{ color: "text.muted" }}>
-                            {t("enter_cast_pin_code")}
-                        </Typography>
+                        <FocusVisibleUnstyledButton
+                            onClick={() => setView("pin")}
+                            sx={{
+                                color: "text.base",
+                                fontSize: 12,
+                                fontWeight: 500,
+                                textDecoration: "underline",
+                                textUnderlineOffset: "3px",
+                            }}
+                        >
+                            {t("pair_with_pin")}
+                        </FocusVisibleUnstyledButton>
+                    </Stack>
+                </Stack>
+            )}
+            {view == "pin" && (
+                <Stack sx={{ gap: "20px" }}>
+                    <FocusVisibleUnstyledButton
+                        onClick={() => setView("choose")}
+                        sx={{
+                            display: "inline-flex",
+                            gap: 1,
+                            alignItems: "center",
+                            alignSelf: "flex-start",
+                            minHeight: 36,
+                            fontSize: 14,
+                            fontWeight: 500,
+                            color: "text.muted",
+                            "&:hover": { color: "text.base" },
+                        }}
+                    >
+                        <HugeiconsIcon
+                            icon={ArrowLeft02Icon}
+                            size={18}
+                            aria-hidden
+                        />
+                        {t("go_back")}
+                    </FocusVisibleUnstyledButton>
+                    <Stack
+                        component="ol"
+                        sx={{ listStyle: "none", m: 0, p: 0, gap: "14px" }}
+                    >
+                        <Stack
+                            component="li"
+                            direction="row"
+                            sx={{ gap: "12px", alignItems: "flex-start" }}
+                        >
+                            <Box component="span" aria-hidden sx={stepNumberSx}>
+                                1
+                            </Box>
+                            <Typography sx={instructionSx}>
+                                <Trans
+                                    i18nKey="visit_cast_url"
+                                    components={{
+                                        a: (
+                                            <Link
+                                                target="_blank"
+                                                rel="noopener"
+                                                href={castURL}
+                                            />
+                                        ),
+                                    }}
+                                    values={{ url: castHost }}
+                                />
+                            </Typography>
+                        </Stack>
+                        <Stack
+                            component="li"
+                            direction="row"
+                            sx={{ gap: "12px", alignItems: "flex-start" }}
+                        >
+                            <Box component="span" aria-hidden sx={stepNumberSx}>
+                                2
+                            </Box>
+                            <Typography sx={instructionSx}>
+                                {t("enter_cast_pin_code")}
+                            </Typography>
+                        </Stack>
                     </Stack>
                     <SingleInputForm
+                        variant="v2"
                         label={t("code")}
                         placeholder={ut("123456")}
                         submitButtonTitle={t("pair_device_to_tv")}
@@ -292,6 +390,40 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
 };
 
 const CastPairRequest = z.object({ code: z.string() });
+
+const instructionSx = { fontSize: 14, lineHeight: "22px", color: "text.muted" };
+
+const castIconSx = (theme: Theme) => ({
+    display: "grid",
+    placeItems: "center",
+    width: 56,
+    height: 56,
+    borderRadius: "18px",
+    mb: "18px",
+    backgroundColor: "background.paper",
+    ...theme.applyStyles("dark", { backgroundColor: "#282828" }),
+});
+
+const secondaryButtonSx = {
+    minHeight: 52,
+    borderRadius: "16px",
+    fontSize: 14,
+    fontWeight: 500,
+};
+
+const stepNumberSx = (theme: Theme) => ({
+    display: "grid",
+    placeItems: "center",
+    flexShrink: 0,
+    width: 24,
+    height: 24,
+    borderRadius: "50%",
+    backgroundColor: "background.paper",
+    color: "text.muted",
+    fontSize: 12,
+    fontWeight: 500,
+    ...theme.applyStyles("dark", { backgroundColor: "#282828" }),
+});
 
 const PairingOption: React.FC<{
     icon: React.ReactNode;
