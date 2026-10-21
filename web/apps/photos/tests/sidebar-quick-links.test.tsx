@@ -65,6 +65,7 @@ const renderSidebar = (
         barCollectionSummaries: new Map(summaries.map((cs) => [cs.id, cs])),
         uncategorizedCollectionSummaryID: 99,
         people: [],
+        sortedPeople: [],
         peopleSortBy: "name-asc",
         saveGroups: [],
         setActiveCollectionID: vi.fn(),
