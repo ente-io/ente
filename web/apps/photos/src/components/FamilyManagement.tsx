@@ -435,7 +435,7 @@ const MemberActionsMenu: React.FC<{
                     if (member) onRemove(member);
                 }}
             >
-                {t(invited ? "revoke_family_invite" : "family_remove_action")}
+                {t(invited ? "revoke_family_invite" : "remove_family_member")}
             </ContextMenuItem>
         </ContextMenu>
     );
