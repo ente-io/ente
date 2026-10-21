@@ -3,7 +3,7 @@ import {
     CollectionShare,
     type CollectionShareIntent,
     type CollectionShareProps,
-} from "@/components/Collections/CollectionShare";
+} from "@/components/collections/CollectionShare";
 import type { FileListHeaderOrFooter } from "@/components/FileList";
 import {
     GalleryBarImpl,

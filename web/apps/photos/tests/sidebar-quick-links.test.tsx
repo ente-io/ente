@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import {
     GalleryBarAndListHeader,
     type GalleryBarAndListHeaderProps,
-} from "../src/components/Collections/GalleryBarAndListHeader";
+} from "../src/components/collections/GalleryBarAndListHeader";
 import type { GalleryBarImplProps } from "../src/components/gallery/BarImpl";
 
 const { renderBar } = vi.hoisted(() => ({
@@ -13,16 +13,16 @@ const { renderBar } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/components/gallery/BarImpl", () => ({ GalleryBarImpl: renderBar }));
-vi.mock("@/components/Collections/CollectionShare", () => ({
+vi.mock("@/components/collections/CollectionShare", () => ({
     CollectionShare: () => null,
 }));
 vi.mock("@/components/gallery/PeopleHeader", () => ({
     PeopleHeader: () => null,
 }));
-vi.mock("../src/components/Collections/AlbumCastDialog", () => ({
+vi.mock("../src/components/collections/AlbumCastDialog", () => ({
     AlbumCastDialog: () => null,
 }));
-vi.mock("../src/components/Collections/CollectionHeader", () => ({
+vi.mock("../src/components/collections/CollectionHeader", () => ({
     CollectionHeader: () => null,
 }));
 vi.mock("@/utils/album-filters", () => import("../src/utils/album-filters"));

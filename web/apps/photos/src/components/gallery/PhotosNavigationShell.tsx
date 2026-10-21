@@ -1,8 +1,8 @@
-import { CreateAlbumDialog } from "@/components/Collections/CreateAlbumDialog";
+import { CreateAlbumDialog } from "@/components/collections/CreateAlbumDialog";
 import {
     GalleryBarAndListHeader,
     type GalleryBarAndListHeaderProps,
-} from "@/components/Collections/GalleryBarAndListHeader";
+} from "@/components/collections/GalleryBarAndListHeader";
 import { SearchBar, type SearchBarProps } from "@/components/SearchBar";
 import { uploadManager } from "@/services/upload-manager";
 import {
