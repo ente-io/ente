@@ -69,6 +69,7 @@ interface SpacePostBase {
     commentCount?: number;
     friendID: string;
     height?: number;
+    likeCount?: number;
     name: string;
     postId: number;
     timestampMs: number;
@@ -465,6 +466,7 @@ const postBaseFromResponse = (
             : post.commentCount,
         friendID: author.id,
         isUnavailable: post.isUnavailable,
+        likeCount: post.likeCount,
         name: author.fullName || author.username,
         postId: post.postId,
         spaceId: post.spaceId,
@@ -1388,6 +1390,25 @@ export const loadCurrentCreatedPost = async (
         });
         await prependCachedSpaceFeedPost(spaceId, post);
         return post;
+    } finally {
+        releaseCurrentSpaceContext(ctx);
+    }
+};
+
+export const loadCurrentPostLikes = async (spaceId: string, postId: number) => {
+    const ctx = await ensureCurrentSpaceContext();
+    try {
+        const actors = await ctx.listPostLikes(spaceId, BigInt(postId));
+        return await Promise.all(
+            actors.map(async (item) => {
+                const actor = actorProfile(item);
+                actor.avatarUrl = await cachedAccountAvatarURLIfPresent(
+                    actor.spaceId,
+                    item.avatar,
+                );
+                return actor;
+            }),
+        );
     } finally {
         releaseCurrentSpaceContext(ctx);
     }

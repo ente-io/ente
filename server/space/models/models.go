@@ -403,6 +403,7 @@ type PostResponse struct {
 	CreatedAt        string              `json:"createdAt"`
 	ViewerLiked      bool                `json:"viewerLiked"`
 	CommentCount     int64               `json:"commentCount"`
+	LikeCount        int64               `json:"likeCount"`
 }
 
 type SpaceUnreadStatusResponse struct {

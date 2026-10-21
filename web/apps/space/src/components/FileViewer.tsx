@@ -26,6 +26,7 @@ import { ConfirmationActionSheet } from "components/ConfirmationActionSheet";
 import { spacePostLikePopDurationMs } from "components/post-like-animation";
 import { paintStretchingDot } from "components/post-photos-dots";
 import { PostComments } from "components/PostComments";
+import { SpacePostLikes } from "components/PostLikes";
 import { SpacePostPhotosDots } from "components/PostPhotosDots";
 import { SpacePostReplyControls } from "components/PostReplyControls";
 import { createSpaceVideoContent } from "components/PostVideoContent";
@@ -127,7 +128,8 @@ const postButtonSpin = keyframes`
     }
 `;
 
-export type SpaceViewerPostActionMode = "draft-post" | "hidden" | "like-only";
+export type SpaceViewerPostActionMode =
+    "draft-post" | "hidden" | "like-only" | "likes";
 
 interface SpaceViewerPostActionConfig {
     showLikeButton: boolean;
@@ -140,9 +142,11 @@ const spaceViewerPostActionConfigs: Record<
     "draft-post": { showLikeButton: false },
     hidden: { showLikeButton: false },
     "like-only": { showLikeButton: true },
+    likes: { showLikeButton: false },
 };
 
 export interface SpaceViewerPhoto {
+    likeCount?: number;
     preparationError?: string;
     isVideo?: boolean;
     video?: SpacePostVideo;
@@ -209,6 +213,7 @@ interface SpaceFileViewerProps {
     targetCommentId?: string;
     focusCommentOnOpen?: boolean;
     privateReplyOnOpen?: boolean;
+    showLikesOnOpen?: boolean;
     postActionMode?: SpaceViewerPostActionMode;
 }
 
@@ -404,10 +409,11 @@ const viewerCaptionTextSx = {
 
 const SpaceViewerPhotoOverlay: React.FC<{
     caption: string;
+    isCaptionHidden: boolean;
     onOpenCaption: () => void;
     photoIndex: number;
     photoCount: number;
-}> = ({ caption, onOpenCaption, photoIndex, photoCount }) => {
+}> = ({ caption, isCaptionHidden, onOpenCaption, photoIndex, photoCount }) => {
     const [isCaptionTruncated, setIsCaptionTruncated] = React.useState(false);
 
     return (
@@ -453,6 +459,7 @@ const SpaceViewerPhotoOverlay: React.FC<{
                         overflowWrap: "break-word",
                         p: 0,
                         pointerEvents: isCaptionTruncated ? "auto" : "none",
+                        visibility: isCaptionHidden ? "hidden" : "visible",
                         width: "100%",
                         "&:focus-visible": {
                             outline: `2px solid ${green}`,
@@ -500,6 +507,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     initialPhotoIndex = 0,
     photos,
     postActionMode = "like-only",
+    showLikesOnOpen = false,
 }) => {
     const { profile } = useSpaceAppState();
     const [commentsOpen, setCommentsOpen] = React.useState(false);
@@ -570,6 +578,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     const activeReplyKeyRef = React.useRef(activeReplyKey);
     activeReplyKeyRef.current = activeReplyKey;
     const activePostKey = `${activePhoto.spaceId ?? ""}:${activePhoto.postId ?? ""}`;
+    const showPostLikes = activePostActionMode == "likes";
+    const [likesPostKey, setLikesPostKey] = React.useState<string | undefined>(
+        showLikesOnOpen ? activePostKey : undefined,
+    );
+    const isLikesOpen = showPostLikes && likesPostKey == activePostKey;
     const hasPhotoLoadError = Boolean(photoLoadErrors[activePhotoKey]);
     const photoRetryAt = photoLoadErrors[activePhotoKey]?.retryAt;
     const isPhotoRateLimited = photoRetryAt !== undefined && now < photoRetryAt;
@@ -616,6 +629,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     );
     const [isCaptionEditing, setIsCaptionEditing] = React.useState(false);
     const [isCaptionDialogOpen, setIsCaptionDialogOpen] = React.useState(false);
+    const [hasCaptionDialogExited, setHasCaptionDialogExited] =
+        React.useState(true);
     const [captionUpdateActionPhase, setCaptionUpdateActionPhase] =
         React.useState<SpaceActionPhase | null>(null);
     const [hasCaptionUpdateError, setHasCaptionUpdateError] =
@@ -724,6 +739,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
     isSwipeBlockedRef.current =
         isActionsOpen ||
         commentsOpen ||
+        isLikesOpen ||
         addFriendSheetOpen ||
         (canDeletePost && deleteSheetOpen) ||
         isDeleteExit ||
@@ -1778,6 +1794,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         const closeOnEscape = (event: KeyboardEvent) => {
             if (
                 addFriendSheetOpen ||
+                isLikesOpen ||
                 deleteSheetOpen ||
                 isCaptionDialogOpen ||
                 isDraftPostExit ||
@@ -1799,6 +1816,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         cancelCaptionEdit,
         isDraftPostActionRunning,
         addFriendSheetOpen,
+        isLikesOpen,
         deleteSheetOpen,
         isDraftPostExit,
         isCaptionEditing,
@@ -2761,6 +2779,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 (hasDisplayCaption ||
                     canComment ||
                     showPhotoLikeButton ||
+                    showPostLikes ||
                     postPhotoCount > 1) &&
                 !isCaptionEditing && (
                     <Box
@@ -2785,6 +2804,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                             <SpaceViewerPhotoOverlay
                                 key={activePostKey}
                                 caption={displayCaption}
+                                isCaptionHidden={
+                                    isCaptionDialogOpen ||
+                                    !hasCaptionDialogExited
+                                }
                                 onOpenCaption={() =>
                                     setIsCaptionDialogOpen(true)
                                 }
@@ -2852,17 +2875,37 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                                         : undefined
                                 }
                             />
-                        ) : canComment ? (
+                        ) : canComment || showPostLikes ? (
                             <Box
                                 sx={{
+                                    alignItems: "center",
                                     display: "flex",
+                                    gap: "12px",
                                     justifyContent: "flex-end",
                                 }}
                             >
-                                <SpaceCommentsButton
-                                    count={commentCount}
-                                    onClick={() => setCommentsOpen(true)}
-                                />
+                                {showPostLikes &&
+                                    activePhoto.spaceId &&
+                                    activePhoto.postId && (
+                                        <SpacePostLikes
+                                            likeCount={activePhoto.likeCount}
+                                            spaceId={activePhoto.spaceId}
+                                            postId={activePhoto.postId}
+                                            open={isLikesOpen}
+                                            onOpen={() =>
+                                                setLikesPostKey(activePostKey)
+                                            }
+                                            onClose={() =>
+                                                setLikesPostKey(undefined)
+                                            }
+                                        />
+                                    )}
+                                {canComment && (
+                                    <SpaceCommentsButton
+                                        count={commentCount}
+                                        onClick={() => setCommentsOpen(true)}
+                                    />
+                                )}
                             </Box>
                         ) : null}
                     </Box>
@@ -2902,7 +2945,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             >
                 <CaptionTransition
                     in={isCaptionDialogOpen}
+                    onEnter={() => setHasCaptionDialogExited(false)}
                     onEntered={(node) => node.focus({ preventScroll: true })}
+                    onExited={() => setHasCaptionDialogExited(true)}
                 >
                     <Box
                         role="dialog"

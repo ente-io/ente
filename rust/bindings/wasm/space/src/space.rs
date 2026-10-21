@@ -303,7 +303,7 @@ impl From<ente_space::transport::UpdateSpaceProfileResponse> for UpdateSpaceProf
 
 #[derive(Serialize, Tsify)]
 #[serde(rename_all = "camelCase")]
-struct SpaceActorResponse {
+pub struct SpaceActorResponse {
     space_id: String,
     space_slug: String,
     public_key: String,
@@ -327,6 +327,7 @@ pub struct PostResponse {
     created_at: String,
     viewer_liked: bool,
     comment_count: i64,
+    like_count: i64,
 }
 
 #[derive(Serialize, Tsify)]
@@ -723,6 +724,7 @@ impl From<ente_space::Post> for PostResponse {
             created_at: post.created_at,
             viewer_liked: post.viewer_liked,
             comment_count: post.comment_count,
+            like_count: post.like_count,
         }
     }
 }
@@ -1441,6 +1443,24 @@ impl SpaceAccountCtxHandle {
             )
             .await
             .map_err(Into::into)
+    }
+
+    #[wasm_bindgen(js_name = listPostLikes)]
+    pub async fn list_post_likes(
+        &self,
+        space_id: String,
+        post_id: i64,
+    ) -> Result<Vec<<SpaceActorResponse as Tsify>::JsType>, Error> {
+        self.inner
+            .list_post_likes(&space_id, post_id)
+            .await?
+            .into_iter()
+            .map(|actor| {
+                SpaceActorResponse::from(actor)
+                    .into_js()
+                    .map_err(Into::into)
+            })
+            .collect()
     }
 
     #[wasm_bindgen(js_name = likePost)]

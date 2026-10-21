@@ -110,6 +110,7 @@ type SpacePostRecord struct {
 	CreatedAt        int64
 	ViewerLiked      bool
 	CommentCount     int64
+	LikeCount        int64
 }
 
 type SpacePostAssetRecord struct {

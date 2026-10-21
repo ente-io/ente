@@ -300,6 +300,11 @@ fn load_key(
 
 fn keyring_error(error: keyring::Error, exists: bool) -> anyhow::Error {
     let reason = match error {
+        keyring::Error::NoEntry if exists => {
+            return anyhow::anyhow!(
+                "no saved vault key for this CLI home; if you moved the directory, restore its previous location or supply the original ENTE_CLI_VAULT_KEY"
+            );
+        }
         keyring::Error::NoEntry => "the vault key is missing".to_owned(),
         keyring::Error::NoStorageAccess(error) => {
             format!("access to system secret storage was denied: {error}")
@@ -320,8 +325,7 @@ fn keyring_error(error: keyring::Error, exists: bool) -> anyhow::Error {
 }
 
 fn decrypt(bytes: &[u8], key: &Key, home: &Path) -> Result<State> {
-    let unlock_error =
-        || anyhow::anyhow!("cannot unlock CLI vault: wrong key or damaged ciphertext");
+    let unlock_error = || anyhow::anyhow!("cannot unlock CLI vault: wrong key or damaged file");
     let encrypted: EncryptedVault =
         parse_json(bytes).context("unsupported or invalid CLI vault format")?;
     let ciphertext = b64::decode(&encrypted.data)
@@ -332,7 +336,7 @@ fn decrypt(bytes: &[u8], key: &Key, home: &Path) -> Result<State> {
         parse_json(&plaintext).context("invalid CLI vault contents")?;
     ensure!(
         version.schema_version == SCHEMA_VERSION,
-        "unsupported CLI vault schema {}; this build supports {SCHEMA_VERSION}.\nTo start fresh, move {} aside, then log in again.",
+        "cannot read CLI vault format {}; this CLI supports {SCHEMA_VERSION}.\nTo start fresh, move {} aside, then log in again.",
         version.schema_version,
         home.join(VAULT_FILE).display(),
     );

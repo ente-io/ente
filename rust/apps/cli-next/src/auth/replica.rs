@@ -114,7 +114,7 @@ pub async fn refresh(db: &mut Db, session: &Session) -> Result<()> {
         }
         ensure!(
             next > cursor,
-            "Auth diff timestamp boundary did not advance"
+            "cannot finish syncing Auth codes: the server's next page did not advance"
         );
         cursor = next;
     }

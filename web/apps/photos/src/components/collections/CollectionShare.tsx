@@ -3,11 +3,14 @@
 import Avatar from "@/components/Avatar";
 import type { RemotePullOpts } from "@/components/gallery";
 import { PublicLinkCreated } from "@/components/share/PublicLinkCreated";
+import { sidebarStyles, sidebarTheme } from "@/components/sidebar/theme";
+import { usePublicLinkURL } from "@/components/utils/use-public-link-url";
 import { avatarTextColor } from "@/services/avatar";
 import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import DoneIcon from "@mui/icons-material/Done";
@@ -19,16 +22,31 @@ import Photo, { default as PhotoIcon } from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
 import RemoveCircleOutlinedIcon from "@mui/icons-material/RemoveCircleOutlined";
 import WorkspacesIcon from "@mui/icons-material/Workspaces";
-import { Dialog, Stack, styled, Typography } from "@mui/material";
+import {
+    Box,
+    Dialog,
+    DialogTitle,
+    IconButton,
+    Stack,
+    styled,
+    ThemeProvider,
+    Typography,
+} from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import type { LocalUser } from "ente-accounts/services/user";
+import { EnteSwitch } from "ente-base/components/EnteSwitch";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
     SidebarDrawerTitlebar,
     TitledNestedSidebarDrawer,
 } from "ente-base/components/mui/SidebarDrawer";
+import {
+    SidebarDrawerDepthContext,
+    SidebarPanelContext,
+} from "ente-base/components/mui/SidebarDrawerContext";
 import {
     RowButton,
     RowButtonDivider,
@@ -40,6 +58,12 @@ import {
     RowSwitch,
 } from "ente-base/components/RowButton";
 import {
+    v2CloseButtonSx,
+    v2HeaderRowSx,
+    v2PaperSx,
+    v2TitleSx,
+} from "ente-base/components/SingleInput.styles";
+import {
     SingleInputForm,
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
@@ -48,13 +72,13 @@ import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "ente-base/components/utils/modal";
+import { RowCard } from "ente-base/components/v2/RowCard";
 import { useBaseContext } from "ente-base/context";
 import { deriveInteractiveKey } from "ente-base/crypto";
 import { isHTTPErrorWithStatus, isMuseumHTTPError } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { useResolvedContactDisplay } from "ente-contacts";
-import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
 import type {
     Collection,
     CollectionNewParticipantRole,
@@ -81,7 +105,9 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import React, {
     useCallback,
+    useContext,
     useEffect,
+    useId,
     useMemo,
     useRef,
     useState,
@@ -1422,34 +1448,21 @@ const PublicShare: React.FC<PublicShareProps> = ({
         props: publicLinkCreatedVisibilityProps,
     } = useModalVisibility();
 
-    const [publicURL, setPublicURL] = useState<PublicURL | undefined>(
-        undefined,
+    const [shareState, setShareState] = useState({
+        collection,
+        publicURL: collection.publicURLs[0],
+    });
+    const publicURL =
+        shareState.collection === collection
+            ? shareState.publicURL
+            : collection.publicURLs[0];
+    const setPublicURL = (publicURL: PublicURL | undefined) =>
+        setShareState({ collection, publicURL });
+    const { resolvedURL, isLoading, error } = usePublicLinkURL(
+        collection,
+        publicURL,
+        canManage ? customDomain : undefined,
     );
-    const [resolvedURL, setResolvedURL] = useState<string | undefined>(
-        undefined,
-    );
-
-    useEffect(() => {
-        setPublicURL(collection.publicURLs[0]);
-    }, [collection]);
-
-    useEffect(() => {
-        if (publicURL?.url) {
-            void appendCollectionKeyToShareURL(
-                publicURL.url,
-                collection.key,
-            ).then((url) =>
-                setResolvedURL(
-                    substituteCustomDomainIfNeeded(
-                        url,
-                        canManage ? customDomain : undefined,
-                    ),
-                ),
-            );
-        } else {
-            setResolvedURL(undefined);
-        }
-    }, [collection.key, publicURL, customDomain, canManage]);
 
     const handleCopyLink = () => {
         if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);
@@ -1474,6 +1487,14 @@ const PublicShare: React.FC<PublicShareProps> = ({
                 ) : (
                     <ReadOnlyPublicShare resolvedURL={resolvedURL} />
                 )
+            ) : publicURL ? (
+                <Typography role="status" color="text.muted">
+                    {error
+                        ? t("generic_error")
+                        : isLoading
+                          ? t("loading")
+                          : null}
+                </Typography>
             ) : canManage ? (
                 <EnablePublicShareOptions
                     {...{ collection, onRemotePull, setPublicURL }}
@@ -1486,16 +1507,6 @@ const PublicShare: React.FC<PublicShareProps> = ({
             />
         </>
     );
-};
-
-const substituteCustomDomainIfNeeded = (
-    url: string,
-    customDomain: string | undefined,
-) => {
-    if (!customDomain) return url;
-    const u = new URL(url);
-    u.host = customDomain;
-    return u.href;
 };
 
 type EnablePublicShareOptionsProps = {
@@ -1701,27 +1712,34 @@ const ReadOnlyPublicShare: React.FC<{ resolvedURL: string }> = ({
     );
 };
 
-type ManagePublicShareOptionsProps = ModalVisibilityProps & {
-    onRootClose: () => void;
+type ManagePublicShareOptionsProps = {
     publicURL: PublicURL;
     setPublicURL: (publicURL: PublicURL | undefined) => void;
     resolvedURL: string;
 } & Pick<
-        CollectionShareProps,
-        "collection" | "setBlockingLoad" | "onRemotePull"
-    >;
+    CollectionShareProps,
+    "collection" | "setBlockingLoad" | "onRemotePull"
+> &
+    (
+        | ({
+              variant?: "drawer";
+              onRootClose: () => void;
+          } & ModalVisibilityProps)
+        | { variant: "inline" }
+    );
 
-const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
-    open,
-    onClose,
-    onRootClose,
-    collection,
-    publicURL,
-    setPublicURL,
-    resolvedURL,
-    setBlockingLoad,
-    onRemotePull,
-}) => {
+export const ManagePublicShareOptions: React.FC<
+    ManagePublicShareOptionsProps
+> = (props) => {
+    const {
+        collection,
+        publicURL,
+        setPublicURL,
+        resolvedURL,
+        setBlockingLoad,
+        onRemotePull,
+    } = props;
+    const panelRef = useRef<HTMLDivElement>(null);
     const [errorMessage, setErrorMessage] = useState("");
     const { embedURL: embedBaseURL } = useSettingsSnapshot();
 
@@ -1738,6 +1756,12 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         : "";
     const [embedCopied, handleCopyEmbedLink] = useClipboardCopy(iframeHTML);
 
+    const onRootClose = () => {
+        if (props.variant != "inline") props.onRootClose();
+    };
+    const onClose = () => {
+        if (props.variant != "inline") props.onClose();
+    };
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -1789,98 +1813,219 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         }
     };
 
-    return (
-        <TitledNestedSidebarDrawer
-            anchor="right"
-            {...{ open, onClose }}
-            onRootClose={handleRootClose}
-            title={t("manage_link")}
-        >
-            <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
-                <ManageLayout
-                    {...{
-                        collection,
-                        onRootClose,
-                        onRemotePull,
-                        setBlockingLoad,
-                    }}
-                />
-                <ManagePublicCollect
-                    {...{ publicURL }}
-                    onUpdate={handlePublicURLUpdate}
-                />
-                <ManageLinkExpiry
+    const content = (
+        <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
+            <ManageLayout
+                {...{ collection, onRootClose, onRemotePull, setBlockingLoad }}
+            />
+            <ManagePublicCollect
+                {...{ publicURL }}
+                onUpdate={handlePublicURLUpdate}
+            />
+            <ManageLinkExpiry
+                {...{ onRootClose, publicURL }}
+                onUpdate={handlePublicURLUpdate}
+            />
+            <RowButtonGroup>
+                <ManageDeviceLimit
                     {...{ onRootClose, publicURL }}
                     onUpdate={handlePublicURLUpdate}
                 />
-                <RowButtonGroup>
-                    <ManageDeviceLimit
-                        {...{ onRootClose, publicURL }}
-                        onUpdate={handlePublicURLUpdate}
-                    />
-                    <RowButtonDivider />
-                    <ManageDownloadAccess
-                        {...{ publicURL }}
-                        onUpdate={handlePublicURLUpdate}
-                    />
-                    <RowButtonDivider />
-                    <ManageJoinAlbum
-                        {...{ publicURL }}
-                        onUpdate={handlePublicURLUpdate}
-                    />
-                    <RowButtonDivider />
-                    <ManageLinkPassword
-                        {...{ publicURL }}
-                        onUpdate={handlePublicURLUpdate}
-                    />
-                </RowButtonGroup>
-                <RowButtonGroup>
-                    <RowButton
-                        startIcon={
-                            copied ? (
-                                <DoneIcon sx={{ color: "accent.main" }} />
-                            ) : (
-                                <ContentCopyIcon />
-                            )
-                        }
-                        onClick={handleCopyLink}
-                        label={t("copy_link")}
-                    />
-                    <RowButtonDivider />
-                    <RowButton
-                        startIcon={
-                            embedCopied ? (
-                                <DoneIcon sx={{ color: "accent.main" }} />
-                            ) : (
-                                <CodeIcon />
-                            )
-                        }
-                        onClick={handleCopyEmbedLink}
-                        label={t("copy_embed_html")}
-                    />
-                </RowButtonGroup>
-                <RowButtonGroup>
-                    <RowButton
+                <RowButtonDivider />
+                <ManageDownloadAccess
+                    {...{ publicURL }}
+                    onUpdate={handlePublicURLUpdate}
+                />
+                <RowButtonDivider />
+                <ManageJoinAlbum
+                    {...{ publicURL }}
+                    onUpdate={handlePublicURLUpdate}
+                />
+                <RowButtonDivider />
+                <ManageLinkPassword
+                    {...{ publicURL }}
+                    onUpdate={handlePublicURLUpdate}
+                />
+            </RowButtonGroup>
+            <RowButtonGroup>
+                <RowButton
+                    startIcon={
+                        copied ? (
+                            <DoneIcon sx={{ color: "accent.main" }} />
+                        ) : (
+                            <ContentCopyIcon />
+                        )
+                    }
+                    onClick={handleCopyLink}
+                    label={t("copy_link")}
+                />
+                <RowButtonDivider />
+                <RowButton
+                    startIcon={
+                        embedCopied ? (
+                            <DoneIcon sx={{ color: "accent.main" }} />
+                        ) : (
+                            <CodeIcon />
+                        )
+                    }
+                    onClick={handleCopyEmbedLink}
+                    label={t("copy_embed_html")}
+                />
+            </RowButtonGroup>
+            <RowButtonGroup>
+                <RowButton
+                    color="critical"
+                    startIcon={<RemoveCircleOutlinedIcon />}
+                    onClick={handleRemovePublicLink}
+                    label={t("remove_link")}
+                />
+            </RowButtonGroup>
+            {errorMessage && (
+                <Typography
+                    variant="small"
+                    sx={{ color: "critical.main", textAlign: "center" }}
+                >
+                    {errorMessage}
+                </Typography>
+            )}
+        </Stack>
+    );
+
+    if (props.variant == "inline") {
+        return (
+            <ThemeProvider theme={sidebarTheme}>
+                <Stack
+                    ref={panelRef}
+                    component="section"
+                    aria-label={t("manage_link")}
+                    sx={[
+                        sidebarStyles,
+                        {
+                            gap: 2,
+                            position: "relative",
+                            minWidth: 0,
+                            borderRadius: 3,
+                            overflow: "hidden",
+                        },
+                    ]}
+                >
+                    <Box sx={{ minWidth: 0, p: 1 }}>
+                        <SidebarPanelContext.Provider
+                            value={() => panelRef.current}
+                        >
+                            <SidebarDrawerDepthContext.Provider value={1}>
+                                <Stack sx={{ gap: 1 }}>
+                                    <ManageLayout
+                                        variant="inline"
+                                        {...{
+                                            collection,
+                                            onRootClose,
+                                            onRemotePull,
+                                        }}
+                                    />
+                                    <ManagePublicCollect
+                                        variant="inline"
+                                        publicURL={publicURL}
+                                        onUpdate={handlePublicURLUpdate}
+                                    />
+                                    <ManageLinkExpiry
+                                        variant="inline"
+                                        {...{ onRootClose, publicURL }}
+                                        onUpdate={handlePublicURLUpdate}
+                                    />
+                                    <ManageDeviceLimit
+                                        variant="inline"
+                                        {...{ onRootClose, publicURL }}
+                                        onUpdate={handlePublicURLUpdate}
+                                    />
+                                    <ManageDownloadAccess
+                                        variant="inline"
+                                        publicURL={publicURL}
+                                        onUpdate={handlePublicURLUpdate}
+                                    />
+                                    <ManageJoinAlbum
+                                        variant="inline"
+                                        publicURL={publicURL}
+                                        onUpdate={handlePublicURLUpdate}
+                                    />
+                                    <ManageLinkPassword
+                                        variant="inline"
+                                        publicURL={publicURL}
+                                        onUpdate={handlePublicURLUpdate}
+                                    />
+                                </Stack>
+                                <Stack sx={{ mt: 2, gap: 1 }}>
+                                    <RowCard
+                                        title={t("copy_link")}
+                                        onClick={handleCopyLink}
+                                        endIcon={
+                                            copied ? (
+                                                <DoneIcon />
+                                            ) : (
+                                                <ContentCopyIcon />
+                                            )
+                                        }
+                                    />
+                                    <RowCard
+                                        title={t("copy_embed_html")}
+                                        onClick={handleCopyEmbedLink}
+                                        endIcon={
+                                            embedCopied ? (
+                                                <DoneIcon />
+                                            ) : (
+                                                <CodeIcon />
+                                            )
+                                        }
+                                    />
+                                </Stack>
+                            </SidebarDrawerDepthContext.Provider>
+                        </SidebarPanelContext.Provider>
+                    </Box>
+                    <FocusVisibleButton
                         color="critical"
-                        startIcon={<RemoveCircleOutlinedIcon />}
                         onClick={handleRemovePublicLink}
-                        label={t("remove_link")}
-                    />
-                </RowButtonGroup>
-                {errorMessage && (
-                    <Typography
-                        variant="small"
-                        sx={{ color: "critical.main", textAlign: "center" }}
+                        sx={{
+                            alignSelf: "flex-start",
+                            ml: 1,
+                            px: 1,
+                            py: 1,
+                            bgcolor: "transparent",
+                            color: "critical.main",
+                            fontSize: 14,
+                            fontWeight: 600,
+                            "&:hover": { bgcolor: "fill.faintHover" },
+                        }}
                     >
-                        {errorMessage}
-                    </Typography>
-                )}
-            </Stack>
+                        {t("remove_link")}
+                    </FocusVisibleButton>
+                    {errorMessage && (
+                        <Typography
+                            variant="small"
+                            sx={{ px: 2, color: "critical.main" }}
+                        >
+                            {errorMessage}
+                        </Typography>
+                    )}
+                </Stack>
+            </ThemeProvider>
+        );
+    }
+
+    return (
+        <TitledNestedSidebarDrawer
+            anchor="right"
+            open={props.open}
+            onClose={onClose}
+            onRootClose={handleRootClose}
+            title={t("manage_link")}
+        >
+            {content}
         </TitledNestedSidebarDrawer>
     );
 };
 
 interface ManagePublicLinkSettingProps {
+    variant?: "inline";
     publicURL: PublicURL;
     onUpdate: (req: UpdatePublicURLAttributes) => Promise<void>;
 }
@@ -1890,6 +2035,7 @@ type ManagePublicLinkSettingDrawerProps = ManagePublicLinkSettingProps & {
 };
 
 const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
+    variant,
     publicURL,
     onUpdate,
 }) => {
@@ -1900,6 +2046,25 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
     const handleCommentSetting = () => {
         void onUpdate({ enableComment: !publicURL.enableComment });
     };
+
+    if (variant == "inline") {
+        return (
+            <Stack sx={{ gap: 1 }}>
+                <PublicLinkSwitch
+                    variant={variant}
+                    label={t("allow_adding_photos")}
+                    checked={publicURL.enableCollect}
+                    onClick={handleCollectSetting}
+                />
+                <PublicLinkSwitch
+                    variant={variant}
+                    label={t("enable_comments")}
+                    checked={publicURL.enableComment}
+                    onClick={handleCommentSetting}
+                />
+            </Stack>
+        );
+    }
 
     return (
         <Stack>
@@ -1921,6 +2086,7 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
 };
 
 const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
+    variant,
     onRootClose,
     publicURL,
     onUpdate,
@@ -1937,17 +2103,21 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
 
     return (
         <>
-            <RowButtonGroup>
-                <RowButton
-                    onClick={showExpiryOptions}
-                    endIcon={<ChevronRightIcon />}
-                    label={t("link_expiry")}
-                    color={
-                        isLinkExpired(publicURL.validTill)
-                            ? "critical"
-                            : "primary"
+            {variant == "inline" ? (
+                <RowCard
+                    title={
+                        <Box
+                            component="span"
+                            sx={{
+                                color: isLinkExpired(publicURL.validTill)
+                                    ? "critical.main"
+                                    : "text.base",
+                            }}
+                        >
+                            {t("link_expiry")}
+                        </Box>
                     }
-                    caption={
+                    subtitle={
                         isLinkExpired(publicURL.validTill)
                             ? t("link_expired")
                             : publicURL.validTill
@@ -1956,8 +2126,31 @@ const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
                                 })
                               : t("never")
                     }
+                    onClick={showExpiryOptions}
                 />
-            </RowButtonGroup>
+            ) : (
+                <RowButtonGroup>
+                    <RowButton
+                        onClick={showExpiryOptions}
+                        endIcon={<ChevronRightIcon />}
+                        label={t("link_expiry")}
+                        color={
+                            isLinkExpired(publicURL.validTill)
+                                ? "critical"
+                                : "primary"
+                        }
+                        caption={
+                            isLinkExpired(publicURL.validTill)
+                                ? t("link_expired")
+                                : publicURL.validTill
+                                  ? formattedDateTime(publicURL.validTill, {
+                                        omitWeekdayWhenYearIncluded: true,
+                                    })
+                                  : t("never")
+                        }
+                    />
+                </RowButtonGroup>
+            )}
             <TitledNestedSidebarDrawer
                 anchor="right"
                 {...expiryOptionsVisibilityProps}
@@ -2017,6 +2210,7 @@ const microsecsAfter = (after: "hour" | "day" | "week" | "month" | "year") => {
 };
 
 const ManageDeviceLimit: React.FC<ManagePublicLinkSettingDrawerProps> = ({
+    variant,
     onRootClose,
     publicURL,
     onUpdate,
@@ -2033,16 +2227,28 @@ const ManageDeviceLimit: React.FC<ManagePublicLinkSettingDrawerProps> = ({
 
     return (
         <>
-            <RowButton
-                label={t("device_limit")}
-                caption={
-                    publicURL.deviceLimit == 0
-                        ? t("none")
-                        : publicURL.deviceLimit.toString()
-                }
-                onClick={showDeviceOptions}
-                endIcon={<ChevronRightIcon />}
-            />
+            {variant == "inline" ? (
+                <RowCard
+                    title={t("device_limit")}
+                    subtitle={
+                        publicURL.deviceLimit == 0
+                            ? t("none")
+                            : publicURL.deviceLimit.toString()
+                    }
+                    onClick={showDeviceOptions}
+                />
+            ) : (
+                <RowButton
+                    label={t("device_limit")}
+                    caption={
+                        publicURL.deviceLimit == 0
+                            ? t("none")
+                            : publicURL.deviceLimit.toString()
+                    }
+                    onClick={showDeviceOptions}
+                    endIcon={<ChevronRightIcon />}
+                />
+            )}
             <TitledNestedSidebarDrawer
                 anchor="right"
                 {...deviceOptionsVisibilityProps}
@@ -2077,6 +2283,7 @@ const deviceLimitOptions = () =>
     }));
 
 const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
+    variant,
     publicURL,
     onUpdate,
 }) => {
@@ -2101,7 +2308,8 @@ const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
     };
 
     return (
-        <RowSwitch
+        <PublicLinkSwitch
+            variant={variant}
             label={t("allow_downloads")}
             checked={publicURL.enableDownload}
             onClick={handleFileDownloadSetting}
@@ -2110,6 +2318,7 @@ const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
 };
 
 const ManageJoinAlbum: React.FC<ManagePublicLinkSettingProps> = ({
+    variant,
     publicURL,
     onUpdate,
 }) => {
@@ -2118,7 +2327,8 @@ const ManageJoinAlbum: React.FC<ManagePublicLinkSettingProps> = ({
     };
 
     return (
-        <RowSwitch
+        <PublicLinkSwitch
+            variant={variant}
             label={t("allow_joining_album")}
             checked={publicURL.enableJoin}
             onClick={handleJoinSetting}
@@ -2127,6 +2337,7 @@ const ManageJoinAlbum: React.FC<ManagePublicLinkSettingProps> = ({
 };
 
 const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
+    variant,
     publicURL,
     onUpdate,
 }) => {
@@ -2152,28 +2363,50 @@ const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
 
     return (
         <>
-            <RowSwitch
+            <PublicLinkSwitch
+                variant={variant}
                 label={t("password_lock")}
                 checked={publicURL.passwordEnabled}
                 onClick={handlePasswordChangeSetting}
             />
             <SetPublicLinkPassword
                 {...setPasswordVisibilityProps}
-                {...{ publicURL, onUpdate }}
+                {...{ variant, publicURL, onUpdate }}
             />
         </>
     );
 };
 
+const PublicLinkSwitch: React.FC<
+    React.ComponentProps<typeof RowSwitch> & { variant?: "inline" }
+> = ({ variant, label, checked, onClick }) =>
+    variant == "inline" ? (
+        <RowCard
+            title={label}
+            endIcon={
+                <EnteSwitch
+                    checked={checked}
+                    onChange={onClick}
+                    slotProps={{ input: { "aria-label": label } }}
+                />
+            }
+        />
+    ) : (
+        <RowSwitch {...{ label, checked, onClick }} />
+    );
+
 type SetPublicLinkPasswordProps = ModalVisibilityProps &
     ManagePublicLinkSettingProps;
 
 const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
+    variant,
     open,
     onClose,
     publicURL,
     onUpdate,
 }) => {
+    const inPanel = !!useContext(SidebarPanelContext);
+    const titleID = useId();
     const savePassword: SingleInputFormProps["onSubmit"] = async (password) => {
         await enablePublicUrlPassword(password);
         publicURL.passwordEnabled = true;
@@ -2192,10 +2425,81 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
         });
     };
 
-    // This dialog is nested inside the sidebar.
+    const passwordForm = (
+        <SingleInputForm
+            variant={variant == "inline" ? "people" : undefined}
+            inputType="password"
+            label={t("password")}
+            submitButtonColor="primary"
+            submitButtonTitle={t("lock")}
+            onCancel={onClose}
+            onSubmit={savePassword}
+        />
+    );
+
+    if (variant == "inline") {
+        return (
+            <Dialog
+                {...{ open, onClose }}
+                aria-labelledby={titleID}
+                maxWidth={false}
+                slotProps={{ paper: { sx: v2PaperSx } }}
+            >
+                <Stack sx={{ p: "20px", gap: "20px" }}>
+                    <Stack direction="row" sx={v2HeaderRowSx}>
+                        <DialogTitle
+                            id={titleID}
+                            sx={{
+                                ...v2TitleSx,
+                                fontSize: "20px",
+                                lineHeight: "28px",
+                                "&&": { p: 0 },
+                            }}
+                        >
+                            {t("password_lock")}
+                        </DialogTitle>
+                        <IconButton
+                            aria-label={t("close")}
+                            onClick={onClose}
+                            sx={v2CloseButtonSx}
+                        >
+                            <CloseIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                    </Stack>
+                    {passwordForm}
+                </Stack>
+            </Dialog>
+        );
+    }
+
+    const form = (
+        <Stack sx={{ gap: 3, p: 1.5 }}>
+            {!inPanel && (
+                <Typography id={titleID} variant="h3" sx={{ px: 1, py: 0.5 }}>
+                    {t("password_lock")}
+                </Typography>
+            )}
+            {passwordForm}
+        </Stack>
+    );
+
+    if (inPanel) {
+        return (
+            <TitledNestedSidebarDrawer
+                anchor="right"
+                {...{ open, onClose }}
+                onRootClose={onClose}
+                title={t("password_lock")}
+            >
+                {form}
+            </TitledNestedSidebarDrawer>
+        );
+    }
+
     return (
         <Dialog
             {...{ open, onClose }}
+            aria-labelledby={titleID}
             disablePortal
             slotProps={{
                 backdrop: { sx: { position: "absolute" } },
@@ -2205,30 +2509,20 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
             maxWidth={"sm"}
             fullWidth
         >
-            <Stack sx={{ gap: 3, p: 1.5 }}>
-                <Typography variant="h3" sx={{ px: 1, py: 0.5 }}>
-                    {t("password_lock")}
-                </Typography>
-                <SingleInputForm
-                    inputType="password"
-                    label={t("password")}
-                    submitButtonColor="primary"
-                    submitButtonTitle={t("lock")}
-                    onCancel={onClose}
-                    onSubmit={savePassword}
-                />
-            </Stack>
+            {form}
         </Dialog>
     );
 };
 
 interface ManageLayoutProps {
+    variant?: "inline";
     onRootClose: () => void;
     collection: Collection;
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
 }
 
 const ManageLayout: React.FC<ManageLayoutProps> = ({
+    variant,
     onRootClose,
     collection,
     onRemotePull,
@@ -2265,19 +2559,28 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
 
     return (
         <>
-            <RowButtonGroup>
-                <RowButton
-                    label={t("album_layout")}
-                    caption={layoutLabel(currentLayout)}
+            {variant == "inline" ? (
+                <RowCard
+                    title={t("album_layout")}
+                    subtitle={layoutLabel(currentLayout)}
                     onClick={showLayoutOptions}
-                    endIcon={<ChevronRightIcon />}
                 />
-            </RowButtonGroup>
+            ) : (
+                <RowButtonGroup>
+                    <RowButton
+                        label={t("album_layout")}
+                        caption={layoutLabel(currentLayout)}
+                        onClick={showLayoutOptions}
+                        endIcon={<ChevronRightIcon />}
+                    />
+                </RowButtonGroup>
+            )}
             <TitledNestedSidebarDrawer
                 anchor="right"
                 {...layoutOptionsVisibilityProps}
                 onRootClose={onRootClose}
                 title={t("album_layout")}
+                titleInline={variant == "inline"}
             >
                 <Stack sx={{ py: "20px", px: "8px" }}>
                     <RowButtonGroup>

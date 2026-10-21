@@ -1,7 +1,7 @@
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { useDeleteEmptyAlbums } from "../src/components/Collections/useDeleteEmptyAlbums";
+import { useDeleteEmptyAlbums } from "../src/components/collections/useDeleteEmptyAlbums";
 
 const mocks = vi.hoisted(() => ({
     showMiniDialog: vi.fn<(attributes: MiniDialogAttributes) => void>(),

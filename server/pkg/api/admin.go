@@ -511,6 +511,26 @@ func (h *AdminHandler) ReQueueItem(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
+func (h *AdminHandler) RepairDeletedCollectionShare(c *gin.Context) {
+	var request ente.RepairDeletedCollectionShareRequest
+	if err := handler.BindJSON(c, &request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	updated, err := h.CollectionRepo.RepairDeletedCollectionShare(c.Request.Context(), request.CollectionID, request.ToUserID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logrus.WithFields(logrus.Fields{
+		"admin_id":      auth.GetUserID(c.Request.Header),
+		"collection_id": request.CollectionID,
+		"to_user_id":    request.ToUserID,
+		"updated":       updated,
+	}).Info("repaired deleted collection share")
+	c.JSON(http.StatusOK, gin.H{"updated": updated})
+}
+
 func (h *AdminHandler) InitializeFileCounts(c *gin.Context) {
 	var r ente.AdminOpsForUserRequest
 	if err := handler.BindJSON(c, &r); err != nil {

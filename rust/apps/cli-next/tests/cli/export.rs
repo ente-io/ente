@@ -151,12 +151,12 @@ fn export_metadata_updates_and_repairs_preserve_source_values() -> TestResult {
             assert_eq!(record["modificationTime"]["timestamp"],"1700000001");
             assert_eq!(fs::read(root.join("Family/A.jpg"))?,original);
             let unchanged=export(&home,&root,&["--album","Family"]);
-            assert_eq!(unchanged["changes"],json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0}));
+            assert_eq!(unchanged["changes"],json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0}));
             assert_eq!(fs::metadata(&sidecar)?.modified()?,sidecar_time);
             assert_eq!(fs::metadata(root.join("Family/A.jpg"))?.modified()?,original_time);
             let before_locale=fs::read(&sidecar)?;
             let localized=success(home.command(&["photos","export",root.to_str().unwrap(),"--album","Family","--json"]).env("LC_ALL","tr_TR.UTF-8").env("TZ","Pacific/Honolulu").output()?);
-            assert_eq!(serde_json::from_slice::<Value>(&localized.stdout)?["changes"],json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0}));
+            assert_eq!(serde_json::from_slice::<Value>(&localized.stdout)?["changes"],json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0}));
             assert_eq!(fs::read(&sidecar)?,before_locale);
             assert_eq!(fs::metadata(&sidecar)?.modified()?,sidecar_time);
             fs::File::options().write(true).open(root.join("Family/A.jpg"))?.set_modified(UNIX_EPOCH+Duration::from_secs(99))?;
@@ -209,7 +209,7 @@ fn export_metadata_updates_and_repairs_preserve_source_values() -> TestResult {
             assert!(failure(&output).contains("locally changed media"));
             let result: Value=serde_json::from_slice(&output.stdout)?;
             assert_eq!(result["complete"],false);
-            assert_eq!(result["conflicts"],1);
+            assert_eq!(result["failures"]["conflicts"],1);
             assert_eq!(fs::read(root.join("Family/Renamed.jpg"))?,vec![0;original.len()]);
             assert_eq!(read_json(&root.join("Travel/metadata/Renamed.jpg.json"))["description"],"source advanced");
             let after: i64=replica.query_row("SELECT files_cursor FROM photos_collections WHERE id=?1",[family],|r|r.get(0))?;
@@ -278,7 +278,7 @@ fn export_metadata_failure_does_not_block_an_independent_album() -> TestResult {
                 result["copies"],
                 json!({"expected":2,"completed":1,"pending":1})
             );
-            assert_eq!(result["failures"], 1);
+            assert_eq!(result["failures"]["total"], 1);
             assert!(
                 read_json(&root.join("Family/metadata/A.jpg.json"))
                     .get("custom")
@@ -309,12 +309,12 @@ fn export_retention_restoration_and_album_removal_preserve_history() -> TestResu
             export(&home, &root, &["--album", "Travel"]);
             move_file(origin,&account,family,(travel,&travel_key),(file,&key)).await;
             let result=export(&home,&root,&["--album","Family"]);
-            assert_eq!(result["changes"]["retained"],1);
+            assert_eq!(result["changes"]["movedToTrash"],1);
             let retained=root.join("Trash/Family/Renamed.jpg");
             assert_eq!(fs::read(&retained)?,original);
             let retained_record=fs::read(root.join("Trash/Family/metadata/Renamed.jpg.json"))?;
             let retained_time=fs::metadata(&retained)?.modified()?;
-            assert_eq!(export(&home,&root,&["--album","Family"])["changes"]["retained"],0);
+            assert_eq!(export(&home,&root,&["--album","Family"])["changes"]["movedToTrash"],0);
             place(origin,&account,family,&family_key,file,&key,"add-files").await;
             export(&home,&root,&["--album","Family"]);
             assert_eq!(objects.reads(),initial_reads+1);
@@ -404,7 +404,7 @@ fn export_adopts_relocated_output_and_verifies_later_selections() -> TestResult 
             ]);
             assert!(failure(&output).contains("locally changed media"));
             assert_eq!(
-                serde_json::from_slice::<Value>(&output.stdout)?["conflicts"],
+                serde_json::from_slice::<Value>(&output.stdout)?["failures"]["conflicts"],
                 1
             );
             assert_eq!(fs::read(relocated.join("Work/Work.jpg"))?, b"xxxx");
@@ -448,7 +448,7 @@ fn export_restores_a_trashed_original_from_retained_output() -> TestResult {
             .await;
             let trashed = export(&home, &root, &["--album", "Work"]);
             assert_eq!(trashed["copies"]["expected"], 0);
-            assert_eq!(trashed["changes"]["retained"], 1);
+            assert_eq!(trashed["changes"]["movedToTrash"], 1);
             assert!(!root.join("Work/Work.jpg").exists());
             assert!(!root.join("Work/metadata/Work.jpg.json").exists());
             assert_eq!(fs::read(root.join("Trash/Work/Work.jpg"))?, b"work");
@@ -540,7 +540,7 @@ fn export_destination_conflicts_do_not_block_other_jobs() -> TestResult {
                 "2",
                 "--json",
             ]);
-            assert!(failure(&output).contains("unrelated occupant"));
+            assert!(failure(&output).contains("exists and is not part of this export"));
             let result: Value = serde_json::from_slice(&output.stdout)?;
             assert_eq!(result["copies"]["completed"], 1);
             assert_eq!(result["copies"]["pending"], total);
@@ -895,7 +895,12 @@ fn export_live_pairs_retry_and_reuse_without_rewriting_unchanged_output() -> Tes
             let destination = tempfile::tempdir()?;
             let root = destination.path().join("export");
             objects.interrupt_reads(1);
-            let result = export(&home, &root, &[]);
+            let output = success(
+                home.command(&["photos", "export", root.to_str().unwrap(), "--json"])
+                    .output()?,
+            );
+            assert!(String::from_utf8_lossy(&output.stderr).contains("retrying in "));
+            let result: Value = serde_json::from_slice(&output.stdout)?;
             assert_eq!(result["copies"]["completed"], 3);
             assert_eq!(objects.reads(), 3);
             for folder in ["Live", "Copies"] {
@@ -966,7 +971,7 @@ fn export_live_pairs_retry_and_reuse_without_rewriting_unchanged_output() -> Tes
             );
             assert_eq!(
                 result["changes"],
-                json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0})
+                json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0})
             );
             assert_eq!(objects.reads(), reads);
             for (path, before) in paths.iter().zip(unchanged) {
@@ -1200,7 +1205,7 @@ fn export_rejects_invalid_live_archives_and_component_hashes() -> TestResult {
                 result["copies"],
                 json!({"expected":8,"completed":1,"pending":7})
             );
-            assert_eq!(result["failures"], 7);
+            assert_eq!(result["failures"]["total"], 7);
             assert_eq!(fs::read(root.join("Album/Good.jpg"))?, b"independent");
             assert_eq!(fs::read_dir(root.join("Album/metadata"))?.count(), 1);
             for index in 0..archives.len() {
@@ -1331,6 +1336,9 @@ fn export_names_are_portable_and_stable() -> TestResult {
             ("IMG-1.jpg", Some(0), "IMG-1-1.jpg"),
             ("CON.jpg", Some(0), "CON-1.jpg"),
             ("CON.extra.jpg", Some(0), "CON-1.extra.jpg"),
+            ("CONIN$.jpg", Some(0), "CONIN$-1.jpg"),
+            ("CONOUT$.jpg", Some(0), "CONOUT$-1.jpg"),
+            ("NUL .jpg", Some(0), "NUL -1.jpg"),
             ("bad:name.jpg", Some(0), "bad_name.jpg"),
             ("bad_name.jpg", Some(0), "bad_name-1.jpg"),
             ("Straße.jpg", Some(0), "Straße.jpg"),
@@ -1392,7 +1400,7 @@ fn export_names_are_portable_and_stable() -> TestResult {
         );
         assert_eq!(
             export(&home, &root, &[])["changes"],
-            json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0})
+            json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0})
         );
         let fresh = TestHome::new();
         fresh.write_vault(&home.read_vault());
@@ -1413,7 +1421,7 @@ fn export_names_are_portable_and_stable() -> TestResult {
         );
         assert_eq!(
             export(&fresh, &root, &[])["changes"],
-            json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0})
+            json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0})
         );
         Ok(())
     })
@@ -1516,7 +1524,7 @@ fn export_allocates_live_pairs_from_their_actual_extensions() -> TestResult {
             let reads = objects.reads();
             assert_eq!(
                 export(&home, &root, &[])["changes"],
-                json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0})
+                json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0})
             );
             let fresh = TestHome::new();
             fresh.write_vault(&home.read_vault());
@@ -1664,7 +1672,7 @@ fn export_refills_transfers(live: bool) -> TestResult {
             }
             assert_eq!(
                 export(&home, &root, &["--album", &album.to_string()])["changes"],
-                json!({"exported":0,"metadataUpdated":0,"renamed":0,"retained":0})
+                json!({"exported":0,"metadataUpdated":0,"renamed":0,"movedToTrash":0})
             );
             Ok(())
         })

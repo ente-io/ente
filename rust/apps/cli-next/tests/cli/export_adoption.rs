@@ -191,15 +191,42 @@ fn snapshot(root: &Path) -> BTreeMap<PathBuf, (Vec<u8>, std::time::SystemTime)> 
 
 #[test]
 fn adoption_reuses_captured_producer_shapes_and_converts_current_names() {
-    for producer in ["go", "desktop"] {
+    for producer in ["go", "desktop", "rust"] {
         let mut server = mockito::Server::new();
-        let (mut engine, downloads) = new_engine(&server, producer);
+        let (mut engine, downloads) =
+            new_engine(&server, if producer == "rust" { "go" } else { producer });
         engine.hardlinks = true;
         let requests: Vec<_> = downloads
             .iter()
             .map(|(id, bytes)| download(&mut server, *id, bytes, 0))
             .collect();
         let root = engine.root();
+        let pair = if producer == "rust" {
+            "Pair.heic"
+        } else {
+            "Pair.jpg"
+        };
+        if producer == "rust" {
+            for folder in ["Family", "Live Pair"] {
+                nominal_live_record(&root, folder);
+                let folder = root.join(folder);
+                fs::rename(folder.join("Pair.jpg"), folder.join(pair)).unwrap();
+                fs::rename(folder.join("Pair.mov"), folder.join("Pair.MOV")).unwrap();
+            }
+            let folder = root.join("Family");
+            fs::write(folder.join("Pair.xmp"), b"unrelated metadata").unwrap();
+            fs::copy(folder.join(pair), folder.join("Pair.png")).unwrap();
+            let before = snapshot(&root);
+            let error = engine.prepare(engine.options(true, &[])).err().unwrap();
+            assert!(
+                error
+                    .to_string()
+                    .contains("ambiguous legacy Live Photo component"),
+                "{error:#}"
+            );
+            assert_eq!(snapshot(&root), before);
+            fs::remove_file(folder.join("Pair.png")).unwrap();
+        }
         if producer == "desktop" {
             fs::rename(root.join("Family"), root.join("Family(1)")).unwrap();
             fs::rename(
@@ -266,11 +293,23 @@ fn adoption_reuses_captured_producer_shapes_and_converts_current_names() {
         assert!(root.join("Renamed/Portrait.jpg").is_file());
         assert!(
             same_file::is_same_file(
-                root.join("Renamed/Pair.jpg"),
-                root.join("Live Pair/Pair.jpg")
+                root.join("Renamed").join(pair),
+                root.join("Live Pair").join(pair)
             )
             .unwrap()
         );
+        if producer == "rust" {
+            assert_eq!(
+                fs::read(root.join("Renamed/Pair.xmp")).unwrap(),
+                b"unrelated metadata"
+            );
+            assert_component(
+                &root,
+                "Renamed",
+                "Pair.MOV",
+                format!("export fixture {PAIR} component 1").as_bytes(),
+            );
+        }
         assert!(root.join("Renamed/Live-1.jpg").is_file());
         assert!(root.join("Renamed/Live.mov").is_file());
         assert_eq!(
@@ -498,6 +537,18 @@ fn adoption_history_resumes_after_media_move_and_keeps_the_full_scope() {
     downloaded.assert();
     assert!(!root.join("export_status.json").exists());
     assert_eq!(count(&engine.db(), "SELECT bound FROM export"), 1);
+    engine.catalog.files.remove(&(FAMILY, PHOTO));
+    assert!(engine.run(false, &[]).unwrap().complete);
+    assert_eq!(
+        fs::read(root.join("Trash/Family/Pair.jpg")).unwrap(),
+        b"existing trash"
+    );
+    assert!(root.join("Trash/Family-1/Photo.jpg").is_file());
+    assert!(
+        root.join("Trash/Family-1/metadata/Photo.jpg.json")
+            .is_file()
+    );
+    assert!(engine.run(false, &[]).unwrap().complete);
 }
 
 #[test]
@@ -567,7 +618,7 @@ fn adoption_requires_initial_presence_and_never_treats_a_failed_refresh_as_histo
             .err()
             .unwrap()
             .to_string()
-            .contains("at least one")
+            .contains("no existing original could be matched to this account")
     );
     assert_eq!(snapshot(&root), before);
 }
@@ -575,7 +626,10 @@ fn adoption_requires_initial_presence_and_never_treats_a_failed_refresh_as_histo
 #[test]
 fn adoption_hashless_verification_downloads_once_per_source_and_keeps_scope_per_invocation() {
     let mut server = mockito::Server::new();
-    let (mut engine, downloads) = new_engine(&server, "desktop");
+    let (mut engine, downloads) = new_engine(&server, "go");
+    for folder in ["Family", "Live Pair"] {
+        nominal_live_record(&engine.root(), folder);
+    }
     for ((_, id), remote) in &mut engine.catalog.files {
         if ![PHOTO, PAIR].contains(id) {
             continue;
@@ -990,22 +1044,69 @@ fn adoption_defers_wholly_missing_hashless_originals_until_after_acceptance() {
     requested.assert();
 }
 
+fn nominal_live_record(root: &Path, folder: &str) {
+    let path = root.join(folder).join(".meta/Pair.jpg.json");
+    let mut record = read_json(&path);
+    record["info"]["fileNames"] = json!(["Pair.jpg"]);
+    fs::write(&path, serde_json::to_vec(&record).unwrap()).unwrap();
+    fs::rename(path, root.join(folder).join(".meta/Pair_0.jpg.json")).unwrap();
+}
+
 #[test]
-fn adoption_verifies_a_single_undeclared_live_survivor_before_preserving_it() {
+fn adoption_leaves_unmatched_old_rust_live_files_for_ordinary_conflict_handling() {
+    for renamed in [false, true] {
+        let server = mockito::Server::new();
+        let (mut engine, _) = new_engine(&server, "go");
+        let root = engine.root();
+        nominal_live_record(&root, "Family");
+        fs::write(root.join("Family/Pair.mov"), b"edited video").unwrap();
+        if renamed {
+            rename(&mut engine, FAMILY, PAIR, "Holiday.jpg");
+        }
+        let export = engine.prepare(engine.options(true, &[])).unwrap();
+        assert_eq!(
+            fs::read(root.join("Family/Pair.mov")).unwrap(),
+            b"edited video"
+        );
+        assert_eq!(
+            fs::read(root.join("Trash/Family/Pair.jpg")).unwrap(),
+            format!("export fixture {PAIR} component 0").as_bytes()
+        );
+        let result = engine.execute(export).unwrap();
+        assert_eq!(result.complete, renamed, "{}", result.json);
+        assert_eq!(
+            fs::read(root.join("Family/Pair.mov")).unwrap(),
+            b"edited video"
+        );
+        if renamed {
+            assert_component(
+                &root,
+                "Family",
+                "Holiday.mov",
+                format!("export fixture {PAIR} component 1").as_bytes(),
+            );
+        } else {
+            assert_eq!(result.json["failures"]["conflicts"], 1);
+            fs::remove_file(root.join("Family/Pair.mov")).unwrap();
+            assert!(engine.run(false, &[]).unwrap().complete);
+            assert_component(
+                &root,
+                "Family",
+                "Pair.mov",
+                format!("export fixture {PAIR} component 1").as_bytes(),
+            );
+        }
+    }
+}
+
+#[test]
+fn adoption_preserves_a_single_hash_identified_live_survivor() {
     let mut server = mockito::Server::new();
     let (mut engine, downloads) = new_engine(&server, "go");
     let root = engine.root();
-    let path = root.join("Family/.meta/Pair.jpg.json");
-    let mut record = read_json(&path);
-    record["info"]["fileNames"] = json!(["Pair.jpg"]);
-    fs::write(path, serde_json::to_vec(&record).unwrap()).unwrap();
+    nominal_live_record(&root, "Family");
     fs::remove_file(root.join("Family/Pair.mov")).unwrap();
     let original = fs::read(root.join("Family/Pair.jpg")).unwrap();
-    fs::write(root.join("Family/Pair.jpg"), b"edited survivor").unwrap();
-    let before = snapshot(&root);
-    assert!(engine.run(true, &[]).is_err());
-    assert_eq!(snapshot(&root), before);
-    fs::write(root.join("Family/Pair.jpg"), &original).unwrap();
     for (path, _) in snapshot(&root) {
         if !path.to_string_lossy().ends_with(".json")
             && path.as_path() != Path::new("Family/Pair.jpg")

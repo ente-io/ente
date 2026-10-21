@@ -14,7 +14,7 @@ use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 use crate::{
     api,
     args::{LoginArgs, Options},
-    parse_json, read_input,
+    output, parse_json, read_input,
     vault::{Account, AccountKeys, DbKey, State, StoredSession, Vault},
 };
 
@@ -231,10 +231,12 @@ async fn authenticate(
     credentials: &mut Credentials,
     interactive: bool,
 ) -> Result<AuthenticatedAccount> {
+    let displayed_email = output::escape_controls(&email);
     let (mut flow, mut step) = LoginFlow::prepare(client, email).await?;
     if matches!(step, LoginStep::EmailCode) {
         if interactive {
             flow.resend_code(client).await?;
+            eprintln!("Verification code sent to {displayed_email}.");
         } else {
             ensure!(
                 credentials.otp.is_some(),
@@ -254,10 +256,13 @@ async fn authenticate(
                 match flow.submit_code(client, &code).await {
                     Ok(next) => break next,
                     Err(ente_accounts::Error::IncorrectEmailVerificationCode) if interactive => {
-                        eprintln!("Incorrect email verification code. Try again.");
+                        eprintln!("Incorrect verification code. Try again.");
                     }
                     Err(ente_accounts::Error::EmailVerificationCodeExpired) if interactive => {
                         flow.resend_code(client).await?;
+                        eprintln!(
+                            "Verification code expired. A new code has been sent to {displayed_email}."
+                        );
                     }
                     Err(error) => return Err(error.into()),
                 }
@@ -298,15 +303,24 @@ async fn authenticate(
                         "passkey login requires an interactive terminal without --input or --no-input"
                     );
                     let url = flow.passkey_url(client, "ente-cli://passkey")?;
-                    eprintln!("Open this URL to verify your passkey:\n{url}");
+                    eprintln!("Opening browser for passkey authentication.");
+                    if !url::Url::parse(&url).is_ok_and(|url| {
+                        matches!(url.scheme(), "http" | "https") && open::that(url.as_str()).is_ok()
+                    }) {
+                        eprintln!(
+                            "Could not open the browser. Open this URL to complete passkey authentication:"
+                        );
+                    }
+                    eprintln!("{url}\n");
                     loop {
                         Input::<String>::new()
-                            .with_prompt("Press Enter after completing verification")
+                            .with_prompt("Press Enter after completing authentication")
                             .allow_empty(true)
                             .interact_on(&Term::stderr())?;
                         if let Some(next) = flow.poll_passkey(client).await? {
                             break next;
                         }
+                        eprintln!("Passkey authentication is not complete.");
                     }
                 } else {
                     loop {
@@ -319,7 +333,7 @@ async fn authenticate(
                         match flow.submit_code(client, &code).await {
                             Ok(next) => break next,
                             Err(ente_accounts::Error::IncorrectTotp) if interactive => {
-                                eprintln!("Incorrect TOTP code. Try again.");
+                                eprintln!("Incorrect authenticator code. Try again.");
                             }
                             Err(error) => return Err(error.into()),
                         }

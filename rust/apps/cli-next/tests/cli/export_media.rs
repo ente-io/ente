@@ -79,7 +79,7 @@ fn engine_category_filters_preserve_history_and_reuse_excluded_originals() {
     let export = engine.prepare(options).unwrap();
     let result = engine.execute(export).unwrap();
     assert!(result.complete);
-    assert_eq!(result.json["changes"]["retained"], 2);
+    assert_eq!(result.json["changes"]["movedToTrash"], 2);
     for album in ["First", "Incoming", "Trash/Second", "Trash/Owned"] {
         assert_eq!(
             fs::read(root.join(album).join("Photo.jpg")).unwrap(),
@@ -90,7 +90,7 @@ fn engine_category_filters_preserve_history_and_reuse_excluded_originals() {
         fs::read(root.join("First/.ente-excluded.part")).unwrap(),
         b"pending"
     );
-    assert_eq!(run(&mut engine, true)["changes"]["retained"], 2);
+    assert_eq!(run(&mut engine, true)["changes"]["movedToTrash"], 2);
     assert!(!root.join("First/.ente-excluded.part").exists());
     fetched.assert();
 }
@@ -155,7 +155,7 @@ fn engine_category_recovery_preserves_unknown_albums_after_database_loss() {
     let export = engine.prepare(options).unwrap();
     let result = engine.execute(export).unwrap();
     assert!(!result.complete);
-    assert_eq!(result.json["failures"], 1);
+    assert_eq!(result.json["failures"]["total"], 1);
     assert_eq!(result.completed, 1);
     for album in ["First", "Second", "Current"] {
         assert_eq!(
@@ -169,7 +169,7 @@ fn engine_category_recovery_preserves_unknown_albums_after_database_loss() {
     options.exclude_albums.push("Second".into());
     let export = engine.prepare(options).unwrap();
     assert!(engine.execute(export).unwrap().complete);
-    assert_eq!(run(&mut engine, true)["changes"]["retained"], 2);
+    assert_eq!(run(&mut engine, true)["changes"]["movedToTrash"], 2);
     engine.database = "history-only.db".into();
     let mut options = engine.options(true, &[]);
     options.exclude_shared = true;
@@ -213,7 +213,7 @@ fn engine_category_filters_recheck_recovered_metadata() {
     let export = engine.prepare(options).unwrap();
     let result = engine.execute(export).unwrap();
     assert!(!result.complete);
-    assert_eq!(result.json["failures"], 1);
+    assert_eq!(result.json["failures"]["total"], 1);
     assert_eq!(
         fs::read(engine.root().join("Second/Photo.jpg")).unwrap(),
         b"original"
@@ -263,7 +263,7 @@ fn engine_preserves_native_dates_and_metadata_overrides() {
     }
     let encrypted = blob::encrypt_json(&uploaded, &file_key(&file, &key)).unwrap();
     file["metadata"] = json!({"encryptedData":b64::encode(&encrypted.encrypted_data),"decryptionHeader":b64::encode(encrypted.decryption_header.as_bytes())});
-    let fetched = download(&mut server, 10, &bytes, 1);
+    let fetched = download(&mut server, 10, &bytes, 4);
     let mut engine = new_engine(&server, key, file.clone());
     for (index, (edits, description, location, seconds)) in [
         (json!({"editedTime":null,"caption":null,"lat":0}), None, (12.0,34.0), "1700000000"),
@@ -332,7 +332,7 @@ fn engine_preserves_local_media_and_restores_missing_copies() {
     engine.catalog.files = BTreeMap::from([((1, 10), changed.clone()), ((2, 10), changed)]);
     for _ in 0..2 {
         let result = run(&mut engine, false);
-        assert_eq!(result["conflicts"], 1);
+        assert_eq!(result["failures"]["conflicts"], 1);
         assert_eq!(
             result["copies"],
             json!({"expected":2,"completed":1,"pending":1})
@@ -384,6 +384,75 @@ fn engine_preserves_local_media_and_restores_missing_copies() {
 }
 
 #[test]
+fn engine_forgets_removed_photos_when_all_local_components_are_missing() {
+    for (live, interrupted) in [(false, false), (true, false), (true, true)] {
+        let mut server = mockito::Server::new();
+        let key = Key::generate();
+        let (file, bytes) = original_fixture(&key, b"original", live, true, 10);
+        let fetched = download(&mut server, 10, &bytes, 1);
+        let mut engine = new_engine(&server, key, file);
+        run(&mut engine, true);
+        let root = engine.root();
+        let db = engine.db();
+        engine.catalog.files.remove(&(1, 10));
+        if interrupted {
+            db.execute_batch("CREATE TRIGGER stop_retention BEFORE UPDATE ON pending WHEN old.album=1 AND old.retained=1 AND json_type(old.action,'$.Move') IS NOT NULL AND new.action='null' BEGIN SELECT RAISE(ABORT,'stop after retention move'); END;").unwrap();
+            run(&mut engine, false);
+            db.execute_batch("DROP TRIGGER stop_retention;").unwrap();
+        }
+        let folder = if interrupted { "Trash/First" } else { "First" };
+        let name = if live { "Motion.heic" } else { "Photo.jpg" };
+        fs::remove_file(root.join(folder).join(name)).unwrap();
+        if live {
+            run(&mut engine, false);
+            assert_eq!(
+                fs::read(root.join("First/Motion.mov")).unwrap(),
+                b"original"
+            );
+            fs::remove_file(root.join("First/Motion.mov")).unwrap();
+        }
+        for _ in 0..2 {
+            run(&mut engine, true);
+            for folder in ["First", "Trash/First"] {
+                for name in ["Photo.jpg", "Motion.heic", "Motion.mov"] {
+                    assert!(
+                        !root
+                            .join(folder)
+                            .join("metadata")
+                            .join(format!("{name}.json"))
+                            .exists()
+                    );
+                }
+            }
+            assert_component(&root, "Second", name, b"original");
+        }
+        fetched.assert();
+    }
+}
+
+#[test]
+fn engine_refetches_hashless_originals_after_database_loss() {
+    let mut server = mockito::Server::new();
+    let key = Key::generate();
+    let (old, bytes) = original_fixture(&key, b"old", false, false, 10);
+    let fetched = download(&mut server, 10, &bytes, 1);
+    let mut engine = new_engine(&server, key, old);
+    run(&mut engine, true);
+    fetched.assert();
+    fetched.remove();
+    let (new, bytes) = original_fixture(&engine.catalog.key, b"new", false, false, 30);
+    engine.catalog.files = BTreeMap::from([((1, 10), new.clone()), ((2, 10), new)]);
+    engine.database = "recovered.db".into();
+    let fetched = download(&mut server, 10, &bytes, 1);
+    assert!(engine.run(true, &[]).unwrap().complete);
+    run(&mut engine, true);
+    for folder in ["First", "Second"] {
+        assert_component(&engine.root(), folder, "Photo.jpg", b"new");
+    }
+    fetched.assert();
+}
+
+#[test]
 fn engine_checks_previous_bytes_before_source_and_layout_replacement() {
     for (before_live, after_live, hashed) in [
         (false, false, true),
@@ -421,7 +490,7 @@ fn engine_checks_previous_bytes_before_source_and_layout_replacement() {
         engine.catalog.files = BTreeMap::from([((1, 10), new.clone()), ((2, 10), new)]);
         let fetched = download(&mut server, 10, &bytes, 1);
         let result = run(&mut engine, false);
-        assert_eq!(result["conflicts"], 1);
+        assert_eq!(result["failures"]["conflicts"], 1);
         assert_eq!(result["copies"]["completed"], 1);
         assert_eq!(fs::read(&photo).unwrap(), b"bad");
         assert_eq!(fs::metadata(&photo).unwrap().modified().unwrap(), modified);
@@ -496,7 +565,7 @@ fn engine_restores_a_new_layout_after_missing_interrupted_retention() {
         db.execute_batch("DROP TRIGGER stop_retention;").unwrap();
         if old_live {
             fs::write(root.join("First/Motion.mov"), b"local edit").unwrap();
-            assert_eq!(run(&mut engine, false)["conflicts"], 1);
+            assert_eq!(run(&mut engine, false)["failures"]["conflicts"], 1);
             assert_eq!(
                 fs::read(root.join("First/Motion.mov")).unwrap(),
                 b"local edit"
@@ -524,7 +593,7 @@ fn engine_restores_a_new_layout_after_missing_interrupted_retention() {
             )["ente"]["components"][0]["hash"],
             b64::encode(&hash::hash(b"old", Some(64), None).unwrap())
         );
-        assert_eq!(run(&mut engine, true)["changes"]["retained"], 0);
+        assert_eq!(run(&mut engine, true)["changes"]["movedToTrash"], 0);
         assert_eq!(
             count(
                 &db,
@@ -575,7 +644,7 @@ fn engine_checks_both_live_components_when_only_one_source_component_changes() {
     let new = revision(new, 30);
     engine.catalog.files = BTreeMap::from([((1, 10), new.clone()), ((2, 10), new)]);
     let fetched = download(&mut server, 10, &bytes, 1);
-    assert_eq!(run(&mut engine, false)["conflicts"], 1);
+    assert_eq!(run(&mut engine, false)["failures"]["conflicts"], 1);
     assert_eq!(fs::read(&photo).unwrap(), b"bad");
     assert_component(&root, "First", "Motion.mov", b"old");
     assert_component(&root, "Second", "Motion.heic", b"old");
@@ -615,7 +684,7 @@ fn engine_recovery_checks_live_siblings_before_acknowledging_publication() {
         .unwrap();
     db.execute_batch("DROP TRIGGER stop_ack;").unwrap();
     let result = run(&mut engine, false);
-    assert_eq!(result["conflicts"], 1);
+    assert_eq!(result["failures"]["conflicts"], 1);
     assert_eq!(
         fs::read(root.join("First/Motion.mov")).unwrap(),
         b"edited video"
@@ -683,7 +752,7 @@ fn engine_recovery_preserves_edits_at_either_move_endpoint() {
             continue;
         }
         let result = run(&mut engine, false);
-        assert_eq!(result["conflicts"], 1);
+        assert_eq!(result["failures"]["conflicts"], 1);
         assert_eq!(fs::read(changed).unwrap(), b"local edit");
         assert_component(&root, "Second", "Renamed.jpg", b"original");
         assert_eq!(
@@ -830,13 +899,13 @@ fn engine_links_live_components_and_preserves_edits() {
     engine.catalog.files.insert((2, 11), other);
     let independent = download(&mut server, 11, &bytes, 1);
     let result = run(&mut engine, false);
-    assert_eq!(result["conflicts"], 2);
+    assert_eq!(result["failures"]["conflicts"], 2);
     assert_eq!(result["copies"]["completed"], 1);
     assert_component(&root, "Second", "Other.jpg", b"independent");
     assert_eq!(fs::read(&second).unwrap(), b"edited in place");
     fs::remove_file(&first).unwrap();
     fs::write(&first, b"independent local edit").unwrap();
-    assert_eq!(run(&mut engine, false)["conflicts"], 2);
+    assert_eq!(run(&mut engine, false)["failures"]["conflicts"], 2);
     assert_eq!(fs::read(&first).unwrap(), b"independent local edit");
     independent.assert();
     fetched.assert();
@@ -879,7 +948,7 @@ fn engine_recovers_interrupted_link_publication() {
             for _ in 0..2 {
                 let result = engine.run(false, &["Second"]).unwrap();
                 assert!(!result.complete);
-                assert_eq!(result.json["conflicts"], 1);
+                assert_eq!(result.json["failures"]["conflicts"], 1);
             }
             assert_eq!(fs::read(&photo).unwrap(), b"modified");
             fs::write(&photo, b"original").unwrap();
@@ -940,7 +1009,7 @@ fn engine_rechecks_link_source_before_completion() {
     });
     let result = result.unwrap();
     assert!(!result.complete);
-    assert_eq!(result.json["conflicts"], 2);
+    assert_eq!(result.json["failures"]["conflicts"], 2);
     assert_eq!(result.json["copies"]["completed"], 2);
     assert_eq!(fs::read(&first).unwrap(), b"modified");
     assert_eq!(
@@ -949,7 +1018,7 @@ fn engine_rechecks_link_source_before_completion() {
     );
     let result = engine.run(false, &["First", "Second", "Fourth"]).unwrap();
     assert!(!result.complete);
-    assert_eq!(result.json["conflicts"], 3);
+    assert_eq!(result.json["failures"]["conflicts"], 3);
     assert_eq!(result.json["copies"]["completed"], 0);
     fetched.assert();
 }

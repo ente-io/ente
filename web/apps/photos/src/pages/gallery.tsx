@@ -8,13 +8,6 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "@/components/CollectionSelector";
-import { AlbumSlideshow } from "@/components/Collections/AlbumSlideshow";
-import { CollectionMapDialog } from "@/components/Collections/CollectionMapDialog";
-import {
-    EditAlbumDetailsDialog,
-    type AlbumDetails,
-} from "@/components/Collections/EditAlbumDetailsDialog";
-import { slideshowFiles } from "@/components/Collections/album-slideshow";
 import { FamilyManagement } from "@/components/FamilyManagement";
 import type { FileListHeaderOrFooter } from "@/components/FileList";
 import { FileListWithViewer } from "@/components/FileListWithViewer";
@@ -28,6 +21,13 @@ import {
 } from "@/components/SelectedFileOptions";
 import { Upload } from "@/components/Upload";
 import { WhatsNew } from "@/components/WhatsNew";
+import { AlbumSlideshow } from "@/components/collections/AlbumSlideshow";
+import { CollectionMapDialog } from "@/components/collections/CollectionMapDialog";
+import {
+    EditAlbumDetailsDialog,
+    type AlbumDetails,
+} from "@/components/collections/EditAlbumDetailsDialog";
+import { slideshowFiles } from "@/components/collections/album-slideshow";
 import {
     GalleryEmptyState,
     PeopleConsentDialog,
@@ -39,6 +39,7 @@ import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import { PeopleOverview } from "@/components/gallery/PeopleOverview";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
+import { PublicLinkDetails } from "@/components/gallery/PublicLinkDetails";
 import {
     albumShortcutCollectionID,
     findCollectionCreatingIfNeeded,
@@ -49,6 +50,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/components/gallery/reducer";
+import { useAlbumNavigationData } from "@/components/gallery/use-album-navigation-data";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import {
     notifyOthersFilesDialogAttributes,
@@ -65,6 +67,7 @@ import {
     type AlbumFilter,
 } from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
+import { visibleQuickLinks } from "@/utils/quick-links";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Link, Typography } from "@mui/material";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
@@ -129,8 +132,6 @@ import {
 import {
     haveOnlySystemCollections,
     PseudoCollectionID,
-    type CollectionsSortBy,
-    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import {
     updateFilesLocation,
@@ -215,18 +216,6 @@ const Page: React.FC = () => {
     });
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
     const [albumSearchQuery, setAlbumSearchQuery] = useState("");
-    const [overviewAlbums, setOverviewAlbums] = useState<CollectionSummary[]>(
-        [],
-    );
-    const [overviewSortBy, setOverviewSortBy] =
-        useState<CollectionsSortBy>("updation-time-desc");
-    const handleAlbumSummariesChange = useCallback(
-        (albums: CollectionSummary[], sortBy: CollectionsSortBy) => {
-            setOverviewAlbums(albums);
-            setOverviewSortBy(sortBy);
-        },
-        [],
-    );
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [peopleSortBy, setPeopleSortBy] =
         useState<PeopleSortBy>("count-desc");
@@ -447,17 +436,68 @@ const Page: React.FC = () => {
             ? ItemVisibility.hidden
             : ItemVisibility.visible;
     const activeCollectionID =
-        state.view?.type == "people" || state.view?.type == "album-overview"
+        state.view?.type == "people" ||
+        state.view?.type == "album-overview" ||
+        state.view?.type == "links"
             ? undefined
             : state.view?.activeCollectionSummaryID;
     const activeCollection =
-        state.view?.type == "people" || state.view?.type == "album-overview"
+        state.view?.type == "people" ||
+        state.view?.type == "album-overview" ||
+        state.view?.type == "links"
             ? undefined
             : state.view?.activeCollection;
     const activeCollectionSummary =
-        state.view?.type == "people" || state.view?.type == "album-overview"
+        state.view?.type == "people" ||
+        state.view?.type == "album-overview" ||
+        state.view?.type == "links"
             ? undefined
             : state.view?.activeCollectionSummary;
+    const selectedLinkID =
+        state.view?.type == "links" ? state.view.selectedLinkID : undefined;
+    const quickLinks = useMemo(
+        () =>
+            visibleQuickLinks(
+                state.collections,
+                user?.id ?? 0,
+                state.hiddenCollectionIDs,
+            ),
+        [state.collections, user?.id, state.hiddenCollectionIDs],
+    );
+    const linkSummaries = useMemo(
+        () =>
+            new Map(
+                quickLinks.flatMap((collection) => {
+                    const summary = normalCollectionSummaries.get(
+                        collection.id,
+                    );
+                    return summary ? [[collection.id, summary] as const] : [];
+                }),
+            ),
+        [quickLinks, normalCollectionSummaries],
+    );
+    const selectedLink = quickLinks.find(({ id }) => id === selectedLinkID);
+    const selectedLinkSummary =
+        selectedLink && linkSummaries.get(selectedLink.id);
+    const selectedLinkFiles = useMemo(
+        () =>
+            selectedLinkID === undefined
+                ? []
+                : state.collectionFiles.filter(
+                      ({ id, collectionID }) =>
+                          collectionID === selectedLinkID &&
+                          !hiddenFileIDs.has(id) &&
+                          !tempDeletedFileIDs.has(id) &&
+                          !tempHiddenFileIDs.has(id),
+                  ),
+        [
+            selectedLinkID,
+            state.collectionFiles,
+            hiddenFileIDs,
+            tempDeletedFileIDs,
+            tempHiddenFileIDs,
+        ],
+    );
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
@@ -563,11 +603,28 @@ const Page: React.FC = () => {
         selectedFilesInView.length === filteredFiles.length;
 
     const barCollectionSummaries =
-        barMode == "hidden-albums"
-            ? state.hiddenCollectionSummaries
-            : barMode == "archive-albums"
-              ? state.archivedCollectionSummaries
-              : state.normalCollectionSummaries;
+        barMode == "links"
+            ? linkSummaries
+            : barMode == "hidden-albums"
+              ? state.hiddenCollectionSummaries
+              : barMode == "archive-albums"
+                ? state.archivedCollectionSummaries
+                : state.normalCollectionSummaries;
+
+    const {
+        sidebarCollectionSummaries,
+        overviewAlbums,
+        visibleAlbumFilters: sidebarAlbumFilters,
+        collectionsSortBy,
+        onChangeCollectionsSortBy,
+    } = useAlbumNavigationData({
+        mode: barMode,
+        collectionSummaries: barCollectionSummaries,
+        uncategorizedCollectionSummaryID:
+            state.uncategorizedCollectionSummaryID,
+        albumFilter,
+        albumSearchQuery,
+    });
 
     useEffect(() => {
         setAlbumSearchQuery("");
@@ -1574,6 +1631,12 @@ const Page: React.FC = () => {
     };
 
     const handleChangeBarMode = (mode: GalleryBarMode) => {
+        if (mode == "links") {
+            setCleanupView(undefined);
+            clearSelection();
+            dispatch({ type: "showLinks" });
+            return true;
+        }
         if (mode == "people") {
             return handleShowPeople();
         }
@@ -2106,15 +2169,19 @@ const Page: React.FC = () => {
                               // TODO: These are incorrect assertions, the types of the
                               // component need to be updated.
                               activeCollection: activeCollection!,
-                              activeCollectionID: activeCollectionID!,
+                              activeCollectionID: (barMode == "links"
+                                  ? selectedLinkID
+                                  : activeCollectionID)!,
                               activePerson,
                               albumFilter,
                               albumSearchQuery,
                               onAlbumSearchQueryChange: setAlbumSearchQuery,
                               onShowAlbumOverview: handleShowAlbumOverview,
                               onShowPeopleOverview: handleShowPeople,
-                              onAlbumSummariesChange:
-                                  handleAlbumSummariesChange,
+                              collectionSummaries: sidebarCollectionSummaries,
+                              visibleAlbumFilters: sidebarAlbumFilters,
+                              collectionsSortBy,
+                              onChangeCollectionsSortBy,
                               peopleSortBy,
                               onChangePeopleSortBy: setPeopleSortBy,
                               setFileListHeader,
@@ -2139,7 +2206,13 @@ const Page: React.FC = () => {
                                       : undefined) ?? [],
                               setBlockingLoad,
                               setActiveCollectionID:
-                                  handleShowCollectionSummaryWithID,
+                                  barMode == "links"
+                                      ? (collectionID) =>
+                                            dispatch({
+                                                type: "selectLink",
+                                                collectionID,
+                                            })
+                                      : handleShowCollectionSummaryWithID,
                               hasActiveFileSelection,
                               onRemotePull: remotePull,
                               onSelectPerson: handleSelectPerson,
@@ -2194,6 +2267,22 @@ const Page: React.FC = () => {
                     <DuplicatesView onRemoteFilesPull={remoteFilesPull} />
                 ) : cleanupView === "large-files" ? (
                     <LargeFilesView onRemoteFilesPull={remoteFilesPull} />
+                ) : !isInSearchMode && barMode == "links" ? (
+                    selectedLink ? (
+                        <PublicLinkDetails
+                            key={selectedLink.id}
+                            collection={selectedLink}
+                            fileCount={
+                                selectedLinkSummary?.fileCount ??
+                                selectedLinkFiles.length
+                            }
+                            files={selectedLinkFiles}
+                            user={user}
+                            setBlockingLoad={setBlockingLoad}
+                            onRemotePull={remotePull}
+                            coverFile={selectedLinkSummary?.coverFile}
+                        />
+                    ) : null
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
                   !state.collectionFiles.length &&
@@ -2213,7 +2302,7 @@ const Page: React.FC = () => {
                         ).title()}
                         filter={overviewFilter!}
                         searchQuery={albumSearchQuery}
-                        sortBy={overviewSortBy}
+                        sortBy={collectionsSortBy}
                         onSelectAlbum={handleShowCollectionSummaryWithID}
                         onCreateAlbum={() => {
                             setPostCreateAlbumOp(undefined);

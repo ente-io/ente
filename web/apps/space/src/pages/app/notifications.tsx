@@ -237,7 +237,7 @@ const NotificationRow: React.FC<{
                                           ) +
                                               (isDiscussion
                                                   ? `?comments=1&comment=${encodeURIComponent(group.commentId!)}`
-                                                  : ""),
+                                                  : "?likes=1"),
                                       );
                                   else
                                       void router.push(

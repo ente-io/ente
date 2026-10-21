@@ -53,9 +53,9 @@ pub async fn request_otp(
         .await?;
     output::action(
         options.json,
-        &json!({"email": email, "host": origin, "app": app, "purpose": purpose, "verificationRequested": true}),
+        &json!({"email": email, "host": origin, "app": app, "purpose": purpose}),
         &format!(
-            "Verification requested for {}. Check your email.",
+            "Verification code sent to {}.",
             output::escape_controls(&email)
         ),
     )
@@ -122,7 +122,10 @@ pub async fn create(args: CreateArgs, options: &Options) -> Result<(State, usize
     } else {
         if interactive {
             client.send_otp(&email, "signup").await?;
-            eprintln!("Verification requested. Check your email.");
+            eprintln!(
+                "Verification code sent to {}.",
+                output::escape_controls(&email)
+            );
         }
         let mut supplied = credentials.as_mut().and_then(|input| input.otp.take());
         let response = loop {
@@ -136,7 +139,7 @@ pub async fn create(args: CreateArgs, options: &Options) -> Result<(State, usize
             match client.verify_email(&email, &code, None).await {
                 Ok(response) => break response,
                 Err(ente_accounts::Error::IncorrectEmailVerificationCode) if interactive => {
-                    eprintln!("Incorrect email verification code. Try again.")
+                    eprintln!("Incorrect verification code. Try again.")
                 }
                 Err(error) => return Err(error.into()),
             }
@@ -296,7 +299,7 @@ pub async fn totp(
     if matches!(command, TotpCommand::Status) {
         return output::action(
             options.json,
-            &json!({"enabled": enabled}),
+            &json!({"totpEnabled": enabled}),
             if enabled {
                 "Authenticator protection is enabled."
             } else {
@@ -348,7 +351,7 @@ pub async fn totp(
     }
     output::action(
         options.json,
-        &json!({"enabled": true}),
+        &json!({"totpEnabled": true}),
         "Authenticator protection is enabled.",
     )
 }

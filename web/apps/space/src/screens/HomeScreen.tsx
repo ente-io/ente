@@ -1999,7 +1999,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             photoIndex,
             photos,
             photo,
-            postActionMode: isOwnPost ? "hidden" : "like-only",
+            postActionMode: isOwnPost ? "likes" : "like-only",
             privateReplyOnOpen: action == "reply",
             commentsOnOpen: action == "comments" || action == "comment",
             focusCommentOnOpen: action == "comment",
