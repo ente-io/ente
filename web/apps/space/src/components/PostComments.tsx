@@ -1,4 +1,4 @@
-import { ArrowLeft02Icon, SmilePlusIcon } from "@hugeicons/core-free-icons";
+import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
     Box,
@@ -173,9 +173,7 @@ const CommentRow: React.FC<{
     disabled: boolean;
     ownReaction: string | undefined;
     onReact: (emoji: string) => void;
-    onAddReaction: () => void;
     onOpenReactions: () => void;
-    onReply: () => void;
     onOpenActions: (
         anchor: HTMLElement,
         source: "touch" | "contextmenu",
@@ -188,9 +186,7 @@ const CommentRow: React.FC<{
     disabled,
     ownReaction,
     onReact,
-    onAddReaction,
     onOpenReactions,
-    onReply,
     onOpenActions,
 }) => {
     const timer = React.useRef<number | undefined>(undefined);
@@ -200,7 +196,7 @@ const CommentRow: React.FC<{
     const didOpen = React.useRef(false);
     const canOpenActions = !disabled && !comment.deleted;
     const reactions = commentReactionGroups(comment.reactions, ownReaction);
-    const reactionColumns = Math.min(reactions.length, 4);
+    const reactionColumns = Math.min(reactions.length, 6);
     const largeEmoji = isEmojiOnlyComment(comment.text ?? "");
     const previousReaction = React.useRef(ownReaction);
     const [poppingReaction, setPoppingReaction] = React.useState<string>();
@@ -333,7 +329,7 @@ const CommentRow: React.FC<{
                     ? `${commentEnter} 240ms ease-out`
                     : undefined,
                 position: "relative",
-                py: 0.5,
+                py: 1,
                 px: 2,
                 flexShrink: 0,
                 cursor: canOpenActions ? "context-menu" : "default",
@@ -367,7 +363,6 @@ const CommentRow: React.FC<{
                         columnGap: 1,
                         rowGap: 0.25,
                         lineHeight: "18px",
-                        mt: "-2px",
                     }}
                 >
                     {comment.author ? (
@@ -424,20 +419,23 @@ const CommentRow: React.FC<{
                     )}
                     {comment.text ?? "Comment unavailable"}
                 </Box>
-                {!comment.deleted && (
+                {!comment.deleted && reactions.length > 0 && (
                     <Box
                         sx={{
                             alignItems: "center",
                             display: "grid",
-                            gridTemplateColumns: `repeat(${reactionColumns + 2}, max-content)`,
+                            gridTemplateColumns: `repeat(${reactionColumns}, max-content)`,
                             columnGap: 0.5,
                             mt: 0.25,
-                            "@container (max-width: 240px)": {
+                            "@container (max-width: 260px)": {
                                 columnGap: 0.25,
+                            },
+                            "@container (max-width: 224px)": {
+                                gridTemplateColumns: `repeat(${Math.min(reactionColumns, 5)}, max-content)`,
                             },
                         }}
                     >
-                        {reactions.map(({ emoji, count, isOwn }, index) => (
+                        {reactions.map(({ emoji, count, isOwn }) => (
                             <Box
                                 component="button"
                                 type="button"
@@ -457,8 +455,6 @@ const CommentRow: React.FC<{
                                     alignItems: "center",
                                     borderRadius: "999px",
                                     display: "flex",
-                                    gridColumn: (index % 4) + 1,
-                                    gridRow: Math.floor(index / 4) + 1,
                                     justifyContent: "center",
                                     minHeight: 28,
                                     "&:hover > span": {
@@ -487,7 +483,7 @@ const CommentRow: React.FC<{
                                         height: 24,
                                         px: 0.75,
                                         transition: "transform 180ms ease-out",
-                                        "@container (max-width: 240px)": {
+                                        "@container (max-width: 260px)": {
                                             px: 0.5,
                                         },
                                         animation:
@@ -515,52 +511,6 @@ const CommentRow: React.FC<{
                                 </Box>
                             </Box>
                         ))}
-                        {comment.text !== undefined && (
-                            <Box
-                                component="button"
-                                type="button"
-                                aria-label="Add reaction"
-                                disabled={disabled}
-                                onClick={onAddReaction}
-                                sx={{
-                                    ...textActionSx,
-                                    alignItems: "center",
-                                    display: "flex",
-                                    gridColumn: reactionColumns + 1,
-                                    gridRow: 1,
-                                    justifyContent:
-                                        reactions.length > 0
-                                            ? "center"
-                                            : "flex-start",
-                                    minHeight: 28,
-                                    width: 24,
-                                    "@container (max-width: 240px)": {
-                                        width: 20,
-                                    },
-                                }}
-                            >
-                                <HugeiconsIcon
-                                    icon={SmilePlusIcon}
-                                    size={16}
-                                    strokeWidth={1.8}
-                                />
-                            </Box>
-                        )}
-                        <Box
-                            component="button"
-                            type="button"
-                            disabled={disabled}
-                            onClick={onReply}
-                            sx={{
-                                ...textActionSx,
-                                gridColumn: reactionColumns + 2,
-                                gridRow: 1,
-                                minHeight: 28,
-                                px: 0.25,
-                            }}
-                        >
-                            Reply
-                        </Box>
                     </Box>
                 )}
             </Box>
@@ -927,9 +877,6 @@ export const PostComments: React.FC<{
                           ?.emoji
             }
             onReact={(emoji) => react(comment, emoji)}
-            onAddReaction={() =>
-                setAction({ type: "react", commentId: comment.commentId })
-            }
             onOpenReactions={() =>
                 setAction({
                     type: "reactions",
@@ -937,7 +884,6 @@ export const PostComments: React.FC<{
                     open: true,
                 })
             }
-            onReply={() => replyTo(comment)}
             onOpenActions={(anchor, source) => {
                 menuPointerTarget.current = null;
                 ignoreMouseAwayUntil.current =

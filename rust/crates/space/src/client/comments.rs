@@ -6,6 +6,8 @@ use crate::transport::CommentPageResponse;
 use ente_core::{b64, crypto::SecretVec};
 use serde::{Deserialize, Serialize};
 
+const REACTION_PAYLOAD_BYTES: usize = 256;
+
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct DiscussionPayload {
@@ -18,13 +20,22 @@ struct DiscussionPayload {
 }
 
 fn encrypt_contribution(key: &[u8], payload: &DiscussionPayload) -> Result<String> {
-    let bytes =
+    let mut bytes =
         serde_json::to_vec(payload).map_err(|_| Error::InvalidInput("invalid comment".into()))?;
+    if payload.kind == "reaction" {
+        if bytes.len() > REACTION_PAYLOAD_BYTES {
+            return Err(Error::InvalidInput("reaction is too large".into()));
+        }
+        bytes.resize(REACTION_PAYLOAD_BYTES, b' ');
+    }
     Ok(b64::encode(&encrypt_secretbox_payload(key, &bytes)?))
 }
 
 fn decrypt_contribution(key: &[u8], cipher: &str, expected: &DiscussionPayload) -> Result<String> {
     let plaintext = decrypt_secretbox_payload(key, &b64::decode(cipher)?)?;
+    if expected.kind == "reaction" && plaintext.len() != REACTION_PAYLOAD_BYTES {
+        return Err(Error::InvalidInput("invalid reaction size".into()));
+    }
     let payload: DiscussionPayload = serde_json::from_slice(&plaintext)
         .map_err(|_| Error::InvalidInput("invalid comment".into()))?;
     if payload.kind != expected.kind
@@ -462,6 +473,10 @@ mod tests {
         };
         let cipher = encrypt_contribution(&post_key, &payload).unwrap();
         assert_eq!(
+            decrypt_secretbox_payload(&post_key, &b64::decode(&cipher).unwrap()).unwrap(),
+            serde_json::to_vec(&payload).unwrap()
+        );
+        assert_eq!(
             decrypt_contribution(&post_key, &cipher, &payload).unwrap(),
             "Hello Z"
         );
@@ -469,6 +484,63 @@ mod tests {
         assert!(decrypt_contribution(&profile_key, &cipher, &payload).is_err());
         let private_profile = encrypt_secretbox_payload(&profile_key, b"private profile").unwrap();
         assert!(decrypt_secretbox_payload(&post_key, &private_profile).is_err());
+    }
+
+    #[test]
+    fn comment_reactions_are_padded_and_round_trip() {
+        let key = generate_key();
+        for emoji in ["👍", "❤️", "👍🏽", "👨‍👩‍👧‍👦", "🇮🇳", "1️⃣", "🏳️‍⚧️", "🧑🏿‍💻"]
+        {
+            let payload = DiscussionPayload {
+                kind: "reaction".into(),
+                post_id: i64::MAX,
+                comment_id: "a".repeat(64),
+                author_space_id: format!("space_{}", "a".repeat(22)),
+                reply_to_id: String::new(),
+                text: emoji.into(),
+            };
+            let cipher = encrypt_contribution(&key, &payload).unwrap();
+            assert_eq!(b64::decode(&cipher).unwrap().len(), 296, "{emoji}");
+            assert_eq!(
+                decrypt_contribution(&key, &cipher, &payload).unwrap(),
+                emoji
+            );
+        }
+    }
+
+    #[test]
+    fn comment_reactions_reject_invalid_payload_sizes() {
+        let key = generate_key();
+        let mut payload = DiscussionPayload {
+            kind: "reaction".into(),
+            post_id: i64::MAX,
+            comment_id: "a".repeat(64),
+            author_space_id: format!("space_{}", "a".repeat(22)),
+            reply_to_id: String::new(),
+            text: "❤️".into(),
+        };
+        let bytes = serde_json::to_vec(&payload).unwrap();
+        for size in [bytes.len(), 255, 257] {
+            let mut plaintext = bytes.clone();
+            plaintext.resize(size, b' ');
+            let cipher = b64::encode(&encrypt_secretbox_payload(&key, &plaintext).unwrap());
+            assert!(matches!(
+                decrypt_contribution(&key, &cipher, &payload),
+                Err(Error::InvalidInput(message)) if message == "invalid reaction size"
+            ));
+        }
+        payload.text = "👨\u{200d}".repeat(8) + "👨";
+        validate_contribution("reaction", &payload.text).unwrap();
+        assert!(matches!(
+            encrypt_contribution(&key, &payload),
+            Err(Error::InvalidInput(message)) if message == "reaction is too large"
+        ));
+        payload.kind = "comment".into();
+        let cipher = encrypt_contribution(&key, &payload).unwrap();
+        assert_eq!(
+            decrypt_contribution(&key, &cipher, &payload).unwrap(),
+            payload.text
+        );
     }
 
     #[test]
