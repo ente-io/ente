@@ -1,31 +1,15 @@
-import { createInstance } from "i18next";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import german from "../../../packages/base/locales/de-DE/translation.json";
-import english from "../../../packages/base/locales/en-US/translation.json";
-import russian from "../../../packages/base/locales/ru-RU/translation.json";
 import type { PublicMemoryShareMetadata } from "../src/services/public-memory";
 import {
     buildLaneCaptionModel,
     buildLaneTitle,
     laneCaptionNamePlaceholder,
     laneCaptionTimePlaceholder,
-    localizeLaneCaption,
 } from "../src/utils/lane";
 
-const i18n = createInstance();
-beforeEach(async () => {
+beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 9, 16, 12));
-    await i18n.init({
-        lng: "en-US",
-        fallbackLng: "en-US",
-        resources: {
-            "en-US": { translation: english },
-            "de-DE": { translation: german },
-            "ru-RU": { translation: russian },
-        },
-        interpolation: { escapeValue: false },
-    });
 });
 afterEach(() => vi.useRealTimers());
 
@@ -39,36 +23,70 @@ const caption = (
         fallbackLabel: "Memory lane",
     });
 
-test("uses now until the first completed anniversary, including unnamed people", () => {
-    const current = caption(new Date(2025, 9, 17), { personName: "Snow now" });
-    expect(localizeLaneCaption(current, i18n.t, "en-US")).toMatchObject({
-        label: "Snow now now",
+test("uses now until the first completed anniversary, keeping names separate", () => {
+    expect(
+        caption(new Date(2025, 9, 17), { personName: "Snow now" }),
+    ).toMatchObject({
+        text: "Snow now now",
+        template: `${laneCaptionNamePlaceholder} ${laneCaptionTimePlaceholder}`,
         name: "Snow now",
+        time: "now",
+        isNow: true,
+    });
+    expect(caption(new Date(2026, 9, 16))).toMatchObject({
+        text: "now",
+        template: laneCaptionTimePlaceholder,
+        name: "",
+        time: "now",
         isNow: true,
     });
     expect(
-        localizeLaneCaption(caption(new Date(2026, 9, 16)), i18n.t, "en-US")
-            .label,
-    ).toBe("now");
-    expect(
-        localizeLaneCaption(caption(new Date(2025, 9, 16)), i18n.t, "en-US")
-            .label,
-    ).toBe("1 year ago");
-});
-
-test("preserves age mode, including zero and a leap-day birthday", () => {
-    const newborn = caption(new Date(2026, 9, 16), { birthDate: "2026-10-16" });
-    expect(localizeLaneCaption(newborn, i18n.t, "en-US")).toMatchObject({
-        label: "0 years old",
+        caption(new Date(2025, 9, 16), { personName: "ليلى" }),
+    ).toMatchObject({
+        text: "ليلى 1 year ago",
+        template: `${laneCaptionNamePlaceholder} ${laneCaptionTimePlaceholder} year ago`,
+        name: "ليلى",
+        time: "1",
+        value: 1,
         isNow: false,
     });
-    const birthday = caption(new Date(2025, 1, 28), {
-        birthDate: "2024-02-29",
-        personName: "Ashil",
+});
+
+test("preserves age captions, including zero and a leap-day birthday", () => {
+    expect(
+        caption(new Date(2026, 9, 16), { birthDate: "2026-10-16" }),
+    ).toMatchObject({
+        text: "0 years old",
+        template: `${laneCaptionTimePlaceholder} years old`,
+        time: "0",
+        value: 0,
+        isNow: false,
     });
-    expect(localizeLaneCaption(birthday, i18n.t, "en-US").label).toBe(
-        "1 year old",
-    );
+    expect(
+        caption(new Date(2025, 1, 28), {
+            birthDate: "2024-02-29",
+            personName: "Ashil",
+        }),
+    ).toMatchObject({
+        text: "1 year old",
+        template: `${laneCaptionTimePlaceholder} year old`,
+        name: "",
+        time: "1",
+        value: 1,
+        isNow: false,
+    });
+});
+
+test("uses the supplied label when a frame has no capture date", () => {
+    expect(
+        buildLaneCaptionModel({ fallbackLabel: "Erinnerungen" }),
+    ).toMatchObject({
+        text: "Erinnerungen",
+        template: "Erinnerungen",
+        name: "",
+        time: "",
+        isNow: false,
+    });
 });
 
 test("personalizes legacy lane titles while preserving translated named titles", () => {
@@ -84,78 +102,4 @@ test("personalizes legacy lane titles while preserving translated named titles",
     ] as const) {
         expect(buildLaneTitle({ memoryName, personName })).toBe(expected);
     }
-});
-
-test("keeps Russian captions localized through the transition to now", async () => {
-    await i18n.changeLanguage("ru-RU");
-    expect(
-        localizeLaneCaption(
-            caption(new Date(2024, 9, 16), { personName: "Алиса" }),
-            i18n.t,
-            "ru-RU",
-        ).label,
-    ).toBe("Алиса 2 года назад");
-    expect(
-        localizeLaneCaption(
-            caption(new Date(2026, 9, 16), { personName: "Алиса" }),
-            i18n.t,
-            "ru-RU",
-        ),
-    ).toMatchObject({ label: "Алиса сейчас", language: "ru-RU" });
-    expect(
-        localizeLaneCaption(caption(new Date(2026, 9, 16)), i18n.t, "ru-RU"),
-    ).toMatchObject({ label: "сейчас", language: "ru-RU" });
-});
-
-test("keeps translated word order and placeholders separate from names", async () => {
-    await i18n.changeLanguage("de-DE");
-    const before = localizeLaneCaption(
-        caption(new Date(2025, 9, 16), { personName: "Jetzt" }),
-        i18n.t,
-        "de-DE",
-    );
-    expect(before.template).toBe(
-        `${laneCaptionNamePlaceholder} vor ${laneCaptionTimePlaceholder} Jahr`,
-    );
-    expect(before.label).toBe("Jetzt vor 1 Jahr");
-    const after = localizeLaneCaption(
-        caption(new Date(2026, 9, 16), { personName: "Jetzt" }),
-        i18n.t,
-        "de-DE",
-    );
-    expect(after.template).toBe(
-        `${laneCaptionNamePlaceholder} ${laneCaptionTimePlaceholder}`,
-    );
-    expect(after.label).toBe("Jetzt jetzt");
-});
-
-test("uses the English fallback direction with an Arabic name and localized number", async () => {
-    await i18n.changeLanguage("ar-SA");
-    const result = localizeLaneCaption(
-        caption(new Date(2025, 9, 16), { personName: "ليلى" }),
-        i18n.t,
-        "ar-SA",
-    );
-    expect(result.language).toBe("en-US");
-    expect(i18n.dir(result.language)).toBe("ltr");
-    expect(result.label).toBe(
-        `ليلى ${new Intl.NumberFormat("ar-SA").format(1)} year ago`,
-    );
-});
-
-test("uses RTL direction when the caption template has an RTL translation", async () => {
-    i18n.addResourceBundle("ar-SA", "translation", {
-        memory_lane_caption_years_ago_one: "قبل {{number}} عام {{name}}",
-    });
-    await i18n.changeLanguage("ar-SA");
-    const result = localizeLaneCaption(
-        caption(new Date(2025, 9, 16), { personName: "ليلى" }),
-        i18n.t,
-        "ar-SA",
-    );
-    expect(result.language).toBe("ar-SA");
-    expect(i18n.dir(result.language)).toBe("rtl");
-    expect(result.template).toBe(
-        `قبل ${laneCaptionTimePlaceholder} عام ${laneCaptionNamePlaceholder}`,
-    );
 });

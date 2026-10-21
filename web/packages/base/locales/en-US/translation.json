@@ -1171,15 +1171,5 @@
     "auto_lock_5_minutes": "5 minutes",
     "auto_lock_30_minutes": "30 minutes",
     "wrong_unlock_code_one": "You've entered the wrong unlock code {{count}} time.",
-    "wrong_unlock_code_other": "You've entered the wrong unlock code {{count}} times.",
-    "memory_lane_caption_years_ago_one": "{{name}} {{number}} year ago",
-    "memory_lane_caption_years_ago_other": "{{name}} {{number}} years ago",
-    "memory_lane_caption_now": "{{name}} {{now}}",
-    "memory_lane_now": "now",
-    "memory_lane_caption_age_one": "{{number}} year old",
-    "memory_lane_caption_age_other": "{{number}} years old",
-    "lane_replay": "Replay memory lane",
-    "lane_get_ente": "Get Ente Photos",
-    "lane_timeline": "Memory timeline",
-    "lane_position": "Photo {{current}} of {{total}}"
+    "wrong_unlock_code_other": "You've entered the wrong unlock code {{count}} times."
 }

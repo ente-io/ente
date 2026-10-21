@@ -1,6 +1,5 @@
 import { styled } from "@mui/material";
 import { useRef } from "react";
-import { useTranslation } from "react-i18next";
 
 interface LaneTimelineProps {
     total: number;
@@ -21,7 +20,6 @@ export function LaneTimeline({
     onScrub,
     onScrubEnd,
 }: LaneTimelineProps) {
-    const { t } = useTranslation();
     const dragging = useRef(false);
     const value = useRef(currentProgress);
     value.current = currentProgress;
@@ -68,14 +66,8 @@ export function LaneTimeline({
                 step={1}
                 value={Math.round(currentProgress)}
                 disabled={total <= 1}
-                aria-label={t("lane_timeline", {
-                    defaultValue: "Memory timeline",
-                })}
-                aria-valuetext={t("lane_position", {
-                    defaultValue: "Photo {{current}} of {{total}}",
-                    current: Math.round(currentProgress) + 1,
-                    total,
-                })}
+                aria-label="Memory timeline"
+                aria-valuetext={`Photo ${Math.round(currentProgress) + 1} of ${total}`}
                 onPointerDown={(event) => {
                     if (event.button !== 0 || total <= 1) return;
                     dragging.current = true;

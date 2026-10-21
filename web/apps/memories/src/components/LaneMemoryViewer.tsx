@@ -11,7 +11,6 @@ import {
     useRef,
     useState,
 } from "react";
-import { useTranslation } from "react-i18next";
 import {
     buildLaneCaptionModel,
     buildLaneTitle,
@@ -64,7 +63,6 @@ export function LaneMemoryViewer({
     const [mediaAspectRatios, setMediaAspectRatios] = useState<
         Record<number, number>
     >({});
-    const { t } = useTranslation();
     const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
     const transitionDurationRef = useRef(100);
     const heldPointerRef = useRef<
@@ -663,9 +661,7 @@ export function LaneMemoryViewer({
                         rel="noopener"
                         sx={laneHeaderJoinNowButtonSx}
                     >
-                        {t("lane_get_ente", {
-                            defaultValue: "Get Ente Photos",
-                        })}
+                        Get Ente Photos
                     </JoinNowButton>
                 </LaneHeader>
                 <LaneMediaSection>
@@ -687,7 +683,7 @@ export function LaneMemoryViewer({
                         <LaneNavigation
                             className="lane-navigation"
                             type="button"
-                            aria-label={t("previous")}
+                            aria-label="Previous"
                             onClick={onPrev}
                             disabled={currentIndex === 0}
                             data-memory-control="true"
@@ -696,7 +692,7 @@ export function LaneMemoryViewer({
                         </LaneNavigation>
                         <LanePhotoFrame
                             role="group"
-                            aria-label={t("photos")}
+                            aria-label="Photos"
                             style={{
                                 width: laneFrameSize.width,
                                 height: laneFrameSize.height,
@@ -793,14 +789,14 @@ export function LaneMemoryViewer({
                             })}
                             {!fileLoaded && (
                                 <LaneLoading role="status">
-                                    {t("loading")}
+                                    Loading...
                                 </LaneLoading>
                             )}
                         </LanePhotoFrame>
                         <LaneNavigation
                             className="lane-navigation"
                             type="button"
-                            aria-label={t("next")}
+                            aria-label="Next"
                             onClick={onNext}
                             disabled={currentIndex === files.length - 1}
                             data-memory-control="true"
@@ -828,23 +824,17 @@ export function LaneMemoryViewer({
                                 onClick={handlePlaybackToggle}
                                 aria-label={
                                     finishedLanePlaybackRef.current
-                                        ? t("lane_replay", {
-                                              defaultValue:
-                                                  "Replay memory lane",
-                                          })
+                                        ? "Replay memory lane"
                                         : paused
-                                          ? t("play")
-                                          : t("pause")
+                                          ? "Play"
+                                          : "Pause"
                                 }
                                 title={
                                     finishedLanePlaybackRef.current
-                                        ? t("lane_replay", {
-                                              defaultValue:
-                                                  "Replay memory lane",
-                                          })
+                                        ? "Replay memory lane"
                                         : paused
-                                          ? t("play")
-                                          : t("pause")
+                                          ? "Play"
+                                          : "Pause"
                                 }
                                 data-memory-control="true"
                             >

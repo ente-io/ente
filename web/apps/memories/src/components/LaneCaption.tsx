@@ -7,11 +7,9 @@ import {
     useState,
     type CSSProperties,
 } from "react";
-import { useTranslation } from "react-i18next";
 import {
     laneCaptionNamePlaceholder,
     laneCaptionTimePlaceholder,
-    localizeLaneCaption,
     type LaneCaptionModel,
 } from "../utils/lane";
 
@@ -31,20 +29,7 @@ interface CaptionPosition {
     copy: HTMLElement;
 }
 
-export function LaneCaption({ model }: { model: LaneCaptionModel }) {
-    const { t, i18n, ready } = useTranslation();
-    const locale = i18n.language || "en-US";
-    const caption = ready
-        ? localizeLaneCaption(model, t, locale)
-        : {
-              template: model.text,
-              language: "en-US",
-              name: "",
-              time: "",
-              label: model.text,
-              value: undefined,
-              isNow: false,
-          };
+export function LaneCaption({ model: caption }: { model: LaneCaptionModel }) {
     const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
     const rootRef = useRef<HTMLDivElement>(null);
     const phraseRef = useRef<HTMLDivElement>(null);
@@ -199,8 +184,6 @@ export function LaneCaption({ model }: { model: LaneCaptionModel }) {
         caption.name,
         caption.time,
         caption.value,
-        caption.language,
-        locale,
         reducedMotion,
         layoutVersion,
     ]);
@@ -210,12 +193,8 @@ export function LaneCaption({ model }: { model: LaneCaptionModel }) {
     let times = 0;
     const parts = caption.template.split(/([\uFFF9\uFFFC])/u);
     return (
-        <CaptionRoot
-            ref={rootRef}
-            lang={caption.language}
-            dir={ready ? i18n.dir(caption.language) : "ltr"}
-        >
-            <AccessibleCaption>{caption.label}</AccessibleCaption>
+        <CaptionRoot ref={rootRef} lang="en" dir="ltr">
+            <AccessibleCaption>{caption.text}</AccessibleCaption>
             <div ref={phraseRef} aria-hidden="true">
                 {parts.map((part) => {
                     if (!part) return null;
@@ -248,7 +227,6 @@ export function LaneCaption({ model }: { model: LaneCaptionModel }) {
                                 ) : (
                                     <RollingNumber
                                         value={caption.value}
-                                        locale={locale}
                                         reducedMotion={reducedMotion}
                                     />
                                 )}
@@ -273,11 +251,9 @@ export function LaneCaption({ model }: { model: LaneCaptionModel }) {
 
 function RollingNumber({
     value,
-    locale,
     reducedMotion,
 }: {
     value: number;
-    locale: string;
     reducedMotion: boolean;
 }) {
     const rootRef = useRef<HTMLSpanElement>(null);
@@ -310,9 +286,8 @@ function RollingNumber({
         // Keep word layout at its destination while the outgoing digit shrinks.
         root.style.width = `${Array.from(widths.values()).reduce((sum, width) => sum + width, 0)}px`;
     });
-    const formatter = new Intl.NumberFormat(locale);
-    const current = Array.from(formatter.format(value));
-    const previous = Array.from(formatter.format(transition.previous));
+    const current = Array.from(String(value));
+    const previous = Array.from(String(transition.previous));
     const length = Math.max(current.length, previous.length);
     const direction = value >= transition.previous ? 1 : -1;
     return (
@@ -342,7 +317,7 @@ function RollingNumber({
                         }
                     >
                         <DigitLayer
-                            key={`${value}-${locale}`}
+                            key={value}
                             data-digit-current={digit ? place : undefined}
                             style={
                                 {
@@ -354,7 +329,7 @@ function RollingNumber({
                         </DigitLayer>
                         {old && (
                             <DigitLayer
-                                key={`old-${value}-${locale}`}
+                                key={`old-${value}`}
                                 className="outgoing"
                                 style={
                                     {

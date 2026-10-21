@@ -1,4 +1,3 @@
-import type { TFunction } from "i18next";
 import type { CSSProperties } from "react";
 
 import type { EnteFile } from "ente-media/file";
@@ -14,9 +13,11 @@ const LANE_CROP_MINIMUM_PADDING = 0.1;
 
 export interface LaneCaptionModel {
     text: string;
+    template: string;
+    name: string;
+    time: string;
     value?: number;
-    name?: string;
-    captionType?: "age" | "yearsAgo";
+    isNow: boolean;
 }
 
 export interface LaneCardSlice {
@@ -263,7 +264,13 @@ export const buildLaneCaptionModel = ({
 }): LaneCaptionModel => {
     const creationDate = getFrameCreationDate(frame);
     if (!creationDate) {
-        return { text: fallbackLabel };
+        return {
+            text: fallbackLabel,
+            template: fallbackLabel,
+            name: "",
+            time: "",
+            isNow: false,
+        };
     }
 
     const personName = metadata?.personName?.trim() ?? "";
@@ -275,82 +282,25 @@ export const buildLaneCaptionModel = ({
         birthDate: metadata?.birthDate,
     });
     const isNow = captionType === "yearsAgo" && roundedValue === 0;
-    const prefix = captionType === "age" || !personName ? "" : `${personName} `;
-    const suffix =
-        captionType === "age"
-            ? ` year${roundedValue === 1 ? "" : "s"} old`
-            : ` year${roundedValue === 1 ? "" : "s"} ago`;
+    const name = captionType === "age" ? "" : personName;
+    const time = isNow ? "now" : String(roundedValue);
+    const suffix = isNow
+        ? ""
+        : captionType === "age"
+          ? ` year${roundedValue === 1 ? "" : "s"} old`
+          : ` year${roundedValue === 1 ? "" : "s"} ago`;
     return {
-        text: isNow ? `${prefix}now` : `${prefix}${roundedValue}${suffix}`,
+        text: `${name ? `${name} ` : ""}${time}${suffix}`,
+        template: `${name ? `${laneCaptionNamePlaceholder} ` : ""}${laneCaptionTimePlaceholder}${suffix}`,
+        name,
+        time,
         value: isNow ? undefined : roundedValue,
-        name: captionType === "age" ? "" : personName,
-        captionType,
+        isNow,
     };
 };
 
 export const laneCaptionNamePlaceholder = "\uFFF9";
 export const laneCaptionTimePlaceholder = "\uFFFC";
-
-export interface LocalizedLaneCaption {
-    template: string;
-    language: string;
-    name: string;
-    time: string;
-    label: string;
-    value?: number;
-    isNow: boolean;
-}
-
-export const localizeLaneCaption = (
-    model: LaneCaptionModel,
-    t: TFunction,
-    locale: string,
-): LocalizedLaneCaption => {
-    const name = model.name ?? "";
-    if (!model.captionType) {
-        return {
-            template: model.text,
-            language: locale,
-            name: "",
-            time: "",
-            label: model.text,
-            isNow: false,
-        };
-    }
-    const isNow = model.captionType === "yearsAgo" && model.value === undefined;
-    const now = isNow
-        ? t("memory_lane_now", { returnDetails: true })
-        : undefined;
-    const time =
-        now?.res ?? new Intl.NumberFormat(locale).format(model.value ?? 0);
-    const translation = t(
-        isNow
-            ? "memory_lane_caption_now"
-            : model.captionType === "age"
-              ? "memory_lane_caption_age"
-              : "memory_lane_caption_years_ago",
-        {
-            name: name ? laneCaptionNamePlaceholder : "",
-            number: laneCaptionTimePlaceholder,
-            now: laneCaptionTimePlaceholder,
-            count: model.value,
-            returnDetails: true,
-        },
-    );
-    const template =
-        isNow && !name ? laneCaptionTimePlaceholder : translation.res.trim();
-    return {
-        template,
-        language: isNow && !name ? now!.usedLng : translation.usedLng,
-        name,
-        time,
-        label: template
-            .replaceAll(laneCaptionNamePlaceholder, name)
-            .replaceAll(laneCaptionTimePlaceholder, time),
-        value: model.value,
-        isNow,
-    };
-};
 
 export const buildLaneTitle = ({
     memoryName,
