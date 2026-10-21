@@ -21,7 +21,7 @@ if args.mode == "build" and not args.sign:
 
 app = Path(__file__).resolve().parent.parent
 cargo = {
-    "build": ["cargo", "build", "--bin", "ente-cli-next"],
+    "build": ["cargo", "build", "--bin", "ente"],
     "test": ["cargo", "test", "--test", "cli", "--no-run"],
 }[args.mode]
 cargo += ["--locked", "--message-format=json-render-diagnostics"]

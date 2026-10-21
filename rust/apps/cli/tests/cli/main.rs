@@ -47,7 +47,7 @@ fn completion_prints_scripts_without_storage() {
 
 #[test]
 fn migration_hints_respect_command_and_argument_boundaries() {
-    let binary = format!("ente-cli-next{}", std::env::consts::EXE_SUFFIX);
+    let binary = format!("ente{}", std::env::consts::EXE_SUFFIX);
     let home = TestHome::new();
     let path = home.dir.path().join("unused");
     for (args, suggestion) in [
@@ -101,7 +101,7 @@ fn migration_hints_respect_command_and_argument_boundaries() {
 
 #[test]
 fn reads_do_not_initialize_storage() {
-    let binary = format!("ente-cli-next{}", std::env::consts::EXE_SUFFIX);
+    let binary = format!("ente{}", std::env::consts::EXE_SUFFIX);
     for existing_home in [false, true] {
         let home = TestHome::new();
         let path = home.dir.path().join("unused");
@@ -1042,7 +1042,7 @@ impl TestHome {
     }
 
     fn command(&self, args: &[&str]) -> Command {
-        let mut command = Command::new(env!("CARGO_BIN_EXE_ente-cli-next"));
+        let mut command = Command::new(env!("CARGO_BIN_EXE_ente"));
         command
             .env_clear()
             .env("ENTE_CLI_HOME", self.dir.path())

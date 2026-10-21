@@ -88,12 +88,6 @@ fn downloads_publish_only_complete_authenticated_originals() {
     let original = vec![37u8; stream::ENCRYPTION_CHUNK_SIZE + 321];
     let (file, encrypted) = remote_file(10, &collection_key, &original);
     page(&mut server, 1, 0, json!([file]), false).create();
-    let signed = server
-        .mock("GET", "/files/download/v3/10")
-        .match_header("x-auth-token", "--8=")
-        .with_body(json!({"url": format!("{}/original", server.url())}).to_string())
-        .expect_at_least(1)
-        .create();
     let args = [
         "photos",
         "file",
@@ -103,6 +97,31 @@ fn downloads_publish_only_complete_authenticated_originals() {
         path.to_str().unwrap(),
         "--json",
     ];
+    let unavailable = server
+        .mock("GET", "/files/download/v3/10")
+        .with_status(404)
+        .create();
+    assert_eq!(
+        failure(&home.run(&args)),
+        "Error: cannot download file 10: HTTP 404 at /files/download/v3/10\nFile downloads require the v3 API. Update your Ente server or check its proxy configuration.\n"
+    );
+    assert!(!path.exists());
+    unavailable.assert();
+    unavailable.remove();
+    let signed = server
+        .mock("GET", "/files/download/v3/10")
+        .match_header("x-auth-token", "--8=")
+        .with_body(json!({"url": format!("{}/original", server.url())}).to_string())
+        .expect_at_least(1)
+        .create();
+    let missing = server.mock("GET", "/original").with_status(404).create();
+    assert_eq!(
+        failure(&home.run(&args)),
+        "Error: cannot download file 10: HTTP 404 at /original\n"
+    );
+    assert!(!path.exists());
+    missing.assert();
+    missing.remove();
     let mut damaged = encrypted.clone();
     *damaged.last_mut().unwrap() ^= 1;
     let mut trailing = encrypted.clone();

@@ -234,8 +234,8 @@ Log in again with {binary} account login; old saved logins and config.yaml are n
 APP is photos, auth or locker. NAME is a local account name.
 Choose the server with --host on login or creation; later commands use the saved server.
 Use the same app and server when requesting an email code and completing login or creation.
-ENTE_CLI_HOME replaces ENTE_CLI_CONFIG_DIR for choosing this CLI's local storage.
-For unattended access, see {binary} vault --help for ENTE_CLI_VAULT_KEY.
+ENTE_CLI_HOME replaces ENTE_CLI_CONFIG_DIR for choosing this CLI's storage folder.
+See {binary} vault --help for default locations and unattended access with ENTE_CLI_VAULT_KEY.
 Admin commands use --account NAME instead of --admin-user/-a; USER is positional.
 Use --json for structured results. Old output formats are not preserved."
     )?;

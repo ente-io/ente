@@ -8,7 +8,7 @@ if [[ $(uname -s) != Linux ]]; then
 fi
 
 test_name=native_keyring_survives_separate_processes
-executable=$(cargo test --locked -p ente-cli-next --test cli --no-run \
+executable=$(cargo test --locked -p ente-cli --test cli --no-run \
     --message-format=json-render-diagnostics "$@" | python3 -c '
 import json, sys
 artifacts = [json.loads(line) for line in sys.stdin]
