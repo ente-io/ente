@@ -10,10 +10,6 @@ import {
     type GalleryBarImplProps,
 } from "@/components/gallery/BarImpl";
 import { PeopleHeader } from "@/components/gallery/PeopleHeader";
-import {
-    filterAlbumSummaries,
-    visibleAlbumFilters as getVisibleAlbumFilters,
-} from "@/utils/album-filters";
 import { sortPeople } from "@/utils/people-sort";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import {
@@ -27,14 +23,9 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
-    collectionsSortBy,
     PseudoCollectionID,
-    sortCollectionSummaries,
-    type CollectionsSortBy,
     type CollectionSummaries,
-    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
-import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {
@@ -42,17 +33,7 @@ import {
     type CollectionHeaderProps,
 } from "./CollectionHeader";
 
-export type GalleryBarAndListHeaderProps = Omit<
-    GalleryBarImplProps,
-    | "collectionSummaries"
-    | "visibleAlbumFilters"
-    | "collectionsSortBy"
-    | "onChangeCollectionsSortBy"
-> & {
-    onAlbumSummariesChange: (
-        albums: CollectionSummary[],
-        sortBy: CollectionsSortBy,
-    ) => void;
+export type GalleryBarAndListHeaderProps = GalleryBarImplProps & {
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
     activeCollection: Collection | undefined;
@@ -82,6 +63,10 @@ export const GalleryBarAndListHeader: React.FC<
     mode,
     user,
     barCollectionSummaries: toShowCollectionSummaries,
+    collectionSummaries,
+    visibleAlbumFilters,
+    collectionsSortBy,
+    onChangeCollectionsSortBy,
     normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowCollectionSummary,
@@ -93,7 +78,6 @@ export const GalleryBarAndListHeader: React.FC<
     people,
     peopleSortBy,
     onChangePeopleSortBy,
-    onAlbumSummariesChange,
     albumFilter,
     albumSearchQuery,
     onAlbumSearchQueryChange,
@@ -137,79 +121,6 @@ export const GalleryBarAndListHeader: React.FC<
         setCollectionShareIntent(undefined);
         collectionShareVisibilityProps.onClose();
     }, [collectionShareVisibilityProps]);
-
-    const [collectionsSortBy, setCollectionsSortBy] =
-        useCollectionsSortByLocalState("updation-time-desc");
-
-    const sortedCollectionSummaries = useMemo(
-        () =>
-            sortCollectionSummaries(
-                [...toShowCollectionSummaries.values()],
-                collectionsSortBy,
-            ).sort((a, b) => b.sortPriority - a.sortPriority),
-        [collectionsSortBy, toShowCollectionSummaries],
-    );
-    const eligibleCollectionSummaries = useMemo(
-        () =>
-            sortedCollectionSummaries.filter(
-                (cs) =>
-                    cs.id !== uncategorizedCollectionSummaryID &&
-                    cs.id !== PseudoCollectionID.hiddenItems &&
-                    cs.id !== PseudoCollectionID.archiveItems &&
-                    cs.id !== PseudoCollectionID.trash &&
-                    (mode == "albums"
-                        ? !cs.attributes.has("system") ||
-                          (cs.id > 0 && cs.type == "uncategorized")
-                        : !cs.attributes.has("hideFromCollectionBar")),
-            ),
-        [sortedCollectionSummaries, uncategorizedCollectionSummaryID, mode],
-    );
-    const visibleAlbumFilters = useMemo(
-        () =>
-            getVisibleAlbumFilters(
-                eligibleCollectionSummaries,
-                albumSearchQuery,
-            ),
-        [eligibleCollectionSummaries, albumSearchQuery],
-    );
-    // Sidebar searches span groups; the overview still follows its selected group.
-    const sidebarCollectionSummaries = useMemo(
-        () =>
-            eligibleCollectionSummaries.filter((album) =>
-                album.name
-                    .toLowerCase()
-                    .includes(albumSearchQuery.trim().toLowerCase()),
-            ),
-        [eligibleCollectionSummaries, albumSearchQuery],
-    );
-    const visibleCollectionSummaries = useMemo(
-        () =>
-            mode == "albums"
-                ? filterAlbumSummaries(
-                      eligibleCollectionSummaries,
-                      albumFilter,
-                      albumSearchQuery,
-                  )
-                : eligibleCollectionSummaries.filter((album) =>
-                      album.name
-                          .toLowerCase()
-                          .includes(albumSearchQuery.trim().toLowerCase()),
-                  ),
-        [eligibleCollectionSummaries, mode, albumFilter, albumSearchQuery],
-    );
-
-    useEffect(() => {
-        if (mode == "albums")
-            onAlbumSummariesChange(
-                visibleCollectionSummaries,
-                collectionsSortBy,
-            );
-    }, [
-        mode,
-        visibleCollectionSummaries,
-        collectionsSortBy,
-        onAlbumSummariesChange,
-    ]);
 
     const sortedPeople = useMemo(
         () => sortPeople(people, peopleSortBy),
@@ -325,6 +236,9 @@ export const GalleryBarAndListHeader: React.FC<
                     people: sortedPeople,
                     activePerson,
                     collectionsSortBy,
+                    onChangeCollectionsSortBy,
+                    collectionSummaries,
+                    visibleAlbumFilters,
                     peopleSortBy,
                     collapsed,
                     mobileDrawerProps,
@@ -332,14 +246,7 @@ export const GalleryBarAndListHeader: React.FC<
                     uncategorizedCollectionSummaryID,
                     onShowCollectionSummary,
                 }}
-                onChangeCollectionsSortBy={setCollectionsSortBy}
                 onChangePeopleSortBy={onChangePeopleSortBy}
-                collectionSummaries={
-                    mode == "albums"
-                        ? sidebarCollectionSummaries
-                        : visibleCollectionSummaries
-                }
-                visibleAlbumFilters={visibleAlbumFilters}
             />
 
             {activeCollection && (
@@ -368,22 +275,4 @@ export const GalleryBarAndListHeader: React.FC<
             )}
         </>
     );
-};
-
-const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
-    const key = "collectionsSortBy";
-
-    const [value, setValue] = useState(initialValue);
-
-    useEffect(() => {
-        const value = localStorage.getItem(key);
-        if (value && includes(collectionsSortBy, value)) setValue(value);
-    }, []);
-
-    const setter = (value: CollectionsSortBy) => {
-        localStorage.setItem(key, value);
-        setValue(value);
-    };
-
-    return [value, setter] as const;
 };

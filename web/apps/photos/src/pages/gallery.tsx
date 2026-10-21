@@ -50,6 +50,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/components/gallery/reducer";
+import { useAlbumNavigationData } from "@/components/gallery/use-album-navigation-data";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import {
     notifyOthersFilesDialogAttributes,
@@ -131,8 +132,6 @@ import {
 import {
     haveOnlySystemCollections,
     PseudoCollectionID,
-    type CollectionsSortBy,
-    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import {
     updateFilesLocation,
@@ -217,18 +216,6 @@ const Page: React.FC = () => {
     });
     const [albumFilter, setAlbumFilter] = useState<AlbumFilter>("ente");
     const [albumSearchQuery, setAlbumSearchQuery] = useState("");
-    const [overviewAlbums, setOverviewAlbums] = useState<CollectionSummary[]>(
-        [],
-    );
-    const [overviewSortBy, setOverviewSortBy] =
-        useState<CollectionsSortBy>("updation-time-desc");
-    const handleAlbumSummariesChange = useCallback(
-        (albums: CollectionSummary[], sortBy: CollectionsSortBy) => {
-            setOverviewAlbums(albums);
-            setOverviewSortBy(sortBy);
-        },
-        [],
-    );
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [peopleSortBy, setPeopleSortBy] =
         useState<PeopleSortBy>("count-desc");
@@ -623,6 +610,21 @@ const Page: React.FC = () => {
               : barMode == "archive-albums"
                 ? state.archivedCollectionSummaries
                 : state.normalCollectionSummaries;
+
+    const {
+        sidebarCollectionSummaries,
+        overviewAlbums,
+        visibleAlbumFilters: sidebarAlbumFilters,
+        collectionsSortBy,
+        onChangeCollectionsSortBy,
+    } = useAlbumNavigationData({
+        mode: barMode,
+        collectionSummaries: barCollectionSummaries,
+        uncategorizedCollectionSummaryID:
+            state.uncategorizedCollectionSummaryID,
+        albumFilter,
+        albumSearchQuery,
+    });
 
     useEffect(() => {
         setAlbumSearchQuery("");
@@ -2176,8 +2178,10 @@ const Page: React.FC = () => {
                               onAlbumSearchQueryChange: setAlbumSearchQuery,
                               onShowAlbumOverview: handleShowAlbumOverview,
                               onShowPeopleOverview: handleShowPeople,
-                              onAlbumSummariesChange:
-                                  handleAlbumSummariesChange,
+                              collectionSummaries: sidebarCollectionSummaries,
+                              visibleAlbumFilters: sidebarAlbumFilters,
+                              collectionsSortBy,
+                              onChangeCollectionsSortBy,
                               peopleSortBy,
                               onChangePeopleSortBy: setPeopleSortBy,
                               setFileListHeader,
@@ -2298,7 +2302,7 @@ const Page: React.FC = () => {
                         ).title()}
                         filter={overviewFilter!}
                         searchQuery={albumSearchQuery}
-                        sortBy={overviewSortBy}
+                        sortBy={collectionsSortBy}
                         onSelectAlbum={handleShowCollectionSummaryWithID}
                         onCreateAlbum={() => {
                             setPostCreateAlbumOp(undefined);
