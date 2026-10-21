@@ -9,6 +9,7 @@ import {
     Dialog,
     IconButton,
     Link,
+    Skeleton,
     Stack,
     styled,
     ToggleButton,
@@ -143,10 +144,11 @@ export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
     );
 
     useEffect(() => {
+        const request = { cancelled: false };
         void (async () => {
             try {
-                setLoading(true);
                 const plansData = await getPlansData();
+                if (request.cancelled) return;
                 const { plans } = plansData;
                 if (subscription && isSubscriptionActive(subscription)) {
                     const activePlan = plans.find((plan) =>
@@ -166,13 +168,15 @@ export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
                 }
                 setPlansData(plansData);
             } catch (e) {
+                if (request.cancelled) return;
                 log.error("Failed to get plans", e);
                 onClose();
                 showMiniDialog(genericRetriableErrorDialogAttributes());
-            } finally {
-                setLoading(false);
             }
         })();
+        return () => {
+            request.cancelled = true;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -513,6 +517,17 @@ const Plans: React.FC<PlansProps> = ({
     onPlanSelect,
 }) => (
     <Stack sx={{ gap: 2 }}>
+        {!plansData && (
+            <Stack
+                role="status"
+                aria-label={t("loading")}
+                aria-busy
+                sx={{ gap: 2 }}
+            >
+                <Skeleton variant="rounded" height={56} />
+                <Skeleton variant="rounded" height={56} />
+            </Stack>
+        )}
         {plansData?.plans
             .filter((plan) => plan.period === planPeriod)
             .map((plan) => (
