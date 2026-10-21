@@ -1046,7 +1046,7 @@ export const PostComments: React.FC<{
                     cursor: isDragging ? "grabbing" : "grab",
                     display: "flex",
                     justifyContent: "center",
-                    minHeight: 32,
+                    minHeight: 24,
                     flexShrink: 0,
                     touchAction: "none",
                     width: "100%",
@@ -1331,7 +1331,7 @@ export const PostComments: React.FC<{
                 <Box
                     sx={{
                         position: "absolute",
-                        inset: "32px 0 0",
+                        inset: "24px 0 0",
                         bgcolor: spaceDialogBackground,
                         display: "flex",
                         flexDirection: "column",

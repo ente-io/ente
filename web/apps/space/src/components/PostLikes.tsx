@@ -13,6 +13,8 @@ import {
 } from "services/space";
 import { spaceActivityRowSx } from "styles/activity-list";
 import {
+    spaceControlBackground,
+    spaceControlBackgroundHover,
     spaceDialogBackground,
     spaceText,
     spaceTextMuted,
@@ -156,21 +158,22 @@ export const SpacePostLikes = ({
                 onClick={onOpen}
                 sx={{
                     alignItems: "center",
-                    alignSelf: "flex-end",
-                    bgcolor: "transparent",
+                    bgcolor: spaceControlBackground,
                     border: 0,
                     borderRadius: "24px",
-                    color: spaceTextMuted,
+                    color: spaceText,
                     cursor: "pointer",
                     display: "flex",
-                    gap: "8px",
-                    minHeight: spaceTouchTargetSize,
-                    minWidth: 64,
-                    px: "14px",
-                    transform: "translate(8px, 8px)",
-                    fontFamily: '"Inter Variable", Inter, sans-serif',
+                    flex: "0 0 auto",
+                    font: "inherit",
                     fontSize: 14,
-                    fontWeight: 600,
+                    fontWeight: 500,
+                    gap: 1,
+                    height: 48,
+                    justifyContent: "center",
+                    minWidth: 68,
+                    px: 1.5,
+                    "&:hover": { bgcolor: spaceControlBackgroundHover },
                     "&:focus-visible": {
                         outline: "2px solid #08C225",
                         outlineOffset: 2,
@@ -179,21 +182,10 @@ export const SpacePostLikes = ({
             >
                 <HugeiconsIcon
                     icon={FavouriteIcon}
-                    size={20}
+                    size={28}
                     strokeWidth={1.8}
                 />
-                <Box
-                    component="span"
-                    sx={{
-                        flexShrink: 0,
-                        fontVariantNumeric: "tabular-nums",
-                        height: "20px",
-                        lineHeight: "20px",
-                        textAlign: "left",
-                        whiteSpace: "nowrap",
-                        width: "1ch",
-                    }}
-                >
+                <Box component="span" sx={{ color: "#C4C4C8" }}>
                     {displayedLikeCount ?? ""}
                 </Box>
             </Box>
@@ -308,7 +300,7 @@ export const SpacePostLikes = ({
                             cursor: isDragging ? "grabbing" : "grab",
                             display: "flex",
                             flexShrink: 0,
-                            height: spaceTouchTargetSize,
+                            height: 24,
                             justifyContent: "center",
                             p: 0,
                             touchAction: "none",
@@ -330,6 +322,21 @@ export const SpacePostLikes = ({
                         />
                     </Box>
                 )}
+                <Box
+                    component="h2"
+                    sx={{
+                        flexShrink: 0,
+                        fontSize: 16,
+                        fontWeight: 600,
+                        lineHeight: "24px",
+                        m: 0,
+                        px: 2,
+                        pb: 1,
+                        textAlign: "center",
+                    }}
+                >
+                    Likes
+                </Box>
                 <Box
                     sx={{
                         height: "min(224px, 40dvh)",

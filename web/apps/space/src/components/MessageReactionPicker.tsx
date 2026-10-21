@@ -322,7 +322,7 @@ export const MessageReactionPicker: React.FC<{
                     ...buttonSx,
                     borderRadius: "999px",
                     cursor: isDragging ? "grabbing" : "grab",
-                    height: 32,
+                    height: 24,
                     touchAction: "none",
                     width: "100%",
                     "&:hover": { bgcolor: "transparent" },
