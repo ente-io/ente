@@ -277,6 +277,10 @@ func (h *AdminHandler) UpdateReferral(c *gin.Context) {
 // to reset passkey 2FA. Their identity is verified out of band. Removing
 // passkeys does not disable TOTP 2FA.
 func (h *AdminHandler) RemovePasskeys(c *gin.Context) {
+	if err := h.isFreshAdminToken(c); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
 	var request ente.AdminOpsForUserRequest
 	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Bad request"))
@@ -303,6 +307,10 @@ func (h *AdminHandler) RemovePasskeys(c *gin.Context) {
 }
 
 func (h *AdminHandler) UpdateEmailMFA(c *gin.Context) {
+	if err := h.isFreshAdminToken(c); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
 	var request ente.AdminOpsForUserRequest
 	if err := handler.BindJSON(c, &request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Bad request"))
