@@ -1,10 +1,13 @@
 import { publishCastPayload, revokeAllCastTokens } from "@/services/cast";
 import { loadCast } from "@/utils/chromecast-sender";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CastIcon from "@mui/icons-material/Cast";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import CloseIcon from "@mui/icons-material/Close";
-import KeyboardOutlinedIcon from "@mui/icons-material/KeyboardOutlined";
+import {
+    ArrowLeft02Icon,
+    ArrowRight01Icon,
+    Cancel01Icon,
+    CastIcon,
+    KeyboardIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
     Box,
     Dialog,
@@ -50,7 +53,17 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             {...{ open, onClose }}
             maxWidth={false}
             aria-labelledby={titleID}
-            slotProps={{ paper: { sx: v2PaperSx } }}
+            slotProps={{
+                paper: {
+                    sx: [
+                        v2PaperSx,
+                        {
+                            width: "min(640px, calc(100svw - 32px))",
+                            maxWidth: "640px",
+                        },
+                    ],
+                },
+            }}
         >
             <Stack sx={{ p: "24px", gap: "24px" }}>
                 <Stack sx={{ gap: "16px" }}>
@@ -70,7 +83,11 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                             onClick={onClose}
                             sx={v2CloseButtonSx}
                         >
-                            <CloseIcon sx={{ fontSize: 18 }} />
+                            <HugeiconsIcon
+                                icon={Cancel01Icon}
+                                size={18}
+                                aria-hidden
+                            />
                         </IconButton>
                     </Stack>
                 </Stack>
@@ -171,14 +188,28 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                 <Stack sx={{ gap: "12px" }}>
                     {browserCanCast && (
                         <PairingOption
-                            icon={<CastIcon sx={{ fontSize: 24 }} />}
+                            icon={
+                                <HugeiconsIcon
+                                    icon={CastIcon}
+                                    size={24}
+                                    strokeWidth={1.5}
+                                    aria-hidden
+                                />
+                            }
                             title={t("cast_auto_pair")}
                             description={t("cast_auto_pair_description")}
                             onClick={() => setView("auto")}
                         />
                     )}
                     <PairingOption
-                        icon={<KeyboardOutlinedIcon sx={{ fontSize: 24 }} />}
+                        icon={
+                            <HugeiconsIcon
+                                icon={KeyboardIcon}
+                                size={24}
+                                strokeWidth={1.5}
+                                aria-hidden
+                            />
+                        }
                         title={t("pair_with_pin")}
                         description={t("pair_with_pin_description")}
                         onClick={() => setView("pin")}
@@ -215,7 +246,13 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                     <FocusVisibleButton
                         variant="text"
                         color="secondary"
-                        startIcon={<ArrowBackIcon />}
+                        startIcon={
+                            <HugeiconsIcon
+                                icon={ArrowLeft02Icon}
+                                size={20}
+                                aria-hidden
+                            />
+                        }
                         onClick={() => setView("choose")}
                         sx={{ alignSelf: "flex-start", p: 0 }}
                     >
@@ -299,8 +336,8 @@ const PairingOption: React.FC<{
                 {description}
             </Typography>
         </Stack>
-        <ChevronRightIcon
-            sx={{ fontSize: 18, color: "text.muted", flexShrink: 0 }}
-        />
+        <Box sx={{ display: "flex", color: "text.muted", flexShrink: 0 }}>
+            <HugeiconsIcon icon={ArrowRight01Icon} size={18} aria-hidden />
+        </Box>
     </FocusVisibleUnstyledButton>
 );
