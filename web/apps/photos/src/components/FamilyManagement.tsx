@@ -24,7 +24,6 @@ import {
     RadioGroup,
     Stack,
     styled,
-    TextField,
     Typography,
 } from "@mui/material";
 import {
@@ -874,15 +873,14 @@ const StorageLimitDialog: React.FC<{
                             }
                             label={t("storage_limit_up_to")}
                         />
-                        <TextField
-                            variant="outlined"
+                        <InputBase
                             type="number"
                             value={value}
                             disabled={loading}
                             error={!!error}
                             onFocus={() => setLimited(true)}
                             slotProps={{
-                                htmlInput: {
+                                input: {
                                     "aria-label": t("storage_limit_gb"),
                                     "aria-describedby": error
                                         ? "storage-limit-error"
@@ -896,27 +894,24 @@ const StorageLimitDialog: React.FC<{
                                 setValue(e.target.value);
                                 setError("");
                             }}
-                            sx={{
-                                m: 0,
-                                width: 100,
-                                minWidth: 0,
-                                "& .MuiInputBase-root": {
+                            sx={[
+                                ...(isSxArray(v2InputSx)
+                                    ? v2InputSx
+                                    : [v2InputSx]),
+                                {
+                                    width: 100,
+                                    minWidth: 0,
                                     height: 36,
-                                    bgcolor: "fill.faint",
+                                    boxSizing: "border-box",
                                     borderRadius: "12px",
-                                },
-                                "& .MuiOutlinedInput-notchedOutline": {
+                                    px: "12px",
+                                    bgcolor: "fill.faint",
                                     borderColor: "stroke.muted",
+                                    "& input::-webkit-inner-spin-button, & input::-webkit-outer-spin-button":
+                                        { WebkitAppearance: "none", m: 0 },
+                                    "& input": { MozAppearance: "textfield" },
                                 },
-                                "& .MuiInputBase-input": {
-                                    p: "8px 12px",
-                                    fontSize: 14,
-                                    fontWeight: 500,
-                                },
-                                "& input::-webkit-inner-spin-button, & input::-webkit-outer-spin-button":
-                                    { WebkitAppearance: "none", m: 0 },
-                                "& input": { MozAppearance: "textfield" },
-                            }}
+                            ]}
                         />
                         <Typography
                             variant="small"
@@ -935,7 +930,7 @@ const StorageLimitDialog: React.FC<{
                         id="storage-limit-error"
                         role="alert"
                         variant="mini"
-                        sx={{ color: "critical.main" }}
+                        sx={v2HelperSx(true)}
                     >
                         {error}
                     </Typography>
