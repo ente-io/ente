@@ -69,13 +69,19 @@ test("preserves age mode, including zero and a leap-day birthday", () => {
     );
 });
 
+test("personalizes legacy lane titles while preserving translated named titles", () => {
+    for (const [memoryName, personName, expected] of [
+        ["Memory lane", "Alice", "Alice's memory lane"],
+        ["Erinnerungen", "Ashil", "Ashil's memory lane"],
+        ["Ashils Erinnerungen", "Ashil", "Ashils Erinnerungen"],
+        ["Kỷ niệm của Ashil", "Ashil", "Kỷ niệm của Ashil"],
+        ["Erinnerungen", "", "Erinnerungen"],
+    ] as const) {
+        expect(buildLaneTitle({ memoryName, personName })).toBe(expected);
+    }
+});
+
 test("keeps translated word order and placeholders separate from names", async () => {
-    expect(
-        buildLaneTitle({
-            memoryName: "Ashils Erinnerungen",
-            personName: "Ashil",
-        }),
-    ).toBe("Ashils Erinnerungen");
     await i18n.changeLanguage("de-DE");
     const before = localizeLaneCaption(
         caption(new Date(2025, 9, 16), { personName: "Jetzt" }),

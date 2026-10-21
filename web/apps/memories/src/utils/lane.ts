@@ -360,8 +360,13 @@ export const buildLaneTitle = ({
     personName?: string;
 }) => {
     const trimmedTitle = memoryName.trim();
-    if (trimmedTitle) return trimmedTitle;
     const trimmedPersonName = personName?.trim() ?? "";
+    if (
+        trimmedTitle &&
+        (!trimmedPersonName || trimmedTitle.includes(trimmedPersonName))
+    ) {
+        return trimmedTitle;
+    }
     if (!trimmedPersonName) return "Memory lane";
 
     const possessiveName = trimmedPersonName.endsWith("s")
