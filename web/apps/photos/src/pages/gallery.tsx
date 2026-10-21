@@ -36,7 +36,6 @@ import {
     type RemotePullOpts,
 } from "@/components/gallery";
 import { AlbumsOverview } from "@/components/gallery/AlbumsOverview";
-import { GalleryBarImpl } from "@/components/gallery/BarImpl";
 import { DuplicatesView } from "@/components/gallery/DuplicatesView";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import { PeopleOverview } from "@/components/gallery/PeopleOverview";
@@ -2194,48 +2193,23 @@ const Page: React.FC = () => {
                               activeCollectionID: galleryBarActiveCollectionID,
                               onSelectCollectionID: selectGalleryCollection,
                               onRemotePull: remotePull,
-                              renderGalleryBar: (presentationProps) =>
-                                  !isInSearchMode && (
-                                      <GalleryBarImpl
-                                          {...presentationProps}
-                                          {...{
-                                              activePerson,
-                                              albumFilter,
-                                              albumSearchQuery,
-                                              collectionsSortBy,
-                                              onChangeCollectionsSortBy,
-                                              normalCollectionSummaries,
-                                              peopleSortBy,
-                                          }}
-                                          mode={barMode}
-                                          activeCollectionID={
-                                              galleryBarActiveCollectionID
-                                          }
-                                          onAlbumSearchQueryChange={
-                                              setAlbumSearchQuery
-                                          }
-                                          onShowAlbumOverview={
-                                              handleShowAlbumOverview
-                                          }
-                                          onShowPeopleOverview={
-                                              handleShowPeople
-                                          }
-                                          collectionSummaries={
-                                              sidebarCollectionSummaries
-                                          }
-                                          visibleAlbumFilters={
-                                              sidebarAlbumFilters
-                                          }
-                                          uncategorizedCollectionSummaryID={
-                                              state.uncategorizedCollectionSummaryID
-                                          }
-                                          onShowCollectionSummary={
-                                              showCollectionSummary
-                                          }
-                                          onChangePeopleSortBy={setPeopleSortBy}
-                                          people={sortedPeople}
-                                      />
-                                  ),
+                              activePerson,
+                              albumFilter,
+                              albumSearchQuery,
+                              onAlbumSearchQueryChange: setAlbumSearchQuery,
+                              onShowAlbumOverview: handleShowAlbumOverview,
+                              onShowPeopleOverview: handleShowPeople,
+                              collectionSummaries: sidebarCollectionSummaries,
+                              visibleAlbumFilters: sidebarAlbumFilters,
+                              normalCollectionSummaries,
+                              uncategorizedCollectionSummaryID:
+                                  state.uncategorizedCollectionSummaryID,
+                              onShowCollectionSummary: showCollectionSummary,
+                              collectionsSortBy,
+                              onChangeCollectionsSortBy,
+                              peopleSortBy,
+                              onChangePeopleSortBy: setPeopleSortBy,
+                              people: sortedPeople,
                           }
                 }
                 alternateHeader={
