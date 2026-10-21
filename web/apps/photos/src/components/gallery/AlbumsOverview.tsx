@@ -1,4 +1,4 @@
-import { useDeleteEmptyAlbums } from "@/components/Collections/useDeleteEmptyAlbums";
+import { useDeleteEmptyAlbums } from "@/components/collections/useDeleteEmptyAlbums";
 import type { RemotePullOpts } from "@/components/gallery";
 import type { AlbumFilter } from "@/utils/album-filters";
 import { Delete02Icon } from "@hugeicons/core-free-icons";

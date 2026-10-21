@@ -3,7 +3,7 @@ import {
     CollectionShare,
     type CollectionShareIntent,
     type CollectionShareProps,
-} from "@/components/Collections/CollectionShare";
+} from "@/components/collections/CollectionShare";
 import type { FileListHeaderOrFooter } from "@/components/FileList";
 import {
     GalleryBarImpl,
@@ -41,16 +41,13 @@ import {
     CollectionHeader,
     type CollectionHeaderProps,
 } from "./CollectionHeader";
-import { CreateAlbumDialog } from "./CreateAlbumDialog";
 
 export type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
     | "visibleAlbumFilters"
-    | "onSelectCollectionID"
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
-    | "onCreateAlbum"
 > & {
     onAlbumSummariesChange: (
         albums: CollectionSummary[],
@@ -60,6 +57,7 @@ export type GalleryBarAndListHeaderProps = Omit<
     barCollectionSummaries: CollectionSummaries;
     activeCollection: Collection | undefined;
     setActiveCollectionID: (collectionID: number) => void;
+    onSelectPersonInHeader: GalleryBarImplProps["onSelectPerson"];
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     hasActiveFileSelection: boolean;
     saveGroups: SaveGroup[];
@@ -90,6 +88,7 @@ export const GalleryBarAndListHeader: React.FC<
     activeCollection,
     activeCollectionID,
     setActiveCollectionID,
+    onSelectCollectionID,
     setBlockingLoad,
     people,
     peopleSortBy,
@@ -100,7 +99,9 @@ export const GalleryBarAndListHeader: React.FC<
     onAlbumSearchQueryChange,
     onShowAlbumOverview,
     onShowPeopleOverview,
+    onCreateAlbum,
     onSelectPerson,
+    onSelectPersonInHeader,
     saveGroups,
     hasActiveFileSelection,
     activePerson,
@@ -115,14 +116,6 @@ export const GalleryBarAndListHeader: React.FC<
     collapsed,
     mobileDrawerProps,
 }) => {
-    const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
-        useModalVisibility();
-    const [createInHiddenSection, setCreateInHiddenSection] = useState(false);
-    const openAlbumCreation = () => {
-        setCreateInHiddenSection(mode == "hidden-albums");
-        showAlbumNameInput();
-    };
-
     const { show: showCollectionShare, props: collectionShareVisibilityProps } =
         useModalVisibility();
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
@@ -234,22 +227,6 @@ export const GalleryBarAndListHeader: React.FC<
         activeCollection?.pubMagicMetadata?.data.caption?.trim();
     const [descriptionHeight, setDescriptionHeight] = useState(0);
 
-    const { onClose: closeMobileDrawer } = mobileDrawerProps;
-    const selectCollection = useCallback(
-        (id: number) => {
-            setActiveCollectionID(id);
-            closeMobileDrawer();
-        },
-        [setActiveCollectionID, closeMobileDrawer],
-    );
-    const selectPerson = useCallback(
-        (id: string) => {
-            onSelectPerson(id);
-            closeMobileDrawer();
-        },
-        [onSelectPerson, closeMobileDrawer],
-    );
-
     useEffect(() => {
         if (shouldHide || mode == "links") return;
 
@@ -293,7 +270,8 @@ export const GalleryBarAndListHeader: React.FC<
             ) : activePerson ? (
                 <PeopleHeader
                     person={activePerson}
-                    {...{ onSelectPerson, people }}
+                    people={people}
+                    onSelectPerson={onSelectPersonInHeader}
                 />
             ) : (
                 <></>
@@ -340,6 +318,9 @@ export const GalleryBarAndListHeader: React.FC<
                     onAlbumSearchQueryChange,
                     onShowAlbumOverview,
                     onShowPeopleOverview,
+                    onCreateAlbum,
+                    onSelectCollectionID,
+                    onSelectPerson,
                     activeCollectionID,
                     people: sortedPeople,
                     activePerson,
@@ -351,11 +332,8 @@ export const GalleryBarAndListHeader: React.FC<
                     uncategorizedCollectionSummaryID,
                     onShowCollectionSummary,
                 }}
-                onSelectCollectionID={selectCollection}
-                onSelectPerson={selectPerson}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onChangePeopleSortBy={onChangePeopleSortBy}
-                onCreateAlbum={openAlbumCreation}
                 collectionSummaries={
                     mode == "albums"
                         ? sidebarCollectionSummaries
@@ -364,12 +342,6 @@ export const GalleryBarAndListHeader: React.FC<
                 visibleAlbumFilters={visibleAlbumFilters}
             />
 
-            <CreateAlbumDialog
-                {...albumNameInputVisibilityProps}
-                isHidden={createInHiddenSection}
-                onRemotePull={onRemotePull}
-                onSelectCollectionID={selectCollection}
-            />
             {activeCollection && (
                 <>
                     <CollectionShare

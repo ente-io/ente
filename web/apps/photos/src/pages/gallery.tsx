@@ -8,13 +8,6 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "@/components/CollectionSelector";
-import { AlbumSlideshow } from "@/components/Collections/AlbumSlideshow";
-import { CollectionMapDialog } from "@/components/Collections/CollectionMapDialog";
-import {
-    EditAlbumDetailsDialog,
-    type AlbumDetails,
-} from "@/components/Collections/EditAlbumDetailsDialog";
-import { slideshowFiles } from "@/components/Collections/album-slideshow";
 import { FamilyManagement } from "@/components/FamilyManagement";
 import type { FileListHeaderOrFooter } from "@/components/FileList";
 import { FileListWithViewer } from "@/components/FileListWithViewer";
@@ -28,6 +21,13 @@ import {
 } from "@/components/SelectedFileOptions";
 import { Upload } from "@/components/Upload";
 import { WhatsNew } from "@/components/WhatsNew";
+import { AlbumSlideshow } from "@/components/collections/AlbumSlideshow";
+import { CollectionMapDialog } from "@/components/collections/CollectionMapDialog";
+import {
+    EditAlbumDetailsDialog,
+    type AlbumDetails,
+} from "@/components/collections/EditAlbumDetailsDialog";
+import { slideshowFiles } from "@/components/collections/album-slideshow";
 import {
     GalleryEmptyState,
     PeopleConsentDialog,
