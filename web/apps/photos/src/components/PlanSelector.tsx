@@ -120,7 +120,7 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
 export type PlanSelectorContentsProps = Pick<
     PlanSelectorProps,
     "onClose" | "setLoading" | "onManageFamily" | "initialPlansData"
-> & { onBeginCheckout?: () => void };
+> & { onBeginCheckout?: () => void; showInitialLoading?: boolean };
 
 export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
     onClose,
@@ -128,6 +128,7 @@ export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
     initialPlansData,
     onManageFamily,
     onBeginCheckout,
+    showInitialLoading = false,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const showCloseButton = !useContext(SidebarPanelContext);
@@ -154,11 +155,13 @@ export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
 
     useEffect(() => {
         const request = { cancelled: false };
+        const showFetchLoading = showInitialLoading && !initialPlansData;
+        if (showFetchLoading) setLoading(true);
         void (async () => {
             try {
                 const plansData = initialPlansData ?? (await getPlansData());
                 if (request.cancelled) return;
-                const { plans } = plansData;
+                const plans = [...plansData.plans];
                 if (subscription && isSubscriptionActive(subscription)) {
                     const activePlan = plans.find((plan) =>
                         isSubscriptionForPlan(subscription, plan),
@@ -175,16 +178,19 @@ export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
                         });
                     }
                 }
-                setPlansData(plansData);
+                setPlansData({ ...plansData, plans });
             } catch (e) {
                 if (request.cancelled) return;
                 log.error("Failed to get plans", e);
                 onClose();
                 showMiniDialog(genericRetriableErrorDialogAttributes());
+            } finally {
+                if (showFetchLoading && !request.cancelled) setLoading(false);
             }
         })();
         return () => {
             request.cancelled = true;
+            if (showFetchLoading) setLoading(false);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
