@@ -221,10 +221,14 @@ export const SpacePostLikes = ({
                             boxShadow: "none",
                             boxSizing: "border-box",
                             color: spaceText,
+                            display: "flex",
+                            flexDirection: "column",
                             fontFamily: '"Inter Variable", Inter, sans-serif',
+                            height: "min(72dvh, 640px)",
                             left: 0,
                             m: 0,
-                            maxHeight: "min(560px, calc(100dvh - 64px))",
+                            maxHeight:
+                                "calc(100dvh - env(safe-area-inset-top) - 16px)",
                             maxWidth: "none",
                             overflow: "hidden",
                             position: "fixed",
@@ -331,7 +335,7 @@ export const SpacePostLikes = ({
                         lineHeight: "24px",
                         m: 0,
                         px: 2,
-                        pb: 1,
+                        pb: 2,
                         textAlign: "center",
                     }}
                 >
@@ -339,7 +343,7 @@ export const SpacePostLikes = ({
                 </Box>
                 <Box
                     sx={{
-                        height: "min(224px, 40dvh)",
+                        flex: "1 1 auto",
                         overflowY: "auto",
                         overscrollBehaviorY: "contain",
                         px: "20px",

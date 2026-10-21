@@ -1085,7 +1085,7 @@ export const PostComments: React.FC<{
                         alignItems: "center",
                         justifyContent: "center",
                         px: 2,
-                        pb: 1,
+                        pb: 2,
                         flexShrink: 0,
                         position: "relative",
                     }}
@@ -1347,7 +1347,7 @@ export const PostComments: React.FC<{
                             alignItems: "center",
                             justifyContent: "center",
                             px: 2,
-                            pb: 1,
+                            pb: 2,
                             flexShrink: 0,
                             position: "relative",
                         }}
