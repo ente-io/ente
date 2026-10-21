@@ -285,31 +285,6 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                     >
                         {t("go_back")}
                     </FocusVisibleButton>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            justifyContent: "center",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                            columnGap: "6px",
-                        }}
-                    >
-                        <Typography sx={{ fontSize: 12, color: "text.muted" }}>
-                            {t("cast_device_not_visible")}
-                        </Typography>
-                        <FocusVisibleUnstyledButton
-                            onClick={() => setView("pin")}
-                            sx={{
-                                color: "text.base",
-                                fontSize: 12,
-                                fontWeight: 500,
-                                textDecoration: "underline",
-                                textUnderlineOffset: "3px",
-                            }}
-                        >
-                            {t("pair_with_pin")}
-                        </FocusVisibleUnstyledButton>
-                    </Stack>
                 </Stack>
             )}
             {view == "pin" && (
