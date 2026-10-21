@@ -1996,7 +1996,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             photos,
             focusReplyOnOpen: isOwnPost ? false : focusReplyOnOpen,
             photo,
-            postActionMode: isOwnPost ? "hidden" : "like-only",
+            postActionMode: isOwnPost ? "likes" : "like-only",
         });
     };
     const closeSelectedPhoto = () => {

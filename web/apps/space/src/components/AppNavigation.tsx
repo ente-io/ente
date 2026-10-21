@@ -41,6 +41,7 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
     const isConversation = router.pathname.startsWith(
         `${spaceRoutes.messages}/`,
     );
+    const isPost = router.pathname.startsWith("/app/posts/");
     const isSettingsPage =
         router.pathname == spaceRoutes.settings ||
         router.pathname == spaceRoutes.settingsProfileName ||
@@ -59,6 +60,7 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
         isAppPage &&
         Boolean(profile) &&
         !isConversation &&
+        !isPost &&
         !isSettingsPage &&
         !isProfilePage &&
         !isNotificationsPage;
@@ -189,6 +191,7 @@ export const SpaceAppLayout = ({ children }: { children: React.ReactNode }) => {
                 ref={layoutRef}
                 className={isAppPage ? "space-app-layout" : undefined}
                 data-space-conversation={isConversation || undefined}
+                data-space-post={isPost || undefined}
                 data-space-settings={isSettingsPage || undefined}
                 data-space-profile={isProfilePage || undefined}
                 data-space-notifications={isNotificationsPage || undefined}

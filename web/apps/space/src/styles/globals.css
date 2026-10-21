@@ -59,6 +59,7 @@ html[data-space-ios-pwa]
 }
 
 .space-app-layout[data-space-conversation],
+.space-app-layout[data-space-post],
 .space-app-layout[data-space-settings],
 .space-app-layout[data-space-profile],
 .space-app-layout[data-space-notifications] {
