@@ -17,6 +17,8 @@ We decided to leave out the **i** from **GiBs** to reduce noise on our interface
 
 This means that the same file appears to take up less "storage" on Ente compared to providers using GB (base-1000) calculation.
 
+Storage usage in the mobile app is rounded for display, so a small upload may not visibly change the total. To check pending uploads, see [Backup status](/photos/faq/backup-and-sync#check-backup-status).
+
 ### How does Ente deduplicate photos? {#deduplication}
 
 Ente automatically detects and handles duplicate files during backup to save storage space:

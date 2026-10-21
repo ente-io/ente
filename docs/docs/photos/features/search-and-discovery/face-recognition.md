@@ -70,6 +70,11 @@ Learn more about [Machine learning](/photos/features/search-and-discovery/machin
 
 - Access the People section through the top tab
 
+**On web, on a wide screen:**
+
+- Select **People** in the navigation rail to open the people overview
+- Use the name search in the People sidebar to find a person
+
 ![Named person with populated memories on Ente Photos desktop](https://docs-assets.ente.com/screenshots/desktop-face-named-person.png){width=720px}
 
 ### Naming persons

@@ -45,17 +45,21 @@ Hiding differs from [Archiving](./archive) in that hidden content won't appear a
 
 ![Hidden view showing hidden albums and photos on Ente Photos mobile](https://docs-assets.ente.com/screenshots/phone-hidden-view.png){width=320px}
 
-**On web/desktop:**
+**On web:**
 
-- Click the menu icon (three horizontal lines) at top left
+- Open **Albums**
 - Select **Hidden**
 - Authenticate with your Ente password
-
-![Hidden item in the sidebar menu on Ente Photos web](https://docs-assets.ente.com/screenshots/web-hidden-sidebar.png){width=720px}
 
 ![Password authentication dialog for Hidden on Ente Photos web](https://docs-assets.ente.com/screenshots/web-hidden-auth.png){width=720px}
 
 ![Hidden view showing hidden albums and photos on Ente Photos web](https://docs-assets.ente.com/screenshots/web-hidden-view.png){width=720px}
+
+**On desktop:**
+
+- Click the menu icon (three horizontal lines) at top left
+- Select **Hidden**
+- Authenticate with your Ente password
 
 ### Add photos to a hidden album (web/desktop)
 

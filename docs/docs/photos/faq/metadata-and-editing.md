@@ -379,7 +379,7 @@ We're working on bringing all editing features to all platforms.
 
 ### A photo I shared into Ente from WhatsApp shows the wrong date in the timeline. Why? {#whatsapp-wrong-date}
 
-Apps like WhatsApp strip the hidden "date taken" information from photos for privacy. When Ente can't find that information, and can't reliably extract it from the filename either (especially for videos), it falls back to the upload date.
+The timeline date can depend on how the file reaches Ente. On Android, a video shared directly into Ente may use a date from its filename, or the time you imported it, rather than its embedded capture date. This does not by itself show that the sending app removed metadata.
 
 To fix dates already uploaded, the easiest path is the desktop app, which supports bulk editing:
 
@@ -390,7 +390,7 @@ To fix dates already uploaded, the easiest path is the desktop app, which suppor
 
 The correction syncs to all your devices.
 
-To prevent this for future shared media, save photos to your phone's gallery first and let Ente back them up from the gallery. Ente reads dates correctly when files come from the gallery rather than directly from a sharing intent.
+For future imports, try saving one original to your gallery and backing it up from there. Check its date in Ente before importing the rest. This does not change the dates of files already uploaded.
 
 ### Why is GPS location missing when I share a photo to Ente on Android? {#android-share-gps-missing}
 
