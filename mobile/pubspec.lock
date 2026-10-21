@@ -518,10 +518,10 @@ packages:
     dependency: transitive
     description:
       name: dio_http2_adapter
-      sha256: c56522c50bb3bab7e3ca77c153b0f03ae672a87d8c32e46be8f2868693ec9f0a
+      sha256: c48daafd9cded83368ba0b7d731db6bc9d0413fe21727abf1575780b7c8a74a1
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.1"
+    version: "2.8.0"
   dio_web_adapter:
     dependency: transitive
     description:
