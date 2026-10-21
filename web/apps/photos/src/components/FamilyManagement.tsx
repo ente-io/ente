@@ -23,6 +23,7 @@ import {
     Radio,
     RadioGroup,
     Stack,
+    styled,
     TextField,
     Typography,
 } from "@mui/material";
@@ -699,22 +700,20 @@ const StorageLimitDialog: React.FC<{
             fullWidth
             slotProps={{
                 paper: {
-                    sx: {
-                        width: 420,
-                        maxWidth: "calc(100% - 32px)",
-                        m: 2,
-                        p: "20px",
-                        gap: 2,
-                        borderRadius: "20px",
-                        border: "1px solid",
-                        borderColor: "stroke.faint",
-                        backgroundImage:
-                            "linear-gradient(var(--mui-palette-fill-faint), var(--mui-palette-fill-faint))",
-                    },
+                    sx: [
+                        ...(isSxArray(v2PaperSx) ? v2PaperSx : [v2PaperSx]),
+                        {
+                            width: 420,
+                            maxWidth: "calc(100% - 32px)",
+                            boxSizing: "border-box",
+                            p: "20px",
+                            gap: 2,
+                        },
+                    ],
                 },
             }}
         >
-            <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+            <Stack direction="row" sx={v2HeaderRowSx}>
                 <DialogTitle
                     id="storage-limit-title"
                     sx={{
@@ -731,18 +730,9 @@ const StorageLimitDialog: React.FC<{
                     aria-label={t("close")}
                     onClick={onClose}
                     disabled={loading}
-                    sx={{ width: 38, height: 38, bgcolor: "background.paper" }}
+                    sx={v2CloseButtonSx}
                 >
-                    <Box
-                        component="img"
-                        alt=""
-                        src="/images/storage-limit/close.svg"
-                        sx={(theme) => ({
-                            ...theme.applyStyles("dark", {
-                                filter: "invert(1)",
-                            }),
-                        })}
-                    />
+                    <HugeiconsIcon icon={Cancel01Icon} size={18} />
                 </IconButton>
             </Stack>
             <Stack
@@ -845,18 +835,8 @@ const StorageLimitDialog: React.FC<{
                         disabled={loading}
                         control={
                             <Radio
-                                icon={
-                                    <img
-                                        alt=""
-                                        src="/images/storage-limit/unselected.svg"
-                                    />
-                                }
-                                checkedIcon={
-                                    <img
-                                        alt=""
-                                        src="/images/storage-limit/selected.svg"
-                                    />
-                                }
+                                icon={<StorageLimitRadioIcon />}
+                                checkedIcon={<StorageLimitRadioIcon />}
                             />
                         }
                         label={t("no_limit")}
@@ -888,18 +868,8 @@ const StorageLimitDialog: React.FC<{
                             disabled={loading}
                             control={
                                 <Radio
-                                    icon={
-                                        <img
-                                            alt=""
-                                            src="/images/storage-limit/unselected.svg"
-                                        />
-                                    }
-                                    checkedIcon={
-                                        <img
-                                            alt=""
-                                            src="/images/storage-limit/selected.svg"
-                                        />
-                                    }
+                                    icon={<StorageLimitRadioIcon />}
+                                    checkedIcon={<StorageLimitRadioIcon />}
                                 />
                             }
                             label={t("storage_limit_up_to")}
@@ -976,35 +946,27 @@ const StorageLimitDialog: React.FC<{
                 >
                     {t("storage_limit_explanation")}
                 </Typography>
-                <Stack
-                    sx={{
-                        gap: 1.5,
-                        "& .MuiButton-root": {
-                            height: 52,
-                            px: 3,
-                            borderRadius: "20px",
-                            fontSize: 14,
-                            lineHeight: "20px",
-                        },
-                    }}
-                >
+                <Stack sx={{ gap: 1.5 }}>
                     <LoadingButton
                         fullWidth
                         type="submit"
-                        color="accent"
                         loading={loading}
+                        sx={{
+                            ...v2SubmitButtonSx,
+                            flex: "none",
+                            fontWeight: 600,
+                        }}
                     >
                         {t("save")}
                     </LoadingButton>
                     <FocusVisibleButton
                         fullWidth
-                        color="secondary"
                         disabled={loading}
                         onClick={onClose}
-                        sx={{
-                            bgcolor: "secondary.dark",
-                            "&:hover": { bgcolor: "fill.muted" },
-                        }}
+                        sx={[
+                            v2CancelButtonSx,
+                            { flex: "none", fontWeight: 600 },
+                        ]}
                     >
                         {t("cancel")}
                     </FocusVisibleButton>
@@ -1013,3 +975,25 @@ const StorageLimitDialog: React.FC<{
         </Dialog>
     );
 };
+
+const StorageLimitRadioIcon = styled("span")(({ theme }) => ({
+    width: 16,
+    height: 16,
+    boxSizing: "border-box",
+    border: "1px solid",
+    borderColor: theme.vars.palette.text.faint,
+    borderRadius: "50%",
+    display: "grid",
+    placeItems: "center",
+    ".Mui-checked &": {
+        borderColor: theme.vars.palette.accent.main,
+        "&::after": {
+            content: '""',
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            backgroundColor: theme.vars.palette.accent.main,
+        },
+    },
+    ".Mui-disabled &": { opacity: 0.5 },
+}));
