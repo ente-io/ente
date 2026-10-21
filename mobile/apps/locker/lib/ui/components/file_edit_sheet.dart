@@ -6,7 +6,6 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/utils/collection_list_util.dart';
-import 'package:path/path.dart' as path;
 
 class FileEditSheetResult {
   final String title;
@@ -44,22 +43,13 @@ class _FileEditSheetState extends State<FileEditSheet> {
   bool get _canSave =>
       _hasLoadedCollectionSelection &&
       _selectedCollectionIds.isNotEmpty &&
-      _titleController.text.isNotEmpty &&
-      _titleForSave.characters.length <= 200;
-
-  String get _titleForSave {
-    final originalTitle = widget.file.displayName;
-    final name = _titleController.text;
-    return name == path.withoutExtension(originalTitle)
-        ? originalTitle
-        : '$name${path.extension(originalTitle)}';
-  }
+      _titleController.text.trim().isNotEmpty;
 
   @override
   void initState() {
     super.initState();
     _availableCollections = _filterCollections(widget.collections);
-    _titleController.text = path.withoutExtension(widget.file.displayName);
+    _titleController.text = widget.file.displayName;
     _captionController.text = widget.file.caption ?? '';
     _initializeSelections();
   }
@@ -122,7 +112,7 @@ class _FileEditSheetState extends State<FileEditSheet> {
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
     final result = FileEditSheetResult(
-      title: _titleForSave,
+      title: _titleController.text.trim(),
       caption: _captionController.text.trim(),
       selectedCollections: selectedCollections,
     );

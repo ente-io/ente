@@ -1,1 +1,0 @@
-- Fixed file renaming and JPEG icons.

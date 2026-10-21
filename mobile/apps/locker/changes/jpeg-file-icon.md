@@ -1,0 +1,1 @@
+- Fixed icons for .jpeg files.
