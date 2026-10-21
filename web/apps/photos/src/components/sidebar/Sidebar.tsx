@@ -46,6 +46,7 @@ import {
     pullUserDetails,
     redirectToCustomerPortal,
     userDetailsAddOnBonuses,
+    type PlansData,
     type UserDetails,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
@@ -75,7 +76,7 @@ type SidebarProps = ModalVisibilityProps & {
     onActionHandled?: (actionID: SidebarActionID) => void;
     onShowLargeFiles: () => void;
     onShowDuplicates: () => void;
-    onShowPlanSelector: () => void;
+    onShowPlanSelector: (plansData?: PlansData) => void;
     collectionNameByID: Map<number, string>;
     onCloseOverlays: () => void;
     children?: React.ReactNode;
@@ -592,7 +593,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     );
 
     const handleSubscriptionCardClick = () =>
-        openManageSubscription({
+        void openManageSubscription({
             userDetails,
             showManageMemberSubscription,
             onShowPlanSelector,

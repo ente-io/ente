@@ -184,6 +184,7 @@ import {
     redirectToCustomerPortal,
     savedUserDetailsOrTriggerPull,
     verifyStripeSubscription,
+    type PlansData,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { PromiseQueue } from "ente-utils/promise";
@@ -304,8 +305,16 @@ const Page: React.FC = () => {
     const pendingPeopleSearchReset = useRef<(() => void) | undefined>(
         undefined,
     );
-    const { show: showPlanSelector, props: planSelectorVisibilityProps } =
+    const { show: showPlanSelectorModal, props: planSelectorVisibilityProps } =
         useModalVisibility();
+    const [initialPlansData, setInitialPlansData] = useState<PlansData>();
+    const showPlanSelector = useCallback(
+        (plansData?: PlansData) => {
+            setInitialPlansData(plansData);
+            showPlanSelectorModal();
+        },
+        [showPlanSelectorModal],
+    );
     const {
         show: showFamilyManagement,
         props: familyManagementVisibilityProps,
@@ -2121,6 +2130,7 @@ const Page: React.FC = () => {
         <>
             <PlanSelector
                 {...planSelectorVisibilityProps}
+                initialPlansData={initialPlansData}
                 setLoading={(v) => setBlockingLoad(v)}
                 onManageFamily={showFamilyManagement}
             />

@@ -9,7 +9,6 @@ import {
     Dialog,
     IconButton,
     Link,
-    Skeleton,
     Stack,
     styled,
     ToggleButton,
@@ -62,6 +61,7 @@ import { Trans } from "react-i18next";
 
 type PlanSelectorProps = ModalVisibilityProps & {
     setLoading: (loading: boolean) => void;
+    initialPlansData?: PlansData;
     onManageFamily: () => void;
 };
 
@@ -69,6 +69,7 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
     open,
     onClose,
     setLoading,
+    initialPlansData,
     onManageFamily,
 }) => {
     const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
@@ -83,7 +84,12 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
             <SidebarDrawer {...{ open, onClose }} transitionDuration={0}>
                 <Box sx={{ maxWidth: 420, mx: "auto", py: 1 }}>
                     <PlanSelectorContents
-                        {...{ onClose, setLoading, onManageFamily }}
+                        {...{
+                            onClose,
+                            setLoading,
+                            onManageFamily,
+                            initialPlansData,
+                        }}
                     />
                 </Box>
             </SidebarDrawer>
@@ -105,7 +111,7 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
             }}
         >
             <PlanSelectorContents
-                {...{ onClose, setLoading, onManageFamily }}
+                {...{ onClose, setLoading, onManageFamily, initialPlansData }}
             />
         </Dialog>
     );
@@ -113,12 +119,13 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
 
 export type PlanSelectorContentsProps = Pick<
     PlanSelectorProps,
-    "onClose" | "setLoading" | "onManageFamily"
+    "onClose" | "setLoading" | "onManageFamily" | "initialPlansData"
 > & { onBeginCheckout?: () => void };
 
 export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
     onClose,
     setLoading,
+    initialPlansData,
     onManageFamily,
     onBeginCheckout,
 }) => {
@@ -127,7 +134,9 @@ export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
 
     const userDetails = useUserDetailsSnapshot();
 
-    const [plansData, setPlansData] = useState<PlansData | undefined>();
+    const [plansData, setPlansData] = useState<PlansData | undefined>(
+        initialPlansData,
+    );
     const [planPeriod, setPlanPeriod] = useState<PlanPeriod>(
         userDetails?.subscription.period ?? "month",
     );
@@ -147,7 +156,7 @@ export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
         const request = { cancelled: false };
         void (async () => {
             try {
-                const plansData = await getPlansData();
+                const plansData = initialPlansData ?? (await getPlansData());
                 if (request.cancelled) return;
                 const { plans } = plansData;
                 if (subscription && isSubscriptionActive(subscription)) {
@@ -517,17 +526,6 @@ const Plans: React.FC<PlansProps> = ({
     onPlanSelect,
 }) => (
     <Stack sx={{ gap: 2 }}>
-        {!plansData && (
-            <Stack
-                role="status"
-                aria-label={t("loading")}
-                aria-busy
-                sx={{ gap: 2 }}
-            >
-                <Skeleton variant="rounded" height={56} />
-                <Skeleton variant="rounded" height={56} />
-            </Stack>
-        )}
         {plansData?.plans
             .filter((plan) => plan.period === planPeriod)
             .map((plan) => (
