@@ -29,6 +29,7 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { isSxArray } from "ente-base/components/utils/sx";
 import { isNamedError } from "ente-base/error";
 import { ut } from "ente-base/i18n";
 import log from "ente-base/log";
@@ -56,10 +57,10 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             slotProps={{
                 paper: {
                     sx: [
-                        v2PaperSx,
+                        ...(isSxArray(v2PaperSx) ? v2PaperSx : [v2PaperSx]),
                         {
-                            width: "min(640px, calc(100svw - 32px))",
-                            maxWidth: "640px",
+                            width: "min(560px, calc(100svw - 32px))",
+                            maxWidth: "560px",
                         },
                     ],
                 },
