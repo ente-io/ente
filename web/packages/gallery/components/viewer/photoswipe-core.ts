@@ -617,7 +617,6 @@ export class FileViewerPhotoSwipe<
                 toggleMediaChromeSettingsMenu();
         };
 
-        // Detached cached videos can still receive system media keys.
         const videos = new Set<HTMLVideoElement>();
 
         pswp.on("contentAppend", (e) => {
@@ -684,7 +683,6 @@ export class FileViewerPhotoSwipe<
             video.removeAttribute("autoplay");
             if (video.readyState == 0) return;
             video.defaultPlaybackRate = video.playbackRate;
-            // Release the paused media session while retaining the source.
             video.load();
             video.currentTime = currentTime;
         };
