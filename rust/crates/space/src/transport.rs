@@ -392,7 +392,7 @@ pub struct SpaceKeyVersionResponse {
 pub struct SpaceLinkWriteRequest {
     pub auth_key: String,
     pub kdf_salt: String,
-    pub kdf_mem_limit: u32,
+    pub kdf_mem_limit: u64,
     pub kdf_ops_limit: u32,
     pub key_version: i32,
     pub encrypted_space_key: String,
@@ -410,7 +410,7 @@ pub struct SpaceLinkStatusResponse {
     #[serde(default)]
     pub kdf_salt: String,
     #[serde(default)]
-    pub kdf_mem_limit: u32,
+    pub kdf_mem_limit: u64,
     #[serde(default)]
     pub kdf_ops_limit: u32,
     #[serde(default)]
@@ -423,7 +423,7 @@ pub struct SpaceLinkStatusResponse {
 #[serde(rename_all = "camelCase")]
 pub struct SpaceLinkBootstrapResponse {
     pub kdf_salt: String,
-    pub kdf_mem_limit: u32,
+    pub kdf_mem_limit: u64,
     pub kdf_ops_limit: u32,
 }
 
