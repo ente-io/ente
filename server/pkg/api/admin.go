@@ -373,7 +373,6 @@ func (h *AdminHandler) AddOtt(c *gin.Context) {
 	h.notifyAdminAction(adminID, "adding custom ott")
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.Email,
-		"code":     request.Code,
 		"admin_id": adminID,
 		"req_id":   requestid.Get(c),
 		"req_ctx":  "custom_ott",
