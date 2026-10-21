@@ -66,7 +66,7 @@ Your **recovery key is a 24-word phrase** used to recover your account if you:
 
 ⚠️ **Ente support CANNOT provide or regenerate your recovery key**. Due to end-to-end encryption, we never have access to your recovery key or your encrypted data.
 
-⚠️ **Without your recovery key, losing your password may mean permanently losing access** to your photos if you're logged out everywhere and have no previously accepted [Legacy trusted contact](/photos/features/account/legacy/).
+⚠️ **Without your recovery key, losing your password means permanently losing access** to your photos if you're logged out everywhere and have no previously accepted [Legacy trusted contact](/photos/features/account/legacy/).
 
 ⚠️ **Your recovery key is different from verification codes**. Verification codes are temporary 6-digit numbers sent to your email. Your recovery key is a permanent 24-word phrase.
 
