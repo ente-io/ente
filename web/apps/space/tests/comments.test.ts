@@ -2,9 +2,10 @@ import { expect, test } from "vitest";
 import type { SpaceComment, SpaceNotification } from "../src/services/space";
 import {
     commentNotificationText,
-    commentReactionPreview,
+    commentReactionGroups,
     commentThreads,
     groupCommentReactions,
+    isEmojiOnlyComment,
     validateCommentReplyTarget,
     type CommentReplyTarget,
 } from "../src/utils/comments";
@@ -42,44 +43,46 @@ const reaction = (
     isOwn,
 });
 
-test.each([
-    [[], []],
-    [["❤️"], ["❤️"]],
-    [
-        ["❤️", "❤️"],
-        ["❤️", "❤️"],
-    ],
-    [
-        ["❤️", "❤️", "❤️", "❤️", "❤️"],
-        ["❤️", "❤️", "❤️"],
-    ],
-    [
-        ["❤️", "😂"],
-        ["❤️", "😂"],
-    ],
-    [
-        ["❤️", "😂", "❤️"],
-        ["❤️", "❤️", "😂"],
-    ],
-    [
-        ["❤️", "😂", "😂", "❤️", "😂"],
-        ["😂", "😂", "❤️"],
-    ],
-    [
-        ["❤️", "😂", "❤️", "👍", "❤️"],
-        ["❤️", "😂", "👍"],
-    ],
-    [
-        ["❤️", "😂", "👍", "😮", "😮"],
-        ["😮", "❤️", "😂"],
-    ],
-])("reaction preview for %j is %j", (emojis, expected) => {
-    expect(
-        commentReactionPreview(
-            emojis.map((emoji, index) => reaction(String(index), emoji)),
-        ),
-    ).toEqual(expected);
+test("reaction chips combine counts and move your optimistic reaction", () => {
+    const reactions = [
+        reaction("alice", "❤️"),
+        reaction("you", "❤️", true),
+        reaction("bob", "😂"),
+    ];
+    const original = [...reactions];
+    expect(commentReactionGroups(reactions, "❤️")).toEqual([
+        { emoji: "❤️", count: 2, isOwn: true },
+        { emoji: "😂", count: 1, isOwn: false },
+    ]);
+    expect(commentReactionGroups(reactions, "😂")).toEqual([
+        { emoji: "❤️", count: 1, isOwn: false },
+        { emoji: "😂", count: 2, isOwn: true },
+    ]);
+    expect(commentReactionGroups(reactions, undefined)).toEqual([
+        { emoji: "❤️", count: 1, isOwn: false },
+        { emoji: "😂", count: 1, isOwn: false },
+    ]);
+    expect(reactions).toEqual(original);
 });
+
+test("the first reaction adds a chip and removing the last one clears it", () => {
+    expect(commentReactionGroups([], "🥹")).toEqual([
+        { emoji: "🥹", count: 1, isOwn: true },
+    ]);
+    expect(
+        commentReactionGroups([reaction("you", "🥹", true)], undefined),
+    ).toEqual([]);
+});
+
+test.each(["🥹", "😂 🥪", "👍🏽", "👨‍👩‍👧‍👦", "🇮🇳", "1️⃣", "  ❤️\n🙌  "])(
+    "%s is a short emoji-only comment",
+    (text) => expect(isEmojiOnlyComment(text)).toBe(true),
+);
+
+test.each(["", "   ", "123", "Nice 😂", "😂😂😂😂", "á", "hello"])(
+    "%s keeps normal comment typography",
+    (text) => expect(isEmojiOnlyComment(text)).toBe(false),
+);
 
 test("reactions stay grouped by emoji with your group and your row first", () => {
     const reactions = [

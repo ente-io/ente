@@ -92,9 +92,8 @@ export const MessageQuickReactions: React.FC<{
                 maxWidth: "calc(100vw - 16px)",
                 outline: 0,
                 p: "5px",
-                "& > button": {
-                    transition: "none",
-                    "&:hover, &:active": { transform: "none" },
+                "@media (hover: hover)": {
+                    "& > button:not(:active):hover": { transform: "none" },
                 },
             }}
         >

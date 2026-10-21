@@ -80,17 +80,37 @@ export const groupCommentReactions = (reactions: SpaceComment["reactions"]) => {
     return [...groups.values()].flat();
 };
 
-export const commentReactionPreview = (
+export const commentReactionGroups = (
     reactions: SpaceComment["reactions"],
+    ownEmoji: string | undefined,
 ) => {
     const counts = new Map<string, number>();
-    for (const { emoji } of reactions)
-        counts.set(emoji, (counts.get(emoji) ?? 0) + 1);
-    const ranked = [...counts].sort(([, a], [, b]) => b - a).slice(0, 3);
-    let remaining = 3 - ranked.length;
-    return ranked.flatMap(([emoji, count]) => {
-        const repeats = Math.min(count - 1, remaining);
-        remaining -= repeats;
-        return Array<string>(repeats + 1).fill(emoji);
-    });
+    for (const { emoji, isOwn } of reactions) {
+        if (!isOwn) counts.set(emoji, (counts.get(emoji) ?? 0) + 1);
+    }
+    if (ownEmoji) counts.set(ownEmoji, (counts.get(ownEmoji) ?? 0) + 1);
+    return [...counts].map(([emoji, count]) => ({
+        emoji,
+        count,
+        isOwn: emoji == ownEmoji,
+    }));
+};
+
+const commentEmojiSegmenter = new Intl.Segmenter(undefined, {
+    granularity: "grapheme",
+});
+
+export const isEmojiOnlyComment = (text: string) => {
+    const segments = [
+        ...commentEmojiSegmenter.segment(text.replace(/\s/g, "")),
+    ];
+    return (
+        segments.length > 0 &&
+        segments.length <= 3 &&
+        segments.every(({ segment }) =>
+            /\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20E3/u.test(
+                segment,
+            ),
+        )
+    );
 };

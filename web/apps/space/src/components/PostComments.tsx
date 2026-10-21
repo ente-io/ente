@@ -1,4 +1,4 @@
-import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft02Icon, SmilePlusIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
     Box,
@@ -7,8 +7,10 @@ import {
     Dialog,
     Grow,
     Popper,
+    Slide,
     useMediaQuery,
 } from "@mui/material";
+import { keyframes } from "@mui/material/styles";
 import { SpaceAvatarImage } from "components/AvatarImage";
 import { SpaceBottomSheetTransition } from "components/BottomSheetTransition";
 import { SpaceCommentComposer } from "components/CommentComposer";
@@ -24,6 +26,7 @@ import {
     MessageReactionPicker,
 } from "components/MessageReactionPicker";
 import { ReplyComposerPreview } from "components/ReplyComposerPreview";
+import { emojiName } from "data/emojis";
 import type { FriendProfile } from "data/friends";
 import log from "ente-base/log";
 import { useBrowserBackClose } from "hooks/use-browser-back-close";
@@ -48,9 +51,10 @@ import {
     spaceTextMuted,
 } from "styles/colors";
 import {
-    commentReactionPreview,
+    commentReactionGroups,
     commentThreads,
     groupCommentReactions,
+    isEmojiOnlyComment,
     validateCommentReplyTarget,
     type CommentDraft,
 } from "utils/comments";
@@ -59,6 +63,17 @@ import { useSpaceRouter } from "utils/route-transitions";
 import { spaceRoutes } from "utils/routes";
 
 const messageActionsTransitionDuration = { enter: 300, exit: 100 };
+
+const reactionPop = keyframes`
+    from { transform: scale(0.85); }
+    60% { transform: scale(1.15); }
+    to { transform: scale(1); }
+`;
+
+const commentEnter = keyframes`
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+`;
 
 const textActionSx = {
     appearance: "none",
@@ -75,7 +90,7 @@ const textActionSx = {
     "&:hover": { color: spaceText },
     "&:disabled": { cursor: "default", opacity: 0.4 },
     "&:focus-visible": { outline: "2px solid #08C225", outlineOffset: 3 },
-};
+} as const;
 
 const CommentIdentity: React.FC<{
     actor: FriendProfile;
@@ -156,19 +171,27 @@ const CommentRow: React.FC<{
     viewer: string;
     highlighted: boolean;
     disabled: boolean;
+    ownReaction: string | undefined;
+    onReact: (emoji: string) => void;
+    onAddReaction: () => void;
+    onOpenReactions: () => void;
+    onReply: () => void;
     onOpenActions: (
         anchor: HTMLElement,
         source: "touch" | "contextmenu",
     ) => void;
-    onOpenReactions: () => void;
 }> = ({
     comment,
     recipient,
     viewer,
     highlighted,
     disabled,
-    onOpenActions,
+    ownReaction,
+    onReact,
+    onAddReaction,
     onOpenReactions,
+    onReply,
+    onOpenActions,
 }) => {
     const timer = React.useRef<number | undefined>(undefined);
     const start = React.useRef<
@@ -176,24 +199,37 @@ const CommentRow: React.FC<{
     >(undefined);
     const didOpen = React.useRef(false);
     const canOpenActions = !disabled && !comment.deleted;
-    const hasReactions = !comment.deleted && comment.reactions.length > 0;
-    const topReactions = commentReactionPreview(comment.reactions);
+    const reactions = commentReactionGroups(comment.reactions, ownReaction);
+    const reactionColumns = Math.min(reactions.length, 4);
+    const largeEmoji = isEmojiOnlyComment(comment.text ?? "");
+    const previousReaction = React.useRef(ownReaction);
+    const [poppingReaction, setPoppingReaction] = React.useState<string>();
+    React.useEffect(() => {
+        if (ownReaction && ownReaction != previousReaction.current)
+            setPoppingReaction(ownReaction);
+        previousReaction.current = ownReaction;
+    }, [ownReaction]);
     const clearLongPress = React.useCallback(() => {
         window.clearTimeout(timer.current);
         timer.current = undefined;
         start.current = undefined;
     }, []);
     React.useEffect(() => clearLongPress, [clearLongPress]);
-    const openActions = (
+    const openContextAction = (
         anchor: HTMLElement,
         source: "touch" | "contextmenu",
     ) => {
         clearLongPress();
         window.getSelection()?.removeAllRanges();
-        onOpenActions(anchor, source);
+        if (anchor.hasAttribute("data-comment-reaction")) onOpenReactions();
+        else onOpenActions(anchor, source);
     };
     const isInteractiveTarget = (target: EventTarget | null) =>
         target instanceof Element && Boolean(target.closest("a, button"));
+    const reactionTarget = (target: EventTarget | null) =>
+        target instanceof Element
+            ? target.closest<HTMLElement>("[data-comment-reaction]")
+            : null;
     return (
         <Box
             component="article"
@@ -204,35 +240,47 @@ const CommentRow: React.FC<{
             aria-label={`Comment by ${comment.author ? firstNameFrom(comment.author.fullName) || `@${comment.author.username}` : "deleted account"}`}
             aria-haspopup={canOpenActions ? "menu" : undefined}
             onContextMenu={(event) => {
-                if (!canOpenActions || isInteractiveTarget(event.target))
+                const reaction = reactionTarget(event.target);
+                if (
+                    !canOpenActions ||
+                    (isInteractiveTarget(event.target) && !reaction)
+                )
                     return;
                 event.preventDefault();
                 event.stopPropagation();
                 if (didOpen.current) return;
                 const source = start.current ? "touch" : "contextmenu";
                 didOpen.current = source == "touch";
-                openActions(event.currentTarget, source);
+                openContextAction(reaction ?? event.currentTarget, source);
             }}
             onKeyDown={(event) => {
-                if (!canOpenActions || isInteractiveTarget(event.target))
+                didOpen.current = false;
+                const reaction = reactionTarget(event.target);
+                if (
+                    !canOpenActions ||
+                    (isInteractiveTarget(event.target) && !reaction)
+                )
                     return;
                 if (
                     event.key == "ContextMenu" ||
                     (event.shiftKey && event.key == "F10") ||
-                    event.key == "Enter" ||
-                    event.key == " "
+                    (!reaction && (event.key == "Enter" || event.key == " "))
                 ) {
                     event.preventDefault();
-                    openActions(event.currentTarget, "contextmenu");
+                    openContextAction(
+                        reaction ?? event.currentTarget,
+                        "contextmenu",
+                    );
                 }
             }}
             onPointerDown={(event) => {
                 clearLongPress();
                 didOpen.current = false;
+                const reaction = reactionTarget(event.target);
                 if (
                     !canOpenActions ||
                     event.button != 0 ||
-                    isInteractiveTarget(event.target)
+                    (isInteractiveTarget(event.target) && !reaction)
                 )
                     return;
                 start.current = {
@@ -240,11 +288,11 @@ const CommentRow: React.FC<{
                     x: event.clientX,
                     y: event.clientY,
                 };
-                const anchor = event.currentTarget;
+                const anchor = reaction ?? event.currentTarget;
                 anchor.setPointerCapture(event.pointerId);
                 timer.current = window.setTimeout(() => {
                     didOpen.current = true;
-                    openActions(anchor, "touch");
+                    openContextAction(anchor, "touch");
                 }, 520);
             }}
             onPointerMove={(event) => {
@@ -281,6 +329,9 @@ const CommentRow: React.FC<{
                     ? spaceControlBackgroundHover
                     : "transparent",
                 transition: "background-color 400ms ease-out",
+                animation: highlighted
+                    ? `${commentEnter} 240ms ease-out`
+                    : undefined,
                 position: "relative",
                 py: 0.5,
                 px: 2,
@@ -296,24 +347,21 @@ const CommentRow: React.FC<{
                 },
                 "@media (prefers-reduced-motion: reduce)": {
                     transition: "none",
+                    animation: "none",
                 },
             }}
         >
             <Box
                 sx={{
                     position: "relative",
-                    display: "grid",
-                    gridTemplateColumns:
-                        "minmax(0, 1fr) minmax(80px, max-content)",
-                    columnGap: 1.5,
                     pl: 5,
                     ml: comment.parentId ? 5 : 0,
+                    containerType: "inline-size",
                 }}
             >
                 <Box
                     sx={{
                         display: "flex",
-                        gridColumn: 1,
                         alignItems: "baseline",
                         flexWrap: "wrap",
                         columnGap: 1,
@@ -358,93 +406,160 @@ const CommentRow: React.FC<{
                 </Box>
                 <Box
                     sx={{
-                        gridColumn: 1,
                         whiteSpace: "pre-wrap",
                         overflowWrap: "anywhere",
-                        fontSize: 13,
+                        fontSize: largeEmoji ? 30 : 13,
                         fontWeight: 400,
-                        lineHeight: "18px",
+                        lineHeight: largeEmoji ? "40px" : "18px",
                         color: spaceText,
                     }}
                 >
                     {recipient?.author && !recipient.deleted && (
-                        <Box component="span" sx={{ color: spaceTextMuted }}>
+                        <Box
+                            component="span"
+                            sx={{ color: spaceTextMuted, fontSize: 13 }}
+                        >
                             {`@${recipient.author.username} `}
                         </Box>
                     )}
                     {comment.text ?? "Comment unavailable"}
                 </Box>
-                {hasReactions && (
+                {!comment.deleted && (
                     <Box
-                        component="button"
-                        type="button"
-                        aria-label={`View ${comment.reactions.length} ${comment.reactions.length == 1 ? "reaction" : "reactions"}`}
-                        onClick={onOpenReactions}
                         sx={{
-                            ...textActionSx,
-                            "--reaction-stack-background": spaceSurface,
                             alignItems: "center",
-                            bgcolor: "var(--reaction-stack-background)",
-                            borderRadius: "999px",
-                            boxSizing: "border-box",
-                            display: "flex",
-                            gap: "1px",
-                            justifyContent: "center",
-                            gridColumn: 2,
-                            gridRow: 2,
-                            alignSelf: "start",
-                            justifySelf: "end",
-                            minHeight: 28,
-                            minWidth: 28,
-                            my: "-4px",
-                            px: "5px",
-                            width: "max-content",
-                            "&:hover": {
-                                "--reaction-stack-background": "#383838",
-                                color: spaceText,
-                            },
-                            "&:active": {
-                                "--reaction-stack-background": "#484848",
+                            display: "grid",
+                            gridTemplateColumns: `repeat(${reactionColumns + 2}, max-content)`,
+                            columnGap: 0.5,
+                            mt: 0.25,
+                            "@container (max-width: 240px)": {
+                                columnGap: 0.25,
                             },
                         }}
                     >
-                        {topReactions.map((emoji, index) => (
+                        {reactions.map(({ emoji, count, isOwn }, index) => (
                             <Box
-                                component="span"
-                                key={`${emoji}-${index}`}
-                                aria-hidden
+                                component="button"
+                                type="button"
+                                key={emoji}
+                                data-comment-reaction
+                                aria-label={`${isOwn ? "Remove" : "Add"} ${emojiName(emoji)} reaction, ${count} ${count == 1 ? "reaction" : "reactions"}`}
+                                aria-pressed={isOwn}
+                                disabled={
+                                    disabled || comment.text === undefined
+                                }
+                                onClick={() => onReact(emoji)}
+                                onAnimationEnd={() =>
+                                    setPoppingReaction(undefined)
+                                }
                                 sx={{
-                                    bgcolor: "inherit",
-                                    borderRadius: "50%",
-                                    boxShadow:
-                                        "0 0 0 1px var(--reaction-stack-background)",
-                                    display: "grid",
-                                    flexShrink: 0,
-                                    fontSize: 14,
-                                    height: 16,
-                                    lineHeight: "16px",
-                                    placeItems: "center",
-                                    position: "relative",
-                                    width: 16,
-                                    zIndex: topReactions.length - index,
+                                    ...textActionSx,
+                                    alignItems: "center",
+                                    borderRadius: "999px",
+                                    display: "flex",
+                                    gridColumn: (index % 4) + 1,
+                                    gridRow: Math.floor(index / 4) + 1,
+                                    justifyContent: "center",
+                                    minHeight: 28,
+                                    "&:hover > span": {
+                                        bgcolor: spaceControlBackgroundHover,
+                                    },
+                                    "&:disabled": { cursor: "default" },
+                                    "&:active > span": {
+                                        transform: "scale(0.94)",
+                                    },
                                 }}
                             >
-                                {emoji}
+                                <Box
+                                    component="span"
+                                    aria-hidden
+                                    sx={{
+                                        alignItems: "center",
+                                        bgcolor: isOwn
+                                            ? "#233C28"
+                                            : spaceSurface,
+                                        borderRadius: "999px",
+                                        boxShadow: isOwn
+                                            ? "inset 0 0 0 1px #08C225"
+                                            : undefined,
+                                        display: "flex",
+                                        gap: 0.5,
+                                        height: 24,
+                                        px: 0.75,
+                                        transition: "transform 180ms ease-out",
+                                        "@container (max-width: 240px)": {
+                                            px: 0.5,
+                                        },
+                                        animation:
+                                            poppingReaction == emoji
+                                                ? `${reactionPop} 240ms ease-out`
+                                                : undefined,
+                                        "@media (prefers-reduced-motion: reduce)":
+                                            {
+                                                animation: "none",
+                                                transition: "none",
+                                            },
+                                    }}
+                                >
+                                    <Box component="span" sx={{ fontSize: 16 }}>
+                                        {emoji}
+                                    </Box>
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            fontVariantNumeric: "tabular-nums",
+                                        }}
+                                    >
+                                        {count}
+                                    </Box>
+                                </Box>
                             </Box>
                         ))}
+                        {comment.text !== undefined && (
+                            <Box
+                                component="button"
+                                type="button"
+                                aria-label="Add reaction"
+                                disabled={disabled}
+                                onClick={onAddReaction}
+                                sx={{
+                                    ...textActionSx,
+                                    alignItems: "center",
+                                    display: "flex",
+                                    gridColumn: reactionColumns + 1,
+                                    gridRow: 1,
+                                    justifyContent:
+                                        reactions.length > 0
+                                            ? "center"
+                                            : "flex-start",
+                                    minHeight: 28,
+                                    width: 24,
+                                    "@container (max-width: 240px)": {
+                                        width: 20,
+                                    },
+                                }}
+                            >
+                                <HugeiconsIcon
+                                    icon={SmilePlusIcon}
+                                    size={16}
+                                    strokeWidth={1.8}
+                                />
+                            </Box>
+                        )}
                         <Box
-                            component="span"
-                            aria-hidden
+                            component="button"
+                            type="button"
+                            disabled={disabled}
+                            onClick={onReply}
                             sx={{
-                                color: spaceTextMuted,
-                                fontSize: 12,
-                                fontVariantNumeric: "tabular-nums",
-                                lineHeight: "16px",
-                                ml: "4px",
-                                whiteSpace: "nowrap",
+                                ...textActionSx,
+                                gridColumn: reactionColumns + 2,
+                                gridRow: 1,
+                                minHeight: 28,
+                                px: 0.25,
                             }}
                         >
-                            {comment.reactions.length}
+                            Reply
                         </Box>
                     </Box>
                 )}
@@ -495,7 +610,8 @@ export const PostComments: React.FC<{
               anchor: HTMLElement;
               open: boolean;
           }
-        | { type: "react" | "reactions"; commentId: string }
+        | { type: "react"; commentId: string }
+        | { type: "reactions"; commentId: string; open: boolean }
     >();
     const ignoreMouseAwayUntil = React.useRef(0);
     const menuPointerTarget = React.useRef<Element | null>(null);
@@ -530,6 +646,10 @@ export const PostComments: React.FC<{
             comment.commentId == replyTarget.commentId,
     );
     const [mutating, setMutating] = React.useState(false);
+    const [optimisticReaction, setOptimisticReaction] = React.useState<{
+        commentId: string;
+        emoji: string | undefined;
+    }>();
     const busy = mutating || Boolean(draft.sending);
     const selectedComment = comments.find(
         (comment) => comment.commentId == action?.commentId && !comment.deleted,
@@ -611,9 +731,21 @@ export const PostComments: React.FC<{
             )
         )
             return;
+        const target = Array.from(
+            container.querySelectorAll<HTMLElement>("[data-comment-id]"),
+        ).find((row) => row.dataset.commentId == submittedCommentId.current);
+        if (!target) return;
+        setHighlightedCommentId(submittedCommentId.current);
         submittedCommentId.current = undefined;
         container.scrollTo({
-            top: container.scrollHeight,
+            top:
+                container.scrollTop +
+                target.getBoundingClientRect().top -
+                container.getBoundingClientRect().top -
+                Math.max(
+                    12,
+                    (container.clientHeight - target.clientHeight) / 2,
+                ),
             behavior: prefersReducedMotion ? "instant" : "smooth",
         });
     }, [comments, open, prefersReducedMotion, reactionList]);
@@ -732,24 +864,49 @@ export const PostComments: React.FC<{
         }
     };
     const react = (comment: SpaceComment, emoji: string) => {
+        if (busy) return;
+        const nextEmoji = comment.reactions.some(
+            (item) => item.isOwn && item.emoji == emoji,
+        )
+            ? undefined
+            : emoji;
+        setOptimisticReaction({
+            commentId: comment.commentId,
+            emoji: nextEmoji,
+        });
         void mutate(() =>
             setCurrentCommentReaction(
                 viewer,
                 owner,
                 postId,
                 comment.commentId,
-                comment.reactions.some(
-                    (item) => item.isOwn && item.emoji == emoji,
-                )
-                    ? undefined
-                    : emoji,
+                nextEmoji,
             ),
-        );
+        ).finally(() => setOptimisticReaction(undefined));
     };
     const closeActions = () =>
         setAction((current) =>
             current?.type == "menu" ? { ...current, open: false } : current,
         );
+    const closeReactions = () =>
+        setAction((current) =>
+            current?.type == "reactions"
+                ? { ...current, open: false }
+                : current,
+        );
+    const replyTo = (comment: SpaceComment) => {
+        flushSync(() => {
+            closeActions();
+            setDraft((value) => ({
+                ...value,
+                replyTarget: {
+                    status: "selected",
+                    commentId: comment.commentId,
+                },
+            }));
+        });
+        input.current?.focus({ preventScroll: true });
+    };
     const renderComment = (comment: SpaceComment) => (
         <CommentRow
             key={comment.commentId}
@@ -760,6 +917,24 @@ export const PostComments: React.FC<{
             viewer={viewer}
             highlighted={highlightedCommentId == comment.commentId}
             disabled={busy}
+            ownReaction={
+                optimisticReaction?.commentId == comment.commentId
+                    ? optimisticReaction.emoji
+                    : comment.reactions.find((reaction) => reaction.isOwn)
+                          ?.emoji
+            }
+            onReact={(emoji) => react(comment, emoji)}
+            onAddReaction={() =>
+                setAction({ type: "react", commentId: comment.commentId })
+            }
+            onOpenReactions={() =>
+                setAction({
+                    type: "reactions",
+                    commentId: comment.commentId,
+                    open: true,
+                })
+            }
+            onReply={() => replyTo(comment)}
             onOpenActions={(anchor, source) => {
                 menuPointerTarget.current = null;
                 ignoreMouseAwayUntil.current =
@@ -771,9 +946,6 @@ export const PostComments: React.FC<{
                     open: true,
                 });
             }}
-            onOpenReactions={() =>
-                setAction({ type: "reactions", commentId: comment.commentId })
-            }
         />
     );
     return (
@@ -895,150 +1067,50 @@ export const PostComments: React.FC<{
                 />
             </Box>
             <Box
+                inert={Boolean(reactionList)}
+                aria-hidden={Boolean(reactionList)}
                 sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    px: 2,
-                    pb: 2,
-                    flexShrink: 0,
-                    position: "relative",
-                }}
-            >
-                {reactionList && (
-                    <Box
-                        component="button"
-                        type="button"
-                        aria-label="Back to comments"
-                        onClick={() => setAction(undefined)}
-                        sx={{
-                            ...textActionSx,
-                            position: "absolute",
-                            left: 16,
-                            display: "flex",
-                            alignItems: "center",
-                        }}
-                    >
-                        <HugeiconsIcon
-                            icon={ArrowLeft02Icon}
-                            size={20}
-                            strokeWidth={1.8}
-                        />
-                    </Box>
-                )}
-                <Box
-                    component="h2"
-                    sx={{
-                        fontSize: 16,
-                        fontWeight: 600,
-                        lineHeight: "24px",
-                        m: 0,
-                    }}
-                >
-                    {reactionList ? "Reactions" : "Comments"}
-                </Box>
-            </Box>
-            <Box
-                ref={list}
-                sx={{
-                    py: 1,
                     display: "flex",
                     flexDirection: "column",
-                    overflowY: "auto",
-                    overscrollBehavior: "contain",
-                    flex: "1 1 auto",
+                    flex: 1,
                     minHeight: 0,
                 }}
             >
-                {reactionList ? (
-                    <>
-                        {reactionList.reactions.length == 0 && (
-                            <Box
-                                role="status"
-                                sx={{
-                                    alignItems: "center",
-                                    color: spaceTextMuted,
-                                    display: "flex",
-                                    flex: "1 1 auto",
-                                    fontSize: 13,
-                                    justifyContent: "center",
-                                    px: 2,
-                                    py: 3,
-                                }}
-                            >
-                                No reactions yet
-                            </Box>
-                        )}
-                        {groupCommentReactions(reactionList.reactions).map(
-                            (reaction) => (
-                                <Box
-                                    key={reaction.actor.id}
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 1.5,
-                                        px: 2,
-                                        py: 1.5,
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <CommentIdentity
-                                        actor={reaction.actor}
-                                        viewer={viewer}
-                                    />
-                                    <Box
-                                        sx={{
-                                            ml: "auto",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: 1.5,
-                                            flexShrink: 0,
-                                        }}
-                                    >
-                                        {(reaction.isOwn ||
-                                            viewer == owner) && (
-                                            <Box
-                                                component="button"
-                                                type="button"
-                                                disabled={busy}
-                                                sx={{
-                                                    ...textActionSx,
-                                                    bgcolor: "#383838",
-                                                    borderRadius: "999px",
-                                                    color: spaceText,
-                                                    minHeight: 28,
-                                                    px: 1.5,
-                                                    "&:hover": {
-                                                        bgcolor: "#484848",
-                                                    },
-                                                    "&:active": {
-                                                        bgcolor: "#505050",
-                                                    },
-                                                }}
-                                                onClick={() =>
-                                                    void mutate(() =>
-                                                        removeCurrentCommentReaction(
-                                                            viewer,
-                                                            postId,
-                                                            reactionList.commentId,
-                                                            reaction.actor
-                                                                .spaceId!,
-                                                        ),
-                                                    )
-                                                }
-                                            >
-                                                Remove
-                                            </Box>
-                                        )}
-                                        <Box sx={{ fontSize: 22 }}>
-                                            {reaction.emoji}
-                                        </Box>
-                                    </Box>
-                                </Box>
-                            ),
-                        )}
-                    </>
-                ) : (
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        px: 2,
+                        pb: 1,
+                        flexShrink: 0,
+                        position: "relative",
+                    }}
+                >
+                    <Box
+                        component="h2"
+                        sx={{
+                            fontSize: 16,
+                            fontWeight: 600,
+                            lineHeight: "24px",
+                            m: 0,
+                        }}
+                    >
+                        Comments
+                    </Box>
+                </Box>
+                <Box
+                    ref={list}
+                    sx={{
+                        py: 0.5,
+                        display: "flex",
+                        flexDirection: "column",
+                        overflowY: "auto",
+                        overscrollBehavior: "contain",
+                        flex: "1 1 auto",
+                        minHeight: 0,
+                    }}
+                >
                     <>
                         {!loading &&
                             !error &&
@@ -1112,7 +1184,7 @@ export const PostComments: React.FC<{
                                 key={comment.commentId}
                                 sx={{
                                     flexShrink: 0,
-                                    py: 1,
+                                    py: 0.5,
                                     mt: index > 0 ? 1 : 0,
                                 }}
                             >
@@ -1122,8 +1194,8 @@ export const PostComments: React.FC<{
                                         sx={{
                                             display: "flex",
                                             flexDirection: "column",
-                                            gap: 1,
-                                            mt: 1,
+                                            gap: 0.5,
+                                            mt: 0.5,
                                         }}
                                     >
                                         {replies.map(renderComment)}
@@ -1153,95 +1225,264 @@ export const PostComments: React.FC<{
                             </Box>
                         )}
                     </>
-                )}
-            </Box>
-            <Box
-                sx={{
-                    display: reactionList ? "none" : "grid",
-                    gap: "8px",
-                    px: 2,
-                    pt: 2,
-                    pb: "max(16px, env(safe-area-inset-bottom))",
-                    flexShrink: 0,
-                }}
-            >
-                {replyTarget && (
-                    <ReplyComposerPreview
-                        tone="neutral"
-                        name={
-                            replyTarget.status == "unavailable"
-                                ? "Comment unavailable"
-                                : reply?.author?.spaceId == viewer
-                                  ? "You"
-                                  : reply?.author
-                                    ? firstNameFrom(reply.author.fullName) ||
-                                      `@${reply.author.username}`
-                                    : reply
-                                      ? "Deleted account"
-                                      : "Replying…"
+                </Box>
+                <Box
+                    sx={{
+                        display: "grid",
+                        gap: "8px",
+                        px: 2,
+                        pt: 1,
+                        pb: "max(16px, env(safe-area-inset-bottom))",
+                        flexShrink: 0,
+                    }}
+                >
+                    {replyTarget && (
+                        <ReplyComposerPreview
+                            tone="neutral"
+                            name={
+                                replyTarget.status == "unavailable"
+                                    ? "Comment unavailable"
+                                    : reply?.author?.spaceId == viewer
+                                      ? "You"
+                                      : reply?.author
+                                        ? firstNameFrom(
+                                              reply.author.fullName,
+                                          ) || `@${reply.author.username}`
+                                        : reply
+                                          ? "Deleted account"
+                                          : "Replying…"
+                            }
+                            text={
+                                replyTarget.status == "unavailable"
+                                    ? "This comment or its thread is no longer available."
+                                    : loading && !reply
+                                      ? "Loading comment…"
+                                      : (reply?.text ?? "Comment unavailable")
+                            }
+                            cancelLabel={
+                                replyTarget.status == "unavailable"
+                                    ? "Comment instead"
+                                    : "Cancel reply"
+                            }
+                            onCancel={() => {
+                                flushSync(() =>
+                                    setDraft((value) => ({
+                                        ...value,
+                                        replyTarget: undefined,
+                                    })),
+                                );
+                                input.current?.focus({ preventScroll: true });
+                            }}
+                        />
+                    )}
+                    <SpaceCommentComposer
+                        autoFocus={autoFocus}
+                        inputRef={input}
+                        text={draft.text}
+                        onTextChange={(text) =>
+                            setDraft((value) => ({ ...value, text }))
                         }
-                        text={
-                            replyTarget.status == "unavailable"
-                                ? "This comment or its thread is no longer available."
-                                : loading && !reply
-                                  ? "Loading comment…"
-                                  : (reply?.text ?? "Comment unavailable")
+                        disabled={
+                            busy ||
+                            Boolean(error) ||
+                            replyTarget?.status == "unavailable"
                         }
-                        cancelLabel={
-                            replyTarget.status == "unavailable"
-                                ? "Comment instead"
-                                : "Cancel reply"
-                        }
-                        onCancel={() => {
-                            flushSync(() =>
+                        sendDisabled={loading}
+                        placeholder={replyTarget ? "Reply…" : "Add a comment…"}
+                        onSend={async (text) => {
+                            setDraft((value) => ({ ...value, sending: true }));
+                            try {
+                                const commentId = crypto.randomUUID();
+                                await createCurrentComment(
+                                    viewer,
+                                    owner,
+                                    postId,
+                                    commentId,
+                                    replyTarget?.status == "selected"
+                                        ? replyTarget.commentId
+                                        : undefined,
+                                    text,
+                                );
+                                submittedCommentId.current = commentId;
+                                setDraft({ text: "", sending: true });
+                            } finally {
                                 setDraft((value) => ({
                                     ...value,
-                                    replyTarget: undefined,
-                                })),
-                            );
-                            input.current?.focus({ preventScroll: true });
+                                    sending: false,
+                                }));
+                            }
                         }}
                     />
-                )}
-                <SpaceCommentComposer
-                    autoFocus={autoFocus}
-                    inputRef={input}
-                    text={draft.text}
-                    onTextChange={(text) =>
-                        setDraft((value) => ({ ...value, text }))
-                    }
-                    disabled={
-                        busy ||
-                        Boolean(error) ||
-                        replyTarget?.status == "unavailable"
-                    }
-                    sendDisabled={loading}
-                    placeholder={replyTarget ? "Reply…" : "Add a comment…"}
-                    onSend={async (text) => {
-                        setDraft((value) => ({ ...value, sending: true }));
-                        try {
-                            const commentId = crypto.randomUUID();
-                            await createCurrentComment(
-                                viewer,
-                                owner,
-                                postId,
-                                commentId,
-                                replyTarget?.status == "selected"
-                                    ? replyTarget.commentId
-                                    : undefined,
-                                text,
-                            );
-                            submittedCommentId.current =
-                                replyTarget?.status == "selected"
-                                    ? undefined
-                                    : commentId;
-                            setDraft({ text: "", sending: true });
-                        } finally {
-                            setDraft((value) => ({ ...value, sending: false }));
-                        }
-                    }}
-                />
+                </Box>
             </Box>
+            <Slide
+                direction="up"
+                in={action?.type == "reactions" && action.open}
+                timeout={prefersReducedMotion ? 0 : 240}
+                easing="cubic-bezier(0.22, 1, 0.36, 1)"
+                mountOnEnter
+                unmountOnExit
+                onExited={() =>
+                    setAction((current) =>
+                        current?.type == "reactions" ? undefined : current,
+                    )
+                }
+            >
+                <Box
+                    sx={{
+                        position: "absolute",
+                        inset: "32px 0 0",
+                        bgcolor: spaceDialogBackground,
+                        display: "flex",
+                        flexDirection: "column",
+                        zIndex: 1,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            px: 2,
+                            pb: 1,
+                            flexShrink: 0,
+                            position: "relative",
+                        }}
+                    >
+                        <Box
+                            component="button"
+                            type="button"
+                            aria-label="Back to comments"
+                            onClick={closeReactions}
+                            sx={{
+                                ...textActionSx,
+                                position: "absolute",
+                                left: 16,
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                        >
+                            <HugeiconsIcon
+                                icon={ArrowLeft02Icon}
+                                size={20}
+                                strokeWidth={1.8}
+                            />
+                        </Box>
+                        <Box
+                            component="h2"
+                            sx={{
+                                fontSize: 16,
+                                fontWeight: 600,
+                                lineHeight: "24px",
+                                m: 0,
+                            }}
+                        >
+                            Reactions
+                        </Box>
+                    </Box>
+                    <Box
+                        sx={{
+                            overflowY: "auto",
+                            overscrollBehavior: "contain",
+                            display: "flex",
+                            flexDirection: "column",
+                            flex: 1,
+                            minHeight: 0,
+                            py: 0.5,
+                        }}
+                    >
+                        {reactionList && (
+                            <>
+                                {reactionList.reactions.length == 0 && (
+                                    <Box
+                                        role="status"
+                                        sx={{
+                                            alignItems: "center",
+                                            color: spaceTextMuted,
+                                            display: "flex",
+                                            flex: "1 1 auto",
+                                            fontSize: 13,
+                                            justifyContent: "center",
+                                            px: 2,
+                                            py: 3,
+                                        }}
+                                    >
+                                        No reactions yet
+                                    </Box>
+                                )}
+                                {groupCommentReactions(
+                                    reactionList.reactions,
+                                ).map((reaction) => (
+                                    <Box
+                                        key={reaction.actor.id}
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 1.5,
+                                            px: 2,
+                                            py: 1.5,
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        <CommentIdentity
+                                            actor={reaction.actor}
+                                            viewer={viewer}
+                                        />
+                                        <Box
+                                            sx={{
+                                                ml: "auto",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 1.5,
+                                                flexShrink: 0,
+                                            }}
+                                        >
+                                            {(reaction.isOwn ||
+                                                viewer == owner) && (
+                                                <Box
+                                                    component="button"
+                                                    type="button"
+                                                    disabled={busy}
+                                                    sx={{
+                                                        ...textActionSx,
+                                                        bgcolor: "#383838",
+                                                        borderRadius: "999px",
+                                                        color: spaceText,
+                                                        minHeight: 28,
+                                                        px: 1.5,
+                                                        "&:hover": {
+                                                            bgcolor: "#484848",
+                                                        },
+                                                        "&:active": {
+                                                            bgcolor: "#505050",
+                                                        },
+                                                    }}
+                                                    onClick={() =>
+                                                        void mutate(() =>
+                                                            removeCurrentCommentReaction(
+                                                                viewer,
+                                                                postId,
+                                                                reactionList.commentId,
+                                                                reaction.actor
+                                                                    .spaceId!,
+                                                            ),
+                                                        )
+                                                    }
+                                                >
+                                                    Remove
+                                                </Box>
+                                            )}
+                                            <Box sx={{ fontSize: 22 }}>
+                                                {reaction.emoji}
+                                            </Box>
+                                        </Box>
+                                    </Box>
+                                ))}
+                            </>
+                        )}
+                    </Box>
+                </Box>
+            </Slide>
             {action?.type == "react" && selectedComment && (
                 <MessageReactionPicker
                     label="React to comment"
@@ -1440,22 +1681,9 @@ export const PostComments: React.FC<{
                                         <MessageActionMenuItem
                                             icon={<ReplyIcon />}
                                             label="Reply"
-                                            onClick={() => {
-                                                flushSync(() => {
-                                                    closeActions();
-                                                    setDraft((value) => ({
-                                                        ...value,
-                                                        replyTarget: {
-                                                            status: "selected",
-                                                            commentId:
-                                                                selectedComment.commentId,
-                                                        },
-                                                    }));
-                                                });
-                                                input.current?.focus({
-                                                    preventScroll: true,
-                                                });
-                                            }}
+                                            onClick={() =>
+                                                replyTo(selectedComment)
+                                            }
                                         />
                                     )}
                                     {selectedComment?.text !== undefined && (
