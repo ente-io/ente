@@ -390,7 +390,7 @@
     "account_recovery_unavailable_description": "This account can no longer be recovered.",
     "account_recovery_email_in_use": "This email is already in use",
     "account_recovery_email_in_use_description": "To recover your deleted account, first sign in to the account using this email and delete it. Then reopen this recovery link before it expires.",
-    "invite": "Invite",
+    "invite": "Send invite",
     "enter_valid_email": "Enter a valid email address",
     "family_user_not_found": "No Ente account was found for this email address.",
     "family_already_member": "This person is already part of a family plan.",

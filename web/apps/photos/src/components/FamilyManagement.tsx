@@ -7,26 +7,47 @@ import {
     removeFamilyMember,
     revokeFamilyInvite,
 } from "@/services/family";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AddOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import {
     Avatar,
     Box,
     Dialog,
     DialogContent,
+    DialogTitle,
     Divider,
+    IconButton,
+    InputBase,
     Stack,
     TextField,
     Typography,
 } from "@mui/material";
+import {
+    v2CancelButtonSx,
+    v2CloseButtonSx,
+    v2HeaderRowSx,
+    v2HelperSx,
+    v2InputSx,
+    v2PaperSx,
+    v2SubmitButtonSx,
+} from "ente-base/components/SingleInput.styles";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { isSxArray } from "ente-base/components/utils/sx";
 import { useBaseContext } from "ente-base/context";
 import { isHTTPErrorWithStatus } from "ente-base/http";
+import {
+    uploadSheetMediaQuery,
+    uploadSheetPaperSx,
+    useIsUploadSheet,
+} from "ente-gallery/components/upload-progress/bottom-sheet";
 import { formattedStorageByteSize } from "ente-gallery/utils/units";
+import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
 import { useUserDetailsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     familyUsage,
@@ -38,7 +59,7 @@ import {
     type UserDetails,
 } from "ente-new/photos/services/user-details";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 
 type FamilyManagementProps = ModalVisibilityProps & {
     onShowPlanSelector: () => void;
@@ -445,6 +466,10 @@ const InviteMemberDialog: React.FC<
     ModalVisibilityProps & { create: boolean }
 > = ({ open, onClose, create }) => {
     const { onGenericError } = useBaseContext();
+    const isSheet = useIsUploadSheet();
+    const titleID = useId();
+    const helperID = useId();
+    const submitting = useRef(false);
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -457,11 +482,13 @@ const InviteMemberDialog: React.FC<
     }, [open]);
 
     const submit = async () => {
+        if (submitting.current) return;
         const normalizedEmail = email.trim().toLowerCase();
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
             setError(t("enter_valid_email"));
             return;
         }
+        submitting.current = true;
         setLoading(true);
         try {
             if (create) await createFamily();
@@ -472,45 +499,130 @@ const InviteMemberDialog: React.FC<
             if (errorKey) setError(t(errorKey));
             else onGenericError(e);
         } finally {
+            submitting.current = false;
             setLoading(false);
         }
     };
 
     return (
-        <Dialog {...{ open, onClose }} maxWidth="xs" fullWidth>
-            <Stack direction="row" sx={{ p: "20px 16px 8px 24px" }}>
-                <Typography variant="h3" sx={{ flex: 1 }}>
-                    {t("invite_family_member")}
+        <Dialog
+            open={open}
+            onClose={loading ? undefined : onClose}
+            aria-labelledby={titleID}
+            aria-busy={loading}
+            maxWidth={false}
+            slots={isSheet ? { transition: SlideUpTransition } : undefined}
+            slotProps={{
+                paper: {
+                    sx: [
+                        ...(isSxArray(v2PaperSx) ? v2PaperSx : [v2PaperSx]),
+                        {
+                            width: "min(420px, calc(100svw - 32px))",
+                            maxWidth: 420,
+                            boxSizing: "border-box",
+                        },
+                        uploadSheetPaperSx,
+                    ],
+                },
+            }}
+        >
+            <Stack
+                component="form"
+                noValidate
+                onSubmit={(event) => {
+                    event.preventDefault();
+                    void submit();
+                }}
+                sx={{
+                    p: "20px",
+                    gap: "16px",
+                    [uploadSheetMediaQuery]: {
+                        pb: "calc(20px + env(safe-area-inset-bottom, 0px))",
+                    },
+                }}
+            >
+                <Stack direction="row" sx={v2HeaderRowSx}>
+                    <DialogTitle
+                        id={titleID}
+                        sx={{
+                            "&&": { p: 0 },
+                            fontFamily: "inherit",
+                            fontSize: 20,
+                            lineHeight: "28px",
+                            fontWeight: 600,
+                        }}
+                    >
+                        {t("add_family_member")}
+                    </DialogTitle>
+                    <IconButton
+                        aria-label={t("close")}
+                        disabled={loading}
+                        onClick={onClose}
+                        sx={v2CloseButtonSx}
+                    >
+                        <HugeiconsIcon icon={Cancel01Icon} size={18} />
+                    </IconButton>
+                </Stack>
+                <InputBase
+                    autoFocus
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    disabled={loading}
+                    error={!!error}
+                    aria-label={t("enter_email")}
+                    aria-describedby={helperID}
+                    sx={[
+                        ...(isSxArray(v2InputSx) ? v2InputSx : [v2InputSx]),
+                        { boxSizing: "border-box", fontFamily: "inherit" },
+                    ]}
+                    onChange={(event) => {
+                        setEmail(event.target.value);
+                        setError("");
+                    }}
+                />
+                <Typography
+                    id={helperID}
+                    aria-live="polite"
+                    sx={[
+                        v2HelperSx(!!error),
+                        {
+                            fontSize: 12,
+                            lineHeight: "17px",
+                            fontWeight: 400,
+                            ...(!error && { color: "text.muted" }),
+                        },
+                    ]}
+                >
+                    {error || t("family_invite_hint")}
                 </Typography>
-                <DialogCloseIconButton {...{ onClose }} />
-            </Stack>
-            <DialogContent>
-                <Stack sx={{ gap: 2 }}>
-                    <TextField
-                        autoFocus
-                        type="email"
-                        label={t("enter_email")}
-                        value={email}
-                        error={!!error}
-                        helperText={error || t("family_invite_hint")}
-                        onChange={(e) => {
-                            setEmail(e.target.value);
-                            setError("");
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key == "Enter") void submit();
-                        }}
-                    />
+                <Stack direction="row" sx={{ gap: "12px" }}>
+                    <FocusVisibleButton
+                        disabled={loading}
+                        onClick={onClose}
+                        sx={[
+                            v2CancelButtonSx,
+                            { minWidth: 0, fontWeight: 600 },
+                        ]}
+                    >
+                        {t("cancel")}
+                    </FocusVisibleButton>
                     <LoadingButton
-                        fullWidth
-                        color="accent"
+                        type="submit"
+                        disabled={loading}
                         loading={loading}
-                        onClick={() => void submit()}
+                        sx={{
+                            ...v2SubmitButtonSx,
+                            minWidth: 0,
+                            fontWeight: 600,
+                        }}
                     >
                         {t("invite")}
                     </LoadingButton>
                 </Stack>
-            </DialogContent>
+            </Stack>
         </Dialog>
     );
 };
