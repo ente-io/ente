@@ -95,18 +95,16 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 <Stack sx={{ gap: "8px" }}>
                     {rest.label && (
                         <Typography
-                            component={variant === "people" ? "label" : "p"}
-                            htmlFor={variant === "people" ? inputID : undefined}
+                            component="label"
+                            htmlFor={inputID}
                             sx={v2LabelSx}
                         >
                             {rest.label}
                         </Typography>
                     )}
                     <InputBase
-                        id={variant === "people" ? inputID : undefined}
-                        aria-describedby={
-                            variant === "people" && error ? helperID : undefined
-                        }
+                        id={inputID}
+                        aria-describedby={error ? helperID : undefined}
                         name="value"
                         value={formik.values.value}
                         onChange={formik.handleChange}
@@ -127,8 +125,8 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                         }
                     />
                     <Typography
-                        id={variant === "people" ? helperID : undefined}
-                        aria-live={variant === "people" ? "polite" : undefined}
+                        id={helperID}
+                        aria-live="polite"
                         sx={v2HelperSx(!!error)}
                     >
                         {error ?? ""}
