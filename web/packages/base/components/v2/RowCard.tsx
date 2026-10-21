@@ -1,6 +1,5 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Box, Stack, Typography } from "@mui/material";
-import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import React from "react";
 
@@ -10,7 +9,6 @@ interface RowCardProps {
     subtitle?: string;
     onClick?: () => void;
     endIcon?: React.ReactNode;
-    loading?: boolean;
 }
 
 export const RowCard: React.FC<RowCardProps> = ({
@@ -18,14 +16,11 @@ export const RowCard: React.FC<RowCardProps> = ({
     title,
     subtitle,
     onClick,
-    loading = false,
     endIcon = <ChevronRightIcon className="ente-chevron-right" />,
 }) => (
     <Box
         component={onClick ? FocusVisibleButton : "div"}
         onClick={onClick}
-        disabled={onClick ? loading : undefined}
-        aria-busy={loading || undefined}
         sx={[
             {
                 display: "flex",
@@ -77,6 +72,6 @@ export const RowCard: React.FC<RowCardProps> = ({
                 </Typography>
             )}
         </Stack>
-        {loading ? <ActivityIndicator size={20} /> : endIcon}
+        {endIcon}
     </Box>
 );

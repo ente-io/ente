@@ -9,6 +9,7 @@ import {
     Dialog,
     IconButton,
     Link,
+    Skeleton,
     Stack,
     styled,
     ToggleButton,
@@ -61,7 +62,6 @@ import { Trans } from "react-i18next";
 
 type PlanSelectorProps = ModalVisibilityProps & {
     setLoading: (loading: boolean) => void;
-    initialPlansData?: PlansData;
     onManageFamily: () => void;
 };
 
@@ -69,7 +69,6 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
     open,
     onClose,
     setLoading,
-    initialPlansData,
     onManageFamily,
 }) => {
     const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
@@ -84,12 +83,7 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
             <SidebarDrawer {...{ open, onClose }} transitionDuration={0}>
                 <Box sx={{ maxWidth: 420, mx: "auto", py: 1 }}>
                     <PlanSelectorContents
-                        {...{
-                            onClose,
-                            setLoading,
-                            onManageFamily,
-                            initialPlansData,
-                        }}
+                        {...{ onClose, setLoading, onManageFamily }}
                     />
                 </Box>
             </SidebarDrawer>
@@ -111,7 +105,7 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
             }}
         >
             <PlanSelectorContents
-                {...{ onClose, setLoading, onManageFamily, initialPlansData }}
+                {...{ onClose, setLoading, onManageFamily }}
             />
         </Dialog>
     );
@@ -119,25 +113,21 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
 
 export type PlanSelectorContentsProps = Pick<
     PlanSelectorProps,
-    "onClose" | "setLoading" | "onManageFamily" | "initialPlansData"
-> & { onBeginCheckout?: () => void; showInitialLoading?: boolean };
+    "onClose" | "setLoading" | "onManageFamily"
+> & { onBeginCheckout?: () => void };
 
 export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
     onClose,
     setLoading,
-    initialPlansData,
     onManageFamily,
     onBeginCheckout,
-    showInitialLoading = false,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const showCloseButton = !useContext(SidebarPanelContext);
 
     const userDetails = useUserDetailsSnapshot();
 
-    const [plansData, setPlansData] = useState<PlansData | undefined>(
-        initialPlansData,
-    );
+    const [plansData, setPlansData] = useState<PlansData | undefined>();
     const [planPeriod, setPlanPeriod] = useState<PlanPeriod>(
         userDetails?.subscription.period ?? "month",
     );
@@ -155,11 +145,9 @@ export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
 
     useEffect(() => {
         const request = { cancelled: false };
-        const showFetchLoading = showInitialLoading && !initialPlansData;
-        if (showFetchLoading) setLoading(true);
         void (async () => {
             try {
-                const plansData = initialPlansData ?? (await getPlansData());
+                const plansData = await getPlansData();
                 if (request.cancelled) return;
                 const plans = [...plansData.plans];
                 if (subscription && isSubscriptionActive(subscription)) {
@@ -184,13 +172,10 @@ export const PlanSelectorContents: React.FC<PlanSelectorContentsProps> = ({
                 log.error("Failed to get plans", e);
                 onClose();
                 showMiniDialog(genericRetriableErrorDialogAttributes());
-            } finally {
-                if (showFetchLoading && !request.cancelled) setLoading(false);
             }
         })();
         return () => {
             request.cancelled = true;
-            if (showFetchLoading) setLoading(false);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -531,7 +516,16 @@ const Plans: React.FC<PlansProps> = ({
     hasAddOnBonus,
     onPlanSelect,
 }) => (
-    <Stack sx={{ gap: 2 }}>
+    <Stack sx={{ gap: 2 }} aria-busy={!plansData}>
+        {!plansData &&
+            [0, 1, 2].map((index) => (
+                <Skeleton
+                    key={index}
+                    variant="rounded"
+                    height={64}
+                    animation="wave"
+                />
+            ))}
         {plansData?.plans
             .filter((plan) => plan.period === planPeriod)
             .map((plan) => (

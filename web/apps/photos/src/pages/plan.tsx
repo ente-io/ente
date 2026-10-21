@@ -45,7 +45,6 @@ function PlanPage(): JSX.Element {
         <>
             <PhotosAuthShell contentWidth={420}>
                 <PlanSelectorContents
-                    showInitialLoading
                     onClose={handleContinue}
                     setLoading={setIsLoading}
                     onManageFamily={handleContinue}

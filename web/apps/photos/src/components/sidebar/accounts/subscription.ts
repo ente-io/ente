@@ -14,7 +14,7 @@ export const openManageSubscription = ({
 }: {
     userDetails: UserDetails | undefined;
     showManageMemberSubscription: () => void;
-    onShowPlanSelector: () => void | Promise<void>;
+    onShowPlanSelector: () => void;
 }) => {
     if (
         userDetails &&
@@ -32,6 +32,6 @@ export const openManageSubscription = ({
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         redirectToCustomerPortal();
     } else {
-        return onShowPlanSelector();
+        onShowPlanSelector();
     }
 };

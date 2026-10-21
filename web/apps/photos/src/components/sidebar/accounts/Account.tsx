@@ -26,24 +26,16 @@ import type { SidebarActionID } from "ente-new/photos/services/search/types";
 import { disable2FA, get2FAStatus } from "ente-new/photos/services/user";
 import {
     familyMemberStorageLimit,
-    getPlansData,
     isFamilyAdmin,
     isPartOfFamily,
     isPartOfFamilyWithOtherMembers,
     isSubscriptionFree,
     pullUserDetails,
     userDetailsSnapshot,
-    type PlansData,
 } from "ente-new/photos/services/user-details";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DeleteAccount } from "../account/DeleteAccount";
 import { SessionsSettings } from "../account/SessionsSettings";
 import { ManageMemberSubscription } from "./ManageMemberSubscription";
@@ -64,7 +56,7 @@ export type AccountAction = Extract<
 
 type AccountProps = NestedSidebarDrawerVisibilityProps & {
     onAuthenticateUser: () => Promise<boolean>;
-    onShowPlanSelector: (plansData?: PlansData) => void;
+    onShowPlanSelector: () => void;
     pendingAction?: AccountAction;
     onActionHandled?: (action?: AccountAction) => void;
 };
@@ -78,20 +70,11 @@ export const Account: React.FC<AccountProps> = ({
     pendingAction,
     onActionHandled,
 }) => {
-    const { showMiniDialog, onGenericError } = useBaseContext();
+    const { showMiniDialog } = useBaseContext();
     const userDetails = useUserDetailsSnapshot();
     const [twoFactorEnabled, setTwoFactorEnabled] = useState<boolean>();
     const [disablingTwoFactor, setDisablingTwoFactor] = useState(false);
     const [sessionCount, setSessionCount] = useState<number>();
-    const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-    const subscriptionRequest = useRef(0);
-
-    useEffect(() => {
-        if (!open) setSubscriptionLoading(false);
-        return () => {
-            subscriptionRequest.current += 1;
-        };
-    }, [open]);
 
     let planSubtext: string | undefined;
     if (userDetails) {
@@ -174,40 +157,21 @@ export const Account: React.FC<AccountProps> = ({
     }, [router]);
 
     const handleManageSubscription = useCallback(() => {
-        if (subscriptionLoading) return;
-        const requestID = ++subscriptionRequest.current;
-        setSubscriptionLoading(true);
         void (async () => {
-            try {
-                if (!userDetails) await pullUserDetails();
-                if (subscriptionRequest.current != requestID) return;
-                const resolvedUserDetails =
-                    userDetails ?? userDetailsSnapshot();
-                if (!resolvedUserDetails) return;
-                await openManageSubscription({
-                    userDetails: resolvedUserDetails,
-                    showManageMemberSubscription,
-                    onShowPlanSelector: async () => {
-                        const plansData = await getPlansData();
-                        if (subscriptionRequest.current == requestID)
-                            onShowPlanSelector(plansData);
-                    },
-                });
-            } catch (error) {
-                if (subscriptionRequest.current == requestID)
-                    onGenericError(error);
-            } finally {
-                if (subscriptionRequest.current == requestID)
-                    setSubscriptionLoading(false);
+            if (!userDetails) {
+                await pullUserDetails();
             }
+
+            const resolvedUserDetails = userDetails ?? userDetailsSnapshot();
+            if (!resolvedUserDetails) return;
+
+            openManageSubscription({
+                userDetails: resolvedUserDetails,
+                showManageMemberSubscription,
+                onShowPlanSelector,
+            });
         })();
-    }, [
-        subscriptionLoading,
-        userDetails,
-        showManageMemberSubscription,
-        onShowPlanSelector,
-        onGenericError,
-    ]);
+    }, [onShowPlanSelector, showManageMemberSubscription, userDetails]);
 
     const handleRecoveryKey = useCallback(async () => {
         if (isDesktop) {
@@ -362,7 +326,6 @@ export const Account: React.FC<AccountProps> = ({
                     title={t("manage_plan")}
                     subtitle={planSubtext}
                     onClick={handleManageSubscription}
-                    loading={subscriptionLoading}
                 />
                 <RowCard
                     title={t("recovery_key")}
