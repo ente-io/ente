@@ -96,18 +96,23 @@ export const commentReactionGroups = (
     }));
 };
 
-const commentEmojiSegmenter = new Intl.Segmenter(undefined, {
-    granularity: "grapheme",
-});
+const commentEmojiSegmenter =
+    typeof Intl !== "undefined" && typeof Intl.Segmenter == "function"
+        ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
+        : null;
 
 export const isEmojiOnlyComment = (text: string) => {
-    const segments = [
-        ...commentEmojiSegmenter.segment(text.replace(/\s/g, "")),
-    ];
+    const compact = text.replace(/\s/g, "");
+    const segments = commentEmojiSegmenter
+        ? Array.from(
+              commentEmojiSegmenter.segment(compact),
+              ({ segment }) => segment,
+          )
+        : Array.from(compact);
     return (
         segments.length > 0 &&
         segments.length <= 3 &&
-        segments.every(({ segment }) =>
+        segments.every((segment) =>
             /\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20E3/u.test(
                 segment,
             ),

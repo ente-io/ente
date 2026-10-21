@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import type { SpaceComment, SpaceNotification } from "../src/services/space";
 import {
     commentNotificationText,
@@ -83,6 +83,22 @@ test.each(["", "   ", "123", "Nice 😂", "😂😂😂😂", "á", "hello"])(
     "%s keeps normal comment typography",
     (text) => expect(isEmojiOnlyComment(text)).toBe(false),
 );
+
+test("comments load and classify simple emojis without Intl.Segmenter", async () => {
+    const descriptor = Object.getOwnPropertyDescriptor(Intl, "Segmenter")!;
+    Reflect.deleteProperty(Intl, "Segmenter");
+    vi.resetModules();
+    try {
+        const comments = await import("../src/utils/comments");
+        expect(comments.isEmojiOnlyComment("😂 🥪")).toBe(true);
+        expect(comments.isEmojiOnlyComment("Nice 😂")).toBe(false);
+        expect(comments.isEmojiOnlyComment("😂😂😂😂")).toBe(false);
+        expect(comments.isEmojiOnlyComment("👨‍👩‍👧‍👦")).toBe(false);
+    } finally {
+        Object.defineProperty(Intl, "Segmenter", descriptor);
+        vi.resetModules();
+    }
+});
 
 test("reactions stay grouped by emoji with your group and your row first", () => {
     const reactions = [
