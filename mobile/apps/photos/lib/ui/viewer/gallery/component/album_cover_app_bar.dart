@@ -22,7 +22,7 @@ import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart
 class AlbumCoverAppBar extends StatefulWidget {
   const AlbumCoverAppBar({
     super.key,
-    required this.collection,
+    this.collection,
     required this.cover,
     required this.title,
     required this.actionsBuilder,
@@ -33,7 +33,7 @@ class AlbumCoverAppBar extends StatefulWidget {
     this.bottom,
   });
 
-  final Collection collection;
+  final Collection? collection;
   final EnteFile cover;
   final String title;
   final List<Widget> Function(Color foregroundColor) actionsBuilder;
@@ -104,7 +104,7 @@ class _AlbumCoverAppBarState extends State<AlbumCoverAppBar> with RouteAware {
   Widget build(BuildContext context) {
     final colors = context.componentColors;
     final bottomHeight = widget.bottom?.preferredSize.height ?? 0;
-    final description = widget.collection.displayDescription;
+    final description = widget.collection?.displayDescription;
     final geometry = AlbumCoverAppBar.resolveGeometry(
       context,
       collapsedHeight: widget.collapsedHeight,

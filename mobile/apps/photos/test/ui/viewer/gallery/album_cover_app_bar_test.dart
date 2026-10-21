@@ -64,7 +64,7 @@ void main() {
     ]) {
       tester.view.physicalSize = size;
       final header = _coverHeader(cover);
-      header.collection.pubMagicMetadata = CollectionPubMagicMetadata(
+      header.collection!.pubMagicMetadata = CollectionPubMagicMetadata(
         description: caption,
       );
       await tester.pumpWidget(
@@ -157,7 +157,7 @@ void main() {
           valueListenable: files,
           builder: (_, files, _) {
             final header = _coverHeader(cover);
-            header.collection.pubMagicMetadata = CollectionPubMagicMetadata(
+            header.collection!.pubMagicMetadata = CollectionPubMagicMetadata(
               description:
                   "An album description that wraps onto several lines.",
             );

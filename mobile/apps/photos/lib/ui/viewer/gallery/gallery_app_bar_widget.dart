@@ -84,7 +84,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     PreferredSizeWidget? bottom,
     bool showOverflowMenu = true,
   }) {
-    assert(cover == null || collection != null);
+    assert(cover == null || collection != null || files != null);
     return GalleryAppBarConfig(
       extendBodyForCollapse: cover != null && bottom == null,
       sliverBuilder: (_) => GalleryAppBarWidget._(
@@ -367,7 +367,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final strings = context.strings;
     return AlbumCoverAppBar(
       key: widget.coverAppBarKey,
-      collection: widget.collection!,
+      collection: widget.collection,
       cover: widget.cover!,
       heroTag: widget.coverHeroTag,
       title: _appBarTitle,
@@ -1200,7 +1200,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await showAlbumSlideshow(
       context,
       files: galleryFiles,
-      title: widget.deviceCollection?.name ?? widget.collection!.displayName,
+      title:
+          widget.deviceCollection?.name ??
+          widget.collection?.displayName ??
+          _appBarTitle,
       includeBackupExcludedFiles: widget.deviceCollection != null,
     );
   }
