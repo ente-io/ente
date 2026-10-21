@@ -390,7 +390,7 @@ To fix dates already uploaded, the easiest path is the desktop app, which suppor
 
 The correction syncs to all your devices.
 
-For future imports, try saving one original to your gallery and backing it up from there. Check its date in Ente before importing the rest. This does not change the dates of files already uploaded.
+To prevent this for future shared media, save photos to your phone's gallery first and let Ente back them up from the gallery. Ente reads dates correctly when files come from the gallery rather than directly from a sharing intent.
 
 ### Why is GPS location missing when I share a photo to Ente on Android? {#android-share-gps-missing}
 
