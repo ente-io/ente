@@ -4,28 +4,28 @@ import { downloadAndSaveCollectionFiles } from "@/services/save";
 import {
     CleanIcon,
     Delete02Icon,
+    Download05Icon,
+    Edit02Icon,
+    Logout01Icon,
+    MapIcon,
     ModernTvIcon,
+    PinIcon,
+    PinOffIcon,
+    PlaySquareIcon,
     RemoveCircleIcon,
+    Sorting05Icon,
     StarIcon,
+    Unarchive03Icon,
+    UserGroupIcon,
+    ViewIcon,
+    ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CheckIcon from "@mui/icons-material/Check";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import EditIcon from "@mui/icons-material/Edit";
 import LinkIcon from "@mui/icons-material/Link";
-import LogoutIcon from "@mui/icons-material/Logout";
-import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PublicIcon from "@mui/icons-material/Public";
-import PushPinIcon from "@mui/icons-material/PushPin";
-import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
-import SlideshowIcon from "@mui/icons-material/Slideshow";
-import SortIcon from "@mui/icons-material/Sort";
-import TvIcon from "@mui/icons-material/Tv";
-import UnarchiveIcon from "@mui/icons-material/Unarchive";
-import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -446,29 +446,29 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             menuOptions = [
                 shouldShowMapOption(collectionSummary) && (
                     <ContextMenuItem key="map" onClick={onShowMap}>
-                        <MapOutlinedIcon />
+                        <HugeiconsIcon icon={MapIcon} size={20} />
                         {t("map")}
                     </ContextMenuItem>
                 ),
                 collectionSummary.attributes.has("shareePinned") ? (
                     <ContextMenuItem key="unpin" onClick={unpinSharedAlbum}>
-                        <PushPinOutlinedIcon />
+                        <HugeiconsIcon icon={PinOffIcon} size={20} />
                         {t("unpin_album")}
                     </ContextMenuItem>
                 ) : (
                     <ContextMenuItem key="pin" onClick={pinSharedAlbum}>
-                        <PushPinIcon />
+                        <HugeiconsIcon icon={PinIcon} size={20} />
                         {t("pin_album")}
                     </ContextMenuItem>
                 ),
                 collectionSummary.attributes.has("archived") ? (
                     <ContextMenuItem key="unarchive" onClick={unarchiveAlbum}>
-                        <UnarchiveIcon />
+                        <HugeiconsIcon icon={Unarchive03Icon} size={20} />
                         {t("unarchive_album")}
                     </ContextMenuItem>
                 ) : (
                     <ContextMenuItem key="archive" onClick={archiveAlbum}>
-                        <ArchiveOutlinedIcon />
+                        <HugeiconsIcon icon={Download05Icon} size={20} />
                         {t("archive_album")}
                     </ContextMenuItem>
                 ),
@@ -476,22 +476,22 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 activeCollection ? (
                     isHiddenCollection(activeCollection) ? (
                         <ContextMenuItem key="unhide" onClick={unhideAlbum}>
-                            <VisibilityOutlinedIcon />
+                            <HugeiconsIcon icon={ViewIcon} size={20} />
                             {t("unhide_collection")}
                         </ContextMenuItem>
                     ) : (
                         <ContextMenuItem key="hide" onClick={hideAlbum}>
-                            <VisibilityOffOutlinedIcon />
+                            <HugeiconsIcon icon={ViewOffSlashIcon} size={20} />
                             {t("hide_collection")}
                         </ContextMenuItem>
                     )
                 ) : undefined,
                 <ContextMenuItem key="leave" onClick={confirmLeaveSharedAlbum}>
-                    <LogoutIcon />
+                    <HugeiconsIcon icon={Logout01Icon} size={20} />
                     {t("leave_album")}
                 </ContextMenuItem>,
                 <ContextMenuItem key="cast" onClick={onCollectionCast}>
-                    <TvIcon />
+                    <HugeiconsIcon icon={ModernTvIcon} size={20} />
                     {t("cast_album_to_tv")}
                 </ContextMenuItem>,
             ];
@@ -502,16 +502,16 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 menuOptions = [
                     shouldShowMapOption(collectionSummary) && (
                         <ContextMenuItem key="map" onClick={onShowMap}>
-                            <MapOutlinedIcon />
+                            <HugeiconsIcon icon={MapIcon} size={20} />
                             {t("map")}
                         </ContextMenuItem>
                     ),
                     <ContextMenuItem key="sort" onClick={showSortOrderMenu}>
-                        <SortIcon />
+                        <HugeiconsIcon icon={Sorting05Icon} size={20} />
                         {t("sort_by")}
                     </ContextMenuItem>,
                     <ContextMenuItem key="cast" onClick={onCollectionCast}>
-                        <TvIcon />
+                        <HugeiconsIcon icon={ModernTvIcon} size={20} />
                         {t("cast_album_to_tv")}
                     </ContextMenuItem>,
                     <ContextMenuItem
@@ -534,28 +534,28 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                         key="edit-details"
                         onClick={onEditAlbumDetails}
                     >
-                        <EditIcon />
+                        <HugeiconsIcon icon={Edit02Icon} size={20} />
                         {t("edit_details")}
                     </ContextMenuItem>
                 ),
                 <ContextMenuItem key="sort" onClick={showSortOrderMenu}>
-                    <SortIcon />
+                    <HugeiconsIcon icon={Sorting05Icon} size={20} />
                     {t("sort_by")}
                 </ContextMenuItem>,
                 shouldShowMapOption(collectionSummary) && (
                     <ContextMenuItem key="map" onClick={onShowMap}>
-                        <MapOutlinedIcon />
+                        <HugeiconsIcon icon={MapIcon} size={20} />
                         {t("map")}
                     </ContextMenuItem>
                 ),
                 collectionSummary.attributes.has("pinned") ? (
                     <ContextMenuItem key="unpin" onClick={unpinAlbum}>
-                        <PushPinOutlinedIcon />
+                        <HugeiconsIcon icon={PinOffIcon} size={20} />
                         {t("unpin_album")}
                     </ContextMenuItem>
                 ) : (
                     <ContextMenuItem key="pin" onClick={pinAlbum}>
-                        <PushPinIcon />
+                        <HugeiconsIcon icon={PinIcon} size={20} />
                         {t("pin_album")}
                     </ContextMenuItem>
                 ),
@@ -566,7 +566,10 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                                   key="unarchive"
                                   onClick={unarchiveAlbum}
                               >
-                                  <UnarchiveIcon />
+                                  <HugeiconsIcon
+                                      icon={Unarchive03Icon}
+                                      size={20}
+                                  />
                                   {t("unarchive_album")}
                               </ContextMenuItem>
                           ) : (
@@ -574,7 +577,10 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                                   key="archive"
                                   onClick={archiveAlbum}
                               >
-                                  <ArchiveOutlinedIcon />
+                                  <HugeiconsIcon
+                                      icon={Download05Icon}
+                                      size={20}
+                                  />
                                   {t("archive_album")}
                               </ContextMenuItem>
                           ),
@@ -582,12 +588,12 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                     : []),
                 activeCollection && isHiddenCollection(activeCollection) ? (
                     <ContextMenuItem key="unhide" onClick={unhideAlbum}>
-                        <VisibilityOutlinedIcon />
+                        <HugeiconsIcon icon={ViewIcon} size={20} />
                         {t("unhide_collection")}
                     </ContextMenuItem>
                 ) : (
                     <ContextMenuItem key="hide" onClick={hideAlbum}>
-                        <VisibilityOffOutlinedIcon />
+                        <HugeiconsIcon icon={ViewOffSlashIcon} size={20} />
                         {t("hide_collection")}
                     </ContextMenuItem>
                 ),
@@ -596,15 +602,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                     destructive
                     onClick={confirmDeleteCollection}
                 >
-                    <DeleteOutlinedIcon />
+                    <HugeiconsIcon icon={Delete02Icon} size={20} />
                     {t("delete_album")}
                 </ContextMenuItem>,
                 <ContextMenuItem key="share" onClick={onCollectionShare}>
-                    <ShareIcon />
+                    <HugeiconsIcon icon={UserGroupIcon} size={20} />
                     {t("share_album")}
                 </ContextMenuItem>,
                 <ContextMenuItem key="cast" onClick={onCollectionCast}>
-                    <TvIcon />
+                    <HugeiconsIcon icon={ModernTvIcon} size={20} />
                     {t("cast_album_to_tv")}
                 </ContextMenuItem>,
             ];
@@ -614,7 +620,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     if (activeCollection)
         menuOptions.push(
             <ContextMenuItem key="slideshow" onClick={onCollectionSlideshow}>
-                <SlideshowIcon />
+                <HugeiconsIcon icon={PlaySquareIcon} size={20} />
                 {t("slideshow")}
             </ContextMenuItem>,
         );
