@@ -67,6 +67,9 @@ const renderSidebar = (
         peopleSortBy: "name-asc",
         saveGroups: [],
         setActiveCollectionID: vi.fn(),
+        onSelectCollectionID: vi.fn(),
+        onSelectPerson: vi.fn(),
+        onSelectPersonInHeader: vi.fn(),
         onCreateAlbum: vi.fn(),
         mobileDrawerProps: { open: true, onClose: vi.fn() },
     } as unknown as GalleryBarAndListHeaderProps;
@@ -83,8 +86,7 @@ describe.each(["hidden-albums", "archive-albums"] as const)(
             const { bar, props } = renderSidebar(mode);
             expect(bar.collectionSummaries.map(({ id }) => id)).toEqual([1, 2]);
             bar.onSelectCollectionID(1);
-            expect(props.setActiveCollectionID).toHaveBeenCalledWith(1);
-            expect(props.mobileDrawerProps.onClose).toHaveBeenCalledOnce();
+            expect(props.onSelectCollectionID).toHaveBeenCalledWith(1);
         });
 
         test("finds quick links using the sidebar search", () => {
