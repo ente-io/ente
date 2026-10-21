@@ -67,7 +67,7 @@ const renderSidebar = (
         people: [],
         sortedPeople: [],
         peopleSortBy: "name-asc",
-        saveGroups: [],
+        isActiveCollectionDownloadInProgress: vi.fn(() => false),
         setActiveCollectionID: vi.fn(),
         onSelectCollectionID: vi.fn(),
         onSelectPerson: vi.fn(),

@@ -11,11 +11,6 @@ import {
 } from "@/components/gallery/BarImpl";
 import { PeopleHeader } from "@/components/gallery/PeopleHeader";
 import { useModalVisibility } from "ente-base/components/utils/modal";
-import {
-    isSaveCancelled,
-    isSaveComplete,
-    type SaveGroup,
-} from "ente-gallery/components/utils/save-groups";
 import type { Collection } from "ente-media/collection";
 import {
     GalleryItemsHeaderAdapter,
@@ -41,9 +36,9 @@ export type GalleryBarAndListHeaderProps = GalleryBarImplProps & {
     onSelectPersonInHeader: GalleryBarImplProps["onSelectPerson"];
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     hasActiveFileSelection: boolean;
-    saveGroups: SaveGroup[];
 } & Pick<
         CollectionHeaderProps,
+        | "isActiveCollectionDownloadInProgress"
         | "onRemotePull"
         | "onAddSaveGroup"
         | "onEditAlbumDetails"
@@ -87,7 +82,7 @@ export const GalleryBarAndListHeader: React.FC<
     onCreateAlbum,
     onSelectPerson,
     onSelectPersonInHeader,
-    saveGroups,
+    isActiveCollectionDownloadInProgress,
     hasActiveFileSelection,
     activePerson,
     emailByUserID,
@@ -122,13 +117,6 @@ export const GalleryBarAndListHeader: React.FC<
         setCollectionShareIntent(undefined);
         collectionShareVisibilityProps.onClose();
     }, [collectionShareVisibilityProps]);
-
-    const isActiveCollectionDownloadInProgress = useCallback(() => {
-        const group = saveGroups.find(
-            (g) => g.collectionSummaryID === activeCollectionID,
-        );
-        return !!group && !isSaveComplete(group) && !isSaveCancelled(group);
-    }, [saveGroups, activeCollectionID]);
 
     const albumDescription =
         activeCollection?.pubMagicMetadata?.data.caption?.trim();

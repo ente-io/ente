@@ -101,7 +101,11 @@ import { initContacts, pullContacts } from "ente-contacts";
 import { DownloadStatusNotifications } from "ente-gallery/components/DownloadStatusNotifications";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import type { UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
-import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
+import {
+    isSaveCancelled,
+    isSaveComplete,
+    useSaveGroups,
+} from "ente-gallery/components/utils/save-groups";
 import type { FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
@@ -455,6 +459,14 @@ const Page: React.FC = () => {
             : state.view?.activeCollectionSummary;
     const selectedLinkID =
         state.view?.type == "links" ? state.view.selectedLinkID : undefined;
+    const galleryBarActiveCollectionID =
+        barMode == "links" ? selectedLinkID : activeCollectionID;
+    const isActiveCollectionDownloadInProgress = useCallback(() => {
+        const group = saveGroups.find(
+            (g) => g.collectionSummaryID === galleryBarActiveCollectionID,
+        );
+        return !!group && !isSaveComplete(group) && !isSaveCancelled(group);
+    }, [saveGroups, galleryBarActiveCollectionID]);
     const quickLinks = useMemo(
         () =>
             visibleQuickLinks(
@@ -2176,9 +2188,7 @@ const Page: React.FC = () => {
                               // TODO: These are incorrect assertions, the types of the
                               // component need to be updated.
                               activeCollection: activeCollection!,
-                              activeCollectionID: (barMode == "links"
-                                  ? selectedLinkID
-                                  : activeCollectionID)!,
+                              activeCollectionID: galleryBarActiveCollectionID!,
                               activePerson,
                               albumFilter,
                               albumSearchQuery,
@@ -2192,7 +2202,7 @@ const Page: React.FC = () => {
                               peopleSortBy,
                               onChangePeopleSortBy: setPeopleSortBy,
                               setFileListHeader,
-                              saveGroups,
+                              isActiveCollectionDownloadInProgress,
                               onAddSaveGroup,
                               onEditAlbumDetails: showEditAlbumDetails,
                               onShowMap: handleShowCollectionMap,
