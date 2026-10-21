@@ -312,6 +312,7 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                     </FocusVisibleUnstyledButton>
                     <Stack
                         component="ol"
+                        role="list"
                         sx={{ listStyle: "none", m: 0, p: 0, gap: "14px" }}
                     >
                         <Stack
@@ -319,7 +320,7 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                             direction="row"
                             sx={{ gap: "12px", alignItems: "flex-start" }}
                         >
-                            <Box component="span" aria-hidden sx={stepNumberSx}>
+                            <Box component="span" sx={stepNumberSx}>
                                 1
                             </Box>
                             <Typography sx={instructionSx}>
@@ -343,7 +344,7 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                             direction="row"
                             sx={{ gap: "12px", alignItems: "flex-start" }}
                         >
-                            <Box component="span" aria-hidden sx={stepNumberSx}>
+                            <Box component="span" sx={stepNumberSx}>
                                 2
                             </Box>
                             <Typography sx={instructionSx}>

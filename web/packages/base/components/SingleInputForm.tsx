@@ -137,10 +137,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                         <ButtonBase
                             onClick={onCancel}
                             disabled={formik.isSubmitting}
-                            sx={[
-                                v2CancelButtonSx,
-                                variant === "people" && peopleActionFocusSx,
-                            ]}
+                            sx={[v2CancelButtonSx, peopleActionFocusSx]}
                         >
                             {t("cancel")}
                         </ButtonBase>
@@ -148,10 +145,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                     <ButtonBase
                         type="submit"
                         disabled={formik.isSubmitting}
-                        sx={[
-                            v2SubmitButtonSx,
-                            variant === "people" && peopleActionFocusSx,
-                        ]}
+                        sx={[v2SubmitButtonSx, peopleActionFocusSx]}
                     >
                         {formik.isSubmitting ? (
                             <CircularProgress
