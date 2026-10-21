@@ -1,84 +1,44 @@
-import { styled } from "@mui/material";
+import { styled, useMediaQuery } from "@mui/material";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { FileType } from "ente-media/file-type";
 import {
     type MouseEvent as ReactMouseEvent,
+    type PointerEvent as ReactPointerEvent,
     useCallback,
     useEffect,
     useMemo,
     useRef,
     useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import {
     buildLaneCaptionModel,
     buildLaneTitle,
-    calculateLaneBlur,
-    calculateLaneOpacity,
-    calculateLaneOverlayOpacity,
-    calculateLaneRotation,
-    calculateLaneScale,
     easeInOutCubic,
     getFileAspectRatio,
     getLaneStackSlices,
-    laneCardShadow,
     lerp,
     resolveLaneCropRect,
 } from "../utils/lane";
-import {
-    LaneCaptionText,
-    LaneProgressSlider,
-    PlaybackGlyph,
-} from "./PublicMemoryControls";
+import { LaneCaption } from "./LaneCaption";
+import { LaneTimeline } from "./LaneTimeline";
+import { PlaybackGlyph } from "./PublicMemoryControls";
 import { PhotoImage, VideoPlayer } from "./PublicMemoryMedia";
 import {
     BrandLink,
-    EDGE_NAV_TAP_ZONE_RATIO,
     ENTE_BRAND_TAG_IMAGE_PATH,
     EnteBrandTagImage,
     isInteractiveTapTarget,
     JoinNowButton,
     type LaneMemoryViewerProps,
     MOBILE_LAYOUT_BREAKPOINT_PX,
-    PhotoContainer,
     readViewport,
-    ViewerRoot,
 } from "./PublicMemoryViewerShared";
 
 const LANE_PLAYBACK_SPEED_MULTIPLIER = 1.25;
-const LANE_FRAME_INTERVAL_MS = 1200;
-const LANE_CARD_TRANSITION_DURATION_MS = 440;
-const LANE_COMPACT_LAYOUT_BREAKPOINT_PX = 900;
-const LANE_MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 340;
-const DESKTOP_LANE_MEDIA_VERTICAL_RESERVED_PX = 320;
-const LANE_CARD_ASPECT_RATIO = 0.68;
-const LANE_MOBILE_CARD_MAX_WIDTH_PX = 326;
-const LANE_MOBILE_CARD_MIN_WIDTH_PX = 220;
-const LANE_DESKTOP_CARD_MAX_WIDTH_PX = 420;
-const LANE_DESKTOP_CARD_MIN_WIDTH_PX = 280;
-const LANE_GRID_CELL_SIZE_PX = 80;
-const LANE_GRID_LINE_COLOR = "#08c225";
-const LANE_GRID_LINE_OPACITY = 0.06;
-const LANE_GRID_DISPLACEMENT_SCALE = 9;
-const LANE_VERTICAL_STACK_GAP_PX = 32;
-const LANE_CARD_TO_CONTROLS_GAP_PX = 52;
-const LANE_CARD_SIZE_SCALE = 0.94;
+const LANE_FRAME_INTERVAL_MS = 1000;
 const LANE_MEDIA_ASPECT_RATIO_CHANGE_EPSILON = 0.00001;
-
-function calculateLaneXOffset(
-    distance: number,
-    cardWidth: number,
-    viewportWidth: number,
-): number {
-    if (distance >= 0) {
-        const compression = Math.pow(0.78, distance);
-        return -cardWidth * 0.12 * distance * compression;
-    }
-    const sideways = Math.abs(distance);
-    const exitDistance = Math.max(cardWidth * 1.8, viewportWidth * 0.82);
-    const overshoot = Math.max(0, sideways - 1) * cardWidth * 0.4;
-    return sideways * exitDistance + overshoot;
-}
 
 export function LaneMemoryViewer({
     files,
@@ -104,16 +64,13 @@ export function LaneMemoryViewer({
     const [mediaAspectRatios, setMediaAspectRatios] = useState<
         Record<number, number>
     >({});
-    const [previousCaptionValue, setPreviousCaptionValue] = useState<
-        number | undefined
-    >(() => {
-        const initialModel = buildLaneCaptionModel({
-            frame: laneFrames?.[currentIndex],
-            metadata: memoryMetadata,
-            fallbackLabel: memoryName || "Memory lane",
-        });
-        return initialModel.value;
-    });
+    const { t } = useTranslation();
+    const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+    const transitionDurationRef = useRef(100);
+    const heldPointerRef = useRef<
+        { id: number; started: number; paused: boolean } | undefined
+    >(undefined);
+    const suppressTapRef = useRef(false);
     const finishedLanePlaybackRef = useRef(false);
     const restartOnResumeRef = useRef(false);
     const animationFrameRef = useRef<number | null>(null);
@@ -135,8 +92,6 @@ export function LaneMemoryViewer({
     const currentFile = files[displayIndex]!;
     const currentLaneFrame = laneFrames?.[displayIndex];
     const isVideo = currentFile.metadata.fileType === FileType.video;
-    const isCompactLaneLayout =
-        viewport.width <= LANE_COMPACT_LAYOUT_BREAKPOINT_PX;
 
     onNextRef.current = onNext;
     currentIndexRef.current = currentIndex;
@@ -188,30 +143,19 @@ export function LaneMemoryViewer({
 
         laneAdvanceTimeoutRef.current = window.setTimeout(() => {
             laneAdvanceTimeoutRef.current = null;
+            transitionDurationRef.current = 1000;
             onNextRef.current();
         }, LANE_FRAME_INTERVAL_MS);
     }, [clearLaneAdvanceTimeout, files.length]);
 
-    const commitDisplayIndex = useCallback(
-        (nextIndex: number) => {
-            const previousModel = buildLaneCaptionModel({
-                frame: laneFrames?.[displayIndexRef.current],
-                metadata: memoryMetadata,
-                fallbackLabel: memoryName || "Memory lane",
-            });
-            const nextModel = buildLaneCaptionModel({
-                frame: laneFrames?.[nextIndex],
-                metadata: memoryMetadata,
-                fallbackLabel: memoryName || "Memory lane",
-            });
-            setPreviousCaptionValue(previousModel.value ?? nextModel.value);
-            setFileLoaded(false);
-            setVideoDurationKnown(false);
-            setActiveMediaAspectRatio(undefined);
-            setDisplayIndex(nextIndex);
-        },
-        [laneFrames, memoryMetadata, memoryName],
-    );
+    const commitDisplayIndex = useCallback((nextIndex: number) => {
+        if (displayIndexRef.current === nextIndex) return;
+        finishedLanePlaybackRef.current = false;
+        setFileLoaded(false);
+        setVideoDurationKnown(false);
+        setActiveMediaAspectRatio(undefined);
+        setDisplayIndex(nextIndex);
+    }, []);
 
     useEffect(
         () => () => {
@@ -241,8 +185,6 @@ export function LaneMemoryViewer({
             return;
         }
 
-        finishedLanePlaybackRef.current = false;
-
         const targetIndex = Math.min(
             Math.max(currentIndex, 0),
             files.length - 1,
@@ -258,9 +200,15 @@ export function LaneMemoryViewer({
             return;
         }
 
-        const duration =
-            LANE_CARD_TRANSITION_DURATION_MS *
-            Math.min(Math.max(Math.abs(targetIndex - startProgress), 1), 4);
+        if (reducedMotion || Math.abs(targetIndex - startProgress) > 1) {
+            setStackProgress(targetIndex);
+            commitDisplayIndex(targetIndex);
+            transitionDurationRef.current = 100;
+            return;
+        }
+        const duration = transitionDurationRef.current;
+        transitionDurationRef.current = 100;
+        commitDisplayIndex(targetIndex);
         setIsAnimatingStack(true);
 
         const tick = (timestamp: number) => {
@@ -293,6 +241,7 @@ export function LaneMemoryViewer({
         currentIndex,
         files.length,
         isScrubbing,
+        reducedMotion,
     ]);
 
     useEffect(() => {
@@ -453,7 +402,7 @@ export function LaneMemoryViewer({
             }
         }
 
-        if (!isVideoRef.current) {
+        if (!isVideoRef.current || isAnimatingStackRef.current) {
             return;
         }
 
@@ -496,105 +445,96 @@ export function LaneMemoryViewer({
             setPaused(true);
             return;
         }
+        transitionDurationRef.current = 1000;
         onNext();
     }, [files.length, onNext]);
 
-    const handleScreenTap = useCallback(
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (
+                event.defaultPrevented ||
+                isInteractiveTapTarget(event.target) ||
+                event.altKey ||
+                event.ctrlKey ||
+                event.metaKey
+            )
+                return;
+            if (event.code === "Space") {
+                event.preventDefault();
+                if (pausedRef.current) resumeLanePlaybackFromGesture();
+                else pauseLanePlayback();
+            } else if (event.key === "Home") {
+                event.preventDefault();
+                onSeek(0);
+            } else if (event.key === "End") {
+                event.preventDefault();
+                onSeek(files.length - 1);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [
+        files.length,
+        onSeek,
+        pauseLanePlayback,
+        resumeLanePlaybackFromGesture,
+    ]);
+
+    const handleHoldStart = (event: ReactPointerEvent<HTMLDivElement>) => {
+        if (event.button !== 0 || heldPointerRef.current) return;
+        suppressTapRef.current = false;
+        heldPointerRef.current = {
+            id: event.pointerId,
+            started: performance.now(),
+            paused: pausedRef.current,
+        };
+        event.currentTarget.setPointerCapture(event.pointerId);
+        setPaused(true);
+    };
+    const handleHoldEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+        const held = heldPointerRef.current;
+        if (held?.id !== event.pointerId) return;
+        heldPointerRef.current = undefined;
+        suppressTapRef.current = performance.now() - held.started > 300;
+        setPaused(held.paused);
+    };
+
+    const handlePhotoTap = useCallback(
         (event: ReactMouseEvent<HTMLDivElement>) => {
-            if (isInteractiveTapTarget(event.target)) {
+            if (
+                suppressTapRef.current ||
+                isInteractiveTapTarget(event.target) ||
+                isScrubbingRef.current
+            )
                 return;
-            }
-            if (isAnimatingStackRef.current || isScrubbingRef.current) {
-                return;
-            }
-
-            const clickX = event.clientX;
-            if (clickX <= viewport.width * EDGE_NAV_TAP_ZONE_RATIO) {
-                onPrev();
-            } else if (
-                clickX >=
-                viewport.width * (1 - EDGE_NAV_TAP_ZONE_RATIO)
-            ) {
-                onNext();
-            }
+            const rect = event.currentTarget.getBoundingClientRect();
+            if (event.clientX - rect.left < rect.width / 2) onPrev();
+            else onNext();
         },
-        [onNext, onPrev, viewport.width],
-    );
-
-    const handleLaneMediaFrameClick = useCallback(
-        (event: ReactMouseEvent<HTMLDivElement>) => {
-            if (isInteractiveTapTarget(event.target)) {
-                return;
-            }
-            if (isAnimatingStackRef.current || isScrubbingRef.current) {
-                return;
-            }
-
-            event.stopPropagation();
-
-            const clickX = event.clientX;
-            if (clickX <= viewport.width * EDGE_NAV_TAP_ZONE_RATIO) {
-                onPrev();
-                return;
-            }
-
-            if (clickX >= viewport.width * (1 - EDGE_NAV_TAP_ZONE_RATIO)) {
-                onNext();
-                return;
-            }
-
-            if (pausedRef.current) {
-                resumeLanePlaybackFromGesture();
-            } else {
-                pauseLanePlayback();
-            }
-        },
-        [
-            onNext,
-            onPrev,
-            pauseLanePlayback,
-            resumeLanePlaybackFromGesture,
-            viewport.width,
-        ],
+        [onNext, onPrev],
     );
 
     const laneFrameSize = useMemo(() => {
-        const availableWidth = Math.max(
-            isCompactLaneLayout
-                ? LANE_MOBILE_CARD_MIN_WIDTH_PX
-                : LANE_DESKTOP_CARD_MIN_WIDTH_PX,
-            viewport.width - (isCompactLaneLayout ? 56 : 96),
-        );
-        const availableHeight = Math.max(
-            200,
-            viewport.height -
-                (isCompactLaneLayout
-                    ? LANE_MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX - 24
-                    : DESKTOP_LANE_MEDIA_VERTICAL_RESERVED_PX),
-        );
-        const preferredWidth = isCompactLaneLayout
-            ? Math.min(LANE_MOBILE_CARD_MAX_WIDTH_PX + 28, availableWidth)
-            : Math.min(
-                  LANE_DESKTOP_CARD_MAX_WIDTH_PX,
-                  Math.max(
-                      LANE_DESKTOP_CARD_MIN_WIDTH_PX,
-                      availableWidth * 0.34,
-                  ),
-              );
-
-        let width = preferredWidth;
-        let height = width / LANE_CARD_ASPECT_RATIO;
-
-        if (height > availableHeight) {
-            height = availableHeight;
-            width = height * LANE_CARD_ASPECT_RATIO;
+        if (viewport.height <= 500 && viewport.width >= 480) {
+            const width = Math.max(
+                100,
+                Math.min(
+                    viewport.width * 0.5 - 60,
+                    (viewport.height - 112) * 0.75,
+                ),
+            );
+            return { width, height: width / 0.75 };
         }
-
-        width *= LANE_CARD_SIZE_SCALE;
-        height *= LANE_CARD_SIZE_SCALE;
-
-        return { width: Math.round(width), height: Math.round(height) };
-    }, [isCompactLaneLayout, viewport.height, viewport.width]);
+        const width = Math.max(
+            100,
+            Math.min(
+                viewport.width * 0.84,
+                480,
+                Math.max(120, viewport.height - 360) * 0.75,
+            ),
+        );
+        return { width, height: width / 0.75 };
+    }, [viewport.height, viewport.width]);
 
     const laneTitle = useMemo(
         () =>
@@ -606,15 +546,19 @@ export function LaneMemoryViewer({
     );
 
     const laneTitleLines = useMemo(() => {
-        const memoryLaneMatch = /^(.*?)(?:\s+)?memory lane$/i.exec(laneTitle);
-        const primaryLine = memoryLaneMatch?.[1]?.trim();
-
-        if (primaryLine) {
-            return { primary: primaryLine, secondary: "memory lane" };
+        const name = memoryMetadata?.personName?.trim();
+        if (
+            name &&
+            laneTitle.startsWith(name) &&
+            !laneTitle.includes(name, name.length)
+        ) {
+            const suffix = /^(\S*)\s+(.+)$/u.exec(laneTitle.slice(name.length));
+            if (suffix) {
+                return { primary: name + suffix[1]!, secondary: suffix[2] };
+            }
         }
-
         return { primary: laneTitle, secondary: undefined };
-    }, [laneTitle]);
+    }, [laneTitle, memoryMetadata?.personName]);
 
     const laneSlices = useMemo(
         () => getLaneStackSlices(files.length, stackProgress),
@@ -675,526 +619,366 @@ export function LaneMemoryViewer({
         [commitDisplayIndex, files.length, onSeek, trackScrubValue],
     );
 
-    const showPlaybackOverlay = paused && !isScrubbing;
-    const playbackOverlayLabel = finishedLanePlaybackRef.current
-        ? "Restart memory lane"
-        : "Resume playback";
+    const visibleSlices = laneSlices.filter(
+        (slice) => Math.abs(slice.distance) <= 1,
+    );
 
     return (
-        <ViewerRoot onClick={handleScreenTap}>
-            <LaneBackground isCompactLayout={isCompactLaneLayout} />
-            <LaneContentContainer>
-                <LaneTopBar>
-                    <LaneTopBrandSection>
-                        <LaneHeaderBrandLink
-                            href="https://ente.com"
-                            target="_blank"
-                            rel="noopener"
+        <LaneRoot>
+            <LaneBackdrop aria-hidden="true">
+                {visibleSlices.map((slice) => (
+                    <LaneBackdropImage
+                        key={slice.index}
+                        style={{ opacity: 1 - Math.abs(slice.distance) }}
+                    >
+                        <PhotoImage
+                            file={files[slice.index]!}
+                            fillFrame
+                            objectFit="cover"
+                            thumbnailOnly
+                            showLoadingOverlay={false}
+                        />
+                    </LaneBackdropImage>
+                ))}
+            </LaneBackdrop>
+            <LaneContent>
+                <LaneHeader>
+                    <LaneHeaderBrandLink
+                        href="https://ente.com"
+                        target="_blank"
+                        rel="noopener"
+                        aria-label="Ente Photos"
+                    >
+                        <EnteBrandTagImage
+                            src={ENTE_BRAND_TAG_IMAGE_PATH}
+                            alt="Ente Photos"
+                        />
+                    </LaneHeaderBrandLink>
+                    <JoinNowButton
+                        variant="contained"
+                        color="accent"
+                        disableElevation
+                        href="https://ente.com/try"
+                        target="_blank"
+                        rel="noopener"
+                        sx={laneHeaderJoinNowButtonSx}
+                    >
+                        {t("lane_get_ente", {
+                            defaultValue: "Get Ente Photos",
+                        })}
+                    </JoinNowButton>
+                </LaneHeader>
+                <LaneMediaSection>
+                    <LaneHeading
+                        className="lane-heading"
+                        dir="auto"
+                        aria-label={laneTitle}
+                    >
+                        <LaneTitlePrimary>
+                            {laneTitleLines.primary}
+                        </LaneTitlePrimary>
+                        {laneTitleLines.secondary && (
+                            <LaneTitleSecondary>
+                                {laneTitleLines.secondary}
+                            </LaneTitleSecondary>
+                        )}
+                    </LaneHeading>
+                    <LaneStage className="lane-stage">
+                        <LaneNavigation
+                            className="lane-navigation"
+                            type="button"
+                            aria-label={t("previous")}
+                            onClick={onPrev}
+                            disabled={currentIndex === 0}
                             data-memory-control="true"
                         >
-                            <EnteBrandTagImage
-                                src={ENTE_BRAND_TAG_IMAGE_PATH}
-                                alt="Ente Photos"
-                            />
-                        </LaneHeaderBrandLink>
-                    </LaneTopBrandSection>
-                    <LaneTopActionSection>
-                        <JoinNowButton
-                            variant="contained"
-                            color="accent"
-                            disableElevation
-                            href="https://ente.com/try"
-                            target="_blank"
-                            rel="noopener"
-                            sx={laneHeaderJoinNowButtonSx}
+                            <span aria-hidden="true">‹</span>
+                        </LaneNavigation>
+                        <LanePhotoFrame
+                            role="group"
+                            aria-label={t("photos")}
+                            style={{
+                                width: laneFrameSize.width,
+                                height: laneFrameSize.height,
+                            }}
+                            onClick={handlePhotoTap}
+                            onPointerDown={handleHoldStart}
+                            onPointerUp={handleHoldEnd}
+                            onPointerCancel={handleHoldEnd}
+                            onLostPointerCapture={handleHoldEnd}
                         >
-                            Get Ente Photos
-                        </JoinNowButton>
-                    </LaneTopActionSection>
-                </LaneTopBar>
-
-                <LaneCenterSection>
-                    <LaneMediaSection>
-                        <LaneSliderTitle
-                            role="heading"
-                            aria-level={2}
-                            aria-label={laneTitle}
-                        >
-                            <LaneSliderTitlePrimary>
-                                {laneTitleLines.primary}
-                            </LaneSliderTitlePrimary>
-                            {laneTitleLines.secondary && (
-                                <LaneSliderTitleSecondary>
-                                    {laneTitleLines.secondary}
-                                </LaneSliderTitleSecondary>
+                            {laneSlices.map((slice) => {
+                                const file = files[slice.index]!;
+                                const isDisplayCard =
+                                    slice.index === displayIndex;
+                                const distance = Math.min(
+                                    1,
+                                    Math.abs(slice.distance),
+                                );
+                                const mediaAspectRatio =
+                                    file.metadata.fileType === FileType.video &&
+                                    isDisplayCard
+                                        ? (activeMediaAspectRatio ??
+                                          getFileAspectRatio(file))
+                                        : (mediaAspectRatios[file.id] ??
+                                          getFileAspectRatio(file));
+                                const common = {
+                                    file,
+                                    fillFrame: true,
+                                    objectFit: "cover" as const,
+                                    cropRect: resolveLaneCropRect(
+                                        laneFrames?.[slice.index],
+                                    ),
+                                    cropContainerAspectRatio: 0.75,
+                                    mediaAspectRatio,
+                                };
+                                return (
+                                    <LanePhotoLayer
+                                        key={slice.index}
+                                        style={{
+                                            opacity: 1 - distance,
+                                            transform: `scale(${reducedMotion ? 1 : 1.1 - 0.1 * distance})`,
+                                            filter:
+                                                reducedMotion || distance === 0
+                                                    ? undefined
+                                                    : `blur(${12 * distance}px)`,
+                                        }}
+                                    >
+                                        {file.metadata.fileType ===
+                                            FileType.video && isDisplayCard ? (
+                                            <VideoPlayer
+                                                {...common}
+                                                paused={
+                                                    paused || isAnimatingStack
+                                                }
+                                                mediaRef={activeVideoElementRef}
+                                                onReady={handleFullLoad}
+                                                onDuration={handleVideoDuration}
+                                                onEnded={handleVideoEnded}
+                                                onPlaybackBlocked={
+                                                    handleVideoPlaybackBlocked
+                                                }
+                                                onAspectRatio={
+                                                    handleActiveAspectRatio
+                                                }
+                                            />
+                                        ) : (
+                                            <PhotoImage
+                                                {...common}
+                                                onFullLoad={
+                                                    isDisplayCard
+                                                        ? handleFullLoad
+                                                        : undefined
+                                                }
+                                                onAspectRatio={(
+                                                    width,
+                                                    height,
+                                                ) =>
+                                                    handleMediaAspectRatio(
+                                                        file.id,
+                                                        width,
+                                                        height,
+                                                    )
+                                                }
+                                                showLoadingOverlay={false}
+                                                thumbnailOnly={
+                                                    Math.abs(slice.distance) > 1
+                                                }
+                                            />
+                                        )}
+                                    </LanePhotoLayer>
+                                );
+                            })}
+                            {!fileLoaded && (
+                                <LaneLoading role="status">
+                                    {t("loading")}
+                                </LaneLoading>
                             )}
-                        </LaneSliderTitle>
-                        <PhotoContainer
-                            style={{ flex: "0 0 auto", minHeight: "auto" }}
-                            onContextMenu={(event) => event.preventDefault()}
-                            onDragStart={(event) => event.preventDefault()}
+                        </LanePhotoFrame>
+                        <LaneNavigation
+                            className="lane-navigation"
+                            type="button"
+                            aria-label={t("next")}
+                            onClick={onNext}
+                            disabled={currentIndex === files.length - 1}
+                            data-memory-control="true"
                         >
-                            <LaneCardStack
-                                style={{
-                                    width: `${laneFrameSize.width}px`,
-                                    height: `${laneFrameSize.height}px`,
-                                }}
-                                onClick={handleLaneMediaFrameClick}
-                            >
-                                {laneSlices.map((slice) => {
-                                    const file = files[slice.index]!;
-                                    const frame = laneFrames?.[slice.index];
-                                    const scale = calculateLaneScale(
-                                        slice.distance,
-                                    );
-                                    const xOffset: number =
-                                        calculateLaneXOffset(
-                                            slice.distance,
-                                            laneFrameSize.width,
-                                            viewport.width,
-                                        );
-                                    const opacity = calculateLaneOpacity(
-                                        slice.distance,
-                                    );
-                                    const blurSigma =
-                                        isScrubbing || isCompactLaneLayout
-                                            ? 0
-                                            : calculateLaneBlur(slice.distance);
-                                    const rotation =
-                                        (calculateLaneRotation(slice.distance) *
-                                            180) /
-                                        Math.PI;
-                                    const overlayOpacity =
-                                        calculateLaneOverlayOpacity(
-                                            slice.distance,
-                                        );
-                                    const cropRect = resolveLaneCropRect(frame);
-                                    const containerAspectRatio =
-                                        laneFrameSize.width /
-                                        laneFrameSize.height;
-                                    const isDisplayCard =
-                                        slice.index === displayIndex;
-                                    const prefersRichImage =
-                                        file.metadata.fileType ===
-                                        FileType.video
-                                            ? isDisplayCard
-                                            : Math.abs(slice.distance) < 1.1;
-                                    const fallbackMediaAspectRatio =
-                                        getFileAspectRatio(file);
-                                    const mediaAspectRatio =
-                                        file.metadata.fileType ===
-                                            FileType.video && isDisplayCard
-                                            ? (activeMediaAspectRatio ??
-                                              fallbackMediaAspectRatio)
-                                            : (mediaAspectRatios[file.id] ??
-                                              fallbackMediaAspectRatio);
-
-                                    return (
-                                        <LaneStackSlice
-                                            key={`lane-slice-${slice.index}`}
-                                            style={{
-                                                opacity,
-                                                transform: `translateX(${xOffset}px) rotate(${rotation}deg) scale(${scale})`,
-                                            }}
-                                        >
-                                            <LaneCardSurface
-                                                style={{
-                                                    boxShadow: laneCardShadow(
-                                                        slice.distance,
-                                                    ),
-                                                }}
-                                            >
-                                                <LaneCardMediaLayer
-                                                    style={{
-                                                        filter:
-                                                            blurSigma > 0
-                                                                ? `blur(${blurSigma}px)`
-                                                                : undefined,
-                                                    }}
-                                                >
-                                                    {file.metadata.fileType ===
-                                                        FileType.video &&
-                                                    isDisplayCard ? (
-                                                        <VideoPlayer
-                                                            file={file}
-                                                            paused={paused}
-                                                            mediaRef={
-                                                                activeVideoElementRef
-                                                            }
-                                                            fillFrame
-                                                            objectFit="cover"
-                                                            cropRect={cropRect}
-                                                            cropContainerAspectRatio={
-                                                                containerAspectRatio
-                                                            }
-                                                            mediaAspectRatio={
-                                                                mediaAspectRatio
-                                                            }
-                                                            onReady={
-                                                                handleFullLoad
-                                                            }
-                                                            onDuration={
-                                                                handleVideoDuration
-                                                            }
-                                                            onEnded={
-                                                                handleVideoEnded
-                                                            }
-                                                            onPlaybackBlocked={
-                                                                handleVideoPlaybackBlocked
-                                                            }
-                                                            onAspectRatio={
-                                                                handleActiveAspectRatio
-                                                            }
-                                                        />
-                                                    ) : (
-                                                        <PhotoImage
-                                                            file={file}
-                                                            fillFrame
-                                                            objectFit="cover"
-                                                            cropRect={cropRect}
-                                                            cropContainerAspectRatio={
-                                                                containerAspectRatio
-                                                            }
-                                                            mediaAspectRatio={
-                                                                mediaAspectRatio
-                                                            }
-                                                            onFullLoad={
-                                                                isDisplayCard
-                                                                    ? handleFullLoad
-                                                                    : undefined
-                                                            }
-                                                            onAspectRatio={(
-                                                                width,
-                                                                height,
-                                                            ) =>
-                                                                handleMediaAspectRatio(
-                                                                    file.id,
-                                                                    width,
-                                                                    height,
-                                                                )
-                                                            }
-                                                            showLoadingOverlay={
-                                                                false
-                                                            }
-                                                            thumbnailOnly={
-                                                                !prefersRichImage
-                                                            }
-                                                        />
-                                                    )}
-                                                </LaneCardMediaLayer>
-                                                {overlayOpacity > 0 && (
-                                                    <LaneCardOverlayLayer
-                                                        style={{
-                                                            opacity:
-                                                                overlayOpacity,
-                                                        }}
-                                                    />
-                                                )}
-                                            </LaneCardSurface>
-                                        </LaneStackSlice>
-                                    );
-                                })}
-                                {showPlaybackOverlay && (
-                                    <LaneCenteredPlaybackOverlay>
-                                        <LaneCenteredPlaybackControl
-                                            type="button"
-                                            onClick={handlePlaybackToggle}
-                                            aria-label={playbackOverlayLabel}
-                                            data-memory-control="true"
-                                        >
-                                            <LaneCenteredPlaybackGlyph>
-                                                <PlaybackGlyph
-                                                    paused={paused}
-                                                />
-                                            </LaneCenteredPlaybackGlyph>
-                                        </LaneCenteredPlaybackControl>
-                                    </LaneCenteredPlaybackOverlay>
-                                )}
-                            </LaneCardStack>
-                        </PhotoContainer>
-                    </LaneMediaSection>
-
-                    <LaneBottomSection>
-                        <LaneSliderMetaStack>
-                            <LaneProgressSlider
+                            <span aria-hidden="true">›</span>
+                        </LaneNavigation>
+                    </LaneStage>
+                    <LaneBottom className="lane-bottom">
+                        <LaneCaption model={laneCaptionModel} />
+                        <LaneTimelineRow>
+                            <LaneTimeline
                                 total={files.length}
-                                currentProgress={stackProgress}
-                                width={laneFrameSize.width}
+                                currentProgress={
+                                    isScrubbing ? stackProgress : displayIndex
+                                }
+                                width={Math.min(viewport.width * 0.68, 400)}
                                 onSeek={onSeek}
                                 onScrubStart={handleScrubStart}
                                 onScrub={handleScrub}
                                 onScrubEnd={handleScrubEnd}
                             />
-                            <LaneCaptionRow>
-                                <LaneCaption>
-                                    <LaneCaptionText
-                                        model={laneCaptionModel}
-                                        previousValue={previousCaptionValue}
-                                    />
-                                </LaneCaption>
-                            </LaneCaptionRow>
-                        </LaneSliderMetaStack>
-                    </LaneBottomSection>
-                </LaneCenterSection>
-            </LaneContentContainer>
-        </ViewerRoot>
+                            <LaneControl
+                                className="lane-playback"
+                                type="button"
+                                onClick={handlePlaybackToggle}
+                                aria-label={
+                                    finishedLanePlaybackRef.current
+                                        ? t("lane_replay", {
+                                              defaultValue:
+                                                  "Replay memory lane",
+                                          })
+                                        : paused
+                                          ? t("play")
+                                          : t("pause")
+                                }
+                                title={
+                                    finishedLanePlaybackRef.current
+                                        ? t("lane_replay", {
+                                              defaultValue:
+                                                  "Replay memory lane",
+                                          })
+                                        : paused
+                                          ? t("play")
+                                          : t("pause")
+                                }
+                                data-memory-control="true"
+                            >
+                                {finishedLanePlaybackRef.current ? (
+                                    <span
+                                        aria-hidden="true"
+                                        style={{ fontSize: 26 }}
+                                    >
+                                        ↻
+                                    </span>
+                                ) : (
+                                    <span
+                                        style={{
+                                            transform: "scale(.65)",
+                                            display: "flex",
+                                        }}
+                                    >
+                                        <PlaybackGlyph paused={paused} />
+                                    </span>
+                                )}
+                            </LaneControl>
+                        </LaneTimelineRow>
+                    </LaneBottom>
+                </LaneMediaSection>
+            </LaneContent>
+        </LaneRoot>
     );
 }
 
-const LaneDesktopBackgroundPattern = styled("div")({
-    position: "fixed",
-    inset: 0,
-    overflow: "hidden",
-    backgroundColor: "#000000",
-    zIndex: 1,
-    pointerEvents: "none",
-    "&::before": {
-        content: '""',
-        position: "absolute",
-        inset: 0,
-        background: [
-            "radial-gradient(ellipse 102% 138% at 50% 60%, rgba(7, 102, 81, 0.36) 0%, rgba(6, 86, 73, 0.28) 32%, rgba(4, 60, 59, 0.17) 54%, rgba(2, 33, 35, 0.08) 76%, transparent 100%)",
-            "radial-gradient(ellipse 82% 120% at 50% 60%, rgba(8, 123, 91, 0.5) 0%, rgba(7, 104, 83, 0.38) 30%, rgba(5, 78, 69, 0.24) 52%, rgba(3, 48, 48, 0.11) 74%, transparent 100%)",
-            "radial-gradient(ellipse 56% 86% at 50% 60%, rgba(10, 133, 95, 0.24) 0%, rgba(7, 103, 82, 0.14) 42%, transparent 100%)",
-        ].join(", "),
-    },
-    "&::after": {
-        content: '""',
-        position: "absolute",
-        inset: 0,
-        background: [
-            "linear-gradient(180deg, rgba(0, 0, 0, 0.98) 0%, rgba(0, 0, 0, 0.62) 14%, rgba(0, 0, 0, 0.14) 32%, rgba(0, 0, 0, 0.10) 68%, rgba(0, 0, 0, 0.62) 88%, rgba(0, 0, 0, 0.98) 100%)",
-            "radial-gradient(ellipse 62% 30% at 50% 9%, rgba(28, 51, 96, 0.26) 0%, rgba(13, 23, 48, 0.18) 42%, transparent 100%)",
-            "radial-gradient(ellipse 124% 132% at 50% 58%, transparent 24%, rgba(0, 0, 0, 0.18) 48%, rgba(0, 0, 0, 0.86) 100%)",
-        ].join(", "),
-    },
-});
-
-const LaneDesktopBackgroundAtmosphere = styled("div")({
-    position: "absolute",
-    inset: "-6% 0 34%",
-    background:
-        "repeating-linear-gradient(90deg, rgba(34, 60, 112, 0.12) 0px, rgba(34, 60, 112, 0.12) 20px, transparent 20px, transparent 94px)",
-    opacity: 0.11,
-    filter: "blur(26px)",
-    maskImage:
-        "linear-gradient(180deg, rgba(0, 0, 0, 0.98) 0%, rgba(0, 0, 0, 0.86) 18%, rgba(0, 0, 0, 0.30) 50%, transparent 100%)",
-});
-
-const LaneDesktopBackgroundGrid = styled("svg")({
-    position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
-    maskImage:
-        "radial-gradient(ellipse 82% 84% at 50% 56%, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.74) 44%, rgba(0, 0, 0, 0.32) 72%, transparent 100%)",
-});
-
-function LaneBackgroundGridFill({
-    patternId,
-    filterId,
-}: {
-    patternId: string;
-    filterId: string;
-}) {
-    return (
-        <>
-            <defs>
-                <pattern
-                    id={patternId}
-                    width={LANE_GRID_CELL_SIZE_PX}
-                    height={LANE_GRID_CELL_SIZE_PX}
-                    patternUnits="userSpaceOnUse"
-                >
-                    <rect
-                        width={LANE_GRID_CELL_SIZE_PX}
-                        height="1"
-                        fill={LANE_GRID_LINE_COLOR}
-                        fillOpacity={LANE_GRID_LINE_OPACITY}
-                    />
-                    <rect
-                        width="1"
-                        height={LANE_GRID_CELL_SIZE_PX}
-                        fill={LANE_GRID_LINE_COLOR}
-                        fillOpacity={LANE_GRID_LINE_OPACITY}
-                    />
-                </pattern>
-                <filter
-                    id={filterId}
-                    x="-6%"
-                    y="-6%"
-                    width="112%"
-                    height="112%"
-                    colorInterpolationFilters="sRGB"
-                >
-                    <feTurbulence
-                        type="turbulence"
-                        baseFrequency="0.009"
-                        numOctaves="3"
-                        seed="3"
-                        result="laneGridNoise"
-                    />
-                    <feDisplacementMap
-                        in="SourceGraphic"
-                        in2="laneGridNoise"
-                        scale={LANE_GRID_DISPLACEMENT_SCALE}
-                        xChannelSelector="R"
-                        yChannelSelector="G"
-                    />
-                </filter>
-            </defs>
-            <rect
-                width="100%"
-                height="100%"
-                fill={`url(#${patternId})`}
-                filter={`url(#${filterId})`}
-            />
-        </>
-    );
-}
-
-function LaneDesktopBackgroundGridOverlay() {
-    return (
-        <LaneDesktopBackgroundGrid aria-hidden preserveAspectRatio="none">
-            <LaneBackgroundGridFill
-                patternId="lane-desktop-grid-pattern"
-                filterId="lane-desktop-grid-filter"
-            />
-        </LaneDesktopBackgroundGrid>
-    );
-}
-
-const LaneMobileBackgroundPattern = styled("div")({
-    position: "fixed",
-    inset: 0,
-    overflow: "hidden",
-    backgroundColor: "#000000",
-    zIndex: 1,
-    pointerEvents: "none",
-    "&::before": {
-        content: '""',
-        position: "absolute",
-        inset: 0,
-        background: [
-            "linear-gradient(180deg, rgba(8, 37, 32, 0.96) 0%, rgba(19, 78, 59, 0.88) 16%, rgba(46, 95, 95, 0.94) 50%, rgba(16, 70, 64, 0.88) 72%, rgba(5, 47, 34, 0.94) 100%)",
-            "radial-gradient(ellipse 82% 26% at 50% 16%, rgba(24, 120, 80, 0.42) 0%, rgba(14, 80, 58, 0.24) 46%, transparent 100%)",
-            "radial-gradient(ellipse 100% 34% at 50% 54%, rgba(76, 123, 145, 0.38) 0%, rgba(43, 90, 107, 0.22) 42%, transparent 100%)",
-            "radial-gradient(ellipse 84% 28% at 50% 86%, rgba(18, 96, 54, 0.34) 0%, rgba(9, 58, 39, 0.18) 46%, transparent 100%)",
-        ].join(", "),
-    },
-    "&::after": {
-        content: '""',
-        position: "absolute",
-        inset: 0,
-        background: [
-            "linear-gradient(180deg, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.34) 12%, rgba(0, 0, 0, 0.08) 24%, rgba(0, 0, 0, 0.10) 48%, rgba(0, 0, 0, 0.16) 68%, rgba(0, 0, 0, 0.46) 88%, rgba(0, 0, 0, 0.96) 100%)",
-            "linear-gradient(90deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.52) 16%, rgba(0, 0, 0, 0.14) 32%, rgba(0, 0, 0, 0.14) 68%, rgba(0, 0, 0, 0.52) 84%, rgba(0, 0, 0, 0.94) 100%)",
-        ].join(", "),
-    },
-});
-
-const LaneMobileBackgroundGrid = styled("svg")({
-    position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
-    maskImage:
-        "linear-gradient(180deg, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.78) 10%, rgba(0, 0, 0, 0.42) 24%, rgba(0, 0, 0, 0.30) 52%, rgba(0, 0, 0, 0.52) 76%, rgba(0, 0, 0, 0.92) 100%)",
-});
-
-function LaneMobileBackgroundGridOverlay() {
-    return (
-        <LaneMobileBackgroundGrid aria-hidden preserveAspectRatio="none">
-            <LaneBackgroundGridFill
-                patternId="lane-mobile-grid-pattern"
-                filterId="lane-mobile-grid-filter"
-            />
-        </LaneMobileBackgroundGrid>
-    );
-}
-
-function LaneBackground({
-    isCompactLayout = false,
-}: {
-    isCompactLayout?: boolean;
-}) {
-    return isCompactLayout ? (
-        <LaneMobileBackgroundPattern>
-            <LaneMobileBackgroundGridOverlay />
-        </LaneMobileBackgroundPattern>
-    ) : (
-        <LaneDesktopBackgroundPattern>
-            <LaneDesktopBackgroundAtmosphere />
-            <LaneDesktopBackgroundGridOverlay />
-        </LaneDesktopBackgroundPattern>
-    );
-}
-
-const LaneContentContainer = styled("div")({
+const LaneRoot = styled("main")({
     position: "relative",
-    zIndex: 2,
+    isolation: "isolate",
+    width: "100%",
+    minHeight: "100svh",
+    height: "100dvh",
+    overflow: "auto",
+    background: "#111",
+    color: "white",
+    fontFamily: "Inter Variable, Inter, sans-serif",
+    touchAction: "manipulation",
+});
+const LaneBackdrop = styled("div")({
+    position: "fixed",
+    inset: 0,
+    zIndex: -1,
+    overflow: "hidden",
+    pointerEvents: "none",
+    "&::after": {
+        content: '""',
+        position: "absolute",
+        inset: 0,
+        background:
+            "linear-gradient(180deg,rgba(0,0,0,.38),rgba(0,0,0,.12) 45%,rgba(0,0,0,.5))",
+    },
+});
+const LaneBackdropImage = styled("div")({
+    position: "absolute",
+    inset: "-100px",
+    filter: "blur(80px)",
+    transform: "scale(1.15)",
+});
+const LaneContent = styled("div")({
+    position: "relative",
+    width: "100%",
+    maxWidth: 1360,
+    minHeight: "100%",
+    marginInline: "auto",
+    "& > *": { minWidth: 0 },
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "26px",
-    width: "100%",
-    maxWidth: "1360px",
-    minHeight: "100svh",
-    height: "100dvh",
-    padding: "42px 24px 24px",
+    padding:
+        "max(42px,env(safe-area-inset-top)) 24px max(24px,env(safe-area-inset-bottom))",
     boxSizing: "border-box",
-    "@media (max-width: 900px)": { gap: "22px", padding: "36px 24px 24px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        gap: "18px",
-        padding: "32px 24px calc(18px + env(safe-area-inset-bottom, 0px))",
+    "@media(max-width:900px)": {
+        paddingTop: "max(36px,env(safe-area-inset-top))",
+    },
+    [`@media(max-width:${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        paddingTop: "max(32px,env(safe-area-inset-top))",
+        paddingBottom: "max(18px,env(safe-area-inset-bottom))",
+    },
+    "@media (max-height: 500px) and (min-width: 480px)": {
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+        gridTemplateRows: "auto auto 1fr",
+        columnGap: 24,
+        rowGap: 12,
+        maxWidth: 1000,
+        paddingBlock: 16,
+        "& > header": { gridColumn: "1 / 3", gridRow: 1 },
+        "& .lane-heading": { gridColumn: 2, gridRow: 2, marginBlock: 0 },
+        "& .lane-stage": {
+            gridColumn: 1,
+            gridRow: "2 / 4",
+            paddingBlock: 0,
+            height: "100%",
+        },
+        "& .lane-bottom": { gridColumn: 2, gridRow: 3, minHeight: 80 },
+        "& .lane-navigation": { display: "none" },
     },
 });
-
-const LaneTopBar = styled("div")({
+const LaneHeader = styled("header")({
     width: "100%",
-    maxWidth: "100%",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    minHeight: "64px",
-    gap: "20px",
-    boxSizing: "border-box",
-    "@media (max-width: 900px)": { minHeight: "56px", gap: "14px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        minHeight: "48px",
-        gap: "12px",
+    gap: 20,
+    flexShrink: 0,
+    minHeight: 64,
+    "@media(max-width:900px)": { minHeight: 56, gap: 14 },
+    [`@media(max-width:${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        minHeight: 48,
+        gap: 12,
     },
 });
-
-const LaneTopBrandSection = styled("div")({
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-});
-
 const LaneHeaderBrandLink = styled(BrandLink)({
-    "& img": { width: "98px" },
-    "@media (max-width: 900px)": { "& img": { width: "84px" } },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        "& img": { width: "72px" },
+    "& img": { width: 98 },
+    "@media(max-width:900px)": { "& img": { width: 84 } },
+    [`@media(max-width:${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        "& img": { width: 72 },
     },
 });
-
-const LaneTopActionSection = styled("div")({
-    display: "flex",
-    alignItems: "center",
-});
-
 const laneHeaderJoinNowButtonSx = {
+    color: "white",
+    backgroundColor: "rgba(255,255,255,.14)",
+    "&:hover": { backgroundColor: "rgba(255,255,255,.22)" },
+    "&:focus-visible": { outline: "2px solid white", outlineOffset: 4 },
     fontSize: "17px",
     paddingBlock: "14px",
     paddingInline: "30px",
-    "@media (max-width: 900px)": {
+    "@media(max-width:900px)": {
         fontSize: "15px",
         paddingBlock: "11px",
         paddingInline: "22px",
     },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+    [`@media(max-width:${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         borderRadius: "14px",
         fontSize: "14px",
         paddingBlock: "9px",
@@ -1202,58 +986,63 @@ const laneHeaderJoinNowButtonSx = {
         minWidth: "auto",
     },
 } as const;
-
-const LaneSliderTitle = styled("div")({
+const LaneHeading = styled("h1")({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "4px",
+    gap: 4,
     textAlign: "center",
-    paddingBottom: "12px",
+    margin: 0,
     whiteSpace: "normal",
     overflowWrap: "anywhere",
-    maxWidth: "min(52vw, 520px)",
-    textShadow: "0 12px 28px rgba(0, 0, 0, 0.32)",
-    "@media (max-width: 900px)": {
-        gap: "3px",
-        paddingBottom: "10px",
-        maxWidth: "min(64vw, 420px)",
-    },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        gap: "2px",
-        paddingBottom: "8px",
+    maxWidth: "min(100%, 520px)",
+    textShadow: "0 12px 28px rgba(0,0,0,.32)",
+    "@media(max-width:900px)": { gap: 3, maxWidth: "min(100%, 420px)" },
+    [`@media(max-width:${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        gap: 2,
         maxWidth: "min(100%, 320px)",
     },
 });
-
-const LaneSliderTitlePrimary = styled("span")({
-    color: "rgba(255, 255, 255, 0.82)",
+const LaneTitlePrimary = styled("span")({
+    color: "rgba(255,255,255,.82)",
     fontWeight: 600,
-    fontSize: "44px",
+    fontSize: 44,
     lineHeight: 0.98,
-    letterSpacing: "-0.04em",
-    "@media (max-width: 900px)": { fontSize: "37px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        fontSize: "31px",
+    letterSpacing: "-.04em",
+    "@media(max-width:900px)": { fontSize: 37 },
+    [`@media(max-width:${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        fontSize: 31,
         lineHeight: 1,
     },
 });
-
-const LaneSliderTitleSecondary = styled("span")({
-    color: "rgba(255, 255, 255, 0.5)",
+const LaneTitleSecondary = styled("span")({
+    color: "rgba(255,255,255,.5)",
     fontWeight: 500,
-    fontSize: "29px",
+    fontSize: 29,
     lineHeight: 1.02,
-    letterSpacing: "-0.02em",
-    textTransform: "lowercase",
-    "@media (max-width: 900px)": { fontSize: "25px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        fontSize: "21px",
+    letterSpacing: "-.02em",
+    "@media(max-width:900px)": { fontSize: 25 },
+    [`@media(max-width:${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        fontSize: 21,
         lineHeight: 1.08,
     },
 });
-
-const LaneCenterSection = styled("div")({
+const LaneControl = styled("button")({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 48,
+    height: 48,
+    flexShrink: 0,
+    border: 0,
+    borderRadius: "50%",
+    color: "white",
+    background: "rgba(0,0,0,.16)",
+    cursor: "pointer",
+    "&:hover": { background: "rgba(255,255,255,.14)" },
+    "&:focus-visible": { outline: "2px solid white", outlineOffset: 4 },
+});
+const LaneMediaSection = styled("div")({
     width: "100%",
     flex: 1,
     minHeight: 0,
@@ -1261,143 +1050,67 @@ const LaneCenterSection = styled("div")({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: `${LANE_CARD_TO_CONTROLS_GAP_PX}px`,
-    transform: "translateY(-28px)",
-    "@media (max-width: 900px)": { transform: "translateY(0)" },
+    "@media (max-height: 500px) and (min-width: 480px)": {
+        display: "contents",
+    },
 });
-
-const LaneMediaSection = styled("div")({
+const LaneStage = styled("div")({
     width: "100%",
+    flex: "0 0 auto",
+    minHeight: 0,
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
-    gap: "26px",
-    "@media (max-width: 900px)": { gap: "22px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: { gap: "18px" },
+    justifyContent: "center",
+    gap: 48,
+    paddingBlock: "24px",
+    userSelect: "none",
 });
-
-const LaneCardStack = styled("div")({ position: "relative", flexShrink: 0 });
-
-const LaneStackSlice = styled("div")({
+const LanePhotoFrame = styled("div")({
+    position: "relative",
+    maxWidth: "100%",
+    flexShrink: 0,
+    overflow: "hidden",
+    borderRadius: 16,
+    background: "rgba(0,0,0,.15)",
+    cursor: "pointer",
+    WebkitTapHighlightColor: "transparent",
+});
+const LanePhotoLayer = styled("div")({
     position: "absolute",
     inset: 0,
     pointerEvents: "none",
-    willChange: "transform, opacity",
+    willChange: "transform,opacity",
 });
-
-const LaneCardSurface = styled("div")({
-    position: "relative",
+const LaneNavigation = styled(LaneControl)({
+    fontSize: 34,
+    "&:disabled": { opacity: 0.25, cursor: "default" },
+    "@media(max-width:899px)": { display: "none" },
+});
+const LaneLoading = styled("div")({
+    position: "absolute",
+    inset: 0,
+    display: "grid",
+    placeItems: "center",
+    fontSize: 14,
+    color: "rgba(255,255,255,.8)",
+    pointerEvents: "none",
+});
+const LaneBottom = styled("div")({
     width: "100%",
-    height: "100%",
-    overflow: "hidden",
-    borderRadius: "28px",
-    border: "3px solid white",
-    boxSizing: "border-box",
-    backgroundColor: "black",
-    "@media (max-width: 900px)": { borderRadius: "24px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        borderRadius: "22px",
-        borderWidth: "2px",
-    },
-});
-
-const LaneCardMediaLayer = styled("div")({
-    position: "absolute",
-    inset: 0,
-    overflow: "hidden",
-    borderRadius: "inherit",
-});
-
-const LaneCardOverlayLayer = styled("div")({
-    position: "absolute",
-    inset: 0,
-    borderRadius: "inherit",
-    backgroundColor: "rgba(0, 0, 0, 1)",
-});
-
-const LaneBottomSection = styled("div")({
-    position: "relative",
+    minHeight: 100,
+    flexShrink: 0,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "flex-end",
-    gap: `${LANE_VERTICAL_STACK_GAP_PX}px`,
-    width: "100%",
-    paddingBottom: 0,
+    justifyContent: "center",
+    gap: 12,
 });
-
-const LaneSliderMetaStack = styled("div")({
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: `${LANE_VERTICAL_STACK_GAP_PX}px`,
-});
-
-const LaneCaptionRow = styled("div")({
+const LaneTimelineRow = styled("div")({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-});
-
-const LaneCaption = styled("div")({
-    color: "rgba(255, 255, 255, 0.53)",
-    fontWeight: 600,
-    fontSize: "24px",
-    letterSpacing: "-0.01em",
-    lineHeight: 1.15,
-    textAlign: "center",
-    whiteSpace: "normal",
-    overflowWrap: "anywhere",
-    "@media (max-width: 900px)": { fontSize: "21px" },
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        fontSize: "18px",
-        lineHeight: 1.2,
-    },
-});
-
-const LaneCenteredPlaybackOverlay = styled("div")({
-    position: "absolute",
-    inset: 0,
-    zIndex: 4,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-});
-
-const LaneCenteredPlaybackControl = styled("button")({
-    width: "88px",
-    height: "88px",
-    borderRadius: "999px",
-    border: 0,
-    cursor: "pointer",
-    padding: 0,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "white",
-    backgroundColor: "rgba(18, 18, 18, 0.64)",
-    boxShadow: "0 18px 40px rgba(0, 0, 0, 0.34)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
-    transition:
-        "transform 150ms ease, background-color 150ms ease, box-shadow 150ms ease",
-    "&:hover": {
-        backgroundColor: "rgba(18, 18, 18, 0.72)",
-        transform: "scale(1.03)",
-    },
-    "&:active": { transform: "scale(0.98)" },
-    "@media (max-width: 900px)": { width: "80px", height: "80px" },
-});
-
-const LaneCenteredPlaybackGlyph = styled("span")({
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transform: "scale(1.65)",
-    transformOrigin: "center",
-    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
-        transform: "scale(1.5)",
-    },
+    maxWidth: 460,
+    gap: 12,
+    "& > :first-child": { flex: 1, minWidth: 0 },
 });

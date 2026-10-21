@@ -1161,5 +1161,9 @@
     "auto_lock_5_minutes": "5 Minuten",
     "auto_lock_30_minutes": "30 Minuten",
     "wrong_unlock_code_one": "Sie haben den falschen Entsperrcode {{count}} Mal eingegeben.",
-    "wrong_unlock_code_other": "Sie haben den falschen Entsperrcode {{count}} Mal eingegeben."
+    "wrong_unlock_code_other": "Sie haben den falschen Entsperrcode {{count}} Mal eingegeben.",
+    "memory_lane_caption_years_ago_one": "{{name}} vor {{number}} Jahr",
+    "memory_lane_caption_years_ago_other": "{{name}} vor {{number}} Jahren",
+    "memory_lane_caption_now": "{{name}} {{now}}",
+    "memory_lane_now": "jetzt"
 }

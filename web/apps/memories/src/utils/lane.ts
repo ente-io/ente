@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { CSSProperties } from "react";
 
 import type { EnteFile } from "ente-media/file";
@@ -12,10 +13,10 @@ const LANE_CROP_REGULAR_PADDING = 0.4;
 const LANE_CROP_MINIMUM_PADDING = 0.1;
 
 export interface LaneCaptionModel {
-    prefix?: string;
-    suffix?: string;
     text: string;
     value?: number;
+    name?: string;
+    captionType?: "age" | "yearsAgo";
 }
 
 export interface LaneCardSlice {
@@ -273,17 +274,81 @@ export const buildLaneCaptionModel = ({
         creationDate,
         birthDate: metadata?.birthDate,
     });
-    const prefix =
-        captionType === "age" ? "" : personName ? `${personName} ` : "";
+    const isNow = captionType === "yearsAgo" && roundedValue === 0;
+    const prefix = captionType === "age" || !personName ? "" : `${personName} `;
     const suffix =
         captionType === "age"
             ? ` year${roundedValue === 1 ? "" : "s"} old`
             : ` year${roundedValue === 1 ? "" : "s"} ago`;
     return {
-        prefix,
-        suffix,
-        text: `${prefix}${roundedValue}${suffix}`,
-        value: roundedValue,
+        text: isNow ? `${prefix}now` : `${prefix}${roundedValue}${suffix}`,
+        value: isNow ? undefined : roundedValue,
+        name: captionType === "age" ? "" : personName,
+        captionType,
+    };
+};
+
+export const laneCaptionNamePlaceholder = "\uFFF9";
+export const laneCaptionTimePlaceholder = "\uFFFC";
+
+export interface LocalizedLaneCaption {
+    template: string;
+    language: string;
+    name: string;
+    time: string;
+    label: string;
+    value?: number;
+    isNow: boolean;
+}
+
+export const localizeLaneCaption = (
+    model: LaneCaptionModel,
+    t: TFunction,
+    locale: string,
+): LocalizedLaneCaption => {
+    const name = model.name ?? "";
+    if (!model.captionType) {
+        return {
+            template: model.text,
+            language: locale,
+            name: "",
+            time: "",
+            label: model.text,
+            isNow: false,
+        };
+    }
+    const isNow = model.captionType === "yearsAgo" && model.value === undefined;
+    const now = isNow
+        ? t("memory_lane_now", { returnDetails: true })
+        : undefined;
+    const time =
+        now?.res ?? new Intl.NumberFormat(locale).format(model.value ?? 0);
+    const translation = t(
+        isNow
+            ? "memory_lane_caption_now"
+            : model.captionType === "age"
+              ? "memory_lane_caption_age"
+              : "memory_lane_caption_years_ago",
+        {
+            name: name ? laneCaptionNamePlaceholder : "",
+            number: laneCaptionTimePlaceholder,
+            now: laneCaptionTimePlaceholder,
+            count: model.value,
+            returnDetails: true,
+        },
+    );
+    const template =
+        isNow && !name ? laneCaptionTimePlaceholder : translation.res.trim();
+    return {
+        template,
+        language: isNow && !name ? now!.usedLng : translation.usedLng,
+        name,
+        time,
+        label: template
+            .replaceAll(laneCaptionNamePlaceholder, name)
+            .replaceAll(laneCaptionTimePlaceholder, time),
+        value: model.value,
+        isNow,
     };
 };
 
@@ -295,15 +360,9 @@ export const buildLaneTitle = ({
     personName?: string;
 }) => {
     const trimmedTitle = memoryName.trim();
+    if (trimmedTitle) return trimmedTitle;
     const trimmedPersonName = personName?.trim() ?? "";
-    const baseTitle = trimmedTitle || "Memory lane";
-
-    if (!trimmedPersonName) {
-        if (baseTitle.toLowerCase().includes("memory lane")) {
-            return baseTitle;
-        }
-        return `${baseTitle} memory lane`;
-    }
+    if (!trimmedPersonName) return "Memory lane";
 
     const possessiveName = trimmedPersonName.endsWith("s")
         ? `${trimmedPersonName}'`
@@ -347,53 +406,4 @@ export const getLaneStackSlices = (
         .sort((a, b) => a.distance - b.distance);
 
     return [...futureSlices, ...presentAndPastSlices];
-};
-
-export const calculateLaneScale = (distance: number) => {
-    if (distance >= 0) {
-        return Math.max(0.84, 1.0 - distance * 0.05);
-    }
-    return Math.min(Math.max(1.0 - Math.abs(distance) * 0.02, 0.82), 1.02);
-};
-
-export const calculateLaneBlur = (distance: number) => {
-    if (distance <= 0) {
-        return 0;
-    }
-    const effective = Math.max(0, distance - 0.15);
-    return Math.min(20, (effective + 0.05) * 10);
-};
-
-export const calculateLaneRotation = (distance: number) => {
-    if (distance <= 0) {
-        return 0;
-    }
-    const clamped = Math.min(Math.max(distance, 0), 3);
-    const falloff = Math.max(0.2, 1 - clamped * 0.18);
-    return 0.035 * clamped * falloff;
-};
-
-export const calculateLaneOpacity = (distance: number) => {
-    if (distance >= 0) {
-        return Math.max(0.35, 1 - distance * 0.22);
-    }
-    const drop = Math.abs(distance);
-    return Math.max(0, 1 - drop * 0.85);
-};
-
-export const calculateLaneOverlayOpacity = (distance: number) => {
-    if (distance <= 0) {
-        return 0;
-    }
-    const normalized = Math.min(Math.max(distance / 3, 0), 1);
-    return 0.45 * (1 - Math.pow(1 - normalized, 3));
-};
-
-export const laneCardShadow = (distance: number) => {
-    const baseOpacity = 0.55;
-    if (distance > 0) {
-        return `0 26px 38px -6px rgba(0, 0, 0, ${Math.max(0, baseOpacity - distance * 0.12)})`;
-    }
-    const dampening = Math.max(0.2, 1 - Math.abs(distance) * 0.25);
-    return `0 24px 34px -12px rgba(0, 0, 0, ${baseOpacity * dampening})`;
 };

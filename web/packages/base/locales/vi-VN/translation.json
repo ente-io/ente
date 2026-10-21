@@ -1161,5 +1161,8 @@
     "auto_lock_5_minutes": "5 phút",
     "auto_lock_30_minutes": "30 phút",
     "wrong_unlock_code_one": "Bạn đã nhập sai mã mở khóa {{count}} lần.",
-    "wrong_unlock_code_other": "Bạn đã nhập sai mã mở khóa {{count}} lần."
+    "wrong_unlock_code_other": "Bạn đã nhập sai mã mở khóa {{count}} lần.",
+    "memory_lane_caption_years_ago_other": "{{name}} {{number}} năm trước",
+    "memory_lane_caption_now": "{{name}} {{now}}",
+    "memory_lane_now": "bây giờ"
 }

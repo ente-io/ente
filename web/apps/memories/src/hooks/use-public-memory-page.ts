@@ -105,6 +105,17 @@ export const usePublicMemoryPage = (): UsePublicMemoryPageResult => {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (
+                e.defaultPrevented ||
+                e.altKey ||
+                e.ctrlKey ||
+                e.metaKey ||
+                (e.target instanceof Element &&
+                    e.target.closest(
+                        "input, textarea, select, [contenteditable='true']",
+                    ))
+            )
+                return;
             if (e.key === "ArrowRight") goToNext();
             else if (e.key === "ArrowLeft") goToPrev();
         };

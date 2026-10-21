@@ -1161,5 +1161,7 @@
     "auto_lock_5_minutes": "",
     "auto_lock_30_minutes": "",
     "wrong_unlock_code_one": "",
-    "wrong_unlock_code_other": ""
+    "wrong_unlock_code_other": "",
+    "memory_lane_caption_years_ago_one": "{{name}} {{number}} år sedan",
+    "memory_lane_caption_years_ago_other": "{{name}} {{number}} år sedan"
 }

@@ -1161,5 +1161,9 @@
     "auto_lock_5_minutes": "5 минут",
     "auto_lock_30_minutes": "30 минут",
     "wrong_unlock_code_one": "Вы ввели неправильный код разблокировки {{count}} раз.",
-    "wrong_unlock_code_other": "Вы ввели неправильный код разблокировки {{count}} раз."
+    "wrong_unlock_code_other": "Вы ввели неправильный код разблокировки {{count}} раз.",
+    "memory_lane_caption_years_ago_one": "{{name}} {{number}} год назад",
+    "memory_lane_caption_years_ago_few": "{{name}} {{number}} года назад",
+    "memory_lane_caption_years_ago_many": "{{name}} {{number}} лет назад",
+    "memory_lane_caption_years_ago_other": "{{name}} {{number}} года назад"
 }

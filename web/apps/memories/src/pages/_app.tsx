@@ -4,7 +4,10 @@ import "@fontsource/itim";
 import { CssBaseline, GlobalStyles } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { CustomHead } from "ente-base/components/Head";
-import { useSetupLogs } from "ente-base/components/utils/hooks-app";
+import {
+    useSetupI18n,
+    useSetupLogs,
+} from "ente-base/components/utils/hooks-app";
 import { shareTheme } from "ente-base/components/utils/theme";
 import type { AppProps } from "next/app";
 import Head from "next/head";
@@ -38,6 +41,7 @@ function MemoriesAppHead() {
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs({ disableDiskLogs: true });
+    useSetupI18n();
 
     return (
         <div style={memoriesAppStyle}>
@@ -51,6 +55,13 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <CssBaseline enableColorScheme />
                 <GlobalStyles
                     styles={{
+                        "@font-face": {
+                            fontFamily: "Gochi Hand",
+                            src: "url('/fonts/GochiHand-Regular.ttf') format('truetype')",
+                            fontStyle: "normal",
+                            fontWeight: 400,
+                            fontDisplay: "swap",
+                        },
                         html: { height: "100%" },
                         body: {
                             height: "100%",

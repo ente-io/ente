@@ -1161,5 +1161,9 @@
     "auto_lock_5_minutes": "5 分钟",
     "auto_lock_30_minutes": "30 分钟",
     "wrong_unlock_code_one": "您输错了 {{count}} 次解锁码。",
-    "wrong_unlock_code_other": "您输错了 {{count}} 次解锁码。"
+    "wrong_unlock_code_other": "您输错了 {{count}} 次解锁码。",
+    "memory_lane_caption_years_ago_one": "{{name}} {{number}} 年前",
+    "memory_lane_caption_years_ago_other": "{{name}} {{number}} 年前",
+    "memory_lane_caption_now": "{{name}} {{now}}",
+    "memory_lane_now": "现在"
 }
