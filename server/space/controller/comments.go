@@ -58,10 +58,13 @@ func (c *CommentsController) Create(ctx context.Context, space *repo.SpaceRecord
 	if err != nil {
 		return err
 	}
-	if err := c.Repo.Create(ctx, space.SpaceID, postID, req, cipher); err != nil {
+	created, err := c.Repo.CreateWithCreated(ctx, space.SpaceID, postID, req, cipher)
+	if err != nil {
 		return err
 	}
-	c.notify(ctx, space, postID, req.CommentID, false)
+	if created {
+		c.notify(ctx, space, postID, req.CommentID, false)
+	}
 	return nil
 }
 
@@ -89,7 +92,5 @@ func (c *CommentsController) notify(ctx context.Context, actor *repo.SpaceRecord
 	if err != nil {
 		return
 	}
-	for _, recipient := range recipients {
-		go c.ActivityNotifier.OnSpaceComment(spaceActivityActor(actor), recipient.UserID, spaceActivityActor(&owner), postID, commentID, recipient.Kind)
-	}
+	go c.ActivityNotifier.OnSpaceComment(spaceActivityActor(actor), recipients, spaceActivityActor(&owner), postID, commentID)
 }

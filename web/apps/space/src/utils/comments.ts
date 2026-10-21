@@ -32,6 +32,7 @@ export interface CommentDraft {
     text: string;
     replyTarget?: CommentReplyTarget;
     sending?: boolean;
+    pendingSubmission?: { commentId: string; text: string; replyToId?: string };
 }
 
 export const validateCommentReplyTarget = (

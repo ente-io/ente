@@ -52,6 +52,34 @@ const commentVisibleSQL = `NOT EXISTS (
     WHERE NOT a.has_content OR account.encrypted_email IS NULL
 )`
 
+const commentRecipientsSQL = `WITH RECURSIVE hidden_comments AS (
+    SELECT c.comment_id FROM space_comments c
+    LEFT JOIN spaces author ON author.space_id = c.author_space_id
+    LEFT JOIN users account ON account.user_id = author.owner_id
+    WHERE c.post_id = $2 AND (c.cipher IS NULL OR account.encrypted_email IS NULL)
+    UNION
+    SELECT child.comment_id FROM hidden_comments parent
+    CROSS JOIN LATERAL (
+        SELECT c.comment_id FROM space_comments c
+        WHERE c.reply_to_id = parent.comment_id AND c.post_id = $2
+        OFFSET 0
+    ) child
+)
+SELECT ARRAY(
+    SELECT participant.space_id FROM (
+        SELECT $1::text AS space_id
+        UNION
+        SELECT c.author_space_id FROM space_comments c WHERE c.post_id = $2 AND NOT EXISTS (
+            SELECT 1 FROM hidden_comments hidden WHERE hidden.comment_id = c.comment_id
+        )
+        UNION
+        SELECT l.actor_space_id FROM space_post_likes l WHERE l.post_id = $2
+    ) participant
+    JOIN spaces s ON s.space_id = participant.space_id
+    JOIN users u ON u.user_id = s.owner_id AND u.encrypted_email IS NOT NULL
+    WHERE participant.space_id <> $3
+)`
+
 func discussionPostTx(ctx context.Context, tx *sql.Tx, viewer string, postID int64, forUpdate bool) (string, error) {
 	locking := "FOR SHARE OF s, p"
 	if forUpdate {
@@ -183,48 +211,54 @@ func (r *CommentsRepository) List(ctx context.Context, viewer string, postID int
 }
 
 func (r *CommentsRepository) Create(ctx context.Context, viewer string, postID int64, req models.CreateCommentRequest, cipher []byte) error {
+	_, err := r.CreateWithCreated(ctx, viewer, postID, req, cipher)
+	return err
+}
+
+func (r *CommentsRepository) CreateWithCreated(ctx context.Context, viewer string, postID int64, req models.CreateCommentRequest, cipher []byte) (bool, error) {
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer tx.Rollback()
 	owner, err := discussionPostTx(ctx, tx, viewer, postID, true)
 	if err != nil {
-		return err
+		return false, err
+	}
+	var matches bool
+	err = tx.QueryRowContext(ctx, `SELECT post_id = $2 AND COALESCE(author_space_id, '') = $3 AND COALESCE(reply_to_id, '') = $4
+        FROM space_comments WHERE comment_id = $1`, req.CommentID, postID, viewer, req.ReplyToID).Scan(&matches)
+	if err == nil {
+		if !matches {
+			return false, ente.NewConflictError("comment ID already used")
+		}
+		return false, nil
+	}
+	if err != sql.ErrNoRows {
+		return false, err
 	}
 	var parent, replyRecipient string
 	if req.ReplyToID != "" {
 		if err := tx.QueryRowContext(ctx, `SELECT COALESCE(c.parent_id, c.comment_id), c.author_space_id FROM space_comments c
             WHERE c.comment_id = $1 AND c.post_id = $2 AND `+commentVisibleSQL, req.ReplyToID, postID).Scan(&parent, &replyRecipient); err != nil {
-			return err
+			return false, err
 		}
 	}
 	res, err := tx.ExecContext(ctx, `INSERT INTO space_comments (comment_id, post_id, author_space_id, parent_id, reply_to_id, cipher)
         VALUES ($1, $2, $3, NULLIF($4, ''), NULLIF($5, ''), $6) ON CONFLICT (comment_id) DO NOTHING`, req.CommentID, postID, viewer, parent, req.ReplyToID, cipher)
 	if err != nil {
-		return err
+		return false, err
 	}
 	count, err := res.RowsAffected()
 	if err != nil {
-		return err
+		return false, err
 	}
 	if count == 0 {
-		return ente.NewConflictError("discussion changed; refresh and retry")
+		return false, ente.NewConflictError("comment ID already used")
 	}
 	var recipients pq.StringArray
-	if err := tx.QueryRowContext(ctx, `SELECT ARRAY(
-        SELECT participant.space_id FROM (
-            SELECT $1::text AS space_id
-            UNION
-            SELECT c.author_space_id FROM space_comments c WHERE c.post_id = $2 AND `+commentVisibleSQL+`
-            UNION
-            SELECT l.actor_space_id FROM space_post_likes l WHERE l.post_id = $2
-        ) participant
-        JOIN spaces s ON s.space_id = participant.space_id
-        JOIN users u ON u.user_id = s.owner_id AND u.encrypted_email IS NOT NULL
-        WHERE participant.space_id <> $3
-    )`, owner, postID, viewer).Scan(&recipients); err != nil {
-		return err
+	if err := tx.QueryRowContext(ctx, commentRecipientsSQL, owner, postID, viewer).Scan(&recipients); err != nil {
+		return false, err
 	}
 	for _, recipient := range recipients {
 		kind := "comment"
@@ -232,10 +266,13 @@ func (r *CommentsRepository) Create(ctx context.Context, viewer string, postID i
 			kind = "comment_reply"
 		}
 		if _, err := commentNotificationTx(ctx, tx, owner, viewer, recipient, req.CommentID, kind); err != nil {
-			return err
+			return false, err
 		}
 	}
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func commentNotificationTx(ctx context.Context, tx *sql.Tx, owner, actor, recipient, commentID, kind string) (bool, error) {

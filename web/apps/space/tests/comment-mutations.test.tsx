@@ -2,6 +2,7 @@ import React, { type EffectCallback, type SetStateAction } from "react";
 import { beforeEach, expect, test, vi } from "vitest";
 import { PostComments } from "../src/components/PostComments";
 import type { SpaceComment } from "../src/services/space";
+import type { CommentDraft } from "../src/utils/comments";
 
 const mocks = vi.hoisted(() => ({
     hooks: [] as unknown[],
@@ -105,6 +106,8 @@ const comment: SpaceComment = {
 
 type Element = React.ReactElement<Record<string, unknown>>;
 
+let draft: CommentDraft;
+
 const elements = (node: React.ReactNode): Element[] => {
     if (Array.isArray(node)) return node.flatMap(elements);
     if (!React.isValidElement<Record<string, unknown>>(node)) return [];
@@ -128,8 +131,10 @@ const render = () => {
             viewer: "viewer",
             owner: "owner",
             postId: 42,
-            draft: { text: "New comment" },
-            setDraft: vi.fn(),
+            draft,
+            setDraft: (update) => {
+                draft = typeof update == "function" ? update(draft) : update;
+            },
             onClose: vi.fn(),
         }) as React.ReactNode,
     );
@@ -156,11 +161,58 @@ beforeEach(async () => {
     vi.resetAllMocks();
     mocks.hooks = [];
     mocks.effects = [];
+    draft = { text: "New comment" };
     mocks.load.mockResolvedValue([comment]);
     render();
     mocks.effects[0]!();
     await vi.waitFor(() => expect(composer().props.sendDisabled).toBe(false));
 });
+
+test("a lost creation response keeps the submission ID through reopening and retry", async () => {
+    mocks.create.mockRejectedValueOnce(new Error("Response lost"));
+    await expect(
+        (composer().props.onSend as (text: string) => Promise<void>)(
+            draft.text,
+        ),
+    ).rejects.toThrow("Response lost");
+    const submission = draft.pendingSubmission!;
+    expect(submission.commentId).toEqual(expect.any(String));
+    expect(draft.text).toBe("New comment");
+    expect(draft.sending).toBe(false);
+    mocks.hooks = [];
+    mocks.create.mockResolvedValueOnce(undefined);
+    await (composer().props.onSend as (text: string) => Promise<void>)(
+        draft.text,
+    );
+    expect(mocks.create.mock.calls[1]).toEqual(mocks.create.mock.calls[0]);
+    expect(draft.text).toBe("");
+    expect(draft.pendingSubmission).toBeUndefined();
+});
+
+test.each(["text", "reply"])(
+    "changing the %s after a failed send creates a new submission",
+    async (change) => {
+        mocks.create.mockRejectedValueOnce(new Error("Request failed"));
+        await expect(
+            (composer().props.onSend as (text: string) => Promise<void>)(
+                draft.text,
+            ),
+        ).rejects.toThrow("Request failed");
+        const firstID = draft.pendingSubmission!.commentId;
+        if (change == "text") draft.text = "Changed comment";
+        else draft.replyTarget = { status: "selected", commentId: "comment" };
+        await (composer().props.onSend as (text: string) => Promise<void>)(
+            draft.text,
+        );
+        expect(mocks.create.mock.calls[1]![3]).not.toBe(firstID);
+        expect(mocks.create.mock.calls[1]![4]).toBe(
+            change == "reply" ? "comment" : undefined,
+        );
+        expect(mocks.create.mock.calls[1]![5]).toBe(
+            change == "text" ? "Changed comment" : "New comment",
+        );
+    },
+);
 
 test.each(["react", "delete"] as const)(
     "a failed %s keeps the composer usable when the discussion refresh succeeds",

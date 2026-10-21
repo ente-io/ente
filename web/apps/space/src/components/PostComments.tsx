@@ -1293,20 +1293,35 @@ export const PostComments: React.FC<{
                         sendDisabled={loading}
                         placeholder={replyTarget ? "Reply…" : "Add a comment…"}
                         onSend={async (text) => {
-                            setDraft((value) => ({ ...value, sending: true }));
+                            const replyToId =
+                                replyTarget?.status == "selected"
+                                    ? replyTarget.commentId
+                                    : undefined;
+                            const submission =
+                                draft.pendingSubmission?.text == text &&
+                                draft.pendingSubmission.replyToId == replyToId
+                                    ? draft.pendingSubmission
+                                    : {
+                                          commentId: crypto.randomUUID(),
+                                          text,
+                                          replyToId,
+                                      };
+                            setDraft((value) => ({
+                                ...value,
+                                pendingSubmission: submission,
+                                sending: true,
+                            }));
                             try {
-                                const commentId = crypto.randomUUID();
                                 await createCurrentComment(
                                     viewer,
                                     owner,
                                     postId,
-                                    commentId,
-                                    replyTarget?.status == "selected"
-                                        ? replyTarget.commentId
-                                        : undefined,
-                                    text,
+                                    submission.commentId,
+                                    submission.replyToId,
+                                    submission.text,
                                 );
-                                submittedCommentId.current = commentId;
+                                submittedCommentId.current =
+                                    submission.commentId;
                                 setDraft({ text: "", sending: true });
                             } finally {
                                 setDraft((value) => ({

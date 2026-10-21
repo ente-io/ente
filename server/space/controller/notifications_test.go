@@ -459,7 +459,7 @@ func TestFriendAndDiscussionPushNotificationDestinations(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			payload = spaceWebPushPayload{}
-			sender.OnSpaceComment(actor, recipientID, test.postOwner, 42, "comment/with space", test.kind)
+			sender.OnSpaceComment(actor, []repo.CommentNotificationRecipient{{UserID: recipientID, Kind: test.kind}}, test.postOwner, 42, "comment/with space")
 			require.Equal(t, spaceWebPushPayload{
 				Title:  "Ente Space",
 				Body:   test.body,
@@ -500,15 +500,67 @@ func TestSpaceWebPushSendRateAppliesOncePerActivity(t *testing.T) {
 	require.Equal(t, len(subscriptions), len(sent))
 }
 
-func (n *recordingSpaceActivityNotifier) OnSpaceComment(actor SpaceActivityActor, recipientUserID int64, postOwner SpaceActivityActor, postID int64, commentID, kind string) {
-	n.events <- recordedSpaceActivity{
-		event:        kind,
-		actorUserID:  actor.UserID,
-		actorSpaceID: actor.SpaceID,
-		actorSlug:    actor.Slug,
-		postID:       postID,
-		postOwner:    postOwner,
-		commentID:    commentID,
-		recipientIDs: []int64{recipientUserID},
+func TestCommentPushQuotaAppliesOnceAcrossRecipients(t *testing.T) {
+	_, repos, ctx := setupPostsControllerTest(t)
+	var recipients []repo.CommentNotificationRecipient
+	var endpoints []string
+	for i := range 10 {
+		userID := insertSpaceControllerUser(t, repos, fmt.Sprintf("comment-push-%d@example.com", i), "public")
+		sessionHash := []byte(fmt.Sprintf("comment-push-session-%d", i))
+		require.NoError(t, repos.Sessions.CreateBrowserSession(ctx, sessionHash, userID, "wrap-key", timeutil.NDaysFromNow(1)))
+		endpoint := fmt.Sprintf("https://fcm.googleapis.com/wp/comment-%d", i)
+		_, err := repos.WebPush.UpsertAccountSubscription(ctx, sessionHash, endpoint, "p256dh", "auth")
+		require.NoError(t, err)
+		recipients = append(recipients, repo.CommentNotificationRecipient{UserID: userID, Kind: "comment"})
+		endpoints = append(endpoints, endpoint)
+	}
+	recipients[0].Kind = "comment_reply"
+	originalSend := sendSpaceWebPush
+	t.Cleanup(func() { sendSpaceWebPush = originalSend })
+	sent := make(chan string, len(recipients))
+	sendSpaceWebPush = func(_ context.Context, _ []byte, subscription *webpush.Subscription, _ *webpush.Options) (*http.Response, error) {
+		sent <- subscription.Endpoint
+		return &http.Response{StatusCode: http.StatusCreated, Body: io.NopCloser(strings.NewReader(""))}, nil
+	}
+	actor := SpaceActivityActor{UserID: 100, SpaceID: "actor", Slug: "alice"}
+	owner := SpaceActivityActor{UserID: recipients[1].UserID, SpaceID: "owner", Slug: "bob"}
+	for _, priorActivities := range []int{0, 49} {
+		t.Run(fmt.Sprintf("after-%d-activities", priorActivities), func(t *testing.T) {
+			sender := NewSpaceWebPushSender(repos.WebPush, newSpaceWebPushTestConfig(t))
+			sender.OnSpaceComment(actor, []repo.CommentNotificationRecipient{{UserID: actor.UserID, Kind: "comment"}}, owner, 42, "no-subscribers")
+			for range priorActivities {
+				sender.OnSpaceFriendAdded(actor, recipients[0].UserID)
+				require.Len(t, sent, 1)
+				<-sent
+			}
+			for i := range 50 - priorActivities {
+				sender.OnSpaceComment(actor, recipients, owner, 42, fmt.Sprintf("comment-%d", i))
+				require.Len(t, sent, len(recipients))
+				var delivered []string
+				for range recipients {
+					delivered = append(delivered, <-sent)
+				}
+				require.ElementsMatch(t, endpoints, delivered)
+			}
+			sender.OnSpaceComment(actor, recipients, owner, 42, "over-limit")
+			require.Empty(t, sent)
+			sender.OnSpaceFriendAdded(actor, recipients[0].UserID)
+			require.Empty(t, sent)
+		})
+	}
+}
+
+func (n *recordingSpaceActivityNotifier) OnSpaceComment(actor SpaceActivityActor, recipients []repo.CommentNotificationRecipient, postOwner SpaceActivityActor, postID int64, commentID string) {
+	for _, recipient := range recipients {
+		n.events <- recordedSpaceActivity{
+			event:        recipient.Kind,
+			actorUserID:  actor.UserID,
+			actorSpaceID: actor.SpaceID,
+			actorSlug:    actor.Slug,
+			postID:       postID,
+			postOwner:    postOwner,
+			commentID:    commentID,
+			recipientIDs: []int64{recipient.UserID},
+		}
 	}
 }

@@ -4,13 +4,114 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"net/http"
 	"testing"
 	"time"
 
 	"github.com/ente/museum/ente"
 	"github.com/ente/museum/space/models"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 )
+
+func TestCommentCreationRetriesPreserveTheOriginal(t *testing.T) {
+	module := newSpaceTestModule(t)
+	ctx := t.Context()
+	owner, friend := notificationTestSpaces(t, module)
+	postID, err := testCreatePost(ctx, module, owner.OwnerID, owner.SpaceID, "post-key", nil, 1, nil)
+	require.NoError(t, err)
+	otherPostID, err := testCreatePost(ctx, module, owner.OwnerID, owner.SpaceID, "other-key", nil, 1, nil)
+	require.NoError(t, err)
+	require.NoError(t, module.Comments.Create(ctx, owner.SpaceID, postID, models.CreateCommentRequest{CommentID: "parent"}, []byte("parent")))
+	request := models.CreateCommentRequest{CommentID: "retry", ReplyToID: "parent"}
+	created, err := module.Comments.CreateWithCreated(ctx, friend.SpaceID, postID, request, []byte("original"))
+	require.NoError(t, err)
+	require.True(t, created)
+	created, err = module.Comments.CreateWithCreated(ctx, friend.SpaceID, postID, request, []byte("reencrypted"))
+	require.NoError(t, err)
+	require.False(t, created)
+	var cipher []byte
+	require.NoError(t, module.Comments.DB.QueryRowContext(ctx, `SELECT cipher FROM space_comments WHERE comment_id = 'retry'`).Scan(&cipher))
+	require.Equal(t, []byte("original"), cipher)
+	require.EqualValues(t, 1, countSpaceRows(t, module, `SELECT count(*) FROM space_notifications WHERE comment_id = 'retry'`))
+	for _, test := range []struct {
+		name, actor, replyTo string
+		postID               int64
+	}{
+		{"different-author", owner.SpaceID, "parent", postID},
+		{"different-post", friend.SpaceID, "parent", otherPostID},
+		{"different-target", friend.SpaceID, "", postID},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			created, err := module.Comments.CreateWithCreated(ctx, test.actor, test.postID, models.CreateCommentRequest{CommentID: "retry", ReplyToID: test.replyTo}, []byte("other"))
+			require.False(t, created)
+			var apiError *ente.ApiError
+			require.ErrorAs(t, err, &apiError)
+			require.Equal(t, http.StatusConflict, apiError.HttpStatusCode)
+		})
+	}
+	require.NoError(t, module.Comments.Delete(ctx, owner.SpaceID, postID, "parent"))
+	created, err = module.Comments.CreateWithCreated(ctx, friend.SpaceID, postID, request, []byte("retry-after-deletion"))
+	require.NoError(t, err)
+	require.False(t, created)
+	require.NoError(t, module.Comments.DB.QueryRowContext(ctx, `SELECT cipher FROM space_comments WHERE comment_id = 'retry'`).Scan(&cipher))
+	require.Empty(t, cipher)
+	require.Zero(t, countSpaceRows(t, module, `SELECT count(*) FROM space_notifications WHERE comment_id = 'retry'`))
+}
+
+func TestCommentRecipientWorkScalesWithReplyChainLength(t *testing.T) {
+	for _, hidden := range []string{"visible", "deleted-comment", "deleted-author"} {
+		t.Run(hidden, func(t *testing.T) {
+			module := newSpaceTestModule(t)
+			ctx := t.Context()
+			owner, friend := notificationTestSpaces(t, module)
+			var previousBlocks int64
+			for _, length := range []int{128, 512} {
+				postID, err := testCreatePost(ctx, module, owner.OwnerID, owner.SpaceID, "post-key", nil, 1, nil)
+				require.NoError(t, err)
+				_, err = module.Posts.DB.ExecContext(ctx, `INSERT INTO space_comments
+                    (comment_id, post_id, author_space_id, parent_id, reply_to_id, cipher)
+                    SELECT $1::text || ':' || i, $1::bigint, CASE WHEN i = 1 THEN $2 ELSE $3 END,
+                        CASE WHEN i > 1 THEN $1::text || ':1' END,
+                        CASE WHEN i > 1 THEN $1::text || ':' || (i - 1) END,
+                        CASE WHEN i = 1 AND $5 = 'deleted-comment' THEN NULL ELSE '\x01'::bytea END
+                    FROM generate_series(1, $4::int) i`, postID, owner.SpaceID, friend.SpaceID, length, hidden)
+				require.NoError(t, err)
+				if hidden == "deleted-author" {
+					_, err = module.Posts.DB.ExecContext(ctx, `UPDATE users SET encrypted_email = NULL WHERE user_id = $1`, owner.OwnerID)
+					require.NoError(t, err)
+				}
+				_, err = module.Posts.DB.ExecContext(ctx, `ANALYZE space_comments`)
+				require.NoError(t, err)
+				var recipients pq.StringArray
+				require.NoError(t, module.Posts.DB.QueryRowContext(ctx, commentRecipientsSQL, owner.SpaceID, postID, owner.SpaceID).Scan(&recipients))
+				if hidden == "visible" {
+					require.Equal(t, pq.StringArray{friend.SpaceID}, recipients)
+				} else {
+					require.Empty(t, recipients)
+				}
+				var planJSON []byte
+				require.NoError(t, module.Posts.DB.QueryRowContext(ctx, `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) `+commentRecipientsSQL, owner.SpaceID, postID, owner.SpaceID).Scan(&planJSON))
+				var plans []struct {
+					Plan struct {
+						Hits  int64 `json:"Shared Hit Blocks"`
+						Reads int64 `json:"Shared Read Blocks"`
+					}
+				}
+				require.NoError(t, json.Unmarshal(planJSON, &plans))
+				require.Len(t, plans, 1)
+				blocks := plans[0].Plan.Hits + plans[0].Plan.Reads
+				t.Logf("%d comments: %d buffer accesses", length, blocks)
+				if previousBlocks > 0 {
+					require.Less(t, blocks, previousBlocks*8)
+				}
+				previousBlocks = blocks
+				_, err = module.Posts.DB.ExecContext(ctx, `UPDATE users SET encrypted_email = '\x00'::bytea WHERE user_id = $1`, owner.OwnerID)
+				require.NoError(t, err)
+			}
+		})
+	}
+}
 
 func TestPostCommentCountWorkScalesWithReplyChainLength(t *testing.T) {
 	for _, hidden := range []bool{false, true} {

@@ -136,11 +136,12 @@ func TestDiscussionNotifiesPostOwnerParticipantsAndLikers(t *testing.T) {
 				_, err := repos.Spaces.DB.ExecContext(ctx, `UPDATE users SET encrypted_email = NULL WHERE user_id = $1`, spaces["bob"].OwnerID)
 				require.NoError(t, err)
 			}
-			require.NoError(t, comments.Create(ctx, spaces[test.actor], test.postID, models.CreateCommentRequest{
+			request := models.CreateCommentRequest{
 				CommentID: test.id,
 				ReplyToID: test.replyTo,
 				Cipher:    base64.StdEncoding.EncodeToString([]byte(test.id)),
-			}))
+			}
+			require.NoError(t, comments.Create(ctx, spaces[test.actor], test.postID, request))
 			var expectedRecipients, notifiedRecipients []int64
 			expectedKinds := make(map[int64]string)
 			for name, kind := range test.recipients {
@@ -158,6 +159,7 @@ func TestDiscussionNotifiesPostOwnerParticipantsAndLikers(t *testing.T) {
 				notifiedRecipients = append(notifiedRecipients, activity.recipientIDs...)
 			}
 			require.ElementsMatch(t, expectedRecipients, notifiedRecipients)
+			require.NoError(t, comments.Create(ctx, spaces[test.actor], test.postID, request))
 			requireNoSpaceActivity(t, notifier)
 			for name, space := range spaces {
 				items, _, err := repos.Notifications.List(ctx, space.SpaceID, "", 50)
