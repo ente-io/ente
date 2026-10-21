@@ -11,7 +11,7 @@ struct NotificationRecipient: Codable {
 }
 
 enum NotificationKeyStore {
-  static let accessGroup = "group.io.ente.frame.notifications"
+  static let accessGroup = "group.io.ente.frame.NotificationServiceExtension"
   static let service = "io.ente.frame.notifications"
   #if DEBUG
   static let account = "recipient.debug"
