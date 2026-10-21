@@ -1,1 +1,0 @@
-- Fixed macOS media keys resuming unseen Ente videos instead of controlling music apps.
