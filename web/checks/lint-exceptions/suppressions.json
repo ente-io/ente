@@ -14,9 +14,6 @@
     "web/apps/photos/src/components/collections/CollectionShare.tsx": [
         "@typescript-eslint/no-unnecessary-condition"
     ],
-    "web/apps/photos/src/components/collections/GalleryBarAndListHeader.tsx": [
-        "react-hooks/exhaustive-deps"
-    ],
     "web/apps/photos/src/components/PlanSelector.tsx": [
         "react-hooks/exhaustive-deps"
     ],

@@ -1,4 +1,3 @@
-// TODO: Audit this file
 import {
     CollectionShare,
     type CollectionShareIntent,
@@ -18,14 +17,14 @@ import {
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState, type ReactNode } from "react";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {
     CollectionHeader,
     type CollectionHeaderProps,
 } from "./CollectionHeader";
 
-type GalleryBarAndListHeaderProps = {
+type GalleryListHeaderProps = {
     mode: GalleryBarMode;
     shouldHide: boolean;
     collectionSummary: CollectionSummary | undefined;
@@ -34,7 +33,7 @@ type GalleryBarAndListHeaderProps = {
     people: Person[];
     setActiveCollectionID: (collectionID: number) => void;
     onSelectPerson: (personID: string) => void;
-    setFileListHeader: (header: FileListHeaderOrFooter) => void;
+    children: (header: FileListHeaderOrFooter | undefined) => ReactNode;
     hasActiveFileSelection: boolean;
 } & Pick<
     CollectionHeaderProps,
@@ -50,9 +49,9 @@ type GalleryBarAndListHeaderProps = {
         "user" | "emailByUserID" | "shareSuggestionEmails" | "setBlockingLoad"
     >;
 
-export const GalleryBarAndListHeader: React.FC<
-    GalleryBarAndListHeaderProps
-> = ({
+// Keep dialog and measurement state outside the virtualized header, so they
+// survive header remounts and switching between the file list and overview views.
+export const GalleryListHeader: React.FC<GalleryListHeaderProps> = ({
     shouldHide,
     mode,
     user,
@@ -72,7 +71,7 @@ export const GalleryBarAndListHeader: React.FC<
     onAddSaveGroup,
     onShowMap,
     onCollectionSlideshow,
-    setFileListHeader,
+    children,
 }) => {
     const { show: showCollectionShare, props: collectionShareVisibilityProps } =
         useModalVisibility();
@@ -100,86 +99,58 @@ export const GalleryBarAndListHeader: React.FC<
         activeCollection?.pubMagicMetadata?.data.caption?.trim();
     const [descriptionHeight, setDescriptionHeight] = useState(0);
 
-    useEffect(() => {
-        if (shouldHide || mode == "links") return;
+    // Pseudo-collections need header actions despite having no Collection.
+    const shouldRenderCollectionHeader =
+        mode != "people" &&
+        collectionSummary &&
+        (activeCollection || collectionSummary.id <= PseudoCollectionID.all);
 
-        // Pseudo-collections need header actions despite having no Collection.
-        const shouldRenderCollectionHeader =
-            mode != "people" &&
-            collectionSummary &&
-            (activeCollection ||
-                collectionSummary.id <= PseudoCollectionID.all);
-
-        setFileListHeader({
-            component: shouldRenderCollectionHeader ? (
-                <CollectionHeader
-                    {...{
-                        activeCollection,
-                        setActiveCollectionID,
-                        isActiveCollectionDownloadInProgress,
-                        onRemotePull,
-                        onAddSaveGroup,
-                        onShowMap,
-                        onCollectionSlideshow,
-                    }}
-                    collectionSummary={collectionSummary}
-                    onCollectionShare={openCollectionShare}
-                    onCollectionManageLink={openCollectionManageLink}
-                    onCollectionCast={showCollectionCast}
-                    onEditAlbumDetails={onEditAlbumDetails}
-                    hasActiveFileSelection={hasActiveFileSelection}
-                    onDescriptionHeightChange={setDescriptionHeight}
-                />
-            ) : mode != "people" && collectionSummary ? (
-                <GalleryItemsHeaderAdapter>
-                    <GalleryItemsSummary
-                        name={collectionSummary.name}
-                        fileCount={collectionSummary.fileCount}
-                    />
-                </GalleryItemsHeaderAdapter>
-            ) : activePerson ? (
-                <PeopleHeader
-                    person={activePerson}
-                    people={people}
-                    onSelectPerson={onSelectPerson}
-                />
-            ) : (
-                <></>
-            ),
-            height: 72 + (albumDescription ? descriptionHeight : 0),
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        shouldHide,
-        mode,
-        collectionSummary,
-        activeCollection,
-        isActiveCollectionDownloadInProgress,
-        activePerson,
-        showCollectionShare,
-        openCollectionShare,
-        openCollectionManageLink,
-        showCollectionCast,
-        hasActiveFileSelection,
-        onRemotePull,
-        onAddSaveGroup,
-        onShowMap,
-        onCollectionSlideshow,
-        onEditAlbumDetails,
-        albumDescription,
-        descriptionHeight,
-        // TODO: Cluster
-        // This causes a loop since it is an array dep
-        // people,
-    ]);
-
-    if (shouldHide) {
-        return <></>;
-    }
+    const header: FileListHeaderOrFooter | undefined =
+        shouldHide || mode == "links"
+            ? undefined
+            : {
+                  component: shouldRenderCollectionHeader ? (
+                      <CollectionHeader
+                          {...{
+                              activeCollection,
+                              setActiveCollectionID,
+                              isActiveCollectionDownloadInProgress,
+                              onRemotePull,
+                              onAddSaveGroup,
+                              onShowMap,
+                              onCollectionSlideshow,
+                          }}
+                          collectionSummary={collectionSummary}
+                          onCollectionShare={openCollectionShare}
+                          onCollectionManageLink={openCollectionManageLink}
+                          onCollectionCast={showCollectionCast}
+                          onEditAlbumDetails={onEditAlbumDetails}
+                          hasActiveFileSelection={hasActiveFileSelection}
+                          onDescriptionHeightChange={setDescriptionHeight}
+                      />
+                  ) : mode != "people" && collectionSummary ? (
+                      <GalleryItemsHeaderAdapter>
+                          <GalleryItemsSummary
+                              name={collectionSummary.name}
+                              fileCount={collectionSummary.fileCount}
+                          />
+                      </GalleryItemsHeaderAdapter>
+                  ) : activePerson ? (
+                      <PeopleHeader
+                          person={activePerson}
+                          people={people}
+                          onSelectPerson={onSelectPerson}
+                      />
+                  ) : (
+                      <></>
+                  ),
+                  height: 72 + (albumDescription ? descriptionHeight : 0),
+              };
 
     return (
         <>
-            {activeCollection && (
+            {children(header)}
+            {!shouldHide && activeCollection && (
                 <>
                     <CollectionShare
                         {...collectionShareVisibilityProps}
