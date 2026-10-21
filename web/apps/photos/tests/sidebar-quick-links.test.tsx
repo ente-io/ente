@@ -25,9 +25,6 @@ vi.mock("../src/components/Collections/AlbumCastDialog", () => ({
 vi.mock("../src/components/Collections/CollectionHeader", () => ({
     CollectionHeader: () => null,
 }));
-vi.mock("../src/components/Collections/CreateAlbumDialog", () => ({
-    CreateAlbumDialog: () => null,
-}));
 vi.mock("@/utils/album-filters", () => import("../src/utils/album-filters"));
 vi.mock("@/utils/people-sort", () => import("../src/utils/people-sort"));
 
@@ -70,6 +67,7 @@ const renderSidebar = (
         peopleSortBy: "name-asc",
         saveGroups: [],
         setActiveCollectionID: vi.fn(),
+        onCreateAlbum: vi.fn(),
         mobileDrawerProps: { open: true, onClose: vi.fn() },
     } as unknown as GalleryBarAndListHeaderProps;
     renderToStaticMarkup(<GalleryBarAndListHeader {...props} />);

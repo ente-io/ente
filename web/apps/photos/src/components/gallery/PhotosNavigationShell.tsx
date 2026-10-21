@@ -1,3 +1,4 @@
+import { CreateAlbumDialog } from "@/components/Collections/CreateAlbumDialog";
 import {
     GalleryBarAndListHeader,
     type GalleryBarAndListHeaderProps,
@@ -54,7 +55,7 @@ export const PhotosNavigationShell: React.FC<
             galleryBarProps:
                 | Omit<
                       GalleryBarAndListHeaderProps,
-                      keyof GalleryBarPresentationProps
+                      keyof GalleryBarPresentationProps | "onCreateAlbum"
                   >
                 | undefined;
         }
@@ -74,6 +75,13 @@ export const PhotosNavigationShell: React.FC<
     const { show: showMobileNavigation, props: mobileDrawerProps } =
         useModalVisibility();
     const { onClose: closeMobileNavigation } = mobileDrawerProps;
+    const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
+        useModalVisibility();
+    const [createInHiddenSection, setCreateInHiddenSection] = useState(false);
+    const openAlbumCreation = () => {
+        setCreateInHiddenSection(props.mode == "hidden-albums");
+        showAlbumNameInput();
+    };
     useEffect(() => {
         setNavigationCollapsed(false);
     }, [props.mode, props.isInSearchMode]);
@@ -203,13 +211,30 @@ export const PhotosNavigationShell: React.FC<
                     }}
                 >
                     {galleryBarProps && (
-                        <GalleryBarAndListHeader
-                            {...galleryBarProps}
-                            collapsed={
-                                showRail && (!railOpen || navigationCollapsed)
-                            }
-                            mobileDrawerProps={mobileDrawerProps}
-                        />
+                        <>
+                            <GalleryBarAndListHeader
+                                {...galleryBarProps}
+                                collapsed={
+                                    showRail &&
+                                    (!railOpen || navigationCollapsed)
+                                }
+                                mobileDrawerProps={mobileDrawerProps}
+                                onCreateAlbum={openAlbumCreation}
+                            />
+                            {!galleryBarProps.shouldHide && (
+                                <CreateAlbumDialog
+                                    {...albumNameInputVisibilityProps}
+                                    isHidden={createInHiddenSection}
+                                    onRemotePull={galleryBarProps.onRemotePull}
+                                    onSelectCollectionID={(id) => {
+                                        galleryBarProps.setActiveCollectionID(
+                                            id,
+                                        );
+                                        closeMobileNavigation();
+                                    }}
+                                />
+                            )}
+                        </>
                     )}
                     <Stack
                         sx={(theme) => ({
