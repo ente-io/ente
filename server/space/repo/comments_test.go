@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -10,6 +11,67 @@ import (
 	"github.com/ente/museum/space/models"
 	"github.com/stretchr/testify/require"
 )
+
+func TestPostCommentCountWorkScalesWithReplyChainLength(t *testing.T) {
+	for _, hidden := range []bool{false, true} {
+		name := "visible"
+		if hidden {
+			name = "hidden-author"
+		}
+		t.Run(name, func(t *testing.T) {
+			module := newSpaceTestModule(t)
+			ctx := t.Context()
+			owner, friend := notificationTestSpaces(t, module)
+			if hidden {
+				_, err := module.Posts.DB.ExecContext(ctx, `UPDATE users SET encrypted_email = NULL WHERE user_id = $1`, friend.OwnerID)
+				require.NoError(t, err)
+			}
+			var previousBlocks int64
+			for _, length := range []int{128, 512} {
+				postID, err := testCreatePost(ctx, module, owner.OwnerID, owner.SpaceID, "post-key", nil, 1, nil)
+				require.NoError(t, err)
+				_, err = module.Posts.DB.ExecContext(ctx, `INSERT INTO space_comments
+				    (comment_id, post_id, author_space_id, parent_id, reply_to_id, cipher)
+				    SELECT $1::text || ':' || i, $1::bigint, CASE WHEN i = 1 THEN $4 ELSE $2 END,
+				        CASE WHEN i > 1 THEN $1::text || ':1' END,
+				        CASE WHEN i > 1 THEN $1::text || ':' || (i - 1) END,
+				        '\x01'::bytea
+				    FROM generate_series(1, $3::int) i`, postID, owner.SpaceID, length, friend.SpaceID)
+				require.NoError(t, err)
+				_, err = module.Posts.DB.ExecContext(ctx, `ANALYZE space_comments`)
+				require.NoError(t, err)
+				post, err := module.Posts.GetPost(ctx, postID, owner.SpaceID)
+				require.NoError(t, err)
+				if hidden {
+					require.Zero(t, post.CommentCount)
+				} else {
+					require.EqualValues(t, length, post.CommentCount)
+				}
+				var planJSON []byte
+				err = module.Posts.DB.QueryRowContext(ctx, `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) `+
+					postRecordSelectSQL("FALSE", "$2")+`
+				    FROM space_posts p JOIN spaces w ON w.space_id = p.space_id
+				    `+spaceActorAvatarJoin("w", "w_avatar")+`
+				    WHERE p.post_id = $1`, postID, owner.SpaceID).Scan(&planJSON)
+				require.NoError(t, err)
+				var plans []struct {
+					Plan struct {
+						Hits  int64 `json:"Shared Hit Blocks"`
+						Reads int64 `json:"Shared Read Blocks"`
+					}
+				}
+				require.NoError(t, json.Unmarshal(planJSON, &plans))
+				require.Len(t, plans, 1)
+				blocks := plans[0].Plan.Hits + plans[0].Plan.Reads
+				t.Logf("%d comments: %d buffer accesses", length, blocks)
+				if previousBlocks > 0 {
+					require.Less(t, blocks, previousBlocks*8)
+				}
+				previousBlocks = blocks
+			}
+		})
+	}
+}
 
 func TestDiscussionParentDeletionRemovesWholeThread(t *testing.T) {
 	for _, deleteAsOwner := range []bool{false, true} {

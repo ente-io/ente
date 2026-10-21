@@ -594,6 +594,7 @@ export const PostComments: React.FC<{
     const threads = commentThreads(comments);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState<string>();
+    const [mutationError, setMutationError] = React.useState<string>();
     const [open, setOpen] = React.useState(true);
     const [entered, setEntered] = React.useState(false);
     const [highlightedCommentId, setHighlightedCommentId] =
@@ -670,6 +671,7 @@ export const PostComments: React.FC<{
             if (current != generation.current) return;
             setComments(items);
             setError(undefined);
+            setMutationError(undefined);
             setDraft((value) => ({
                 ...value,
                 replyTarget: validateCommentReplyTarget(
@@ -853,12 +855,13 @@ export const PostComments: React.FC<{
     }, [action, comments, entered, loading, open, viewer]);
     const mutate = async (action: () => Promise<void>) => {
         setMutating(true);
+        setMutationError(undefined);
         try {
             await action();
             await refresh();
         } catch {
             await refresh();
-            setError("Couldn't save your change. Refresh and try again.");
+            setMutationError("Couldn't save your change. Please try again.");
         } finally {
             setMutating(false);
         }
@@ -1203,7 +1206,7 @@ export const PostComments: React.FC<{
                                 )}
                             </Box>
                         ))}
-                        {error && (
+                        {(error || mutationError) && (
                             <Box
                                 role="alert"
                                 sx={{
@@ -1213,7 +1216,7 @@ export const PostComments: React.FC<{
                                     fontSize: 13,
                                 }}
                             >
-                                {error}{" "}
+                                {error || mutationError}{" "}
                                 <Box
                                     component="button"
                                     type="button"
