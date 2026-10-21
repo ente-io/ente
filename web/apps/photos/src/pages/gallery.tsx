@@ -2133,7 +2133,6 @@ const Page: React.FC = () => {
         </>
     );
 
-    const showNormalNavigation = !showSelectionBar;
     const selectGalleryCollection =
         barMode == "links"
             ? (collectionID: number) =>
@@ -2176,8 +2175,6 @@ const Page: React.FC = () => {
                 onRemotePull={remotePull}
             />
             <PhotosNavigationShell
-                showRail
-                showNormalNavigation={showNormalNavigation}
                 isInSearchMode={isInSearchMode}
                 isSettingsOpen={sidebarVisibilityProps.open}
                 mode={barMode}
