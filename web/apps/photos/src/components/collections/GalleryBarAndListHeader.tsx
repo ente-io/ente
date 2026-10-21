@@ -25,7 +25,7 @@ import {
     type CollectionHeaderProps,
 } from "./CollectionHeader";
 
-type GalleryListHeaderProps = {
+type GalleryBarAndListHeaderProps = {
     mode: GalleryBarMode;
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
@@ -51,7 +51,9 @@ type GalleryListHeaderProps = {
         "user" | "emailByUserID" | "shareSuggestionEmails" | "setBlockingLoad"
     >;
 
-export const GalleryListHeader: React.FC<GalleryListHeaderProps> = ({
+export const GalleryBarAndListHeader: React.FC<
+    GalleryBarAndListHeaderProps
+> = ({
     shouldHide,
     mode,
     user,

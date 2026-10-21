@@ -27,7 +27,7 @@ import {
     EditAlbumDetailsDialog,
     type AlbumDetails,
 } from "@/components/collections/EditAlbumDetailsDialog";
-import { GalleryListHeader } from "@/components/collections/GalleryListHeader";
+import { GalleryBarAndListHeader } from "@/components/collections/GalleryBarAndListHeader";
 import { slideshowFiles } from "@/components/collections/album-slideshow";
 import {
     GalleryEmptyState,
@@ -2253,7 +2253,7 @@ const Page: React.FC = () => {
             >
                 {!isCleanupViewOpen && (
                     <>
-                        <GalleryListHeader
+                        <GalleryBarAndListHeader
                             {...{
                                 user,
                                 activeCollection,
