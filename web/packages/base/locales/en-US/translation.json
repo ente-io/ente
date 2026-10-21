@@ -401,6 +401,7 @@
     "revoke_family_invite": "Revoke invite",
     "revoke_family_invite_confirm": "Revoke the invite sent to {{email}}?",
     "revoke": "Revoke",
+    "family_remove_action": "Remove from family",
     "remove_family_member": "Remove family member",
     "remove_family_member_confirm": "Remove {{email}} from your family?",
     "set_storage_limit": "Set storage limit",
