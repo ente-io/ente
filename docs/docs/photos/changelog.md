@@ -9,11 +9,6 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 
 ## v1.3.66 (mobile) - Oct 2026
 
-## Quick look at what’s new
-
-https://github.com/user-attachments/assets/93af4a4d-a379-496b-9871-d5b4ef14bc18
-
-## What’s changed
 - Added a mosaic gallery layout that shows photos in their original proportions.
 - Pinch in or out to switch gallery layouts and choose how many photos fit on your screen, including when selecting photos.
 - Add text to photos with a choice of fonts, colors, backgrounds, and alignment.
