@@ -1,8 +1,4 @@
 import { CreateAlbumDialog } from "@/components/collections/CreateAlbumDialog";
-import {
-    GalleryBarAndListHeader,
-    type GalleryBarAndListHeaderProps,
-} from "@/components/collections/GalleryBarAndListHeader";
 import { SearchBar, type SearchBarProps } from "@/components/SearchBar";
 import { uploadManager } from "@/services/upload-manager";
 import {
@@ -35,8 +31,25 @@ import { isMLSupported } from "ente-new/photos/services/ml";
 import { t } from "i18next";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
-import type { GalleryBarPresentationProps } from "./BarImpl";
+import type { RemotePullOpts } from ".";
+import type {
+    GalleryBarImplProps,
+    GalleryBarPresentationProps,
+} from "./BarImpl";
 import type { GalleryBarMode } from "./reducer";
+
+type GalleryBarRenderProps = GalleryBarPresentationProps &
+    Pick<
+        GalleryBarImplProps,
+        "onCreateAlbum" | "onSelectCollectionID" | "onSelectPerson"
+    >;
+
+interface GalleryNavigation {
+    activeCollectionID: number | undefined;
+    onSelectCollectionID: (collectionID: number) => void;
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+    renderGalleryBar: (props: GalleryBarRenderProps) => ReactNode;
+}
 
 type PhotosNavigationShellProps = SearchBarProps & {
     onSidebar: () => void;
@@ -52,22 +65,14 @@ export const PhotosNavigationShell: React.FC<
             showRail: boolean;
             showNormalNavigation: boolean;
             alternateHeader: ReactNode;
-            galleryBarProps:
-                | Omit<
-                      GalleryBarAndListHeaderProps,
-                      | keyof GalleryBarPresentationProps
-                      | "onCreateAlbum"
-                      | "onSelectCollectionID"
-                      | "onSelectPersonInHeader"
-                  >
-                | undefined;
+            galleryNavigation: GalleryNavigation | undefined;
         }
     >
 > = ({
     showRail,
     showNormalNavigation,
     alternateHeader,
-    galleryBarProps,
+    galleryNavigation,
     children,
     ...props
 }) => {
@@ -78,17 +83,18 @@ export const PhotosNavigationShell: React.FC<
     const { show: showMobileNavigation, props: mobileDrawerProps } =
         useModalVisibility();
     const { onClose: closeMobileNavigation } = mobileDrawerProps;
-    const { setActiveCollectionID, onSelectPerson } = galleryBarProps ?? {};
+    const { onSelectCollectionID } = galleryNavigation ?? {};
+    const { onSelectPerson } = props;
     const selectCollection = useCallback(
         (id: number) => {
-            setActiveCollectionID?.(id);
+            onSelectCollectionID?.(id);
             closeMobileNavigation();
         },
-        [setActiveCollectionID, closeMobileNavigation],
+        [onSelectCollectionID, closeMobileNavigation],
     );
     const selectPerson = useCallback(
         (id: string) => {
-            onSelectPerson?.(id);
+            onSelectPerson(id);
             closeMobileNavigation();
         },
         [onSelectPerson, closeMobileNavigation],
@@ -115,14 +121,15 @@ export const PhotosNavigationShell: React.FC<
         const reopeningSection =
             mobile &&
             mode == "albums" &&
-            galleryBarProps &&
+            galleryNavigation &&
             !props.isInSearchMode &&
             (props.mode == "hidden-albums" || props.mode == "archive-albums");
         if (
-            galleryBarProps &&
+            galleryNavigation &&
             !props.isInSearchMode &&
             ((props.mode == mode &&
-                galleryBarProps.activeCollectionID != PseudoCollectionID.all) ||
+                galleryNavigation.activeCollectionID !=
+                    PseudoCollectionID.all) ||
                 reopeningSection)
         ) {
             if (mobile) {
@@ -205,13 +212,13 @@ export const PhotosNavigationShell: React.FC<
                                 isHome={
                                     props.mode == "albums" &&
                                     !props.isInSearchMode &&
-                                    galleryBarProps?.activeCollectionID ==
+                                    galleryNavigation?.activeCollectionID ==
                                         PseudoCollectionID.all
                                 }
                                 onChangeMode={handleChangeMode}
                                 opensDialog={mobile}
                                 navigationOpen={
-                                    !!galleryBarProps &&
+                                    !!galleryNavigation &&
                                     (mobile
                                         ? mobileDrawerProps.open
                                         : !navigationCollapsed)
@@ -228,27 +235,24 @@ export const PhotosNavigationShell: React.FC<
                         flexDirection: { xs: "column", md: "row" },
                     }}
                 >
-                    {galleryBarProps && (
+                    {galleryNavigation && (
                         <>
-                            <GalleryBarAndListHeader
-                                {...galleryBarProps}
-                                collapsed={
+                            {galleryNavigation.renderGalleryBar({
+                                collapsed:
                                     showRail &&
-                                    (!railOpen || navigationCollapsed)
-                                }
-                                mobileDrawerProps={mobileDrawerProps}
-                                onCreateAlbum={openAlbumCreation}
-                                onSelectCollectionID={selectCollection}
-                                onSelectPerson={selectPerson}
-                                onSelectPersonInHeader={
-                                    galleryBarProps.onSelectPerson
-                                }
-                            />
-                            {!galleryBarProps.shouldHide && (
+                                    (!railOpen || navigationCollapsed),
+                                mobileDrawerProps,
+                                onCreateAlbum: openAlbumCreation,
+                                onSelectCollectionID: selectCollection,
+                                onSelectPerson: selectPerson,
+                            })}
+                            {!props.isInSearchMode && (
                                 <CreateAlbumDialog
                                     {...albumNameInputVisibilityProps}
                                     isHidden={createInHiddenSection}
-                                    onRemotePull={galleryBarProps.onRemotePull}
+                                    onRemotePull={
+                                        galleryNavigation.onRemotePull
+                                    }
                                     onSelectCollectionID={selectCollection}
                                 />
                             )}

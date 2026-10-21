@@ -122,4 +122,40 @@ describe("album navigation data", () => {
             "empty-albums",
         ]);
     });
+
+    describe.each(["hidden-albums", "archive-albums"] as const)(
+        "%s quick links",
+        (mode) => {
+            const summaries = () => {
+                const quickLink = album(1, {
+                    name: "Trip link",
+                    attributes: new Set(["quickLink"]),
+                });
+                if (mode == "archive-albums")
+                    quickLink.attributes.add("archived");
+                return [
+                    quickLink,
+                    album(2, { name: "Family" }),
+                    album(3, {
+                        attributes: new Set(["hideFromCollectionBar"]),
+                    }),
+                    album(PseudoCollectionID.hiddenItems),
+                    album(PseudoCollectionID.archiveItems),
+                ];
+            };
+
+            test("lists quick links alongside albums while omitting system entries", () => {
+                const data = navigationData(summaries(), { mode });
+                expect(ids(data.sidebarCollectionSummaries)).toEqual([2, 1]);
+            });
+
+            test("finds quick links using the sidebar search", () => {
+                const data = navigationData(summaries(), {
+                    mode,
+                    albumSearchQuery: "  TRIP  ",
+                });
+                expect(ids(data.sidebarCollectionSummaries)).toEqual([1]);
+            });
+        },
+    );
 });
