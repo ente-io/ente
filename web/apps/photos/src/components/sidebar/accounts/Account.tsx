@@ -70,7 +70,7 @@ export const Account: React.FC<AccountProps> = ({
     pendingAction,
     onActionHandled,
 }) => {
-    const { showMiniDialog } = useBaseContext();
+    const { showMiniDialog, onGenericError } = useBaseContext();
     const userDetails = useUserDetailsSnapshot();
     const [twoFactorEnabled, setTwoFactorEnabled] = useState<boolean>();
     const [disablingTwoFactor, setDisablingTwoFactor] = useState(false);
@@ -170,8 +170,13 @@ export const Account: React.FC<AccountProps> = ({
                 showManageMemberSubscription,
                 onShowPlanSelector,
             });
-        })();
-    }, [onShowPlanSelector, showManageMemberSubscription, userDetails]);
+        })().catch(onGenericError);
+    }, [
+        onShowPlanSelector,
+        showManageMemberSubscription,
+        userDetails,
+        onGenericError,
+    ]);
 
     const handleRecoveryKey = useCallback(async () => {
         if (isDesktop) {
