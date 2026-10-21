@@ -631,6 +631,10 @@ const Page: React.FC = () => {
                 ? state.archivedCollectionSummaries
                 : state.normalCollectionSummaries;
 
+    const collectionSummary = barCollectionSummaries.get(
+        galleryBarActiveCollectionID!,
+    );
+
     const {
         sidebarCollectionSummaries,
         overviewAlbums,
@@ -2129,7 +2133,6 @@ const Page: React.FC = () => {
         </>
     );
 
-    const showNormalNavigation = !showSelectionBar;
     const selectGalleryCollection =
         barMode == "links"
             ? (collectionID: number) =>
@@ -2172,8 +2175,6 @@ const Page: React.FC = () => {
                 onRemotePull={remotePull}
             />
             <PhotosNavigationShell
-                showRail
-                showNormalNavigation={showNormalNavigation}
                 isInSearchMode={isInSearchMode}
                 isSettingsOpen={sidebarVisibilityProps.open}
                 mode={barMode}
@@ -2258,7 +2259,7 @@ const Page: React.FC = () => {
                                 user,
                                 activeCollection,
                                 activePerson,
-                                barCollectionSummaries,
+                                collectionSummary,
                                 people,
                                 setBlockingLoad,
                                 setFileListHeader,
@@ -2268,7 +2269,6 @@ const Page: React.FC = () => {
                             }}
                             mode={barMode}
                             shouldHide={isInSearchMode}
-                            activeCollectionID={galleryBarActiveCollectionID}
                             setActiveCollectionID={selectGalleryCollection}
                             onSelectPerson={handleSelectPerson}
                             onEditAlbumDetails={showEditAlbumDetails}
