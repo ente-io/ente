@@ -42,6 +42,7 @@ import { isSxArray } from "ente-base/components/utils/sx";
 import { useBaseContext } from "ente-base/context";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import {
+    uploadSheetMediaQuery,
     uploadSheetPaperSx,
     useIsUploadSheet,
 } from "ente-gallery/components/upload-progress/bottom-sheet";
@@ -532,7 +533,13 @@ const InviteMemberDialog: React.FC<
                     event.preventDefault();
                     void submit();
                 }}
-                sx={{ p: "20px", gap: "16px" }}
+                sx={{
+                    p: "20px",
+                    gap: "16px",
+                    [uploadSheetMediaQuery]: {
+                        pb: "calc(20px + env(safe-area-inset-bottom, 0px))",
+                    },
+                }}
             >
                 <Stack direction="row" sx={v2HeaderRowSx}>
                     <DialogTitle
