@@ -22,7 +22,7 @@ interface AlbumNavigationDataOptions {
     albumSearchQuery: string;
 }
 
-/** Prepare the shared album ordering and the sidebar and overview lists. */
+// Prepare the shared album ordering and the sidebar and overview lists.
 export const useAlbumNavigationData = ({
     mode,
     collectionSummaries,
