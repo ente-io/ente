@@ -14,7 +14,6 @@ import {
     Avatar,
     Box,
     Dialog,
-    DialogContent,
     DialogTitle,
     Divider,
     FormControlLabel,
@@ -36,10 +35,12 @@ import {
     v2SubmitButtonSx,
 } from "ente-base/components/SingleInput.styles";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
-import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import {
+    TitledNestedSidebarDrawer,
+    type NestedSidebarDrawerVisibilityProps,
+} from "ente-base/components/mui/SidebarDrawer";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { isSxArray } from "ente-base/components/utils/sx";
 import { useBaseContext } from "ente-base/context";
@@ -64,18 +65,18 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useId, useRef, useState } from "react";
 
-type FamilyManagementProps = ModalVisibilityProps & {
+type FamilyManagementProps = NestedSidebarDrawerVisibilityProps & {
     onShowPlanSelector: () => void;
 };
 
 export const FamilyManagement: React.FC<FamilyManagementProps> = ({
     open,
     onClose,
+    onRootClose,
     onShowPlanSelector,
 }) => {
     const { onGenericError, showMiniDialog } = useBaseContext();
     const userDetails = useUserDetailsSnapshot();
-    const fullScreen = useIsSmallWidth();
     const [inviteOpen, setInviteOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<FamilyMember>();
     const [memberActionsAnchor, setMemberActionsAnchor] =
@@ -154,17 +155,14 @@ export const FamilyManagement: React.FC<FamilyManagementProps> = ({
 
     return (
         <>
-            <Dialog {...{ open, onClose, fullScreen }} maxWidth="sm" fullWidth>
-                <Stack
-                    direction="row"
-                    sx={{ p: "20px 16px 12px 24px", alignItems: "center" }}
-                >
-                    <Typography variant="h3" sx={{ flex: 1 }}>
-                        {t("family")}
-                    </Typography>
-                    <DialogCloseIconButton {...{ onClose }} />
-                </Stack>
-                <DialogContent sx={{ pt: 1, minHeight: 360 }}>
+            <TitledNestedSidebarDrawer
+                {...{ open, onClose, onRootClose }}
+                anchor="right"
+                maxWidth="440px"
+                title={t("family")}
+                showBackButton
+            >
+                <Box sx={{ px: 2, py: 1 }}>
                     {!userDetails ? (
                         <Stack
                             sx={{
@@ -194,8 +192,8 @@ export const FamilyManagement: React.FC<FamilyManagementProps> = ({
                             onShowPlans={showPlans}
                         />
                     )}
-                </DialogContent>
-            </Dialog>
+                </Box>
+            </TitledNestedSidebarDrawer>
             <InviteMemberDialog
                 open={inviteOpen}
                 onClose={() => setInviteOpen(false)}

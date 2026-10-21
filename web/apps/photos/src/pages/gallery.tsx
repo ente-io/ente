@@ -2127,6 +2127,7 @@ const Page: React.FC = () => {
             {familyManagementVisibilityProps.open && (
                 <FamilyManagement
                     {...familyManagementVisibilityProps}
+                    onRootClose={handleSidebarClose}
                     onShowPlanSelector={showPlanSelector}
                 />
             )}
