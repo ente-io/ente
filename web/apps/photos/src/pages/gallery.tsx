@@ -66,7 +66,7 @@ import {
     visibleAlbumFilters,
     type AlbumFilter,
 } from "@/utils/album-filters";
-import type { PeopleSortBy } from "@/utils/people-sort";
+import { sortPeople, type PeopleSortBy } from "@/utils/people-sort";
 import { visibleQuickLinks } from "@/utils/quick-links";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Link, Typography } from "@mui/material";
@@ -500,6 +500,13 @@ const Page: React.FC = () => {
     );
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
+    const people =
+        (state.view?.type == "people" ? state.view.visiblePeople : undefined) ??
+        [];
+    const sortedPeople = useMemo(
+        () => sortPeople(people, peopleSortBy),
+        [people, peopleSortBy],
+    );
     const activePersonID = activePerson?.id;
     const fileCollectionIDs = useMemo(
         () =>
@@ -2200,10 +2207,8 @@ const Page: React.FC = () => {
                               emailByUserID: state.emailByUserID,
                               shareSuggestionEmails:
                                   state.shareSuggestionEmails,
-                              people:
-                                  (state.view?.type == "people"
-                                      ? state.view.visiblePeople
-                                      : undefined) ?? [],
+                              people,
+                              sortedPeople,
                               setBlockingLoad,
                               setActiveCollectionID:
                                   barMode == "links"

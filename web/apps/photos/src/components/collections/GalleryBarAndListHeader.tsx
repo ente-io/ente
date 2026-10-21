@@ -10,7 +10,6 @@ import {
     type GalleryBarImplProps,
 } from "@/components/gallery/BarImpl";
 import { PeopleHeader } from "@/components/gallery/PeopleHeader";
-import { sortPeople } from "@/utils/people-sort";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import {
     isSaveCancelled,
@@ -26,7 +25,7 @@ import {
     PseudoCollectionID,
     type CollectionSummaries,
 } from "ente-new/photos/services/collection-summary";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {
     CollectionHeader,
@@ -34,6 +33,7 @@ import {
 } from "./CollectionHeader";
 
 export type GalleryBarAndListHeaderProps = GalleryBarImplProps & {
+    sortedPeople: GalleryBarImplProps["people"];
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
     activeCollection: Collection | undefined;
@@ -76,6 +76,7 @@ export const GalleryBarAndListHeader: React.FC<
     onSelectCollectionID,
     setBlockingLoad,
     people,
+    sortedPeople,
     peopleSortBy,
     onChangePeopleSortBy,
     albumFilter,
@@ -121,11 +122,6 @@ export const GalleryBarAndListHeader: React.FC<
         setCollectionShareIntent(undefined);
         collectionShareVisibilityProps.onClose();
     }, [collectionShareVisibilityProps]);
-
-    const sortedPeople = useMemo(
-        () => sortPeople(people, peopleSortBy),
-        [people, peopleSortBy],
-    );
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
         const group = saveGroups.find(
