@@ -15,7 +15,7 @@ import {
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
     PseudoCollectionID,
-    type CollectionSummaries,
+    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
 import React, { useCallback, useEffect, useState } from "react";
@@ -28,9 +28,8 @@ import {
 type GalleryBarAndListHeaderProps = {
     mode: GalleryBarMode;
     shouldHide: boolean;
-    barCollectionSummaries: CollectionSummaries;
+    collectionSummary: CollectionSummary | undefined;
     activeCollection: Collection | undefined;
-    activeCollectionID: number | undefined;
     activePerson: Person | undefined;
     people: Person[];
     setActiveCollectionID: (collectionID: number) => void;
@@ -57,9 +56,8 @@ export const GalleryBarAndListHeader: React.FC<
     shouldHide,
     mode,
     user,
-    barCollectionSummaries: toShowCollectionSummaries,
+    collectionSummary,
     activeCollection,
-    activeCollectionID,
     setActiveCollectionID,
     setBlockingLoad,
     people,
@@ -105,9 +103,6 @@ export const GalleryBarAndListHeader: React.FC<
     useEffect(() => {
         if (shouldHide || mode == "links") return;
 
-        const collectionSummary = toShowCollectionSummaries.get(
-            activeCollectionID!,
-        );
         // Pseudo-collections need header actions despite having no Collection.
         const shouldRenderCollectionHeader =
             mode != "people" &&
@@ -157,9 +152,8 @@ export const GalleryBarAndListHeader: React.FC<
     }, [
         shouldHide,
         mode,
-        toShowCollectionSummaries,
+        collectionSummary,
         activeCollection,
-        activeCollectionID,
         isActiveCollectionDownloadInProgress,
         activePerson,
         showCollectionShare,
@@ -190,9 +184,7 @@ export const GalleryBarAndListHeader: React.FC<
                     <CollectionShare
                         {...collectionShareVisibilityProps}
                         onClose={closeCollectionShare}
-                        collectionSummary={toShowCollectionSummaries.get(
-                            activeCollectionID!,
-                        )!}
+                        collectionSummary={collectionSummary!}
                         collection={activeCollection}
                         intent={collectionShareIntent}
                         {...{
