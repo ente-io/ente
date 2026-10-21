@@ -531,6 +531,8 @@ export class FileViewerPhotoSwipe<
         };
 
         const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
+            if (pswp.isDestroying || itemData.fileID != currSlideData().fileID)
+                return;
             const container = mediaControlsContainerElement;
             const showVideoControls =
                 itemData.fileType == FileType.video && !itemData.fetchFailed;
@@ -615,6 +617,9 @@ export class FileViewerPhotoSwipe<
                 toggleMediaChromeSettingsMenu();
         };
 
+        // Detached cached videos can still receive system media keys.
+        const videos = new Set<HTMLVideoElement>();
+
         pswp.on("contentAppend", (e) => {
             // PhotoSwipe can emit this later for content it already detached.
             if (!e.content.hasSlide) {
@@ -623,6 +628,8 @@ export class FileViewerPhotoSwipe<
             }
 
             const { fileID, fileType, videoURL } = asItemData(e.content.data);
+            const contentVideo = queryVideoElement(e.content.element);
+            if (contentVideo) videos.add(contentVideo);
 
             // Initial contentAppend can follow change, so wire controls here too.
             if (currSlideData().fileID == fileID) {
@@ -637,6 +644,7 @@ export class FileViewerPhotoSwipe<
             const video = createElementFromHTMLString(
                 livePhotoVideoHTML(videoURL),
             ) as HTMLVideoElement;
+            videos.add(video);
             const container = e.content.slide!.container;
             container.style = "position: relative";
             container.appendChild(video);
@@ -670,12 +678,52 @@ export class FileViewerPhotoSwipe<
         const queryVideoElement = (element: HTMLElement | undefined) =>
             element?.querySelector<HTMLVideoElement>("video, hls-video");
 
+        const resetVideo = (video: HTMLVideoElement) => {
+            const currentTime = video.currentTime;
+            video.pause();
+            video.removeAttribute("autoplay");
+            if (video.readyState == 0) return;
+            video.defaultPlaybackRate = video.playbackRate;
+            // Release the paused media session while retaining the source.
+            video.load();
+            video.currentTime = currentTime;
+        };
+
+        const unloadVideo = (video: HTMLVideoElement) => {
+            videos.delete(video);
+            video.pause();
+            video.removeAttribute("src");
+            video
+                .querySelectorAll("source")
+                .forEach((source) => source.removeAttribute("src"));
+            video.load();
+            const nativeVideo = video.shadowRoot?.querySelector("video");
+            if (nativeVideo) {
+                nativeVideo.removeAttribute("src");
+                nativeVideo.load();
+            }
+        };
+
         pswp.on("contentDeactivate", (e) => {
             const fileID = asItemData(e.content.data).fileID;
             if (fileID) dataSource.forgetItemDataForFileIDIfNeeded(fileID);
 
             const video = queryVideoElement(e.content.slide?.container);
-            video?.pause();
+            if (video) resetVideo(video);
+        });
+
+        pswp.on("contentRemove", ({ content }) => {
+            const video =
+                queryVideoElement(content.slide?.container) ??
+                queryVideoElement(content.element);
+            if (!video) return;
+            if (asItemData(content.data).fileType == FileType.livePhoto)
+                unloadVideo(video);
+            else resetVideo(video);
+        });
+
+        pswp.on("close", () => {
+            videos.forEach(unloadVideo);
         });
 
         pswp.on(
@@ -691,9 +739,11 @@ export class FileViewerPhotoSwipe<
             () => void dataSource.updateFileInfoExifIfNeeded(currSlideData()),
         );
 
-        pswp.on("contentDestroy", (e) =>
-            dataSource.forgetExifForItemData(asItemData(e.content.data)),
-        );
+        pswp.on("contentDestroy", ({ content }) => {
+            const video = queryVideoElement(content.element);
+            if (video) unloadVideo(video);
+            dataSource.forgetExifForItemData(asItemData(content.data));
+        });
 
         let videoVideoEl: HTMLVideoElement | undefined;
 
