@@ -280,7 +280,7 @@ fn admin_interactive_subscription() -> TestResult {
                 .env_clear()
                 .args([
                     concat!(env!("CARGO_MANIFEST_DIR"), "/tests/cli/admin_prompt.py"),
-                    env!("CARGO_BIN_EXE_ente-cli-next"),
+                    env!("CARGO_BIN_EXE_ente"),
                     &email,
                     mode,
                 ])

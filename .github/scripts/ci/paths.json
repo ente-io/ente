@@ -113,7 +113,7 @@
         "rust/.cargo/config.toml",
         "rust/Cargo.lock",
         "rust/Cargo.toml",
-        "rust/apps/cli-next/**",
+        "rust/apps/cli/**",
         "rust/crates/accounts/**",
         "rust/crates/assets/**",
         "rust/crates/auth/**",

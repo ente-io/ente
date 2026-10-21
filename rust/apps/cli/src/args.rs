@@ -5,7 +5,7 @@ use clap_complete::Shell;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
-#[command(version, about = "Ente client for terminals and agents")]
+#[command(name = "ente", version, about = "Ente client for terminals and agents")]
 pub struct Cli {
     #[command(flatten, next_help_heading = "Global options")]
     pub options: Options,
@@ -130,8 +130,13 @@ pub enum Command {
     #[command(
         about = "Generate a vault key for unattended use",
         after_help = "Environment:
-  ENTE_CLI_HOME       Directory containing the encrypted vault.
+  ENTE_CLI_HOME       Directory for saved accounts and encrypted databases.
   ENTE_CLI_VAULT_KEY  Base64 key from `vault key generate`; bypasses the OS keychain.
+
+Default locations:
+  macOS:   ~/Library/Application Support/ente-cli
+  Linux:   $XDG_DATA_HOME/ente-cli (defaults to ~/.local/share/ente-cli)
+  Windows: %LOCALAPPDATA%\\ente-cli
 
 Keep the same home and key across unattended invocations."
     )]
@@ -143,18 +148,18 @@ Keep the same home and key across unattended invocations."
         about = "Print a shell completion script",
         after_help = "Enable completion in the current shell, or add the commands to its startup file:
   Bash (~/.bashrc):
-    eval \"$(ente-cli-next completion bash)\"
+    eval \"$(ente completion bash)\"
   Zsh (~/.zshrc):
     autoload -Uz compinit; compinit
-    source <(ente-cli-next completion zsh)
+    source <(ente completion zsh)
   PowerShell ($PROFILE):
-    ente-cli-next completion powershell | Out-String | Invoke-Expression
+    ente completion powershell | Out-String | Invoke-Expression
   Elvish (~/.config/elvish/rc.elv):
-    eval (ente-cli-next completion elvish | slurp)
+    eval (ente completion elvish | slurp)
 
 Fish loads a saved script on demand. Write it once, and again after upgrading:
   mkdir -p ~/.config/fish/completions
-  ente-cli-next completion fish > ~/.config/fish/completions/ente-cli-next.fish
+  ente completion fish > ~/.config/fish/completions/ente.fish
 
 Prints the script to stdout, including when --json is set."
     )]
@@ -188,7 +193,7 @@ With --password --no-input, ENTE_CLI_PASSWORD is required.
 Prints the paste URL. With --json: {\"url\": \"...\"}. Requires network access.
 
 Example:
-  ente-cli-next paste create --input notes.txt"
+  ente paste create --input notes.txt"
     )]
     Create {
         #[arg(
@@ -254,8 +259,8 @@ JSON summary fields: output, codes, failures.total. --json does not change backu
 Backups written to stdout have no summary.
 
 Examples:
-  ente-cli-next auth export ~/Backups/Auth
-  ente-cli-next auth export --plaintext --output codes.txt"
+  ente auth export ~/Backups/Auth
+  ente auth export --plaintext --output codes.txt"
     )]
     Export(AuthExportArgs),
     #[command(about = "Decrypt an Auth export without an account")]
@@ -308,8 +313,8 @@ HOTP values are not supported yet.
 Codes use your computer's clock. Make sure its date and time are correct.
 
 Examples:
-  ente-cli-next auth code view github
-  ente-cli-next auth code view \"GitHub (alice@example.com)\""
+  ente auth code view github
+  ente auth code view \"GitHub (alice@example.com)\""
     )]
     View {
         #[arg(
@@ -361,8 +366,8 @@ files and copies are null when the full export size could not be determined.
 changes contains exported, metadataUpdated, renamed and movedToTrash counts; failures contains total and conflicts.
 
 Examples:
-  ente-cli-next photos export ~/Pictures/Ente
-  ente-cli-next photos export ~/Pictures/Ente --album Holidays --account personal"
+  ente photos export ~/Pictures/Ente
+  ente photos export ~/Pictures/Ente --album Holidays --account personal"
     )]
     Export(PhotosExportArgs),
     #[command(about = "Manage albums")]
@@ -591,8 +596,8 @@ With --no-input, supply credentials through --input PATH or --input -.
 For unattended vault access, set ENTE_CLI_VAULT_KEY (see vault --help).
 
 Examples:
-  ente-cli-next account login --app photos
-  ente-cli-next account login --app auth --account personal"
+  ente account login --app photos
+  ente account login --app auth --account personal"
     )]
     Login(LoginArgs),
     #[command(
@@ -790,7 +795,7 @@ pub enum KeyCommand {
 
 const ADMIN_HELP: &str =
     "Uses the selected account's server and saved login; the server grants administrator access.
-Log in with: ente-cli-next account login --account NAME --app photos --host URL
+Log in with: ente account login --account NAME --app photos --host URL
 --account selects a saved account by name; otherwise uses the selected or sole account.
 --app selects its saved login; otherwise uses the only saved app, then Photos.
 With multiple apps and no Photos login, supply --app.
@@ -821,7 +826,7 @@ Lists users in creation order. Fetches all users matching --since before applyin
 JSON returns an array: id and email (strings), createdAt (RFC3339).
 
 Example:
-  ente-cli-next admin --account home user list --all --no-input --json"
+  ente admin --account home user list --all --no-input --json"
     )]
     List {
         #[command(flatten)]
@@ -836,7 +841,7 @@ subscription contains productId, storageBytes and expiresAt, or null when unavai
 IDs are strings; timestamps are RFC3339; storageBytes is an integer.
 
 Example:
-  ente-cli-next admin --account home user view alice@example.com"
+  ente admin --account home user view alice@example.com"
     )]
     View {
         #[arg(value_name = "USER", help = "User email or numeric ID")]
@@ -873,7 +878,7 @@ Dates accept YYYY-MM-DD (00:00 UTC at the start of that date) or RFC3339 with a 
 Shows old and new limits before confirmation. Paid plans are rejected.
 
 Example:
-  ente-cli-next admin --account home user update-subscription alice@example.com --no-limit"
+  ente admin --account home user update-subscription alice@example.com --no-limit"
     )]
     UpdateSubscription(SubscriptionArgs),
 }

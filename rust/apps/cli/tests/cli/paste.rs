@@ -56,7 +56,7 @@ fn create_and_consume_preserve_each_input_without_account_storage() {
             .mock("POST", "/paste/create")
             .match_header(
                 "user-agent",
-                concat!("ente-cli-next/", env!("CARGO_PKG_VERSION")),
+                concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION")),
             )
             .with_body_from_request(move |request| {
                 *body.lock().unwrap() =

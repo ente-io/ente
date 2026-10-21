@@ -2125,7 +2125,6 @@ checksum = "25f104b501bf2364e78d0d3974cbc774f738f5865306ed128e1e0d7499c0ad96"
 dependencies = [
  "console",
  "shell-words",
- "tempfile",
  "zeroize",
 ]
 
@@ -2525,8 +2524,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "ente-cli-next"
-version = "0.1.0"
+name = "ente-cli"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2956,36 +2955,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ente-rs"
-version = "0.0.1"
-dependencies = [
- "chrono",
- "clap",
- "dialoguer",
- "dirs",
- "ente-accounts",
- "ente-core",
- "ente-paste",
- "ente-test-support",
- "env_logger 0.11.11",
- "futures",
- "indicatif",
- "log",
- "mockito",
- "open",
- "rusqlite",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "tokio",
- "url",
- "urlencoding",
- "uuid",
- "zeroize",
- "zip",
-]
-
-[[package]]
 name = "ente-space"
 version = "0.0.1"
 dependencies = [
@@ -3168,10 +3137,7 @@ version = "0.11.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de671bd27a75a797dc9ae289ba1e77276e75e2026408aab65185384e2d5cd3f6"
 dependencies = [
- "anstream",
- "anstyle",
  "env_filter 2.0.0",
- "jiff",
  "log",
 ]
 
@@ -5352,30 +5318,6 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
-]
-
-[[package]]
-name = "jiff"
-version = "0.2.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f00b5dbd620d61dfdcb6007c9c1f6054ebd75319f163d886a9055cec1155073d"
-dependencies = [
- "jiff-static",
- "log",
- "portable-atomic",
- "portable-atomic-util",
- "serde_core",
-]
-
-[[package]]
-name = "jiff-static"
-version = "0.2.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e000de030ff8022ea1da3f466fbb0f3a809f5e51ed31f6dd931c35181ad8e6d7"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.117",
 ]
 
 [[package]]
@@ -8215,7 +8157,6 @@ dependencies = [
  "fallible-streaming-iterator",
  "hashlink 0.12.2",
  "libsqlite3-sys",
- "serde_json",
  "smallvec",
  "sqlite-wasm-rs",
 ]

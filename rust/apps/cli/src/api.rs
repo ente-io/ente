@@ -21,7 +21,7 @@ use crate::{
     vault::{Account, State},
 };
 
-pub(crate) const USER_AGENT: &str = concat!("ente-cli-next/", env!("CARGO_PKG_VERSION"));
+pub(crate) const USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"));
 
 pub fn normalize_host(host: &str) -> Result<String> {
     let input = if host.contains("://") {

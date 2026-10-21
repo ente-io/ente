@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
     "apps/cli",
-    "apps/cli-next",
     "apps/ensu/src-tauri",
     "bindings/frb/lib",
     "bindings/frb/locker",
