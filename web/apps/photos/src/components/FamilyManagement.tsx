@@ -1,3 +1,4 @@
+import { ContextMenu, ContextMenuItem } from "@/components/ContextMenu";
 import { avatarBackgroundColor, avatarTextColor } from "@/services/avatar";
 import {
     createFamily,
@@ -6,13 +7,7 @@ import {
     removeFamilyMember,
     revokeFamilyInvite,
 } from "@/services/family";
-import {
-    AddOutlined,
-    ChevronRightOutlined,
-    DeleteOutlined,
-    EditOutlined,
-    RefreshOutlined,
-} from "@mui/icons-material";
+import { AddOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import {
     Avatar,
     Box,
@@ -23,12 +18,6 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import {
-    RowButton,
-    RowButtonDivider,
-    RowButtonEndActivityIndicator,
-    RowButtonGroup,
-} from "ente-base/components/RowButton";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
@@ -65,6 +54,8 @@ export const FamilyManagement: React.FC<FamilyManagementProps> = ({
     const fullScreen = useIsSmallWidth();
     const [inviteOpen, setInviteOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<FamilyMember>();
+    const [memberActionsAnchor, setMemberActionsAnchor] =
+        useState<HTMLElement | null>(null);
     const [editingMember, setEditingMember] = useState<FamilyMember>();
     const [resendingID, setResendingID] = useState<string>();
 
@@ -164,7 +155,10 @@ export const FamilyManagement: React.FC<FamilyManagementProps> = ({
                         <FamilyDashboard
                             {...{ userDetails, members, isAdmin }}
                             onInvite={() => setInviteOpen(true)}
-                            onManage={setSelectedMember}
+                            onManage={(member, anchor) => {
+                                setSelectedMember(member);
+                                setMemberActionsAnchor(anchor);
+                            }}
                             onLeave={confirmLeave}
                         />
                     ) : (
@@ -183,7 +177,8 @@ export const FamilyManagement: React.FC<FamilyManagementProps> = ({
                 onClose={() => setInviteOpen(false)}
                 create={!members.length}
             />
-            <MemberActionsDialog
+            <MemberActionsMenu
+                anchorEl={memberActionsAnchor}
                 member={selectedMember}
                 resending={selectedMember?.id == resendingID}
                 onClose={() => setSelectedMember(undefined)}
@@ -236,7 +231,7 @@ interface FamilyDashboardProps {
     members: FamilyMember[];
     isAdmin: boolean;
     onInvite: () => void;
-    onManage: (member: FamilyMember) => void;
+    onManage: (member: FamilyMember, anchor: HTMLElement) => void;
     onLeave: () => void;
 }
 
@@ -329,7 +324,7 @@ const FamilyMemberRow: React.FC<{
     member: FamilyMember;
     isAdmin: boolean;
     color: string;
-    onManage: (member: FamilyMember) => void;
+    onManage: (member: FamilyMember, anchor: HTMLElement) => void;
 }> = ({ member, isAdmin, color, onManage }) => {
     const invited = member.status == "INVITED";
     const manageable = isAdmin && !member.isAdmin;
@@ -379,7 +374,8 @@ const FamilyMemberRow: React.FC<{
     return manageable ? (
         <FocusVisibleButton
             fullWidth
-            onClick={() => onManage(member)}
+            aria-haspopup="menu"
+            onClick={(event) => onManage(member, event.currentTarget)}
             sx={{
                 display: "block",
                 p: 0,
@@ -398,67 +394,50 @@ const FamilyMemberRow: React.FC<{
     );
 };
 
-const MemberActionsDialog: React.FC<{
+const MemberActionsMenu: React.FC<{
+    anchorEl: HTMLElement | null;
     member?: FamilyMember;
     resending: boolean;
     onClose: () => void;
     onEdit: (member: FamilyMember) => void;
     onRemove: (member: FamilyMember) => void;
     onResend: (member: FamilyMember) => void;
-}> = ({ member, resending, onClose, onEdit, onRemove, onResend }) => {
-    if (!member) return null;
-
-    const invited = member.status == "INVITED";
+}> = ({ anchorEl, member, resending, onClose, onEdit, onRemove, onResend }) => {
+    const invited = member?.status == "INVITED";
     return (
-        <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
-            <Stack direction="row" sx={{ p: "20px 16px 8px 24px" }}>
-                <Typography variant="h3" noWrap sx={{ flex: 1, minWidth: 0 }}>
-                    {member.email}
-                </Typography>
-                <DialogCloseIconButton {...{ onClose }} />
-            </Stack>
-            <DialogContent>
-                <RowButtonGroup>
-                    {invited ? (
-                        <>
-                            <RowButton
-                                disabled={resending}
-                                startIcon={<RefreshOutlined />}
-                                endIcon={
-                                    resending ? (
-                                        <RowButtonEndActivityIndicator />
-                                    ) : undefined
-                                }
-                                label={t("resend_family_invite")}
-                                onClick={() => onResend(member)}
-                            />
-                            <RowButtonDivider />
-                            <RowButton
-                                color="critical"
-                                startIcon={<DeleteOutlined />}
-                                label={t("revoke_family_invite")}
-                                onClick={() => onRemove(member)}
-                            />
-                        </>
-                    ) : (
-                        <>
-                            <RowButton
-                                startIcon={<EditOutlined />}
-                                label={t("set_storage_limit")}
-                                onClick={() => onEdit(member)}
-                            />
-                            <RowButtonDivider />
-                            <RowButton
-                                color="critical"
-                                startIcon={<DeleteOutlined />}
-                                label={t("remove_family_member")}
-                                onClick={() => onRemove(member)}
-                            />
-                        </>
-                    )}
-                </RowButtonGroup>
-            </DialogContent>
-        </Dialog>
+        <ContextMenu
+            sx={{ "& .MuiMenuItem-root": { fontSize: 14, lineHeight: "20px" } }}
+            anchorEl={anchorEl}
+            open={!!member}
+            onClose={onClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            slotProps={{
+                list: { "aria-label": member?.email, "aria-busy": resending },
+            }}
+        >
+            <ContextMenuItem
+                disabled={resending}
+                onClick={() => {
+                    if (member) {
+                        if (invited) onResend(member);
+                        else onEdit(member);
+                    }
+                }}
+            >
+                {t(invited ? "resend_family_invite" : "set_storage_limit")}
+                {resending && <ActivityIndicator size="16px" sx={{ ml: 1 }} />}
+            </ContextMenuItem>
+            <ContextMenuItem
+                disabled={resending}
+                destructive
+                onClick={() => {
+                    if (member) onRemove(member);
+                }}
+            >
+                {t(invited ? "revoke_family_invite" : "remove_family_member")}
+            </ContextMenuItem>
+        </ContextMenu>
     );
 };
 
