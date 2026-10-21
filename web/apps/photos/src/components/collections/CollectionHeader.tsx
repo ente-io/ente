@@ -1,3 +1,4 @@
+import { ContextMenu, ContextMenuItem } from "@/components/ContextMenu";
 import type { RemotePullOpts } from "@/components/gallery";
 import { downloadAndSaveCollectionFiles } from "@/services/save";
 import {
@@ -25,13 +26,9 @@ import TvIcon from "@mui/icons-material/Tv";
 import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "ente-base/components/OverflowMenu";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
@@ -72,7 +69,7 @@ import {
 import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
 export interface CollectionHeaderProps {
@@ -161,6 +158,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar, showNotification } =
         usePhotosAppContext();
+    const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
     const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
@@ -447,82 +445,55 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         case "sharedIncoming":
             menuOptions = [
                 shouldShowMapOption(collectionSummary) && (
-                    <OverflowMenuOption
-                        key="map"
-                        onClick={onShowMap}
-                        startIcon={<MapOutlinedIcon />}
-                    >
+                    <ContextMenuItem key="map" onClick={onShowMap}>
+                        <MapOutlinedIcon />
                         {t("map")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ),
                 collectionSummary.attributes.has("shareePinned") ? (
-                    <OverflowMenuOption
-                        key="unpin"
-                        onClick={unpinSharedAlbum}
-                        startIcon={<PushPinOutlinedIcon />}
-                    >
+                    <ContextMenuItem key="unpin" onClick={unpinSharedAlbum}>
+                        <PushPinOutlinedIcon />
                         {t("unpin_album")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ) : (
-                    <OverflowMenuOption
-                        key="pin"
-                        onClick={pinSharedAlbum}
-                        startIcon={<PushPinIcon />}
-                    >
+                    <ContextMenuItem key="pin" onClick={pinSharedAlbum}>
+                        <PushPinIcon />
                         {t("pin_album")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ),
                 collectionSummary.attributes.has("archived") ? (
-                    <OverflowMenuOption
-                        key="unarchive"
-                        onClick={unarchiveAlbum}
-                        startIcon={<UnarchiveIcon />}
-                    >
+                    <ContextMenuItem key="unarchive" onClick={unarchiveAlbum}>
+                        <UnarchiveIcon />
                         {t("unarchive_album")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ) : (
-                    <OverflowMenuOption
-                        key="archive"
-                        onClick={archiveAlbum}
-                        startIcon={<ArchiveOutlinedIcon />}
-                    >
+                    <ContextMenuItem key="archive" onClick={archiveAlbum}>
+                        <ArchiveOutlinedIcon />
                         {t("archive_album")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ),
 
                 activeCollection ? (
                     isHiddenCollection(activeCollection) ? (
-                        <OverflowMenuOption
-                            key="unhide"
-                            onClick={unhideAlbum}
-                            startIcon={<VisibilityOutlinedIcon />}
-                        >
+                        <ContextMenuItem key="unhide" onClick={unhideAlbum}>
+                            <VisibilityOutlinedIcon />
                             {t("unhide_collection")}
-                        </OverflowMenuOption>
+                        </ContextMenuItem>
                     ) : (
-                        <OverflowMenuOption
-                            key="hide"
-                            onClick={hideAlbum}
-                            startIcon={<VisibilityOffOutlinedIcon />}
-                        >
+                        <ContextMenuItem key="hide" onClick={hideAlbum}>
+                            <VisibilityOffOutlinedIcon />
                             {t("hide_collection")}
-                        </OverflowMenuOption>
+                        </ContextMenuItem>
                     )
                 ) : undefined,
-                <OverflowMenuOption
-                    key="leave"
-                    startIcon={<LogoutIcon />}
-                    onClick={confirmLeaveSharedAlbum}
-                >
+                <ContextMenuItem key="leave" onClick={confirmLeaveSharedAlbum}>
+                    <LogoutIcon />
                     {t("leave_album")}
-                </OverflowMenuOption>,
-                <OverflowMenuOption
-                    key="cast"
-                    startIcon={<TvIcon />}
-                    onClick={onCollectionCast}
-                >
+                </ContextMenuItem>,
+                <ContextMenuItem key="cast" onClick={onCollectionCast}>
+                    <TvIcon />
                     {t("cast_album_to_tv")}
-                </OverflowMenuOption>,
+                </ContextMenuItem>,
             ];
             break;
 
@@ -530,159 +501,122 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             if (isQuickLinkAlbum) {
                 menuOptions = [
                     shouldShowMapOption(collectionSummary) && (
-                        <OverflowMenuOption
-                            key="map"
-                            onClick={onShowMap}
-                            startIcon={<MapOutlinedIcon />}
-                        >
+                        <ContextMenuItem key="map" onClick={onShowMap}>
+                            <MapOutlinedIcon />
                             {t("map")}
-                        </OverflowMenuOption>
+                        </ContextMenuItem>
                     ),
-                    <OverflowMenuOption
-                        key="sort"
-                        onClick={showSortOrderMenu}
-                        startIcon={<SortIcon />}
-                    >
+                    <ContextMenuItem key="sort" onClick={showSortOrderMenu}>
+                        <SortIcon />
                         {t("sort_by")}
-                    </OverflowMenuOption>,
-                    <OverflowMenuOption
-                        key="cast"
-                        startIcon={<TvIcon />}
-                        onClick={onCollectionCast}
-                    >
+                    </ContextMenuItem>,
+                    <ContextMenuItem key="cast" onClick={onCollectionCast}>
+                        <TvIcon />
                         {t("cast_album_to_tv")}
-                    </OverflowMenuOption>,
-                    <OverflowMenuOption
+                    </ContextMenuItem>,
+                    <ContextMenuItem
                         key="remove-link"
                         onClick={removeQuickLink}
-                        startIcon={
-                            <HugeiconsIcon
-                                icon={RemoveCircleIcon}
-                                size={20}
-                                strokeWidth={1.5}
-                            />
-                        }
                     >
+                        <HugeiconsIcon
+                            icon={RemoveCircleIcon}
+                            size={20}
+                            strokeWidth={1.5}
+                        />
                         {t("remove_link")}
-                    </OverflowMenuOption>,
+                    </ContextMenuItem>,
                 ];
                 break;
             }
             menuOptions = [
                 activeCollection && (
-                    <OverflowMenuOption
+                    <ContextMenuItem
                         key="edit-details"
                         onClick={onEditAlbumDetails}
-                        startIcon={<EditIcon />}
                     >
+                        <EditIcon />
                         {t("edit_details")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ),
-                <OverflowMenuOption
-                    key="sort"
-                    onClick={showSortOrderMenu}
-                    startIcon={<SortIcon />}
-                >
+                <ContextMenuItem key="sort" onClick={showSortOrderMenu}>
+                    <SortIcon />
                     {t("sort_by")}
-                </OverflowMenuOption>,
+                </ContextMenuItem>,
                 shouldShowMapOption(collectionSummary) && (
-                    <OverflowMenuOption
-                        key="map"
-                        onClick={onShowMap}
-                        startIcon={<MapOutlinedIcon />}
-                    >
+                    <ContextMenuItem key="map" onClick={onShowMap}>
+                        <MapOutlinedIcon />
                         {t("map")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ),
                 collectionSummary.attributes.has("pinned") ? (
-                    <OverflowMenuOption
-                        key="unpin"
-                        onClick={unpinAlbum}
-                        startIcon={<PushPinOutlinedIcon />}
-                    >
+                    <ContextMenuItem key="unpin" onClick={unpinAlbum}>
+                        <PushPinOutlinedIcon />
                         {t("unpin_album")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ) : (
-                    <OverflowMenuOption
-                        key="pin"
-                        onClick={pinAlbum}
-                        startIcon={<PushPinIcon />}
-                    >
+                    <ContextMenuItem key="pin" onClick={pinAlbum}>
+                        <PushPinIcon />
                         {t("pin_album")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ),
                 ...(!activeCollection || !isHiddenCollection(activeCollection)
                     ? [
                           collectionSummary.attributes.has("archived") ? (
-                              <OverflowMenuOption
+                              <ContextMenuItem
                                   key="unarchive"
                                   onClick={unarchiveAlbum}
-                                  startIcon={<UnarchiveIcon />}
                               >
+                                  <UnarchiveIcon />
                                   {t("unarchive_album")}
-                              </OverflowMenuOption>
+                              </ContextMenuItem>
                           ) : (
-                              <OverflowMenuOption
+                              <ContextMenuItem
                                   key="archive"
                                   onClick={archiveAlbum}
-                                  startIcon={<ArchiveOutlinedIcon />}
                               >
+                                  <ArchiveOutlinedIcon />
                                   {t("archive_album")}
-                              </OverflowMenuOption>
+                              </ContextMenuItem>
                           ),
                       ]
                     : []),
                 activeCollection && isHiddenCollection(activeCollection) ? (
-                    <OverflowMenuOption
-                        key="unhide"
-                        onClick={unhideAlbum}
-                        startIcon={<VisibilityOutlinedIcon />}
-                    >
+                    <ContextMenuItem key="unhide" onClick={unhideAlbum}>
+                        <VisibilityOutlinedIcon />
                         {t("unhide_collection")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ) : (
-                    <OverflowMenuOption
-                        key="hide"
-                        onClick={hideAlbum}
-                        startIcon={<VisibilityOffOutlinedIcon />}
-                    >
+                    <ContextMenuItem key="hide" onClick={hideAlbum}>
+                        <VisibilityOffOutlinedIcon />
                         {t("hide_collection")}
-                    </OverflowMenuOption>
+                    </ContextMenuItem>
                 ),
-                <OverflowMenuOption
+                <ContextMenuItem
                     key="delete"
-                    startIcon={<DeleteOutlinedIcon />}
+                    destructive
                     onClick={confirmDeleteCollection}
                 >
+                    <DeleteOutlinedIcon />
                     {t("delete_album")}
-                </OverflowMenuOption>,
-                <OverflowMenuOption
-                    key="share"
-                    onClick={onCollectionShare}
-                    startIcon={<ShareIcon />}
-                >
+                </ContextMenuItem>,
+                <ContextMenuItem key="share" onClick={onCollectionShare}>
+                    <ShareIcon />
                     {t("share_album")}
-                </OverflowMenuOption>,
-                <OverflowMenuOption
-                    key="cast"
-                    startIcon={<TvIcon />}
-                    onClick={onCollectionCast}
-                >
+                </ContextMenuItem>,
+                <ContextMenuItem key="cast" onClick={onCollectionCast}>
+                    <TvIcon />
                     {t("cast_album_to_tv")}
-                </OverflowMenuOption>,
+                </ContextMenuItem>,
             ];
             break;
     }
 
     if (activeCollection)
         menuOptions.push(
-            <OverflowMenuOption
-                key="slideshow"
-                startIcon={<SlideshowIcon />}
-                onClick={onCollectionSlideshow}
-            >
+            <ContextMenuItem key="slideshow" onClick={onCollectionSlideshow}>
+                <SlideshowIcon />
                 {t("slideshow")}
-            </OverflowMenuOption>,
+            </ContextMenuItem>,
         );
     const validMenuOptions = menuOptions.filter((o) => !!o);
 
@@ -705,14 +639,43 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 onCleanUncategorizedClick={confirmCleanUncategorized}
             />
             {validMenuOptions.length > 0 && (
-                <OverflowMenu
-                    ariaID="collection-options"
-                    triggerButtonIcon={
+                <>
+                    <IconButton
+                        id="collection-options-trigger"
+                        aria-controls={
+                            menuAnchorEl ? "collection-options" : undefined
+                        }
+                        aria-haspopup="true"
+                        aria-expanded={menuAnchorEl ? "true" : undefined}
+                        onClick={(event) =>
+                            setMenuAnchorEl(event.currentTarget)
+                        }
+                    >
                         <MoreHorizIcon ref={overflowMenuIconRef} />
-                    }
-                >
-                    {validMenuOptions}
-                </OverflowMenu>
+                    </IconButton>
+                    <ContextMenu
+                        id="collection-options"
+                        anchorEl={menuAnchorEl}
+                        open={!!menuAnchorEl}
+                        onClose={() => setMenuAnchorEl(null)}
+                        onClick={() => setMenuAnchorEl(null)}
+                        slotProps={{
+                            list: {
+                                "aria-labelledby": "collection-options-trigger",
+                            },
+                        }}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "right",
+                        }}
+                        transformOrigin={{
+                            vertical: "top",
+                            horizontal: "right",
+                        }}
+                    >
+                        {validMenuOptions}
+                    </ContextMenu>
+                </>
             )}
             <CollectionSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
@@ -1050,33 +1013,29 @@ function CollectionSortOrderMenu({
         { by: "fileName", asc: false, label: t("album_sort_name_desc") },
     ];
     return (
-        <Menu
+        <ContextMenu
             id="collection-files-sort"
             anchorEl={overflowMenuIconRef.current}
             open={open}
             onClose={onClose}
-            slotProps={{
-                list: { disablePadding: true, "aria-label": t("sort_by") },
-            }}
+            slotProps={{ list: { "aria-label": t("sort_by") } }}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
             {options.map(({ by, asc, label }) => (
-                <OverflowMenuOption
+                <ContextMenuItem
                     key={`${by}-${asc}`}
                     onClick={() => {
                         onSort(by, asc);
                         onClose();
                     }}
-                    endIcon={
-                        sortBy === by && sortAsc === asc ? (
-                            <CheckIcon />
-                        ) : undefined
-                    }
                 >
                     {label}
-                </OverflowMenuOption>
+                    {sortBy === by && sortAsc === asc && (
+                        <CheckIcon sx={{ ml: "auto" }} />
+                    )}
+                </ContextMenuItem>
             ))}
-        </Menu>
+        </ContextMenu>
     );
 }
