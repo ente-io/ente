@@ -99,6 +99,38 @@ void main() {
   });
 
   test(
+    'failed album refresh keeps its snapshot and retries from the start',
+    () async {
+      library.items = List.generate(100, (index) => media('old-$index'));
+      await model.refresh();
+      library.folders.removeAt(0);
+      library.readOverride = (_, _, _) =>
+          Future.error(StateError('Unavailable'));
+      await model.refresh();
+      expect(model.album!.id, 'recent');
+      expect(model.media.first.id, 'old-0');
+      expect(model.media.length, 96);
+      expect(model.hasMore, isFalse);
+      expect(model.error, isNotNull);
+
+      final starts = <int>[];
+      final replacement = List.generate(100, (index) => media('new-$index'));
+      library.readOverride = (album, start, end) async {
+        expect(album.id, 'camera');
+        starts.add(start);
+        return replacement.skip(start).take(end - start).toList();
+      };
+      await model.refresh();
+      expect(model.album!.id, 'camera');
+      expect(model.media, replacement.take(96));
+      expect(model.error, isNull);
+      await model.loadMore();
+      expect(starts, [0, 96]);
+      expect(model.media, replacement);
+    },
+  );
+
+  test(
     'confirmation removes unavailable selections and requires review',
     () async {
       await model.refresh();

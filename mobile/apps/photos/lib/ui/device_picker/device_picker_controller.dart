@@ -85,18 +85,19 @@ class DevicePickerController extends ChangeNotifier {
       final folders = await library.albums();
       if (!_isCurrent(revision)) return;
       final previousID = album?.id;
-      albums = folders;
-      album =
+      final nextAlbum =
           folders.where((item) => item.id == previousID).firstOrNull ??
           folders.where((item) => item.isAll).firstOrNull ??
           folders.firstOrNull;
-      final length = album?.id == previousID
+      final length = nextAlbum?.id == previousID
           ? math.max(batchSize, _nextOffset)
           : batchSize;
-      final items = album == null
+      final items = nextAlbum == null
           ? <AssetEntity>[]
-          : await library.read(album!, start: 0, end: length);
+          : await library.read(nextAlbum, start: 0, end: length);
       if (!_isCurrent(revision)) return;
+      albums = folders;
+      album = nextAlbum;
       media = _unique(items);
       _mediaIDs
         ..clear()
@@ -109,6 +110,7 @@ class DevicePickerController extends ChangeNotifier {
     } catch (exception, stack) {
       if (_isCurrent(revision)) {
         error = exception;
+        hasMore = false;
         _log.warning("Could not refresh device media", exception, stack);
       }
     } finally {
