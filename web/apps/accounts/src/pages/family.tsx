@@ -3,16 +3,12 @@ import {
     getFamilyInviteInfo,
     type FamilyInviteInfo,
 } from "@/services/family";
-import CloseIcon from "@mui/icons-material/Close";
 import { Box, Stack, Typography } from "@mui/material";
 import { AccountsPageContents } from "ente-accounts/components/layouts/centered-paper";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
-    v2CancelButtonSx,
-    v2CloseButtonSx,
-    v2HeaderRowSx,
     v2PaperSx,
     v2SubmitButtonSx,
 } from "ente-base/components/SingleInput.styles";
@@ -102,25 +98,12 @@ const Page: React.FC = () => {
                 },
             ]}
         >
-            <Stack direction="row" sx={v2HeaderRowSx}>
-                <Typography
-                    component="h1"
-                    sx={{ fontSize: 20, lineHeight: "28px", fontWeight: 600 }}
-                >
-                    {title}
-                </Typography>
-                <FocusVisibleButton
-                    aria-label={t("close")}
-                    disabled={accepting}
-                    href="https://photos.ente.com"
-                    sx={[
-                        v2CloseButtonSx,
-                        { minWidth: 38, borderRadius: "50%" },
-                    ]}
-                >
-                    <CloseIcon sx={{ fontSize: 18 }} />
-                </FocusVisibleButton>
-            </Stack>
+            <Typography
+                component="h1"
+                sx={{ fontSize: 20, lineHeight: "28px", fontWeight: 600 }}
+            >
+                {title}
+            </Typography>
             {phase == "loading" ? (
                 <Stack sx={{ alignItems: "center", py: 4 }}>
                     <ActivityIndicator />
@@ -131,16 +114,6 @@ const Page: React.FC = () => {
                     <FamilyInviteDescription>
                         {t("family_invite_invalid")}
                     </FamilyInviteDescription>
-                    <FocusVisibleButton
-                        fullWidth
-                        href="https://photos.ente.com"
-                        sx={[
-                            v2CancelButtonSx,
-                            { flex: "none", fontWeight: 600 },
-                        ]}
-                    >
-                        {t("done")}
-                    </FocusVisibleButton>
                 </FamilyInviteContents>
             ) : phase == "failed" ? (
                 <FocusVisibleButton
@@ -178,32 +151,19 @@ const Page: React.FC = () => {
                             email: invite?.adminEmail,
                         })}
                     </FamilyInviteDescription>
-                    <Stack sx={{ gap: 1.5 }}>
-                        <LoadingButton
-                            fullWidth
-                            disabled={accepting}
-                            loading={accepting}
-                            sx={{
-                                ...v2SubmitButtonSx,
-                                flex: "none",
-                                fontWeight: 600,
-                            }}
-                            onClick={() => void accept()}
-                        >
-                            {t("accept_family_invite")}
-                        </LoadingButton>
-                        <FocusVisibleButton
-                            fullWidth
-                            disabled={accepting}
-                            href="https://photos.ente.com"
-                            sx={[
-                                v2CancelButtonSx,
-                                { flex: "none", fontWeight: 600 },
-                            ]}
-                        >
-                            {t("cancel")}
-                        </FocusVisibleButton>
-                    </Stack>
+                    <LoadingButton
+                        fullWidth
+                        disabled={accepting}
+                        loading={accepting}
+                        sx={{
+                            ...v2SubmitButtonSx,
+                            flex: "none",
+                            fontWeight: 600,
+                        }}
+                        onClick={() => void accept()}
+                    >
+                        {t("accept_family_invite")}
+                    </LoadingButton>
                 </FamilyInviteContents>
             )}
         </AccountsPageContents>
