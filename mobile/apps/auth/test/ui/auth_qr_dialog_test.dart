@@ -85,9 +85,12 @@ void main() {
     await _pumpDialog(tester);
     if (Platform.isLinux) {
       expect(find.text('Share'), findsNothing);
+      // Exercise the defensive guard even though its button is hidden.
+      final state = tester.state<AuthQrDialogState>(find.byType(AuthQrDialog));
+      await tester.runAsync(state.shareQrCode);
+      expect(directory.listSync(), isEmpty);
       expect(temporaryDirectoryRequests, 0);
       expect(shares, isEmpty);
-      expect(directory.listSync(), isEmpty);
     } else {
       final button = tester.widget<ButtonComponent>(
         find.widgetWithText(ButtonComponent, 'Share'),
