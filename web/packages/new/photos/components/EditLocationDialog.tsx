@@ -15,6 +15,7 @@ import {
     styled,
     Typography,
 } from "@mui/material";
+import { InlineErrorIndicator } from "ente-base/components/ErrorIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
@@ -30,6 +31,7 @@ import {
 } from "ente-base/components/SingleInput.styles";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { isSxArray } from "ente-base/components/utils/sx";
+import log from "ente-base/log";
 import type { Location } from "ente-base/types";
 import {
     uploadSheetMediaQuery,
@@ -81,6 +83,7 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
     >(undefined);
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [saveFailed, setSaveFailed] = useState(false);
 
     const initialLocation = useMemo(() => {
         if (files.length !== 1) return undefined;
@@ -99,6 +102,7 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
             setCoordinatesValid(true);
             setIsLoading(false);
             setIsSuccess(false);
+            setSaveFailed(false);
             setIsAddingLocation(!files.some((file) => fileLocation(file)));
         }
         prevOpenRef.current = open;
@@ -132,9 +136,13 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
         if (locationToSave && hasLocationChanged && !isLoading) {
             setIsLoading(true);
             setIsSuccess(false);
+            setSaveFailed(false);
             try {
                 await onConfirm(locationToSave);
                 setIsSuccess(true);
+            } catch (error) {
+                log.error("Failed to update photo location", error);
+                setSaveFailed(true);
             } finally {
                 setIsLoading(false);
             }
@@ -206,6 +214,11 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
                         onCoordinateDraftChange={onCoordinateDraftChange}
                     />
                 </Box>
+                {saveFailed && (
+                    <Box role="alert">
+                        <InlineErrorIndicator />
+                    </Box>
+                )}
                 <Stack direction="row" sx={{ gap: "12px" }}>
                     <FocusVisibleButton
                         onClick={onClose}
@@ -216,6 +229,7 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
                     </FocusVisibleButton>
                     <LoadingButton
                         onClick={handleConfirm}
+                        aria-label={t("save_location")}
                         loading={isLoading}
                         disabled={!hasLocationChanged || isSuccess}
                         color="accent"
@@ -305,6 +319,9 @@ const EditableMap: React.FC<EditableMapProps> = ({
                     signal: abortController.signal,
                 },
             );
+            if (!response.ok) {
+                throw new Error(`Location search failed: ${response.status}`);
+            }
             const data = (await response.json()) as NominatimResult[];
             if (
                 searchRequestIdRef.current !== requestId ||
@@ -319,7 +336,7 @@ const EditableMap: React.FC<EditableMapProps> = ({
                 searchRequestIdRef.current !== requestId
             )
                 return;
-            console.error("Search failed:", error);
+            log.error("Location search failed", error);
             setSearchResults([]);
             setShowResults(false);
         } finally {
