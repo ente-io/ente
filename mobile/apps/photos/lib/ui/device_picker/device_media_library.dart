@@ -30,6 +30,10 @@ class PhotoManagerDeviceLibrary implements DeviceMediaLibrary {
       imageOption: const FilterOption(
         sizeConstraint: SizeConstraint(ignoreSize: true),
       ),
+      videoOption: const FilterOption(
+        sizeConstraint: SizeConstraint(ignoreSize: true),
+      ),
+      createTimeCond: DateTimeCond.def().copyWith(ignore: true),
       orders: [const OrderOption(type: OrderOptionType.createDate)],
     ),
   );
