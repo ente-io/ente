@@ -594,6 +594,18 @@ If you delete a file from a watched folder on your computer, the corresponding f
 
 If you want to remove it completely from Ente, you'll need to manually delete it from the Uncategorized album.
 
+### Why don't metadata changes to a file in my watched folder show up in Ente? {#watch-folder-edited-files}
+
+Watch folders upload new files and react to deleted files, but they don't pick up changes to a file that has already been uploaded. So a new description or location saved to the file in another app won't reach Ente.
+
+You can change the description and location in Ente directly, from the photo's info panel.
+
+### What happens if I rename a file in my watched folder? {#rename-in-watched-folder}
+
+Ente treats a renamed file as a deleted file plus a new one. The new file is uploaded, and the old copy is removed from the album and moved to [Uncategorized](/photos/faq/albums-and-organization#uncategorized), not deleted.
+
+You can review and delete those copies in Uncategorized.
+
 ### Why are my watch folders not syncing? {#watch-folders-not-syncing}
 
 Common issues and solutions:

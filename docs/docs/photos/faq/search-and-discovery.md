@@ -235,6 +235,14 @@ Similarly, on desktop you can use the "Add a name" button to merge people by sel
 
 ### How can I remove an incorrectly grouped face from a person? {#remove-incorrect-face}
 
+You can fix this in bulk on the mobile app:
+
+1. Open the person in People, then tap **More** and **Edit**.
+2. Under **Merged photos**, find the group with the wrong face and tap the minus to remove it from this person.
+3. Open that group from People, tap **Add a name**, and pick the correct person from the list.
+
+If only a few photos are wrong, open the group under **Merged photos**, long press to select them, and tap **Not this person?**.
+
 If the same person is tagged on two different faces in one photo, one of those faces may be in the wrong group.
 
 1. Open the photo and tap the incorrectly named person.
