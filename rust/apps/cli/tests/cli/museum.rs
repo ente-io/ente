@@ -26,8 +26,36 @@ fn auth_login_refresh_and_offline_export_across_processes() -> TestResult {
         state["selected"] = Value::Null;
         home.write_vault(&state);
         login(&home, "auth", &email, &[]);
+        let encrypted_round_trip = |expected: &[u8]| {
+            let output = success(
+                home.command(&["auth", "export", "--output", "-", "--json", "--no-input"])
+                    .env("ENTE_CLI_PASSWORD", " backup password ")
+                    .output()
+                    .unwrap(),
+            );
+            let backup = home.dir.path().join("backup.json");
+            fs::write(&backup, output.stdout).unwrap();
+            let independent = TestHome::new();
+            let decrypted = success(
+                independent
+                    .command(&[
+                        "auth",
+                        "decrypt",
+                        backup.to_str().unwrap(),
+                        "--json",
+                        "--no-input",
+                    ])
+                    .env("ENTE_CLI_PASSWORD", " backup password ")
+                    .env("ENTE_CLI_VAULT_KEY", "invalid")
+                    .output()
+                    .unwrap(),
+            );
+            assert_eq!(decrypted.stdout, expected);
+            assert_eq!(fs::read_dir(independent.dir.path()).unwrap().count(), 0);
+        };
         let export = ["auth", "export", "--output", "-", "--plaintext"];
         assert!(success(home.run(&export)).stdout.is_empty());
+        encrypted_round_trip(b"");
         let key = Key::generate();
         let wrapped = secretbox::encrypt(
             key.as_bytes(),
@@ -80,6 +108,7 @@ fn auth_login_refresh_and_offline_export_across_processes() -> TestResult {
             success(home.command(&export).arg("--offline").output().unwrap()).stdout,
             format!("{changed}\n").as_bytes()
         );
+        encrypted_round_trip(format!("{changed}\n").as_bytes());
         success(home.run(&[
             "auth",
             "api",

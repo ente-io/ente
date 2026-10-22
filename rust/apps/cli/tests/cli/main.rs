@@ -971,10 +971,8 @@ struct TestHome {
 #[test]
 #[ignore = "requires accessible native secret storage; creates and removes a disposable keyring entry"]
 fn native_keyring_survives_separate_processes() {
-    let mut home = TestHome::new();
+    let home = TestHome::new();
     let path = fs::canonicalize(home.dir.path()).unwrap();
-    let entry = keyring::Entry::new("io.ente.cli", &path.to_string_lossy()).unwrap();
-    assert!(matches!(entry.get_secret(), Err(keyring::Error::NoEntry)));
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         success(
             home.command(&["account", "list"])
@@ -982,55 +980,86 @@ fn native_keyring_survives_separate_processes() {
                 .output()
                 .unwrap(),
         );
-        assert!(matches!(entry.get_secret(), Err(keyring::Error::NoEntry)));
         assert_eq!(fs::read_dir(home.dir.path()).unwrap().count(), 0);
-        let mut server = mockito::Server::new();
-        let ping = server.mock("GET", "/ping").with_status(503).create();
-        let input = home.dir.path().join("login.json");
-        fs::write(
-            &input,
-            br#"{"email":"fixture@example.org","password":"secret"}"#,
-        )
-        .unwrap();
-        let output = home
-            .command(&[
-                "account",
-                "login",
-                "--app",
-                "photos",
-                "--host",
-                &server.url(),
-            ])
-            .args(["--input", input.to_str().unwrap()])
-            .env_remove("ENTE_CLI_VAULT_KEY")
-            .output()
-            .unwrap();
-        assert!(failure(&output).contains("cannot reach the selected Ente server"));
-        ping.assert();
-        home.key = Key::try_from_slice(&entry.get_secret().unwrap()).unwrap();
-        home.seed("http://localhost:8080");
-        success(
-            home.command(&["account", "rename", "fixture", "native"])
-                .env_remove("ENTE_CLI_VAULT_KEY")
-                .output()
-                .unwrap(),
-        );
-        let output = success(
-            home.command(&["account", "view", "--account", "native", "--json"])
-                .env_remove("ENTE_CLI_VAULT_KEY")
-                .output()
-                .unwrap(),
-        );
+        #[cfg(target_os = "macos")]
         assert_eq!(
-            serde_json::from_slice::<Value>(&output.stdout).unwrap()["name"],
-            "native"
+            Command::new("/usr/bin/security")
+                .args(["find-generic-password", "-s", "io.ente.cli", "-a"])
+                .arg(&path)
+                .output()
+                .unwrap()
+                .status
+                .code(),
+            Some(44)
         );
+        #[cfg(not(target_os = "macos"))]
+        assert!(matches!(
+            keyring::Entry::new("io.ente.cli", &path.to_string_lossy())
+                .unwrap()
+                .delete_credential(),
+            Err(keyring::Error::NoEntry)
+        ));
+        tokio::runtime::Runtime::new().unwrap().block_on(async {
+            let mut server = mockito::Server::new_async().await;
+            let (_, attrs, verify) = account::mock_email_login(&mut server).await;
+            let input = home.dir.path().join("login.json");
+            fs::write(
+                &input,
+                br#"{"email":"new@example.org","password":" secret \ud83d\ude42 ","otp":"654321"}"#,
+            )
+            .unwrap();
+            success(
+                home.command(&[
+                    "account",
+                    "login",
+                    "--app",
+                    "photos",
+                    "--account",
+                    "native",
+                    "--host",
+                    &server.url(),
+                    "--no-input",
+                ])
+                .arg("--input")
+                .arg(&input)
+                .env_remove("ENTE_CLI_VAULT_KEY")
+                .output()
+                .unwrap(),
+            );
+            let output = success(
+                home.command(&["account", "view", "--account", "native", "--json"])
+                    .env_remove("ENTE_CLI_VAULT_KEY")
+                    .output()
+                    .unwrap(),
+            );
+            let account: Value = serde_json::from_slice(&output.stdout).unwrap();
+            assert_eq!(account["id"], "42");
+            assert_eq!(account["email"], "new@example.org");
+            assert_eq!(account["apps"], json!(["photos"]));
+            verify.assert_async().await;
+            attrs.assert_async().await;
+        });
     }));
-    let cleanup = entry.delete_credential();
+    #[cfg(target_os = "macos")]
+    let cleanup = Command::new("/usr/bin/security")
+        .args(["delete-generic-password", "-s", "io.ente.cli", "-a"])
+        .arg(&path)
+        .output();
+    #[cfg(not(target_os = "macos"))]
+    let cleanup = keyring::Entry::new("io.ente.cli", &path.to_string_lossy())
+        .unwrap()
+        .delete_credential();
     if let Err(panic) = result {
         std::panic::resume_unwind(panic);
     }
+    #[cfg(target_os = "macos")]
+    success(cleanup.unwrap());
+    #[cfg(not(target_os = "macos"))]
     cleanup.unwrap();
+}
+
+fn cli_binary() -> std::ffi::OsString {
+    std::env::var_os("ENTE_CLI_TEST_BINARY").unwrap_or_else(|| env!("CARGO_BIN_EXE_ente").into())
 }
 
 impl TestHome {
@@ -1042,7 +1071,7 @@ impl TestHome {
     }
 
     fn command(&self, args: &[&str]) -> Command {
-        let mut command = Command::new(env!("CARGO_BIN_EXE_ente"));
+        let mut command = Command::new(cli_binary());
         command
             .env_clear()
             .env("ENTE_CLI_HOME", self.dir.path())

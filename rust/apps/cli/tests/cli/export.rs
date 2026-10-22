@@ -380,7 +380,12 @@ fn export_adopts_relocated_output_and_verifies_later_selections() -> TestResult 
             )
             .await;
             export(&home, &root, &[]);
-            let root_bytes = fs::read(root.join("export.json"))?;
+            let mut record = read_json(&root.join("export.json"));
+            record["extension"] = json!({"nested":[true,null,17]});
+            let root_bytes = serde_json::to_vec_pretty(&record)?;
+            fs::write(root.join("export.json"), &root_bytes)?;
+            export(&home, &root, &[]);
+            assert_eq!(fs::read(root.join("export.json"))?, root_bytes);
             let relocated = destination.path().join("relocated");
             fs::rename(&root, &relocated)?;
             let fresh = TestHome::new();
@@ -1006,6 +1011,21 @@ fn export_live_pairs_retry_and_reuse_without_rewriting_unchanged_output() -> Tes
             export(&home, &root, &[]);
             assert_eq!(objects.reads(), reads);
             assert_eq!(fs::read(root.join("Live/Motion.mov"))?, video);
+            let download = destination.path().join("Motion.zip");
+            let result = home.json(&[
+                "photos",
+                "file",
+                "download",
+                &file.to_string(),
+                "--output",
+                download.to_str().unwrap(),
+            ]);
+            assert_eq!(
+                result,
+                json!({"id":file.to_string(),"output":download,"bytes":archive.len()})
+            );
+            assert_eq!(fs::read(download)?, archive);
+            assert_eq!(objects.reads(), reads + 1);
             Ok(())
         })
     })

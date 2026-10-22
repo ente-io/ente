@@ -85,7 +85,7 @@ pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)>
         &authenticated.secrets.token,
     )));
 
-    let mut previous_session = None;
+    let mut previous_sessions = Vec::new();
     let result = async {
         let email = client.email().await?;
         let mut vault = access.open()?;
@@ -115,7 +115,9 @@ pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)>
             let account = &mut vault.state.accounts[index];
             account.email = email;
             account.identity = identity;
-            previous_session = account.sessions.insert(app, session);
+            if let Some(previous) = account.sessions.insert(app, session) {
+                previous_sessions.push((app, previous));
+            }
             index
         } else {
             let new_name = args.name.unwrap_or_else(|| email.clone());
@@ -134,25 +136,35 @@ pub async fn login(args: LoginArgs, options: &Options) -> Result<(State, usize)>
             vault.state.selected = Some(vault.state.accounts[index].storage_id);
             index
         };
+        let account = &vault.state.accounts[index];
+        vault.state.creations.retain(|pending| {
+            if pending.origin != account.origin || pending.signup.user_id != account.user_id {
+                return true;
+            }
+            previous_sessions.push((
+                pending.app,
+                StoredSession {
+                    token: pending.signup.token().to_vec(),
+                },
+            ));
+            false
+        });
         vault.save()?;
         Ok((vault.into_state(), index))
     }
     .await;
-    if result.is_ok()
-        && let Some(previous) = &previous_session
-    {
-        client.set_auth_token(Some(ente_core::b64::encode_url_safe(&previous.token)));
-    }
-    if (result.is_err() || previous_session.is_some())
-        && let Err(error) = client.logout().await
+    if let Ok((state, index)) = &result {
+        for (app, previous) in previous_sessions {
+            if let Err(error) =
+                api::logout_session(&state.accounts[*index].origin, app, &previous.token).await
+            {
+                eprintln!("Could not end the previous login: {error}");
+            }
+        }
+    } else if let Err(error) = client.logout().await
         && !matches!(&error, ente_accounts::Error::Http(error) if error.status_code() == Some(401))
     {
-        let session = if result.is_err() {
-            "unsaved"
-        } else {
-            "previous"
-        };
-        eprintln!("Could not end the {session} login: {error}");
+        eprintln!("Could not end the unsaved login: {error}");
     }
     result
 }

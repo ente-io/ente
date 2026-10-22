@@ -72,8 +72,12 @@ pub fn accounts_client(origin: &str, app: App) -> Result<AccountsClient> {
 }
 
 pub async fn logout(account: &Account, app: App) -> Result<()> {
-    let client = accounts_client(&account.origin, app)?;
-    client.set_auth_token(Some(b64::encode_url_safe(account.token(app)?)));
+    logout_session(&account.origin, app, account.token(app)?).await
+}
+
+pub async fn logout_session(origin: &str, app: App, token: &[u8]) -> Result<()> {
+    let client = accounts_client(origin, app)?;
+    client.set_auth_token(Some(b64::encode_url_safe(token)));
     match client.logout().await {
         Ok(()) => Ok(()),
         Err(ente_accounts::Error::Http(error)) if error.status_code() == Some(401) => Ok(()),
