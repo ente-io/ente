@@ -3,10 +3,7 @@ import "dart:async";
 import "dart:collection";
 
 import "package:collection/collection.dart";
-import "package:ente_components/ente_components.dart";
-import "package:ente_strings/ente_strings.dart";
 import 'package:flutter/material.dart';
-import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/backup_updated_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
@@ -15,7 +12,7 @@ import "package:photos/models/backup/backup_item_status.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/module/upload/service/file_uploader.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/ui/settings/backup/backup_item_card.dart";
+import "package:photos/ui/settings/backup/backup_status_view.dart";
 
 class BackupStatusScreen extends StatefulWidget {
   const BackupStatusScreen({super.key});
@@ -105,67 +102,6 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
       ...?result,
     ];
 
-    return Scaffold(
-      backgroundColor: context.componentColors.backgroundBase,
-      body: AppBarComponent(
-        title: context.strings.backupStatus,
-        slivers: [
-          if (allItems.isEmpty)
-            const SliverFillRemaining(
-              hasScrollBody: false,
-              child: _EmptyBackupStatus(),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-              sliver: SliverList.builder(
-                itemBuilder: (context, index) {
-                  final file = allItems[index].file;
-                  return BackupItemCard(
-                    item: allItems[index],
-                    key: ValueKey(
-                      file.uploadedFileID != null
-                          ? ("uploaded", file.uploadedFileID)
-                          : file.localID != null
-                          ? ("local", file.localID)
-                          : ("generated", file.generatedID),
-                    ),
-                  );
-                },
-                itemCount: allItems.length,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyBackupStatus extends StatelessWidget {
-  const _EmptyBackupStatus();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.componentColors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: Spacing.md),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedCloudUpload,
-            color: colors.textLight,
-            size: IconSizes.medium,
-          ),
-          const SizedBox(height: Spacing.lg),
-          Text(
-            context.strings.backupStatusDescription,
-            textAlign: TextAlign.center,
-            style: TextStyles.large.copyWith(color: colors.textLight),
-          ),
-          const SizedBox(height: 48),
-        ],
-      ),
-    );
+    return BackupStatusView(items: allItems);
   }
 }

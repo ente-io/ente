@@ -1,0 +1,1 @@
+- Refreshed backup status with green activity filters and a scrollable list of backups.

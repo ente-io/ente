@@ -490,6 +490,14 @@
   "backupSettings": "Backup settings",
   "backupStatus": "Backup status",
   "backupStatusDescription": "Items that have been backed up will show up here",
+  "backupStatusFailed": "Failed",
+  "@backupStatusFailed": {
+    "description": "Backup activity filter and status for items in the existing retry state, including failed or interrupted uploads."
+  },
+  "backupStatusInBackground": "Backing up in background",
+  "backupStatusNoFailed": "No failed backups",
+  "backupStatusNoPending": "No pending backups",
+  "backupStatusUploading": "Backing up",
   "backupToEnte": "Backup to Ente",
   "backupVideos": "Backup videos",
   "beach": "Sand and sea",
