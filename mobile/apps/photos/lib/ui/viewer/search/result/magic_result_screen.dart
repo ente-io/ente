@@ -53,7 +53,6 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   final _selectedFiles = SelectedFiles();
   final _coverAppBarKey = GlobalKey();
   late final List<EnteFile> files;
-  late final String? _coverHeroTag;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<MagicSortChangeEvent> _magicSortChangeEvent;
   late final Logger _logger = Logger("_MagicResultScreenState");
@@ -67,7 +66,6 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   void initState() {
     super.initState();
     files = List.of(widget.files);
-    _coverHeroTag = files.isEmpty ? null : widget.heroTag + files.first.tag;
     _enableGrouping = widget.enableGrouping;
     fileIDToRelevantPos = getFileIDToRelevantPos();
     if (isLocalGalleryMode) {
@@ -184,13 +182,14 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cover = widget.files.firstOrNull;
     final appBar = GalleryAppBarWidget.sliverConfig(
       MagicResultScreen.appBarType,
       widget.name,
       _selectedFiles,
       coverAppBarKey: _coverAppBarKey,
-      cover: files.firstOrNull,
-      coverHeroTag: _coverHeroTag,
+      cover: cover,
+      coverHeroTag: cover == null ? null : widget.heroTag + cover.tag,
       files: files,
       magicSortType: _enableGrouping
           ? MagicSortType.mostRecent
