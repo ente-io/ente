@@ -1,4 +1,6 @@
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
     Button,
@@ -7,6 +9,7 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
+    InputAdornment,
     Menu,
     MenuItem,
     Tab,
@@ -48,6 +51,7 @@ export const App: React.FC = () => {
         () => urlCredentials.token ?? localStorage.getItem("token") ?? "",
     );
     const [tokenInput, setTokenInput] = useState("");
+    const [showToken, setShowToken] = useState(false);
     const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
     const [tokenMenuAnchor, setTokenMenuAnchor] = useState<HTMLElement | null>(
         null,
@@ -227,14 +231,36 @@ export const App: React.FC = () => {
     const tokenForm = (
         <form className="token-form" onSubmit={handleTokenSubmit}>
             <TextField
-                label="Staff token"
-                type="password"
+                label="Token"
+                type={showToken ? "text" : "password"}
                 value={tokenInput}
                 onChange={(event) => setTokenInput(event.target.value)}
                 autoComplete="off"
                 autoFocus
                 required
                 fullWidth
+                slotProps={{
+                    input: {
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    type="button"
+                                    aria-label={
+                                        showToken ? "Hide token" : "Show token"
+                                    }
+                                    onClick={() => setShowToken(!showToken)}
+                                    edge="end"
+                                >
+                                    {showToken ? (
+                                        <VisibilityOffIcon />
+                                    ) : (
+                                        <VisibilityIcon />
+                                    )}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    },
+                }}
             />
             <div className="token-form-actions">
                 {authToken && (
@@ -242,7 +268,11 @@ export const App: React.FC = () => {
                         Cancel
                     </Button>
                 )}
-                <Button type="submit" variant="contained">
+                <Button
+                    type="submit"
+                    variant="contained"
+                    className="token-submit-button"
+                >
                     {authToken ? "Update token" : "Continue"}
                 </Button>
             </div>
@@ -251,11 +281,22 @@ export const App: React.FC = () => {
 
     if (!authToken) {
         return (
-            <div className="container token-entry">
-                <h1>Ente Staff</h1>
-                <p>Enter your staff token to continue.</p>
-                {tokenForm}
-            </div>
+            <main className="container token-entry">
+                <section className="token-entry-card">
+                    <img
+                        src={duckieimage}
+                        alt=""
+                        className="token-entry-image"
+                    />
+                    <h1>Ente Staff</h1>
+                    <p>Enter your token to continue.</p>
+                    {tokenForm}
+                    <p className="token-entry-hint">
+                        The token is saved in this browser. You can update or
+                        remove it later from the menu.
+                    </p>
+                </section>
+            </main>
         );
     }
 
@@ -325,6 +366,7 @@ export const App: React.FC = () => {
                                     onClick={() => {
                                         setTokenMenuAnchor(null);
                                         setTokenInput("");
+                                        setShowToken(false);
                                         setTokenDialogOpen(true);
                                     }}
                                 >
@@ -418,11 +460,14 @@ export const App: React.FC = () => {
                             )}
                         </>
                     ) : (
-                        <img
-                            src={duckieimage}
-                            alt="duckie"
-                            className="empty-state-image"
-                        />
+                        <div className="empty-state">
+                            <img src={duckieimage} alt="" />
+                            <h2>Find an account</h2>
+                            <p>
+                                Enter an email address or user ID above to view
+                                account details.
+                            </p>
+                        </div>
                     )}
                 </div>
                 <Dialog
@@ -431,7 +476,7 @@ export const App: React.FC = () => {
                     fullWidth
                     maxWidth="xs"
                 >
-                    <DialogTitle>Update staff token</DialogTitle>
+                    <DialogTitle>Update token</DialogTitle>
                     <DialogContent>{tokenForm}</DialogContent>
                 </Dialog>
             </div>
