@@ -7,6 +7,7 @@ import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_components/ente_components.dart' hide textBaseLight;
 import 'package:ente_strings/ente_strings.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -44,6 +45,7 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
 
   Future<void> _shareQrCode() async {
     try {
+      if (!kIsWeb && Platform.isLinux) return;
       if (!mounted) return;
       final boundary =
           _qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
@@ -201,7 +203,8 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
           ),
         ),
         actions: [
-          ButtonComponent(label: widget.shareButtonText, onTap: _shareQrCode),
+          if (kIsWeb || !Platform.isLinux)
+            ButtonComponent(label: widget.shareButtonText, onTap: _shareQrCode),
         ],
       ),
     );
