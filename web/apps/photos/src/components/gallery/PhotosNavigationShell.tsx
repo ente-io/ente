@@ -1,5 +1,6 @@
 import { CreateAlbumDialog } from "@/components/collections/CreateAlbumDialog";
 import { SearchBar, type SearchBarProps } from "@/components/SearchBar";
+import { useIsOffline } from "@/components/utils/use-is-offline";
 import { uploadManager } from "@/services/upload-manager";
 import {
     Album02Icon,
@@ -62,19 +63,20 @@ export const PhotosNavigationShell: React.FC<
     React.PropsWithChildren<
         PhotosNavigationShellProps & {
             isFirstLoad: boolean;
-            isOffline: boolean;
+            isCleanupViewOpen: boolean;
             alternateHeader: ReactNode;
             galleryNavigation: GalleryNavigation | undefined;
         }
     >
 > = ({
     isFirstLoad,
-    isOffline,
+    isCleanupViewOpen,
     alternateHeader,
     galleryNavigation,
     children,
     ...props
 }) => {
+    const isOffline = useIsOffline();
     const [railOpen, setRailOpen] = useState(true);
     const [navigationCollapsed, setNavigationCollapsed] = useState(false);
     const toggleRail = () => setRailOpen((open) => !open);
@@ -268,8 +270,12 @@ export const PhotosNavigationShell: React.FC<
                         >
                             {children}
                         </Stack>
-                        {isFirstLoad && <FirstLoadMessage />}
-                        {isOffline && <OfflineMessage />}
+                        {!isCleanupViewOpen && (
+                            <>
+                                {isFirstLoad && <FirstLoadMessage />}
+                                {isOffline && <OfflineMessage />}
+                            </>
+                        )}
                     </Stack>
                 </Stack>
             </Stack>

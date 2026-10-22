@@ -58,7 +58,6 @@ import {
     notifyUnsupportedSharedFavoritesDialogAttributes,
     trashFilesDialogAttributes,
 } from "@/components/utils/dialog-attributes";
-import { useIsOffline } from "@/components/utils/use-is-offline";
 import { shouldShowWhatsNew } from "@/services/changelog";
 import exportService from "@/services/export";
 import { processPendingAlbumJoin } from "@/services/join-album";
@@ -201,7 +200,6 @@ const Page: React.FC = () => {
         showNotification,
     } = usePhotosAppContext();
 
-    const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
 
     const [cleanupView, setCleanupView] = useState<
@@ -2187,8 +2185,8 @@ const Page: React.FC = () => {
                 onRemotePull={remotePull}
             />
             <PhotosNavigationShell
-                isFirstLoad={!isCleanupViewOpen && isFirstLoad}
-                isOffline={!isCleanupViewOpen && isOffline}
+                isFirstLoad={isFirstLoad}
+                isCleanupViewOpen={isCleanupViewOpen}
                 isInSearchMode={isInSearchMode}
                 isSettingsOpen={sidebarVisibilityProps.open}
                 mode={barMode}
