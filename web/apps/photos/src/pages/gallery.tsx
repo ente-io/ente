@@ -1654,6 +1654,19 @@ const Page: React.FC = () => {
         dispatch({ type: "showAlbumOverview", albumFilter: filter });
     };
 
+    const handleBackToAlbums = useCallback(() => {
+        setCleanupView(undefined);
+        setAlbumSearchQuery("");
+        setSelected({
+            ownCount: 0,
+            count: 0,
+            collectionID: 0,
+            context: undefined,
+        });
+        setAlbumFilter("ente");
+        dispatch({ type: "showAlbumOverview", albumFilter: "ente" });
+    }, []);
+
     const handleChangeBarMode = (mode: GalleryBarMode) => {
         if (mode == "links") {
             setCleanupView(undefined);
@@ -2267,6 +2280,7 @@ const Page: React.FC = () => {
                                 isActiveCollectionDownloadInProgress,
                                 onAddSaveGroup,
                             }}
+                            onBackToAlbums={handleBackToAlbums}
                             mode={barMode}
                             shouldHide={isInSearchMode}
                             setActiveCollectionID={selectGalleryCollection}

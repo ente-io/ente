@@ -44,6 +44,7 @@ type GalleryBarAndListHeaderProps = {
     | "onEditAlbumDetails"
     | "onShowMap"
     | "onCollectionSlideshow"
+    | "onBackToAlbums"
 > &
     Pick<
         CollectionShareProps,
@@ -73,6 +74,7 @@ export const GalleryBarAndListHeader: React.FC<
     onShowMap,
     onCollectionSlideshow,
     setFileListHeader,
+    onBackToAlbums,
 }) => {
     const { show: showCollectionShare, props: collectionShareVisibilityProps } =
         useModalVisibility();
@@ -121,6 +123,7 @@ export const GalleryBarAndListHeader: React.FC<
                         onAddSaveGroup,
                         onShowMap,
                         onCollectionSlideshow,
+                        onBackToAlbums,
                     }}
                     collectionSummary={collectionSummary}
                     onCollectionShare={openCollectionShare}
@@ -165,6 +168,7 @@ export const GalleryBarAndListHeader: React.FC<
         onAddSaveGroup,
         onShowMap,
         onCollectionSlideshow,
+        onBackToAlbums,
         onEditAlbumDetails,
         albumDescription,
         descriptionHeight,
