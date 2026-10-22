@@ -1778,7 +1778,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
                             onOpenPhoto && (
                                 <SpacePostInputButton
                                     label="Reply privately"
-                                    placeholder="Send a message…"
+                                    placeholder="Reply privately…"
                                     backgroundColor={feedActionBackground}
                                     hoverBackgroundColor={
                                         feedActionBackgroundHover

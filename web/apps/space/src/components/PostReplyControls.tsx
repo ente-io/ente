@@ -185,7 +185,7 @@ export const SpacePostReplyControls: React.FC<SpacePostReplyControlsProps> = ({
                     component="textarea"
                     aria-label="Reply privately"
                     disabled={disabled || replyActionPhase != null}
-                    placeholder="Send a message…"
+                    placeholder="Reply privately…"
                     rows={1}
                     {...replyInputProps}
                     sx={{
