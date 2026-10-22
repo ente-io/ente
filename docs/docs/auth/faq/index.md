@@ -90,6 +90,7 @@ If your recovery key was exposed, keep any device where you are signed in to Ent
 2. Create a new Ente account with a different email address. Save its recovery key securely.
 3. Sign in to the new account on another trusted device or installation. Open `Settings > Data > Import codes`, choose **Ente Encrypted export**, and select the file.
 4. Check that all your codes are present, work, and have synced before deleting the old account.
+5. If the old account has a paid subscription or manages a family plan, [contact support](mailto:support@ente.com) before deleting it so you can plan for the people using its storage.
 
 If the account also holds Photos or Locker data, [contact support](mailto:support@ente.com) before deleting anything. If someone you do not trust may have seen your key, consider resetting two-factor authentication for your most sensitive services.
 
