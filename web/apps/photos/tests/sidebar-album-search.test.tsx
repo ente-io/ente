@@ -16,15 +16,15 @@ vi.mock("@/components/PeopleSortOptions", () => ({
     PeopleSortOptions: () => null,
 }));
 vi.mock("@/utils/album-filters", () => import("../src/utils/album-filters"));
-vi.mock("i18next", () => ({
-    t: (key: string) =>
-        ({
-            section_uncategorized: "Uncategorized",
-            section_hidden: "Hidden",
-            section_archive: "Archive",
-            section_trash: "Trash",
-        })[key] ?? key,
-}));
+vi.mock("i18next", () => {
+    const translations: Record<string, string> = {
+        section_uncategorized: "Uncategorized",
+        section_hidden: "Hidden",
+        section_archive: "Archive",
+        section_trash: "Trash",
+    };
+    return { t: (key: string) => translations[key] ?? key };
+});
 vi.mock("ente-new/photos/components/Tiles", () => ({ ItemCard: () => null }));
 vi.mock("react-virtualized-auto-sizer", () => ({
     default: ({
@@ -63,8 +63,8 @@ const renderSearch = (
     query: string,
     albumFilter: GalleryBarImplProps["albumFilter"] = "ente",
     mode: GalleryBarImplProps["mode"] = "albums",
+    summaries = mode == "links" ? [link] : albums,
 ) => {
-    const summaries = mode == "links" ? [link] : albums;
     const props: GalleryBarImplProps = {
         mode,
         albumFilter,
@@ -108,6 +108,19 @@ const renderSearch = (
 };
 
 describe("sidebar album search across groups", () => {
+    test("keeps shortcuts beyond the viewport of a long expanded album group", () => {
+        const manyAlbums = Array.from({ length: 100 }, (_, i) => ({
+            ...owned,
+            id: i + 10,
+            name: `Album ${String(i).padStart(3, "0")}`,
+        }));
+        const html = renderSearch("", "ente", "albums", manyAlbums);
+        expect(html).toContain('aria-label="Album 000"');
+        expect(html).not.toContain('aria-label="Album 099"');
+        for (const label of ["Uncategorized", "Hidden", "Archive", "Trash"])
+            expect(html).not.toContain(`aria-label="${label}"`);
+    });
+
     test("reveals matching Shared albums while Ente is selected", () => {
         const html = renderSearch("holiday");
         expect(html).toContain('aria-label="shared_albums_title"');
@@ -176,9 +189,12 @@ describe("Links sidebar search", () => {
 
 describe("Hidden and Archive sidebars", () => {
     test.each(["hidden-albums", "archive-albums"] as const)(
-        "%s omits the album shortcuts",
+        "%s retains its search field and album cards without shortcuts",
         (mode) => {
             const html = renderSearch("", "ente", mode);
+            expect(html).toContain('aria-label="search_in_albums"');
+            expect(html).toContain('aria-label="Family"');
+            expect(html).toContain('aria-label="Holiday album"');
             for (const label of ["Uncategorized", "Hidden", "Archive", "Trash"])
                 expect(html).not.toContain(`aria-label="${label}"`);
         },
