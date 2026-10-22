@@ -10,6 +10,8 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/notification_key_service.dart';
+import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/bg_task_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -100,10 +102,17 @@ class PushService {
   }
 
   Future<void> _setPushTokenOnServer(String fcmToken, String? apnsToken) async {
+    String? notificationKey;
+    try {
+      notificationKey = await NotificationKeyService.generateNotificationKey();
+    } catch (e, s) {
+      _logPushError("Could not prepare notification key", e, s);
+    }
     await pushGateway.registerToken(
       fcmToken: fcmToken,
       platform: Platform.operatingSystem,
       apnsToken: apnsToken,
+      notificationKey: notificationKey,
     );
   }
 
@@ -117,16 +126,11 @@ class PushService {
     }
   }
 
-  void _handleForegroundPushMessage(RemoteMessage message) {
-    _logger.info("Message data: ${message.data}");
-    if (message.notification != null) {
-      _logger.info(
-        "Message also contained a notification: ${message.notification}",
-      );
-    }
-    if (shouldSync(message)) {
-      SyncService.instance.sync();
-    }
+  Future<void> _handleForegroundPushMessage(RemoteMessage message) async {
+    await NotificationService.instance.handlePushNotification(
+      message.data,
+      onSync: () => SyncService.instance.sync(),
+    );
   }
 
   static bool shouldSync(Object message) {
@@ -140,10 +144,13 @@ class PushService {
 
 @pragma('vm:entry-point')
 Future<void> handleAndroidBackgroundPush(RemoteMessage message) async {
-  if (!PushService.shouldSync(message)) return;
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp().timeout(const Duration(seconds: 10));
-  await BgTaskUtils.scheduleAndroidBackgroundRefresh().timeout(
-    const Duration(seconds: 10),
+  NotificationService.instance.init(await SharedPreferences.getInstance());
+  await NotificationService.instance.handlePushNotification(
+    message.data,
+    onSync: () => BgTaskUtils.scheduleAndroidBackgroundRefresh().timeout(
+      const Duration(seconds: 10),
+    ),
   );
 }
