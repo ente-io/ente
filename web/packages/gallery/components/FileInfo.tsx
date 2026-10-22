@@ -22,11 +22,7 @@ import {
     Box,
     Button,
     CircularProgress,
-    Dialog,
-    DialogContent,
-    DialogTitle,
     IconButton,
-    InputAdornment,
     Link,
     Stack,
     styled,
@@ -39,17 +35,16 @@ import { LinkButtonUndecorated } from "ente-base/components/LinkButton";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
-import { SingleInputForm } from "ente-base/components/SingleInputForm";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { nameAndExtension } from "ente-base/file-name";
 import { formattedDate, formattedTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import type { Location } from "ente-base/types";
 import { CopyButton } from "ente-gallery/components/FileInfoComponents";
+import { RenameFileDialog } from "ente-gallery/components/RenameFileDialog";
 import { tagNumericValue, type RawExifTags } from "ente-gallery/services/exif";
 import { getLeafletWithDefaultIcons } from "ente-gallery/utils/leaflet";
 import { formattedByteSize } from "ente-gallery/utils/units";
@@ -1109,57 +1104,6 @@ const createMultipartCaption = (
         {p3 && <div>{p3}</div>}
     </Stack>
 );
-
-type RenameFileDialogProps = ModalVisibilityProps & {
-    fileName: string;
-    onRename: (newFileName: string) => Promise<void>;
-};
-
-const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
-    open,
-    onClose,
-    fileName,
-    onRename,
-}) => {
-    const [name, extension] = nameAndExtension(fileName);
-
-    const handleSubmit = async (newName: string) => {
-        const newFileName = [newName, extension].filter((x) => !!x).join(".");
-        if (newFileName != fileName) {
-            await onRename(newFileName);
-        }
-        onClose();
-    };
-
-    return (
-        <Dialog {...{ open, onClose }} fullWidth maxWidth="xs">
-            <DialogTitle sx={{ "&&&": { paddingBlock: "26px 0px" } }}>
-                {t("rename_file")}
-            </DialogTitle>
-            <DialogContent>
-                <SingleInputForm
-                    label={t("file_name")}
-                    placeholder={t("file_name")}
-                    initialValue={name}
-                    submitButtonColor="primary"
-                    submitButtonTitle={t("rename")}
-                    onSubmit={handleSubmit}
-                    onCancel={onClose}
-                    slotProps={{
-                        input: {
-                            sx: { alignItems: "baseline" },
-                            endAdornment: extension && (
-                                <InputAdornment position="end">
-                                    {`.${extension}`}
-                                </InputAdornment>
-                            ),
-                        },
-                    }}
-                />
-            </DialogContent>
-        </Dialog>
-    );
-};
 
 const openStreetMapLink = ({ latitude, longitude }: Location) =>
     `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;

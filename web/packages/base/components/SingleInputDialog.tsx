@@ -50,16 +50,13 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
                 open={open}
                 onClose={onClose}
                 maxWidth={false}
-                aria-labelledby={variant === "people" ? titleID : undefined}
+                aria-labelledby={titleID}
                 sx={sx}
                 slotProps={{ paper: { sx: v2PaperSx } }}
             >
                 <Stack sx={{ p: "20px", gap: "20px" }}>
                     <Stack direction="row" sx={v2HeaderRowSx}>
-                        <Typography
-                            id={variant === "people" ? titleID : undefined}
-                            sx={v2TitleSx}
-                        >
+                        <Typography id={titleID} sx={v2TitleSx}>
                             {title}
                         </Typography>
                         <IconButton
