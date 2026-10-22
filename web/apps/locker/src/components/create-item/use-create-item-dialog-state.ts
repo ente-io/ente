@@ -17,7 +17,7 @@ import {
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import log from "ente-base/log";
 import { t } from "i18next";
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     collectionNamesByUploadItem,
@@ -190,6 +190,12 @@ export const useCreateItemDialogState = ({
     const defaultCollectionInitializedRef = useRef(false);
 
     displayCollectionsRef.current = displayCollections;
+
+    const handleCollectionSelectionChange: Dispatch<SetStateAction<number[]>> =
+        useCallback((selection) => {
+            defaultCollectionInitializedRef.current = true;
+            setSelectedCollectionIDs(selection);
+        }, []);
 
     const normalizeSelectedCollectionIDs = useCallback(
         (collectionIDs: number[]) =>
@@ -533,7 +539,7 @@ export const useCreateItemDialogState = ({
         selectedUploadItems,
         setCustomCollectionNames,
         setCollectionName,
-        setSelectedCollectionIDs,
+        setSelectedCollectionIDs: handleCollectionSelectionChange,
         setSelectedCollectionNamesByFileKey,
         setSelectedUploadItems,
         setShowPassword,
