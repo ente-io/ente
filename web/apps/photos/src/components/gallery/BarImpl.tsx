@@ -354,6 +354,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     height: rowHeight,
                     content: (
                         <CollectionBarCard
+                            key={`${collectionSummary.id}-${collectionSummary.coverFile?.id}`}
                             collectionSummary={collectionSummary}
                             activeCollectionID={activeCollectionID!}
                             onSelectCollectionID={onSelectCollectionID}

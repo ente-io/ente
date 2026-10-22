@@ -1,6 +1,7 @@
 import { ThemeProvider } from "@mui/material";
 import { photosTheme } from "ente-base/components/utils/theme";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
+import type { ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
 import {
@@ -8,6 +9,37 @@ import {
     type GalleryBarImplProps,
 } from "../src/components/gallery/BarImpl";
 import { useAlbumNavigationData } from "../src/components/gallery/use-album-navigation-data";
+
+const viewport = vi.hoisted(() => ({ scrollToEnd: false }));
+
+vi.mock("react-window", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("react-window")>();
+    const { createElement } = await import("react");
+    return {
+        ...actual,
+        VariableSizeList: (
+            props: ComponentProps<typeof actual.VariableSizeList>,
+        ) => {
+            let initialScrollOffset = 0;
+            if (viewport.scrollToEnd) {
+                if (typeof props.height != "number")
+                    throw new Error(
+                        "The test viewport must have a numeric height",
+                    );
+                for (let index = 0; index < props.itemCount; index++)
+                    initialScrollOffset += props.itemSize(index);
+                initialScrollOffset = Math.max(
+                    0,
+                    initialScrollOffset - props.height,
+                );
+            }
+            return createElement(actual.VariableSizeList, {
+                ...props,
+                initialScrollOffset,
+            });
+        },
+    };
+});
 
 vi.mock("@/components/CollectionsSortOptions", () => ({
     CollectionsSortOptions: () => null,
@@ -64,6 +96,7 @@ const renderSearch = (
     albumFilter: GalleryBarImplProps["albumFilter"] = "ente",
     mode: GalleryBarImplProps["mode"] = "albums",
     summaries = mode == "links" ? [link] : albums,
+    scrollToEnd = false,
 ) => {
     const props: GalleryBarImplProps = {
         mode,
@@ -104,11 +137,18 @@ const renderSearch = (
             </ThemeProvider>
         );
     };
-    return renderToStaticMarkup(<Sidebar />);
+    // SSR cannot dispatch scroll events; render the real virtualizer at the
+    // requested scroll position using its initialScrollOffset instead.
+    viewport.scrollToEnd = scrollToEnd;
+    try {
+        return renderToStaticMarkup(<Sidebar />);
+    } finally {
+        viewport.scrollToEnd = false;
+    }
 };
 
 describe("sidebar album search across groups", () => {
-    test("keeps shortcuts beyond the viewport of a long expanded album group", () => {
+    test("keeps shortcuts reachable at the end of a long expanded album group", () => {
         const manyAlbums = Array.from({ length: 100 }, (_, i) => ({
             ...owned,
             id: i + 10,
@@ -119,6 +159,12 @@ describe("sidebar album search across groups", () => {
         expect(html).not.toContain('aria-label="Album 099"');
         for (const label of ["Uncategorized", "Hidden", "Archive", "Trash"])
             expect(html).not.toContain(`aria-label="${label}"`);
+
+        const endHTML = renderSearch("", "ente", "albums", manyAlbums, true);
+        expect(endHTML).not.toContain('aria-label="Album 000"');
+        expect(endHTML).toContain('aria-label="Album 099"');
+        for (const label of ["Uncategorized", "Hidden", "Archive", "Trash"])
+            expect(endHTML).toContain(`aria-label="${label}"`);
     });
 
     test("reveals matching Shared albums while Ente is selected", () => {
