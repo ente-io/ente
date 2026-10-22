@@ -1,27 +1,22 @@
 import "package:ente_components/ente_components.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/loading_widget.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/locale.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/selected_files.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
+import "package:photos/ui/device_picker/device_picker_page.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
-import "package:photos/utils/dialog_util.dart";
-import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 Future<dynamic> showAddPhotosSheet(
   BuildContext context,
@@ -179,89 +174,12 @@ class AddPhotosPhotoWidget extends StatelessWidget {
   }
 
   Future<void> _onPickFromDeviceClicked(BuildContext context) async {
-    try {
-      final assetPickerTextDelegate = await _getAssetPickerTextDelegate();
-      if (!context.mounted) return;
-      final List<AssetEntity>? result = await AssetPicker.pickAssets(
-        context,
-        pickerConfig: AssetPickerConfig(
-          keepScrollOffset: true,
-          maxAssets: maxPickAssetLimit,
-          textDelegate: assetPickerTextDelegate,
-          gridCount: 6,
-          pageSize: 120,
-        ),
-      );
-      if (result != null && result.isNotEmpty) {
-        final ca = CollectionActions(CollectionsService.instance);
-        if (!context.mounted) return;
-        await ca.addToCollection(
-          context,
-          collection.id,
-          false,
-          picketAssets: result,
-        );
-        if (!context.mounted) return;
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      if (e is StateError) {
-        final PermissionState ps = await permissionService
-            .requestPhotoMangerPermissions();
-        if (ps != PermissionState.authorized && ps != PermissionState.limited) {
-          if (!context.mounted) return;
-          await showChoiceDialog(
-            context,
-            title: context.strings.grantPermission,
-            body: context.strings.pleaseGrantPermissions,
-            firstButtonLabel: context.strings.ok,
-            secondButtonLabel: context.strings.cancel,
-            firstButtonOnTap: () async {
-              await PhotoManager.openSetting();
-            },
-          );
-        } else {
-          if (!context.mounted) return;
-          await showErrorDialog(
-            context,
-            context.strings.oops,
-            context.strings.somethingWentWrong + (kDebugMode ? "\n$e" : ""),
-          );
-        }
-      }
-    }
-  }
-
-  // AssetPicker's fallback is Chinese. Unsupported locales use its English
-  // delegate.
-  Future<AssetPickerTextDelegate> _getAssetPickerTextDelegate() async {
-    final Locale locale = (await getLocale())!;
-    switch (locale.languageCode.toLowerCase()) {
-      case "en":
-        return const EnglishAssetPickerTextDelegate();
-      case "he":
-        return const HebrewAssetPickerTextDelegate();
-      case "de":
-        return const GermanAssetPickerTextDelegate();
-      case "ru":
-        return const RussianAssetPickerTextDelegate();
-      case "ja":
-        return const JapaneseAssetPickerTextDelegate();
-      case "ar":
-        return const ArabicAssetPickerTextDelegate();
-      case "fr":
-        return const FrenchAssetPickerTextDelegate();
-      case "vi":
-        return const VietnameseAssetPickerTextDelegate();
-      case "tr":
-        return const TurkishAssetPickerTextDelegate();
-      case "ko":
-        return const KoreanAssetPickerTextDelegate();
-      case "zh":
-        return const AssetPickerTextDelegate();
-      default:
-        return const EnglishAssetPickerTextDelegate();
-    }
+    final result = await showDevicePicker(context);
+    if (!context.mounted || result == null || result.isEmpty) return;
+    final added = await CollectionActions(
+      CollectionsService.instance,
+    ).addToCollection(context, collection.id, false, picketAssets: result);
+    if (context.mounted && added) Navigator.of(context).pop();
   }
 }
 

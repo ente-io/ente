@@ -1768,14 +1768,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.1"
-  nested:
-    dependency: transitive
-    description:
-      name: nested
-      sha256: "03bac4c528c64c95c722ec99280375a6f2fc708eec17c7b3f07253b626cd2a20"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   nm:
     dependency: transitive
     description:
@@ -2137,14 +2129,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
-  provider:
-    dependency: transitive
-    description:
-      name: provider
-      sha256: "4e82183fa20e5ca25703ead7e05de9e4cceed1fbd1eadc1ac3cb6f565a09f272"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.1.5+1"
   pub_semver:
     dependency: transitive
     description:
@@ -2984,22 +2968,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
-  wechat_assets_picker:
-    dependency: transitive
-    description:
-      name: wechat_assets_picker
-      sha256: c307e50394c1e6dfcd5c4701e84efb549fce71444fedcf2e671c50d809b3e2a1
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.8.0"
-  wechat_picker_library:
-    dependency: transitive
-    description:
-      name: wechat_picker_library
-      sha256: "5cb61b9aa935b60da5b043f8446fbb9c5077419f20ccc4856bf444aec4f44bc1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.7"
   widgets_to_image:
     dependency: transitive
     description:
