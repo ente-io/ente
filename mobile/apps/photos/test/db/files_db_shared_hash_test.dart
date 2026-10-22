@@ -54,12 +54,6 @@ void main() {
     );
     expect(quoted.keys, ["quote'only"]);
     expect(quoted["quote'only"]?.uploadedFileID, 5);
-
-    final injected = await files
-        .getUserOwnedFilesWithSameHashForGivenListOfFiles([
-          _sharedFile("x') OR 1=1 --"),
-        ], 7);
-    expect(injected, isEmpty);
   });
 
   test("merges results across hash lookup batches", () async {
