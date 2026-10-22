@@ -1080,6 +1080,9 @@
     "description": "Instructions for enabling device lock"
   },
   "deviceNotFound": "Device not found",
+  "devicePickerLimitedAccess": "Showing the photos you allowed",
+  "devicePickerPermissionHint": "To add photos and videos to this album, allow access in settings.",
+  "devicePickerSelectionChanged": "Some selected items couldn't be found. Check your selection and try again.",
   "didYouKnow": "Did you know?",
   "digits": "Digits",
   "disableBackup": "Disable backup",
@@ -3946,6 +3949,20 @@
       "count": {
         "type": "int",
         "example": "3"
+      }
+    }
+  },
+  "selectedCountWithLimit": "{count}/{limit} selected",
+  "@selectedCountWithLimit": {
+    "description": "Selected item count and the selection limit",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      },
+      "limit": {
+        "type": "int",
+        "example": "50"
       }
     }
   },
