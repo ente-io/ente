@@ -63,14 +63,12 @@ export const PhotosNavigationShell: React.FC<
     React.PropsWithChildren<
         PhotosNavigationShellProps & {
             isFirstLoad: boolean;
-            isCleanupViewOpen: boolean;
             alternateHeader: ReactNode;
             galleryNavigation: GalleryNavigation | undefined;
         }
     >
 > = ({
     isFirstLoad,
-    isCleanupViewOpen,
     alternateHeader,
     galleryNavigation,
     children,
@@ -270,12 +268,8 @@ export const PhotosNavigationShell: React.FC<
                         >
                             {children}
                         </Stack>
-                        {!isCleanupViewOpen && (
-                            <>
-                                {isFirstLoad && <FirstLoadMessage />}
-                                {isOffline && <OfflineMessage />}
-                            </>
-                        )}
+                        {isFirstLoad && <FirstLoadMessage />}
+                        {isOffline && <OfflineMessage />}
                     </Stack>
                 </Stack>
             </Stack>

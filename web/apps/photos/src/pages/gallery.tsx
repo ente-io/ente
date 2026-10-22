@@ -2186,7 +2186,6 @@ const Page: React.FC = () => {
             />
             <PhotosNavigationShell
                 isFirstLoad={isFirstLoad}
-                isCleanupViewOpen={isCleanupViewOpen}
                 isInSearchMode={isInSearchMode}
                 isSettingsOpen={sidebarVisibilityProps.open}
                 mode={barMode}
