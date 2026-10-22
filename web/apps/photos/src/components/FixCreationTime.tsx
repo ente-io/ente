@@ -1,10 +1,8 @@
 import {
+    Box,
     Dialog,
-    DialogContent,
-    DialogTitle,
-    FormControl,
     FormControlLabel,
-    FormLabel,
+    IconButton,
     LinearProgress,
     Link,
     Radio,
@@ -14,6 +12,7 @@ import {
 } from "@mui/material";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractExifDates } from "ente-gallery/services/exif";
@@ -30,6 +29,7 @@ import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import { collectionDialogIconButtonSx } from "./CollectionDialog/styles";
 
 type FixCreationTimeProps = ModalVisibilityProps & {
     files: EnteFile[];
@@ -61,35 +61,99 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
         await onRemotePull();
     };
 
-    const title =
-        step == "running"
-            ? t("fix_creation_time_in_progress")
-            : t("fix_creation_time");
-
     const message = messageForStatus(step);
 
     return (
         <Dialog
             open={open}
             onClose={(_, reason) => {
-                if (reason == "backdropClick") return;
+                if (reason == "backdropClick" || step == "running") return;
                 onClose();
             }}
+            maxWidth={false}
+            aria-labelledby="fix-date-time-title"
+            aria-describedby="fix-date-time-description"
+            aria-busy={step == "running"}
+            slotProps={{
+                paper: {
+                    sx: (theme) => ({
+                        width: 560,
+                        maxWidth: "calc(100% - 32px)",
+                        m: "16px",
+                        p: "19px",
+                        border: "1px solid #e0e0e0",
+                        borderRadius: "20px",
+                        backgroundColor: "#f4f4f4",
+                        backgroundImage: "none",
+                        boxShadow: "none",
+                        ...theme.applyStyles("dark", {
+                            borderColor: "stroke.faint",
+                            backgroundColor: "#1b1b1b",
+                        }),
+                    }),
+                },
+            }}
         >
-            <DialogTitle sx={{ mt: "4px" }}>{title}</DialogTitle>
-            <DialogContent
-                sx={{
-                    minWidth: "310px",
-                    pt: "6px",
-                    display: "flex",
-                    flexDirection: "column",
-                    ...(step == "running" && { alignItems: "center" }),
-                }}
-            >
-                {message && <Typography>{message}</Typography>}
+            <Stack sx={{ gap: "18px" }}>
+                <Stack
+                    direction="row"
+                    sx={{
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 2,
+                    }}
+                >
+                    <Typography
+                        id="fix-date-time-title"
+                        component="h2"
+                        sx={{
+                            fontSize: 20,
+                            lineHeight: "28px",
+                            fontWeight: 600,
+                        }}
+                    >
+                        {step == "running"
+                            ? t("fix_creation_time_in_progress")
+                            : t("fix_date_time_title")}
+                    </Typography>
+                    <IconButton
+                        aria-label={t("close")}
+                        onClick={onClose}
+                        disabled={step == "running"}
+                        sx={collectionDialogIconButtonSx}
+                    >
+                        <Box
+                            component="img"
+                            src="/images/fix-time/close.svg"
+                            alt=""
+                            sx={(theme) => ({
+                                ...theme.applyStyles("dark", {
+                                    filter: "invert(1)",
+                                }),
+                            })}
+                        />
+                    </IconButton>
+                </Stack>
+                <Typography
+                    id="fix-date-time-description"
+                    sx={{
+                        fontSize: 13,
+                        lineHeight: "19px",
+                        color: "text.muted",
+                        fontWeight: 400,
+                    }}
+                    role={message ? "status" : undefined}
+                >
+                    {message ??
+                        (step == "running"
+                            ? t("fix_creation_time_in_progress")
+                            : t("fix_date_time_selection", {
+                                  count: files.length,
+                              }))}
+                </Typography>
                 {step == "running" && <Progress {...progress} />}
-                <OptionsForm {...{ step: step, onSubmit, onClose }} />
-            </DialogContent>
+                <OptionsForm {...{ step, files, onSubmit, onClose }} />
+            </Stack>
         </Dialog>
     );
 };
@@ -116,7 +180,6 @@ interface FixProgress {
 const messageForStatus = (step?: Step) => {
     switch (step) {
         case undefined:
-            return undefined;
         case "running":
             return undefined;
         case "completed":
@@ -127,32 +190,31 @@ const messageForStatus = (step?: Step) => {
 };
 
 const Progress: React.FC<FixProgress> = ({ completed, total }) => (
-    <Stack sx={{ width: "100%", gap: "2rem", marginBlockEnd: "20px" }}>
-        <Stack direction="row" sx={{ justifyContent: "center", gap: "2rem" }}>
-            <Typography sx={{ wordSpacing: "1rem" }}>
-                {completed} / {total}
-            </Typography>
-            <Typography>{t("fix_creation_time_file_updated")}</Typography>
-        </Stack>
-
+    <Stack sx={{ gap: 2 }}>
+        <Typography role="status" sx={{ textAlign: "center" }}>
+            {completed} / {total} · {t("fix_creation_time_file_updated")}
+        </Typography>
         <LinearProgress
             variant="determinate"
-            value={Math.round((completed * 100) / total)}
+            value={total ? Math.round((completed * 100) / total) : 0}
         />
     </Stack>
 );
 
 interface OptionsFormProps {
     step: Step | undefined;
+    files: EnteFile[];
     onSubmit: (values: FormValues) => Promise<void>;
     onClose: () => void;
 }
 
 const OptionsForm: React.FC<OptionsFormProps> = ({
     step,
+    files,
     onSubmit,
     onClose,
 }) => {
+    const [showPicker, setShowPicker] = useState(false);
     const { values, handleChange, setValues, handleSubmit } =
         useFormik<FormValues>({
             initialValues: {
@@ -163,128 +225,209 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
             onSubmit,
         });
 
+    const options: { value: FixOption; label: string; description: string }[] =
+        [
+            {
+                value: "date-time-original",
+                label: t("exif_date_time_original"),
+                description: t("fix_date_time_original_description"),
+            },
+            {
+                value: "date-time-digitized",
+                label: t("exif_date_time_digitized"),
+                description: t("fix_date_time_digitized_description"),
+            },
+            {
+                value: "metadata-date",
+                label: t("exif_metadata_date"),
+                description: t("fix_date_time_metadata_description"),
+            },
+            {
+                value: "file-name",
+                label: t("fix_date_time_from_name"),
+                description: t("fix_date_time_name_example"),
+            },
+            {
+                value: "custom",
+                label: t("fix_date_time_custom"),
+                description: values.customDate
+                    ? formattedDateTime(values.customDate.timestamp)
+                    : t("fix_date_time_custom_description", {
+                          count: files.length,
+                      }),
+            },
+        ];
+
+    if (step == "running") return null;
+    if (step == "completed")
+        return (
+            <FocusVisibleButton fullWidth onClick={onClose} sx={submitButtonSx}>
+                {t("close")}
+            </FocusVisibleButton>
+        );
+
     return (
-        <>
-            {(step === undefined || step == "completed-with-errors") && (
-                <form onSubmit={handleSubmit}>
-                    <FormControl>
-                        <FormLabel>{t("fix_creation_time_options")}</FormLabel>
-                    </FormControl>
-                    <RadioGroup
-                        name={"option"}
-                        value={values.option}
-                        onChange={handleChange}
-                        sx={{ pt: 1 }}
-                    >
-                        <FormControlLabel
-                            value={"date-time-original"}
-                            control={<Radio size="small" />}
-                            label={t("exif_date_time_original")}
-                        />
-                        <FormControlLabel
-                            value={"date-time-digitized"}
-                            control={<Radio size="small" />}
-                            label={t("exif_date_time_digitized")}
-                        />
-                        <FormControlLabel
-                            value={"metadata-date"}
-                            control={<Radio size="small" />}
-                            label={t("exif_metadata_date")}
-                        />
-                        <FormControlLabel
-                            value={"file-name"}
-                            control={<Radio size="small" />}
-                            label={t("file_name")}
-                        />
-                        <FormControlLabel
-                            value={"custom"}
-                            control={<Radio size="small" />}
-                            label={t("custom_time")}
-                        />
-                    </RadioGroup>
-                    {values.option == "custom" && (
-                        <FileDateTimePicker
-                            onAccept={(customDate) =>
-                                setValues({ option: "custom", customDate })
-                            }
-                        />
-                    )}
-                </form>
-            )}
-            <Footer
-                step={step}
-                onSubmit={() => handleSubmit()}
-                onClose={onClose}
-            />
-            {(step === undefined || step == "completed-with-errors") && (
-                <Typography
-                    variant="mini"
-                    sx={{
-                        mt: 1.5,
-                        color: "text.faint",
-                        opacity: 0.8,
-                        textAlign: "center",
+        <Stack component="form" onSubmit={handleSubmit} sx={{ gap: "18px" }}>
+            <RadioGroup
+                name="option"
+                value={values.option}
+                onChange={handleChange}
+                aria-labelledby="fix-date-time-description"
+                sx={{ gap: "8px" }}
+            >
+                {options.map(({ value, label, description }) => (
+                    <FormControlLabel
+                        key={value}
+                        value={value}
+                        labelPlacement="start"
+                        onClick={
+                            value == "custom"
+                                ? () => setShowPicker(true)
+                                : undefined
+                        }
+                        control={
+                            <Radio
+                                disableRipple
+                                icon={<Box sx={{ width: 34, height: 34 }} />}
+                                checkedIcon={
+                                    <Box
+                                        sx={{
+                                            width: 34,
+                                            height: 34,
+                                            display: "grid",
+                                            placeItems: "center",
+                                        }}
+                                    >
+                                        <Box
+                                            component="img"
+                                            src="/images/fix-time/selected.svg"
+                                            alt=""
+                                        />
+                                    </Box>
+                                }
+                                sx={{
+                                    p: 0,
+                                    ml: "12px",
+                                    "&.Mui-focusVisible": {
+                                        outline: "2px solid",
+                                        outlineColor: "accent.main",
+                                        borderRadius: "12px",
+                                    },
+                                }}
+                            />
+                        }
+                        label={
+                            <Stack sx={{ gap: "4px" }}>
+                                <Typography
+                                    sx={{
+                                        fontSize: 14,
+                                        lineHeight: "20px",
+                                        fontWeight: 500,
+                                    }}
+                                >
+                                    {label}
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        fontSize: 12,
+                                        lineHeight: "16px",
+                                        fontWeight: 500,
+                                        color: "text.muted",
+                                        overflowWrap: "anywhere",
+                                    }}
+                                >
+                                    {description}
+                                </Typography>
+                            </Stack>
+                        }
+                        sx={(theme) => ({
+                            m: 0,
+                            minHeight: 60,
+                            boxSizing: "border-box",
+                            pl: "15px",
+                            pr: "11px",
+                            py: "9px",
+                            border: "1px solid",
+                            borderColor:
+                                values.option == value
+                                    ? "#e0e0e0"
+                                    : "transparent",
+                            borderRadius: "20px",
+                            backgroundColor: "background.paper",
+                            justifyContent: "space-between",
+                            "& .MuiFormControlLabel-label": {
+                                flex: 1,
+                                minWidth: 0,
+                            },
+                            "&:hover": { backgroundColor: "fill.faintHover" },
+                            "&:has(.Mui-focusVisible)": {
+                                outline: "2px solid",
+                                outlineColor: "accent.main",
+                                outlineOffset: 2,
+                            },
+                            ...theme.applyStyles("dark", {
+                                borderColor:
+                                    values.option == value
+                                        ? "stroke.muted"
+                                        : "transparent",
+                                backgroundColor: "#252525",
+                            }),
+                        })}
+                    />
+                ))}
+            </RadioGroup>
+            {showPicker && (
+                <FileDateTimePicker
+                    initialValue={
+                        values.customDate
+                            ? new Date(values.customDate.timestamp / 1000)
+                            : undefined
+                    }
+                    onAccept={(customDate) => {
+                        void setValues({ option: "custom", customDate });
                     }}
-                >
-                    <Link
-                        href="https://ente.com/help/photos/faq/metadata-and-editing#fix-time-options"
-                        target="_blank"
-                        rel="noopener"
-                        color="inherit"
-                    >
-                        {t("fix_creation_time_options_help")}
-                    </Link>
-                </Typography>
+                    onDidClose={() => setShowPicker(false)}
+                />
             )}
-        </>
+            <FocusVisibleButton
+                type="submit"
+                fullWidth
+                disabled={
+                    !files.length ||
+                    (values.option == "custom" && !values.customDate)
+                }
+                sx={submitButtonSx}
+            >
+                {t("fix_date_time_submit")}
+            </FocusVisibleButton>
+            <Link
+                href="https://ente.com/help/photos/faq/metadata-and-editing#fix-time-options"
+                target="_blank"
+                rel="noopener"
+                sx={{
+                    fontSize: 12,
+                    lineHeight: "16px",
+                    color: "text.muted",
+                    textAlign: "center",
+                }}
+            >
+                {t("fix_creation_time_options_help")}
+            </Link>
+        </Stack>
     );
 };
 
-interface FooterProps {
-    step: Step | undefined;
-    onSubmit: () => void;
-    onClose: () => void;
-}
-
-const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
-    step != "running" && (
-        <Stack
-            direction="row"
-            sx={{
-                width: "100%",
-                marginTop: "24px",
-                justifyContent: "space-around",
-            }}
-        >
-            {(!step || step == "completed-with-errors") && (
-                <FocusVisibleButton
-                    color="secondary"
-                    fullWidth
-                    onClick={onClose}
-                >
-                    {t("cancel")}
-                </FocusVisibleButton>
-            )}
-            {step == "completed" && (
-                <FocusVisibleButton fullWidth onClick={onClose}>
-                    {t("close")}
-                </FocusVisibleButton>
-            )}
-            {(!step || step == "completed-with-errors") && (
-                <>
-                    <div style={{ width: "30px" }} />
-
-                    <FocusVisibleButton
-                        color="accent"
-                        fullWidth
-                        onClick={onSubmit}
-                    >
-                        {t("fix_creation_time")}
-                    </FocusVisibleButton>
-                </>
-            )}
-        </Stack>
-    );
+const submitButtonSx = {
+    minHeight: 52,
+    borderRadius: "20px",
+    fontSize: 14,
+    lineHeight: "20px",
+    fontWeight: 500,
+    color: "#fff",
+    backgroundColor: "#08c225",
+    "&:hover": { backgroundColor: "#07ad21" },
+    "&.Mui-disabled": { color: "text.faint", backgroundColor: "fill.faint" },
+};
 
 const updateFiles = async (
     files: EnteFile[],
