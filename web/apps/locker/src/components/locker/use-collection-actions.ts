@@ -128,7 +128,7 @@ export const useCollectionActions = ({
                 throw new Error("No master key");
             }
 
-            const normalizedNameToID = new Map(
+            const nameToID = new Map(
                 collections
                     .filter(
                         (collection) =>
@@ -136,20 +136,31 @@ export const useCollectionActions = ({
                             isCollectionOwner(collection, currentUserID),
                     )
                     .map((collection) => [
-                        collection.name.trim().toLocaleLowerCase(),
+                        collection.name.trim(),
                         collection.id,
                     ]),
             );
             let createdCollection = false;
 
             for (const name of names) {
-                const normalizedName = name.trim().toLocaleLowerCase();
-                if (!normalizedName || normalizedNameToID.has(normalizedName)) {
+                const trimmedName = name.trim();
+                if (
+                    collections.filter(
+                        (collection) =>
+                            isCollectionOwner(collection, currentUserID) &&
+                            collection.name.trim() === trimmedName,
+                    ).length > 1
+                ) {
+                    throw new Error(
+                        "Multiple upload collections have the same name; select a collection instead",
+                    );
+                }
+                if (!trimmedName || nameToID.has(trimmedName)) {
                     continue;
                 }
 
                 const id = await createCollectionAPI(name, masterKey);
-                normalizedNameToID.set(normalizedName, id);
+                nameToID.set(trimmedName, id);
                 createdCollection = true;
             }
 
@@ -157,7 +168,7 @@ export const useCollectionActions = ({
                 await refreshData();
             }
 
-            return normalizedNameToID;
+            return nameToID;
         },
         [collections, currentUserID, masterKey, refreshData],
     );

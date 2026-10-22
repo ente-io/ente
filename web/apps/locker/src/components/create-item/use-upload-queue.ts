@@ -10,7 +10,7 @@ import {
     type LockerUploadPreflightFailure,
 } from "@/services/locker-limits";
 import type { LockerUploadProgress } from "@/services/uploads";
-import type { LockerCollection, LockerUploadCandidate } from "@/types";
+import type { LockerUploadCandidate } from "@/types";
 import log from "ente-base/log";
 import { t } from "i18next";
 import {
@@ -23,8 +23,9 @@ import {
     dedupeCollectionNames,
     fileForUpload,
     filterNonEmptyUploadItems,
-    normalizeCollectionName,
+    resolveUploadCollectionIDs,
     uploadQueueItemKey,
+    type UploadCollectionSelection,
 } from "./file-upload-helpers";
 
 const MAX_PARALLEL_UPLOADS = 4;
@@ -46,9 +47,8 @@ export interface LockerUploadCallbacks {
 }
 
 interface UseUploadQueueProps extends LockerUploadCallbacks {
-    displayCollections: LockerCollection[];
     selectedUploadItems: LockerUploadCandidate[];
-    selectedCollectionNamesByFileKey: Record<string, string[]>;
+    selectedCollectionsByFileKey: Record<string, UploadCollectionSelection[]>;
     userDetails?: LockerUploadLimitState;
     setError: Dispatch<SetStateAction<string | null>>;
     setUpgradeCTAType: Dispatch<SetStateAction<LockerUpgradeCTAType | null>>;
@@ -71,9 +71,8 @@ const emptyUploadState = (): UploadState => ({
 });
 
 export function useUploadQueue({
-    displayCollections,
     selectedUploadItems,
-    selectedCollectionNamesByFileKey,
+    selectedCollectionsByFileKey,
     userDetails,
     setError,
     setUpgradeCTAType,
@@ -214,49 +213,31 @@ export function useUploadQueue({
             );
             let uploadedCount = 0;
             try {
-                const existingNormalizedNameToID = new Map(
-                    displayCollections.map((collection) => [
-                        normalizeCollectionName(collection.name),
-                        collection.id,
-                    ]),
-                );
-                const normalizedNameToIDResult = await onEnsureCollections?.(
-                    dedupeCollectionNames(
-                        Object.values(selectedCollectionNamesByFileKey).flat(),
+                const draftNames = dedupeCollectionNames(
+                    pendingUploadItems.flatMap((item) =>
+                        (
+                            selectedCollectionsByFileKey[
+                                uploadQueueItemKey(item)
+                            ] ?? []
+                        ).filter(
+                            (selection): selection is string =>
+                                typeof selection === "string",
+                        ),
                     ),
                 );
-                const normalizedNameToID = new Map(existingNormalizedNameToID);
-                if (normalizedNameToIDResult instanceof Map) {
-                    for (const [
-                        name,
-                        id,
-                    ] of normalizedNameToIDResult.entries()) {
-                        normalizedNameToID.set(
-                            normalizeCollectionName(name),
-                            id,
-                        );
-                    }
-                } else {
-                    for (const [name, id] of Object.entries(
-                        normalizedNameToIDResult ?? {},
-                    )) {
-                        normalizedNameToID.set(
-                            normalizeCollectionName(name),
-                            id,
-                        );
-                    }
-                }
+                const created = draftNames.length
+                    ? await onEnsureCollections?.(draftNames)
+                    : undefined;
+                const createdIDs =
+                    created instanceof Map
+                        ? created
+                        : new Map(Object.entries(created ?? {}));
                 const uploadTargets = pendingUploadItems.map((item) => {
                     const fileKey = uploadQueueItemKey(item);
-                    const collectionIDs = dedupeCollectionNames(
-                        selectedCollectionNamesByFileKey[fileKey] ?? [],
-                    )
-                        .map((name) =>
-                            normalizedNameToID.get(
-                                normalizeCollectionName(name),
-                            ),
-                        )
-                        .filter((id): id is number => typeof id === "number");
+                    const collectionIDs = resolveUploadCollectionIDs(
+                        selectedCollectionsByFileKey[fileKey] ?? [],
+                        createdIDs,
+                    );
                     return { item, fileKey, collectionIDs };
                 });
 
@@ -359,13 +340,12 @@ export function useUploadQueue({
         },
         [
             completedFileKeys,
-            displayCollections,
             onEnsureCollections,
             onEnsureUploadLimitState,
             onUploadItemComplete,
             onUploadProgress,
             onUploadsFinished,
-            selectedCollectionNamesByFileKey,
+            selectedCollectionsByFileKey,
             selectedUploadItems,
             userDetails,
             setError,

@@ -38,13 +38,14 @@ import {
     addCollectionName,
     dedupeCollectionNames,
     formatFileSize,
-    normalizeCollectionName,
     renamedUploadFileName,
     toggleCollectionName,
+    uploadCollectionSelection,
     uploadFileExtension,
     uploadItemParentPath,
     uploadProgressValue,
     uploadQueueItemKey,
+    type UploadCollectionSelection,
 } from "./file-upload-helpers";
 
 interface FileUploadSectionProps {
@@ -52,7 +53,7 @@ interface FileUploadSectionProps {
     selectedUploadItems: LockerUploadCandidate[];
     collections: LockerCollection[];
     availableCollectionNames: string[];
-    selectedCollectionNamesByFileKey: Record<string, string[]>;
+    selectedCollectionsByFileKey: Record<string, UploadCollectionSelection[]>;
     completedFileKeys: Set<string>;
     failedFileKeys: Set<string>;
     uploadingFileKeys: Set<string>;
@@ -61,10 +62,15 @@ interface FileUploadSectionProps {
     uploading: boolean;
     canUpload: boolean;
     onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    onToggleCollectionName: (fileKey: string, name: string) => void;
+    onToggleCollectionName: (
+        fileKey: string,
+        name: UploadCollectionSelection,
+    ) => void;
     onAddCollectionName: (fileKey: string, name: string) => void;
     onAddAvailableCollectionName: (name: string) => void;
-    onSetCollectionNamesForAllItems: (names: string[]) => void;
+    onSetCollectionNamesForAllItems: (
+        names: UploadCollectionSelection[],
+    ) => void;
     onRemoveItem: (fileKey: string) => void;
     onRenameItem: (fileKey: string, name: string) => void;
     onUpload: () => Promise<void>;
@@ -75,7 +81,7 @@ export function FileUploadSection({
     selectedUploadItems,
     collections,
     availableCollectionNames,
-    selectedCollectionNamesByFileKey,
+    selectedCollectionsByFileKey,
     completedFileKeys,
     failedFileKeys,
     uploadingFileKeys,
@@ -205,7 +211,7 @@ export function FileUploadSection({
     }, [selectedUploadItems]);
     const sharedSelectedCollectionNames =
         selectedUploadItems.length > 0
-            ? (selectedCollectionNamesByFileKey[
+            ? (selectedCollectionsByFileKey[
                   uploadQueueItemKey(selectedUploadItems[0]!)
               ] ?? [])
             : [];
@@ -374,7 +380,7 @@ export function FileUploadSection({
                                             availableCollectionNames
                                         }
                                         selectedCollectionNames={
-                                            selectedCollectionNamesByFileKey[
+                                            selectedCollectionsByFileKey[
                                                 fileKey
                                             ] ?? []
                                         }
@@ -403,7 +409,7 @@ export function FileUploadSection({
                                         }
                                         uploadInFlight={uploading}
                                         onToggleCollectionName={(
-                                            name: string,
+                                            name: UploadCollectionSelection,
                                         ) =>
                                             onToggleCollectionName(
                                                 fileKey,
@@ -460,7 +466,10 @@ export function FileUploadSection({
                                     onSetCollectionNamesForAllItems(
                                         addCollectionName(
                                             sharedSelectedCollectionNames,
-                                            name,
+                                            uploadCollectionSelection(
+                                                name,
+                                                collections,
+                                            ),
                                         ),
                                     );
                                 }}
@@ -492,7 +501,7 @@ interface UploadItemCardProps {
     item: LockerUploadCandidate;
     collections: LockerCollection[];
     availableCollectionNames: string[];
-    selectedCollectionNames: string[];
+    selectedCollectionNames: UploadCollectionSelection[];
     suggestedCollectionNames: string[];
     showCollectionSelector: boolean;
     isDone: boolean;
@@ -502,7 +511,7 @@ interface UploadItemCardProps {
     uploadProgress: LockerUploadProgress | null | undefined;
     uploadCap: number;
     uploadInFlight: boolean;
-    onToggleCollectionName: (name: string) => void;
+    onToggleCollectionName: (name: UploadCollectionSelection) => void;
     onAddCollectionName: (name: string) => void;
     canRemove: boolean;
     onRemove: () => void;
@@ -717,9 +726,9 @@ function areUploadItemCardPropsEqual(
 const CollectionNameSelector: React.FC<{
     collections: LockerCollection[];
     availableNames: string[];
-    selectedNames: string[];
+    selectedNames: UploadCollectionSelection[];
     suggestedNames: string[];
-    onToggleName: (name: string) => void;
+    onToggleName: (name: UploadCollectionSelection) => void;
     onAddCollectionName: (name: string) => void;
     disabled?: boolean;
 }> = ({
@@ -733,42 +742,30 @@ const CollectionNameSelector: React.FC<{
 }) => {
     const [createOpen, setCreateOpen] = useState(false);
     const [createName, setCreateName] = useState("");
-    const selectedNameMap = useMemo(
-        () =>
-            new Map(
-                selectedNames.map((name) => [
-                    normalizeCollectionName(name),
-                    name,
-                ]),
-            ),
-        [selectedNames],
-    );
-    const displayNames = useMemo(() => {
-        const allNames = dedupeCollectionNames([
-            ...collections.map((collection) => collection.name),
+    const displayCollections = useMemo(() => {
+        const drafts = dedupeCollectionNames([
             ...availableNames,
-            ...selectedNames,
-        ]);
-        const suggestedNameSet = new Set(
-            suggestedNames.map((name) => normalizeCollectionName(name)),
+            ...selectedNames.filter(
+                (selection): selection is string =>
+                    typeof selection === "string",
+            ),
+        ]).filter(
+            (name) =>
+                !collections.some((collection) => collection.name === name),
         );
-        const sortedSuggestedNames = allNames
-            .filter((name) => {
-                const normalizedName = normalizeCollectionName(name);
-                return suggestedNameSet.has(normalizedName);
-            })
-            .sort((a, b) =>
-                a.localeCompare(b, undefined, { sensitivity: "base" }),
-            );
-        const sortedRemainingNames = allNames
-            .filter((name) => {
-                const normalizedName = normalizeCollectionName(name);
-                return !suggestedNameSet.has(normalizedName);
-            })
-            .sort((a, b) =>
-                a.localeCompare(b, undefined, { sensitivity: "base" }),
-            );
-        return [...sortedSuggestedNames, ...sortedRemainingNames];
+        const options = [
+            ...collections.map((collection) => ({
+                key: collection.id,
+                name: collection.name,
+            })),
+            ...drafts.map((name) => ({ key: name, name })),
+        ];
+        return options.sort(
+            (a, b) =>
+                Number(suggestedNames.includes(b.name)) -
+                    Number(suggestedNames.includes(a.name)) ||
+                a.name.localeCompare(b.name),
+        );
     }, [availableNames, collections, selectedNames, suggestedNames]);
 
     const handleAddCollectionName = useCallback(() => {
@@ -785,13 +782,11 @@ const CollectionNameSelector: React.FC<{
     return (
         <Box>
             <CollectionChipRow
-                items={displayNames.map((name) => ({
-                    key: name,
+                items={displayCollections.map(({ key, name }) => ({
+                    key: `${typeof key}:${key}`,
                     label: name,
-                    selected: selectedNameMap.has(
-                        normalizeCollectionName(name),
-                    ),
-                    onClick: () => onToggleName(name),
+                    selected: selectedNames.includes(key),
+                    onClick: () => onToggleName(key),
                 }))}
                 createOpen={createOpen}
                 disabled={disabled}

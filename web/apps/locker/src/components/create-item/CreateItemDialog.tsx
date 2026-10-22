@@ -2,6 +2,7 @@ import { lockerScrollAreaSx } from "@/components/create-item/create-item-dialog-
 import {
     addCollectionName,
     toggleCollectionName,
+    uploadCollectionSelection,
     uploadQueueItemKey,
 } from "@/components/create-item/file-upload-helpers";
 import { FileUploadSection } from "@/components/create-item/FileUploadSection";
@@ -159,14 +160,14 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         saving,
         savedUploadCount,
         selectedCollectionIDs,
-        selectedCollectionNamesByFileKey,
+        selectedCollectionsByFileKey,
         selectedOption,
         selectedType,
         selectedUploadItems,
         setCustomCollectionNames,
         setCollectionName,
         setSelectedCollectionIDs,
-        setSelectedCollectionNamesByFileKey,
+        setSelectedCollectionsByFileKey,
         setSelectedUploadItems,
         setShowPassword,
         shouldShowDialogErrorCard,
@@ -412,8 +413,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             selectedUploadItems={selectedUploadItems}
                             collections={displayCollections}
                             availableCollectionNames={customCollectionNames}
-                            selectedCollectionNamesByFileKey={
-                                selectedCollectionNamesByFileKey
+                            selectedCollectionsByFileKey={
+                                selectedCollectionsByFileKey
                             }
                             completedFileKeys={completedFileKeys}
                             failedFileKeys={failedFileKeys}
@@ -424,29 +425,28 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             canUpload={canUpload}
                             onFileSelect={handleFileSelect}
                             onToggleCollectionName={(fileKey, name) =>
-                                setSelectedCollectionNamesByFileKey(
-                                    (current) => ({
-                                        ...current,
-                                        [fileKey]: toggleCollectionName(
-                                            current[fileKey] ?? [],
-                                            name,
-                                        ),
-                                    }),
-                                )
+                                setSelectedCollectionsByFileKey((current) => ({
+                                    ...current,
+                                    [fileKey]: toggleCollectionName(
+                                        current[fileKey] ?? [],
+                                        name,
+                                    ),
+                                }))
                             }
                             onAddCollectionName={(fileKey, name) => {
                                 setCustomCollectionNames((current) =>
                                     addCollectionName(current, name),
                                 );
-                                setSelectedCollectionNamesByFileKey(
-                                    (current) => ({
-                                        ...current,
-                                        [fileKey]: addCollectionName(
-                                            current[fileKey] ?? [],
+                                setSelectedCollectionsByFileKey((current) => ({
+                                    ...current,
+                                    [fileKey]: addCollectionName(
+                                        current[fileKey] ?? [],
+                                        uploadCollectionSelection(
                                             name,
+                                            displayCollections,
                                         ),
-                                    }),
-                                );
+                                    ),
+                                }));
                             }}
                             onAddAvailableCollectionName={(name) =>
                                 setCustomCollectionNames((current) =>
@@ -454,7 +454,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                 )
                             }
                             onSetCollectionNamesForAllItems={(names) =>
-                                setSelectedCollectionNamesByFileKey(
+                                setSelectedCollectionsByFileKey(
                                     Object.fromEntries(
                                         selectedUploadItems.map((item) => [
                                             uploadQueueItemKey(item),
@@ -482,7 +482,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                             fileKey,
                                     ),
                                 );
-                                setSelectedCollectionNamesByFileKey((current) =>
+                                setSelectedCollectionsByFileKey((current) =>
                                     Object.fromEntries(
                                         Object.entries(current).filter(
                                             ([key]) => key !== fileKey,

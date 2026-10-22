@@ -1,40 +1,58 @@
 import type { LockerUploadProgress } from "@/services/uploads";
-import type { LockerUploadCandidate } from "@/types";
-
-export const normalizeCollectionName = (name: string) =>
-    name.trim().toLocaleLowerCase();
+import type { LockerCollection, LockerUploadCandidate } from "@/types";
 
 export const dedupeCollectionNames = (names: string[]) => {
     const seen = new Set<string>();
     return names.filter((name) => {
         const trimmedName = name.trim();
-        const normalizedName = normalizeCollectionName(trimmedName);
-        if (!normalizedName || seen.has(normalizedName)) {
+        if (!trimmedName || seen.has(trimmedName)) {
             return false;
         }
-        seen.add(normalizedName);
+        seen.add(trimmedName);
         return true;
     });
 };
 
-export const addCollectionName = (names: string[], name: string) =>
-    dedupeCollectionNames([...names, name.trim()]);
+/** Existing collections retain their IDs; only collections to create use names. */
+export type UploadCollectionSelection = number | string;
 
-export const toggleCollectionName = (names: string[], name: string) => {
-    const normalizedName = normalizeCollectionName(name);
-    if (!normalizedName) {
-        return names;
-    }
-
-    return names.some(
-        (candidate) => normalizeCollectionName(candidate) === normalizedName,
-    )
-        ? names.filter(
-              (candidate) =>
-                  normalizeCollectionName(candidate) !== normalizedName,
-          )
-        : addCollectionName(names, name);
+export const uploadCollectionSelection = (
+    name: string,
+    collections: Pick<LockerCollection, "id" | "name">[],
+): UploadCollectionSelection => {
+    const matches = collections.filter(
+        (collection) => collection.name === name.trim(),
+    );
+    return matches.length === 1 ? matches[0]!.id : name.trim();
 };
+
+export const addCollectionName = <T extends UploadCollectionSelection>(
+    names: T[],
+    name: T,
+): T[] => [...new Set([...names, name])];
+
+export const toggleCollectionName = (
+    names: UploadCollectionSelection[],
+    name: UploadCollectionSelection,
+) =>
+    names.includes(name)
+        ? names.filter((candidate) => candidate !== name)
+        : addCollectionName(names, name);
+
+export const resolveUploadCollectionIDs = (
+    selections: UploadCollectionSelection[],
+    createdIDs: Map<string, number>,
+): number[] => [
+    ...new Set(
+        selections.map((selection) => {
+            if (typeof selection === "number") return selection;
+            const id = createdIDs.get(selection.trim());
+            if (id === undefined)
+                throw new Error("Upload collection could not be resolved");
+            return id;
+        }),
+    ),
+];
 
 const uploadItemKeySuffixByFile = new WeakMap<File, string>();
 let uploadItemKeyCounter = 0;
@@ -56,17 +74,20 @@ export const uploadItemParentPath = (item: LockerUploadCandidate) => {
     return segments.slice(0, -1).join("/");
 };
 
-export const collectionNamesByUploadItem = (
+export const collectionsByUploadItem = (
     items: LockerUploadCandidate[],
-    defaultCollectionName?: string,
+    defaultCollectionID?: number,
+    collections: Pick<LockerCollection, "id" | "name">[] = [],
 ) =>
     Object.fromEntries(
         items.map((item) => [
             uploadQueueItemKey(item),
             item.suggestedCollectionNames.length > 0
-                ? dedupeCollectionNames(item.suggestedCollectionNames)
-                : defaultCollectionName
-                  ? [defaultCollectionName]
+                ? dedupeCollectionNames(item.suggestedCollectionNames).map(
+                      (name) => uploadCollectionSelection(name, collections),
+                  )
+                : defaultCollectionID !== undefined
+                  ? [defaultCollectionID]
                   : [],
         ]),
     );

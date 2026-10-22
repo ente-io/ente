@@ -20,9 +20,10 @@ import { t } from "i18next";
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    collectionNamesByUploadItem,
+    collectionsByUploadItem,
     filterNonEmptyUploadItems,
     uploadQueueItemKey,
+    type UploadCollectionSelection,
 } from "./file-upload-helpers";
 import {
     getRequiredFields,
@@ -148,10 +149,8 @@ export const useCreateItemDialogState = ({
     const [selectedUploadItems, setSelectedUploadItems] = useState<
         LockerUploadCandidate[]
     >(filterNonEmptyUploadItems(initialItems ?? []));
-    const [
-        selectedCollectionNamesByFileKey,
-        setSelectedCollectionNamesByFileKey,
-    ] = useState<Record<string, string[]>>({});
+    const [selectedCollectionsByFileKey, setSelectedCollectionsByFileKey] =
+        useState<Record<string, UploadCollectionSelection[]>>({});
     const [customCollectionNames, setCustomCollectionNames] = useState<
         string[]
     >([]);
@@ -165,9 +164,8 @@ export const useCreateItemDialogState = ({
         resetUploadState,
         upload,
     } = useUploadQueue({
-        displayCollections,
         selectedUploadItems,
-        selectedCollectionNamesByFileKey,
+        selectedCollectionsByFileKey,
         userDetails,
         setError,
         setUpgradeCTAType,
@@ -209,11 +207,11 @@ export const useCreateItemDialogState = ({
         setSelectedOption(
             editItem?.type ?? (initialItems?.length ? "file" : null),
         );
-        const defaultCollectionName =
+        const defaultUploadCollectionID =
             defaultCollectionID !== null && defaultCollectionID !== undefined
                 ? displayCollectionsRef.current.find(
                       (collection) => collection.id === defaultCollectionID,
-                  )?.name
+                  )?.id
                 : undefined;
         setSelectedCollectionIDs(
             isEditMode
@@ -239,10 +237,11 @@ export const useCreateItemDialogState = ({
         );
         setSelectedUploadItems(filteredInitialItems);
         setCustomCollectionNames([]);
-        setSelectedCollectionNamesByFileKey(
-            collectionNamesByUploadItem(
+        setSelectedCollectionsByFileKey(
+            collectionsByUploadItem(
                 filteredInitialItems,
-                defaultCollectionName,
+                defaultUploadCollectionID,
+                displayCollectionsRef.current,
             ),
         );
         resetUploadState();
@@ -312,7 +311,7 @@ export const useCreateItemDialogState = ({
             setCollectionName("");
             setSelectedUploadItems([]);
             setCustomCollectionNames([]);
-            setSelectedCollectionNamesByFileKey({});
+            setSelectedCollectionsByFileKey({});
             resetUploadState();
             setError(null);
             setUpgradeCTAType(null);
@@ -425,11 +424,11 @@ export const useCreateItemDialogState = ({
                 return;
             }
 
-            const defaultCollectionName =
+            const defaultUploadCollectionID =
                 selectedCollectionIDs.length > 0
                     ? displayCollectionsRef.current.find((collection) =>
                           selectedCollectionIDs.includes(collection.id),
-                      )?.name
+                      )?.id
                     : undefined;
             const items = files.map((file) => ({
                 file,
@@ -439,10 +438,11 @@ export const useCreateItemDialogState = ({
             const nonEmptyItems = filterNonEmptyUploadItems(items);
             setSelectedUploadItems(nonEmptyItems);
             setCustomCollectionNames([]);
-            setSelectedCollectionNamesByFileKey(
-                collectionNamesByUploadItem(
+            setSelectedCollectionsByFileKey(
+                collectionsByUploadItem(
                     nonEmptyItems,
-                    defaultCollectionName,
+                    defaultUploadCollectionID,
+                    displayCollectionsRef.current,
                 ),
             );
             resetUploadState();
@@ -522,14 +522,14 @@ export const useCreateItemDialogState = ({
         saving,
         savedUploadCount,
         selectedCollectionIDs,
-        selectedCollectionNamesByFileKey,
+        selectedCollectionsByFileKey,
         selectedOption,
         selectedType,
         selectedUploadItems,
         setCustomCollectionNames,
         setCollectionName,
         setSelectedCollectionIDs,
-        setSelectedCollectionNamesByFileKey,
+        setSelectedCollectionsByFileKey,
         setSelectedUploadItems,
         setShowPassword,
         shouldShowDialogErrorCard,
