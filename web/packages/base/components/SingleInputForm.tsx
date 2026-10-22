@@ -26,9 +26,16 @@ import { ShowHidePasswordInputAdornment } from "./mui/PasswordInputAdornment";
 
 export type SingleInputFormProps = Pick<
     TextFieldProps,
-    "label" | "placeholder" | "autoComplete" | "autoFocus" | "slotProps"
+    | "label"
+    | "placeholder"
+    | "autoComplete"
+    | "autoFocus"
+    | "slotProps"
+    | "helperText"
 > & {
     variant?: "default" | "v2" | "people";
+    endAdornment?: React.ReactNode;
+    selectOnFocus?: boolean;
     inputType?: TextFieldProps["type"];
     initialValue?: string;
     submitButtonColor?: ButtonProps["color"];
@@ -48,6 +55,9 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     inputType,
     initialValue,
     autoFocus,
+    endAdornment,
+    selectOnFocus,
+    helperText,
     submitButtonTitle,
     submitButtonColor,
     onCancel,
@@ -104,10 +114,18 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                     )}
                     <InputBase
                         id={inputID}
-                        aria-describedby={error ? helperID : undefined}
+                        aria-describedby={
+                            error || helperText ? helperID : undefined
+                        }
+                        inputProps={{ "aria-invalid": !!error }}
                         name="value"
                         value={formik.values.value}
                         onChange={formik.handleChange}
+                        onFocus={
+                            selectOnFocus
+                                ? (event) => event.target.select()
+                                : undefined
+                        }
                         type={showPassword ? "text" : (inputType ?? "text")}
                         placeholder={rest.placeholder}
                         autoComplete={rest.autoComplete}
@@ -121,7 +139,9 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                                     showPassword={showPassword}
                                     onToggle={handleToggleShowHidePassword}
                                 />
-                            ) : undefined
+                            ) : (
+                                endAdornment
+                            )
                         }
                     />
                     <Typography
@@ -129,7 +149,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                         aria-live="polite"
                         sx={v2HelperSx(!!error)}
                     >
-                        {error ?? ""}
+                        {error ?? helperText ?? ""}
                     </Typography>
                 </Stack>
                 <Stack direction="row" sx={{ gap: "12px" }}>
@@ -185,7 +205,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 disabled={formik.isSubmitting}
                 error={!!formik.errors.value}
                 // The space reserves helper-text height before an error appears.
-                helperText={formik.errors.value ?? " "}
+                helperText={formik.errors.value ?? helperText ?? " "}
                 slotProps={{
                     input:
                         inputType == "password"

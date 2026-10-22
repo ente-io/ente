@@ -568,6 +568,7 @@
     "info": "Info",
     "comments": "comments",
     "file_name": "File name",
+    "file_extension_unchanged": "The file extension stays the same",
     "caption_placeholder": "Add a description",
     "location": "Location",
     "view_on_map": "View on OpenStreetMap",
