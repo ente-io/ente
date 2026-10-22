@@ -91,6 +91,10 @@
       ]
     },
     {
+      "title": "Allan Gray",
+      "slug": "allan_gray"
+    },
+    {
       "title": "Allegro",
       "slug": "allegro",
       "hex": "FF5A00"
@@ -1760,6 +1764,10 @@
     {
       "title": "ngrok",
       "hex": "858585"
+    },
+    {
+      "title": "Ninety One",
+      "slug": "ninety_one"
     },
     {
       "title": "Nintendo",
