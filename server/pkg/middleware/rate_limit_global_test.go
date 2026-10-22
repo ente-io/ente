@@ -18,18 +18,25 @@ func TestGlobalRateLimitBucketsAreIndependent(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	for _, firstPath := range []string{"/collections", "/files/thumbnail/v3/1"} {
 		t.Run(firstPath, func(t *testing.T) {
-			rl := &RateLimitMiddleware{limit: 2}
+			rl := NewRateLimitMiddleware(nil, 3, 2, time.Hour)
+			t.Cleanup(rl.Stop)
 			router := newGlobalRateLimitTestRouter(rl)
-			paths := []string{"/collections", "/files/thumbnail/v3/1"}
-			if firstPath != paths[0] {
+			paths := []struct {
+				path  string
+				limit int
+			}{
+				{"/collections", 3},
+				{"/files/thumbnail/v3/1", 2},
+			}
+			if firstPath != paths[0].path {
 				paths[0], paths[1] = paths[1], paths[0]
 			}
-			for _, path := range paths {
-				for range rl.limit {
-					require.Equal(t, http.StatusNoContent, globalRateLimitTestRequest(router, http.MethodGet, path))
+			for _, tc := range paths {
+				for range tc.limit {
+					require.Equal(t, http.StatusNoContent, globalRateLimitTestRequest(router, http.MethodGet, tc.path))
 				}
 				for range 5 {
-					require.Equal(t, http.StatusTooManyRequests, globalRateLimitTestRequest(router, http.MethodGet, path))
+					require.Equal(t, http.StatusTooManyRequests, globalRateLimitTestRequest(router, http.MethodGet, tc.path))
 				}
 			}
 		})
@@ -38,7 +45,7 @@ func TestGlobalRateLimitBucketsAreIndependent(t *testing.T) {
 
 func TestGlobalRateLimitThumbnailRoutesShareBudget(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	rl := &RateLimitMiddleware{limit: 1}
+	rl := &RateLimitMiddleware{limit: 1, thumbnailLimit: 1}
 	router := newGlobalRateLimitTestRouter(rl)
 	require.Equal(t, http.StatusNoContent, globalRateLimitTestRequest(router, http.MethodGet, "/files/thumbnail/v3/1"))
 	for _, route := range []string{
@@ -66,7 +73,7 @@ func TestGlobalRateLimitOtherRoutesRetainGeneralBudget(t *testing.T) {
 		{http.MethodOptions, "/files/thumbnail/v3/1"},
 	} {
 		t.Run(tc.method+tc.path, func(t *testing.T) {
-			rl := &RateLimitMiddleware{limit: 1}
+			rl := &RateLimitMiddleware{limit: 1, thumbnailLimit: 1}
 			router := newGlobalRateLimitTestRouter(rl)
 			router.GET("/files/download/:fileID", func(c *gin.Context) { c.Status(http.StatusNoContent) })
 			router.GET("/files/data/preview", func(c *gin.Context) { c.Status(http.StatusNoContent) })
@@ -80,7 +87,7 @@ func TestGlobalRateLimitOtherRoutesRetainGeneralBudget(t *testing.T) {
 
 func TestGlobalRateLimitResetsBothBuckets(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	rl := NewRateLimitMiddleware(nil, 1, time.Hour)
+	rl := NewRateLimitMiddleware(nil, 1, 1, time.Hour)
 	t.Cleanup(rl.Stop)
 	router := newGlobalRateLimitTestRouter(rl)
 	for _, path := range []string{"/collections", "/files/thumbnail/v3/1"} {
@@ -98,7 +105,7 @@ func TestGlobalRateLimitResetsBothBuckets(t *testing.T) {
 
 func TestGlobalRateLimitConcurrentRequests(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	rl := &RateLimitMiddleware{limit: 10}
+	rl := &RateLimitMiddleware{limit: 10, thumbnailLimit: 20}
 	router := newGlobalRateLimitTestRouter(rl)
 	var accepted [2]int64
 	var wg sync.WaitGroup
@@ -114,7 +121,7 @@ func TestGlobalRateLimitConcurrentRequests(t *testing.T) {
 		}
 	}
 	wg.Wait()
-	require.Equal(t, [2]int64{10, 10}, accepted)
+	require.Equal(t, [2]int64{10, 20}, accepted)
 }
 
 func TestGlobalRateLimitRejectionMetricsIdentifyBucket(t *testing.T) {

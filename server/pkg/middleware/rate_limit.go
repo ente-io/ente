@@ -42,6 +42,7 @@ type RateLimitMiddleware struct {
 	count              int64
 	thumbnailCount     int64
 	limit              int64
+	thumbnailLimit     int64
 	reset              time.Duration
 	ticker             *time.Ticker
 	limit10ReqPerMin   *limiter.Limiter
@@ -55,7 +56,7 @@ type RateLimitMiddleware struct {
 	discordCtrl        *discord.DiscordController
 }
 
-func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64, reset time.Duration) *RateLimitMiddleware {
+func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit, thumbnailLimit int64, reset time.Duration) *RateLimitMiddleware {
 	rl := &RateLimitMiddleware{
 		limit10ReqPerMin:   util.NewRateLimiter("10-M"),
 		limit60ReqPerMin:   util.NewRateLimiter("60-M"),
@@ -67,6 +68,7 @@ func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64,
 		limit700ReqPerSec:  util.NewRateLimiter("700-S"),
 		discordCtrl:        discordCtrl,
 		limit:              limit,
+		thumbnailLimit:     thumbnailLimit,
 		reset:              reset,
 		ticker:             time.NewTicker(reset),
 	}
@@ -85,17 +87,17 @@ func (r *RateLimitMiddleware) Stop() {
 
 func (r *RateLimitMiddleware) GlobalRateLimiter() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		counter := &r.count
+		counter, limit := &r.count, r.limit
 		metricURL, name := processGlobalRateLimitURL, "Global"
 		if c.Request.Method == http.MethodGet && isThumbnailReadURLPath(c.FullPath()) {
-			counter = &r.thumbnailCount
+			counter, limit = &r.thumbnailCount, r.thumbnailLimit
 			metricURL, name = processThumbnailRateLimitURL, "Thumbnail"
 		}
 		count := atomic.AddInt64(counter, 1)
-		if count > r.limit {
+		if count > limit {
 			recordRateLimitRejection(rateLimitScopeProcessGlobal, c.Request.Method, metricURL)
 			if count%100 == 0 {
-				go r.discordCtrl.NotifyPotentialAbuse(fmt.Sprintf("%s ratelimit (%d) breached %d", name, r.limit, count))
+				go r.discordCtrl.NotifyPotentialAbuse(fmt.Sprintf("%s ratelimit (%d) breached %d", name, limit, count))
 			}
 			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Rate limit breached, try later"})
 			return
