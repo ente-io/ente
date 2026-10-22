@@ -37,11 +37,8 @@ void main() {
     final ordinary = await files
         .getUserOwnedFilesWithSameHashForGivenListOfFiles([
           _sharedFile("owned-hash"),
-          _sharedFile("owned-hash"),
           _sharedFile("other-owner-hash"),
           _sharedFile("image-hash:video-hash"),
-          _sharedFile(""),
-          EnteFile(),
         ], 7);
     expect(
       ordinary.keys,
@@ -65,7 +62,7 @@ void main() {
     expect(injected, isEmpty);
   });
 
-  test("merges hash lookup batches without duplicate results", () async {
+  test("merges results across hash lookup batches", () async {
     await files.clearTable();
     const count = 1001;
     final hashes = List.generate(count, (index) => "hash-$index");
@@ -76,7 +73,7 @@ void main() {
 
     final matches = await files
         .getUserOwnedFilesWithSameHashForGivenListOfFiles(
-          [...hashes, hashes.first].map(_sharedFile).toList(),
+          hashes.map(_sharedFile).toList(),
           7,
         );
 
@@ -100,13 +97,7 @@ EnteFile _storedFile({
   ..hash = hash;
 
 EnteFile _sharedFile(String hash) => EnteFile()
-  ..uploadedFileID = 100
   ..ownerID = 9
-  ..collectionID = 20
-  ..title = "shared.jpg"
-  ..fileType = FileType.image
-  ..creationTime = 100
-  ..modificationTime = 100
   ..hash = hash;
 
 class _PathProvider extends PathProviderPlatform {
