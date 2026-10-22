@@ -1,5 +1,5 @@
 import { ContextMenu, ContextMenuItem } from "@/components/ContextMenu";
-import { avatarBackgroundColor, avatarTextColor } from "@/services/avatar";
+import { avatarTextColor } from "@/services/avatar";
 import {
     createFamily,
     inviteFamilyMember,
@@ -7,15 +7,13 @@ import {
     removeFamilyMember,
     revokeFamilyInvite,
 } from "@/services/family";
-import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AddOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import {
     Avatar,
     Box,
     Dialog,
     DialogTitle,
-    Divider,
     FormControlLabel,
     IconButton,
     InputBase,
@@ -41,6 +39,7 @@ import {
     TitledNestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
+import { SidebarPanelContext } from "ente-base/components/mui/SidebarDrawerContext";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { isSxArray } from "ente-base/components/utils/sx";
 import { useBaseContext } from "ente-base/context";
@@ -63,7 +62,7 @@ import {
     type UserDetails,
 } from "ente-new/photos/services/user-details";
 import { t } from "i18next";
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useContext, useEffect, useId, useRef, useState } from "react";
 
 type FamilyManagementProps = NestedSidebarDrawerVisibilityProps & {
     onShowPlanSelector: () => void;
@@ -76,6 +75,7 @@ export const FamilyManagement: React.FC<FamilyManagementProps> = ({
     onShowPlanSelector,
 }) => {
     const { onGenericError, showMiniDialog } = useBaseContext();
+    const settingsPanel = useContext(SidebarPanelContext);
     const userDetails = useUserDetailsSnapshot();
     const [inviteOpen, setInviteOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<FamilyMember>();
@@ -153,47 +153,97 @@ export const FamilyManagement: React.FC<FamilyManagementProps> = ({
         onShowPlanSelector();
     };
 
+    const content = (
+        <>
+            {!userDetails ? (
+                <Stack
+                    sx={{
+                        height: 300,
+                        placeContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    <ActivityIndicator />
+                </Stack>
+            ) : members.length ? (
+                <FamilyDashboard
+                    {...{ userDetails, members, isAdmin }}
+                    onInvite={() => setInviteOpen(true)}
+                    onManage={(member, anchor) => {
+                        setSelectedMember(member);
+                        setMemberActionsAnchor(anchor);
+                    }}
+                    onLeave={confirmLeave}
+                />
+            ) : (
+                <FamilyIntroduction
+                    canCreate={isSubscriptionActivePaid(
+                        userDetails.subscription,
+                    )}
+                    onContinue={() => setInviteOpen(true)}
+                    onShowPlans={showPlans}
+                />
+            )}
+        </>
+    );
+
     return (
         <>
-            <TitledNestedSidebarDrawer
-                {...{ open, onClose, onRootClose }}
-                anchor="right"
-                maxWidth="440px"
-                title={t("family")}
-                showBackButton
-            >
-                <Box sx={{ px: 2, py: 1 }}>
-                    {!userDetails ? (
-                        <Stack
+            {settingsPanel ? (
+                <Dialog
+                    open={open}
+                    onClose={onClose}
+                    container={settingsPanel}
+                    aria-labelledby="family-dialog-title"
+                    maxWidth={false}
+                    sx={{ position: "absolute", inset: 0 }}
+                    slotProps={{
+                        backdrop: {
+                            sx: {
+                                position: "absolute",
+                                bgcolor: "transparent",
+                            },
+                        },
+                        paper: {
+                            sx: {
+                                m: 0,
+                                width: "100%",
+                                maxWidth: "none",
+                                height: "100%",
+                                maxHeight: "none",
+                                borderRadius: "20px",
+                                boxShadow: "none",
+                                bgcolor: "background.paper",
+                            },
+                        },
+                    }}
+                >
+                    <Stack sx={{ p: "36px", gap: "20px" }}>
+                        <Typography
+                            id="family-dialog-title"
+                            component="h2"
                             sx={{
-                                height: 300,
-                                placeContent: "center",
-                                alignItems: "center",
+                                fontSize: 18,
+                                lineHeight: "24px",
+                                fontWeight: 600,
                             }}
                         >
-                            <ActivityIndicator />
-                        </Stack>
-                    ) : members.length ? (
-                        <FamilyDashboard
-                            {...{ userDetails, members, isAdmin }}
-                            onInvite={() => setInviteOpen(true)}
-                            onManage={(member, anchor) => {
-                                setSelectedMember(member);
-                                setMemberActionsAnchor(anchor);
-                            }}
-                            onLeave={confirmLeave}
-                        />
-                    ) : (
-                        <FamilyIntroduction
-                            canCreate={isSubscriptionActivePaid(
-                                userDetails.subscription,
-                            )}
-                            onContinue={() => setInviteOpen(true)}
-                            onShowPlans={showPlans}
-                        />
-                    )}
-                </Box>
-            </TitledNestedSidebarDrawer>
+                            {t("family")}
+                        </Typography>
+                        {content}
+                    </Stack>
+                </Dialog>
+            ) : (
+                <TitledNestedSidebarDrawer
+                    {...{ open, onClose, onRootClose }}
+                    anchor="right"
+                    maxWidth="440px"
+                    title={t("family")}
+                    showBackButton
+                >
+                    <Box sx={{ px: 2, py: 1 }}>{content}</Box>
+                </TitledNestedSidebarDrawer>
+            )}
             <InviteMemberDialog
                 open={inviteOpen}
                 onClose={() => setInviteOpen(false)}
@@ -216,11 +266,13 @@ export const FamilyManagement: React.FC<FamilyManagementProps> = ({
             />
             <StorageLimitDialog
                 member={editingMember}
-                color={avatarBackgroundColor(
-                    members.findIndex(
-                        (member) => member.id == editingMember?.id,
-                    ),
-                )}
+                color={
+                    familyMemberColors[
+                        members.findIndex(
+                            (member) => member.id == editingMember?.id,
+                        )
+                    ] ?? familyMemberColors[0]!
+                }
                 totalStorage={
                     (userDetails?.familyData?.storage ?? 0) +
                     (userDetails?.storageBonus ?? 0)
@@ -262,6 +314,23 @@ interface FamilyDashboardProps {
     onLeave: () => void;
 }
 
+const familyMemberColors = [
+    "#df61bb",
+    "#f24822",
+    "#08c225",
+    "#9610d6",
+    "#087aff",
+    "#f0a01e",
+];
+const familyStorageColors = [
+    "#08c225",
+    "#f08a1e",
+    "#9610d6",
+    "#087aff",
+    "#df61bb",
+    "#f0a01e",
+];
+
 const FamilyDashboard: React.FC<FamilyDashboardProps> = ({
     userDetails,
     members,
@@ -275,11 +344,40 @@ const FamilyDashboard: React.FC<FamilyDashboardProps> = ({
         (userDetails.familyData?.storage ?? 0) + userDetails.storageBonus;
 
     return (
-        <Stack sx={{ gap: 3 }}>
-            <Box sx={{ p: 2, bgcolor: "fill.faint", borderRadius: 2 }}>
-                <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-                    <Typography>{t("family_storage")}</Typography>
-                    <Typography variant="small" sx={{ color: "text.muted" }}>
+        <Stack sx={{ gap: "14px" }}>
+            <Box
+                sx={{
+                    px: "20px",
+                    py: "16px",
+                    bgcolor: "fill.faint",
+                    borderRadius: "12px",
+                }}
+            >
+                <Stack
+                    direction="row"
+                    sx={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 1,
+                        flexWrap: "wrap",
+                    }}
+                >
+                    <Typography
+                        sx={{
+                            fontSize: 14,
+                            lineHeight: "20px",
+                            fontWeight: 600,
+                        }}
+                    >
+                        {t("storage")}
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontSize: 12,
+                            lineHeight: "16px",
+                            fontWeight: 500,
+                        }}
+                    >
                         {t("family_storage_usage", {
                             used: formattedStorageByteSize(used),
                             total: formattedStorageByteSize(total),
@@ -290,8 +388,8 @@ const FamilyDashboard: React.FC<FamilyDashboardProps> = ({
                     sx={{
                         display: "flex",
                         mt: 1.5,
-                        height: 8,
-                        bgcolor: "fill.muted",
+                        height: 5,
+                        bgcolor: "background.paper",
                         borderRadius: 1,
                         overflow: "hidden",
                     }}
@@ -305,37 +403,82 @@ const FamilyDashboard: React.FC<FamilyDashboardProps> = ({
                                     width: total
                                         ? `${Math.min(((member.usage ?? 0) / total) * 100, 100)}%`
                                         : 0,
-                                    bgcolor: avatarBackgroundColor(index),
+                                    bgcolor: familyStorageColors[index],
+                                    borderRadius: "35px",
                                 }}
                             />
                         ),
                     )}
                 </Box>
+                <Stack
+                    direction="row"
+                    sx={{ mt: 1.5, gap: 1.25, flexWrap: "wrap" }}
+                >
+                    {members.map((member, index) =>
+                        member.status == "INVITED" ? null : (
+                            <Stack
+                                key={member.id}
+                                direction="row"
+                                sx={{
+                                    alignItems: "center",
+                                    gap: "3px",
+                                    minWidth: 0,
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 7,
+                                        height: 7,
+                                        borderRadius: "50%",
+                                        flexShrink: 0,
+                                        bgcolor: familyStorageColors[index],
+                                    }}
+                                />
+                                <Typography
+                                    sx={{
+                                        fontSize: 10,
+                                        lineHeight: "14px",
+                                        fontWeight: 500,
+                                        color: "text.muted",
+                                        overflowWrap: "anywhere",
+                                    }}
+                                >
+                                    {member.status == "SELF"
+                                        ? t("you")
+                                        : member.email.split("@")[0]}
+                                </Typography>
+                            </Stack>
+                        ),
+                    )}
+                </Stack>
             </Box>
+            <Typography
+                sx={{ fontSize: 14, lineHeight: "20px", fontWeight: 600 }}
+            >
+                {t("family_members")}
+            </Typography>
             <Stack sx={{ gap: 1 }}>
-                <Typography variant="small" sx={{ px: 1, color: "text.muted" }}>
-                    {t("family_members")}
-                </Typography>
-                <Box sx={{ bgcolor: "fill.faint", borderRadius: 2 }}>
-                    {members.map((member, index) => (
-                        <React.Fragment key={member.id}>
-                            {!!index && <Divider />}
-                            <FamilyMemberRow
-                                {...{ member, isAdmin, onManage }}
-                                color={avatarBackgroundColor(index)}
-                            />
-                        </React.Fragment>
-                    ))}
-                </Box>
+                {members.map((member, index) => (
+                    <FamilyMemberRow
+                        key={member.id}
+                        {...{ member, isAdmin, onManage }}
+                        color={familyMemberColors[index]!}
+                    />
+                ))}
             </Stack>
             {isAdmin ? (
                 members.length < 6 && (
                     <FocusVisibleButton
                         color="accent"
-                        startIcon={<AddOutlined />}
+                        fullWidth
+                        sx={{
+                            ...v2SubmitButtonSx,
+                            flex: "none",
+                            fontWeight: 600,
+                        }}
                         onClick={onInvite}
                     >
-                        {t("add_family_member")}
+                        {t("add_member")}
                     </FocusVisibleButton>
                 )
             ) : (
@@ -354,46 +497,82 @@ const FamilyMemberRow: React.FC<{
     onManage: (member: FamilyMember, anchor: HTMLElement) => void;
 }> = ({ member, isAdmin, color, onManage }) => {
     const invited = member.status == "INVITED";
-    const manageable = isAdmin && !member.isAdmin;
-    const role = member.isAdmin
-        ? t("family_manager")
-        : t(invited ? "family_invited" : "family_member");
-
+    const manageable = isAdmin && member.status != "SELF" && !member.isAdmin;
     const content = (
         <Stack
             direction="row"
             sx={{
-                minHeight: 72,
-                px: 2,
-                py: 1.5,
+                height: 60,
+                boxSizing: "border-box",
+                px: 1.5,
+                py: 1.25,
+                borderRadius: "20px",
                 gap: 1.5,
                 alignItems: "center",
             }}
         >
-            <Avatar
+            <Box
                 sx={{
                     width: 36,
-                    height: 36,
-                    bgcolor: invited ? "fill.muted" : color,
-                    color: invited ? "text.muted" : avatarTextColor,
-                    fontSize: 15,
+                    display: "flex",
+                    justifyContent: "center",
+                    flexShrink: 0,
                 }}
             >
-                {member.email[0]?.toUpperCase()}
-            </Avatar>
-            <Stack sx={{ flex: 1, minWidth: 0 }}>
-                <Typography noWrap>{member.email}</Typography>
-                <Typography variant="small" noWrap sx={{ color: "text.muted" }}>
-                    {role}
-                    {!invited &&
-                        ` · ${formattedStorageByteSize(member.usage ?? 0)}`}
-                    {!invited &&
-                        member.storageLimit != undefined &&
-                        ` / ${formattedStorageByteSize(member.storageLimit)}`}
+                <Avatar
+                    sx={{
+                        width: 24,
+                        height: 24,
+                        bgcolor: color,
+                        color: avatarTextColor,
+                        fontSize: 12,
+                        fontWeight: 500,
+                    }}
+                >
+                    {member.email[0]?.toUpperCase()}
+                </Avatar>
+            </Box>
+            <Stack sx={{ flex: 1, minWidth: 0, gap: 0.5 }}>
+                <Typography
+                    noWrap
+                    sx={{ fontSize: 14, lineHeight: "20px", fontWeight: 500 }}
+                >
+                    {member.email}
+                </Typography>
+                <Typography
+                    noWrap
+                    sx={{
+                        fontSize: 12,
+                        lineHeight: "16px",
+                        fontWeight: 500,
+                        color: "text.muted",
+                    }}
+                >
+                    {invited
+                        ? t("family_invite_pending")
+                        : t("family_member_storage_used", {
+                              usage: formattedStorageByteSize(
+                                  member.usage ?? 0,
+                              ),
+                          })}
                 </Typography>
             </Stack>
             {manageable && (
-                <ChevronRightOutlined sx={{ color: "stroke.muted" }} />
+                <Box
+                    sx={{
+                        width: 48,
+                        height: 36,
+                        display: "grid",
+                        placeItems: "center",
+                        flexShrink: 0,
+                    }}
+                >
+                    <HugeiconsIcon
+                        icon={ArrowRight01Icon}
+                        size={24}
+                        aria-hidden
+                    />
+                </Box>
             )}
         </Stack>
     );
@@ -410,7 +589,7 @@ const FamilyMemberRow: React.FC<{
                 bgcolor: "transparent",
                 textAlign: "left",
                 textTransform: "none",
-                borderRadius: 0,
+                borderRadius: "20px",
                 "&:hover": { bgcolor: "fill.faintHover" },
             }}
         >
