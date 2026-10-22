@@ -6,21 +6,12 @@ import {
     type albumFilters,
 } from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
-import {
-    Delete02Icon,
-    Download05Icon,
-    GeometricShapes01Icon,
-    Link05Icon,
-    PinIcon,
-    StarIcon,
-    ViewOffSlashIcon,
-} from "@hugeicons/core-free-icons";
+import { Link05Icon, PinIcon, StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PeopleIcon from "@mui/icons-material/People";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -41,7 +32,6 @@ import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { ItemCard } from "ente-new/photos/components/Tiles";
 import {
     PseudoCollectionID,
-    type CollectionSummaries,
     type CollectionSummary,
     type CollectionSummaryAttribute,
     type CollectionsSortBy,
@@ -79,7 +69,6 @@ export interface GalleryBarImplProps extends GalleryBarPresentationProps {
     onShowPeopleOverview: () => void;
     collectionSummaries: CollectionSummary[];
     visibleAlbumFilters: typeof albumFilters;
-    normalCollectionSummaries: CollectionSummaries;
     uncategorizedCollectionSummaryID: number;
     onShowCollectionSummary: (
         collectionSummaryID: number,
@@ -106,7 +95,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     onShowPeopleOverview,
     collectionSummaries,
     visibleAlbumFilters,
-    normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowCollectionSummary,
     activeCollectionID,
@@ -266,25 +254,21 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         {
             id: uncategorizedCollectionSummaryID,
             label: t("section_uncategorized"),
-            icon: GeometricShapes01Icon,
             active: activeCollectionID == uncategorizedCollectionSummaryID,
         },
         {
             id: PseudoCollectionID.hiddenItems,
             label: t("section_hidden"),
-            icon: ViewOffSlashIcon,
             active: mode == "hidden-albums",
         },
         {
             id: PseudoCollectionID.archiveItems,
             label: t("section_archive"),
-            icon: Download05Icon,
             active: mode == "archive-albums",
         },
         {
             id: PseudoCollectionID.trash,
             label: t("section_trash"),
-            icon: Delete02Icon,
             active: activeCollectionID == PseudoCollectionID.trash,
         },
     ];
@@ -360,6 +344,41 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             >
                 {t("no_results")}
             </Typography>
+        </Stack>
+    );
+
+    const albumShortcutItems = (
+        <Stack sx={{ flexShrink: 0, gap: "2px", pb: "8px" }}>
+            <Divider
+                sx={{
+                    mb: "8px",
+                    height: "2px",
+                    border: 0,
+                    bgcolor: "divider",
+                    opacity: 0.5,
+                }}
+            />
+            {albumShortcuts.map(({ id, label, active }) => (
+                <BarCard
+                    key={id}
+                    aria-label={label}
+                    aria-current={active ? "true" : undefined}
+                    onClick={() => {
+                        void onShowCollectionSummary(
+                            id,
+                            id == PseudoCollectionID.hiddenItems,
+                        ).then(async (success) => {
+                            if (!success || !mobile) return;
+                            if (id == PseudoCollectionID.hiddenItems)
+                                await wait(10);
+                            mobileDrawerProps.onClose();
+                        });
+                    }}
+                    sx={{ flexShrink: 0 }}
+                >
+                    <CardText>{label}</CardText>
+                </BarCard>
+            ))}
         </Stack>
     );
 
@@ -611,60 +630,13 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                             {displayedAlbumFilter == filter.value && items}
                         </React.Fragment>
                     ))}
+                    {albumShortcutItems}
                 </Stack>
             ) : (
                 items
             )}
-            {mode != "people" && mode != "links" && (
-                <Stack sx={{ flexShrink: 0, gap: "2px", pb: "8px" }}>
-                    <Divider
-                        sx={{
-                            mb: "8px",
-                            height: "2px",
-                            border: 0,
-                            bgcolor: "divider",
-                            opacity: 0.5,
-                        }}
-                    />
-                    {albumShortcuts.map(({ id, label, icon, active }) => (
-                        <BarCard
-                            key={id}
-                            aria-label={label}
-                            aria-current={active ? "true" : undefined}
-                            onClick={() => {
-                                void onShowCollectionSummary(
-                                    id,
-                                    id == PseudoCollectionID.hiddenItems,
-                                ).then(async (success) => {
-                                    if (!success || !mobile) return;
-                                    if (id == PseudoCollectionID.hiddenItems)
-                                        await wait(10);
-                                    mobileDrawerProps.onClose();
-                                });
-                            }}
-                            sx={{ flexShrink: 0 }}
-                        >
-                            <HugeiconsIcon icon={icon} size={20} aria-hidden />
-                            <CardText>{label}</CardText>
-                            {id == PseudoCollectionID.hiddenItems ? (
-                                <LockOutlinedIcon
-                                    sx={{ color: "text.muted", fontSize: 19 }}
-                                />
-                            ) : (
-                                <Typography
-                                    variant="small"
-                                    sx={{ color: "text.muted" }}
-                                >
-                                    {
-                                        normalCollectionSummaries.get(id)
-                                            ?.fileCount
-                                    }
-                                </Typography>
-                            )}
-                        </BarCard>
-                    ))}
-                </Stack>
-            )}
+            {(mode == "hidden-albums" || mode == "archive-albums") &&
+                albumShortcutItems}
         </Stack>
     );
 

@@ -63,7 +63,6 @@ const renderSearch = (
         albumSearchQuery: query,
         collectionSummaries: [],
         visibleAlbumFilters: [],
-        normalCollectionSummaries: new Map(),
         uncategorizedCollectionSummaryID: 99,
         activeCollectionID: undefined,
         collectionsSortBy: "updation-time-desc",

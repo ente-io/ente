@@ -2203,7 +2203,6 @@ const Page: React.FC = () => {
                               onShowPeopleOverview: handleShowPeople,
                               collectionSummaries: sidebarCollectionSummaries,
                               visibleAlbumFilters: sidebarAlbumFilters,
-                              normalCollectionSummaries,
                               uncategorizedCollectionSummaryID:
                                   state.uncategorizedCollectionSummaryID,
                               onShowCollectionSummary: showCollectionSummary,
