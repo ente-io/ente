@@ -1056,7 +1056,9 @@ class _GalleryFileViewerBottomOverlay extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: GestureDetector(
-                        onTap: () => showDetailsSheet(context, file),
+                        onTap: isGuestView
+                            ? null
+                            : () => showDetailsSheet(context, file),
                         child: Text(
                           captionText,
                           maxLines: 1,
