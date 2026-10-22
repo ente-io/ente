@@ -187,6 +187,7 @@ export const useCreateItemDialogState = ({
     const formType =
         isEditMode && selectedOption === "file" ? "file" : selectedType;
     const displayCollectionsRef = useRef(displayCollections);
+    const defaultCollectionInitializedRef = useRef(false);
 
     displayCollectionsRef.current = displayCollections;
 
@@ -215,6 +216,8 @@ export const useCreateItemDialogState = ({
                       (collection) => collection.id === defaultCollectionID,
                   )?.name
                 : undefined;
+        defaultCollectionInitializedRef.current =
+            defaultCollectionName !== undefined;
         setSelectedCollectionIDs(
             isEditMode
                 ? normalizeSelectedCollectionIDs(
@@ -286,6 +289,7 @@ export const useCreateItemDialogState = ({
         if (
             !open ||
             isEditMode ||
+            defaultCollectionInitializedRef.current ||
             selectedCollectionIDs.length > 0 ||
             defaultCollectionID === null ||
             defaultCollectionID === undefined ||
@@ -296,6 +300,7 @@ export const useCreateItemDialogState = ({
             return;
         }
 
+        defaultCollectionInitializedRef.current = true;
         setSelectedCollectionIDs([defaultCollectionID]);
     }, [
         defaultCollectionID,
