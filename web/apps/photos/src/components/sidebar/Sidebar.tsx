@@ -78,7 +78,7 @@ type SidebarProps = ModalVisibilityProps & {
     onShowPlanSelector: () => void;
     collectionNameByID: Map<number, string>;
     onCloseOverlays: () => void;
-    children?: React.ReactNode;
+    children?: (onRootClose: () => void) => React.ReactNode;
     onAuthenticateUser: () => Promise<boolean>;
 };
 
@@ -397,7 +397,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onActionHandled={setPendingFreeUpSpaceAction}
                 />
             )}
-            {children}
+            {children?.(onClose)}
         </RootSidebarDrawer>
     );
 };

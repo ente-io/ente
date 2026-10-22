@@ -2117,7 +2117,7 @@ const Page: React.FC = () => {
         return <div></div>;
     }
 
-    const subscriptionDialogs = (
+    const renderSubscriptionDialogs = (onRootClose = handleSidebarClose) => (
         <>
             <PlanSelector
                 {...planSelectorVisibilityProps}
@@ -2127,6 +2127,7 @@ const Page: React.FC = () => {
             {familyManagementVisibilityProps.open && (
                 <FamilyManagement
                     {...familyManagementVisibilityProps}
+                    onRootClose={onRootClose}
                     onShowPlanSelector={showPlanSelector}
                 />
             )}
@@ -2148,7 +2149,7 @@ const Page: React.FC = () => {
             onDrop={setDragAndDropFiles}
         >
             {blockingLoad && <TranslucentLoadingOverlay />}
-            {!sidebarVisibilityProps.open && subscriptionDialogs}
+            {!sidebarVisibilityProps.open && renderSubscriptionDialogs()}
             <CollectionSelector
                 open={openCollectionSelector}
                 onClose={handleCloseCollectionSelector}
@@ -2445,7 +2446,10 @@ const Page: React.FC = () => {
                 onCloseOverlays={closeSidebarOverlays}
                 onAuthenticateUser={authenticateUser}
             >
-                {sidebarVisibilityProps.open && subscriptionDialogs}
+                {(onRootClose) =>
+                    sidebarVisibilityProps.open &&
+                    renderSubscriptionDialogs(onRootClose)
+                }
             </Sidebar>
             <WhatsNew {...whatsNewVisibilityProps} />
             <PeopleConsentDialog
