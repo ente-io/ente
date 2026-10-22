@@ -229,7 +229,10 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
             <RadioGroup
                 name="option"
                 value={values.option}
-                onChange={handleChange}
+                onChange={(event, option) => {
+                    handleChange(event);
+                    if (option == "custom") setShowPicker(true);
+                }}
                 aria-labelledby="fix-date-time-description"
                 sx={{ gap: "8px" }}
             >
