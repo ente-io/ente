@@ -16,7 +16,9 @@ func TestCLIConfigDiscovery(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		initConfig(configDir)
+		if err := initConfig(configDir); err != nil {
+			t.Fatal(err)
+		}
 		if got := viper.GetString("endpoint.api"); got != want {
 			t.Fatalf("endpoint.api = %q, want %q", got, want)
 		}

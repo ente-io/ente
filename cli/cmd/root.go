@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"github.com/ente/cli/pkg"
+	"github.com/ente/cli/pkg/secrets"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
@@ -23,9 +24,22 @@ func GenerateDocs() error {
 	return doc.GenMarkdownTree(rootCmd, "./docs/generated")
 }
 
-func Execute(controller *pkg.ClICtrl, ver string) {
+func Execute(controller *pkg.ClICtrl, ver string, beforeNetwork func() error) {
 	ctrl = controller
 	version = ver
+	rootCmd.PersistentPreRunE = func(command *cobra.Command, args []string) error {
+		network := command == exportCmd || command == addAccCmd || command.Parent() == _adminCmd
+		if network {
+			if err := beforeNetwork(); err != nil {
+				return err
+			}
+		}
+		if network || command.Parent() == accountCmd {
+			ctrl.KeyHolder = secrets.NewKeyHolder(secrets.GetOrCreateClISecret())
+			return ctrl.Init()
+		}
+		return nil
+	}
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
