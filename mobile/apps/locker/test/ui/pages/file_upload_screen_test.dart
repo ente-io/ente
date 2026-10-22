@@ -10,7 +10,6 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/configuration.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/pages/file_upload_screen.dart';
-import 'package:locker/ui/pages/file_upload_screen_v2.dart';
 
 import '../../test_utils/configuration_test_util.dart';
 
@@ -18,7 +17,7 @@ void main() {
   late Directory testRoot;
 
   setUp(() async {
-    testRoot = await setupLockerConfigurationForTest('upload_v2');
+    testRoot = await setupLockerConfigurationForTest('upload');
     await Configuration.instance.setUserID(1);
   });
 
@@ -63,7 +62,7 @@ void main() {
               final result = await Navigator.of(context)
                   .push<FileUploadScreenResult>(
                     MaterialPageRoute(
-                      builder: (_) => FileUploadScreenV2(
+                      builder: (_) => FileUploadScreen(
                         files: uploadFiles ?? files,
                         collections: collections,
                         selectedCollection: selectedCollection,
@@ -149,7 +148,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    expect(find.byType(FileUploadScreenV2), findsOneWidget);
+    expect(find.byType(FileUploadScreen), findsOneWidget);
     expect(find.text('No items left to upload'), findsOneWidget);
     expect(find.text('Add items'), findsOneWidget);
     final save = tester.widget<ButtonComponent>(
@@ -183,11 +182,11 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     expect(find.text('Discard upload?'), findsOneWidget);
-    expect(find.byType(FileUploadScreenV2), findsOneWidget);
+    expect(find.byType(FileUploadScreen), findsOneWidget);
 
     await tester.tap(find.text('Discard'));
     await tester.pumpAndSettle();
-    expect(find.byType(FileUploadScreenV2), findsNothing);
+    expect(find.byType(FileUploadScreen), findsNothing);
   });
 
   Future<void> showLongLists(WidgetTester tester) async {
