@@ -71,7 +71,7 @@ func TestURLSanitizerSharesRateLimitsAcrossEncodings(t *testing.T) {
 		{"/file-link/verify-password", "/file-link/verify-%70assword", "/file-link%2Fverify-password"},
 	} {
 		t.Run(paths[0], func(t *testing.T) {
-			rateLimiter := middleware.NewRateLimitMiddleware(discord.NewDiscordController(nil, "test", "test"), 1000, 1000, time.Minute)
+			rateLimiter := middleware.NewRateLimitMiddleware(discord.NewDiscordController(nil, "test", "test"), 1000, time.Minute)
 			t.Cleanup(rateLimiter.Stop)
 			router := gin.New()
 			router.POST(paths[0], rateLimiter.APIRateLimitMiddleware(urlSanitizer), func(c *gin.Context) {
