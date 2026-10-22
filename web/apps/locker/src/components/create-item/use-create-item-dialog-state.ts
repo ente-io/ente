@@ -333,14 +333,14 @@ export const useCreateItemDialogState = ({
 
     const resetToOptions = useCallback(() => {
         handleSelectOption(null);
-        setSelectedCollectionIDs(
-            normalizeSelectedCollectionIDs(
-                defaultCollectionID !== null &&
-                    defaultCollectionID !== undefined
-                    ? [defaultCollectionID]
-                    : [],
-            ),
+        const defaultCollectionIDs = normalizeSelectedCollectionIDs(
+            defaultCollectionID !== null && defaultCollectionID !== undefined
+                ? [defaultCollectionID]
+                : [],
         );
+        defaultCollectionInitializedRef.current =
+            defaultCollectionIDs.length > 0;
+        setSelectedCollectionIDs(defaultCollectionIDs);
         setShowPassword(false);
     }, [
         defaultCollectionID,
