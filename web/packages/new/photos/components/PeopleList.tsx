@@ -122,6 +122,7 @@ export interface FilePeopleListProps {
     onAddPerson?: () => void;
     addPersonTitle?: string;
     addPersonLabel?: string;
+    addPersonIcon?: React.ReactNode;
 }
 
 export const FilePeopleList: React.FC<FilePeopleListProps> = ({
@@ -133,6 +134,7 @@ export const FilePeopleList: React.FC<FilePeopleListProps> = ({
     onAddPerson,
     addPersonTitle,
     addPersonLabel,
+    addPersonIcon,
 }) => (
     <FilePeopleList_>
         {manuallyAssignedPeople
@@ -182,7 +184,7 @@ export const FilePeopleList: React.FC<FilePeopleListProps> = ({
                 aria-label={addPersonTitle}
             >
                 <AddPersonAvatar>
-                    <PersonAddIcon />
+                    {addPersonIcon ?? <PersonAddIcon />}
                 </AddPersonAvatar>
                 <Typography variant="small" sx={{ color: "text.muted" }}>
                     {addPersonLabel}
