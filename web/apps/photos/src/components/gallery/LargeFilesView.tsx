@@ -611,6 +611,7 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
                 checked={checked}
                 onChange={handleCheckboxChange}
                 onClick={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
             />
             {checked && <SelectedOverlay />}
         </TileContainer>
