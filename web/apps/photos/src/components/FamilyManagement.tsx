@@ -288,16 +288,46 @@ const FamilyIntroduction: React.FC<{
     onContinue: () => void;
     onShowPlans: () => void;
 }> = ({ canCreate, onContinue, onShowPlans }) => (
-    <Stack sx={{ alignItems: "center", textAlign: "center", gap: 3, py: 2 }}>
-        <img alt="" height={180} src="/images/family-plan/1x.png" />
-        <Stack sx={{ gap: 1, maxWidth: 380 }}>
-            <Typography variant="h3">{t("family_plan")}</Typography>
-            <Typography sx={{ color: "text.muted" }}>
+    <Stack sx={{ gap: "24px" }}>
+        <Stack
+            sx={{
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: 216,
+                bgcolor: "fill.faint",
+                borderRadius: "16px",
+                p: 3,
+            }}
+        >
+            <Box
+                component="img"
+                alt=""
+                src="/images/family-plan/1x.png"
+                sx={{ height: 168, maxWidth: "100%", objectFit: "contain" }}
+            />
+        </Stack>
+        <Stack sx={{ gap: "8px", textAlign: "center", alignItems: "center" }}>
+            <Typography
+                component="h3"
+                sx={{ fontSize: 24, lineHeight: "32px", fontWeight: 600 }}
+            >
+                {t("family_plan")}
+            </Typography>
+            <Typography
+                sx={{
+                    maxWidth: 360,
+                    fontSize: 14,
+                    lineHeight: "22px",
+                    color: "text.muted",
+                }}
+            >
                 {t("family_plan_description")}
             </Typography>
         </Stack>
         <FocusVisibleButton
             color="accent"
+            fullWidth
+            sx={{ ...v2SubmitButtonSx, flex: "none", fontWeight: 600 }}
             onClick={canCreate ? onContinue : onShowPlans}
         >
             {t(canCreate ? "add_family_member" : "view_plans")}
