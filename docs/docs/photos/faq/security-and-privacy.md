@@ -72,6 +72,8 @@ Your **recovery key is a 24-word phrase** that is the ONLY way to recover your a
 
 The same Ente account uses the same recovery key in Photos, Auth, and Locker. Separate accounts have separate keys. Backup-code lists issued by other websites belong to those websites and cannot be used as your Ente recovery key. Learn [which recovery key or backup codes you need](/auth/faq/#recovery-key-or-backup-codes).
 
+Your recovery key cannot be changed. If it was exposed, see [what to do next](/auth/faq/#change-recovery-key).
+
 ### How do I find my recovery key? {#find-recovery-key}
 
 If you previously downloaded your recovery key, search your Downloads folder for `ente-recovery-key.txt` (or search for `recovery-key.txt`). If you saved it elsewhere, check that folder too. Keep the file private.

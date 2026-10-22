@@ -356,6 +356,7 @@ Jump to a category:
 ### Family Plans
 
 - [Does Ente have Family Plans?](/photos/faq/storage-and-plans#family-plans-faq)
+- [Where do I manage my family plan?](/photos/faq/storage-and-plans#manage-family-plan)
 - [How many family members can I add to my plan?](/photos/faq/storage-and-plans#family-members-limit)
 - [Can family members see each other's photos?](/photos/faq/storage-and-plans#family-privacy)
 - [Can I set storage limits for family members?](/photos/faq/storage-and-plans#family-storage-limits)
