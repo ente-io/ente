@@ -2,7 +2,6 @@ import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Avatar, Dialog, IconButton, Stack, Typography } from "@mui/material";
 import {
-    v2CancelButtonSx,
     v2CloseButtonSx,
     v2HeaderRowSx,
     v2PaperSx,
@@ -175,16 +174,6 @@ export const ManageMemberSubscription: React.FC<
                         })}
                     >
                         {t("leave_family_plan")}
-                    </FocusVisibleButton>
-                    <FocusVisibleButton
-                        fullWidth
-                        onClick={onClose}
-                        sx={[
-                            v2CancelButtonSx,
-                            { flex: "none", fontWeight: 600 },
-                        ]}
-                    >
-                        {t("done")}
                     </FocusVisibleButton>
                 </Stack>
             </Stack>
