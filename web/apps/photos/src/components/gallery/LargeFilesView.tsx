@@ -7,7 +7,6 @@ import {
     type LargeFileFilter,
     type LargeFileItem,
 } from "@/services/large-files";
-import CloseIcon from "@mui/icons-material/Close";
 import { Box, LinearProgress, Stack, styled, Typography } from "@mui/material";
 import { CenteredFill, Overlay } from "ente-base/components/containers";
 import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
@@ -300,7 +299,6 @@ const FilterChips: React.FC<FilterChipsProps> = ({
                 }}
             >
                 {t(value)}
-                {filter === value && <CloseIcon sx={{ fontSize: 16 }} />}
             </FocusVisibleButton>
         ))}
     </Stack>
