@@ -49,6 +49,9 @@ export interface LockerUploadCallbacks {
 interface UseUploadQueueProps extends LockerUploadCallbacks {
     selectedUploadItems: LockerUploadCandidate[];
     selectedCollectionsByFileKey: Record<string, UploadCollectionSelection[]>;
+    setSelectedCollectionsByFileKey: Dispatch<
+        SetStateAction<Record<string, UploadCollectionSelection[]>>
+    >;
     userDetails?: LockerUploadLimitState;
     setError: Dispatch<SetStateAction<string | null>>;
     setUpgradeCTAType: Dispatch<SetStateAction<LockerUpgradeCTAType | null>>;
@@ -73,6 +76,7 @@ const emptyUploadState = (): UploadState => ({
 export function useUploadQueue({
     selectedUploadItems,
     selectedCollectionsByFileKey,
+    setSelectedCollectionsByFileKey,
     userDetails,
     setError,
     setUpgradeCTAType,
@@ -241,6 +245,16 @@ export function useUploadQueue({
                     return { item, fileKey, collectionIDs };
                 });
 
+                setSelectedCollectionsByFileKey((current) => ({
+                    ...current,
+                    ...Object.fromEntries(
+                        uploadTargets.map(({ fileKey, collectionIDs }) => [
+                            fileKey,
+                            collectionIDs,
+                        ]),
+                    ),
+                }));
+
                 let nextIndex = 0;
                 const worker = async () => {
                     while (true) {
@@ -346,6 +360,7 @@ export function useUploadQueue({
             onUploadProgress,
             onUploadsFinished,
             selectedCollectionsByFileKey,
+            setSelectedCollectionsByFileKey,
             selectedUploadItems,
             userDetails,
             setError,

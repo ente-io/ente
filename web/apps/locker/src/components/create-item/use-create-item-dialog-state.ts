@@ -166,6 +166,7 @@ export const useCreateItemDialogState = ({
     } = useUploadQueue({
         selectedUploadItems,
         selectedCollectionsByFileKey,
+        setSelectedCollectionsByFileKey,
         userDetails,
         setError,
         setUpgradeCTAType,
