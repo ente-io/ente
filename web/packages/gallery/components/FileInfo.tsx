@@ -38,12 +38,8 @@ import {
 import { LinkButtonUndecorated } from "ente-base/components/LinkButton";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
-import {
-    SidebarDrawer,
-    SidebarDrawerTitlebar,
-} from "ente-base/components/mui/SidebarDrawer";
+import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
 import { SingleInputForm } from "ente-base/components/SingleInputForm";
-import { EllipsizedTypography } from "ente-base/components/Typography";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
@@ -492,12 +488,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
             </Stack>
             <FileInfoNavigationHint />
-            <RawExif
-                {...rawExifVisibilityProps}
-                onInfoClose={handleClose}
-                tags={exif?.tags}
-                fileName={fileFileName(file)}
-            />
+            <RawExif {...rawExifVisibilityProps} tags={exif?.tags} />
 
             {canAddPerson && (
                 <AssignPersonDialog
@@ -1269,26 +1260,13 @@ const MapBoxEnableContainer = styled(MapBoxContainer)(
 interface RawExifProps {
     open: boolean;
     onClose: () => void;
-    onInfoClose: () => void;
     tags: RawExifTags | undefined;
-    fileName: string;
 }
 
-const RawExif: React.FC<RawExifProps> = ({
-    open,
-    onClose,
-    onInfoClose,
-    tags,
-    fileName,
-}) => {
+const RawExif: React.FC<RawExifProps> = ({ open, onClose, tags }) => {
     if (!tags) {
         return <></>;
     }
-
-    const handleRootClose = () => {
-        onClose();
-        onInfoClose();
-    };
 
     const items: (readonly [string, string, string, string])[] = Object.entries(
         tags,
@@ -1317,52 +1295,89 @@ const RawExif: React.FC<RawExifProps> = ({
         .flat()
         .filter(([, , , description]) => description);
 
+    const namespaces = [...new Set(items.map(([, namespace]) => namespace))];
+
     return (
         <FileInfoSidebar open={open} onClose={onClose}>
-            <SidebarDrawerTitlebar
-                onClose={onClose}
-                onRootClose={handleRootClose}
-                title={t("exif")}
-                caption={fileName}
-                showRootCloseButton={false}
-                actionButton={
-                    <CopyButton size="small" text={JSON.stringify(tags)} />
-                }
-            />
-            <Stack sx={{ gap: 2, py: 3, px: 1 }}>
-                {items.map(([key, namespace, tagName, description]) => (
-                    <ExifItem key={key}>
-                        <Stack direction="row" sx={{ gap: 1 }}>
-                            <Typography
-                                variant="small"
-                                sx={{ color: "text.muted" }}
-                            >
-                                {tagName}
-                            </Typography>
-                            <Typography
-                                variant="tiny"
-                                sx={{ color: "text.faint" }}
-                            >
-                                {namespace}
-                            </Typography>
-                        </Stack>
-                        <EllipsizedTypography sx={{ width: "100%" }}>
-                            {description}
-                        </EllipsizedTypography>
-                    </ExifItem>
+            <FileInfoHeader>
+                <IconButton
+                    aria-label={t("go_back")}
+                    onClick={onClose}
+                    sx={{
+                        width: 40,
+                        height: 40,
+                        flexShrink: 0,
+                        p: 0,
+                        ml: -1.25,
+                        borderRadius: "50%",
+                    }}
+                >
+                    <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
+                </IconButton>
+                <Typography
+                    component="h2"
+                    sx={{
+                        flex: 1,
+                        fontSize: 20,
+                        lineHeight: "28px",
+                        fontWeight: 600,
+                    }}
+                >
+                    {t("exif")}
+                </Typography>
+                <CopyButton size="small" text={JSON.stringify(tags)} />
+            </FileInfoHeader>
+            <Stack sx={{ gap: 2.5, pb: 3 }}>
+                {namespaces.map((namespace) => (
+                    <FileInfoSection
+                        key={namespace}
+                        title={
+                            namespace.charAt(0).toUpperCase() +
+                            namespace.slice(1)
+                        }
+                    >
+                        <Box component="dl" sx={{ m: 0, pl: 2 }}>
+                            {items
+                                .filter(
+                                    ([, itemNamespace]) =>
+                                        itemNamespace === namespace,
+                                )
+                                .map(([key, , tagName, description]) => (
+                                    <Stack
+                                        key={key}
+                                        sx={{ py: 1.25, gap: 0.5 }}
+                                    >
+                                        <Typography
+                                            component="dt"
+                                            variant="small"
+                                            sx={{
+                                                color: "text.muted",
+                                                overflowWrap: "anywhere",
+                                            }}
+                                        >
+                                            {tagName}
+                                        </Typography>
+                                        <Typography
+                                            component="dd"
+                                            sx={{
+                                                m: 0,
+                                                fontSize: 14,
+                                                lineHeight: "22px",
+                                                overflowWrap: "anywhere",
+                                                whiteSpace: "pre-wrap",
+                                            }}
+                                        >
+                                            {description}
+                                        </Typography>
+                                    </Stack>
+                                ))}
+                        </Box>
+                    </FileInfoSection>
                 ))}
             </Stack>
         </FileInfoSidebar>
     );
 };
-
-const ExifItem = styled("div")`
-    padding-left: 8px;
-    padding-right: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-`;
 
 type AlbumsProps = Required<
     Pick<
