@@ -35,7 +35,6 @@ interface SortOptionsProps<
     onChange: (category: Category, ascending: boolean) => void;
 }
 
-// Shared presentation and close-before-sorting behavior for Photos sort menus.
 export function SortOptions<Category extends string>({
     id: ariaID,
     activeCategory,
