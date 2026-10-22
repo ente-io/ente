@@ -117,8 +117,9 @@ func (repo *CollectionRepository) WithSharingDetailsForUser(c ente.Collection, a
 	}
 	if actorUserID != c.Owner.ID {
 		var encryptedKey sql.NullString
-		err := repo.DB.QueryRow(`SELECT encrypted_key FROM collection_shares WHERE collection_id = $1 AND to_user_id = $2 AND is_deleted = $3`,
-			c.ID, actorUserID, false).Scan(&encryptedKey)
+		var sharedAt sql.NullInt64
+		err := repo.DB.QueryRow(`SELECT encrypted_key, magic_metadata, shared_at FROM collection_shares WHERE collection_id = $1 AND to_user_id = $2 AND is_deleted = $3`,
+			c.ID, actorUserID, false).Scan(&encryptedKey, &c.SharedMagicMetadata, &sharedAt)
 		if err != nil {
 			return ente.Collection{}, stacktrace.Propagate(err, "failed to fetch sharee encrypted key")
 		}
@@ -126,6 +127,9 @@ func (repo *CollectionRepository) WithSharingDetailsForUser(c ente.Collection, a
 			return ente.Collection{}, stacktrace.Propagate(fmt.Errorf("share key missing for user %d collection %d", actorUserID, c.ID), "")
 		}
 		c.EncryptedKey = encryptedKey.String
+		if sharedAt.Valid {
+			c.SharedAt = &sharedAt.Int64
+		}
 	}
 	return c, nil
 }

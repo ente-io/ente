@@ -223,7 +223,6 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = (
                         <CollectionsSortOptions
                             activeSortBy={sortBy}
                             onChangeSortBy={setSortBy}
-                            nestedInDialog
                             variant="v2"
                         />
                         <IconButton

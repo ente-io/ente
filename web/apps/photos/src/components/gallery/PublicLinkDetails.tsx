@@ -1,5 +1,5 @@
-import { ManagePublicShareOptions } from "@/components/Collections/CollectionShare";
-import { PickCoverPhotoDialog } from "@/components/Collections/PickCoverPhotoDialog";
+import { ManagePublicShareOptions } from "@/components/collections/CollectionShare";
+import { PickCoverPhotoDialog } from "@/components/collections/PickCoverPhotoDialog";
 import { usePublicLinkURL } from "@/components/utils/use-public-link-url";
 import { Copy01Icon, Edit03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";

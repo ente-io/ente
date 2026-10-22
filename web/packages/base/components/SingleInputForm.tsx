@@ -29,6 +29,8 @@ export type SingleInputFormProps = Pick<
     "label" | "placeholder" | "autoComplete" | "autoFocus" | "slotProps"
 > & {
     variant?: "default" | "v2" | "people";
+    endAdornment?: React.ReactNode;
+    selectOnFocus?: boolean;
     inputType?: TextFieldProps["type"];
     initialValue?: string;
     submitButtonColor?: ButtonProps["color"];
@@ -48,6 +50,8 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     inputType,
     initialValue,
     autoFocus,
+    endAdornment,
+    selectOnFocus,
     submitButtonTitle,
     submitButtonColor,
     onCancel,
@@ -95,21 +99,25 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 <Stack sx={{ gap: "8px" }}>
                     {rest.label && (
                         <Typography
-                            component={variant === "people" ? "label" : "p"}
-                            htmlFor={variant === "people" ? inputID : undefined}
+                            component="label"
+                            htmlFor={inputID}
                             sx={v2LabelSx}
                         >
                             {rest.label}
                         </Typography>
                     )}
                     <InputBase
-                        id={variant === "people" ? inputID : undefined}
-                        aria-describedby={
-                            variant === "people" && error ? helperID : undefined
-                        }
+                        id={inputID}
+                        aria-describedby={error ? helperID : undefined}
+                        inputProps={{ "aria-invalid": !!error }}
                         name="value"
                         value={formik.values.value}
                         onChange={formik.handleChange}
+                        onFocus={
+                            selectOnFocus
+                                ? (event) => event.target.select()
+                                : undefined
+                        }
                         type={showPassword ? "text" : (inputType ?? "text")}
                         placeholder={rest.placeholder}
                         autoComplete={rest.autoComplete}
@@ -123,12 +131,14 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                                     showPassword={showPassword}
                                     onToggle={handleToggleShowHidePassword}
                                 />
-                            ) : undefined
+                            ) : (
+                                endAdornment
+                            )
                         }
                     />
                     <Typography
-                        id={variant === "people" ? helperID : undefined}
-                        aria-live={variant === "people" ? "polite" : undefined}
+                        id={helperID}
+                        aria-live="polite"
                         sx={v2HelperSx(!!error)}
                     >
                         {error ?? ""}
@@ -139,10 +149,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                         <ButtonBase
                             onClick={onCancel}
                             disabled={formik.isSubmitting}
-                            sx={[
-                                v2CancelButtonSx,
-                                variant === "people" && peopleActionFocusSx,
-                            ]}
+                            sx={[v2CancelButtonSx, peopleActionFocusSx]}
                         >
                             {t("cancel")}
                         </ButtonBase>
@@ -150,10 +157,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                     <ButtonBase
                         type="submit"
                         disabled={formik.isSubmitting}
-                        sx={[
-                            v2SubmitButtonSx,
-                            variant === "people" && peopleActionFocusSx,
-                        ]}
+                        sx={[v2SubmitButtonSx, peopleActionFocusSx]}
                     >
                         {formik.isSubmitting ? (
                             <CircularProgress

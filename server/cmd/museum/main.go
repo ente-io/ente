@@ -228,7 +228,7 @@ func main() {
 	collectionLinkRepo.Cache = accessTokenCache
 	discordController := discord.NewDiscordController(userRepo, hostName, environment)
 	userLookupController := controller.NewUserLookupController(userRepo, discordController)
-	rateLimiter := middleware.NewRateLimitMiddleware(discordController, 1000, 1*time.Second)
+	rateLimiter := middleware.NewRateLimitMiddleware(discordController, 1000, 1000, 1*time.Second)
 	defer rateLimiter.Stop()
 
 	emailNotificationCtrl := &email.EmailNotificationController{
@@ -1105,7 +1105,6 @@ func main() {
 	publicAPI.POST("/discount/claim", discountCouponHandler.ClaimCoupon)
 	adminAPI.POST("/discount/add-coupons", discountCouponHandler.AddCoupons)
 
-	setKnownAPIs(server.Routes())
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3, fileDataCtrl, contactController, spaceModule)
 	time.AfterFunc(10*time.Minute, func() {
 		if err := remoteStoreRepository.MigrateCustomDomainCanonicalValues(context.Background()); err != nil {
@@ -1481,33 +1480,19 @@ func cacheHeaders() gin.HandlerFunc {
 	}
 }
 
-var knownAPIs = make(map[string]bool)
-
 func urlSanitizer(c *gin.Context) string {
 	if c.Request.Method == http.MethodOptions {
 		return "/options"
 	}
-	u := *c.Request.URL
-	u.RawQuery = ""
-	uri := u.RequestURI()
-	for _, p := range c.Params {
-		uri = strings.Replace(uri, p.Value, fmt.Sprintf(":%s", p.Key), 1)
+	if path := c.FullPath(); path != "" {
+		return path
 	}
-	if !knownAPIs[uri] {
-		log.Warn("Unknown API: " + uri)
-		return "/unknown-api"
-	}
-	return uri
+	log.Warn("Unknown API: " + c.Request.URL.EscapedPath())
+	return "/unknown-api"
 }
 
 func timeOutResponse(c *gin.Context) {
 	c.JSON(http.StatusRequestTimeout, gin.H{"handler": true})
-}
-
-func setKnownAPIs(routes []gin.RouteInfo) {
-	for _, route := range routes {
-		knownAPIs[route.Path] = true
-	}
 }
 
 func schedule(c *cron.Cron, spec string, cmd func()) (cron.EntryID, error) {

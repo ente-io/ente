@@ -2125,7 +2125,6 @@ checksum = "25f104b501bf2364e78d0d3974cbc774f738f5865306ed128e1e0d7499c0ad96"
 dependencies = [
  "console",
  "shell-words",
- "tempfile",
  "zeroize",
 ]
 
@@ -2525,8 +2524,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "ente-cli-next"
-version = "0.1.0"
+name = "ente-cli"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2956,36 +2955,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ente-rs"
-version = "0.0.1"
-dependencies = [
- "chrono",
- "clap",
- "dialoguer",
- "dirs",
- "ente-accounts",
- "ente-core",
- "ente-paste",
- "ente-test-support",
- "env_logger 0.11.11",
- "futures",
- "indicatif",
- "log",
- "mockito",
- "open",
- "rusqlite",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "tokio",
- "url",
- "urlencoding",
- "uuid",
- "zeroize",
- "zip",
-]
-
-[[package]]
 name = "ente-space"
 version = "0.0.1"
 dependencies = [
@@ -3168,10 +3137,7 @@ version = "0.11.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de671bd27a75a797dc9ae289ba1e77276e75e2026408aab65185384e2d5cd3f6"
 dependencies = [
- "anstream",
- "anstyle",
  "env_filter 2.0.0",
- "jiff",
  "log",
 ]
 
@@ -5352,30 +5318,6 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
-]
-
-[[package]]
-name = "jiff"
-version = "0.2.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f00b5dbd620d61dfdcb6007c9c1f6054ebd75319f163d886a9055cec1155073d"
-dependencies = [
- "jiff-static",
- "log",
- "portable-atomic",
- "portable-atomic-util",
- "serde_core",
-]
-
-[[package]]
-name = "jiff-static"
-version = "0.2.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e000de030ff8022ea1da3f466fbb0f3a809f5e51ed31f6dd931c35181ad8e6d7"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.117",
 ]
 
 [[package]]
@@ -8215,7 +8157,6 @@ dependencies = [
  "fallible-streaming-iterator",
  "hashlink 0.12.2",
  "libsqlite3-sys",
- "serde_json",
  "smallvec",
  "sqlite-wasm-rs",
 ]
@@ -8343,9 +8284,9 @@ checksum = "f87165f0995f63a9fbeea62b64d10b4d9d8e78ec6d7d51fb2125fda7bb36788f"
 
 [[package]]
 name = "rustls-webpki"
-version = "0.103.15"
+version = "0.103.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3c3cf1d8b1e7d4927e2d154c3fcb02979afb9939629c62cd9048d4f07b60ac2"
+checksum = "4443b1b6d39d7c663139942cc4558262562d2c84123bb6282ef177009ca8b281"
 dependencies = [
  "aws-lc-rs",
  "ring",
@@ -11073,18 +11014,18 @@ dependencies = [
 
 [[package]]
 name = "webpki-root-certs"
-version = "1.0.7"
+version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f31141ce3fc3e300ae89b78c0dd67f9708061d1d2eda54b8209346fd6be9a92c"
+checksum = "58ec80e73fd8baf57bf0d9615554c75348bda990d6d5bbeab964dd068319fecb"
 dependencies = [
  "rustls-pki-types",
 ]
 
 [[package]]
 name = "webpki-roots"
-version = "1.0.7"
+version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52f5ee44c96cf55f1b349600768e3ece3a8f26010c05265ab73f945bb1a2eb9d"
+checksum = "1c1c8e20c8a38fc7d65abfe74eb7280e4aa667e8eec8bc84996d2874810748d9"
 dependencies = [
  "rustls-pki-types",
 ]

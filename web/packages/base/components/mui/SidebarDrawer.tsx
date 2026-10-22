@@ -17,12 +17,16 @@ import {
     SidebarPanelContext,
 } from "./SidebarDrawerContext";
 
-type SidebarDrawerProps = DrawerProps & { maxWidth?: string };
+type SidebarDrawerProps = DrawerProps & {
+    maxWidth?: string;
+    disableAppTitlebarBackdrop?: boolean;
+};
 
 export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
     slotProps,
     children,
     maxWidth = "375px",
+    disableAppTitlebarBackdrop = false,
     ...rest
 }) => {
     const container = useContext(SidebarPanelContext);
@@ -65,7 +69,9 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                 },
             }}
         >
-            {isDesktop && !inShell && <AppTitlebarBackdrop />}
+            {isDesktop && !inShell && !disableAppTitlebarBackdrop && (
+                <AppTitlebarBackdrop />
+            )}
             <Box sx={{ p: 1 }}>{children}</Box>
         </Drawer>
     );

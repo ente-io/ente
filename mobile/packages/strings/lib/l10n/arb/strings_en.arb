@@ -2888,6 +2888,7 @@
   "nothingToCleanUp": "Nothing to clean up",
   "nothingToTidyUpHere": "Nothing to tidy up here",
   "notifications": "Notifications",
+  "notificationNewActivity": "New activity",
   "notifyMe": "Notify me",
   "notPersonLabel": "Not {name}?",
   "@notPersonLabel": {

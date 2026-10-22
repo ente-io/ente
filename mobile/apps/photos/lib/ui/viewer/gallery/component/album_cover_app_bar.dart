@@ -24,6 +24,7 @@ class AlbumCoverAppBar extends StatefulWidget {
     super.key,
     this.collection,
     required this.cover,
+    this.subtitle,
     required this.title,
     required this.actionsBuilder,
     required this.coverActions,
@@ -35,6 +36,7 @@ class AlbumCoverAppBar extends StatefulWidget {
 
   final Collection? collection;
   final EnteFile cover;
+  final String? subtitle;
   final String title;
   final List<Widget> Function(Color foregroundColor) actionsBuilder;
   final List<Widget> coverActions;
@@ -150,6 +152,14 @@ class _AlbumCoverAppBarState extends State<AlbumCoverAppBar> with RouteAware {
                 style: TextStyles.display1.copyWith(color: colors.specialWhite),
               ),
             ),
+            if (widget.subtitle != null) ...[
+              const SizedBox(height: Spacing.sm),
+              Text(
+                widget.subtitle!,
+                textAlign: TextAlign.center,
+                style: TextStyles.mini.copyWith(color: colors.specialWhite),
+              ),
+            ],
             if (description != null) ...[
               const SizedBox(height: Spacing.sm),
               Padding(

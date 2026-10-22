@@ -18,7 +18,6 @@ class FeatureFlagService {
   bool get internalUser => _flagService.internalUser;
   bool get multipartUpload => internalUser;
   bool get pdfViewer => internalUser;
-  bool get imageViewer => internalUser;
   bool get isInternalUserDisabled =>
       _preferences.getBool(_internalUserDisabled) ?? false;
 
