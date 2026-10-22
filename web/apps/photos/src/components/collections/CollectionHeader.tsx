@@ -122,7 +122,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
         <GalleryItemsHeaderAdapter>
             <SpacedRow>
                 <GalleryItemsSummary
-                    name={name}
+                    name={type == "hiddenItems" ? t("section_hidden") : name}
                     description={description}
                     descriptionMaxWidth={480}
                     fileCount={fileCount}
@@ -138,7 +138,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
 };
 
 const shouldShowOptions = (type: CollectionSummaryType) =>
-    type != "all" && type != "archiveItems";
+    type != "all" && type != "archiveItems" && type != "hiddenItems";
 
 const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     activeCollection,

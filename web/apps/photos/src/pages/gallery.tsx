@@ -37,6 +37,10 @@ import {
 } from "@/components/gallery";
 import { AlbumsOverview } from "@/components/gallery/AlbumsOverview";
 import { DuplicatesView } from "@/components/gallery/DuplicatesView";
+import {
+    HiddenAlbumsStrip,
+    hiddenAlbumsStripHeight,
+} from "@/components/gallery/HiddenAlbumsStrip";
 import { LargeFilesView } from "@/components/gallery/LargeFilesView";
 import { PeopleOverview } from "@/components/gallery/PeopleOverview";
 import { PhotosNavigationShell } from "@/components/gallery/PhotosNavigationShell";
@@ -2343,7 +2347,45 @@ const Page: React.FC = () => {
                     <FileListWithViewer
                         mode={barMode}
                         modePlus={isInSearchMode ? "search" : barMode}
-                        header={fileListHeader}
+                        header={
+                            !isInSearchMode &&
+                            barMode == "hidden-albums" &&
+                            activeCollectionID ==
+                                PseudoCollectionID.hiddenItems &&
+                            sidebarCollectionSummaries.length > 0 &&
+                            fileListHeader
+                                ? {
+                                      ...fileListHeader,
+                                      height:
+                                          fileListHeader.height +
+                                          hiddenAlbumsStripHeight,
+                                      component: (
+                                          <div
+                                              style={{
+                                                  width: "100%",
+                                                  minWidth: 0,
+                                              }}
+                                          >
+                                              <div
+                                                  style={{
+                                                      height: fileListHeader.height,
+                                                  }}
+                                              >
+                                                  {fileListHeader.component}
+                                              </div>
+                                              <HiddenAlbumsStrip
+                                                  albums={
+                                                      sidebarCollectionSummaries
+                                                  }
+                                                  onSelectAlbum={
+                                                      handleShowCollectionSummaryWithID
+                                                  }
+                                              />
+                                          </div>
+                                      ),
+                                  }
+                                : fileListHeader
+                        }
                         footer={fileListFooter}
                         user={user}
                         files={filteredFiles}
