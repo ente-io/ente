@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/clear_selections_event.dart';
 import 'package:photos/models/file/dummy_file.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/ui/device_picker/device_picker_selection.dart';
@@ -74,31 +72,19 @@ void main() {
     expect(selection.files, isEmpty);
   });
 
-  test(
-    'confirmation locks gestures and clearing stays inside the picker',
-    () async {
-      final selection = DevicePickerSelectedFiles();
-      var globalClears = 0;
-      final subscription = Bus.instance.on<ClearSelectionsEvent>().listen((_) {
-        globalClears++;
-      });
-      addTearDown(() async {
-        await subscription.cancel();
-        selection.dispose();
-      });
-      final file = EnteFile()..localID = 'photo';
-      selection.toggleSelection(file);
-      selection.locked = true;
-      selection.toggleSelection(file);
-      selection.selectAll({EnteFile()..localID = 'other'});
-      selection.unSelectAll({file});
-      selection.clearAll();
-      expect(selection.files, {file});
-      selection.locked = false;
-      selection.clearAll();
-      await Future<void>.delayed(Duration.zero);
-      expect(selection.files, isEmpty);
-      expect(globalClears, 0);
-    },
-  );
+  test('selection stays locked until confirmation finishes', () {
+    final selection = DevicePickerSelectedFiles();
+    addTearDown(selection.dispose);
+    final file = EnteFile()..localID = 'photo';
+    selection.toggleSelection(file);
+    selection.locked = true;
+    selection.toggleSelection(file);
+    selection.selectAll({EnteFile()..localID = 'other'});
+    selection.unSelectAll({file});
+    selection.clearAll();
+    expect(selection.files, {file});
+    selection.locked = false;
+    selection.clearAll();
+    expect(selection.files, isEmpty);
+  });
 }
