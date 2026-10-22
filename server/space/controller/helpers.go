@@ -111,6 +111,7 @@ func toPostResponse(post *spacerepo.SpacePostRecord, assets []spacerepo.SpacePos
 		KeyVersion:       post.KeyVersion,
 		CreatedAt:        formatMicros(post.CreatedAt),
 		ViewerLiked:      post.ViewerLiked,
+		CommentCount:     post.CommentCount,
 		LikeCount:        post.LikeCount,
 	}
 	if len(assets) > 0 {

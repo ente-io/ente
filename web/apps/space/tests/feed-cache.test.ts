@@ -141,6 +141,7 @@ test("shrinks an existing thirty-post cache without losing the visit cutoff or s
 
 test("restores every photo in order and preserves shared post edits", async () => {
     const original = post(3);
+    original.commentCount = 3;
     original.likeCount = 8;
     original.photos = ["cover", "second", "third"].map((objectKey, index) => ({
         imageAsset: { ...original.imageAsset!, objectKey },
@@ -159,6 +160,7 @@ test("restores every photo in order and preserves shared post edits", async () =
         "changed by caller";
     clearSpaceFeedMemoryCache();
     const restored = (await loadCachedSpaceFeed("self"))!.items[0]!;
+    expect(restored.commentCount).toBe(3);
     expect(restored.likeCount).toBe(8);
     expect(restored).toMatchObject({
         caption: "Edited caption",

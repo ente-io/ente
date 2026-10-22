@@ -20,6 +20,7 @@ export interface SpacePostTileItem {
     likeCount?: number;
     avatarUrl?: string | null;
     caption?: string;
+    commentCount?: number;
     friendID?: string;
     height?: number;
     id: string;

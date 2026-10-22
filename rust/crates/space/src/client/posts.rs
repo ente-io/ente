@@ -371,7 +371,7 @@ impl AccountSpaceCtx {
         Ok(HydratedKeys { owned, friends })
     }
 
-    async fn decrypt_post_key_fields(
+    pub(super) async fn decrypt_post_key_fields(
         &self,
         space_id: &str,
         viewer_space_id: Option<&str>,
@@ -624,6 +624,7 @@ pub(super) fn opened_post(
         content,
         created_at: post.created_at,
         viewer_liked: post.viewer_liked,
+        comment_count: post.comment_count,
         like_count: post.like_count,
     }
 }
@@ -655,6 +656,7 @@ mod tests {
             }],
             created_at: format!("2026-08-0{post_id}T00:00:00Z"),
             viewer_liked: false,
+            comment_count: 0,
             like_count: 0,
         }
     }
@@ -689,6 +691,7 @@ mod tests {
         post_with_corrupt_actor_profile.author.key_version = 1;
         post_with_corrupt_actor_profile.author.encrypted_profile = "not-base64".into();
         let mut valid_post = post(3, b64::encode(&valid_post_key));
+        valid_post.comment_count = 3;
         valid_post.like_count = 8;
         valid_post.author.key_version = 1;
         valid_post.author.encrypted_profile = b64::encode(&secretbox::encrypt_combined(
@@ -773,6 +776,7 @@ mod tests {
         assert!(matches!(page.items[1].content, Err(Error::Base64Decode(_))));
         assert_eq!(page.items[1].post_id, 2);
         assert!(page.items[2].content.is_ok());
+        assert_eq!(page.items[2].comment_count, 3);
         assert_eq!(page.items[2].like_count, 8);
         assert_eq!(
             page.items[2]
