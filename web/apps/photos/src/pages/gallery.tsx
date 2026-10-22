@@ -51,6 +51,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/components/gallery/reducer";
+import { handleSubscriptionCompletionRedirectIfNeeded } from "@/components/gallery/subscription-redirect";
 import { useAlbumNavigationData } from "@/components/gallery/use-album-navigation-data";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import {
@@ -80,7 +81,6 @@ import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
-import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
@@ -180,15 +180,11 @@ import {
     initSettings,
     updateMapEnabled,
 } from "ente-new/photos/services/settings";
-import {
-    redirectToCustomerPortal,
-    savedUserDetailsOrTriggerPull,
-    verifyStripeSubscription,
-} from "ente-new/photos/services/user-details";
+import { savedUserDetailsOrTriggerPull } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
-import { useRouter, type NextRouter } from "next/router";
+import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
@@ -2593,77 +2589,6 @@ const preloadImage = (imgBasePath: string) => {
     const srcset: string[] = [];
     for (let i = 1; i <= 3; i++) srcset.push(`${imgBasePath}/${i}x.png ${i}x`);
     new Image().srcset = srcset.join(",");
-};
-
-const handleSubscriptionCompletionRedirectIfNeeded = async (
-    showMiniDialog: (attributes: MiniDialogAttributes) => void,
-    showLoadingBar: () => void,
-    router: NextRouter,
-) => {
-    const { session_id: sessionID, status, reason } = router.query;
-
-    if (status == "success") {
-        try {
-            const subscription = await verifyStripeSubscription(sessionID);
-            showMiniDialog({
-                title: t("thank_you"),
-                message: (
-                    <Trans
-                        i18nKey="subscription_purchase_success"
-                        values={{ date: subscription.expiryTime }}
-                    />
-                ),
-                continue: { text: t("ok") },
-                cancel: false,
-            });
-        } catch (e) {
-            log.error("Subscription verification failed", e);
-            showMiniDialog(
-                errorDialogAttributes(t("subscription_verification_error")),
-            );
-        }
-    } else if (status == "fail") {
-        log.error(`Subscription purchase failed`, reason);
-        switch (reason) {
-            case "canceled":
-                showMiniDialog({
-                    message: t("subscription_purchase_cancelled"),
-                    continue: { text: t("ok"), color: "primary" },
-                    cancel: false,
-                });
-                break;
-            case "requires_payment_method":
-                showMiniDialog({
-                    title: t("update_payment_method"),
-                    message: t("update_payment_method_message"),
-                    continue: {
-                        text: t("update_payment_method"),
-                        action: () => {
-                            showLoadingBar();
-                            return redirectToCustomerPortal();
-                        },
-                    },
-                });
-                break;
-            case "authentication_failed":
-                showMiniDialog({
-                    title: t("update_payment_method"),
-                    message: t("payment_method_authentication_failed"),
-                    continue: {
-                        text: t("update_payment_method"),
-                        action: () => {
-                            showLoadingBar();
-                            return redirectToCustomerPortal();
-                        },
-                    },
-                });
-                break;
-            default:
-                showMiniDialog(
-                    errorDialogAttributes(t("subscription_purchase_failed")),
-                );
-        }
-    }
 };
 
 const createAppDownloadFooter = (): FileListHeaderOrFooter => ({
