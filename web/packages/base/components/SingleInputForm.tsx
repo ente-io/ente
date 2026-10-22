@@ -29,6 +29,8 @@ export type SingleInputFormProps = Pick<
     "label" | "placeholder" | "autoComplete" | "autoFocus" | "slotProps"
 > & {
     variant?: "default" | "v2" | "people";
+    endAdornment?: React.ReactNode;
+    selectOnFocus?: boolean;
     inputType?: TextFieldProps["type"];
     initialValue?: string;
     submitButtonColor?: ButtonProps["color"];
@@ -48,6 +50,8 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     inputType,
     initialValue,
     autoFocus,
+    endAdornment,
+    selectOnFocus,
     submitButtonTitle,
     submitButtonColor,
     onCancel,
@@ -105,9 +109,15 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                     <InputBase
                         id={inputID}
                         aria-describedby={error ? helperID : undefined}
+                        inputProps={{ "aria-invalid": !!error }}
                         name="value"
                         value={formik.values.value}
                         onChange={formik.handleChange}
+                        onFocus={
+                            selectOnFocus
+                                ? (event) => event.target.select()
+                                : undefined
+                        }
                         type={showPassword ? "text" : (inputType ?? "text")}
                         placeholder={rest.placeholder}
                         autoComplete={rest.autoComplete}
@@ -121,7 +131,9 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                                     showPassword={showPassword}
                                     onToggle={handleToggleShowHidePassword}
                                 />
-                            ) : undefined
+                            ) : (
+                                endAdornment
+                            )
                         }
                     />
                     <Typography
