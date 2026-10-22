@@ -78,10 +78,11 @@ If your recovery key was exposed, keep any device where you are signed in to Ent
 
 **If the account has no data you need to keep:**
 
-1. Check whether you use the same account in Photos, Auth, or Locker. **Delete account** deletes its data in all three apps.
-2. Open `Settings > Account > Delete account` and follow the prompts.
-3. After deletion is complete, create a new account. You can use the same email address.
-4. Save the new recovery key somewhere private and secure.
+1. Check whether you use the same account in Photos, Auth, or Locker, and whether it has a paid subscription or manages a family plan. **Delete account** deletes its data in all three apps, can cancel its subscription, and removes members from its family plan.
+2. If the account has a paid subscription or manages a family plan, [contact support](mailto:support@ente.com) before deleting it so you can plan for the people using its storage.
+3. Open `Settings > Account > Delete account` and follow the prompts.
+4. After deletion is complete, create a new account. You can use the same email address.
+5. Save the new recovery key somewhere private and secure.
 
 **If the account has Auth codes you need to keep:**
 

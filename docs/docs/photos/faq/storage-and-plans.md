@@ -192,7 +192,7 @@ On mobile, **Family** appears only when you are signed in to an Ente account. It
 
 If you manage the family plan, you can see shared storage and members. From there, you can invite people, resend or revoke pending invitations, set storage limits, and remove members.
 
-If you are a member, you can see family storage and the active members, but you cannot manage invitations, members, or storage limits. On mobile, use the top-right menu in `Settings > Family` to **Leave family plan**. On web and desktop, open **Manage subscription** or the storage card to see the managing account and **Leave family plan**.
+If you are a member, you cannot manage invitations, members, or storage limits. On mobile, `Settings > Family` shows family storage and active members. Use the top-right menu there to **Leave family plan**. On web and desktop, open **Manage subscription** or the storage card to see the managing account and **Leave family plan**.
 
 Each member's photos stay private unless they choose to share them.
 
