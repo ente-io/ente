@@ -19,9 +19,7 @@ To do this, first configure the CLI to use your server's endpoint.
 
 Define `config.yaml` and place it in `~/.ente/` or the directory specified by `ENTE_CLI_CONFIG_DIR`.
 
-`ENTE_CLI_CONFIG_DIR` selects both configuration and the saved account database. The legacy `ENTE_CLI_CONFIG_PATH` is used only when `ENTE_CLI_CONFIG_DIR` is unset. For example, `ENTE_CLI_CONFIG_DIR=/path/to/existing-cli-directory ente export` uses the accounts already stored in that directory.
-
-If you previously kept configuration in the working directory, migrate its settings into the existing configuration directory, then remove or rename the old file. Network commands stop while a separate working-directory config exists; local account commands remain available. Setting `ENTE_CLI_CONFIG_DIR=.` also changes the account database location. Invalid trusted configuration must be corrected before running commands.
+`ENTE_CLI_CONFIG_DIR` selects both configuration and saved accounts; `ENTE_CLI_CONFIG_PATH` is the legacy fallback. Use the existing account directory, e.g. `ENTE_CLI_CONFIG_DIR=/path/to/existing-cli-directory ente export`. Network commands stop if a separate working-directory config exists. If it contains your intended Ente settings, migrate them into that existing directory and remove or rename the old file; otherwise run from another directory. Local account commands remain available. Invalid trusted configuration must be corrected first.
 
 ```yaml
 # Set the API endpoint to your domain where Museum is being served.

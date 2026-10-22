@@ -49,21 +49,13 @@ func TestCLIConfigDiscovery(t *testing.T) {
 			root := t.TempDir()
 			home := filepath.Join(root, "home")
 			cwd := filepath.Join(root, "cwd")
-			if err := os.MkdirAll(home, 0700); err != nil {
-				t.Fatal(err)
-			}
 			writeConfig := func(path, endpoint string) {
 				t.Helper()
-				if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
-					t.Fatal(err)
-				}
 				body := "endpoint:\n  api: " + endpoint + "\n"
 				if filepath.Ext(path) == ".json" {
 					body = `{"endpoint":{"api":"` + endpoint + `"}}`
 				}
-				if err := os.WriteFile(path, []byte(body), 0600); err != nil {
-					t.Fatal(err)
-				}
+				writeTestConfig(t, path, body)
 			}
 			writeConfig(filepath.Join(cwd, tt.cwdConfig), "https://untrusted.invalid")
 			if tt.trustedConfig != "" {

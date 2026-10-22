@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -79,9 +80,7 @@ func main() {
 	if os.Args[1] == "version" && viper.GetString("endpoint.api") != constants.EnteApiUrl {
 		log.Printf("Custom endpoint: %s\n", viper.GetString("endpoint.api"))
 	}
-	cmd.Execute(&ctrl, AppVersion, func() error {
-		return checkWorkingDirectoryConfig(cliConfigDir)
-	})
+	cmd.Execute(&ctrl, AppVersion, checkWorkingDirectoryConfig(cliConfigDir))
 }
 
 func initConfig(cliConfigDir string) error {
@@ -97,13 +96,8 @@ func initConfig(cliConfigDir string) error {
 		}
 	}
 	value := viper.Get("endpoint.api")
-	hasEndpoint := value != nil
-	for _, key := range viper.AllKeys() {
-		if key == "endpoint" || key == "endpoint.api" {
-			hasEndpoint = true
-		}
-	}
-	if hasEndpoint {
+	keys := viper.AllKeys()
+	if value != nil || slices.Contains(keys, "endpoint") || slices.Contains(keys, "endpoint.api") {
 		endpoint, ok := value.(string)
 		if !ok || strings.TrimSpace(endpoint) == "" {
 			return fmt.Errorf("invalid endpoint.api in trusted configuration %q; expected a non-empty string", path)
@@ -165,7 +159,7 @@ func checkWorkingDirectoryConfig(cliConfigDir string) error {
 		return fmt.Errorf("cannot inspect working-directory configuration")
 	}
 	if path != "" {
-		return fmt.Errorf("refusing network command: working-directory configuration %q is ignored. Migrate your settings into %q, then remove or rename the working-directory file. ENTE_CLI_CONFIG_DIR selects both configuration and account storage", path, cliConfigDir)
+		return fmt.Errorf("refusing network command: working-directory configuration %q is ignored. If it contains your intended Ente CLI settings, migrate them into %q and remove or rename the old file; otherwise run from another directory. ENTE_CLI_CONFIG_DIR selects both configuration and account storage", path, cliConfigDir)
 	}
 	return nil
 }

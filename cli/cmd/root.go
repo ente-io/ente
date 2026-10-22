@@ -24,15 +24,13 @@ func GenerateDocs() error {
 	return doc.GenMarkdownTree(rootCmd, "./docs/generated")
 }
 
-func Execute(controller *pkg.ClICtrl, ver string, beforeNetwork func() error) {
+func Execute(controller *pkg.ClICtrl, ver string, networkConfigErr error) {
 	ctrl = controller
 	version = ver
 	rootCmd.PersistentPreRunE = func(command *cobra.Command, args []string) error {
 		network := command == exportCmd || command == addAccCmd || command.Parent() == _adminCmd
-		if network {
-			if err := beforeNetwork(); err != nil {
-				return err
-			}
+		if network && networkConfigErr != nil {
+			return networkConfigErr
 		}
 		if network || command.Parent() == accountCmd {
 			ctrl.KeyHolder = secrets.NewKeyHolder(secrets.GetOrCreateClISecret())
