@@ -92,7 +92,9 @@ If your recovery key was exposed, keep any device where you are signed in to Ent
 4. Check that all your codes are present, work, and have synced before deleting the old account.
 5. If the old account has a paid subscription or manages a family plan, [contact support](mailto:support@ente.com) before deleting it so you can plan for the people using its storage.
 
-If the account also holds Photos or Locker data, [contact support](mailto:support@ente.com) before deleting anything. If someone you do not trust may have seen your key, consider resetting two-factor authentication for your most sensitive services.
+**If the account has Photos or Locker data you need to keep:** [Contact support](mailto:support@ente.com) before deleting the account. This applies even if you have no Auth codes. If you also have Auth codes, follow the export steps above, but keep the old account until you have a plan for your Photos or Locker data.
+
+If someone you do not trust may have seen your key, consider resetting two-factor authentication for your most sensitive services.
 
 > [!WARNING]
 >
@@ -104,9 +106,9 @@ You can delete or edit a code by long pressing (or right clicking on desktop) on
 
 ### How do I copy the current or next code in Ente Auth? {#copy-current-next-code}
 
-Tap a code, or click it on desktop, to copy the current code. Ente Auth shows **Copied to clipboard**.
+Tap a code on mobile, or click it on desktop, to copy the current code. Ente Auth shows **Copied to clipboard**. On Auth web, clicking a code card also copies the current code.
 
-Time-based codes show the upcoming code on the right of the card, under **next**. Tap it to copy that code instead. Ente Auth shows **Copied next code to clipboard**. This helps when the current code is about to expire.
+On mobile and desktop, time-based codes show the upcoming code on the right of the card, under **next**. Tap or click it to copy that code instead. Ente Auth shows **Copied next code to clipboard**. This helps when the current code is about to expire. On Auth web, clicking the displayed next code copies the current code.
 
 On desktop, you can move focus to a code with your keyboard, for example with Tab. Press `C` to copy the current code or `N` to copy the next code.
 
