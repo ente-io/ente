@@ -9,6 +9,33 @@
     margin: 0 auto;
 }
 
+.token-entry {
+    width: 408px;
+    max-width: 100vw;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.token-entry p {
+    margin-top: 0;
+}
+
+.token-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 360px;
+    margin: 8px auto;
+}
+
+.token-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .input-form {
     display: flex;
     flex-direction: column;
