@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -170,6 +171,107 @@ func TestPostCommentCountWorkScalesWithReplyChainLength(t *testing.T) {
 				}
 				previousBlocks = blocks
 			}
+		})
+	}
+}
+
+func TestDiscussionBatchReadsWithDeepReplyChain(t *testing.T) {
+	module := newSpaceTestModule(t)
+	ctx := t.Context()
+	owner, friend := notificationTestSpaces(t, module)
+	rootAuthorID := insertSpaceUser(t, module, "chain-root@example.com", "root-public")
+	rootAuthor, err := testCreateSpace(ctx, module, rootAuthorID, "chain_root", "root", "public", "secret", "nonce", "profile")
+	require.NoError(t, err)
+	require.NoError(t, testAddFriend(ctx, module, rootAuthorID, rootAuthor.SpaceID, owner.SpaceID, "share", 1, "share", 1))
+	postID, err := testCreatePost(ctx, module, owner.OwnerID, owner.SpaceID, "post-key", nil, 1, nil)
+	require.NoError(t, err)
+	_, err = module.Comments.DB.ExecContext(ctx, `INSERT INTO space_comments
+        (comment_id, post_id, author_space_id, parent_id, reply_to_id, cipher, created_at)
+        SELECT 'chain-' || i, $1, CASE WHEN i = 1 THEN $2 ELSE $3 END,
+            CASE WHEN i > 1 THEN 'chain-1' END,
+            CASE WHEN i > 1 THEN 'chain-' || (i - 1) END, '\x01'::bytea, i
+        FROM generate_series(1, 1000) i`, postID, rootAuthor.SpaceID, owner.SpaceID)
+	require.NoError(t, err)
+	_, err = module.Comments.DB.ExecContext(ctx, `INSERT INTO space_comment_reactions (comment_id, actor_space_id, cipher)
+        SELECT comment_id, $2, '\x01'::bytea FROM space_comments WHERE post_id = $1 AND created_at > 1`, postID, friend.SpaceID)
+	require.NoError(t, err)
+	_, err = module.Comments.DB.ExecContext(ctx, `INSERT INTO space_notifications
+        (notification_id, recipient_space_id, actor_space_id, kind, comment_id, created_at)
+        SELECT 'notification-' || i, $1, $2, 'comment_reaction', 'chain-' || i, i
+        FROM generate_series(2, 1000) i`, owner.SpaceID, friend.SpaceID)
+	require.NoError(t, err)
+	_, err = module.Comments.DB.ExecContext(ctx, `ANALYZE space_comments; ANALYZE space_notifications`)
+	require.NoError(t, err)
+	notificationIDs := make([]string, 0, 999)
+	for i := 2; i <= 1000; i++ {
+		notificationIDs = append(notificationIDs, fmt.Sprintf("notification-%d", i))
+	}
+	for _, state := range []string{"visible", "deleted-comment", "inactive-author", "recovered"} {
+		t.Run(state, func(t *testing.T) {
+			_, err := module.Comments.DB.ExecContext(ctx, `UPDATE space_comments
+                SET cipher = CASE WHEN $1 = 'deleted-comment' THEN NULL ELSE '\x01'::bytea END
+                WHERE comment_id = 'chain-1'`, state)
+			require.NoError(t, err)
+			_, err = module.Comments.DB.ExecContext(ctx, `UPDATE users
+                SET encrypted_email = CASE WHEN $2 = 'inactive-author' THEN NULL ELSE '\x00'::bytea END
+                WHERE user_id = $1`, rootAuthorID, state)
+			require.NoError(t, err)
+			ctx, cancel := context.WithTimeout(t.Context(), 8*time.Second)
+			defer cancel()
+			hidden := state == "deleted-comment" || state == "inactive-author"
+			started := time.Now()
+			items, cursor, err := module.Comments.List(ctx, owner.SpaceID, postID, "900:chain-900")
+			require.NoError(t, err)
+			t.Logf("last 100 comments: %s", time.Since(started))
+			require.Len(t, items, 100)
+			require.Empty(t, cursor)
+			for i, item := range items {
+				require.Equal(t, fmt.Sprintf("chain-%d", i+901), item.ID)
+				require.Equal(t, "chain-1", item.ParentID)
+				require.Equal(t, fmt.Sprintf("chain-%d", i+900), item.ReplyToID)
+				if hidden {
+					require.Empty(t, item.Cipher)
+					require.Empty(t, item.Reactions)
+					require.Empty(t, item.UnreadNotificationIDs)
+					require.False(t, item.CanDelete)
+				} else {
+					require.Equal(t, []byte{1}, item.Cipher)
+					require.Len(t, item.Reactions, 1)
+					require.Equal(t, []string{fmt.Sprintf("notification-%d", i+901)}, item.UnreadNotificationIDs)
+				}
+			}
+			items, cursor, err = module.Comments.List(ctx, owner.SpaceID, postID, "")
+			require.NoError(t, err)
+			require.Len(t, items, 100)
+			require.Equal(t, "100:chain-100", cursor)
+			started = time.Now()
+			notifications, cursor, err := module.Notifications.List(ctx, owner.SpaceID, "", 2)
+			require.NoError(t, err)
+			t.Logf("notifications: %s", time.Since(started))
+			if hidden {
+				require.Empty(t, notifications)
+				require.Empty(t, cursor)
+			} else {
+				require.Len(t, notifications, 2)
+				require.Equal(t, "chain-1000", notifications[0].CommentID)
+				require.Equal(t, "chain-999", notifications[1].CommentID)
+				require.Equal(t, "999:notification-999", cursor)
+			}
+			unread, err := module.Notifications.HasUnread(ctx, owner.SpaceID)
+			require.NoError(t, err)
+			require.Equal(t, !hidden, unread)
+			require.NoError(t, module.Notifications.MarkRead(ctx, owner.SpaceID, notificationIDs))
+			unread, err = module.Notifications.HasUnread(ctx, owner.SpaceID)
+			require.NoError(t, err)
+			require.False(t, unread)
+			readCount := countSpaceRows(t, module, `SELECT count(*) FROM space_notifications WHERE read_at IS NOT NULL`)
+			if hidden {
+				require.Zero(t, readCount)
+			} else {
+				require.EqualValues(t, 999, readCount)
+			}
+			_, err = module.Notifications.DB.ExecContext(ctx, `UPDATE space_notifications SET read_at = NULL`)
+			require.NoError(t, err)
 		})
 	}
 }

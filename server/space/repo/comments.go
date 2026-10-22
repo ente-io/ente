@@ -52,26 +52,32 @@ const commentVisibleSQL = `NOT EXISTS (
     WHERE NOT a.has_content OR account.encrypted_email IS NULL
 )`
 
-const commentRecipientsSQL = `WITH RECURSIVE hidden_comments AS (
-    SELECT c.comment_id FROM space_comments c
+const commentNotHiddenSQL = `NOT EXISTS (
+    SELECT 1 FROM hidden_comments hidden WHERE hidden.comment_id = c.comment_id
+)`
+
+func hiddenCommentsCTE(postFilter string) string {
+	return `hidden_comments AS (
+    SELECT c.comment_id, c.post_id FROM space_comments c
     LEFT JOIN spaces author ON author.space_id = c.author_space_id
     LEFT JOIN users account ON account.user_id = author.owner_id
-    WHERE c.post_id = $2 AND (c.cipher IS NULL OR account.encrypted_email IS NULL)
+    WHERE ` + postFilter + ` AND (c.cipher IS NULL OR account.encrypted_email IS NULL)
     UNION
-    SELECT child.comment_id FROM hidden_comments parent
+    SELECT child.comment_id, parent.post_id FROM hidden_comments parent
     CROSS JOIN LATERAL (
         SELECT c.comment_id FROM space_comments c
-        WHERE c.reply_to_id = parent.comment_id AND c.post_id = $2
+        WHERE c.reply_to_id = parent.comment_id AND c.post_id = parent.post_id
         OFFSET 0
     ) child
-)
+)`
+}
+
+var commentRecipientsSQL = `WITH RECURSIVE ` + hiddenCommentsCTE("c.post_id = $2") + `
 SELECT ARRAY(
     SELECT participant.space_id FROM (
         SELECT $1::text AS space_id
         UNION
-        SELECT c.author_space_id FROM space_comments c WHERE c.post_id = $2 AND NOT EXISTS (
-            SELECT 1 FROM hidden_comments hidden WHERE hidden.comment_id = c.comment_id
-        )
+        SELECT c.author_space_id FROM space_comments c WHERE c.post_id = $2 AND ` + commentNotHiddenSQL + `
         UNION
         SELECT l.actor_space_id FROM space_post_likes l WHERE l.post_id = $2
     ) participant
@@ -124,8 +130,9 @@ func (r *CommentsRepository) List(ctx context.Context, viewer string, postID int
 		return nil, "", err
 	}
 	createdAt, id, _ := parseMessageCursor(cursor)
-	rows, err := tx.QueryContext(ctx, `SELECT c.comment_id, COALESCE(c.parent_id, ''), COALESCE(c.reply_to_id, ''),
-        CASE WHEN `+commentVisibleSQL+` THEN c.cipher END, c.created_at,
+	rows, err := tx.QueryContext(ctx, `WITH RECURSIVE `+hiddenCommentsCTE("c.post_id = $1")+`
+        SELECT c.comment_id, COALESCE(c.parent_id, ''), COALESCE(c.reply_to_id, ''),
+        CASE WHEN `+commentNotHiddenSQL+` THEN c.cipher END, c.created_at,
         (COALESCE(actor.space_id = $2, FALSE) OR EXISTS (SELECT 1 FROM space_friend_shares f WHERE f.space_id = actor.space_id AND f.friend_space_id = $2)),
         COALESCE(actor.space_id, ''), COALESCE(actor.space_slug, ''), actor.public_key, COALESCE(actor.current_version, 0), actor.encrypted_profile,
         avatar.object_id, avatar.key_version, avatar.size, COALESCE(actor.updated_at, 0)
@@ -190,8 +197,10 @@ func (r *CommentsRepository) List(ctx context.Context, viewer string, postID int
 		return nil, "", err
 	}
 	rows.Close()
-	rows, err = tx.QueryContext(ctx, `SELECT n.comment_id, n.notification_id `+notificationSourcesSQL+`
-        WHERE n.recipient_space_id = $1 AND n.comment_id = ANY($2) AND n.read_at IS NULL AND `+notificationVisibleSQL, viewer, pq.Array(commentIDs))
+	const unreadFilter = `n.recipient_space_id = $1 AND n.comment_id = ANY($2) AND n.read_at IS NULL`
+	rows, err = tx.QueryContext(ctx, `WITH RECURSIVE `+notificationHiddenCommentsCTE(unreadFilter)+`
+        SELECT n.comment_id, n.notification_id `+notificationSourcesSQL+`
+        WHERE `+unreadFilter+` AND `+notificationVisibleSQL(commentNotHiddenSQL), viewer, pq.Array(commentIDs))
 	if err != nil {
 		return nil, "", err
 	}
@@ -370,7 +379,7 @@ func (r *CommentsRepository) NotificationRecipients(ctx context.Context, actor s
 	rows, err := r.DB.QueryContext(ctx, `SELECT recipient.owner_id, n.kind, post_owner.owner_id, post_owner.space_id, post_owner.space_slug `+notificationSourcesSQL+`
         JOIN spaces recipient ON recipient.space_id = n.recipient_space_id
         JOIN spaces post_owner ON post_owner.space_id = p.space_id
-        WHERE n.actor_space_id = $1 AND p.post_id = $2 AND n.comment_id = $3 AND (n.kind = 'comment_reaction') = $4 AND `+notificationVisibleSQL, actor, postID, commentID, reaction)
+        WHERE n.actor_space_id = $1 AND p.post_id = $2 AND n.comment_id = $3 AND (n.kind = 'comment_reaction') = $4 AND `+notificationVisibleSQL(commentVisibleSQL), actor, postID, commentID, reaction)
 	if err != nil {
 		return nil, owner, err
 	}

@@ -38,11 +38,20 @@ const notificationSourcesSQL = `
 	JOIN users actor_owner ON actor_owner.user_id = actor.owner_id AND actor_owner.encrypted_email IS NOT NULL
 `
 
-const notificationVisibleSQL = `
+func notificationHiddenCommentsCTE(filter string) string {
+	return hiddenCommentsCTE(`c.post_id IN (
+        SELECT c.post_id FROM space_notifications n
+        JOIN space_comments c ON c.comment_id = n.comment_id
+        WHERE ` + filter + `
+    )`)
+}
+
+func notificationVisibleSQL(commentVisibilitySQL string) string {
+	return `
 	(n.kind = 'friend_request' OR (
         n.comment_id IS NOT NULL AND c.comment_id IS NOT NULL AND p.post_id IS NOT NULL
         AND EXISTS (SELECT 1 FROM spaces s JOIN users u ON u.user_id = s.owner_id AND u.encrypted_email IS NOT NULL WHERE s.space_id = p.space_id)
-        AND ` + commentVisibleSQL + `
+        AND ` + commentVisibilitySQL + `
         AND (p.space_id = n.recipient_space_id OR EXISTS (SELECT 1 FROM space_friend_shares f WHERE f.space_id = p.space_id AND f.friend_space_id = n.recipient_space_id))
         AND (p.space_id = n.actor_space_id OR EXISTS (SELECT 1 FROM space_friend_shares f WHERE f.space_id = p.space_id AND f.friend_space_id = n.actor_space_id))
         AND (n.kind <> 'comment' OR p.space_id = n.recipient_space_id OR EXISTS (SELECT 1 FROM space_friend_shares f WHERE f.space_id = n.recipient_space_id AND f.friend_space_id = n.actor_space_id))
@@ -52,13 +61,15 @@ const notificationVisibleSQL = `
 			WHERE share.space_id = n.recipient_space_id AND share.friend_space_id = n.actor_space_id)
 	))
 `
+}
 
 func (r *NotificationsRepository) List(ctx context.Context, recipientSpaceID, cursor string, limit int) ([]SpaceNotificationRecord, string, error) {
 	limit = optionalInt(limit, 50)
 	if limit > 100 {
 		limit = 100
 	}
-	query := `WITH visible AS (
+	const filter = `n.recipient_space_id = $1`
+	query := `WITH RECURSIVE ` + notificationHiddenCommentsCTE(filter) + `, visible AS (
 		SELECT n.*, p.post_id, p.space_id AS post_space_id, c.reply_to_id, CASE
 			WHEN n.kind IN ('post_like', 'comment') THEN p.post_id::text
 			WHEN n.kind = 'comment_reaction' THEN n.comment_id
@@ -66,7 +77,7 @@ func (r *NotificationsRepository) List(ctx context.Context, recipientSpaceID, cu
 			WHEN n.kind IN ('friend_accepted', 'poke') THEN n.actor_space_id
 			ELSE n.notification_id
 		END AS group_id
-		` + notificationSourcesSQL + ` WHERE n.recipient_space_id = $1 AND ` + notificationVisibleSQL + `
+		` + notificationSourcesSQL + ` WHERE ` + filter + ` AND ` + notificationVisibleSQL(commentNotHiddenSQL) + `
 	), ranked AS (
 		SELECT notification_id, kind, actor_space_id, post_id, post_space_id, comment_id, reply_to_id, friend_request_id, created_at, group_id,
 			ROW_NUMBER() OVER (PARTITION BY kind, group_id ORDER BY created_at DESC, notification_id DESC) AS position,
@@ -147,15 +158,17 @@ func (r *NotificationsRepository) List(ctx context.Context, recipientSpaceID, cu
 
 func (r *NotificationsRepository) HasUnread(ctx context.Context, recipientSpaceID string) (bool, error) {
 	var unread bool
-	err := r.DB.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 `+notificationSourcesSQL+` WHERE n.recipient_space_id = $1 AND n.read_at IS NULL AND `+notificationVisibleSQL+`)`, recipientSpaceID).Scan(&unread)
+	const filter = `n.recipient_space_id = $1 AND n.read_at IS NULL`
+	err := r.DB.QueryRowContext(ctx, `WITH RECURSIVE `+notificationHiddenCommentsCTE(filter)+`
+        SELECT EXISTS (SELECT 1 `+notificationSourcesSQL+` WHERE `+filter+` AND `+notificationVisibleSQL(commentNotHiddenSQL)+`)`, recipientSpaceID).Scan(&unread)
 	return unread, stacktrace.Propagate(err, "")
 }
 
 func (r *NotificationsRepository) MarkRead(ctx context.Context, recipientSpaceID string, notificationIDs []string) error {
-	_, err := r.DB.ExecContext(ctx, `
-		WITH visible AS (
+	const filter = `n.recipient_space_id = $1 AND n.notification_id = ANY($2) AND n.read_at IS NULL`
+	_, err := r.DB.ExecContext(ctx, `WITH RECURSIVE `+notificationHiddenCommentsCTE(filter)+`, visible AS (
 			SELECT n.notification_id
-			`+notificationSourcesSQL+` WHERE n.recipient_space_id = $1 AND n.notification_id = ANY($2) AND `+notificationVisibleSQL+`
+			`+notificationSourcesSQL+` WHERE `+filter+` AND `+notificationVisibleSQL(commentNotHiddenSQL)+`
 		)
 		UPDATE space_notifications n SET read_at = now_utc_micro_seconds()
 		FROM visible item

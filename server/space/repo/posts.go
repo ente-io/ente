@@ -80,23 +80,9 @@ func postRecordSelectSQL(viewerLikedExpr string, viewerSpaceParam string) string
 		       p.encrypted_post_key, p.caption_cipher,
 		       p.key_version, p.created_at,
 		       ` + viewerLikedExpr + ` AS viewer_liked,
-		       (WITH RECURSIVE hidden_comments AS (
-		           SELECT c.comment_id FROM space_comments c
-		           LEFT JOIN spaces author ON author.space_id = c.author_space_id
-		           LEFT JOIN users account ON account.user_id = author.owner_id
-		           WHERE c.post_id = p.post_id AND (c.cipher IS NULL OR account.encrypted_email IS NULL)
-		           UNION
-		           SELECT child.comment_id FROM hidden_comments parent
-		           CROSS JOIN LATERAL (
-		               SELECT c.comment_id FROM space_comments c
-		               WHERE c.reply_to_id = parent.comment_id AND c.post_id = p.post_id
-		               OFFSET 0
-		           ) child
-		       )
+		       (WITH RECURSIVE ` + hiddenCommentsCTE("c.post_id = p.post_id") + `
 		       SELECT COUNT(*) FROM space_comments c
-		       WHERE c.post_id = p.post_id AND NOT EXISTS (
-		           SELECT 1 FROM hidden_comments hidden WHERE hidden.comment_id = c.comment_id
-		       )) AS comment_count,
+		       WHERE c.post_id = p.post_id AND ` + commentNotHiddenSQL + `) AS comment_count,
 		       CASE WHEN p.space_id = ` + viewerSpaceParam + ` THEN (
 		           SELECT COUNT(*) FROM space_post_likes l
 		           JOIN spaces actor ON actor.space_id = l.actor_space_id
