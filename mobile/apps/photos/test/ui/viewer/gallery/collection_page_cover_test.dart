@@ -42,6 +42,7 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/hierarchical/camera_filter.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/module/download/thumbnail.dart";
 import "package:photos/service_locator.dart";
@@ -71,6 +72,7 @@ import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/hierarchicial_search/app_bar_filter_chips.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
+import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -132,6 +134,58 @@ void main() {
   tearDownAll(() async {
     PathProviderPlatform.instance = previousPathProvider;
     await tempDir.delete(recursive: true);
+  });
+
+  testWidgets("keeps the discovery cover stable while switching sort order", (
+    tester,
+  ) async {
+    final files = [_file(1), _file(3), _file(2)];
+    final originalOrder = List<EnteFile>.of(files);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightThemeData,
+        localizationsDelegates: StringsLocalizations.localizationsDelegates,
+        supportedLocales: StringsLocalizations.supportedLocales,
+        home: MagicResultScreen(
+          files,
+          name: "Discovery",
+          heroTag: "discovery",
+          magicFilter: MagicFilter(filterName: "Discovery", occurrence: 3),
+        ),
+      ),
+    );
+    await _expectCover(tester, files.first, count: 3);
+    final header = tester.element(find.byType(AlbumCoverAppBar));
+    for (final (current, next, expected) in [
+      ("Most relevant", "Most recent", [files[1], files[2], files[0]]),
+      ("Most recent", "Most relevant", originalOrder),
+    ]) {
+      await tester.tap(find.byTooltip("Sort"));
+      await tester.pumpAndSettle();
+      expect(find.text("Sort photos"), findsOneWidget);
+      expect(
+        tester
+            .widgetList<MenuComponent>(find.byType(MenuComponent))
+            .singleWhere((choice) => choice.trailing != null)
+            .title,
+        current,
+      );
+      await tester.tap(find.text(next));
+      await _expectCover(tester, expected.first, count: 3);
+      expect(tester.element(find.byType(AlbumCoverAppBar)), same(header));
+      expect(
+        tester.widget<AlbumCoverAppBar>(find.byType(AlbumCoverAppBar)).heroTag,
+        "discovery${originalOrder.first.tag}",
+      );
+      expect(
+        tester
+            .widget<GalleryFilesState>(find.byType(GalleryFilesState))
+            .galleryFiles,
+        expected,
+      );
+      expect(files, originalOrder);
+    }
+    await _disposeAlbum(tester);
   });
 
   testWidgets("keeps interactive back when the album route fades", (
