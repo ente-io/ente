@@ -6,11 +6,8 @@ import (
 	"runtime"
 
 	"github.com/ente/cli/pkg"
-	"github.com/spf13/cobra/doc"
-
-	"github.com/spf13/viper"
-
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 )
 
 var version string
@@ -37,9 +34,6 @@ func Execute(controller *pkg.ClICtrl, ver string) {
 
 func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	viper.ReadInConfig()
 }
 
 func recoverWithLog() {

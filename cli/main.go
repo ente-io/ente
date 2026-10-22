@@ -112,7 +112,6 @@ func initConfig(cliConfigDir string) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(cliConfigDir + "/")
-	viper.AddConfigPath(".")
 
 	viper.SetDefault("endpoint.api", constants.EnteApiUrl)
 	viper.SetDefault("log.http", false)

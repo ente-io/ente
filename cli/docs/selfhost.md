@@ -2,7 +2,7 @@
 
 If you are self-hosting the server, you can still configure CLI to export data & perform basic admin actions.
 
-To do this, first configure the CLI to point to your server. Define a config.yaml and put it either in the same directory as CLI binary or path defined in env variable `ENTE_CLI_CONFIG_DIR`
+To do this, first configure the CLI to point to your server. Define a `config.yaml` and put it in `~/.ente/` or the directory specified by `ENTE_CLI_CONFIG_DIR`.
 
 ```yaml
 endpoint:
