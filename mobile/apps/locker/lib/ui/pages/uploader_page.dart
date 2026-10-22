@@ -15,7 +15,6 @@ import 'package:locker/services/files/sync/metadata_updater_service.dart';
 import 'package:locker/services/files/upload/file_upload_service.dart';
 import 'package:locker/ui/components/locker_progress_dialog.dart';
 import 'package:locker/ui/pages/file_upload_screen.dart';
-import 'package:locker/ui/pages/file_upload_screen_v2.dart';
 import "package:locker/utils/bottom_sheet_illustration.dart";
 import "package:locker/utils/error_sheet.dart";
 import 'package:logging/logging.dart';
@@ -83,7 +82,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       final uploadResult = await Navigator.of(context)
           .push<FileUploadScreenResult>(
             MaterialPageRoute(
-              builder: (context) => FileUploadScreenV2(
+              builder: (context) => FileUploadScreen(
                 files: files,
                 collections: regularCollections,
                 selectedCollection: selectedCollection,
