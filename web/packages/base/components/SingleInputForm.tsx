@@ -26,12 +26,7 @@ import { ShowHidePasswordInputAdornment } from "./mui/PasswordInputAdornment";
 
 export type SingleInputFormProps = Pick<
     TextFieldProps,
-    | "label"
-    | "placeholder"
-    | "autoComplete"
-    | "autoFocus"
-    | "slotProps"
-    | "helperText"
+    "label" | "placeholder" | "autoComplete" | "autoFocus" | "slotProps"
 > & {
     variant?: "default" | "v2" | "people";
     endAdornment?: React.ReactNode;
@@ -57,7 +52,6 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     autoFocus,
     endAdornment,
     selectOnFocus,
-    helperText,
     submitButtonTitle,
     submitButtonColor,
     onCancel,
@@ -114,9 +108,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                     )}
                     <InputBase
                         id={inputID}
-                        aria-describedby={
-                            error || helperText ? helperID : undefined
-                        }
+                        aria-describedby={error ? helperID : undefined}
                         inputProps={{ "aria-invalid": !!error }}
                         name="value"
                         value={formik.values.value}
@@ -149,7 +141,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                         aria-live="polite"
                         sx={v2HelperSx(!!error)}
                     >
-                        {error ?? helperText ?? ""}
+                        {error ?? ""}
                     </Typography>
                 </Stack>
                 <Stack direction="row" sx={{ gap: "12px" }}>
@@ -205,7 +197,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 disabled={formik.isSubmitting}
                 error={!!formik.errors.value}
                 // The space reserves helper-text height before an error appears.
-                helperText={formik.errors.value ?? helperText ?? " "}
+                helperText={formik.errors.value ?? " "}
                 slotProps={{
                     input:
                         inputType == "password"

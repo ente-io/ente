@@ -27,7 +27,6 @@ export const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
             initialValue={name}
             selectOnFocus
             submitButtonTitle={t("rename")}
-            helperText={extension ? t("file_extension_unchanged") : undefined}
             endAdornment={
                 extension && (
                     <InputAdornment position="end">
