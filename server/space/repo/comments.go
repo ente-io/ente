@@ -72,47 +72,6 @@ func hiddenCommentsCTE(postFilter string) string {
 )`
 }
 
-const commentAncestorsSQL = `WITH RECURSIVE comment_ancestors AS (
-    SELECT c.comment_id, c.reply_to_id, c.author_space_id, c.cipher IS NOT NULL AS has_content
-    FROM unnest($1::text[]) target(comment_id)
-    CROSS JOIN LATERAL (
-        SELECT c.comment_id, c.reply_to_id, c.author_space_id, c.cipher
-        FROM space_comments c WHERE c.comment_id = target.comment_id
-        OFFSET 0
-    ) c
-    UNION
-    SELECT parent.comment_id, parent.reply_to_id, parent.author_space_id, parent.cipher IS NOT NULL
-    FROM comment_ancestors child
-    CROSS JOIN LATERAL (
-        SELECT c.comment_id, c.reply_to_id, c.author_space_id, c.cipher
-        FROM space_comments c WHERE c.comment_id = child.reply_to_id
-        OFFSET 0
-    ) parent
-)
-SELECT c.comment_id, COALESCE(c.reply_to_id, ''), c.has_content AND account.encrypted_email IS NOT NULL
-FROM comment_ancestors c
-LEFT JOIN spaces author ON author.space_id = c.author_space_id
-LEFT JOIN users account ON account.user_id = author.owner_id`
-
-var commentsPageSQL = `SELECT c.comment_id, COALESCE(c.parent_id, ''), COALESCE(c.reply_to_id, ''),
-    CASE WHEN actor.space_id IS NOT NULL THEN c.cipher END, c.created_at,
-    (COALESCE(actor.space_id = $2, FALSE) OR EXISTS (SELECT 1 FROM space_friend_shares f WHERE f.space_id = actor.space_id AND f.friend_space_id = $2)),
-    COALESCE(actor.space_id, ''), COALESCE(actor.space_slug, ''), actor.public_key, COALESCE(actor.current_version, 0), actor.encrypted_profile,
-    avatar.object_id, avatar.key_version, avatar.size, COALESCE(actor.updated_at, 0)
-    FROM space_comments c LEFT JOIN spaces actor ON actor.space_id = c.author_space_id
-    AND EXISTS (SELECT 1 FROM users u WHERE u.user_id = actor.owner_id AND u.encrypted_email IS NOT NULL) ` + spaceActorAvatarJoin("actor", "avatar") + `
-    WHERE c.post_id = $1 AND (c.created_at, c.comment_id) > ($3, $4)
-    ORDER BY c.created_at, c.comment_id LIMIT 101`
-
-var commentsUnreadNotificationsSQL = `SELECT notification.comment_id, notification.notification_id
-    FROM unnest($2::text[]) target(comment_id)
-    CROSS JOIN LATERAL (
-        SELECT n.comment_id, n.notification_id ` + notificationSourcesSQL + `
-        WHERE n.recipient_space_id = $1 AND n.comment_id = target.comment_id AND n.read_at IS NULL
-        AND ` + notificationVisibleSQL("TRUE") + `
-        OFFSET 0
-    ) notification`
-
 var commentRecipientsSQL = `WITH RECURSIVE ` + hiddenCommentsCTE("c.post_id = $2") + `
 SELECT ARRAY(
     SELECT participant.space_id FROM (
@@ -171,7 +130,15 @@ func (r *CommentsRepository) List(ctx context.Context, viewer string, postID int
 		return nil, "", err
 	}
 	createdAt, id, _ := parseMessageCursor(cursor)
-	rows, err := tx.QueryContext(ctx, commentsPageSQL, postID, viewer, createdAt, id)
+	rows, err := tx.QueryContext(ctx, `WITH RECURSIVE `+hiddenCommentsCTE("c.post_id = $1")+`
+        SELECT c.comment_id, COALESCE(c.parent_id, ''), COALESCE(c.reply_to_id, ''),
+        CASE WHEN `+commentNotHiddenSQL+` THEN c.cipher END, c.created_at,
+        (COALESCE(actor.space_id = $2, FALSE) OR EXISTS (SELECT 1 FROM space_friend_shares f WHERE f.space_id = actor.space_id AND f.friend_space_id = $2)),
+        COALESCE(actor.space_id, ''), COALESCE(actor.space_slug, ''), actor.public_key, COALESCE(actor.current_version, 0), actor.encrypted_profile,
+        avatar.object_id, avatar.key_version, avatar.size, COALESCE(actor.updated_at, 0)
+        FROM space_comments c LEFT JOIN spaces actor ON actor.space_id = c.author_space_id
+        AND EXISTS (SELECT 1 FROM users u WHERE u.user_id = actor.owner_id AND u.encrypted_email IS NOT NULL) `+spaceActorAvatarJoin("actor", "avatar")+`
+        WHERE c.post_id = $1 AND (c.created_at, c.comment_id) > ($3, $4) ORDER BY c.created_at, c.comment_id LIMIT 101`, postID, viewer, createdAt, id)
 	if err != nil {
 		return nil, "", err
 	}
@@ -230,7 +197,10 @@ func (r *CommentsRepository) List(ctx context.Context, viewer string, postID int
 		return nil, "", err
 	}
 	rows.Close()
-	rows, err = tx.QueryContext(ctx, commentsUnreadNotificationsSQL, viewer, pq.Array(commentIDs))
+	const unreadFilter = `n.recipient_space_id = $1 AND n.comment_id = ANY($2) AND n.read_at IS NULL`
+	rows, err = tx.QueryContext(ctx, `WITH RECURSIVE `+notificationHiddenCommentsCTE(unreadFilter)+`
+        SELECT n.comment_id, n.notification_id `+notificationSourcesSQL+`
+        WHERE `+unreadFilter+` AND `+notificationVisibleSQL(commentNotHiddenSQL), viewer, pq.Array(commentIDs))
 	if err != nil {
 		return nil, "", err
 	}
@@ -246,56 +216,7 @@ func (r *CommentsRepository) List(ctx context.Context, viewer string, postID int
 	if err := rows.Err(); err != nil {
 		return nil, "", err
 	}
-	rows.Close()
-	visible, err := commentBatchVisibility(ctx, tx, commentIDs)
-	if err != nil {
-		return nil, "", err
-	}
-	for i := range items {
-		if !visible[items[i].ID] {
-			items[i].Cipher = nil
-			items[i].CanDelete = false
-			items[i].Reactions = []CommentReactionRecord{}
-			items[i].UnreadNotificationIDs = []string{}
-		}
-	}
 	return items, next, tx.Commit()
-}
-
-func commentBatchVisibility(ctx context.Context, tx *sql.Tx, commentIDs []string) (map[string]bool, error) {
-	rows, err := tx.QueryContext(ctx, commentAncestorsSQL, pq.Array(commentIDs))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	parents := make(map[string]string)
-	visible := make(map[string]bool)
-	for rows.Next() {
-		var id, parentID string
-		var hasContent bool
-		if err := rows.Scan(&id, &parentID, &hasContent); err != nil {
-			return nil, err
-		}
-		visible[id] = hasContent
-		if parentID != "" {
-			parents[id] = parentID
-		}
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	var isVisible func(string) bool
-	isVisible = func(id string) bool {
-		if parentID, ok := parents[id]; ok {
-			visible[id] = visible[id] && isVisible(parentID)
-			delete(parents, id)
-		}
-		return visible[id]
-	}
-	for _, id := range commentIDs {
-		isVisible(id)
-	}
-	return visible, nil
 }
 
 func (r *CommentsRepository) Create(ctx context.Context, viewer string, postID int64, req models.CreateCommentRequest, cipher []byte) error {
