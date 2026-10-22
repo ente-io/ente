@@ -721,8 +721,8 @@ const FileInfoHeader = styled(Stack)(({ theme }) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    minHeight: 100,
-    paddingTop: 24,
+    minHeight: 92,
+    paddingTop: 18,
     [theme.breakpoints.down("sm")]: {
         minHeight: 64,
         paddingTop: 0,
@@ -920,6 +920,7 @@ const Caption: React.FC<CaptionProps> = ({
         <CaptionForm onSubmit={handleSubmit}>
             <TextField
                 id="caption"
+                sx={{ m: { sm: 0 } }}
                 name="caption"
                 type="text"
                 multiline
