@@ -1,1 +1,0 @@
-- Fixed cleanup after logging in to an account whose creation was interrupted.

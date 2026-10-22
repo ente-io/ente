@@ -1,1 +1,0 @@
-- Preserve album ownership in Photos exports, including empty albums.
