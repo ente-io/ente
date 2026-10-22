@@ -58,7 +58,6 @@ import {
     notifyUnsupportedSharedFavoritesDialogAttributes,
     trashFilesDialogAttributes,
 } from "@/components/utils/dialog-attributes";
-import { useIsOffline } from "@/components/utils/use-is-offline";
 import { shouldShowWhatsNew } from "@/services/changelog";
 import exportService from "@/services/export";
 import { processPendingAlbumJoin } from "@/services/join-album";
@@ -82,7 +81,6 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
-import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
@@ -202,7 +200,6 @@ const Page: React.FC = () => {
         showNotification,
     } = usePhotosAppContext();
 
-    const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
 
     const [cleanupView, setCleanupView] = useState<
@@ -701,7 +698,6 @@ const Page: React.FC = () => {
                 return;
             }
 
-            preloadImage("/images/subscription-card-background");
             initSettings();
             setupSelectAllKeyBoardShortcutHandler();
 
@@ -2189,6 +2185,7 @@ const Page: React.FC = () => {
                 onRemotePull={remotePull}
             />
             <PhotosNavigationShell
+                isFirstLoad={isFirstLoad}
                 isInSearchMode={isInSearchMode}
                 isSettingsOpen={sidebarVisibilityProps.open}
                 mode={barMode}
@@ -2292,8 +2289,6 @@ const Page: React.FC = () => {
                             shareSuggestionEmails={state.shareSuggestionEmails}
                             onRemotePull={remotePull}
                         />
-                        {isFirstLoad && <FirstLoadMessage />}
-                        {isOffline && <OfflineMessage />}
                     </>
                 )}
                 {cleanupView === "duplicates" ? (
@@ -2571,29 +2566,6 @@ const Page: React.FC = () => {
 };
 
 export default Page;
-
-const FirstLoadMessage: React.FC = () => (
-    <CenteredRow>
-        <Typography variant="small" sx={{ color: "text.muted" }}>
-            {t("initial_load_delay_warning")}
-        </Typography>
-    </CenteredRow>
-);
-
-const OfflineMessage: React.FC = () => (
-    <Typography
-        variant="small"
-        sx={{ bgcolor: "background.paper", p: 2, mb: 1, textAlign: "center" }}
-    >
-        {t("offline_message")}
-    </Typography>
-);
-
-const preloadImage = (imgBasePath: string) => {
-    const srcset: string[] = [];
-    for (let i = 1; i <= 3; i++) srcset.push(`${imgBasePath}/${i}x.png ${i}x`);
-    new Image().srcset = srcset.join(",");
-};
 
 const handleSubscriptionCompletionRedirectIfNeeded = async (
     showMiniDialog: (attributes: MiniDialogAttributes) => void,
