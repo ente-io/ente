@@ -620,7 +620,7 @@ class VideoPreviewService {
             previewFile,
             fileID: enteFile.uploadedFileID!,
             gateway: _fileDataGateway,
-            dio: serviceLocator.enteDio,
+            dio: serviceLocator.nonEnteDio,
             useUploadV2: flagService.previewUploadV2,
             cancelToken: cancelToken,
           );
