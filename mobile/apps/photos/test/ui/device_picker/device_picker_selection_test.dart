@@ -1,0 +1,80 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/clear_selections_event.dart';
+import 'package:photos/models/file/dummy_file.dart';
+import 'package:photos/models/file/file.dart';
+import 'package:photos/ui/device_picker/device_picker_selection.dart';
+import 'package:photos/ui/viewer/gallery/swipe_to_select_helper.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('local assets toggle by identity without database IDs', () {
+    final selection = DevicePickerSelectedFiles();
+    addTearDown(selection.dispose);
+    selection.toggleSelection(EnteFile()..localID = 'photo');
+    expect(selection.isFileSelected(EnteFile()..localID = 'photo'), isTrue);
+    expect(selection.isFileSelected(EnteFile()..localID = 'other'), isFalse);
+    selection.toggleSelection(EnteFile()..localID = 'photo');
+    expect(selection.files, isEmpty);
+    final group = {EnteFile()..localID = 'a', EnteFile()..localID = 'b'};
+    selection.toggleGroupSelection(group);
+    expect(selection.files, group);
+    selection.toggleGroupSelection(group);
+    expect(selection.files, isEmpty);
+  });
+
+  test('shared swipe selection respects the cap and can deselect', () {
+    final selection = DevicePickerSelectedFiles();
+    final files = List.generate(70, (i) => EnteFile()..localID = '$i');
+    final swipe = SwipeToSelectHelper(
+      allFiles: files,
+      selectedFiles: selection,
+    );
+    addTearDown(() {
+      swipe.dispose();
+      selection.dispose();
+    });
+    swipe.startSelection(files.first);
+    swipe.updateSelection(files.last);
+    expect(selection.files.length, 50);
+    swipe.updateSelection(files[24]);
+    expect(selection.files.length, 25);
+    swipe.endSelection();
+    swipe.startSelection(files.first);
+    swipe.updateSelection(files[24]);
+    swipe.endSelection();
+    expect(selection.files, isEmpty);
+    selection.selectAll({DummyFile(groupID: 'day', index: 0), ...files});
+    expect(selection.files.length, 50);
+    expect(selection.files.any((file) => file is DummyFile), isFalse);
+  });
+
+  test(
+    'confirmation locks gestures and clearing stays inside the picker',
+    () async {
+      final selection = DevicePickerSelectedFiles();
+      var globalClears = 0;
+      final subscription = Bus.instance.on<ClearSelectionsEvent>().listen((_) {
+        globalClears++;
+      });
+      addTearDown(() async {
+        await subscription.cancel();
+        selection.dispose();
+      });
+      final file = EnteFile()..localID = 'photo';
+      selection.toggleSelection(file);
+      selection.locked = true;
+      selection.toggleSelection(file);
+      selection.selectAll({EnteFile()..localID = 'other'});
+      selection.unSelectAll({file});
+      selection.clearAll();
+      expect(selection.files, {file});
+      selection.locked = false;
+      selection.clearAll();
+      await Future<void>.delayed(Duration.zero);
+      expect(selection.files, isEmpty);
+      expect(globalClears, 0);
+    },
+  );
+}
