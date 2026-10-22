@@ -29,6 +29,10 @@ class SearchThumbnailWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Hero(
       tag: tagPrefix + (file?.tag ?? ""),
+      createRectTween: searchResult?.type() == ResultType.magic
+          ? (begin, end) => RectTween(begin: begin, end: end)
+          : null,
+      transitionOnUserGestures: searchResult?.type() == ResultType.magic,
       child: SizedBox(
         height: size,
         width: size,

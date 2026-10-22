@@ -81,10 +81,16 @@ class GalleryAppBarWidget extends StatefulWidget {
     String? coverHeroTag,
     Key? coverAppBarKey,
     List<EnteFile>? files,
+    MagicSortType magicSortType = MagicSortType.mostRelevant,
     PreferredSizeWidget? bottom,
     bool showOverflowMenu = true,
   }) {
-    assert(cover == null || collection != null || deviceCollection != null);
+    assert(
+      cover == null ||
+          collection != null ||
+          deviceCollection != null ||
+          files != null,
+    );
     return GalleryAppBarConfig(
       extendBodyForCollapse: cover != null && bottom == null,
       sliverBuilder: (_) => GalleryAppBarWidget._(
@@ -100,6 +106,7 @@ class GalleryAppBarWidget extends StatefulWidget {
         coverHeroTag: coverHeroTag,
         coverAppBarKey: coverAppBarKey,
         files: files,
+        magicSortType: magicSortType,
         bottom: bottom,
         showOverflowMenu: showOverflowMenu,
       ),
@@ -179,6 +186,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   final String? coverHeroTag;
   final Key? coverAppBarKey;
   final List<EnteFile>? files;
+  final MagicSortType magicSortType;
   final PreferredSizeWidget? bottom;
   final bool showOverflowMenu;
 
@@ -195,6 +203,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.coverHeroTag,
     this.coverAppBarKey,
     this.files,
+    required this.magicSortType,
     this.bottom,
     required this.showOverflowMenu,
   });
@@ -225,8 +234,6 @@ enum AlbumPopupAction {
   removeLink,
   cleanUncategorized,
   downloadAlbum,
-  sortByMostRecent,
-  sortByMostRelevant,
   editLocation,
   deleteLocation,
   galleryGuestView,
@@ -587,6 +594,33 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     final strings = context.strings;
+    if (galleryType == GalleryType.magic) {
+      actions.add(
+        IconButtonComponent(
+          tooltip: strings.sort,
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedFilterHorizontal,
+            color: foregroundColor,
+          ),
+          variant: iconButtonVariant,
+          size: onCover ? kMinInteractiveDimension : 36,
+          iconSize: onCover ? IconSizes.medium : IconSizes.small,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            final sortType = await showMagicSortSheet(
+              context,
+              sortType: widget.magicSortType,
+            );
+            if (mounted &&
+                sortType != null &&
+                sortType != widget.magicSortType) {
+              Bus.instance.fire(MagicSortChangeEvent(sortType));
+            }
+          },
+        ),
+      );
+    }
+
     if (!Configuration.instance.hasConfiguredAccount()) {
       if (!onCover &&
           widget.showOverflowMenu &&
@@ -610,36 +644,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         );
       }
       return actions;
-    }
-
-    if (galleryType == GalleryType.magic) {
-      actions.add(
-        galleryAppBarPopupMenuAction<AlbumPopupAction>(
-          tooltip: strings.sort,
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedFilterHorizontal),
-          optionsBuilder: () {
-            return [
-              EntePopupMenuOption(
-                value: AlbumPopupAction.sortByMostRecent,
-                label: strings.mostRecent,
-              ),
-              EntePopupMenuOption(
-                value: AlbumPopupAction.sortByMostRelevant,
-                label: strings.mostRelevant,
-              ),
-            ];
-          },
-          onSelected: (AlbumPopupAction value) {
-            if (value == AlbumPopupAction.sortByMostRecent) {
-              Bus.instance.fire(MagicSortChangeEvent(MagicSortType.mostRecent));
-            } else if (value == AlbumPopupAction.sortByMostRelevant) {
-              Bus.instance.fire(
-                MagicSortChangeEvent(MagicSortType.mostRelevant),
-              );
-            }
-          },
-        ),
-      );
     }
 
     final int userId = Configuration.instance.getUserID()!;
@@ -1226,7 +1230,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await showAlbumSlideshow(
       context,
       files: galleryFiles,
-      title: widget.deviceCollection?.name ?? widget.collection!.displayName,
+      title:
+          widget.deviceCollection?.name ??
+          widget.collection?.displayName ??
+          _appBarTitle,
       includeBackupExcludedFiles: widget.deviceCollection != null,
     );
   }

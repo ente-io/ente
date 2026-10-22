@@ -252,6 +252,7 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                                   result.getHierarchicalSearchFilter()
                                       as MagicFilter,
                             ),
+                            useFadeTransition: true,
                           );
                         },
                       );
