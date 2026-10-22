@@ -454,7 +454,12 @@ const DuplicatesList: React.FC<DuplicatesListProps> = ({
     duplicateGroups,
     onToggleSelection,
 }) => {
-    const columns = Math.max(1, Math.floor((width + 10) / 142));
+    // Leave room for a conventional scrollbar and some space beside the tiles.
+    const scrollbarAllowance = 24;
+    const columns = Math.max(
+        1,
+        Math.floor((width - scrollbarAllowance + 10) / 142),
+    );
     return (
         <VariableSizeList
             // Invalidate cached heights when groups are reordered or wrap differently.
