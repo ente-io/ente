@@ -2913,6 +2913,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             {commentsOpen && canComment && (
                 <PostComments
                     key={activePhoto.postId}
+                    container={() => viewerRootRef.current}
                     autoFocus={focusCommentOnOpen}
                     targetCommentId={targetCommentId}
                     viewer={profile!.spaceId!}

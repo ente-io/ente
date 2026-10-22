@@ -30,7 +30,6 @@ import { emojiName } from "data/emojis";
 import type { FriendProfile } from "data/friends";
 import log from "ente-base/log";
 import { useBrowserBackClose } from "hooks/use-browser-back-close";
-import { isSpaceIOS } from "hooks/use-pwa-install-prompt";
 import React from "react";
 import { flushSync } from "react-dom";
 import {
@@ -46,7 +45,6 @@ import {
 import {
     spaceControlBackgroundHover,
     spaceDialogBackground,
-    spaceSurface,
     spaceText,
     spaceTextMuted,
 } from "styles/colors";
@@ -173,6 +171,7 @@ const CommentRow: React.FC<{
     disabled: boolean;
     ownReaction: string | undefined;
     onReact: (emoji: string) => void;
+    onReply: () => void;
     onOpenReactions: () => void;
     onOpenActions: (
         anchor: HTMLElement,
@@ -186,14 +185,27 @@ const CommentRow: React.FC<{
     disabled,
     ownReaction,
     onReact,
+    onReply,
     onOpenReactions,
     onOpenActions,
 }) => {
     const timer = React.useRef<number | undefined>(undefined);
     const start = React.useRef<
-        { pointerId: number; x: number; y: number } | undefined
+        | {
+              pointerId: number;
+              x: number;
+              y: number;
+              canReply: boolean;
+              active: boolean;
+              thresholdPx: number;
+              maxOffsetPx: number;
+              resistancePx: number;
+          }
+        | undefined
     >(undefined);
     const didOpen = React.useRef(false);
+    const didSwipe = React.useRef(false);
+    const [swipeOffset, setSwipeOffset] = React.useState(0);
     const canOpenActions = !disabled && !comment.deleted;
     const reactions = commentReactionGroups(comment.reactions, ownReaction);
     const reactionColumns = Math.min(reactions.length, 6);
@@ -208,14 +220,18 @@ const CommentRow: React.FC<{
     const clearLongPress = React.useCallback(() => {
         window.clearTimeout(timer.current);
         timer.current = undefined;
-        start.current = undefined;
     }, []);
     React.useEffect(() => clearLongPress, [clearLongPress]);
+    const cancelGesture = () => {
+        clearLongPress();
+        start.current = undefined;
+        setSwipeOffset(0);
+    };
     const openContextAction = (
         anchor: HTMLElement,
         source: "touch" | "contextmenu",
     ) => {
-        clearLongPress();
+        cancelGesture();
         window.getSelection()?.removeAllRanges();
         if (anchor.hasAttribute("data-comment-reaction")) onOpenReactions();
         else onOpenActions(anchor, source);
@@ -251,6 +267,7 @@ const CommentRow: React.FC<{
             }}
             onKeyDown={(event) => {
                 didOpen.current = false;
+                didSwipe.current = false;
                 const reaction = reactionTarget(event.target);
                 if (
                     !canOpenActions ||
@@ -270,20 +287,43 @@ const CommentRow: React.FC<{
                 }
             }}
             onPointerDown={(event) => {
-                clearLongPress();
+                cancelGesture();
                 didOpen.current = false;
+                didSwipe.current = false;
                 const reaction = reactionTarget(event.target);
                 if (
                     !canOpenActions ||
+                    !event.isPrimary ||
                     event.button != 0 ||
-                    (isInteractiveTarget(event.target) && !reaction)
+                    (event.pointerType != "touch" &&
+                        isInteractiveTarget(event.target) &&
+                        !reaction)
                 )
                     return;
+                const rect = event.currentTarget.getBoundingClientRect();
+                const availableRightPx = Math.max(
+                    0,
+                    Math.min(window.innerWidth - 8, rect.right + 8) -
+                        event.clientX,
+                );
+                const resistancePx = rect.width * 0.42;
                 start.current = {
                     pointerId: event.pointerId,
                     x: event.clientX,
                     y: event.clientY,
+                    canReply: event.pointerType == "touch",
+                    active: false,
+                    thresholdPx: Math.min(
+                        64,
+                        Math.max(20, availableRightPx * 0.65),
+                        availableRightPx,
+                    ),
+                    maxOffsetPx:
+                        resistancePx *
+                        Math.log1p(availableRightPx / resistancePx),
+                    resistancePx,
                 };
+                if (isInteractiveTarget(event.target) && !reaction) return;
                 const anchor = reaction ?? event.currentTarget;
                 anchor.setPointerCapture(event.pointerId);
                 timer.current = window.setTimeout(() => {
@@ -292,33 +332,63 @@ const CommentRow: React.FC<{
                 }, 520);
             }}
             onPointerMove={(event) => {
-                if (start.current?.pointerId != event.pointerId) return;
-                if (
-                    Math.hypot(
-                        event.clientX - start.current.x,
-                        event.clientY - start.current.y,
-                    ) > 10
-                )
-                    clearLongPress();
+                const gesture = start.current;
+                if (gesture?.pointerId != event.pointerId) return;
+                const dx = event.clientX - gesture.x;
+                const dy = event.clientY - gesture.y;
+                if (Math.hypot(dx, dy) > 10) clearLongPress();
+                if (!gesture.canReply || !canOpenActions) return;
+                if (!gesture.active) {
+                    if (
+                        (Math.abs(dy) > 10 && Math.abs(dy) >= Math.abs(dx)) ||
+                        dx < -10
+                    ) {
+                        cancelGesture();
+                        return;
+                    }
+                    if (dx <= 10 || dx <= Math.abs(dy) * 1.2) return;
+                    gesture.active = true;
+                    didSwipe.current = true;
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                }
+                setSwipeOffset(
+                    Math.min(
+                        gesture.maxOffsetPx,
+                        gesture.resistancePx *
+                            Math.log1p(Math.max(dx, 0) / gesture.resistancePx),
+                    ),
+                );
             }}
             onPointerUp={(event) => {
-                clearLongPress();
+                const gesture = start.current;
+                if (gesture && gesture.pointerId != event.pointerId) return;
+                cancelGesture();
                 if (didOpen.current) {
                     event.preventDefault();
                     event.stopPropagation();
+                    return;
                 }
+                if (!gesture?.active || !canOpenActions) return;
+                const dx = event.clientX - gesture.x;
+                const dy = event.clientY - gesture.y;
+                if (dx < gesture.thresholdPx || dx <= Math.abs(dy) * 1.2)
+                    return;
+                if (event.cancelable) event.preventDefault();
+                event.stopPropagation();
+                onReply();
             }}
-            onPointerCancel={clearLongPress}
+            onPointerCancel={cancelGesture}
             onTouchEnd={(event) => {
-                if (!didOpen.current) return;
+                if (!didOpen.current && !didSwipe.current) return;
                 if (event.cancelable) event.preventDefault();
                 event.stopPropagation();
             }}
             onClickCapture={(event) => {
-                if (!didOpen.current) return;
+                if (!didOpen.current && !didSwipe.current) return;
                 event.preventDefault();
                 event.stopPropagation();
                 didOpen.current = false;
+                didSwipe.current = false;
             }}
             sx={{
                 bgcolor: highlighted
@@ -329,7 +399,7 @@ const CommentRow: React.FC<{
                     ? `${commentEnter} 240ms ease-out`
                     : undefined,
                 position: "relative",
-                py: 1,
+                py: 0.75,
                 px: 2,
                 flexShrink: 0,
                 cursor: canOpenActions ? "context-menu" : "default",
@@ -347,12 +417,38 @@ const CommentRow: React.FC<{
                 },
             }}
         >
+            {canOpenActions && (
+                <Box
+                    aria-hidden
+                    sx={{
+                        alignItems: "center",
+                        color: "#888888",
+                        display: "flex",
+                        height: "100%",
+                        justifyContent: "center",
+                        left: comment.parentId ? 56 : 16,
+                        opacity: Math.min(swipeOffset / 24, 1),
+                        position: "absolute",
+                        top: 0,
+                        width: 40,
+                        "& svg": { height: 12, width: 16 },
+                    }}
+                >
+                    <ReplyIcon />
+                </Box>
+            )}
             <Box
                 sx={{
                     position: "relative",
                     pl: 5,
                     ml: comment.parentId ? 5 : 0,
                     containerType: "inline-size",
+                    transform: `translateX(${swipeOffset}px)`,
+                    transition:
+                        swipeOffset > 0 ? "none" : "transform 160ms ease-out",
+                    "@media (prefers-reduced-motion: reduce)": {
+                        transition: "none",
+                    },
                 }}
             >
                 <Box
@@ -471,13 +567,8 @@ const CommentRow: React.FC<{
                                     aria-hidden
                                     sx={{
                                         alignItems: "center",
-                                        bgcolor: isOwn
-                                            ? "#233C28"
-                                            : spaceSurface,
+                                        bgcolor: isOwn ? "#28462F" : "#333333",
                                         borderRadius: "999px",
-                                        boxShadow: isOwn
-                                            ? "inset 0 0 0 1px #08C225"
-                                            : undefined,
                                         display: "flex",
                                         gap: 0.5,
                                         height: 24,
@@ -503,6 +594,9 @@ const CommentRow: React.FC<{
                                     <Box
                                         component="span"
                                         sx={{
+                                            color: isOwn
+                                                ? "#A1D5AB"
+                                                : "#C2C2C2",
                                             fontVariantNumeric: "tabular-nums",
                                         }}
                                     >
@@ -519,6 +613,7 @@ const CommentRow: React.FC<{
 };
 
 export const PostComments: React.FC<{
+    container: () => HTMLElement | null;
     autoFocus?: boolean;
     targetCommentId?: string;
     viewer: string;
@@ -528,6 +623,7 @@ export const PostComments: React.FC<{
     setDraft: React.Dispatch<React.SetStateAction<CommentDraft>>;
     onClose: () => void;
 }> = ({
+    container,
     autoFocus,
     targetCommentId,
     viewer,
@@ -877,6 +973,7 @@ export const PostComments: React.FC<{
                           ?.emoji
             }
             onReact={(emoji) => react(comment, emoji)}
+            onReply={() => replyTo(comment)}
             onOpenReactions={() =>
                 setAction({
                     type: "reactions",
@@ -899,6 +996,7 @@ export const PostComments: React.FC<{
     );
     return (
         <Dialog
+            container={container}
             open={open}
             onClose={() => setOpen(false)}
             maxWidth={false}
@@ -913,13 +1011,15 @@ export const PostComments: React.FC<{
                 "--space-dialog-backdrop": "rgba(0 0 0 / 0.64)",
                 "& .MuiDialog-container": {
                     alignItems: "flex-end",
-                    pb: isSpaceIOS() ? "var(--space-keyboard-inset, 0px)" : 0,
+                    pb: "var(--space-keyboard-inset, 0px)",
                 },
             }}
             slotProps={{
                 container: { ref: dialogContainer },
                 paper: {
                     style: {
+                        maxHeight:
+                            "calc(100dvh - var(--space-keyboard-inset, 0px) - env(safe-area-inset-top) - 16px)",
                         translate: `0 ${dragOffset}px`,
                         transition:
                             isDragging || prefersReducedMotion
@@ -936,9 +1036,6 @@ export const PostComments: React.FC<{
                         flexDirection: "column",
                         height: "min(72dvh, 640px)",
                         m: 0,
-                        maxHeight: isSpaceIOS()
-                            ? "calc(100dvh - var(--space-keyboard-inset, 0px) - env(safe-area-inset-top) - 16px)"
-                            : "calc(100dvh - env(safe-area-inset-top) - 16px)",
                         maxWidth: { xs: "none", sm: 480 },
                         overflow: "hidden",
                         width: "100%",
@@ -1054,6 +1151,7 @@ export const PostComments: React.FC<{
                         py: 0.5,
                         display: "flex",
                         flexDirection: "column",
+                        overflowX: "hidden",
                         overflowY: "auto",
                         overscrollBehavior: "contain",
                         flex: "1 1 auto",
@@ -1134,7 +1232,7 @@ export const PostComments: React.FC<{
                                 sx={{
                                     flexShrink: 0,
                                     py: 0.5,
-                                    mt: index > 0 ? 1 : 0,
+                                    mt: index > 0 ? 0.75 : 0,
                                 }}
                             >
                                 {renderComment(comment)}
@@ -1143,8 +1241,8 @@ export const PostComments: React.FC<{
                                         sx={{
                                             display: "flex",
                                             flexDirection: "column",
-                                            gap: 0.5,
-                                            mt: 0.5,
+                                            gap: 0.25,
+                                            mt: 0.25,
                                         }}
                                     >
                                         {replies.map(renderComment)}
@@ -1213,15 +1311,12 @@ export const PostComments: React.FC<{
                                     ? "Comment instead"
                                     : "Cancel reply"
                             }
-                            onCancel={() => {
-                                flushSync(() =>
-                                    setDraft((value) => ({
-                                        ...value,
-                                        replyTarget: undefined,
-                                    })),
-                                );
-                                input.current?.focus({ preventScroll: true });
-                            }}
+                            onCancel={() =>
+                                setDraft((value) => ({
+                                    ...value,
+                                    replyTarget: undefined,
+                                }))
+                            }
                         />
                     )}
                     <SpaceCommentComposer
@@ -1470,7 +1565,7 @@ export const PostComments: React.FC<{
                 container={() => dialogContainer.current}
                 transition
                 modifiers={[
-                    { name: "offset", options: { offset: [0, 8] } },
+                    { name: "offset", options: { offset: [16, 8] } },
                     {
                         name: "preventOverflow",
                         options: {

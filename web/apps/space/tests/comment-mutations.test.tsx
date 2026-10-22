@@ -1,5 +1,5 @@
 import React, { type EffectCallback, type SetStateAction } from "react";
-import { beforeEach, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { PostComments } from "../src/components/PostComments";
 import type { SpaceComment } from "../src/services/space";
 import type { CommentDraft } from "../src/utils/comments";
@@ -79,7 +79,6 @@ vi.mock("data/emojis", () => ({ emojiName: () => "emoji" }));
 vi.mock("hooks/use-browser-back-close", () => ({
     useBrowserBackClose: vi.fn(),
 }));
-vi.mock("hooks/use-pwa-install-prompt", () => ({ isSpaceIOS: () => false }));
 vi.mock("styles/colors", () => import("../src/styles/colors"));
 vi.mock("utils/route-transitions", () => ({ useSpaceRouter: vi.fn() }));
 vi.mock("services/space", () => ({
@@ -128,6 +127,7 @@ const render = () => {
     mocks.index = 0;
     return elements(
         PostComments({
+            container: () => null,
             viewer: "viewer",
             owner: "owner",
             postId: 42,
@@ -166,6 +166,11 @@ beforeEach(async () => {
     render();
     mocks.effects[0]!();
     await vi.waitFor(() => expect(composer().props.sendDisabled).toBe(false));
+});
+
+afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
 });
 
 test("a lost creation response keeps the submission ID through reopening and retry", async () => {
@@ -249,5 +254,317 @@ test("a failed refresh still disables the unavailable discussion after a mutatio
     expect(composer().props.disabled).toBe(true);
     expect(alert()!.props.children).toContain(
         "Discussion unavailable. Access may have changed or the post may have been deleted.",
+    );
+});
+
+test.each(["selected", "unavailable"] as const)(
+    "cancelling a %s reply preserves the draft without focusing the input",
+    (status) => {
+        draft.replyTarget =
+            status == "selected"
+                ? { status, commentId: comment.commentId }
+                : { status };
+        const focus = vi.fn();
+        const inputRef = composer().props.inputRef as React.RefObject<{
+            focus: typeof focus;
+        }>;
+        inputRef.current = { focus };
+        const preview = render().find((node) => node.type == "preview")!;
+
+        (preview.props.onCancel as () => void)();
+
+        expect(draft.replyTarget).toBeUndefined();
+        expect(draft.text).toBe("New comment");
+        expect(focus).not.toHaveBeenCalled();
+        expect(composer().props.disabled).toBeFalsy();
+        expect(composer().props.placeholder).toBe("Add a comment…");
+        expect(render().find((node) => node.type == "preview")).toBeUndefined();
+    },
+);
+
+const commentGesture = (
+    overrides: Record<string, unknown> = {},
+    commentId = comment.commentId,
+) => {
+    vi.useFakeTimers();
+    class Target {
+        constructor(readonly kind: "body" | "button" | "reaction" = "body") {}
+        closest(selector: string) {
+            return (
+                selector == "a, button"
+                    ? this.kind != "body"
+                    : this.kind == "reaction"
+            )
+                ? this
+                : null;
+        }
+        hasAttribute() {
+            return this.kind == "reaction";
+        }
+        getBoundingClientRect() {
+            return { width: 390, right: 390 };
+        }
+        setPointerCapture = vi.fn();
+    }
+    vi.stubGlobal("Element", Target);
+    vi.stubGlobal("window", {
+        innerWidth: 390,
+        setTimeout,
+        clearTimeout,
+        getSelection: () => null,
+    });
+    const parent = render();
+    const focus = vi.fn();
+    const inputRef = parent.find((node) => node.type == "composer")!.props
+        .inputRef as React.RefObject<{ focus: typeof focus }>;
+    inputRef.current = { focus };
+    const element = parent.find(
+        (node) =>
+            (node.props.comment as SpaceComment | undefined)?.commentId ==
+            commentId,
+    )!;
+    const Component = element.type as (
+        props: Record<string, unknown>,
+    ) => Element;
+    const hookOffset = mocks.index;
+    const row = () => {
+        mocks.index = hookOffset;
+        return Component({ ...element.props, ...overrides });
+    };
+    const target = new Target();
+    const pointer = (
+        type:
+            | "onPointerDown"
+            | "onPointerMove"
+            | "onPointerUp"
+            | "onPointerCancel",
+        x: number,
+        y = 0,
+        options: Record<string, unknown> = {},
+    ) => {
+        const event = {
+            pointerId: 1,
+            pointerType: "touch",
+            isPrimary: true,
+            button: 0,
+            clientX: x,
+            clientY: y,
+            target,
+            currentTarget: target,
+            cancelable: true,
+            preventDefault: vi.fn(),
+            stopPropagation: vi.fn(),
+            ...options,
+        };
+        (row().props[type] as (event: unknown) => void)(event);
+        return event;
+    };
+    const click = (target: Target) => {
+        const event = {
+            target,
+            preventDefault: vi.fn(),
+            stopPropagation: vi.fn(),
+        };
+        (row().props.onClickCapture as (event: unknown) => void)(event);
+        return event;
+    };
+    return { focus, pointer, click, Target };
+};
+
+test("swiping a comment right selects it for reply and focuses the existing draft", () => {
+    const { pointer, focus } = commentGesture();
+    pointer("onPointerDown", 100);
+    pointer("onPointerMove", 180);
+    expect(draft.replyTarget).toBeUndefined();
+    pointer("onPointerUp", 180);
+    expect(draft.replyTarget).toEqual({
+        status: "selected",
+        commentId: "comment",
+    });
+    expect(draft.text).toBe("New comment");
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    vi.runAllTimers();
+    expect(render().find((node) => node.type == "popper")!.props.open).toBe(
+        false,
+    );
+});
+
+test("swiping a threaded reply selects that reply rather than the root comment", async () => {
+    const reply: SpaceComment = {
+        ...comment,
+        commentId: "nested-reply",
+        parentId: "comment",
+        replyToId: "comment",
+    };
+    mocks.hooks = [];
+    mocks.effects = [];
+    mocks.load.mockResolvedValue([comment, reply]);
+    render();
+    mocks.effects[0]!();
+    await vi.waitFor(() => expect(composer().props.sendDisabled).toBe(false));
+    const { pointer } = commentGesture({}, reply.commentId);
+    pointer("onPointerDown", 100);
+    pointer("onPointerMove", 180);
+    pointer("onPointerUp", 180);
+    expect(draft.replyTarget).toEqual({
+        status: "selected",
+        commentId: "nested-reply",
+    });
+});
+
+test.each([
+    ["short", 130, 0],
+    ["leftward", 20, 0],
+    ["vertical", 110, 80],
+    ["diagonal", 180, 100],
+] as const)(
+    "a %s drag does not reply or open the long-press menu",
+    (_, x, y) => {
+        const { pointer, focus } = commentGesture();
+        pointer("onPointerDown", 100);
+        pointer("onPointerMove", x, y);
+        pointer("onPointerUp", x, y);
+        vi.runAllTimers();
+        expect(draft.replyTarget).toBeUndefined();
+        expect(focus).not.toHaveBeenCalled();
+        expect(render().find((node) => node.type == "popper")!.props.open).toBe(
+            false,
+        );
+    },
+);
+
+test("a swipe near the right edge uses the available space", () => {
+    const { pointer } = commentGesture();
+    pointer("onPointerDown", 350);
+    pointer("onPointerMove", 375);
+    pointer("onPointerUp", 375);
+    expect(draft.replyTarget).toEqual({
+        status: "selected",
+        commentId: "comment",
+    });
+});
+
+test("cancelled swipes and unrelated pointer releases do not reply", () => {
+    const { pointer } = commentGesture();
+    pointer("onPointerDown", 100);
+    pointer("onPointerMove", 180);
+    pointer("onPointerUp", 180, 0, { pointerId: 2 });
+    expect(draft.replyTarget).toBeUndefined();
+    pointer("onPointerCancel", 180);
+    pointer("onPointerUp", 180);
+    expect(draft.replyTarget).toBeUndefined();
+});
+
+test.each(["mouse", "pen"])(
+    "%s dragging does not trigger a touch reply",
+    (pointerType) => {
+        const { pointer } = commentGesture();
+        pointer("onPointerDown", 100, 0, { pointerType });
+        pointer("onPointerMove", 180, 0, { pointerType });
+        pointer("onPointerUp", 180, 0, { pointerType });
+        expect(draft.replyTarget).toBeUndefined();
+    },
+);
+
+test.each(["button", "reaction"] as const)(
+    "swiping from a %s replies without activating the original control",
+    (kind) => {
+        const { pointer, click, Target } = commentGesture();
+        const target = new Target(kind);
+        pointer("onPointerDown", 100, 0, { target });
+        pointer("onPointerMove", 180, 0, { target });
+        pointer("onPointerUp", 180, 0, { target });
+        expect(draft.replyTarget).toEqual({
+            status: "selected",
+            commentId: "comment",
+        });
+        const event = click(target);
+        expect(event.preventDefault).toHaveBeenCalled();
+        expect(event.stopPropagation).toHaveBeenCalled();
+    },
+);
+
+test.each(["button", "reaction"] as const)(
+    "tapping a %s still activates the control without replying",
+    (kind) => {
+        const { pointer, click, Target } = commentGesture();
+        const target = new Target(kind);
+        const down = pointer("onPointerDown", 100, 0, { target });
+        pointer("onPointerUp", 100, 0, { target });
+        expect(down.currentTarget.setPointerCapture).not.toHaveBeenCalled();
+        const event = click(target);
+        expect(event.preventDefault).not.toHaveBeenCalled();
+        expect(event.stopPropagation).not.toHaveBeenCalled();
+        expect(draft.replyTarget).toBeUndefined();
+    },
+);
+
+test("a short horizontal drag on a control does not activate it or reply", () => {
+    const { pointer, click, Target } = commentGesture();
+    const target = new Target("button");
+    pointer("onPointerDown", 100, 0, { target });
+    pointer("onPointerMove", 130, 0, { target });
+    pointer("onPointerUp", 130, 0, { target });
+    const event = click(target);
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.stopPropagation).toHaveBeenCalled();
+    expect(draft.replyTarget).toBeUndefined();
+});
+
+test.each(["button", "reaction"] as const)(
+    "a vertical drag starting on a %s scrolls without replying",
+    (kind) => {
+        const { pointer, Target } = commentGesture();
+        const target = new Target(kind);
+        pointer("onPointerDown", 100, 0, { target });
+        const move = pointer("onPointerMove", 110, 80, { target });
+        pointer("onPointerUp", 110, 80, { target });
+        expect(move.preventDefault).not.toHaveBeenCalled();
+        vi.runAllTimers();
+        expect(draft.replyTarget).toBeUndefined();
+    },
+);
+
+test.each([{ disabled: true }, { comment: { ...comment, deleted: true } }])(
+    "inactive comments cannot be swiped to reply",
+    (overrides) => {
+        const { pointer } = commentGesture(overrides);
+        pointer("onPointerDown", 100);
+        pointer("onPointerMove", 180);
+        pointer("onPointerUp", 180);
+        expect(draft.replyTarget).toBeUndefined();
+    },
+);
+
+test("long-pressing still opens comment actions without replying", () => {
+    const { pointer } = commentGesture();
+    pointer("onPointerDown", 100);
+    vi.advanceTimersByTime(520);
+    pointer("onPointerMove", 180);
+    const release = pointer("onPointerUp", 180);
+    expect(release.preventDefault).toHaveBeenCalled();
+    expect(draft.replyTarget).toBeUndefined();
+    expect(render().find((node) => node.type == "popper")!.props.open).toBe(
+        true,
+    );
+});
+
+test("replying from the long-press menu focuses the input and preserves the draft", () => {
+    const { pointer, focus } = commentGesture();
+    pointer("onPointerDown", 100);
+    vi.advanceTimersByTime(520);
+    pointer("onPointerUp", 100);
+    const reply = render().find((node) => node.props.label == "Reply")!;
+
+    (reply.props.onClick as () => void)();
+
+    expect(draft.replyTarget).toEqual({
+        status: "selected",
+        commentId: comment.commentId,
+    });
+    expect(draft.text).toBe("New comment");
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    expect(render().find((node) => node.type == "popper")!.props.open).toBe(
+        false,
     );
 });

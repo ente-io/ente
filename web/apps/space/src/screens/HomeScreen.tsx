@@ -914,6 +914,8 @@ const FeedItem: React.FC<FeedItemProps> = ({
         dragging: boolean;
     } | null>(null);
     const suppressPhotoClickRef = React.useRef(false);
+    const photoClickTimeoutRef =
+        React.useRef<ReturnType<typeof setTimeout>>(undefined);
     const scrollToPhoto = React.useCallback(
         (index: number) => {
             const carousel = carouselRef.current;
@@ -970,6 +972,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
         () => () => {
             if (photoAnimationRef.current != null)
                 cancelAnimationFrame(photoAnimationRef.current);
+            clearTimeout(photoClickTimeoutRef.current);
         },
         [],
     );
@@ -1374,6 +1377,8 @@ const FeedItem: React.FC<FeedItemProps> = ({
                         if (!swipe.dragging) {
                             if (Math.max(Math.abs(dx), Math.abs(dy)) < 8)
                                 return;
+                            clearTimeout(photoClickTimeoutRef.current);
+                            photoClickTimeoutRef.current = undefined;
                             if (Math.abs(dy) >= Math.abs(dx)) {
                                 swipeRef.current = null;
                                 scrollToPhoto(swipe.index);
@@ -1397,15 +1402,39 @@ const FeedItem: React.FC<FeedItemProps> = ({
                         );
                     }}
                     onPointerUp={finishPhotoSwipe}
-                    onPointerCancel={finishPhotoSwipe}
+                    onPointerCancel={(event) => {
+                        clearTimeout(photoClickTimeoutRef.current);
+                        photoClickTimeoutRef.current = undefined;
+                        finishPhotoSwipe(event);
+                    }}
                     onClickCapture={(event) => {
-                        if (!suppressPhotoClickRef.current || event.detail == 0)
+                        if (event.detail == 0) return;
+                        if (suppressPhotoClickRef.current) {
+                            suppressPhotoClickRef.current = false;
+                            event.preventDefault();
+                            event.stopPropagation();
                             return;
-                        suppressPhotoClickRef.current = false;
+                        }
+                        if (isOwnPost || !showFooter) return;
                         event.preventDefault();
                         event.stopPropagation();
+                        if (photoClickTimeoutRef.current != undefined) {
+                            clearTimeout(photoClickTimeoutRef.current);
+                            photoClickTimeoutRef.current = undefined;
+                            if (!isLiked) handleLikeClick();
+                            return;
+                        }
+                        const target = (event.target as Element).closest<
+                            HTMLButtonElement | HTMLVideoElement
+                        >("button, video");
+                        photoClickTimeoutRef.current = setTimeout(() => {
+                            photoClickTimeoutRef.current = undefined;
+                            target?.click();
+                        }, 180);
                     }}
                     onScroll={(event) => {
+                        clearTimeout(photoClickTimeoutRef.current);
+                        photoClickTimeoutRef.current = undefined;
                         const carousel = event.currentTarget;
                         paintStretchingDot(
                             rootRef.current!,

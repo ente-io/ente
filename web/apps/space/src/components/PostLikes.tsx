@@ -1,6 +1,6 @@
 import { FavouriteIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Box, Dialog, Skeleton, useMediaQuery } from "@mui/material";
+import { Box, CircularProgress, Dialog, useMediaQuery } from "@mui/material";
 import { SpaceActivityAvatar } from "components/ActivityList";
 import { SpaceBottomSheetTransition } from "components/BottomSheetTransition";
 import type { FriendProfile } from "data/friends";
@@ -224,7 +224,7 @@ export const SpacePostLikes = ({
                             display: "flex",
                             flexDirection: "column",
                             fontFamily: '"Inter Variable", Inter, sans-serif',
-                            height: "min(72dvh, 640px)",
+                            height: "min(40dvh, 360px)",
                             left: 0,
                             m: 0,
                             maxHeight:
@@ -384,26 +384,19 @@ export const SpacePostLikes = ({
                             </Box>
                         </Box>
                     ) : !actors ? (
-                        <Box role="status" aria-label="Loading likes">
-                            {[0, 1, 2].map((index) => (
-                                <Box
-                                    key={index}
-                                    sx={{
-                                        alignItems: "center",
-                                        display: "flex",
-                                        gap: "12px",
-                                        minHeight: 56,
-                                        py: "8px",
-                                    }}
-                                >
-                                    <Skeleton
-                                        variant="circular"
-                                        width={32}
-                                        height={32}
-                                    />
-                                    <Skeleton width={120} height={24} />
-                                </Box>
-                            ))}
+                        <Box
+                            sx={{
+                                alignItems: "center",
+                                display: "flex",
+                                height: "100%",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <CircularProgress
+                                aria-label="Loading likes"
+                                size={20}
+                                sx={{ color: spaceTextMuted }}
+                            />
                         </Box>
                     ) : actors.length == 0 ? (
                         <Box

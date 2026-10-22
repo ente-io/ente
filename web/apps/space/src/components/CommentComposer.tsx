@@ -1,11 +1,6 @@
 import { Navigation03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Box } from "@mui/material";
-import {
-    spaceActionDoneDurationMs,
-    SpaceActionFeedbackIcon,
-    type SpaceActionPhase,
-} from "components/ActionFeedback";
 import React from "react";
 import {
     spaceControlBackground,
@@ -101,7 +96,7 @@ export const SpaceCommentComposer: React.FC<{
     const [localText, setLocalText] = React.useState("");
     const text = draftText ?? localText;
     const setText = onTextChange ?? setLocalText;
-    const [phase, setPhase] = React.useState<SpaceActionPhase | null>(null);
+    const [isSending, setIsSending] = React.useState(false);
     const [error, setError] = React.useState(false);
     const internalRef = React.useRef<HTMLTextAreaElement>(null);
     const ref = inputRef ?? internalRef;
@@ -111,25 +106,17 @@ export const SpaceCommentComposer: React.FC<{
         input.style.height = "46px";
         input.style.height = `${Math.min(input.scrollHeight, 112)}px`;
     }, [ref, text]);
-    React.useEffect(() => {
-        if (phase != "done") return;
-        const timer = window.setTimeout(
-            () => setPhase(null),
-            spaceActionDoneDurationMs,
-        );
-        return () => window.clearTimeout(timer);
-    }, [phase]);
     const send = async () => {
-        if (!text.trim() || phase || disabled || sendDisabled) return;
-        setPhase("busy");
+        if (!text.trim() || isSending || disabled || sendDisabled) return;
+        setIsSending(true);
         setError(false);
         try {
             await onSend(text);
             if (!onTextChange) setLocalText("");
-            setPhase("done");
         } catch {
             setError(true);
-            setPhase(null);
+        } finally {
+            setIsSending(false);
         }
     };
     return (
@@ -163,7 +150,7 @@ export const SpaceCommentComposer: React.FC<{
                     placeholder={placeholder}
                     rows={1}
                     value={text}
-                    disabled={disabled || phase != null}
+                    disabled={disabled || isSending}
                     onChange={(event) =>
                         setText(clampSpaceMessageText(event.target.value))
                     }
@@ -194,28 +181,24 @@ export const SpaceCommentComposer: React.FC<{
                         "&::placeholder": { color: spaceTextMuted },
                     }}
                 />
-                {(text.trim() || phase) && (
+                {text.trim() && (
                     <Box
                         component="button"
                         type="submit"
-                        className={phase == "done" ? undefined : "green-bg"}
+                        className="green-bg"
                         aria-label={
-                            phase == "done"
-                                ? "Comment sent"
-                                : phase == "busy"
-                                  ? "Sending comment"
-                                  : "Send comment"
+                            isSending ? "Sending comment" : "Send comment"
                         }
-                        disabled={disabled || sendDisabled || phase != null}
+                        disabled={disabled || sendDisabled || isSending}
+                        onPointerDown={(event) => event.preventDefault()}
                         sx={{
                             alignItems: "center",
-                            bgcolor:
-                                phase == "done" ? "transparent" : "#08C225",
+                            bgcolor: "#08C225",
                             border: 0,
                             borderRadius: "50%",
                             color: spaceText,
                             cursor:
-                                disabled || sendDisabled || phase
+                                disabled || sendDisabled || isSending
                                     ? "default"
                                     : "pointer",
                             display: "flex",
@@ -225,23 +208,17 @@ export const SpaceCommentComposer: React.FC<{
                             m: "5px",
                             width: 36,
                             opacity:
-                                (disabled || sendDisabled) && !phase ? 0.4 : 1,
+                                disabled || sendDisabled || isSending ? 0.4 : 1,
                             "&:focus-visible": {
                                 outline: "2px solid #08C225",
                                 outlineOffset: 2,
                             },
                         }}
                     >
-                        <SpaceActionFeedbackIcon
-                            phase={phase}
-                            size={22}
-                            idleIcon={
-                                <HugeiconsIcon
-                                    icon={Navigation03Icon}
-                                    size={20}
-                                    strokeWidth={1.8}
-                                />
-                            }
+                        <HugeiconsIcon
+                            icon={Navigation03Icon}
+                            size={20}
+                            strokeWidth={1.8}
                         />
                     </Box>
                 )}
