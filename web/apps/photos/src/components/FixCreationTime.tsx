@@ -1,4 +1,8 @@
-import { Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import {
+    AlertCircleIcon,
+    Cancel01Icon,
+    Tick02Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
     Box,
@@ -127,9 +131,9 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                         color: "text.muted",
                         fontWeight: 400,
                     }}
-                    role={message ? "status" : undefined}
+                    role={step == "completed" ? "status" : undefined}
                 >
-                    {message ??
+                    {(step == "completed-with-errors" ? undefined : message) ??
                         (step == "running"
                             ? t("fix_creation_time_in_progress")
                             : t("fix_creation_time_options"))}
@@ -234,6 +238,11 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                     if (option == "custom") setShowPicker(true);
                 }}
                 aria-labelledby="fix-date-time-description"
+                aria-describedby={
+                    step == "completed-with-errors"
+                        ? "fix-date-time-error"
+                        : undefined
+                }
                 sx={{ gap: "8px" }}
             >
                 {options.map(({ value, label }) => (
@@ -347,6 +356,34 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                     }}
                     onDidClose={() => setShowPicker(false)}
                 />
+            )}
+            {step == "completed-with-errors" && (
+                <Stack
+                    id="fix-date-time-error"
+                    role="alert"
+                    direction="row"
+                    sx={{
+                        alignItems: "flex-start",
+                        gap: "8px",
+                        px: "4px",
+                        color: "critical.main",
+                    }}
+                >
+                    <HugeiconsIcon
+                        icon={AlertCircleIcon}
+                        size={18}
+                        style={{ flexShrink: 0, marginTop: 1 }}
+                    />
+                    <Typography
+                        sx={{
+                            fontSize: 13,
+                            lineHeight: "19px",
+                            fontWeight: 400,
+                        }}
+                    >
+                        {t("fix_creation_time_completed_with_errors")}
+                    </Typography>
+                </Stack>
             )}
             <FocusVisibleButton
                 type="submit"
