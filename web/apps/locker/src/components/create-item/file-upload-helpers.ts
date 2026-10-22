@@ -13,7 +13,6 @@ export const dedupeCollectionNames = (names: string[]) => {
     });
 };
 
-/** Existing collections retain their IDs; only collections to create use names. */
 export type UploadCollectionSelection = number | string;
 
 export const uploadCollectionSelection = (
