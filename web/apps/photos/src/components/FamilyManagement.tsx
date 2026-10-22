@@ -445,7 +445,7 @@ const FamilyDashboard: React.FC<FamilyDashboardProps> = ({
                                 >
                                     {member.status == "SELF"
                                         ? t("you")
-                                        : member.email.split("@")[0]}
+                                        : member.email}
                                 </Typography>
                             </Stack>
                         ),
