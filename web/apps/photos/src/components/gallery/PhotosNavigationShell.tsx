@@ -10,11 +10,14 @@ import {
     UserGroupIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import CloudOffIcon from "@mui/icons-material/CloudOff";
 import {
     Box,
+    CircularProgress,
     Stack,
     SvgIcon,
     Tooltip,
+    Typography,
     useMediaQuery,
     useTheme,
 } from "@mui/material";
@@ -58,11 +61,20 @@ type PhotosNavigationShellProps = SearchBarProps & {
 export const PhotosNavigationShell: React.FC<
     React.PropsWithChildren<
         PhotosNavigationShellProps & {
+            isFirstLoad: boolean;
+            isOffline: boolean;
             alternateHeader: ReactNode;
             galleryNavigation: GalleryNavigation | undefined;
         }
     >
-> = ({ alternateHeader, galleryNavigation, children, ...props }) => {
+> = ({
+    isFirstLoad,
+    isOffline,
+    alternateHeader,
+    galleryNavigation,
+    children,
+    ...props
+}) => {
     const [railOpen, setRailOpen] = useState(true);
     const [navigationCollapsed, setNavigationCollapsed] = useState(false);
     const toggleRail = () => setRailOpen((open) => !open);
@@ -232,22 +244,32 @@ export const PhotosNavigationShell: React.FC<
                         </>
                     )}
                     <Stack
-                        sx={(theme) => ({
-                            flex: 1,
-                            minWidth: 0,
-                            minHeight: 0,
-                            pt: { xs: `${thumbnailGridPadding}px`, md: "36px" },
-                            px: { xs: 0, md: "12px" },
-                            "--mui-palette-background-default": "#FFFFFF",
-                            bgcolor: "background.default",
-                            borderRadius: "20px",
-                            overflow: "hidden",
-                            ...theme.applyStyles("dark", {
-                                "--mui-palette-background-default": "#212121",
-                            }),
-                        })}
+                        sx={{ flex: 1, minWidth: 0, minHeight: 0, gap: "8px" }}
                     >
-                        {children}
+                        <Stack
+                            sx={(theme) => ({
+                                flex: 1,
+                                minWidth: 0,
+                                minHeight: 0,
+                                pt: {
+                                    xs: `${thumbnailGridPadding}px`,
+                                    md: "36px",
+                                },
+                                px: { xs: 0, md: "12px" },
+                                "--mui-palette-background-default": "#FFFFFF",
+                                bgcolor: "background.default",
+                                borderRadius: "20px",
+                                overflow: "hidden",
+                                ...theme.applyStyles("dark", {
+                                    "--mui-palette-background-default":
+                                        "#212121",
+                                }),
+                            })}
+                        >
+                            {children}
+                        </Stack>
+                        {isFirstLoad && <FirstLoadMessage />}
+                        {isOffline && <OfflineMessage />}
                     </Stack>
                 </Stack>
             </Stack>
@@ -506,3 +528,50 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
         </>
     );
 };
+
+const GalleryStatusMessage: React.FC<
+    React.PropsWithChildren<{ icon: ReactNode }>
+> = ({ icon, children }) => (
+    <Stack
+        direction="row"
+        role="status"
+        sx={{
+            flexShrink: 0,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1.25,
+            px: 1,
+            py: 1.25,
+            color: "text.muted",
+            opacity: 0.65,
+        }}
+    >
+        {icon}
+        <Typography variant="small" sx={{ textAlign: "center" }}>
+            {children}
+        </Typography>
+    </Stack>
+);
+
+const FirstLoadMessage: React.FC = () => (
+    <GalleryStatusMessage
+        icon={
+            <CircularProgress
+                size={12}
+                thickness={5}
+                color="inherit"
+                aria-hidden
+            />
+        }
+    >
+        {t("initial_load_delay_warning")}
+    </GalleryStatusMessage>
+);
+
+const OfflineMessage: React.FC = () => (
+    <GalleryStatusMessage
+        icon={<CloudOffIcon sx={{ fontSize: 16 }} aria-hidden />}
+    >
+        {t("offline_message")}
+    </GalleryStatusMessage>
+);
