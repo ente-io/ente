@@ -580,11 +580,20 @@ const FamilyMemberRow: React.FC<{
                 >
                     {invited
                         ? t("family_invite_pending")
-                        : t("family_member_storage_used", {
-                              usage: formattedStorageByteSize(
-                                  member.usage ?? 0,
-                              ),
-                          })}
+                        : member.storageLimit != undefined
+                          ? t("family_storage_usage", {
+                                used: formattedStorageByteSize(
+                                    member.usage ?? 0,
+                                ),
+                                total: formattedStorageByteSize(
+                                    member.storageLimit,
+                                ),
+                            })
+                          : t("family_member_storage_used", {
+                                usage: formattedStorageByteSize(
+                                    member.usage ?? 0,
+                                ),
+                            })}
                 </Typography>
             </Stack>
             {manageable && (
