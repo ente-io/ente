@@ -276,6 +276,97 @@ func TestDiscussionBatchReadsWithDeepReplyChain(t *testing.T) {
 	}
 }
 
+func TestDiscussionPageWorkIsBoundedByPageAndAncestors(t *testing.T) {
+	for _, shape := range []string{"flat", "shared-parent", "hidden-parent"} {
+		t.Run(shape, func(t *testing.T) {
+			module := newSpaceTestModule(t)
+			ctx := t.Context()
+			owner, friend := notificationTestSpaces(t, module)
+			postID, err := testCreatePost(ctx, module, owner.OwnerID, owner.SpaceID, "post-key", nil, 1, nil)
+			require.NoError(t, err)
+			_, err = module.Comments.DB.ExecContext(ctx, `INSERT INTO space_comments
+                (comment_id, post_id, author_space_id, cipher, created_at)
+                VALUES ('root', $1, $2, CASE WHEN $3 = 'hidden-parent' THEN NULL ELSE '\x01'::bytea END, 1)`, postID, owner.SpaceID, shape)
+			require.NoError(t, err)
+			previousSize := 1
+			previousRows := make(map[string]float64)
+			for _, size := range []int{1000, 10000} {
+				_, err = module.Comments.DB.ExecContext(ctx, `INSERT INTO space_comments
+                    (comment_id, post_id, author_space_id, parent_id, reply_to_id, cipher, created_at)
+                    SELECT 'comment-' || i, $1, $2,
+                        CASE WHEN $3 <> 'flat' THEN 'root' END,
+                        CASE WHEN $3 <> 'flat' THEN 'root' END, '\x01'::bytea, i
+                    FROM generate_series($4::int + 1, $5::int) i`, postID, owner.SpaceID, shape, previousSize, size)
+				require.NoError(t, err)
+				_, err = module.Comments.DB.ExecContext(ctx, `INSERT INTO space_notifications
+                    (notification_id, recipient_space_id, actor_space_id, kind, comment_id, created_at)
+                    SELECT 'notification-' || i, $1, $2, 'comment_reaction', 'comment-' || i, i
+                    FROM generate_series($3::int + 1, $4::int) i`, owner.SpaceID, friend.SpaceID, previousSize, size)
+				require.NoError(t, err)
+				_, err = module.Comments.DB.ExecContext(ctx, `ANALYZE space_comments; ANALYZE space_notifications`)
+				require.NoError(t, err)
+				createdAt := size - 101
+				id := fmt.Sprintf("comment-%d", createdAt)
+				items, cursor, err := module.Comments.List(ctx, owner.SpaceID, postID, fmt.Sprintf("%d:%s", createdAt, id))
+				require.NoError(t, err)
+				require.Len(t, items, 100)
+				require.Equal(t, fmt.Sprintf("%d:comment-%d", size-1, size-1), cursor)
+				ids := make([]string, 0, len(items))
+				for i, item := range items {
+					require.Equal(t, fmt.Sprintf("comment-%d", createdAt+i+1), item.ID)
+					ids = append(ids, item.ID)
+					if shape == "hidden-parent" {
+						require.Empty(t, item.Cipher)
+						require.Empty(t, item.UnreadNotificationIDs)
+					} else {
+						require.Equal(t, []byte{1}, item.Cipher)
+						require.Equal(t, []string{fmt.Sprintf("notification-%d", createdAt+i+1)}, item.UnreadNotificationIDs)
+					}
+				}
+				for _, query := range []struct {
+					name, sql string
+					args      []any
+				}{
+					{"page", commentsPageSQL, []any{postID, owner.SpaceID, createdAt, id}},
+					{"ancestors", commentAncestorsSQL, []any{pq.Array(ids)}},
+					{"unread", commentsUnreadNotificationsSQL, []any{owner.SpaceID, pq.Array(ids)}},
+				} {
+					var planJSON []byte
+					require.NoError(t, module.Comments.DB.QueryRowContext(ctx, `EXPLAIN (ANALYZE, FORMAT JSON) `+query.sql, query.args...).Scan(&planJSON))
+					type planNode struct {
+						Relation string     `json:"Relation Name"`
+						Rows     float64    `json:"Actual Rows"`
+						Filtered float64    `json:"Rows Removed by Filter"`
+						Loops    float64    `json:"Actual Loops"`
+						Plans    []planNode `json:"Plans"`
+					}
+					var plans []struct{ Plan planNode }
+					require.NoError(t, json.Unmarshal(planJSON, &plans))
+					require.Len(t, plans, 1)
+					var rowsExamined float64
+					var inspect func(planNode)
+					inspect = func(node planNode) {
+						if node.Relation == "space_comments" || node.Relation == "space_notifications" {
+							rowsExamined += (node.Rows + node.Filtered) * node.Loops
+						}
+						for _, child := range node.Plans {
+							inspect(child)
+						}
+					}
+					inspect(plans[0].Plan)
+					t.Logf("%d comments, %s: %.0f rows examined", size, query.name, rowsExamined)
+					require.Positive(t, rowsExamined, query.name)
+					if previousRows[query.name] > 0 {
+						require.LessOrEqual(t, rowsExamined, previousRows[query.name]*2, query.name)
+					}
+					previousRows[query.name] = rowsExamined
+				}
+				previousSize = size
+			}
+		})
+	}
+}
+
 func TestDiscussionParentDeletionRemovesWholeThread(t *testing.T) {
 	for _, deleteAsOwner := range []bool{false, true} {
 		name := "author"
