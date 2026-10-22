@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"sync"
 	"time"
@@ -12,13 +13,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+const maxThrottleEntries = 1024
+
 type DiscordController struct {
 	MonaLisa    *discordgo.Session
 	ChaChing    *discordgo.Session
 	HostName    string
 	Environment string
 	UserRepo    *repo.UserRepository
-	lastSent    map[string]time.Time
+	lastSent    map[[sha256.Size]byte]time.Time
 	mu          sync.Mutex
 }
 
@@ -29,7 +32,7 @@ func NewDiscordController(userRepo *repo.UserRepository, hostName string, enviro
 		HostName:    hostName,
 		Environment: environment,
 		UserRepo:    userRepo,
-		lastSent:    make(map[string]time.Time),
+		lastSent:    make(map[[sha256.Size]byte]time.Time),
 	}
 }
 
@@ -73,11 +76,25 @@ func (c *DiscordController) NotifyThrottled(message string, window time.Duration
 	defer c.mu.Unlock()
 
 	now := time.Now()
-	if lastTime, exists := c.lastSent[message]; exists && now.Sub(lastTime) < window {
+	digest := sha256.Sum256([]byte(message))
+	lastTime, exists := c.lastSent[digest]
+	if exists && now.Sub(lastTime) < window {
 		log.Infof("Skipping duplicate Discord notification: %s", message)
 		return
 	}
-	c.lastSent[message] = now
+	if !exists && len(c.lastSent) >= maxThrottleEntries {
+		// Keep new alerts visible; an evicted alert may repeat before its window ends.
+		var oldestKey [sha256.Size]byte
+		var oldestTime time.Time
+		for candidateKey, lastTime := range c.lastSent {
+			if oldestTime.IsZero() || lastTime.Before(oldestTime) {
+				oldestKey = candidateKey
+				oldestTime = lastTime
+			}
+		}
+		delete(c.lastSent, oldestKey)
+	}
+	c.lastSent[digest] = now
 	c.Notify(message)
 }
 
