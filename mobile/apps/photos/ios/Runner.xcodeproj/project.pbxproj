@@ -33,6 +33,7 @@
 		CEE6BE7C2D7AE7FE00E4048B /* EnteMemoryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D3E09F452C70B1E300F01A01 /* FFmpegRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = D3E09F452C70B1E300F01A03 /* FFmpegRuntime */; };
 		DA6BE5E826B3BC8600656280 /* BuildFile in Resources */ = {isa = PBXBuildFile; };
+		074CAC9E3088DD8200DF0FD6 /* NotificationServiceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 074CAC973088DD8200DF0FD6 /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,13 @@
 			remoteGlobalIDString = CEE6BE6E2D7AE7FD00E4048B;
 			remoteInfo = EnteMemoryWidgetExtension;
 		};
+		074CAC9C3088DD8200DF0FD6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 074CAC963088DD8200DF0FD6;
+			remoteInfo = NotificationServiceExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -77,6 +85,7 @@
 				CEE166302DD5E7830012CF61 /* EnteAlbumWidgetExtension.appex in Embed Foundation Extensions */,
 				CEE6BE7C2D7AE7FE00E4048B /* EnteMemoryWidgetExtension.appex in Embed Foundation Extensions */,
 				CEE166882DD5F6F30012CF61 /* EntePeopleWidgetExtension.appex in Embed Foundation Extensions */,
+				074CAC9E3088DD8200DF0FD6 /* NotificationServiceExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -133,6 +142,7 @@
 		D025F2F5A163F84B724D14D7 /* Pods_ShareExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShareExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA8D6672273BBB59007651D4 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		F82DAEEB9A7D9FD00E0FFA1E /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		074CAC973088DD8200DF0FD6 /* NotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -163,6 +173,13 @@
 				Info.plist,
 			);
 			target = CEE6BE6E2D7AE7FD00E4048B /* EnteMemoryWidgetExtension */;
+		};
+		074CACA23088DD8200DF0FD6 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 074CAC963088DD8200DF0FD6 /* NotificationServiceExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -215,6 +232,7 @@
 			path = EnteMemoryWidget;
 			sourceTree = "<group>";
 		};
+		074CAC983088DD8200DF0FD6 /* NotificationServiceExtension */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (074CACA23088DD8200DF0FD6 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = NotificationServiceExtension; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -263,6 +281,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		074CAC943088DD8200DF0FD6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -294,6 +319,7 @@
 				97C146EF1CF9000F007C117D /* Products */,
 				AC6CA265BB505D982CB00391 /* Pods */,
 				C6A22658E77FF012720BEDDA /* Frameworks */,
+				074CAC983088DD8200DF0FD6 /* NotificationServiceExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -305,6 +331,7 @@
 				CEE166232DD5E7820012CF61 /* EnteAlbumWidgetExtension.appex */,
 				CEE1667B2DD5F6F20012CF61 /* EntePeopleWidgetExtension.appex */,
 				54D121EC2F02675C00B8CC69 /* ShareExtension.appex */,
+				074CAC973088DD8200DF0FD6 /* NotificationServiceExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -409,6 +436,7 @@
 				CEE1662F2DD5E7830012CF61 /* PBXTargetDependency */,
 				CEE166872DD5F6F30012CF61 /* PBXTargetDependency */,
 				54D121F52F02675C00B8CC69 /* PBXTargetDependency */,
+				074CAC9D3088DD8200DF0FD6 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -478,6 +506,29 @@
 			productReference = CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		074CAC963088DD8200DF0FD6 /* NotificationServiceExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 074CACA33088DD8200DF0FD6 /* Build configuration list for PBXNativeTarget "NotificationServiceExtension" */;
+			buildPhases = (
+				A17E00000000000000000030 /* Build notification crypto */,
+				074CAC933088DD8200DF0FD6 /* Sources */,
+				074CAC943088DD8200DF0FD6 /* Frameworks */,
+				074CAC953088DD8200DF0FD6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				074CAC983088DD8200DF0FD6 /* NotificationServiceExtension */,
+			);
+			name = NotificationServiceExtension;
+			packageProductDependencies = (
+			);
+			productName = NotificationServiceExtension;
+			productReference = 074CAC973088DD8200DF0FD6 /* NotificationServiceExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -487,6 +538,9 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 1510;
 				TargetAttributes = {
+					074CAC963088DD8200DF0FD6 = {
+						CreatedOnToolsVersion = 27.0;
+					};
 					54D121EB2F02675C00B8CC69 = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -526,6 +580,7 @@
 				CEE166222DD5E7820012CF61 /* EnteAlbumWidgetExtension */,
 				CEE1667A2DD5F6F20012CF61 /* EntePeopleWidgetExtension */,
 				54D121EB2F02675C00B8CC69 /* ShareExtension */,
+				074CAC963088DD8200DF0FD6 /* NotificationServiceExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -566,6 +621,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		CEE6BE6D2D7AE7FD00E4048B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		074CAC953088DD8200DF0FD6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -856,6 +918,18 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		A17E00000000000000000030 /* Build notification crypto */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = ();
+			name = "Build notification crypto";
+			outputPaths = ("$(TARGET_TEMP_DIR)/notification_rust/libente_notification_ffi.a", );
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/bash \"$SRCROOT/../scripts/build-notification-rust.sh\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -900,6 +974,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		074CAC933088DD8200DF0FD6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -922,6 +1003,11 @@
 			isa = PBXTargetDependency;
 			target = CEE6BE6E2D7AE7FD00E4048B /* EnteMemoryWidgetExtension */;
 			targetProxy = CEE6BE7A2D7AE7FE00E4048B /* PBXContainerItemProxy */;
+		};
+		074CAC9D3088DD8200DF0FD6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 074CAC963088DD8200DF0FD6 /* NotificationServiceExtension */;
+			targetProxy = 074CAC9C3088DD8200DF0FD6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1755,6 +1841,89 @@
 			};
 			name = Profile;
 		};
+		074CAC9F3088DD8200DF0FD6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = NotificationServiceExtension/NotificationServiceExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libente_notification_ffi.a", "-framework", Security, );
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug.NotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OBJC_BRIDGING_HEADER = NotificationServiceExtension/NotificationCrypto.h;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		074CACA03088DD8200DF0FD6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = NotificationServiceExtension/NotificationServiceExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libente_notification_ffi.a", "-framework", Security, );
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.NotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(NOTIFICATION_SERVICE_EXTENSION_APP_STORE_PROFILE_SPECIFIER)";
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = NotificationServiceExtension/NotificationCrypto.h;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		074CACA13088DD8200DF0FD6 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = NotificationServiceExtension/NotificationServiceExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libente_notification_ffi.a", "-framework", Security, );
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.NotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = NotificationServiceExtension/NotificationCrypto.h;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1814,6 +1983,16 @@
 				CEE6BE7D2D7AE7FE00E4048B /* Debug */,
 				CEE6BE7E2D7AE7FE00E4048B /* Release */,
 				CEE6BE7F2D7AE7FE00E4048B /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		074CACA33088DD8200DF0FD6 /* Build configuration list for PBXNativeTarget "NotificationServiceExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				074CAC9F3088DD8200DF0FD6 /* Debug */,
+				074CACA03088DD8200DF0FD6 /* Release */,
+				074CACA13088DD8200DF0FD6 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

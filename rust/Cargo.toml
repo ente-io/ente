@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "apps/cli",
     "apps/ensu/src-tauri",
+    "bindings/ffi/notifications",
     "bindings/frb/lib",
     "bindings/frb/locker",
     "bindings/frb/log",

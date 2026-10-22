@@ -2839,6 +2839,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente-notification-ffi"
+version = "0.1.0"
+dependencies = [
+ "ente-core",
+]
+
+[[package]]
 name = "ente-paste"
 version = "0.0.0"
 dependencies = [

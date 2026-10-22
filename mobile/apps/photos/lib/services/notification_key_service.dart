@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/src/rust/api/notification_api.dart';
 import 'package:photos/src/rust/frb_generated.dart';
 
@@ -14,7 +15,9 @@ class NotificationKeyService {
   static Future<String>? _pendingKey;
 
   static Future<String?> generateNotificationKey() {
-    if (!Platform.isAndroid) return Future.value();
+    if (!flagService.internalUser) {
+      return Future.value();
+    }
     return _pendingKey ??= _getOrCreateNotificationKey().whenComplete(() {
       _pendingKey = null;
     });
