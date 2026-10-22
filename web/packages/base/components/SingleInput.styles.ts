@@ -3,7 +3,7 @@ import type { SxProps, Theme } from "@mui/material";
 const surfaceStroke = "#e0e0e0";
 const surfaceStrokeDark = "rgba(255 255 255 / 0.12)";
 
-export const v2PaperSx: SxProps<Theme> = (theme) => ({
+export const v2PaperSx = ((theme: Theme) => ({
     width: "min(444px, calc(100svw - 32px))",
     maxWidth: "444px",
     boxSizing: "content-box",
@@ -18,7 +18,7 @@ export const v2PaperSx: SxProps<Theme> = (theme) => ({
         borderColor: surfaceStrokeDark,
         backgroundColor: "#1b1b1b",
     }),
-});
+})) satisfies SxProps<Theme>;
 export const v2HeaderRowSx = {
     alignItems: "center",
     justifyContent: "space-between",

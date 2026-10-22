@@ -13,6 +13,12 @@ import {
     Typography,
 } from "@mui/material";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    v2CloseButtonSx,
+    v2HeaderRowSx,
+    v2PaperSx,
+    v2SubmitButtonSx,
+} from "ente-base/components/SingleInput.styles";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
@@ -30,7 +36,6 @@ import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { collectionDialogIconButtonSx } from "./CollectionDialog/styles";
 
 type FixCreationTimeProps = ModalVisibilityProps & {
     files: EnteFile[];
@@ -77,33 +82,21 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
             aria-busy={step == "running"}
             slotProps={{
                 paper: {
-                    sx: (theme) => ({
-                        width: 560,
-                        maxWidth: "calc(100% - 32px)",
-                        m: "16px",
-                        p: "19px",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "20px",
-                        backgroundColor: "#f4f4f4",
-                        backgroundImage: "none",
-                        boxShadow: "none",
-                        ...theme.applyStyles("dark", {
-                            borderColor: "stroke.faint",
-                            backgroundColor: "#1b1b1b",
-                        }),
-                    }),
+                    sx: [
+                        v2PaperSx,
+                        {
+                            width: 560,
+                            maxWidth: "calc(100% - 32px)",
+                            boxSizing: "border-box",
+                            m: "16px",
+                            p: "19px",
+                        },
+                    ],
                 },
             }}
         >
             <Stack sx={{ gap: "18px" }}>
-                <Stack
-                    direction="row"
-                    sx={{
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: 2,
-                    }}
-                >
+                <Stack direction="row" sx={v2HeaderRowSx}>
                     <Typography
                         id="fix-date-time-title"
                         component="h2"
@@ -121,7 +114,7 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                         aria-label={t("close")}
                         onClick={onClose}
                         disabled={step == "running"}
-                        sx={collectionDialogIconButtonSx}
+                        sx={v2CloseButtonSx}
                     >
                         <HugeiconsIcon icon={Cancel01Icon} size={18} />
                     </IconButton>
@@ -381,15 +374,14 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
 };
 
 const submitButtonSx = {
+    ...v2SubmitButtonSx,
+    flex: "none",
     minHeight: 52,
-    borderRadius: "20px",
-    fontSize: 14,
-    lineHeight: "20px",
-    fontWeight: 500,
-    color: "#fff",
-    backgroundColor: "#08c225",
-    "&:hover": { backgroundColor: "#07ad21" },
-    "&.Mui-disabled": { color: "text.faint", backgroundColor: "fill.faint" },
+    "&.Mui-disabled": {
+        color: "text.faint",
+        backgroundColor: "fill.faint",
+        opacity: 1,
+    },
 };
 
 const updateFiles = async (
