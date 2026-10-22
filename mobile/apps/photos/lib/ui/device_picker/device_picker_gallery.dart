@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:collection/collection.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -46,6 +47,7 @@ class _DevicePickerGalleryState extends State<DevicePickerGallery> {
       item.id,
       () => fileFromAsset(widget.model.album?.name ?? '', item),
     );
+    _selection.register(file, item.id);
     if (file.duration == null || file.duration == 0) {
       file.duration = item.duration;
     }
@@ -64,20 +66,30 @@ class _DevicePickerGalleryState extends State<DevicePickerGallery> {
 
   void _updateFiles() {
     _snapshot = List.of(widget.model.media);
-    final available = [...widget.model.selection, ..._snapshot];
-    final ids = available.map((item) => item.id).toSet();
+    final available = {
+      for (final item in widget.model.selection) item.id: item,
+      for (final item in _snapshot) item.id: item,
+    };
+    final ids = available.keys.toSet();
     _assets.removeWhere((id, _) => !ids.contains(id));
     _files.removeWhere((id, _) => !ids.contains(id));
     _resolvedIDs.retainAll(ids);
-    for (final item in available) {
-      if (_assets[item.id] != item) _files.remove(item.id);
+    for (final item in available.values) {
+      if (!identical(_assets[item.id], item)) {
+        _files.remove(item.id);
+        _resolvedIDs.remove(item.id);
+      }
       _assets[item.id] = item;
     }
   }
 
   void _modelChanged() {
     _selection.locked = widget.model.confirming;
-    if (listEquals(_snapshot, widget.model.media)) return;
+    if (const ListEquality<AssetEntity>(
+      IdentityEquality(),
+    ).equals(_snapshot, widget.model.media)) {
+      return;
+    }
     _updateFiles();
     _reload.add(FilesUpdatedEvent([]));
   }
@@ -102,7 +114,15 @@ class _DevicePickerGalleryState extends State<DevicePickerGallery> {
     _files.addAll(files);
     _resolvedIDs.addAll(ids);
     _readSelection();
-    return FileLoadResult(snapshot.map(_fileFor).toList(), false);
+    return FileLoadResult(
+      snapshot
+          .map(_fileFor)
+          .sortedByCompare(
+            (file) => file.creationTime ?? 0,
+            (first, second) => second.compareTo(first),
+          ),
+      false,
+    );
   }
 
   void _readSelection() {
@@ -115,7 +135,9 @@ class _DevicePickerGalleryState extends State<DevicePickerGallery> {
   void _writeSelection() {
     if (_syncingSelection) return;
     widget.model.replaceSelection(
-      _selection.files.map((file) => _assets[file.localID]).nonNulls,
+      _selection.files
+          .map((file) => _assets[_selection.assetID(file)])
+          .nonNulls,
     );
   }
 

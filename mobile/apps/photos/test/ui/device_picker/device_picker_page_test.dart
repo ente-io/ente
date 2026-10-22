@@ -196,6 +196,64 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('gallery dates stay ordered when stored dates differ', (
+    tester,
+  ) async {
+    library.items = library.items.take(3).toList();
+    for (final (index, day) in [3, 1, 2].indexed) {
+      final asset = library.items[index];
+      library.knownFiles[asset.id] = fileFromAsset('Camera', asset)
+        ..creationTime = DateTime(2026, 10, day).microsecondsSinceEpoch;
+    }
+    await mount(tester);
+    expect(
+      tester
+          .widgetList<GalleryFileWidget>(find.byType(GalleryFileWidget))
+          .map((tile) => tile.file.localID),
+      ['0', '2', '1'],
+    );
+    library.knownFiles.clear();
+    library.items = [
+      for (final (index, asset) in library.items.indexed)
+        asset.copyWith(
+          createDateSecond:
+              DateTime(2026, 10, index + 1).millisecondsSinceEpoch ~/ 1000,
+        ),
+    ];
+    await tester
+        .widget<DevicePickerGallery>(find.byType(DevicePickerGallery))
+        .model
+        .refresh();
+    await _settleImages(tester);
+    expect(
+      tester
+          .widgetList<GalleryFileWidget>(find.byType(GalleryFileWidget))
+          .map((tile) => tile.file.localID),
+      ['2', '1', '0'],
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('cleared local IDs still return the original device assets', (
+    tester,
+  ) async {
+    final asset = library.items.first;
+    final file = fileFromAsset('Camera', asset)..generatedID = 1;
+    library.knownFiles[asset.id] = file;
+    await mount(tester);
+    file.localID = null;
+    await tester.tap(find.byType(GalleryFileWidget).first);
+    await tester.pumpAndSettle();
+    expect(find.text('1/50'), findsOneWidget);
+    await tester.tap(find.text('Add selected'));
+    await _settleImages(tester);
+    expect(await result, [asset]);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('Add selected in preview returns the remaining original assets', (
     tester,
   ) async {
@@ -295,7 +353,9 @@ void main() {
       expect(model.media.length, 96);
       await tester.tap(find.byType(GalleryFileWidget).first);
       await tester.pumpAndSettle();
-      model.replaceSelection(library.items.take(50));
+      model.replaceSelection(
+        library.items.take(50).map((item) => item.copyWith()),
+      );
       await tester.pumpAndSettle();
       expect(library.fileLookupBatches, hasLength(1));
       final scroll = tester

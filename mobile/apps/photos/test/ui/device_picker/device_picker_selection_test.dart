@@ -50,6 +50,30 @@ void main() {
     expect(selection.files.any((file) => file is DummyFile), isFalse);
   });
 
+  test('uploaded files stay selected when their local ID is cleared', () {
+    final selection = DevicePickerSelectedFiles();
+    addTearDown(selection.dispose);
+    final file = EnteFile()
+      ..generatedID = 1
+      ..uploadedFileID = 10
+      ..localID = 'photo';
+    selection.register(file, 'photo');
+    selection.toggleSelection(file);
+    file.localID = null;
+    expect(selection.isFileSelected(file), isTrue);
+    selection.toggleSelection(file);
+    expect(selection.files, isEmpty);
+    selection.toggleSelection(file);
+    expect(selection.files.single, same(file));
+    final refreshed = EnteFile()
+      ..generatedID = 2
+      ..localID = 'photo';
+    selection.register(refreshed, 'photo');
+    expect(selection.isFileSelected(refreshed), isTrue);
+    selection.toggleGroupSelection({refreshed});
+    expect(selection.files, isEmpty);
+  });
+
   test(
     'confirmation locks gestures and clearing stays inside the picker',
     () async {
