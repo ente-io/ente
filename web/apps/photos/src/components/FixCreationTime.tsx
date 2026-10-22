@@ -1,3 +1,5 @@
+import { Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
     Box,
     Dialog,
@@ -12,7 +14,6 @@ import {
 } from "@mui/material";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
-import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractExifDates } from "ente-gallery/services/exif";
@@ -114,7 +115,7 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                     >
                         {step == "running"
                             ? t("fix_creation_time_in_progress")
-                            : t("fix_date_time_title")}
+                            : t("fix_creation_time")}
                     </Typography>
                     <IconButton
                         aria-label={t("close")}
@@ -122,16 +123,7 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                         disabled={step == "running"}
                         sx={collectionDialogIconButtonSx}
                     >
-                        <Box
-                            component="img"
-                            src="/images/fix-time/close.svg"
-                            alt=""
-                            sx={(theme) => ({
-                                ...theme.applyStyles("dark", {
-                                    filter: "invert(1)",
-                                }),
-                            })}
-                        />
+                        <HugeiconsIcon icon={Cancel01Icon} size={18} />
                     </IconButton>
                 </Stack>
                 <Typography
@@ -147,9 +139,7 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                     {message ??
                         (step == "running"
                             ? t("fix_creation_time_in_progress")
-                            : t("fix_date_time_selection", {
-                                  count: files.length,
-                              }))}
+                            : t("fix_creation_time_options"))}
                 </Typography>
                 {step == "running" && <Progress {...progress} />}
                 <OptionsForm {...{ step, files, onSubmit, onClose }} />
@@ -225,38 +215,13 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
             onSubmit,
         });
 
-    const options: { value: FixOption; label: string; description: string }[] =
-        [
-            {
-                value: "date-time-original",
-                label: t("exif_date_time_original"),
-                description: t("fix_date_time_original_description"),
-            },
-            {
-                value: "date-time-digitized",
-                label: t("exif_date_time_digitized"),
-                description: t("fix_date_time_digitized_description"),
-            },
-            {
-                value: "metadata-date",
-                label: t("exif_metadata_date"),
-                description: t("fix_date_time_metadata_description"),
-            },
-            {
-                value: "file-name",
-                label: t("fix_date_time_from_name"),
-                description: t("fix_date_time_name_example"),
-            },
-            {
-                value: "custom",
-                label: t("fix_date_time_custom"),
-                description: values.customDate
-                    ? formattedDateTime(values.customDate.timestamp)
-                    : t("fix_date_time_custom_description", {
-                          count: files.length,
-                      }),
-            },
-        ];
+    const options: { value: FixOption; label: string }[] = [
+        { value: "date-time-original", label: t("exif_date_time_original") },
+        { value: "date-time-digitized", label: t("exif_date_time_digitized") },
+        { value: "metadata-date", label: t("exif_metadata_date") },
+        { value: "file-name", label: t("file_name") },
+        { value: "custom", label: t("custom_time") },
+    ];
 
     if (step == "running") return null;
     if (step == "completed")
@@ -275,7 +240,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                 aria-labelledby="fix-date-time-description"
                 sx={{ gap: "8px" }}
             >
-                {options.map(({ value, label, description }) => (
+                {options.map(({ value, label }) => (
                     <FormControlLabel
                         key={value}
                         value={value}
@@ -299,10 +264,21 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                                         }}
                                     >
                                         <Box
-                                            component="img"
-                                            src="/images/fix-time/selected.svg"
-                                            alt=""
-                                        />
+                                            sx={{
+                                                width: 18,
+                                                height: 18,
+                                                borderRadius: "50%",
+                                                bgcolor: "accent.main",
+                                                color: "white",
+                                                display: "grid",
+                                                placeItems: "center",
+                                            }}
+                                        >
+                                            <HugeiconsIcon
+                                                icon={Tick02Icon}
+                                                size={12}
+                                            />
+                                        </Box>
                                     </Box>
                                 }
                                 sx={{
@@ -317,28 +293,15 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                             />
                         }
                         label={
-                            <Stack sx={{ gap: "4px" }}>
-                                <Typography
-                                    sx={{
-                                        fontSize: 14,
-                                        lineHeight: "20px",
-                                        fontWeight: 500,
-                                    }}
-                                >
-                                    {label}
-                                </Typography>
-                                <Typography
-                                    sx={{
-                                        fontSize: 12,
-                                        lineHeight: "16px",
-                                        fontWeight: 500,
-                                        color: "text.muted",
-                                        overflowWrap: "anywhere",
-                                    }}
-                                >
-                                    {description}
-                                </Typography>
-                            </Stack>
+                            <Typography
+                                sx={{
+                                    fontSize: 14,
+                                    lineHeight: "20px",
+                                    fontWeight: 500,
+                                }}
+                            >
+                                {label}
+                            </Typography>
                         }
                         sx={(theme) => ({
                             m: 0,
@@ -398,7 +361,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                 }
                 sx={submitButtonSx}
             >
-                {t("fix_date_time_submit")}
+                {t("fix_creation_time")}
             </FocusVisibleButton>
             <Link
                 href="https://ente.com/help/photos/faq/metadata-and-editing#fix-time-options"
