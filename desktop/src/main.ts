@@ -60,7 +60,7 @@ const main = () => {
     registerPrivilegedSchemes();
 
     const handleOpenEnteURLEnsuringWindow = (url: string) => {
-        log.info(`Attempting to handle request to open URL: ${url}`);
+        log.info("Attempting to handle deep link");
         if (mainWindow) handleEnteLinks(mainWindow, url);
         else setTimeout(() => handleOpenEnteURLEnsuringWindow(url), 1000);
     };

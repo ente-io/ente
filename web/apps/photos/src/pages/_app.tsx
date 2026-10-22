@@ -111,7 +111,7 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
             if (url.startsWith("ente://app")) {
                 void router.push(url);
             } else {
-                log.info(`Ignoring unhandled open request for URL ${url}`);
+                log.info("Ignoring unhandled deep link");
             }
         };
 
