@@ -1,1 +1,1 @@
-- Redesigned the upload screen for internal users.
+- Redesigned the upload screen for everyone.
