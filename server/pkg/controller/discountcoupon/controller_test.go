@@ -38,9 +38,6 @@ func TestLaunchClaimProcessSnapshotsRequestIDAndDetachesContext(t *testing.T) {
 	require.Equal(t, "request-id-before-reuse", got.requestID)
 	require.Equal(t, req, got.request)
 	require.Equal(t, context.Background(), got.ctx)
-	require.NoError(t, got.ctx.Err())
-	_, hasDeadline := got.ctx.Deadline()
-	require.False(t, hasDeadline)
 }
 
 func TestAddCouponsStoresTrimmedCodes(t *testing.T) {
