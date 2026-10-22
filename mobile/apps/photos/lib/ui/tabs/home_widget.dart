@@ -800,7 +800,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (_isPublicAlbumDeepLink(initialUri)) {
           await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
-          _logger.info("Ignoring deep link");
+          _logger.info(
+            "Ignoring deep link: ${baseUrlForLogging(initialUri.toString())}",
+          );
         }
       } else {
         _logger.info(
@@ -817,7 +819,9 @@ class _HomeWidgetState extends State<HomeWidget> {
           if (_isPublicAlbumDeepLink(uri)) {
             _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
           } else {
-            _logger.info("Ignoring deep link");
+            _logger.info(
+              "Ignoring deep link: ${baseUrlForLogging(uri.toString())}",
+            );
           }
         } else {
           _logger.info("No link received in public album link subscription.");
