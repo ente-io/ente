@@ -20,6 +20,29 @@ class Code {
 
   // Original otpauth URL.
   final String rawData;
+
+  /// Website associated with this code, when the OTP URI includes a `url`
+  /// query parameter.
+  String? get websiteUrl {
+    final uri = Uri.tryParse(rawData);
+    return _validatedWebsiteUrl(uri?.queryParameters['url']);
+  }
+
+  static String? _validatedWebsiteUrl(String? value) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    final website = Uri.tryParse(
+      trimmed.contains('://') ? trimmed : 'https://$trimmed',
+    );
+    if (website == null ||
+        (website.scheme != 'https' && website.scheme != 'http') ||
+        website.host.isEmpty ||
+        website.userInfo.isNotEmpty) {
+      return null;
+    }
+    return website.toString();
+  }
+
   final int counter;
   bool? hasSynced;
   int? createdAt;
@@ -81,6 +104,8 @@ class Code {
     Type? type,
     int? counter,
     CodeDisplay? display,
+    String? websiteUrl,
+    bool replaceWebsiteUrl = false,
   }) {
     final String updateAccount = account ?? this.account;
     final String updateIssuer = issuer ?? this.issuer;
@@ -91,7 +116,32 @@ class Code {
     final Type updatedType = type ?? this.type;
     final int updatedCounter = counter ?? this.counter;
     final CodeDisplay updatedDisplay = display ?? this.display;
-    final String encodedIssuer = Uri.encodeQueryComponent(updateIssuer);
+    final uri = Uri.tryParse(rawData);
+    final queryParameters = <String, String>{...?uri?.queryParameters};
+    queryParameters.remove('codeDisplay');
+    queryParameters['algorithm'] = updatedAlgo.name.toUpperCase();
+    queryParameters['digits'] = '$updatedDigits';
+    queryParameters['issuer'] = updateIssuer;
+    queryParameters['period'] = '$updatePeriod';
+    queryParameters['secret'] = updatedSecret;
+    if (updatedType == Type.hotp) {
+      queryParameters['counter'] = '$updatedCounter';
+    } else {
+      queryParameters.remove('counter');
+    }
+    final url = replaceWebsiteUrl ? websiteUrl : this.websiteUrl;
+    final validatedUrl = _validatedWebsiteUrl(url);
+    if (validatedUrl == null) {
+      queryParameters.remove('url');
+    } else {
+      queryParameters['url'] = validatedUrl;
+    }
+    final updatedRawData = Uri(
+      scheme: 'otpauth',
+      host: updatedType.name,
+      path: '/$updateIssuer:$updateAccount',
+      queryParameters: queryParameters,
+    ).toString();
 
     return Code(
       updateAccount,
@@ -102,9 +152,7 @@ class Code {
       updatedAlgo,
       updatedType,
       updatedCounter,
-      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name.toUpperCase()}"
-      "&digits=$updatedDigits&issuer=$encodedIssuer"
-      "&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
+      updatedRawData,
       generatedID: generatedID,
       display: updatedDisplay,
     )..createdAt = createdAt;
@@ -119,8 +167,22 @@ class Code {
     int digits, {
     Algorithm algorithm = Algorithm.sha1,
     int period = defaultPeriod,
+    String? websiteUrl,
   }) {
-    final String encodedIssuer = Uri.encodeQueryComponent(issuer);
+    final website = _validatedWebsiteUrl(websiteUrl);
+    final rawData = Uri(
+      scheme: 'otpauth',
+      host: type.name,
+      path: '/$issuer:$account',
+      queryParameters: {
+        'algorithm': algorithm.name.toUpperCase(),
+        'digits': '$digits',
+        'issuer': issuer,
+        'period': '$period',
+        'secret': secret,
+        'url': ?website,
+      },
+    ).toString();
     return Code(
       account,
       issuer,
@@ -130,7 +192,7 @@ class Code {
       algorithm,
       type,
       0,
-      "otpauth://${type.name}/$issuer:$account?algorithm=${algorithm.name.toUpperCase()}&digits=$digits&issuer=$encodedIssuer&period=$period&secret=$secret",
+      rawData,
       display: display ?? CodeDisplay(),
     );
   }

@@ -1883,6 +1883,18 @@
       }
     }
   },
+  "websiteUrl": "Website URL",
+  "@websiteUrl": {
+    "description": "Optional website address used to find the favicon for an authenticator entry"
+  },
+  "websiteUrlCacheNote": "The website icon is cached on this device for 24 hours",
+  "@websiteUrlCacheNote": {
+    "description": "Explains how often an authenticator website icon is refreshed"
+  },
+  "invalidWebsiteUrl": "Enter a valid website URL, such as https://company.example",
+  "@invalidWebsiteUrl": {
+    "description": "Validation message shown when an authenticator website URL is invalid"
+  },
   "grantFullAccessPrompt": "Please allow access to all photos in the Settings app",
   "grantGalleryPermissionDesc": "Grant permission to access and organize photos with face recognition. All processing happens on your device.",
   "grantGalleryPermissionTitle": "Let's find your favourites",

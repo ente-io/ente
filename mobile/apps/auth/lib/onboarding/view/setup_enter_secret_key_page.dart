@@ -52,6 +52,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
+  late TextEditingController _websiteUrlController;
   late TextEditingController _notesController;
   late TextEditingController _digitsController;
   late TextEditingController _periodController;
@@ -77,6 +78,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           : null,
     );
     _secretController = TextEditingController(text: widget.code?.secret);
+    _websiteUrlController = TextEditingController(
+      text: widget.code?.websiteUrl,
+    );
     _notesController = TextEditingController(text: widget.code?.display.note);
     _digitsController = TextEditingController(
       text: widget.code != null
@@ -130,6 +134,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _issuerController.dispose();
     _accountController.dispose();
     _secretController.dispose();
+    _websiteUrlController.dispose();
     _notesController.dispose();
     _digitsController.dispose();
     _periodController.dispose();
@@ -170,7 +175,10 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                           onTap: navigateToCustomIconPage,
                           child: Padding(
                             padding: const EdgeInsets.all(Spacing.sm),
-                            child: CustomIconWidget(iconData: _customIconID),
+                            child: CustomIconWidget(
+                              iconData: _customIconID,
+                              websiteUrl: widget.code?.websiteUrl,
+                            ),
                           ),
                         ),
                       ),
@@ -209,6 +217,22 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       label: l10n.account,
                       isClearable: true,
                       maxLength: _textLimit,
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                  const SizedBox(height: Spacing.lg),
+                  Semantics(
+                    identifier: 'auth_manual_website_url',
+                    child: TextInputComponent(
+                      controller: _websiteUrlController,
+                      label: l10n.websiteUrl,
+                      hintText: 'https://company.example',
+                      message: l10n.websiteUrlCacheNote,
+                      isClearable: true,
+                      maxLength: 2048,
+                      keyboardType: TextInputType.url,
+                      autocorrect: false,
+                      enableSuggestions: false,
                       textInputAction: TextInputAction.next,
                     ),
                   ),
@@ -532,6 +556,25 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final notes = _notesController.text.trim();
       final digits = int.tryParse(_digitsController.text.trim());
       final period = int.tryParse(_periodController.text.trim());
+      final websiteUrl = _websiteUrlController.text.trim();
+      final normalizedWebsiteUrl = websiteUrl.isEmpty
+          ? null
+          : (websiteUrl.contains('://') ? websiteUrl : 'https://$websiteUrl');
+      final parsedWebsiteUrl = normalizedWebsiteUrl == null
+          ? null
+          : Uri.tryParse(normalizedWebsiteUrl);
+      if (normalizedWebsiteUrl != null &&
+          (parsedWebsiteUrl == null ||
+              (parsedWebsiteUrl.scheme != 'http' &&
+                  parsedWebsiteUrl.scheme != 'https') ||
+              parsedWebsiteUrl.host.isEmpty ||
+              parsedWebsiteUrl.userInfo.isNotEmpty)) {
+        _showIncorrectDetailsDialog(
+          context,
+          message: context.strings.invalidWebsiteUrl,
+        );
+        return;
+      }
 
       final isStreamCode =
           issuer.toLowerCase() == "steam" ||
@@ -577,6 +620,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               isStreamCode ? Code.steamDigits : digits!,
               algorithm: _algorithm,
               period: period!,
+              websiteUrl: normalizedWebsiteUrl,
             )
           : widget.code!.copyWith(
               account: account,
@@ -587,6 +631,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               digits: digits!,
               type: _type,
               period: period,
+              websiteUrl: normalizedWebsiteUrl,
+              replaceWebsiteUrl: true,
             );
 
       getOTP(newCode);

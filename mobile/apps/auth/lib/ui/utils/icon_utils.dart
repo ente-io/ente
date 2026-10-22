@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/models/all_icon_data.dart';
-import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/utils/website_favicon_cache.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -114,7 +114,61 @@ class IconUtils {
     }
   }
 
-  Widget getIcon(BuildContext context, String provider, {double width = 24}) {
+  Widget getIcon(
+    BuildContext context,
+    String provider, {
+    double width = 24,
+    String? websiteUrl,
+  }) {
+    final iconFromPack = _getIconFromPack(context, provider, width);
+    final website = websiteUrl == null ? null : Uri.tryParse(websiteUrl);
+    if (website != null &&
+        (website.scheme == 'https' || website.scheme == 'http') &&
+        website.host.isNotEmpty) {
+      final fallback = iconFromPack ?? const SizedBox.shrink();
+      return FutureBuilder<CachedFavicon?>(
+        future: WebsiteFaviconCache.instance.getFavicon(website.toString()),
+        builder: (context, snapshot) {
+          final favicon = snapshot.data;
+          if (favicon == null) return fallback;
+          final Widget image = favicon.isSvg
+              ? SvgPicture.file(
+                  favicon.file!,
+                  width: width,
+                  height: width,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => fallback,
+                )
+              : favicon.bytes != null
+              ? Image.memory(
+                  favicon.bytes!,
+                  width: width,
+                  height: width,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => fallback,
+                )
+              : Image.file(
+                  favicon.file!,
+                  width: width,
+                  height: width,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => fallback,
+                );
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(width * 0.2),
+            child: image,
+          );
+        },
+      );
+    }
+    return iconFromPack ?? const SizedBox.shrink();
+  }
+
+  Widget? _getIconFromPack(
+    BuildContext context,
+    String provider,
+    double width,
+  ) {
     try {
       final providerTitle = _getProviderTitle(provider);
       final List<String> titlesList = [providerTitle];
@@ -146,16 +200,12 @@ class IconUtils {
           );
         }
       }
-      if (providerTitle.isNotEmpty) {
-        return _fallbackAvatar(provider, width, context);
-      } else {
-        return const SizedBox.shrink();
-      }
+      return null;
     } catch (e, s) {
       Logger(
         "IconUtils",
       ).warning("Failed to get icon for provider '$provider'", e, s);
-      return _fallbackAvatar(provider, width, context);
+      return null;
     }
   }
 
@@ -179,37 +229,15 @@ class IconUtils {
           Logger(
             "IconUtils",
           ).warning("Failed to load icon $path", error, stackTrace);
-          return _fallbackAvatar(title, width, context);
+          return const SizedBox.shrink();
         },
       );
     } catch (e, s) {
       Logger(
         "IconUtils",
       ).warning("Failed to create SVG icon for '$title' at path '$path'", e, s);
-      return _fallbackAvatar(title, width, context);
+      return const SizedBox.shrink();
     }
-  }
-
-  Widget _fallbackAvatar(String provider, double width, BuildContext context) {
-    final providerTitle = _getProviderTitle(provider);
-    if (providerTitle.isEmpty) return const SizedBox.shrink();
-    final bool showLargeIcon = width > 24;
-    return CircleAvatar(
-      radius: width / 2,
-      backgroundColor:
-          getEnteColorScheme(context).avatarColors[providerTitle.hashCode %
-              getEnteColorScheme(context).avatarColors.length],
-      child: Text(
-        providerTitle.toUpperCase()[0],
-        style: showLargeIcon
-            ? getEnteTextTheme(
-                context,
-              ).h3Bold.copyWith(color: Colors.white, fontSize: width * 0.6)
-            : getEnteTextTheme(
-                context,
-              ).body.copyWith(color: Colors.white, fontSize: width * 0.6),
-      ),
-    );
   }
 
   Color? _getAdaptiveColor(String? hexColor, BuildContext context) {

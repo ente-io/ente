@@ -913,6 +913,7 @@ class _HomePageState extends State<HomePage> {
                                       context,
                                       iconData.trim(),
                                       width: IconSizes.small,
+                                      websiteUrl: code.websiteUrl,
                                     ),
                                   );
                                 }),
