@@ -10,6 +10,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/app_mode.dart";
+import "package:photos/core/cache/image_cache.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/module/metadata/local_file.dart";
@@ -77,7 +78,6 @@ void main() {
             }
             return switch (call.method) {
               'getThumb' || 'getOriginBytes' => bytes,
-              'getFullFile' => File('assets/memories.jpg').absolute.path,
               'assetExists' => true,
               _ => null,
             };
@@ -139,6 +139,7 @@ void main() {
 
   tearDown(() async {
     await EasyLoading.dismiss(animation: false);
+    FileLruCache.clearAll();
   });
 
   testWidgets(
@@ -154,7 +155,7 @@ void main() {
       expect(tester.takeException(), isNull);
       final strings = StringsLocalizations.of(
         tester.element(find.byType(DevicePickerPage)),
-      )!;
+      );
       final notice = find.text(strings.devicePickerLimitedAccess);
       expect(notice.hitTestable(), findsOneWidget);
       final scroll = tester
@@ -201,6 +202,8 @@ void main() {
     await mount(tester);
     final tiles = find.byType(GalleryFileWidget);
     for (final index in [1, 4, 7]) {
+      final file = fileFromAsset('', library.items[index]);
+      FileLruCache.put('${file.tag}falsefalse', File('assets/memories.jpg'));
       await tester.tap(tiles.at(index));
       await tester.pumpAndSettle();
     }
@@ -251,6 +254,10 @@ void main() {
           .widget<DevicePickerGallery>(find.byType(DevicePickerGallery))
           .model;
       model.replaceSelection(library.items.take(2));
+      for (final asset in model.selection) {
+        final file = fileFromAsset('', asset);
+        FileLruCache.put('${file.tag}falsefalse', File('assets/memories.jpg'));
+      }
       await _settleImages(tester);
       await tester.tap(find.byTooltip('Preview'));
       await _settleImages(tester);
