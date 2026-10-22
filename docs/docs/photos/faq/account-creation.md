@@ -188,7 +188,7 @@ Since Ente uses end-to-end encryption, we cannot reset your password without you
 
 ### Can the recovery key be changed? {#change-recovery-key}
 
-No, the recovery key cannot be changed or rotated. If you suspect your recovery key has been compromised, we recommend creating a new account and migrating your data.
+No, the recovery key cannot be changed or rotated. Changing your password does not change it. If you suspect it was exposed, see [what to do next](/auth/faq/#change-recovery-key) before deleting or moving any data.
 
 ### How do I reset my password if I lost it? {#reset-password}
 

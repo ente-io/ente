@@ -95,32 +95,38 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 <Stack sx={{ gap: "8px" }}>
                     {rest.label && (
                         <Typography
-                            component={variant === "people" ? "label" : "p"}
-                            htmlFor={variant === "people" ? inputID : undefined}
+                            component="label"
+                            htmlFor={inputID}
                             sx={v2LabelSx}
                         >
                             {rest.label}
                         </Typography>
                     )}
                     <InputBase
-                        id={variant === "people" ? inputID : undefined}
-                        aria-describedby={
-                            variant === "people" && error ? helperID : undefined
-                        }
+                        id={inputID}
+                        aria-describedby={error ? helperID : undefined}
                         name="value"
                         value={formik.values.value}
                         onChange={formik.handleChange}
-                        type={inputType ?? "text"}
+                        type={showPassword ? "text" : (inputType ?? "text")}
                         placeholder={rest.placeholder}
                         autoComplete={rest.autoComplete}
                         autoFocus={autoFocus ?? true}
                         disabled={formik.isSubmitting}
                         error={!!error}
                         sx={v2InputSx}
+                        endAdornment={
+                            inputType == "password" ? (
+                                <ShowHidePasswordInputAdornment
+                                    showPassword={showPassword}
+                                    onToggle={handleToggleShowHidePassword}
+                                />
+                            ) : undefined
+                        }
                     />
                     <Typography
-                        id={variant === "people" ? helperID : undefined}
-                        aria-live={variant === "people" ? "polite" : undefined}
+                        id={helperID}
+                        aria-live="polite"
                         sx={v2HelperSx(!!error)}
                     >
                         {error ?? ""}
@@ -131,10 +137,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                         <ButtonBase
                             onClick={onCancel}
                             disabled={formik.isSubmitting}
-                            sx={[
-                                v2CancelButtonSx,
-                                variant === "people" && peopleActionFocusSx,
-                            ]}
+                            sx={[v2CancelButtonSx, peopleActionFocusSx]}
                         >
                             {t("cancel")}
                         </ButtonBase>
@@ -142,10 +145,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                     <ButtonBase
                         type="submit"
                         disabled={formik.isSubmitting}
-                        sx={[
-                            v2SubmitButtonSx,
-                            variant === "people" && peopleActionFocusSx,
-                        ]}
+                        sx={[v2SubmitButtonSx, peopleActionFocusSx]}
                     >
                         {formik.isSubmitting ? (
                             <CircularProgress

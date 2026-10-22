@@ -1004,6 +1004,7 @@ func main() {
 	adminAPI.POST("/emails-from-hashes", adminHandler.GetEmailsFromHashes)
 	adminAPI.PUT("/user/subscription", adminHandler.UpdateSubscription)
 	adminAPI.POST("/queue/re-queue", adminHandler.ReQueueItem)
+	adminAPI.POST("/collection/repair-deleted-share", adminHandler.RepairDeletedCollectionShare)
 	adminAPI.POST("/user/init-file-counts", adminHandler.InitializeFileCounts)
 	adminAPI.POST("/user/bonus", adminHandler.UpdateBonus)
 
@@ -1060,12 +1061,14 @@ func main() {
 	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo, UserRepo: userRepo}
 	authenticatorHandler := &api.AuthenticatorHandler{Controller: authenticatorController}
 
-	privateAPI.POST("/authenticator/key", authenticatorHandler.CreateKey)
-	privateAPI.GET("/authenticator/key", authenticatorHandler.GetKey)
-	privateAPI.POST("/authenticator/entity", authenticatorHandler.CreateEntity)
-	privateAPI.PUT("/authenticator/entity", authenticatorHandler.UpdateEntity)
-	privateAPI.DELETE("/authenticator/entity", authenticatorHandler.DeleteEntity)
-	privateAPI.GET("/authenticator/entity/diff", authenticatorHandler.GetDiff)
+	authenticatorAPI := privateAPI.Group("/authenticator")
+	authenticatorAPI.Use(middleware.RequireAuthApp())
+	authenticatorAPI.POST("/key", authenticatorHandler.CreateKey)
+	authenticatorAPI.GET("/key", authenticatorHandler.GetKey)
+	authenticatorAPI.POST("/entity", authenticatorHandler.CreateEntity)
+	authenticatorAPI.PUT("/entity", authenticatorHandler.UpdateEntity)
+	authenticatorAPI.DELETE("/entity", authenticatorHandler.DeleteEntity)
+	authenticatorAPI.GET("/entity/diff", authenticatorHandler.GetDiff)
 
 	dataCleanupController := &dataCleanupCtrl.DeleteUserCleanupController{
 		Repo:           dataCleanupRepository,
@@ -1102,7 +1105,6 @@ func main() {
 	publicAPI.POST("/discount/claim", discountCouponHandler.ClaimCoupon)
 	adminAPI.POST("/discount/add-coupons", discountCouponHandler.AddCoupons)
 
-	setKnownAPIs(server.Routes())
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3, fileDataCtrl, contactController, spaceModule)
 	time.AfterFunc(10*time.Minute, func() {
 		if err := remoteStoreRepository.MigrateCustomDomainCanonicalValues(context.Background()); err != nil {
@@ -1478,33 +1480,19 @@ func cacheHeaders() gin.HandlerFunc {
 	}
 }
 
-var knownAPIs = make(map[string]bool)
-
 func urlSanitizer(c *gin.Context) string {
 	if c.Request.Method == http.MethodOptions {
 		return "/options"
 	}
-	u := *c.Request.URL
-	u.RawQuery = ""
-	uri := u.RequestURI()
-	for _, p := range c.Params {
-		uri = strings.Replace(uri, p.Value, fmt.Sprintf(":%s", p.Key), 1)
+	if path := c.FullPath(); path != "" {
+		return path
 	}
-	if !knownAPIs[uri] {
-		log.Warn("Unknown API: " + uri)
-		return "/unknown-api"
-	}
-	return uri
+	log.Warn("Unknown API: " + c.Request.URL.EscapedPath())
+	return "/unknown-api"
 }
 
 func timeOutResponse(c *gin.Context) {
 	c.JSON(http.StatusRequestTimeout, gin.H{"handler": true})
-}
-
-func setKnownAPIs(routes []gin.RouteInfo) {
-	for _, route := range routes {
-		knownAPIs[route.Path] = true
-	}
 }
 
 func schedule(c *cron.Cron, spec string, cmd func()) (cron.EntryID, error) {

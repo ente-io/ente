@@ -78,7 +78,7 @@ type SidebarProps = ModalVisibilityProps & {
     onShowPlanSelector: () => void;
     collectionNameByID: Map<number, string>;
     onCloseOverlays: () => void;
-    children?: React.ReactNode;
+    children?: (onRootClose: () => void) => React.ReactNode;
     onAuthenticateUser: () => Promise<boolean>;
 };
 
@@ -176,6 +176,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         () =>
             showMiniDialog({
                 message: t("logout_message"),
+                kind: "info",
                 continue: {
                     text: t("logout"),
                     color: "critical",
@@ -338,18 +339,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
             <AttributedMiniDialog
                 {...downloadAppDialogProps}
-                sx={(theme) => ({
-                    "& .MuiDialog-paper": { borderRadius: "20px" },
-                    "& .MuiDialog-paper > .MuiStack-root": {
-                        p: "24px 24px 8px",
-                    },
-                    "& .MuiDialogContent-root": { p: "16px 24px 24px" },
-                    "& .MuiDialogTitle-root": theme.typography.h2,
-                    "& .MuiButton-root": {
-                        borderRadius: "12px",
-                        minHeight: 48,
-                    },
-                })}
+                appearance="centered"
             />
             {open && exportVisibilityProps.open && (
                 <Export
@@ -407,7 +397,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onActionHandled={setPendingFreeUpSpaceAction}
                 />
             )}
-            {children}
+            {children?.(onClose)}
         </RootSidebarDrawer>
     );
 };
