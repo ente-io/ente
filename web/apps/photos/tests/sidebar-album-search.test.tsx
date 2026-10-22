@@ -16,7 +16,15 @@ vi.mock("@/components/PeopleSortOptions", () => ({
     PeopleSortOptions: () => null,
 }));
 vi.mock("@/utils/album-filters", () => import("../src/utils/album-filters"));
-vi.mock("i18next", () => ({ t: (key: string) => key }));
+vi.mock("i18next", () => ({
+    t: (key: string) =>
+        ({
+            section_uncategorized: "Uncategorized",
+            section_hidden: "Hidden",
+            section_archive: "Archive",
+            section_trash: "Trash",
+        })[key] ?? key,
+}));
 vi.mock("ente-new/photos/components/Tiles", () => ({ ItemCard: () => null }));
 vi.mock("react-virtualized-auto-sizer", () => ({
     default: ({
@@ -116,10 +124,24 @@ describe("sidebar album search across groups", () => {
         expect(html).not.toContain("no-matches.svg");
     });
 
-    test("shows the empty state only when no groups match", () => {
+    test("shows the empty state when neither albums nor shortcuts match", () => {
         const html = renderSearch("missing");
         expect(html).toContain("no-matches.svg");
-        expect(html).not.toContain('aria-label="filter_albums"');
+        for (const label of ["Uncategorized", "Hidden", "Archive", "Trash"])
+            expect(html).not.toContain(`aria-label="${label}"`);
+    });
+
+    test.each([
+        ["  TRASH  ", "Trash"],
+        ["hid", "Hidden"],
+        ["uncat", "Uncategorized"],
+        ["archive", "Archive"],
+    ])("shows only the matching shortcut for %j", (query, match) => {
+        const html = renderSearch(query);
+        expect(html).not.toContain("no-matches.svg");
+        for (const label of ["Uncategorized", "Hidden", "Archive", "Trash"])
+            if (label == match) expect(html).toContain(`aria-label="${label}"`);
+            else expect(html).not.toContain(`aria-label="${label}"`);
     });
 
     test.each(["", "   "])(
@@ -150,4 +172,15 @@ describe("Links sidebar search", () => {
         expect(html).not.toContain("Trip link");
         expect(html).not.toContain('aria-label="filter_albums"');
     });
+});
+
+describe("Hidden and Archive sidebars", () => {
+    test.each(["hidden-albums", "archive-albums"] as const)(
+        "%s omits the album shortcuts",
+        (mode) => {
+            const html = renderSearch("", "ente", mode);
+            for (const label of ["Uncategorized", "Hidden", "Archive", "Trash"])
+                expect(html).not.toContain(`aria-label="${label}"`);
+        },
+    );
 });

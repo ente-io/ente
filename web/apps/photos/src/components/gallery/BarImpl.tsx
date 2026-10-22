@@ -271,7 +271,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             label: t("section_trash"),
             active: activeCollectionID == PseudoCollectionID.trash,
         },
-    ];
+    ].filter(({ label }) =>
+        label.toLowerCase().includes(normalizedSearchQuery),
+    );
 
     const albumListID = `${titleID}-albums`;
     const items = (
@@ -347,17 +349,19 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         </Stack>
     );
 
-    const albumShortcutItems = (
+    const albumShortcutItems = albumShortcuts.length > 0 && (
         <Stack sx={{ flexShrink: 0, gap: "2px", pb: "8px" }}>
-            <Divider
-                sx={{
-                    mb: "8px",
-                    height: "2px",
-                    border: 0,
-                    bgcolor: "divider",
-                    opacity: 0.5,
-                }}
-            />
+            {visibleAlbumFilters.length > 0 && (
+                <Divider
+                    sx={{
+                        mb: "8px",
+                        height: "2px",
+                        border: 0,
+                        bgcolor: "divider",
+                        opacity: 0.5,
+                    }}
+                />
+            )}
             {albumShortcuts.map(({ id, label, active }) => (
                 <BarCard
                     key={id}
@@ -570,7 +574,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             </Stack>
             {isSearching &&
             (mode == "albums"
-                ? !visibleAlbumFilters.length
+                ? !visibleAlbumFilters.length && !albumShortcuts.length
                 : !getItemCount(itemData)) ? (
                 searchEmptyState
             ) : mode == "albums" ? (
@@ -635,8 +639,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             ) : (
                 items
             )}
-            {(mode == "hidden-albums" || mode == "archive-albums") &&
-                albumShortcutItems}
         </Stack>
     );
 
