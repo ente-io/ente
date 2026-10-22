@@ -65,6 +65,7 @@ class NotificationService {
         await showNotification(
           strings.entePhotos,
           strings.notificationNewActivity,
+          id: -1,
         );
       }
       return;
