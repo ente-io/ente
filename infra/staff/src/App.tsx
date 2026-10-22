@@ -178,15 +178,15 @@ export const App: React.FC = () => {
     ]);
 
     useEffect(() => {
-        const { email, token } = urlCredentials;
-        if (email && token) {
+        const { email } = urlCredentials;
+        if (email && authToken) {
             queueMicrotask(() => {
-                fetchData(email, token).catch((error: unknown) =>
+                fetchData(email, authToken).catch((error: unknown) =>
                     console.error("Fetch data error:", error),
                 );
             });
         }
-    }, [fetchData, urlCredentials]);
+    }, [authToken, fetchData, urlCredentials]);
 
     const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
