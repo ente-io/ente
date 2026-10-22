@@ -150,7 +150,7 @@ impl Engine {
     }
 
     pub fn prepare(&mut self, options: Options) -> Result<Export> {
-        let mut export = Export::open(&self.root(), &self.session.master_key, options)?;
+        let mut export = Export::open(&self.root(), &self.session, options)?;
         let (_send, mut cancel) = watch::channel(false);
         let db = self.db();
         tokio::runtime::Runtime::new()?.block_on(export.prepare(

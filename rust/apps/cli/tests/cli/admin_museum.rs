@@ -277,13 +277,13 @@ fn admin_interactive_subscription() -> TestResult {
         for mode in ["decline", "preset", "storage", "expiry", "empty"] {
             let before = home.json(&["admin", "user", "view", &email]);
             let output = Command::new("python3")
+                .arg(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/tests/cli/admin_prompt.py"
+                ))
+                .arg(cli_binary())
+                .args([email.as_str(), mode])
                 .env_clear()
-                .args([
-                    concat!(env!("CARGO_MANIFEST_DIR"), "/tests/cli/admin_prompt.py"),
-                    env!("CARGO_BIN_EXE_ente"),
-                    &email,
-                    mode,
-                ])
                 .env("ENTE_CLI_HOME", home.dir.path())
                 .env("ENTE_CLI_VAULT_KEY", b64::encode(home.key.as_bytes()))
                 .output()?;

@@ -96,7 +96,7 @@ fn engine_category_filters_preserve_history_and_reuse_excluded_originals() {
 }
 
 #[test]
-fn engine_category_recovery_preserves_unknown_albums_after_database_loss() {
+fn engine_category_recovery_preserves_excluded_albums_after_database_loss() {
     let mut server = mockito::Server::new();
     let key = Key::generate();
     let (record, bytes) = original_fixture(&key, b"original", false, true, 10);
@@ -148,14 +148,13 @@ fn engine_category_recovery_preserves_unknown_albums_after_database_loss() {
         .unwrap()
         .remove("sharedMagicMetadata");
     fs::write(&path, serde_json::to_vec(&metadata).unwrap()).unwrap();
-    engine.database = "unknown-owner.db".into();
+    engine.database = "owner-without-metadata.db".into();
     let mut options = engine.options(true, &[]);
     options.exclude_shared = true;
     options.exclude_hidden = true;
     let export = engine.prepare(options).unwrap();
     let result = engine.execute(export).unwrap();
-    assert!(!result.complete);
-    assert_eq!(result.json["failures"]["total"], 1);
+    assert!(result.complete);
     assert_eq!(result.completed, 1);
     for album in ["First", "Second", "Current"] {
         assert_eq!(
@@ -163,12 +162,6 @@ fn engine_category_recovery_preserves_unknown_albums_after_database_loss() {
             b"original"
         );
     }
-    let mut options = engine.options(false, &[]);
-    options.exclude_shared = true;
-    options.exclude_hidden = true;
-    options.exclude_albums.push("Second".into());
-    let export = engine.prepare(options).unwrap();
-    assert!(engine.execute(export).unwrap().complete);
     assert_eq!(run(&mut engine, true)["changes"]["movedToTrash"], 2);
     engine.database = "history-only.db".into();
     let mut options = engine.options(true, &[]);

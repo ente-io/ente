@@ -146,6 +146,50 @@ fn create_and_consume_preserve_each_input_without_account_storage() {
     }
 }
 
+#[cfg(feature = "museum")]
+#[test]
+fn museum_pastes_can_only_be_consumed_once() -> ente_test_support::TestResult {
+    ente_test_support::Museum::run(|museum| {
+        let home = TestHome::new();
+        let text = " Museum paste\r\n\t🔐\n\n";
+        for protected in [false, true] {
+            let mut create = home.command(&[
+                "paste",
+                "create",
+                text,
+                "--host",
+                museum.endpoint(),
+                "--no-input",
+                "--json",
+            ]);
+            create
+                .env("ENTE_CLI_VAULT_KEY", "invalid")
+                .env("ENTE_CLI_PASSWORD", " paste password ");
+            if protected {
+                create.arg("--password");
+            }
+            let created: Value = serde_json::from_slice(&success(create.output()?).stdout)?;
+            let mut consume = home.command(&[
+                "paste",
+                "consume",
+                created["url"].as_str().unwrap(),
+                "--host",
+                museum.endpoint(),
+                "--no-input",
+            ]);
+            consume
+                .env("ENTE_CLI_VAULT_KEY", "invalid")
+                .env("ENTE_CLI_PASSWORD", " paste password ");
+            assert_eq!(success(consume.output()?).stdout, text.as_bytes());
+            let repeated = consume.output()?;
+            assert!(failure(&repeated).contains("paste is unavailable"));
+            assert!(repeated.stdout.is_empty());
+        }
+        assert_eq!(fs::read_dir(home.dir.path())?.count(), 0);
+        Ok(())
+    })
+}
+
 #[test]
 fn invalid_input_and_unattended_passwords_fail_before_requests() {
     let home = TestHome::new();
@@ -285,5 +329,29 @@ fn consume_failures_report_whether_payload_was_retrieved() {
         guard.remove();
         consume.remove();
     }
+    let guard = server
+        .mock("POST", "/paste/guard")
+        .with_header("set-cookie", "paste_guard=fixture")
+        .expect(1)
+        .create();
+    let lost = server
+        .mock("POST", "/paste/consume")
+        .with_chunked_body(|writer| {
+            writer.write_all(br#"{"encryptedData":"unfinished"#)?;
+            Err(std::io::ErrorKind::ConnectionReset.into())
+        })
+        .expect(1)
+        .create();
+    let output = command(
+        &home,
+        &server,
+        &["paste", "consume", "ABC123#AbCd1234EfGh", "--json"],
+    )
+    .output()
+    .unwrap();
+    failure(&output);
+    assert!(output.stdout.is_empty());
+    guard.assert();
+    lost.assert();
     assert!(!home.dir.path().join("unused").exists());
 }

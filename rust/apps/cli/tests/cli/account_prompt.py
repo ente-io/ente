@@ -12,7 +12,7 @@ import sys
 import termios
 import time
 
-binary, origin, email = sys.argv[1:]
+binary, origin, email = sys.argv[1:4]
 
 
 def run(args, replies):
@@ -96,6 +96,28 @@ def login(expect, send, email_mfa):
     send(b"disposable-password", True)
     expect(b"Logged in")
 
+
+def passkey(expect, send):
+    expect(b"Password:")
+    send(" secret 🙂 ".encode(), True)
+    expect(b"Email verification code:")
+    send(b"123456", True)
+    expect(b"Could not open the browser.")
+    url = expect(b"Press Enter after completing authentication")
+    assert b"clientPackage=io.ente.auth" in url, url
+    assert b"passkeySessionID=passkey-session" in url, url
+    assert b"redirect=ente-cli%3A%2F%2Fpasskey" in url, url
+    send(b"")
+    expect(b"Passkey authentication is not complete.")
+    expect(b"Press Enter after completing authentication")
+    assert not os.path.exists(os.path.join(os.environ["ENTE_CLI_HOME"], "vault.json"))
+    send(b"")
+    expect(b"Logged in")
+
+
+if sys.argv[4:] == ["passkey"]:
+    run([binary, "account", "login", "--app", "auth", "--host", origin, "--email", email], passkey)
+    sys.exit()
 
 run([binary, "account", "create", "--host", origin], create)
 for email_mfa in [True, False]:

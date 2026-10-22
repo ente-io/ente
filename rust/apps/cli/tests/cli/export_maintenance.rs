@@ -2667,43 +2667,90 @@ fn export_preserves_native_fields_unused_by_common_commands() {
 
 #[test]
 fn export_preserves_album_documents_and_favorites() {
-    for (document, value) in [
+    for (kind, shared, empty, document) in [
         (
-            "magicMetadata",
-            json!({"order":7,"extension":{"pinned":true}}),
+            "favorites",
+            false,
+            false,
+            Some((
+                "magicMetadata",
+                json!({"order":7,"extension":{"pinned":true}}),
+            )),
         ),
         (
-            "sharedMagicMetadata",
-            json!({"order":9,"mute":true,"extension":{"pinned":false}}),
+            "favorites",
+            true,
+            false,
+            Some((
+                "sharedMagicMetadata",
+                json!({"order":9,"mute":true,"extension":{"pinned":false}}),
+            )),
         ),
         (
-            "pubMagicMetadata",
-            json!({"asc":true,"sortBy":"fileName","coverID":10,"layout":"trip","caption":"Album"}),
+            "favorites",
+            false,
+            false,
+            Some((
+                "pubMagicMetadata",
+                json!({"asc":true,"sortBy":"fileName","coverID":10,"layout":"trip","caption":"Album"}),
+            )),
         ),
+        ("favorites", false, true, None),
+        ("favorites", true, true, None),
+        ("uncategorized", false, true, None),
+        ("uncategorized", true, true, None),
     ] {
         let mut server = mockito::Server::new();
         let home = TestHome::new();
         home.seed(&server.url());
+        let user = home.read_vault()["accounts"][0]["user_id"]
+            .as_i64()
+            .unwrap();
+        let owner = user + i64::from(shared);
         let key = Key::generate();
-        let mut favorites = collection(5, "Favorites", &key);
-        favorites["type"] = json!("favorites");
-        let encrypted = blob::encrypt_json(&value, &key).unwrap();
-        favorites[document] = json!({"data":b64::encode(&encrypted.encrypted_data),"header":b64::encode(encrypted.decryption_header.as_bytes())});
-        listing(
+        let name = if kind == "favorites" {
+            "Favorites"
+        } else {
+            "Uncategorized"
+        };
+        let mut special = collection(5, name, &key);
+        special["type"] = json!(kind);
+        special["owner"]["id"] = json!(owner);
+        if shared {
+            let secret = ente_core::crypto::SecretKey::from_seed(&[0; 32]).unwrap();
+            special["encryptedKey"] = json!(b64::encode(
+                &ente_core::crypto::sealed::seal(key.as_bytes(), &secret.public_key()).unwrap()
+            ));
+            special
+                .as_object_mut()
+                .unwrap()
+                .remove("keyDecryptionNonce");
+        }
+        if let Some((field, value)) = &document {
+            let encrypted = blob::encrypt_json(value, &key).unwrap();
+            special[*field] = json!({"data":b64::encode(&encrypted.encrypted_data),"header":b64::encode(encrypted.decryption_header.as_bytes())});
+        }
+        let catalog = listing(
             &mut server,
-            json!([collection(1, "Healthy", &key), favorites]),
+            json!([collection(1, "Healthy", &key), special]),
         );
         let (file, bytes) = source(10, &key, b"original", "Photo.jpg");
         page(&mut server, 1, 0, json!([file]), false).create();
-        let memberships = page(&mut server, 5, 0, json!([file]), false)
-            .expect(1)
-            .create();
+        let memberships = page(
+            &mut server,
+            5,
+            0,
+            if empty { json!([]) } else { json!([file]) },
+            false,
+        )
+        .expect(1)
+        .create();
         let downloaded = download(&mut server, 10, &bytes, 1);
         let albums = home.json(&["photos", "album", "list"]);
         assert_eq!(albums.as_array().unwrap().len(), 2);
-        let viewed = home.json(&["photos", "album", "view", "Favorites", "--offline"]);
+        let viewed = home.json(&["photos", "album", "view", name, "--offline"]);
         assert_eq!(viewed["id"], "5");
-        assert_eq!(viewed["name"], "Favorites");
+        assert_eq!(viewed["name"], name);
         let destination = tempfile::tempdir().unwrap();
         let root = destination.path().join("photos");
         let output = home.run(&[
@@ -2719,22 +2766,47 @@ fn export_preserves_album_documents_and_favorites() {
             "{}",
             String::from_utf8_lossy(&output.stderr)
         );
-        assert!(!String::from_utf8_lossy(&output.stderr).contains("album:5"));
         let sidecar = root.join("Healthy/metadata/Photo.jpg.json");
         let mut metadata = read_json(&sidecar);
-        assert_eq!(metadata["favorited"], true);
-        metadata["favorited"] = json!(false);
+        let favorited = kind == "favorites" && !shared && !empty;
+        assert_eq!(metadata["favorited"], favorited);
+        metadata["favorited"] = json!(!favorited);
         fs::write(&sidecar, serde_json::to_vec(&metadata).unwrap()).unwrap();
         let output = home.run(&["photos", "export", root.to_str().unwrap(), "--json"]);
         let result: Value = serde_json::from_slice(&success(output).stdout).unwrap();
         assert_eq!(result["complete"], true);
-        assert_eq!(result["copies"]["completed"], 2);
-        assert_eq!(read_json(&sidecar)["favorited"], true);
+        assert_eq!(result["copies"]["completed"], if empty { 1 } else { 2 });
+        assert_eq!(read_json(&sidecar)["favorited"], favorited);
         assert_component(&root, "Healthy", "Photo.jpg", b"original");
         assert_eq!(
-            read_json(&root.join("Favorites/metadata.json"))["ente"][document],
-            value
+            read_json(&root.join("export.json"))["userID"],
+            user.to_string()
         );
+        assert_eq!(
+            read_json(&root.join("Healthy/metadata.json"))["ente"]["ownerID"],
+            user.to_string()
+        );
+        let metadata = read_json(&root.join(name).join("metadata.json"));
+        assert_eq!(metadata["ente"]["ownerID"], owner.to_string());
+        assert_eq!(metadata["ente"]["type"], kind);
+        if let Some((field, value)) = document {
+            assert_eq!(metadata["ente"][field], value);
+        }
+        catalog.remove();
+        listing(&mut server, json!([collection(1, "Healthy", &key)]));
+        let fresh = TestHome::new();
+        fresh.write_vault(&home.read_vault());
+        run(&fresh, &root, &["--adopt", "--exclude-shared"], true);
+        let recovered = if shared {
+            root.join(name)
+        } else {
+            root.join("Trash").join(name)
+        };
+        assert_eq!(read_json(&recovered.join("metadata.json")), metadata);
+        assert_eq!(root.join(name).exists(), shared);
+        if !empty {
+            assert_eq!(fs::read(recovered.join("Photo.jpg")).unwrap(), b"original");
+        }
         memberships.assert();
         downloaded.assert();
     }

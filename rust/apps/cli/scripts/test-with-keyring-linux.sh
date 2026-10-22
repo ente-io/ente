@@ -26,7 +26,7 @@ fi
 keyring_home=$(mktemp -d)
 trap 'rm -rf "$keyring_home"' EXIT
 env -i PATH="$PATH" HOME="$keyring_home" XDG_DATA_HOME="$keyring_home/data" \
-    XDG_RUNTIME_DIR="$keyring_home" dbus-run-session -- bash -euc '
+    XDG_RUNTIME_DIR="$keyring_home" ${ENTE_CLI_TEST_BINARY+"ENTE_CLI_TEST_BINARY=$ENTE_CLI_TEST_BINARY"} dbus-run-session -- bash -euc '
         printf %s native-test | gnome-keyring-daemon --foreground --unlock --components=secrets &
         daemon=$!
         trap '\''kill "$daemon" 2>/dev/null || true; wait "$daemon" 2>/dev/null || true'\'' EXIT

@@ -44,7 +44,6 @@ if args.mode == "test":
         raise SystemExit("Native keyring test not found; nothing was run.")
 
 if args.sign:
-    # The test reads keys created by the CLI; both need the same development identity.
     subprocess.run(
         [
             "codesign",

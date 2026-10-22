@@ -192,7 +192,7 @@ fn replica_resumes_failed_pages_and_only_refreshes_changed_albums() {
             "20".into(),
         ))
         .with_body(json!({"collections": []}).to_string())
-        .expect(2)
+        .expect(3)
         .create();
     let (first, _) = remote_file(10, &key, b"first");
     let (second, _) = remote_file(11, &key, b"second");
@@ -216,6 +216,21 @@ fn replica_resumes_failed_pages_and_only_refreshes_changed_albums() {
     first_page.assert();
     broken_page.assert();
     broken_page.remove();
+    let mut stalled = first.clone();
+    stalled["isDeleted"] = json!(true);
+    let stalled_page = page(&mut server, 1, 10, json!([stalled]), true)
+        .expect(1)
+        .create();
+    assert!(
+        failure(&home.run(&["photos", "file", "list"]))
+            .contains("file changes did not advance the cursor for collection 1")
+    );
+    assert!(
+        failure(&home.run(&["--offline", "photos", "file", "list", "--album", "First"]))
+            .contains("have not finished syncing")
+    );
+    stalled_page.assert();
+    stalled_page.remove();
     let mut second = second;
     second["updationTime"] = json!(20);
     let final_page = page(&mut server, 1, 10, json!([second]), false)

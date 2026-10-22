@@ -37,7 +37,7 @@ async fn run_locked(args: PhotosExportArgs, selected: Option<&str>, as_json: boo
     let _storage_use;
     let mut export = Export::open(
         &args.destination,
-        &session.master_key,
+        &session,
         ente_photos_export::Options {
             albums: args.album,
             exclude_albums: args.exclude_album,
@@ -56,7 +56,7 @@ async fn run_locked(args: PhotosExportArgs, selected: Option<&str>, as_json: boo
         .find(|a| a.storage_id == account.storage_id)
         .context("account was removed while waiting for access")?;
     let session = api::session(&account, App::Photos)?;
-    export.verify_source(&session.master_key)?;
+    export.verify_source(&session)?;
     _storage_use = account_home.storage_use()?;
     home::create(&account_home.path)?;
     let db_path = store_path(&account_home.path, export.destination())?;

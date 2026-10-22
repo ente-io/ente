@@ -19,10 +19,10 @@ use crate::{
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct PendingCreation {
-    origin: String,
-    app: App,
+    pub(crate) origin: String,
+    pub(crate) app: App,
     name: Option<String>,
-    signup: Signup,
+    pub(crate) signup: Signup,
 }
 
 pub async fn request_otp(
