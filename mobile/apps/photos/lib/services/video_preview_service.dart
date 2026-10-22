@@ -48,6 +48,8 @@ import "package:photos/utils/hls_playlist.dart";
 import "package:photos/utils/network_util.dart";
 
 const _maxRetryCount = 3;
+const _maxFfmpegOutputLines = 24;
+const _maxFfmpegOutputChars = 4000;
 const _missingVideoStreamError = "No video stream found in FFprobe metadata";
 
 class VideoPreviewService {
@@ -672,10 +674,9 @@ class VideoPreviewService {
           _logger.shout("Something went wrong with preview upload", err, sT);
         }
       } else {
-        final output = playlistGenResult.output;
         _logger.warning(
           "FFmpeg command failed with return code $playlistGenReturnCode\n"
-          "${output.isEmpty ? 'FFmpeg output unavailable' : output}",
+          "${_summarizeFfmpegOutput(playlistGenResult.output)}",
         );
         error =
             "Failed to generate video preview (return code $playlistGenReturnCode)";
@@ -1446,4 +1447,28 @@ class VideoPreviewService {
       }
     });
   }
+}
+
+String _summarizeFfmpegOutput(String output) {
+  final lines = const LineSplitter()
+      .convert(output)
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .toList();
+  if (lines.isEmpty) return "FFmpeg output unavailable";
+
+  final summarizedLines = lines.length > _maxFfmpegOutputLines
+      ? lines.sublist(lines.length - _maxFfmpegOutputLines)
+      : lines;
+  var summary = summarizedLines.join("\n");
+  final wasTruncated =
+      lines.length > summarizedLines.length ||
+      summary.length > _maxFfmpegOutputChars;
+  if (summary.length > _maxFfmpegOutputChars) {
+    summary = summary.substring(summary.length - _maxFfmpegOutputChars);
+  }
+
+  return wasTruncated
+      ? "FFmpeg output (truncated):\n$summary"
+      : "FFmpeg output:\n$summary";
 }
