@@ -22,6 +22,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckIcon from "@mui/icons-material/Check";
 import LinkIcon from "@mui/icons-material/Link";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -86,6 +87,7 @@ export interface CollectionHeaderProps {
     hasActiveFileSelection: boolean;
     onAddSaveGroup: AddSaveGroup;
     onShowMap: () => void;
+    onBackToAlbums: () => void;
     onDescriptionHeightChange?: (height: number) => void;
 }
 
@@ -121,14 +123,30 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
     return (
         <GalleryItemsHeaderAdapter>
             <SpacedRow>
-                <GalleryItemsSummary
-                    name={name}
-                    description={description}
-                    descriptionMaxWidth={480}
-                    fileCount={fileCount}
-                    endIcon={<EndIcon />}
-                    onDescriptionHeightChange={onDescriptionHeightChange}
-                />
+                <Stack
+                    direction="row"
+                    sx={{ gap: 1, alignItems: "center", minWidth: 0 }}
+                >
+                    {(type == "hiddenItems" || type == "archiveItems") && (
+                        <Tooltip title={t("go_back")}>
+                            <IconButton
+                                aria-label={t("go_back")}
+                                onClick={props.onBackToAlbums}
+                                sx={{ width: 32, height: 32 }}
+                            >
+                                <ArrowBackIcon sx={{ fontSize: 20 }} />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    <GalleryItemsSummary
+                        name={name}
+                        description={description}
+                        descriptionMaxWidth={480}
+                        fileCount={fileCount}
+                        endIcon={<EndIcon />}
+                        onDescriptionHeightChange={onDescriptionHeightChange}
+                    />
+                </Stack>
                 {shouldShowOptions(type) && (
                     <CollectionHeaderOptions {...props} />
                 )}
