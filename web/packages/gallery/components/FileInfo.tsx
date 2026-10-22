@@ -265,7 +265,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     }, [onNavigationLockChange, navigationLocked]);
 
     return (
-        <BottomAlignedFileInfoSidebar open={open} onClose={handleClose}>
+        <FileInfoSidebar open={open} onClose={handleClose}>
             <FileInfoHeader>
                 <IconButton
                     aria-label={t("go_back")}
@@ -515,7 +515,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     onConfirm={handleEditLocationConfirm}
                 />
             )}
-        </BottomAlignedFileInfoSidebar>
+        </FileInfoSidebar>
     );
 };
 
@@ -673,9 +673,6 @@ const FileInfoSidebar = styled(
             backgroundColor: theme.vars.palette.backdrop.faint,
         },
     }),
-}));
-
-const BottomAlignedFileInfoSidebar = styled(FileInfoSidebar)(({ theme }) => ({
     ".MuiDrawer-paper": {
         display: "flex",
         flexDirection: "column",
@@ -940,6 +937,7 @@ const Caption: React.FC<CaptionProps> = ({
             {values.caption != caption && (
                 <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
                     <IconButton
+                        aria-label={t("save")}
                         type="submit"
                         disabled={isSaving}
                         sx={{ minWidth: "48px" }}
@@ -950,7 +948,11 @@ const Caption: React.FC<CaptionProps> = ({
                             <DoneIcon />
                         )}
                     </IconButton>
-                    <IconButton onClick={() => resetForm()} disabled={isSaving}>
+                    <IconButton
+                        aria-label={t("cancel")}
+                        onClick={() => resetForm()}
+                        disabled={isSaving}
+                    >
                         <CloseIcon />
                     </IconButton>
                 </Stack>
