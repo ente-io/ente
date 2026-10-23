@@ -81,7 +81,7 @@ class EntePdfRendererPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
       } else {
         PdfRenderer(descriptor)
       }
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       descriptor.close()
       when {
         e !is SecurityException -> throw e
@@ -102,7 +102,7 @@ class EntePdfRendererPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
           heights.add(it.height.toDouble())
         }
       }
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       renderer.close()
       throw e
     }
