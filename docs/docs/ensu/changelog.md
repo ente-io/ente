@@ -7,6 +7,11 @@ description: Release notes of recent updates to Ensu
 
 A short summary list of changes to the Ensu mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.com/news).
 
+## v0.1.22 - Oct 2026
+
+Set up Ensu Packs and Your Notes after downloading a model.
+- Better model loading/unloading to warmup chat model and keep it in-memory
+
 ## v0.1.21 - Oct 2026
 
 - Improved follow-up questions about notes and packs.
