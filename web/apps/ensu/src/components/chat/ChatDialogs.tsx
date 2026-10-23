@@ -1738,6 +1738,7 @@ export const ChatDialogs = memo(
                     open={chatNotificationOpen}
                     onClose={() => setChatNotificationOpen(false)}
                     attributes={chatNotification}
+                    autoHideDuration={null}
                     horizontal={isSmall ? "left" : "right"}
                     vertical="bottom"
                     sx={{

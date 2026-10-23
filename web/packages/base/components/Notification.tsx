@@ -44,7 +44,8 @@ type NotificationProps = ModalVisibilityProps & {
     keepOpenOnClick?: boolean;
     horizontal?: "left" | "right";
     vertical?: "top" | "bottom";
-    autoHideDuration?: number;
+    // Set to null to keep the notification open until dismissed.
+    autoHideDuration?: number | null;
     sx?: SxProps<Theme>;
 };
 
@@ -75,7 +76,7 @@ export const Notification: React.FC<NotificationProps> = ({
     onClose,
     horizontal = "right",
     vertical = "bottom",
-    autoHideDuration,
+    autoHideDuration = 3000,
     sx,
     attributes,
     keepOpenOnClick,

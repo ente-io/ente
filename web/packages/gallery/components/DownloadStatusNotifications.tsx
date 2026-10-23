@@ -28,7 +28,6 @@ import { t } from "i18next";
 import { useState } from "react";
 
 const MAX_ALBUM_NAME_LENGTH = 25;
-const SINGLE_FILE_SUCCESS_AUTO_CLOSE_DELAY_MS = 3000;
 
 const truncateAlbumName = (name: string): string => {
     if (name.length <= MAX_ALBUM_NAME_LENGTH) return name;
@@ -237,11 +236,7 @@ export const DownloadStatusNotifications: React.FC<
                         })}
                         open={true}
                         onClose={createOnClose(group)}
-                        autoHideDuration={
-                            shouldAutoClose
-                                ? SINGLE_FILE_SUCCESS_AUTO_CLOSE_DELAY_MS
-                                : undefined
-                        }
+                        autoHideDuration={shouldAutoClose ? undefined : null}
                         keepOpenOnClick
                         attributes={{
                             color: hasErrors ? "critical" : "secondary",

@@ -53,6 +53,7 @@ export const QuickLinkCreatedNotification: React.FC<
             open={open}
             onClose={onClose}
             keepOpenOnClick
+            autoHideDuration={null}
             attributes={{
                 color: "inherit",
                 startIcon: null,
