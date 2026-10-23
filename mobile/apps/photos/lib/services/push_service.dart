@@ -74,14 +74,6 @@ class PushService {
     final sessionToken = Configuration.instance.getToken();
     if (sessionToken == null) return;
     try {
-      String? apnsToken;
-      if (Platform.isIOS) {
-        apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-        if (apnsToken == null) {
-          _logger.info("APNs token unavailable; deferring push registration");
-          return;
-        }
-      }
       // ignore: deprecated_member_use
       final String? fcmToken = await FirebaseMessaging.instance.getToken();
       final shouldForceRefreshServerToken =
@@ -91,6 +83,9 @@ class PushService {
       if (fcmToken != null &&
           (_prefs.getString(kFCMPushToken) != fcmToken ||
               shouldForceRefreshServerToken)) {
+        final String? apnsToken = Platform.isIOS
+            ? await FirebaseMessaging.instance.getAPNSToken()
+            : null;
         _logger.info("Updating token on server");
         await _setPushTokenOnServer(fcmToken, apnsToken);
         if (_prefs.getString(Configuration.tokenKey) != sessionToken) return;
