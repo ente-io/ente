@@ -45,20 +45,18 @@ import {
 } from "./utils";
 
 export const App: React.FC = () => {
-    const [urlCredentials] = useState(readUrlCredentials);
-    const [searchInput, setSearchInput] = useState(urlCredentials.email ?? "");
-    const [authToken] = useState(
-        () => urlCredentials.token ?? localStorage.getItem("token") ?? "",
+    const [urlEmail] = useState(() =>
+        new URLSearchParams(window.location.search).get("email"),
     );
+    const [searchInput, setSearchInput] = useState(urlEmail ?? "");
+    const [authToken] = useState(() => localStorage.getItem("token") ?? "");
     const [tokenInput, setTokenInput] = useState("");
     const [showToken, setShowToken] = useState(false);
     const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
     const [tokenMenuAnchor, setTokenMenuAnchor] = useState<HTMLElement | null>(
         null,
     );
-    const [selectedUserEmail, setSelectedUserEmail] = useState(
-        urlCredentials.email ?? "",
-    );
+    const [selectedUserEmail, setSelectedUserEmail] = useState(urlEmail ?? "");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [fetchSuccess, setFetchSuccess] = useState(false);
@@ -178,15 +176,14 @@ export const App: React.FC = () => {
     ]);
 
     useEffect(() => {
-        const { email } = urlCredentials;
-        if (email && authToken) {
+        if (urlEmail && authToken) {
             queueMicrotask(() => {
-                fetchData(email, authToken).catch((error: unknown) =>
+                fetchData(urlEmail, authToken).catch((error: unknown) =>
                     console.error("Fetch data error:", error),
                 );
             });
         }
-    }, [authToken, fetchData, urlCredentials]);
+    }, [authToken, fetchData, urlEmail]);
 
     const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -482,11 +479,6 @@ export const App: React.FC = () => {
             </div>
         </StaffSessionProvider>
     );
-};
-
-const readUrlCredentials = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return { email: urlParams.get("email"), token: urlParams.get("token") };
 };
 
 const removeTokenFromUrl = () => {
