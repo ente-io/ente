@@ -2538,6 +2538,9 @@ final class ChatViewModel: ObservableObject {
 
         let imageFiles = images.compactMap { $0.url }
         if !imageFiles.isEmpty {
+            if prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                prompt = "Describe the attached images."
+            }
             let mediaMarker = "<__media__>"
             prompt += "\n\n[\(imageFiles.count) image attachment"
             if imageFiles.count > 1 { prompt += "s" }

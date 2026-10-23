@@ -223,6 +223,9 @@ const MAX_IMAGE_ATTACHMENTS_PER_MESSAGE = 2;
 const buildPromptWithImages = (text: string, imageCount: number) => {
     if (imageCount <= 0) return text;
     let prompt = text;
+    if (!prompt.trim()) {
+        prompt = "Describe the attached images.";
+    }
     prompt += `\n\n[${imageCount} image attachment${imageCount === 1 ? "" : "s"} provided]`;
     for (let index = 0; index < imageCount; index += 1) {
         prompt += `\n${MEDIA_MARKER}`;

@@ -1873,6 +1873,10 @@ internal class ChatStoreActions(
         }
 
         if (imageFiles.isNotEmpty()) {
+            if (builder.isBlank()) {
+                builder.clear()
+                builder.append("Describe the attached images.")
+            }
             builder.append("\n\n[")
             builder.append(imageFiles.size)
             builder.append(" image attachment")
