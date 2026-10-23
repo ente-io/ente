@@ -1,6 +1,6 @@
 # Install Ente CLI
 
-Download the archive for your system from the latest [Ente CLI release](https://github.com/ente/ente/releases?q=tag%3Aente-cli-v), verify it, extract the `ente` executable, and run `ente --version`.
+Download the archive for your system from the latest [Ente CLI release](https://github.com/ente/ente/releases?q=tag%3Aente-cli-v0), verify it, extract the `ente` executable, and run `ente --version`.
 
 | System              | Archive name ends with |
 | ------------------- | ---------------------- |
@@ -19,7 +19,7 @@ Each archive contains one file, the executable. There are no 32-bit builds.
 cd ~/Downloads
 shasum -a 256 --check --ignore-missing SHA256SUMS
 mkdir -p ~/.local/opt/ente-cli/bin
-tar -xzf ente-vX.Y.Z-linux-amd64.tar.gz -C ~/.local/opt/ente-cli/bin
+tar -xzf ente-cli-vX.Y.Z-linux-amd64.tar.gz -C ~/.local/opt/ente-cli/bin
 ~/.local/opt/ente-cli/bin/ente --version
 ```
 
@@ -31,10 +31,10 @@ On Linux, keep the CLI in its own directory: `/usr/bin/ente` may belong to the E
 
 ```powershell
 cd ~\Downloads
-(Get-FileHash ente-vX.Y.Z-windows-amd64.zip).Hash.ToLower()
+(Get-FileHash ente-cli-vX.Y.Z-windows-amd64.zip).Hash.ToLower()
 Select-String windows-amd64 SHA256SUMS
 New-Item -ItemType Directory -Force "$env:LOCALAPPDATA\Programs\EnteCLI" | Out-Null
-Expand-Archive ente-vX.Y.Z-windows-amd64.zip -DestinationPath "$env:LOCALAPPDATA\Programs\EnteCLI"
+Expand-Archive ente-cli-vX.Y.Z-windows-amd64.zip -DestinationPath "$env:LOCALAPPDATA\Programs\EnteCLI"
 & "$env:LOCALAPPDATA\Programs\EnteCLI\ente.exe" --version
 ```
 

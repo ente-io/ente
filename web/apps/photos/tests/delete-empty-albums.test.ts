@@ -6,7 +6,10 @@ import { useDeleteEmptyAlbums } from "../src/components/collections/useDeleteEmp
 const mocks = vi.hoisted(() => ({
     showMiniDialog: vi.fn<(attributes: MiniDialogAttributes) => void>(),
     notify: vi.fn<
-        (notification: { title: { key: string; opts?: unknown } }) => void
+        (notification: {
+            title: { key: string; opts?: unknown };
+            caption?: { key: string; opts?: unknown };
+        }) => void
     >(),
     pull: vi.fn(),
     collections: vi.fn(),
@@ -131,7 +134,8 @@ describe("shared empty album deletion", () => {
             .mockResolvedValueOnce(undefined)
             .mockRejectedValueOnce(new Error("refresh"));
         await start().continue?.action?.();
-        expect(mocks.notify.mock.calls[0]![0].title.key).toBe(
+        expect(mocks.notify.mock.calls[0]![0].title.key).toBe("error");
+        expect(mocks.notify.mock.calls[0]![0].caption?.key).toBe(
             "delete_empty_albums_refresh_failed",
         );
     });

@@ -20,7 +20,6 @@ export const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
     return (
         <SingleInputDialog
             {...{ open, onClose }}
-            variant="v2"
             title={t("rename_file")}
             label={t("file_name")}
             placeholder={t("file_name")}

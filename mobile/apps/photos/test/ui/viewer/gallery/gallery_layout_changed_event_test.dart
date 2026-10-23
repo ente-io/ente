@@ -9,6 +9,7 @@ import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/ente_theme_data.dart";
+import "package:photos/events/event.dart";
 import "package:photos/events/gallery_layout_changed_event.dart";
 import "package:photos/models/file/dummy_file.dart";
 import "package:photos/models/file/file.dart";
@@ -23,6 +24,7 @@ import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dar
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_config.dart";
+import "package:photos/ui/viewer/gallery/gallery_grid_zoom.dart";
 import "package:photos/ui/viewer/gallery/layout_settings.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -56,6 +58,182 @@ void main() {
 
   setUp(() async {
     await localSettings.setGalleryLayoutType(GalleryLayoutType.grid);
+  });
+
+  testWidgets(
+    "zero-width startup keeps loading and lays out all files on recovery",
+    (tester) async {
+      for (final layout in [
+        GalleryLayoutType.grid,
+        GalleryLayoutType.justified,
+      ]) {
+        await localSettings.setGalleryLayoutType(layout);
+        final width = ValueNotifier<double>(0);
+        final galleryKey = GlobalKey<GalleryState>();
+        final files = List<EnteFile>.generate(200, _justifiedTestFile);
+        final firstPage = Completer<FileLoadResult>();
+        final loadLimits = <int?>[];
+        await tester.pumpWidget(
+          _resizableGalleryHost(
+            width,
+            Gallery(
+              key: galleryKey,
+              tagPrefix: "zero_width_startup",
+              groupType: GroupType.month,
+              loadingWidget: const SizedBox.shrink(),
+              asyncLoader: (start, end, {limit, asc}) {
+                loadLimits.add(limit);
+                return loadLimits.length == 1
+                    ? firstPage.future
+                    : Future.value(FileLoadResult(files, false));
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        firstPage.complete(FileLoadResult(files.take(100).toList(), true));
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 1));
+        expect(tester.takeException(), isNull);
+        expect(loadLimits, [100, null]);
+        expect(galleryKey.currentState!.galleryGroups, isNull);
+        expect(find.byType(GalleryGridZoom), findsNothing);
+
+        width.value = 400;
+        await tester.pumpAndSettle();
+        final groups = galleryKey.currentState!.galleryGroups!;
+        expect(groups.widthAvailable, 400);
+        expect(groups.allFiles, orderedEquals(files));
+        expect(groups.getGeometryOfFile(files.last), isNotNull);
+        expect(loadLimits, [100, null]);
+        expect(find.byType(GalleryGridZoom), findsOneWidget);
+        expect(tester.takeException(), isNull);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump(const Duration(milliseconds: 100));
+        width.dispose();
+      }
+    },
+  );
+
+  testWidgets("zero-width refresh keeps the existing gallery mounted", (
+    tester,
+  ) async {
+    await localSettings.setGalleryLayoutType(GalleryLayoutType.justified);
+    final width = ValueNotifier<double>(400);
+    final galleryKey = GlobalKey<GalleryState>();
+    final reload = StreamController<Event>.broadcast();
+    var files = List<EnteFile>.generate(12, _justifiedTestFile);
+    var loads = 0;
+    await tester.pumpWidget(
+      _resizableGalleryHost(
+        width,
+        Gallery(
+          key: galleryKey,
+          tagPrefix: "zero_width_refresh",
+          reloadDebounceTime: Duration.zero,
+          enableFileGrouping: false,
+          forceReloadEvents: [reload.stream],
+          asyncLoader: (start, end, {limit, asc}) async {
+            loads++;
+            return FileLoadResult(files, false);
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final originalGroups = galleryKey.currentState!.galleryGroups!;
+    expect(originalGroups.allFiles, hasLength(12));
+    final scrollableFinder = find.descendant(
+      of: find.byType(CustomScrollView),
+      matching: find.byType(Scrollable),
+    );
+    final scrollable = tester.state<ScrollableState>(scrollableFinder);
+    scrollable.position.jumpTo(150);
+    await tester.pumpAndSettle();
+    expect(
+      tester.state<ScrollableState>(scrollableFinder).position.pixels,
+      150,
+    );
+
+    width.value = 0;
+    await tester.pump();
+    files = List<EnteFile>.generate(24, _justifiedTestFile);
+    reload.add(Event());
+    await tester.pumpAndSettle();
+    expect(loads, 2);
+    expect(galleryKey.currentState!.galleryGroups, same(originalGroups));
+    expect(tester.state<ScrollableState>(scrollableFinder), same(scrollable));
+    expect(tester.takeException(), isNull);
+
+    width.value = 400;
+    await tester.pumpAndSettle();
+    reload.add(Event());
+    await tester.pumpAndSettle();
+    final groups = galleryKey.currentState!.galleryGroups!;
+    expect(groups.widthAvailable, originalGroups.widthAvailable);
+    expect(groups.allFiles, orderedEquals(files));
+    expect(groups.getGeometryOfFile(files.last), isNotNull);
+    expect(loads, 3);
+    expect(
+      tester.state<ScrollableState>(scrollableFinder).position.pixels,
+      150,
+    );
+    expect(tester.state<ScrollableState>(scrollableFinder), same(scrollable));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 100));
+    await reload.close();
+    width.dispose();
+  });
+
+  testWidgets("zero-width refresh retains the displayed empty state", (
+    tester,
+  ) async {
+    final width = ValueNotifier<double>(400);
+    final galleryKey = GlobalKey<GalleryState>();
+    final reload = StreamController<Event>.broadcast();
+    var files = <EnteFile>[];
+    const emptyStateKey = ValueKey("zero_width_empty_state");
+    await tester.pumpWidget(
+      _resizableGalleryHost(
+        width,
+        Gallery(
+          key: galleryKey,
+          tagPrefix: "zero_width_empty_refresh",
+          groupType: GroupType.month,
+          emptyState: const SizedBox(key: emptyStateKey),
+          forceReloadEvents: [reload.stream],
+          asyncLoader: (start, end, {limit, asc}) async =>
+              FileLoadResult(files, false),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final originalGroups = galleryKey.currentState!.galleryGroups!;
+    expect(originalGroups.allFiles, isEmpty);
+    expect(find.byKey(emptyStateKey), findsOneWidget);
+
+    width.value = 0;
+    await tester.pump();
+    files = List<EnteFile>.generate(12, _justifiedTestFile);
+    reload.add(Event());
+    await tester.pumpAndSettle();
+    width.value = 400;
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
+    expect(galleryKey.currentState!.galleryGroups, same(originalGroups));
+    expect(find.byKey(emptyStateKey), findsOneWidget);
+    expect(find.byType(PinnedGroupHeader), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 100));
+    await reload.close();
+    width.dispose();
   });
 
   testWidgets(
@@ -665,6 +843,25 @@ void main() {
 
 Widget _galleryHost(Gallery gallery) {
   return GalleryBoundariesProvider(child: GalleryFilesState(child: gallery));
+}
+
+Widget _resizableGalleryHost(ValueNotifier<double> width, Gallery gallery) {
+  return MaterialApp(
+    theme: lightThemeData,
+    localizationsDelegates: StringsLocalizations.localizationsDelegates,
+    supportedLocales: StringsLocalizations.supportedLocales,
+    home: ValueListenableBuilder<double>(
+      valueListenable: width,
+      child: _galleryHost(gallery),
+      builder: (context, value, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(size: Size(value, 600)),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(width: value, height: 600, child: child),
+        ),
+      ),
+    ),
+  );
 }
 
 Future<void> _mountPinchGallery(WidgetTester tester, Gallery gallery) async {

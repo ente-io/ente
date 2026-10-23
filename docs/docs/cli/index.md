@@ -7,8 +7,8 @@
 [Install the CLI](./install.md), then log in and export:
 
 ```sh
-ente account login --account personal --app photos
-ente photos export "$HOME/Pictures/Ente" --account personal
+ente account login --app photos
+ente photos export "$HOME/Pictures/Ente"
 ```
 
 Login asks for your email and password, and for a verification code when your account requires one. The export prints progress while it runs and ends with a summary:

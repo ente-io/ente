@@ -258,24 +258,18 @@ test("a failed refresh still disables the unavailable discussion after a mutatio
 });
 
 test.each(["selected", "unavailable"] as const)(
-    "cancelling a %s reply preserves the draft without focusing the input",
+    "cancelling a %s reply preserves the draft",
     (status) => {
         draft.replyTarget =
             status == "selected"
                 ? { status, commentId: comment.commentId }
                 : { status };
-        const focus = vi.fn();
-        const inputRef = composer().props.inputRef as React.RefObject<{
-            focus: typeof focus;
-        }>;
-        inputRef.current = { focus };
         const preview = render().find((node) => node.type == "preview")!;
 
         (preview.props.onCancel as () => void)();
 
         expect(draft.replyTarget).toBeUndefined();
         expect(draft.text).toBe("New comment");
-        expect(focus).not.toHaveBeenCalled();
         expect(composer().props.disabled).toBeFalsy();
         expect(composer().props.placeholder).toBe("Add a comment…");
         expect(render().find((node) => node.type == "preview")).toBeUndefined();

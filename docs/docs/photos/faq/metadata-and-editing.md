@@ -331,7 +331,7 @@ See [original files during export](#modify-originals) and [file-system creation 
 
 No. Ente exports the original photos and videos without changing their embedded metadata. Metadata imported from Google Takeout JSON files and changes you make in Ente are written separately to metadata JSON files during library export.
 
-Keep those sidecars with the originals when transferring to another app that supports them. See [the export metadata format](#export-data-preserve-metadata). To export selected albums with their metadata, you can also use [CLI photo export](/photos/features/utilities/cli#exporting-photos).
+Keep those sidecars with the originals when transferring to another app that supports them. See [the export metadata format](#export-data-preserve-metadata). To export selected albums with their metadata, you can also use [CLI photo export](/cli/photos).
 
 ### How can I read the date used by Ente from my export? {#read-corrected-date-export}
 

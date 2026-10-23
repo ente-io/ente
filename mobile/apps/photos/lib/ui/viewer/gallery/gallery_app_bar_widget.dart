@@ -84,7 +84,12 @@ class GalleryAppBarWidget extends StatefulWidget {
     PreferredSizeWidget? bottom,
     bool showOverflowMenu = true,
   }) {
-    assert(cover == null || collection != null || deviceCollection != null);
+    assert(
+      cover == null ||
+          collection != null ||
+          deviceCollection != null ||
+          files != null,
+    );
     return GalleryAppBarConfig(
       extendBodyForCollapse: cover != null && bottom == null,
       sliverBuilder: (_) => GalleryAppBarWidget._(
@@ -1226,7 +1231,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await showAlbumSlideshow(
       context,
       files: galleryFiles,
-      title: widget.deviceCollection?.name ?? widget.collection!.displayName,
+      title:
+          widget.deviceCollection?.name ??
+          widget.collection?.displayName ??
+          _appBarTitle,
       includeBackupExcludedFiles: widget.deviceCollection != null,
     );
   }
@@ -1536,10 +1544,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
       await localSettings.setOnGuestView(true);
-      if (!mounted) return;
+      if (!mounted) {
+        await localSettings.setOnGuestView(false);
+        return;
+      }
       routeToPage(context, page, forceCustomPageRoute: true).ignore();
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Bus.instance.fire(GuestViewEvent(true, false));
+        if (localSettings.isOnGuestView()) {
+          Bus.instance.fire(GuestViewEvent(true, false));
+        }
       });
     } else {
       if (!mounted) return;
