@@ -54,6 +54,7 @@ jobs:
 
         steps:
             - name: Check release maintainer
+              if: inputs.action == 'update'
               env:
                   GH_TOKEN: ${{ github.token }}
                   TRIGGERING_ACTOR: ${{ github.triggering_actor }}
