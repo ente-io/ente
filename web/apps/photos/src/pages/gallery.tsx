@@ -1139,14 +1139,6 @@ const Page: React.FC = () => {
                         silent: true,
                         source: `collection-op:${op}`,
                     });
-                    if (op == "add" && filesToProcess.length > 0) {
-                        setAddToAlbumProgress({
-                            open: true,
-                            phase: "done",
-                            albumId: selectedCollection.id,
-                            albumName: selectedCollection.name,
-                        });
-                    }
                 } finally {
                     hideLoadingBar();
                 }
@@ -2580,15 +2572,15 @@ const Page: React.FC = () => {
                         setPublicLinkToast((prev) => ({ ...prev, open: false }))
                     }
                 />
-                <AlbumAddedNotification
-                    open={addToAlbumProgress.open}
-                    onClose={() =>
-                        setAddToAlbumProgress((s) => ({ ...s, open: false }))
-                    }
-                    phase={addToAlbumProgress.phase}
-                    albumName={addToAlbumProgress.albumName}
-                />
             </FullScreenDropZone>
+            <AlbumAddedNotification
+                open={addToAlbumProgress.open}
+                onClose={() =>
+                    setAddToAlbumProgress((s) => ({ ...s, open: false }))
+                }
+                phase={addToAlbumProgress.phase}
+                albumName={addToAlbumProgress.albumName}
+            />
             <EditLocationDialog
                 {...editLocationVisibilityProps}
                 files={selectedFilesInView}
