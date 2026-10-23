@@ -10,13 +10,11 @@ export const createSpaceVideoContent = (
         inline = false,
         onPlay,
         onPause,
-        onReady,
         onTogglePlayback,
     }: {
         inline?: boolean;
         onPlay?: () => Promise<void> | void;
         onPause?: () => void;
-        onReady?: () => void;
         onTogglePlayback?: (play: boolean) => void;
     } = {},
 ) => {
@@ -109,24 +107,7 @@ export const createSpaceVideoContent = (
     }
     supportMessage.style.marginTop = "2px";
     errorMessage.append(errorTitle, supportMessage);
-    const poster =
-        !inline && item.imageUrl ? document.createElement("img") : undefined;
-    element.append(video);
-    if (poster) {
-        poster.alt = "";
-        poster.src = item.imageUrl!;
-        poster.hidden = true;
-        Object.assign(poster.style, {
-            position: "absolute",
-            inset: "0",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            pointerEvents: "none",
-        });
-        element.append(poster);
-    }
-    element.append(button, loading, errorMessage);
+    element.append(video, button, loading, errorMessage);
     let generation = 0;
     let sourceGeneration = 0;
     let pendingLoad: Promise<void> | undefined;
@@ -135,33 +116,9 @@ export const createSpaceVideoContent = (
     let active = false;
     let autoplayBlocked = false;
     let failure: "error" | "rate-limit" | undefined;
-    let posterReady = false;
-    let ready = false;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
     let loadingTimer: ReturnType<typeof setTimeout> | undefined;
     let playbackTimeout: ReturnType<typeof setTimeout> | undefined;
-    const updatePreview = () => {
-        if (disposed) return;
-        const frameReady = video.readyState >= video.HAVE_CURRENT_DATA;
-        if (poster) poster.hidden = !posterReady || frameReady;
-        if (
-            !ready &&
-            (posterReady ||
-                frameReady ||
-                failure ||
-                (active && autoplayBlocked))
-        ) {
-            ready = true;
-            onReady?.();
-        }
-    };
-    void poster?.decode().then(
-        () => {
-            posterReady = true;
-            updatePreview();
-        },
-        () => undefined,
-    );
     const hideLoading = () => {
         clearTimeout(loadingTimer);
         loadingTimer = undefined;
@@ -201,7 +158,6 @@ export const createSpaceVideoContent = (
         video.setAttribute("aria-disabled", String(blocked));
         video.style.cursor = blocked ? "default" : "pointer";
         errorMessage.hidden = !active || !failure;
-        updatePreview();
     };
     const showPlaying = () => {
         hideLoading();
@@ -210,7 +166,6 @@ export const createSpaceVideoContent = (
         button.disabled = false;
         button.setAttribute("aria-hidden", "true");
         video.setAttribute("aria-label", "Pause video");
-        updatePreview();
     };
     const pause = () => {
         generation++;
@@ -224,7 +179,6 @@ export const createSpaceVideoContent = (
         pause();
         video.removeAttribute("src");
         video.load();
-        updatePreview();
     };
     const failPlayback = (
         reason: "timeout" | "media" | "play",
@@ -361,7 +315,6 @@ export const createSpaceVideoContent = (
         if (!video.paused) showLoading();
     };
     video.onplaying = showPlaying;
-    video.onloadeddata = updatePreview;
     video.onerror = () => {
         if (active) failPlayback("media");
         else reset();

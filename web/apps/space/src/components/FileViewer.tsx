@@ -287,9 +287,7 @@ const handOverOpenFlight = (
     const image = content?.element;
     const isShown =
         content?.isError() ||
-        (content?.data.type == "video" &&
-            content.state == "loaded" &&
-            image?.isConnected) ||
+        (content?.data.type == "video" && image?.isConnected) ||
         (image instanceof HTMLImageElement &&
             image.complete &&
             image.naturalWidth > 0 &&
@@ -1541,15 +1539,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             pswp.on("contentLoad", (event) => {
                 if (event.content.data.type != "video") return;
                 event.preventDefault();
-                event.content.state = "loading";
                 videos.get(event.content)?.destroy();
                 const item = viewerPhotosRef.current[event.content.index]!;
-                const video = createSpaceVideoContent(
-                    item,
-                    (asset) => videoLoaderRef.current!(asset),
-                    { onReady: () => event.content.onLoaded() },
+                const video = createSpaceVideoContent(item, (asset) =>
+                    videoLoaderRef.current!(asset),
                 );
                 event.content.element = video.element;
+                event.content.onLoaded();
                 videos.set(event.content, video);
             });
             pswp.on("contentActivate", ({ content }) =>
