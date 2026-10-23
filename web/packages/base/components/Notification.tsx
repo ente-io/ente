@@ -66,6 +66,7 @@ export const Notification: React.FC<NotificationProps> = ({
     attributes,
     keepOpenOnClick,
 }) => {
+    const contentID = React.useId();
     if (!attributes) return <></>;
 
     const {
@@ -128,6 +129,7 @@ export const Notification: React.FC<NotificationProps> = ({
                 </Stack>
             )}
             <Stack
+                id={contentID}
                 role="status"
                 sx={{
                     flex: 1,
@@ -202,9 +204,7 @@ export const Notification: React.FC<NotificationProps> = ({
                     <RippleDisabledButton
                         variant="text"
                         color="inherit"
-                        aria-label={
-                            typeof title === "string" ? title : undefined
-                        }
+                        aria-labelledby={contentID}
                         onClick={handleClick}
                         sx={{
                             flex: 1,
