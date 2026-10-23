@@ -576,6 +576,9 @@ const Page: React.FC = () => {
         ResolvedModelPreset[] | null
     >(null);
     const [selectedModelId, setSelectedModelId] = useState("");
+    const [imageAttachmentModelId, setImageAttachmentModelId] = useState<
+        string | null
+    >(null);
     const [contextLength, setContextLength] = useState("");
     const [systemPrompt, setSystemPrompt] = useState(
         DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
@@ -1683,7 +1686,8 @@ const Page: React.FC = () => {
     const drawerWidth = isSmall ? 300 : drawerCollapsed ? 0 : 320;
     const desktopBreakpoint = theme.breakpoints.values.lg;
     const isDesktopOverlay = !isSmall && chatViewportWidth >= desktopBreakpoint;
-    const showImageAttachment = isTauriRuntime;
+    const showImageAttachment =
+        isTauriRuntime && imageAttachmentModelId === selectedModelId;
     const showDownloadProgress =
         !!downloadStatus?.status && downloadStatus.status !== "Ready";
     const showModelGate =
@@ -2173,6 +2177,9 @@ const Page: React.FC = () => {
             const availability =
                 await provider.checkModelAvailability(settings);
             if (!isCurrentRequest()) return;
+            setImageAttachmentModelId(
+                availability.model.mmprojUrl ? (settings.modelId ?? "") : null,
+            );
             const mmprojReady =
                 availability.mmprojAvailable === undefined ||
                 availability.mmprojAvailable;
@@ -2240,7 +2247,11 @@ const Page: React.FC = () => {
                 downloadIfMissing: true,
             });
             if (!isCurrentRequest()) return;
-            setLoadedModelName(provider.getCurrentModel()?.name ?? null);
+            const model = provider.getCurrentModel();
+            setImageAttachmentModelId(
+                model?.mmprojUrl ? (settings.modelId ?? "") : null,
+            );
+            setLoadedModelName(model?.name ?? null);
             setIsDownloading(false);
             setDownloadStatus({ percent: 100, status: "Ready" });
             setModelGateStatus("ready");
@@ -4742,7 +4753,7 @@ const Page: React.FC = () => {
                                     : "Loading sources for this chat…"
                                 : undefined
                         }
-                        showAttachmentPicker={isTauriRuntime}
+                        showAttachmentPicker={showImageAttachment}
                         openPhotoPicker={openPhotoPicker}
                         showImageAttachment={showImageAttachment}
                         isImageAttachmentLimitReached={
