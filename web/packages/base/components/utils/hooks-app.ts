@@ -3,7 +3,7 @@ import { setupI18n } from "ente-base/i18n";
 import { attachRustLogHook, disableDiskLogs } from "ente-base/log";
 import { logUnhandledErrorsAndRejections } from "ente-base/log-web";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const useSetupI18n = () => {
     const [isI18nReady, setIsI18nReady] = useState(false);
@@ -57,31 +57,54 @@ export const useIsRouteChangeInProgress = () => {
 };
 
 export const useNotification = () => {
-    const [attributes, setAttributes] = useState<
-        NotificationAttributes | undefined
-    >(undefined);
-
-    const [open, setOpen] = useState(false);
-    const [notificationID, setNotificationID] = useState(0);
+    const [notifications, setNotifications] = useState<
+        {
+            notificationID: number;
+            attributes: NotificationAttributes;
+            open: boolean;
+        }[]
+    >([]);
+    const nextID = useRef(0);
 
     const showNotification = useCallback(
         (attributes: NotificationAttributes) => {
-            setNotificationID((id) => id + 1);
-            setAttributes(attributes);
-            setOpen(true);
+            const notificationID = nextID.current++;
+            setNotifications((current) => [
+                ...current,
+                { notificationID, attributes, open: true },
+            ]);
         },
         [],
     );
 
-    const handleClose = useCallback(() => setOpen(false), []);
+    const handleClose = useCallback((notificationID: number) => {
+        setNotifications((current) =>
+            current.map((notification) =>
+                notification.notificationID === notificationID
+                    ? { ...notification, open: false }
+                    : notification,
+            ),
+        );
+    }, []);
+
+    const handleExited = useCallback((notificationID: number) => {
+        setNotifications((current) =>
+            current.filter(
+                (notification) =>
+                    notification.notificationID !== notificationID,
+            ),
+        );
+    }, []);
 
     return {
         showNotification,
         notificationProps: {
-            notificationID,
-            open,
-            onClose: handleClose,
-            attributes,
+            open: notifications.some((notification) => notification.open),
+            notifications: notifications.map((notification) => ({
+                ...notification,
+                onClose: () => handleClose(notification.notificationID),
+                onExited: () => handleExited(notification.notificationID),
+            })),
         },
     };
 };

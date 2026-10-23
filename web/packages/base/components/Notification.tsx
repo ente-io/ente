@@ -19,6 +19,7 @@ import { EllipsizedTypography } from "ente-base/components/Typography";
 import { RippleDisabledButton } from "ente-base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type {} from "ente-base/components/utils/mui-theme";
+import { useNotificationStack } from "ente-base/components/utils/notification-stack";
 import { isSxArray } from "ente-base/components/utils/sx";
 import { t } from "i18next";
 import React from "react";
@@ -42,6 +43,7 @@ type NotificationProps = ModalVisibilityProps & {
     horizontal?: "left" | "right";
     autoHideDuration?: number | null;
     sx?: SxProps<Theme>;
+    onExited?: () => void;
 };
 
 const actionButtonSx = {
@@ -59,7 +61,26 @@ const actionButtonSx = {
     },
 };
 
-export const Notification: React.FC<NotificationProps> = ({
+/** Render a single notification or the independent notifications from useNotification. */
+export const Notification: React.FC<
+    | NotificationProps
+    | {
+          open: boolean;
+          notifications: (NotificationProps & { notificationID: number })[];
+      }
+> = (props) => {
+    if ("notifications" in props) {
+        return props.notifications.map((notification) => (
+            <NotificationItem
+                key={notification.notificationID}
+                {...notification}
+            />
+        ));
+    }
+    return <NotificationItem {...props} />;
+};
+
+const NotificationItem: React.FC<NotificationProps> = ({
     open,
     notificationID,
     onClose,
@@ -68,8 +89,14 @@ export const Notification: React.FC<NotificationProps> = ({
     sx,
     attributes,
     keepOpenOnClick,
+    onExited,
 }) => {
     const contentID = React.useId();
+    const [present, setPresent] = React.useState(open);
+    const { ref, offset } = useNotificationStack(
+        !!attributes && (open || present),
+        horizontal,
+    );
     if (!attributes) return <></>;
 
     const {
@@ -168,6 +195,16 @@ export const Notification: React.FC<NotificationProps> = ({
         <Snackbar
             key={notificationID}
             open={open}
+            ref={ref}
+            slotProps={{
+                transition: {
+                    onEnter: () => setPresent(true),
+                    onExited: () => {
+                        setPresent(false);
+                        onExited?.();
+                    },
+                },
+            }}
             autoHideDuration={resolvedAutoHideDuration}
             onClose={(_, reason) => {
                 if (reason === "timeout") onClose();
@@ -178,7 +215,7 @@ export const Notification: React.FC<NotificationProps> = ({
                     width: "min(340px, calc(100vw - 32px))",
                     left: horizontal === "left" ? { xs: 16, sm: 24 } : "auto",
                     right: horizontal === "right" ? { xs: 16, sm: 24 } : "auto",
-                    bottom: { xs: 16, sm: 24 },
+                    bottom: { xs: 16 + offset, sm: 24 + offset },
                     borderRadius: "24px",
                     border: "1px solid",
                     borderColor: "rgba(0, 0, 0, 0.06)",

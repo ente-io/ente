@@ -103,7 +103,7 @@ export const DownloadStatusNotifications: React.FC<
 
     return (
         <>
-            {saveGroups.map((group, index) => {
+            {saveGroups.map((group) => {
                 const hasErrors = isSaveCompleteWithErrors(group);
                 const isComplete = isSaveComplete(group);
                 const canRetry = hasErrors && !!group.retry;
@@ -199,12 +199,10 @@ export const DownloadStatusNotifications: React.FC<
                         key={group.id}
                         horizontal="left"
                         sx={(theme) => ({
-                            "&&": { bottom: `${index * 96 + 24}px` },
                             width: "min(400px, calc(100vw - 48px))",
                             borderRadius: "24px",
                             [theme.breakpoints.down("sm")]: {
                                 "&&": {
-                                    bottom: `${index * 96 + 16}px`,
                                     ...(fullWidthOnMobile
                                         ? { left: "8px" }
                                         : {}),

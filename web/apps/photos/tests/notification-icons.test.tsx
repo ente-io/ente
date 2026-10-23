@@ -116,3 +116,42 @@ describe("notification accessibility", () => {
         },
     );
 });
+
+describe("notification groups", () => {
+    test("renders an actionable prompt alongside a later confirmation", () => {
+        const markup = renderToStaticMarkup(
+            <ThemeProvider theme={photosTheme}>
+                <Notification
+                    open
+                    notifications={[
+                        {
+                            notificationID: 0,
+                            open: true,
+                            onClose: vi.fn(),
+                            attributes: {
+                                color: "inherit",
+                                title: "Update available",
+                                onClick: vi.fn(),
+                            },
+                        },
+                        {
+                            notificationID: 1,
+                            open: true,
+                            onClose: vi.fn(),
+                            attributes: {
+                                color: "inherit",
+                                title: "Added to album",
+                                caption: "Summer",
+                            },
+                        },
+                    ]}
+                />
+            </ThemeProvider>,
+        );
+        expect(markup).toContain("Update available");
+        expect(markup).toContain("Added to album");
+        expect(markup).toContain("Summer");
+        expect(markup.match(/role="status"/g)).toHaveLength(2);
+        expect(markup.match(/aria-label="Close"/g)).toHaveLength(2);
+    });
+});

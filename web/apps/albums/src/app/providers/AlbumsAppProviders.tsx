@@ -50,7 +50,7 @@ export const AlbumsAppProviders: React.FC<PropsWithChildren> = ({
             {miniDialogProps.open && (
                 <LazyAttributedMiniDialog {...miniDialogProps} />
             )}
-            {notificationProps.open && (
+            {notificationProps.notifications.length > 0 && (
                 <LazyNotification {...notificationProps} />
             )}
 
