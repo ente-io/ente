@@ -69,7 +69,6 @@ export const CreateAlbumDialog: React.FC<CreateAlbumDialogProps> = ({
         <>
             <SingleInputDialog
                 {...{ open, onClose }}
-                variant="v2"
                 title={t("new_album")}
                 label={t("album_name")}
                 submitButtonTitle={t("create")}

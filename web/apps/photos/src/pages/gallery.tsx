@@ -2544,22 +2544,21 @@ const Page: React.FC = () => {
                     onClose={handleCloseAuthenticateUser}
                     onAuthenticate={handleAuthenticate}
                 />
-                <SingleInputDialog
-                    {...albumNameInputVisibilityProps}
-                    variant="v2"
-                    title={t("new_album")}
-                    label={t("album_name")}
-                    submitButtonTitle={t("create")}
-                    onClose={() => {
-                        // Do not leak a cancelled add into the next album creation.
-                        pendingSingleFileAdd.current = undefined;
-                        postCreateAlbumHidden.current = false;
-                        setPostCreateAlbumOp(undefined);
-                        albumNameInputVisibilityProps.onClose();
-                    }}
-                    onSubmit={handleAlbumNameSubmit}
-                />
             </FullScreenDropZone>
+            <SingleInputDialog
+                {...albumNameInputVisibilityProps}
+                title={t("new_album")}
+                label={t("album_name")}
+                submitButtonTitle={t("create")}
+                onClose={() => {
+                    // Do not leak a cancelled add into the next album creation.
+                    pendingSingleFileAdd.current = undefined;
+                    postCreateAlbumHidden.current = false;
+                    setPostCreateAlbumOp(undefined);
+                    albumNameInputVisibilityProps.onClose();
+                }}
+                onSubmit={handleAlbumNameSubmit}
+            />
             <QuickLinkCreatedNotification
                 open={publicLinkToast.open}
                 onCopy={() => {

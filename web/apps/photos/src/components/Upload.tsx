@@ -1256,7 +1256,6 @@ export const Upload: React.FC<UploadProps> = ({
             />
             <SingleInputDialog
                 {...newAlbumNameInputVisibilityProps}
-                variant="v2"
                 onClose={handleNewAlbumNameInputClose}
                 title={t("new_album")}
                 label={t("album_name")}
