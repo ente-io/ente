@@ -144,7 +144,13 @@ export const createSpaceVideoContent = (
         if (disposed) return;
         const frameReady = video.readyState >= video.HAVE_CURRENT_DATA;
         if (poster) poster.hidden = !posterReady || frameReady;
-        if (!ready && (posterReady || frameReady || failure)) {
+        if (
+            !ready &&
+            (posterReady ||
+                frameReady ||
+                failure ||
+                (active && autoplayBlocked))
+        ) {
             ready = true;
             onReady?.();
         }
@@ -195,6 +201,7 @@ export const createSpaceVideoContent = (
         video.setAttribute("aria-disabled", String(blocked));
         video.style.cursor = blocked ? "default" : "pointer";
         errorMessage.hidden = !active || !failure;
+        updatePreview();
     };
     const showPlaying = () => {
         hideLoading();
