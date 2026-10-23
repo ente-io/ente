@@ -142,11 +142,12 @@ test("a failed flyer leaves the tile visible and allows viewer handover", async 
 
 test("a playing video opens with its current frame without decoding the poster", async () => {
     const video = {
+        dataset: { spaceVideoFrameVisible: "true" },
         readyState: 2,
         HAVE_CURRENT_DATA: 2,
         videoWidth: 1920,
         videoHeight: 1080,
-    } as HTMLVideoElement;
+    } as unknown as HTMLVideoElement;
     const { flight, flyer, frame, drawFrame, origin, requestFrame } =
         pendingFlight(video);
 
@@ -161,20 +162,25 @@ test("a playing video opens with its current frame without decoding the poster",
     flight.stop();
 });
 
-test("a video without a decoded frame opens using its poster", async () => {
-    const { flight, drawFrame, image, origin, resolveDecode } = pendingFlight({
-        readyState: 1,
-        HAVE_CURRENT_DATA: 2,
-    } as HTMLVideoElement);
+test.each([1, 2])(
+    "a video displaying its poster opens using that poster at readyState %i",
+    async (readyState) => {
+        const { flight, drawFrame, image, origin, resolveDecode } =
+            pendingFlight({
+                readyState,
+                HAVE_CURRENT_DATA: 2,
+                dataset: { spaceVideoFrameVisible: "false" },
+            } as unknown as HTMLVideoElement);
 
-    expect(drawFrame).not.toHaveBeenCalled();
-    expect(image.src).toBe("data:thumbnail");
-    expect(origin.style.opacity).toBe("");
-    resolveDecode();
-    await Promise.resolve();
-    expect(origin.style.opacity).toBe("0");
-    flight.stop();
-});
+        expect(drawFrame).not.toHaveBeenCalled();
+        expect(image.src).toBe("data:thumbnail");
+        expect(origin.style.opacity).toBe("");
+        resolveDecode();
+        await Promise.resolve();
+        expect(origin.style.opacity).toBe("0");
+        flight.stop();
+    },
+);
 
 const closingFlight = (src: string | HTMLCanvasElement = "full-photo") => {
     const { flight, origin, requestFrame } = pendingFlight();
@@ -280,11 +286,12 @@ test("closing a video keeps its captured frame until it fades into the tile", ()
     const { flight, frame } = pendingFlight();
     flight.stop();
     const snapshot = viewerVideoFrame({
+        dataset: { spaceVideoFrameVisible: "true" },
         readyState: 2,
         HAVE_CURRENT_DATA: 2,
         videoWidth: 1920,
         videoHeight: 1080,
-    } as HTMLVideoElement)!;
+    } as unknown as HTMLVideoElement)!;
     expect(snapshot).toBe(frame);
 
     const { root, origin, fade, finishSpring } = closingFlight(snapshot);

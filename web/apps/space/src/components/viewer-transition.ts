@@ -35,7 +35,12 @@ interface ViewerFlightTarget {
 export const viewerVideoFrame = (
     video: HTMLVideoElement | null | undefined,
 ) => {
-    if (!video || video.readyState < video.HAVE_CURRENT_DATA) return undefined;
+    if (
+        !video ||
+        video.readyState < video.HAVE_CURRENT_DATA ||
+        video.dataset.spaceVideoFrameVisible != "true"
+    )
+        return undefined;
     const frame = document.createElement("canvas");
     frame.width = video.videoWidth;
     frame.height = video.videoHeight;

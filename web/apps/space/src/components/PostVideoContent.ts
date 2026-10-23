@@ -44,6 +44,7 @@ export const createSpaceVideoContent = (
         height: "100%",
         objectFit: inline ? "cover" : "contain",
         cursor: "pointer",
+        opacity: "0",
     });
     const button = document.createElement("button");
     button.type = "button";
@@ -135,21 +136,29 @@ export const createSpaceVideoContent = (
     let active = false;
     let autoplayBlocked = false;
     let failure: "error" | "rate-limit" | undefined;
-    let posterReady = false;
+    let posterState: "pending" | "ready" | "unavailable" = poster
+        ? "pending"
+        : "unavailable";
+    let hasPresentedFrame = false;
     let ready = false;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
     let loadingTimer: ReturnType<typeof setTimeout> | undefined;
     let playbackTimeout: ReturnType<typeof setTimeout> | undefined;
     const updatePreview = () => {
         if (disposed) return;
-        const frameReady = video.readyState >= video.HAVE_CURRENT_DATA;
-        if (poster) poster.hidden = !posterReady || frameReady;
+        const frameVisible =
+            hasPresentedFrame ||
+            (!video.poster && video.readyState >= video.HAVE_CURRENT_DATA);
+        video.style.opacity = frameVisible ? "1" : "0";
+        video.dataset.spaceVideoFrameVisible = String(frameVisible);
+        if (poster) poster.hidden = posterState != "ready" || frameVisible;
         if (
             !ready &&
-            (posterReady ||
-                frameReady ||
-                failure ||
-                (active && autoplayBlocked))
+            (posterState == "ready" ||
+                frameVisible ||
+                !errorMessage.hidden ||
+                (posterState == "unavailable" &&
+                    button.getAttribute("aria-hidden") == "false"))
         ) {
             ready = true;
             onReady?.();
@@ -157,10 +166,14 @@ export const createSpaceVideoContent = (
     };
     void poster?.decode().then(
         () => {
-            posterReady = true;
+            posterState = "ready";
             updatePreview();
         },
-        () => undefined,
+        () => {
+            posterState = "unavailable";
+            video.removeAttribute("poster");
+            updatePreview();
+        },
     );
     const hideLoading = () => {
         clearTimeout(loadingTimer);
@@ -204,6 +217,8 @@ export const createSpaceVideoContent = (
         updatePreview();
     };
     const showPlaying = () => {
+        if (video.readyState >= video.HAVE_CURRENT_DATA)
+            hasPresentedFrame = true;
         hideLoading();
         failure = undefined;
         errorMessage.hidden = true;
@@ -222,6 +237,7 @@ export const createSpaceVideoContent = (
         sourceGeneration++;
         pendingLoad = undefined;
         pause();
+        hasPresentedFrame = false;
         video.removeAttribute("src");
         video.load();
         updatePreview();
@@ -362,6 +378,11 @@ export const createSpaceVideoContent = (
     };
     video.onplaying = showPlaying;
     video.onloadeddata = updatePreview;
+    video.onseeked = () => {
+        if (video.readyState >= video.HAVE_CURRENT_DATA)
+            hasPresentedFrame = true;
+        updatePreview();
+    };
     video.onerror = () => {
         if (active) failPlayback("media");
         else reset();
@@ -382,6 +403,11 @@ export const createSpaceVideoContent = (
     return {
         element,
         video,
+        setPoster: (url: string | undefined) => {
+            if (url) video.poster = url;
+            else video.removeAttribute("poster");
+            updatePreview();
+        },
         preload,
         play,
         pause,
