@@ -31,6 +31,12 @@ If `ente` is not found, the installation directory is not on your PATH; see [Ins
 | `cannot unlock CLI vault: wrong key or damaged file`                    | `ENTE_CLI_VAULT_KEY` differs from the key used when the vault was created.                                                           |
 | `ENTE_CLI_VAULT_KEY must be standard padded base64 of exactly 32 bytes` | Use the value printed by `ente vault key generate` without edits.                                                                    |
 
+### "system vault key is invalid" with KeePassXC
+
+CLI 0.4.0 could save an unreadable key in KeePassXC. Upgrade to 0.4.1, delete the `io.ente.cli` entry for your CLI home from KeePassXC, and delete the [CLI home folder](./accounts.md#cli-home) (`~/.local/share/ente-cli` by default; use your configured path if you set `XDG_DATA_HOME` or `ENTE_CLI_HOME`). Then log in again.
+
+Your data in Ente and exported files are untouched. If you have an existing Photos export, run your usual export command with `--adopt` once to reconnect it.
+
 ## Login or creation did not finish
 
 - `login requires otp in --input`: the server wants an email code. Request one with `ente account request-otp --email alice@example.com --purpose login`, then add it to the input JSON.
