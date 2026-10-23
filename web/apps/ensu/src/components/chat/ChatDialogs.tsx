@@ -1740,7 +1740,6 @@ export const ChatDialogs = memo(
                     attributes={chatNotification}
                     autoHideDuration={null}
                     horizontal={isSmall ? "left" : "right"}
-                    vertical="bottom"
                     sx={{
                         width: "fit-content",
                         maxWidth: "min(360px, 100vw)",

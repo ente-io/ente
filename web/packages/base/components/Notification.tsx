@@ -38,7 +38,6 @@ type NotificationProps = ModalVisibilityProps & {
     attributes: NotificationAttributes | undefined;
     keepOpenOnClick?: boolean;
     horizontal?: "left" | "right";
-    vertical?: "top" | "bottom";
     autoHideDuration?: number | null;
     sx?: SxProps<Theme>;
 };
@@ -62,7 +61,6 @@ export const Notification: React.FC<NotificationProps> = ({
     open,
     onClose,
     horizontal = "right",
-    vertical = "bottom",
     autoHideDuration = 3000,
     sx,
     attributes,
@@ -161,15 +159,13 @@ export const Notification: React.FC<NotificationProps> = ({
             onClose={(_, reason) => {
                 if (reason === "timeout") onClose();
             }}
-            anchorOrigin={{ horizontal, vertical }}
+            anchorOrigin={{ horizontal, vertical: "bottom" }}
             sx={[
                 (theme) => ({
                     width: "min(340px, calc(100vw - 32px))",
                     left: horizontal === "left" ? { xs: 16, sm: 24 } : "auto",
                     right: horizontal === "right" ? { xs: 16, sm: 24 } : "auto",
-                    ...(vertical === "bottom"
-                        ? { bottom: { xs: 16, sm: 24 } }
-                        : { top: { xs: 16, sm: 24 } }),
+                    bottom: { xs: 16, sm: 24 },
                     borderRadius: "24px",
                     border: "1px solid",
                     borderColor: "rgba(0, 0, 0, 0.06)",
