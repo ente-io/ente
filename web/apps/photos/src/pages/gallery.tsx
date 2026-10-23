@@ -2606,22 +2606,13 @@ const handleSubscriptionCompletionRedirectIfNeeded = async (
                 });
                 break;
             case "requires_payment_method":
-                showMiniDialog({
-                    title: t("update_payment_method"),
-                    message: t("update_payment_method_message"),
-                    continue: {
-                        text: t("update_payment_method"),
-                        action: () => {
-                            showLoadingBar();
-                            return redirectToCustomerPortal();
-                        },
-                    },
-                });
-                break;
             case "authentication_failed":
                 showMiniDialog({
                     title: t("update_payment_method"),
-                    message: t("payment_method_authentication_failed"),
+                    message:
+                        reason == "authentication_failed"
+                            ? t("payment_method_authentication_failed")
+                            : t("update_payment_method_message"),
                     continue: {
                         text: t("update_payment_method"),
                         action: () => {
