@@ -1,6 +1,4 @@
 import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Box } from "@mui/material";
 import { Notification } from "ente-base/components/Notification";
 import { t } from "i18next";
 import React, { useEffect, useRef, useState } from "react";
@@ -59,21 +57,9 @@ export const QuickLinkCreatedNotification: React.FC<
                 color: "inherit",
                 startIcon: null,
                 title: t("link_created"),
-                endIcon: copied ? (
-                    <Box sx={{ color: "success.main", display: "flex" }}>
-                        <HugeiconsIcon
-                            icon={Tick02Icon}
-                            size={22}
-                            strokeWidth={1.8}
-                        />
-                    </Box>
-                ) : (
-                    <HugeiconsIcon
-                        icon={Copy01Icon}
-                        size={18}
-                        strokeWidth={1.8}
-                    />
-                ),
+                endIcon: copied ? Tick02Icon : Copy01Icon,
+                endIconSize: copied ? 22 : 18,
+                endIconColor: copied ? "success.main" : undefined,
                 endIconLabel: t("copy_link"),
                 onEndIconClick: handleCopy,
                 showCloseButtonWithEndIcon: true,

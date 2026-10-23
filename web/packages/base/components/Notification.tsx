@@ -34,6 +34,8 @@ export interface NotificationAttributes {
     caption?: React.ReactNode;
     onClick?: () => void;
     endIcon?: NotificationIcon;
+    endIconSize?: number;
+    endIconColor?: string;
     endIconLabel?: string;
     showCloseButtonWithEndIcon?: boolean;
     onEndIconClick?: () => void;
@@ -48,11 +50,21 @@ type NotificationProps = ModalVisibilityProps & {
     sx?: SxProps<Theme>;
 };
 
-const renderIcon = (icon: NotificationIcon | undefined, size: number) =>
+const renderIcon = (
+    icon: NotificationIcon | undefined,
+    size: number,
+    color?: string,
+) =>
     React.isValidElement(icon) || icon == null ? (
         icon
     ) : (
-        <HugeiconsIcon icon={icon} size={size} strokeWidth={1.8} />
+        <Box
+            component={HugeiconsIcon}
+            icon={icon}
+            size={size}
+            strokeWidth={1.8}
+            sx={{ color }}
+        />
     );
 
 const actionButtonSx = {
@@ -89,6 +101,8 @@ export const Notification: React.FC<NotificationProps> = ({
         title,
         caption,
         endIcon,
+        endIconSize = 22,
+        endIconColor,
         endIconLabel,
         showCloseButtonWithEndIcon,
         onClick,
@@ -253,7 +267,7 @@ export const Notification: React.FC<NotificationProps> = ({
                             }}
                             sx={buttonSx}
                         >
-                            {renderIcon(endIcon, 22)}
+                            {renderIcon(endIcon, endIconSize, endIconColor)}
                         </IconButton>
                     )}
                     {(!endIcon || showCloseButtonWithEndIcon) && (
