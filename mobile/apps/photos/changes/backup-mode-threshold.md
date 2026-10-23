@@ -1,0 +1,1 @@
+- Lowered the iOS Backup mode banner threshold from 500 to 100 pending files.
