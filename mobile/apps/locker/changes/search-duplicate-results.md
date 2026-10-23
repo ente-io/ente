@@ -1,0 +1,1 @@
+- Fixed files appearing more than once in search results when they belong to multiple matching collections.
