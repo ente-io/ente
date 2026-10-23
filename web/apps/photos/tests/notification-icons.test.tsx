@@ -1,4 +1,4 @@
-import { ReloadIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Copy01Icon, ReloadIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { ThemeProvider } from "@mui/material";
 import {
     Notification,
@@ -45,6 +45,22 @@ describe("notification icons", () => {
         expect(icons[2]).toContain('width="22"');
         for (const icon of icons) expect(icon).toContain('stroke-width="1.8"');
         expect(markup).toContain('aria-label="Retry"');
+    });
+
+    test("uses the same default size and color for copy and copied icons", () => {
+        for (const endIcon of [Copy01Icon, Tick02Icon]) {
+            const markup = renderNotification({
+                color: "inherit",
+                startIcon: null,
+                endIcon,
+            });
+            const icons = markup.match(/<svg\b[^>]*>/g) ?? [];
+            expect(icons).toHaveLength(2);
+            for (const icon of icons) expect(icon).toContain('width="22"');
+            expect(markup).not.toContain(
+                "color:var(--mui-palette-success-main)",
+            );
+        }
     });
 
     test("keeps the default leading icon and allows explicitly omitting it", () => {
