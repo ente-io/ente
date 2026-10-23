@@ -1133,7 +1133,8 @@ export const Upload: React.FC<UploadProps> = ({
             default:
                 showNotification({
                     color: "critical",
-                    title: t("generic_error_retry"),
+                    title: t("upload_reason_failed"),
+                    caption: t("generic_error_retry"),
                 });
         }
     };

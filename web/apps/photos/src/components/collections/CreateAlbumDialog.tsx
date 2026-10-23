@@ -58,7 +58,8 @@ export const CreateAlbumDialog: React.FC<CreateAlbumDialogProps> = ({
             } catch {
                 showNotification({
                     color: "critical",
-                    title: t("generic_error_retry"),
+                    title: t("error"),
+                    caption: t("generic_error_retry"),
                 });
             }
         })();

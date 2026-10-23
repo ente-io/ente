@@ -9,6 +9,7 @@ import {
 import { apiOrigin } from "ente-base/origins";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import type { PublicURL } from "ente-media/collection";
+import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -497,7 +498,8 @@ export const useCollectionShare = (): UseCollectionShareResult => {
             }
             showNotification({
                 color: "critical",
-                title:
+                title: t("download_failed"),
+                caption:
                     err instanceof Error
                         ? err.message
                         : "Failed to download file",
