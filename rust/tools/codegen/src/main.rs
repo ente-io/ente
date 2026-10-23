@@ -116,7 +116,7 @@ fn generate_native(target: NativeTarget) -> Result<(), DynError> {
 
     if matches!(target, NativeTarget::All | NativeTarget::Notifications) {
         let notifications = UniffiCrate {
-            crate_name: "notifications",
+            crate_name: "ente_notification_uniffi",
             crate_dir: rust_root.join("bindings/uniffi/notifications"),
         };
         generate_swift(

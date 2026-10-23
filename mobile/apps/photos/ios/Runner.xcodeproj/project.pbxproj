@@ -34,6 +34,7 @@
 		D3E09F452C70B1E300F01A01 /* FFmpegRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = D3E09F452C70B1E300F01A03 /* FFmpegRuntime */; };
 		DA6BE5E826B3BC8600656280 /* BuildFile in Resources */ = {isa = PBXBuildFile; };
 		074CAC9E3088DD8200DF0FD6 /* NotificationServiceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 074CAC973088DD8200DF0FD6 /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		38B442BF75FB4064D4FB816E /* Pods_NotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DED740990C035FB879F4AB2 /* Pods_NotificationServiceExtension.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -122,6 +123,9 @@
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
+		A17E00000000000000000041 /* NotificationDebug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = NotificationDebug.xcconfig; path = Flutter/NotificationDebug.xcconfig; sourceTree = "<group>"; };
+		A17E00000000000000000042 /* NotificationRelease.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = NotificationRelease.xcconfig; path = Flutter/NotificationRelease.xcconfig; sourceTree = "<group>"; };
+		A17E00000000000000000043 /* NotificationProfile.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = NotificationProfile.xcconfig; path = Flutter/NotificationProfile.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97C146FB1CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -143,6 +147,10 @@
 		DA8D6672273BBB59007651D4 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		F82DAEEB9A7D9FD00E0FFA1E /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		074CAC973088DD8200DF0FD6 /* NotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DED740990C035FB879F4AB2 /* Pods_NotificationServiceExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificationServiceExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6ED373D1AC6D19CD79AD833F /* Pods-NotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationServiceExtension.release.xcconfig"; path = "Target Support Files/Pods-NotificationServiceExtension/Pods-NotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
+		B21A56DCD06AC3D46D32CBE6 /* Pods-NotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-NotificationServiceExtension/Pods-NotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		F7200DA71C0EF4D67BAF8476 /* Pods-NotificationServiceExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationServiceExtension.profile.xcconfig"; path = "Target Support Files/Pods-NotificationServiceExtension/Pods-NotificationServiceExtension.profile.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -178,6 +186,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Generated/.gitignore,
+				ente_notification_uniffi.podspec,
 				Info.plist,
 			);
 			target = 074CAC963088DD8200DF0FD6 /* NotificationServiceExtension */;
@@ -286,6 +295,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				38B442BF75FB4064D4FB816E /* Pods_NotificationServiceExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,6 +308,9 @@
 				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,
 				9740EEB21CF90195004384FC /* Debug.xcconfig */,
 				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
+				A17E00000000000000000041 /* NotificationDebug.xcconfig */,
+				A17E00000000000000000042 /* NotificationRelease.xcconfig */,
+				A17E00000000000000000043 /* NotificationProfile.xcconfig */,
 				9740EEB31CF90195004384FC /* Generated.xcconfig */,
 			);
 			name = Flutter;
@@ -375,6 +388,9 @@
 				53DBFBDBE805FC6E13E3F31E /* Pods-ShareExtension.debug.xcconfig */,
 				C540B46EB90E9D7FDF10AC56 /* Pods-ShareExtension.release.xcconfig */,
 				AAB2B37A8A7F46DD9D1734DF /* Pods-ShareExtension.profile.xcconfig */,
+				B21A56DCD06AC3D46D32CBE6 /* Pods-NotificationServiceExtension.debug.xcconfig */,
+				6ED373D1AC6D19CD79AD833F /* Pods-NotificationServiceExtension.release.xcconfig */,
+				F7200DA71C0EF4D67BAF8476 /* Pods-NotificationServiceExtension.profile.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -387,6 +403,7 @@
 				6DACD83C2B755B0600BA9516 /* WidgetKit.framework */,
 				6DACD83E2B755B0600BA9516 /* SwiftUI.framework */,
 				D025F2F5A163F84B724D14D7 /* Pods_ShareExtension.framework */,
+				4DED740990C035FB879F4AB2 /* Pods_NotificationServiceExtension.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -511,7 +528,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 074CACA33088DD8200DF0FD6 /* Build configuration list for PBXNativeTarget "NotificationServiceExtension" */;
 			buildPhases = (
-				A17E00000000000000000030 /* Build notification crypto */,
+				E7BD861B2DAA578D401B7082 /* [CP] Check Pods Manifest.lock */,
 				074CAC933088DD8200DF0FD6 /* Sources */,
 				074CAC943088DD8200DF0FD6 /* Frameworks */,
 				074CAC953088DD8200DF0FD6 /* Resources */,
@@ -919,17 +936,27 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A17E00000000000000000030 /* Build notification crypto */ = {
+		E7BD861B2DAA578D401B7082 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
-			files = ();
-			inputPaths = ();
-			name = "Build notification crypto";
-			outputPaths = ("$(TARGET_TEMP_DIR)/notification_rust/libnotifications.a", );
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-NotificationServiceExtension-checkManifestLockResult.txt",
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/bash \"$SRCROOT/../scripts/build-notification-rust.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1844,7 +1871,7 @@
 		};
 		074CAC9F3088DD8200DF0FD6 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			baseConfigurationReference = A17E00000000000000000041 /* NotificationDebug.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = NotificationServiceExtension/NotificationServiceExtension.entitlements;
@@ -1859,12 +1886,12 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libnotifications.a", "-framework", Security, );
+				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security, );
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug.NotificationServiceExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/NotificationServiceExtension/Generated/notificationsFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/NotificationServiceExtension/Generated/ente_notification_uniffiFFI.modulemap";
 				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/NotificationServiceExtension/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1873,7 +1900,7 @@
 		};
 		074CACA03088DD8200DF0FD6 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			baseConfigurationReference = A17E00000000000000000042 /* NotificationRelease.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = NotificationServiceExtension/NotificationServiceExtension.entitlements;
@@ -1888,12 +1915,12 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libnotifications.a", "-framework", Security, );
+				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security, );
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.NotificationServiceExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(NOTIFICATION_SERVICE_EXTENSION_APP_STORE_PROFILE_SPECIFIER)";
 				SKIP_INSTALL = YES;
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/NotificationServiceExtension/Generated/notificationsFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/NotificationServiceExtension/Generated/ente_notification_uniffiFFI.modulemap";
 				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/NotificationServiceExtension/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1902,7 +1929,7 @@
 		};
 		074CACA13088DD8200DF0FD6 /* Profile */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			baseConfigurationReference = A17E00000000000000000043 /* NotificationProfile.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = NotificationServiceExtension/NotificationServiceExtension.entitlements;
@@ -1917,11 +1944,11 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libnotifications.a", "-framework", Security, );
+				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security, );
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.NotificationServiceExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/NotificationServiceExtension/Generated/notificationsFFI.modulemap";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/NotificationServiceExtension/Generated/ente_notification_uniffiFFI.modulemap";
 				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/NotificationServiceExtension/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

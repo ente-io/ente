@@ -1,4 +1,4 @@
-uniffi::setup_scaffolding!("notifications");
+uniffi::setup_scaffolding!("ente_notification_uniffi");
 
 use ente_core::crypto::hpke;
 
