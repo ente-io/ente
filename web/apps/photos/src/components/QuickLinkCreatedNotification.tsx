@@ -58,8 +58,6 @@ export const QuickLinkCreatedNotification: React.FC<
                 startIcon: null,
                 title: t("link_created"),
                 endIcon: copied ? Tick02Icon : Copy01Icon,
-                endIconSize: copied ? 22 : 18,
-                endIconColor: copied ? "success.main" : undefined,
                 endIconLabel: t("copy_link"),
                 onEndIconClick: handleCopy,
                 showCloseButtonWithEndIcon: true,

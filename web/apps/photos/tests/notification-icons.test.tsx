@@ -41,27 +41,21 @@ describe("notification icons", () => {
         expect(markup).toContain('aria-label="Retry"');
     });
 
-    test("supports a smaller copy icon without changing the close icon", () => {
-        const markup = renderNotification({
-            startIcon: null,
-            endIcon: Copy01Icon,
-            endIconSize: 18,
-            showCloseButtonWithEndIcon: true,
-        });
-        const icons = markup.match(/<svg\b[^>]*>/g) ?? [];
-        expect(icons).toHaveLength(2);
-        expect(icons[0]).toContain('width="18"');
-        expect(icons[1]).toContain('width="22"');
-    });
-
-    test("resolves the copied icon color through the theme", () => {
-        const markup = renderNotification({
-            startIcon: null,
-            endIcon: Tick02Icon,
-            endIconColor: "success.main",
-        });
-        expect(markup).toContain("color:var(--mui-palette-success-main)");
-        expect(markup.match(/<svg\b[^>]*>/g)?.[0]).toContain('width="22"');
+    test("uses the same default size and color for copy and copied icons", () => {
+        for (const endIcon of [Copy01Icon, Tick02Icon]) {
+            const markup = renderNotification({
+                color: "inherit",
+                startIcon: null,
+                endIcon,
+                showCloseButtonWithEndIcon: true,
+            });
+            const icons = markup.match(/<svg\b[^>]*>/g) ?? [];
+            expect(icons).toHaveLength(2);
+            for (const icon of icons) expect(icon).toContain('width="22"');
+            expect(markup).not.toContain(
+                "color:var(--mui-palette-success-main)",
+            );
+        }
     });
 
     test("preserves custom icon elements and their sizing", () => {
