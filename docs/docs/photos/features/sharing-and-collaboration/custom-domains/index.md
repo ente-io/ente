@@ -72,24 +72,24 @@ Note that orange proxy option is off. And here is how it would look for Namechea
 
 > [!NOTE]
 >
-> The examples are using "pics" as the subdomain, but that's just an example, you can use anything you like (or use "@" if you'd like to use the root domain itself).
+> The examples use `pics`, but you can choose any subdomain, or `@` for the root domain itself. If your provider rejects a CNAME on `@`, see [Using your root domain](#using-your-root-domain).
 
 The time it takes for DNS records to update is dependent on your DNS provider. Usually the changes should start reflecting within a few minutes, and should almost always reflect within an hour.
 
 Once the DNS changes have been applied, then you can take any public link to your shared albums, replace `albums.ente.com` with your choice (e.g. `pics.example.org`), and the link will still work.
 
-You don't need to do this manually though, the apps will do it for you. More on this in the next section. But first, some troubleshooting tips.
+You don't need to do this manually though, the apps will do it for you.
 
 ### Using your root domain
 
 Some DNS providers don't allow a CNAME record on a root domain, such as `example.org`. If adding a CNAME for `@` fails with an error like "Conflicts with pre-existing RRset", use one of these options instead:
 
-- **Use a subdomain.** Link a subdomain, such as `pics.example.org`, in Ente and add a CNAME for it. This works with every DNS provider.
-- **Use an ALIAS record.** If your provider supports ALIAS (sometimes called ANAME or CNAME flattening), add an ALIAS record for `@` pointing to `my.ente.com`.
+- **Use a subdomain.** Link a subdomain, such as `pics.example.org`, in Ente and add a CNAME for it.
+- **Use an ALIAS record.** If your provider supports ALIAS or ANAME records pointing to external hostnames, add one for `@` pointing to `my.ente.com`.
 
 Don't use an A record with Ente's IP addresses. These addresses can change, and your domain would then stop working.
 
-Some providers can't use ALIAS records together with DNSSEC, and ask you to turn DNSSEC off first. Turning it off is safe for an album domain: Ente serves your albums over HTTPS, so visitors would see a certificate warning rather than a fake site. If you'd rather keep DNSSEC on, use a subdomain with a CNAME instead.
+Some providers can't combine ALIAS records with DNSSEC. If yours is one of them, use a subdomain with a CNAME instead.
 
 ### Troubleshooting
 
@@ -111,7 +111,7 @@ To stop using your custom domain, we need to undo the two steps we did during se
 
 1. Unlink your domain in Ente. This can be done just by going to Settings > Preferences > Custom Domains, clearing the value in the "Domain" input and pressing "Update".
 
-2. Remove the CNAME record you added during setup in your DNS provider.
+2. Remove the DNS record you added during setup in your DNS provider.
 
 ## Implementation
 
