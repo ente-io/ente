@@ -386,11 +386,17 @@ class GalleryState extends State<Gallery> {
 
   void _updateGalleryGroups({bool callSetState = true}) {
     if (groupHeaderExtent == null) return;
+    final widthAvailable = MediaQuery.sizeOf(context).width;
+    // View metrics can be zero during background startup. Skip invalid layouts
+    // without replacing an already displayed gallery.
+    if (!widthAvailable.isFinite || widthAvailable <= 0) {
+      return;
+    }
     final groups = GalleryGroups(
       allFiles: _allGalleryFiles,
       groupType: _groupType,
       sortOrderAsc: _sortOrderAsc,
-      widthAvailable: MediaQuery.sizeOf(context).width,
+      widthAvailable: widthAvailable,
       selectedFiles: widget.selectedFiles,
       tagPrefix: widget.tagPrefix,
       groupHeaderExtent: groupHeaderExtent!,
@@ -1061,7 +1067,7 @@ class GalleryState extends State<Gallery> {
           disableSelection: widget.disableSelection,
           type: _groupType,
           galleryType: widget.galleryType,
-          child: _allGalleryFiles.isEmpty
+          child: groups.allFiles.isEmpty
               ? _GalleryAppBarScrollBody(
                   appBar: widget.appBar,
                   physics: _scrollPhysics,
