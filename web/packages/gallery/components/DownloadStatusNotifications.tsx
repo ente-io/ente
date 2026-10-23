@@ -107,9 +107,6 @@ export const DownloadStatusNotifications: React.FC<
                 const hasErrors = isSaveCompleteWithErrors(group);
                 const isComplete = isSaveComplete(group);
                 const canRetry = hasErrors && !!group.retry;
-                const shouldAutoClose =
-                    group.total === 1 && isComplete && !hasErrors;
-
                 const isZipDownload = !group.downloadDirPath && group.total > 1;
                 const shouldShowZipPart =
                     isZipDownload &&
@@ -220,7 +217,7 @@ export const DownloadStatusNotifications: React.FC<
                         })}
                         open={true}
                         onClose={createOnClose(group)}
-                        autoHideDuration={shouldAutoClose ? undefined : null}
+                        autoHideDuration={null}
                         keepOpenOnClick
                         attributes={{
                             color: hasErrors ? "critical" : "secondary",
