@@ -30,6 +30,7 @@ jobs:
         env:
             TARGET: ${{ matrix.target }}
             SUFFIX: ${{ matrix.suffix }}
+            CFLAGS_aarch64_unknown_linux_musl: -mno-outline-atomics
         outputs:
             version: ${{ steps.build.outputs.version }}
         steps:
@@ -50,6 +51,7 @@ jobs:
                   features=()
                   binary=ente
                   if [[ "$RUNNER_OS" = Windows ]]; then
+                      export OPENSSL_SRC_PERL="C:/Strawberry/perl/bin/perl.exe"
                       target_env=$(printf '%s' "$TARGET" | tr '[:lower:]-' '[:upper:]_')
                       export "CARGO_TARGET_${target_env}_RUSTFLAGS=-C target-feature=+crt-static"
                       binary=ente.exe
