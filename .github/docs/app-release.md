@@ -2,6 +2,8 @@
 
 Photos, Auth, Locker, Ensu, Cast, and Photos desktop use the same release process, as described here.
 
+Only primary maintainers can run `app-release.yml`.
+
 > For simplicity, the following assumes we're trying to release Ensu, that main is `0.1.16-beta`, we want to release `0.1.16` and move main to `0.1.17-beta`.
 >
 > To do the same steps for another app, say "auth", you can just mechanically replace "ensu" with that "auth" in the steps.
@@ -46,14 +48,28 @@ The workflow also opens a PR to move `main` to `0.1.17-beta`. Merge that PR afte
 
 ## Update the RC if needed
 
-Cherry pick fixes to the release branch and push to replace the current RC. For release branches the build number does not auto increment and needs to be manually incremented.
+Run the update action with the full SHA of the fix to cherry-pick a commit into the release branch and create a new RC build.
+
+The commit must already be on `main`.
 
 ```sh
-git switch release/ensu-v0.1.16
-git cherry-pick <fix-sha>
-node .github/scripts/app-version.mjs ensu bump-build-and-commit
-git push
+gh workflow run app-release.yml \
+  -f action=update \
+  -f app=ensu \
+  -f version=0.1.16 \
+  -f commit="<fix-sha>"
 ```
+
+Conflicts stop the workflow before pushing.
+
+> To do this manually:
+>
+> ```sh
+> git switch release/ensu-v0.1.16
+> git cherry-pick <fix-sha>
+> node .github/scripts/app-version.mjs ensu bump-build-and-commit
+> git push
+> ```
 
 ## Promote release
 
