@@ -108,8 +108,8 @@ exec "$HOME/.local/opt/ente-cli/bin/ente" auth export "$HOME/Backups/Auth" --acc
 ## Make an API request
 
 ```sh
-ente photos api /collections/v2 --query sinceTime=0 --account personal
-ente auth api /authenticator/key --account personal
+ente photos api /collections/v2 --query sinceTime=0
+ente auth api /authenticator/key
 ```
 
 The CLI adds your token and sends the request to the account's server. The response body is written unchanged; a response status outside 2xx exits with status 1 after the body. `--body PATH` and `--headers PATH` read a request body or a JSON object of headers from a file, or from stdin with `-`.

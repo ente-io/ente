@@ -35,11 +35,7 @@ You can install Ente Photos on your desktop by downloading the installer from [o
 
 ### How do I install CLI for Ente Photos? {#install-cli}
 
-Ente's CLI is distributed directly over [GitHub](https://github.com/ente/ente/releases?q=tag%3Acli-v0). The CLI is useful for:
-
-- Automated exports to NAS or local storage
-- Bulk operations
-- Server-to-server transfers
+Follow [Install Ente CLI](/cli/install) to download and set up the CLI on Linux, macOS or Windows. Use it to export your library to a local disk or NAS, choose albums, and download individual files.
 
 ### Can I access Ente Photos from my browser? {#web-app}
 

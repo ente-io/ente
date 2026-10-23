@@ -5,6 +5,8 @@ description: Guide to configuring Ente CLI for Self Hosted Instance
 
 # Ente CLI for self-hosted instance
 
+This page covers the previous CLI. For the current CLI, see [Administration](/cli/admin). To switch versions, follow [Migration](/cli/migration).
+
 If you are self-hosting, you can configure Ente CLI to export data & perform basic administrative actions.
 
 > [!TIP]
@@ -58,7 +60,7 @@ You can use `ente admin update-subscription` to increase storage quota and accou
 For infinite storage and validity, use the following command:
 
 ```sh
-ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --no-limit
+ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --no-limit True
 
 # Set a limit
 ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --no-limit False

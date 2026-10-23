@@ -3,9 +3,11 @@
 Make an encrypted backup of your codes:
 
 ```sh
-ente account login --account personal --app auth
-ente auth export "$HOME/Backups/Auth" --account personal
+ente account login --app auth
+ente auth export "$HOME/Backups/Auth"
 ```
+
+> Login uses the selected account. Add `--account NAME` to choose another saved account or add one under a new name.
 
 The CLI asks for an export password and its confirmation, refreshes your codes from the server, and prints:
 
@@ -30,7 +32,7 @@ Prints `Decrypted to codes.txt.` The output is one `otpauth://` link per line. N
 ## Show a current code
 
 ```sh
-ente auth code view github --account personal
+ente auth code view github
 ```
 
 ```
@@ -48,8 +50,8 @@ Add `--offline` to `code list`, `code view` or `export` to use the codes synced 
 ## Export plaintext or stream to stdout
 
 ```sh
-ente auth export "$HOME/Backups/Auth" --plaintext --account personal
-ente auth export --output - --account personal > backup.json
+ente auth export "$HOME/Backups/Auth" --plaintext
+ente auth export --output - > backup.json
 ```
 
 `--plaintext` writes unencrypted `otpauth://` links to a dated `.txt` file. `--output PATH` writes to that exact file and refuses to overwrite it; `--output -` writes the backup to stdout with no summary.
