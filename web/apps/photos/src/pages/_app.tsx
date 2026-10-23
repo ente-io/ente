@@ -179,12 +179,7 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
 
             <ThemedLoadingBar ref={loadingBarRef} />
             <AttributedMiniDialog {...miniDialogProps} appearance="centered" />
-            <Notification
-                {...notificationProps}
-                autoHideDuration={
-                    notificationProps.attributes?.onClick ? null : undefined
-                }
-            />
+            <Notification {...notificationProps} />
 
             {isDesktop && (
                 <WindowTitlebar {...{ isFileViewerOpen }}>

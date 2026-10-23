@@ -61,7 +61,7 @@ export const Notification: React.FC<NotificationProps> = ({
     open,
     onClose,
     horizontal = "right",
-    autoHideDuration = 3000,
+    autoHideDuration,
     sx,
     attributes,
     keepOpenOnClick,
@@ -79,6 +79,12 @@ export const Notification: React.FC<NotificationProps> = ({
         onClick,
         onEndIconClick,
     } = attributes;
+    const resolvedAutoHideDuration =
+        autoHideDuration === undefined
+            ? onClick
+                ? null
+                : 3000
+            : autoHideDuration;
     const neutral = !color || color === "inherit";
     const buttonSx = {
         ...actionButtonSx,
@@ -157,7 +163,7 @@ export const Notification: React.FC<NotificationProps> = ({
     return (
         <Snackbar
             open={open}
-            autoHideDuration={autoHideDuration}
+            autoHideDuration={resolvedAutoHideDuration}
             onClose={(_, reason) => {
                 if (reason === "timeout") onClose();
             }}
