@@ -34,6 +34,17 @@ class DevicePickerSelectedFiles extends SelectedFiles {
   }
 
   @override
+  void toggleGroupSelection(Set<EnteFile> filesToToggle) {
+    if (locked) return;
+    if (files.length == maxPickAssetLimit &&
+        filesToToggle.any(isFileSelected)) {
+      unSelectAll(filesToToggle);
+    } else {
+      super.toggleGroupSelection(filesToToggle);
+    }
+  }
+
+  @override
   void selectAll(Set<EnteFile> filesToSelect) {
     if (locked) return;
     final remaining = maxPickAssetLimit - files.length;
