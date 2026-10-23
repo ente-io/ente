@@ -17,7 +17,9 @@ If you are self-hosting, you can configure Ente CLI to export data & perform bas
 
 To do this, first configure the CLI to use your server's endpoint.
 
-Define `config.yaml` and place it in `~/.ente/` or directory specified by `ENTE_CLI_CONFIG_DIR` or directory where Ente CLI is present.
+Define `config.yaml` and place it in `~/.ente/` or the directory specified by `ENTE_CLI_CONFIG_DIR`.
+
+`ENTE_CLI_CONFIG_DIR` selects both configuration and saved accounts; `ENTE_CLI_CONFIG_PATH` is the legacy fallback. Use the existing account directory, e.g. `ENTE_CLI_CONFIG_DIR=/path/to/existing-cli-directory ente export`. Network commands stop if a separate working-directory config exists. If it contains your intended Ente settings, migrate them into that existing directory and remove or rename the old file; otherwise run from another directory. Local account commands remain available. Invalid trusted configuration must be corrected first.
 
 ```yaml
 # Set the API endpoint to your domain where Museum is being served.

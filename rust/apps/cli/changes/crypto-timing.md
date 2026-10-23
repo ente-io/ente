@@ -1,0 +1,1 @@
+- Update a cryptographic dependency to fix a timing side-channel vulnerability.

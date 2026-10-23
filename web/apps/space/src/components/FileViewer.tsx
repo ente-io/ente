@@ -675,6 +675,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         ? Fade
         : SpaceBottomSheetTransition;
     const viewerRootRef = React.useRef<HTMLDivElement | null>(null);
+    const pageScrollRef = React.useRef({ left: 0, top: 0 });
     const viewerHeaderRef = React.useRef<HTMLDivElement>(null);
     const stableViewportSizeRef = React.useRef<ViewerViewportSize>(
         currentViewerViewportSize(null),
@@ -822,6 +823,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             );
             src = element.currentSrc || element.src;
         }
+        window.scrollTo({ ...pageScrollRef.current, behavior: "instant" });
         const origin =
             item && !isDraftPost && !item.video
                 ? findViewerOrigin(viewerOriginKey(item.spaceId, item.postId))
@@ -1216,6 +1218,17 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
         setIsCaptionEditing(false);
         setIsCaptionDialogOpen(false);
     }, [activePostKey]);
+
+    React.useLayoutEffect(() => {
+        if (typeof document == "undefined") return;
+
+        pageScrollRef.current = { left: window.scrollX, top: window.scrollY };
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, []);
 
     React.useLayoutEffect(() => {
         setReplyText(replyDraftsRef.current.get(activeReplyKey) ?? "");
@@ -1779,16 +1792,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             root.style.removeProperty("--space-viewer-bg-opacity");
         };
     }, [headerHeight, isDraftPost, viewerViewportSize]);
-
-    React.useEffect(() => {
-        if (typeof document == "undefined") return;
-
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = previousOverflow;
-        };
-    }, []);
 
     React.useEffect(() => {
         const closeOnEscape = (event: KeyboardEvent) => {

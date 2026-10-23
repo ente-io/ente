@@ -30,6 +30,7 @@ jobs:
         env:
             TARGET: ${{ matrix.target }}
             SUFFIX: ${{ matrix.suffix }}
+            CFLAGS_aarch64_unknown_linux_musl: -mno-outline-atomics
         outputs:
             version: ${{ steps.build.outputs.version }}
         steps:
@@ -50,12 +51,13 @@ jobs:
                   features=()
                   binary=ente
                   if [[ "$RUNNER_OS" = Windows ]]; then
+                      export OPENSSL_SRC_PERL="C:/Strawberry/perl/bin/perl.exe"
                       target_env=$(printf '%s' "$TARGET" | tr '[:lower:]-' '[:upper:]_')
                       export "CARGO_TARGET_${target_env}_RUSTFLAGS=-C target-feature=+crt-static"
                       binary=ente.exe
                   fi
                   if [[ "$RUNNER_OS" = Linux ]]; then features=(--features rusqlite/bundled-sqlcipher-vendored-openssl,keyring/vendored); fi
-                  version=$(cargo metadata --locked --no-deps --format-version 1 | jq -rj '.packages[] | select(.name == "ente-cli") | .version')
+                  version=$(node ../.github/scripts/cli-version.mjs get)
                   cargo build --locked --release -p ente-cli --bin ente --target "$TARGET" "${features[@]}"
                   cd "target/$TARGET/release"
                   [[ "$(./"$binary" --version)" = "ente $version" ]]
@@ -103,6 +105,7 @@ jobs:
                   private-key: ${{ secrets.ENTE_CI_GH_APP_PRIVATE_KEY }}
                   repositories: ente
                   permission-contents: write
+                  permission-pull-requests: write
             - name: Publish release
               env:
                   GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -117,3 +120,22 @@ jobs:
                   cd assets
                   sha256sum *.tar.gz *.zip > SHA256SUMS
                   gh release create "$tag" --target "$GITHUB_SHA" --title "Ente CLI $VERSION" --notes-file "$RUNNER_TEMP/release-notes.md" --latest=false *
+            - name: Open release follow-up PR
+              env:
+                  GH_TOKEN: ${{ steps.app-token.outputs.token }}
+                  APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+                  RELEASE_BODY: ${{ steps.notes.outputs.release_body }}
+              run: |
+                  IFS=. read -r major minor patch <<< "$VERSION"
+                  next_version="$major.$minor.$((patch + 1))"
+                  branch="ente-cli-v$next_version"
+                  git switch -c "$branch"
+                  node .github/scripts/cli-version.mjs set "$next_version"
+                  node .github/scripts/sync-help-changelog.mjs cli "$VERSION"
+                  find rust/apps/cli/changes -maxdepth 1 -type f -name '*.md' ! -name README.md -delete
+                  bot_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+                  git config user.name "${APP_SLUG}[bot]"
+                  git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+                  git commit -am "Start Ente CLI $next_version"
+                  git -c http.https://github.com/.extraheader= push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$branch"
+                  gh pr create --base main --head "$branch" --title "[rust] Start Ente CLI $next_version" --body ""
