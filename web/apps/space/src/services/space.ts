@@ -137,6 +137,7 @@ export interface PublicSpaceLinkSession {
 
 export type SpacePostAssetURLLoader = (
     asset: SpacePostAsset,
+    signal?: AbortSignal,
 ) => Promise<string>;
 
 export type SpacePostAvatarURLLoader = (
@@ -414,11 +415,13 @@ const accountPostAssetURLFromAsset = (
     ctx: SpaceAccountCtxHandle,
     asset: SpacePostAsset,
     viewerSpaceId?: string,
+    signal?: AbortSignal,
 ) =>
     cachedSpaceMediaBlobURL(
         postAssetCacheKey(asset),
-        () => ctx.downloadPostAsset(asset, viewerSpaceId ?? null),
+        (signal) => ctx.downloadPostAsset(asset, viewerSpaceId ?? null, signal),
         asset.mediaType,
+        signal,
     );
 
 const accountPostAssetURL = (
@@ -586,11 +589,12 @@ export const openPublicSpaceLink = async (
         const profile = profileFromSpaceProfile(response);
         return {
             close: () => ctx.free(),
-            loadPostImage: (asset) =>
+            loadPostImage: (asset, signal) =>
                 cachedSpaceMediaBlobURL(
                     postAssetCacheKey(asset),
-                    () => ctx.downloadPostAsset(asset),
+                    (signal) => ctx.downloadPostAsset(asset, signal),
                     asset.mediaType,
+                    signal,
                 ),
             loadProfileMedia: async () => {
                 const [avatarUrl, coverUrl] = await Promise.all([
@@ -1166,17 +1170,24 @@ export const loadCurrentSpacePost = async (
 
 export const loadCurrentSpacePostAssetURL: SpacePostAssetURLLoader = async (
     asset,
+    signal,
 ) => {
     const cachedURL = await cachedSpaceMediaBlobURLIfPresent(
         postAssetCacheKey(asset),
         asset.mediaType,
+        signal,
     );
     if (cachedURL) return cachedURL;
 
     const profile = await loadExistingSpaceProfile();
     const ctx = await ensureCurrentSpaceContext();
     try {
-        return await accountPostAssetURLFromAsset(ctx, asset, profile?.spaceId);
+        return await accountPostAssetURLFromAsset(
+            ctx,
+            asset,
+            profile?.spaceId,
+            signal,
+        );
     } finally {
         releaseCurrentSpaceContext(ctx);
     }

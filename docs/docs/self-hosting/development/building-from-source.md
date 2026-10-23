@@ -42,7 +42,7 @@ Then the toolchains:
 | -------- | ---------------------------------------------------- | -------------------- |
 | Rust     | [rustup](https://www.rust-lang.org/tools/install)    | `rust/`, web, mobile |
 | Node     | `brew install node`                                  | web, desktop, docs   |
-| Go       | `brew install go`                                    | server, CLI          |
+| Go       | `brew install go`                                    | server, previous CLI |
 | Flutter  | [Docs](https://flutter.dev/docs/get-started/install) | mobile               |
 
 Node and Go are one `brew` command each:

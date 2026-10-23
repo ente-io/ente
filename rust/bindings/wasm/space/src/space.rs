@@ -984,12 +984,10 @@ impl SpaceLinkCtxHandle {
     pub async fn download_post_asset(
         &self,
         asset: <PostAsset as Tsify>::JsType,
-    ) -> Result<Vec<u8>, Error> {
-        let asset = PostAsset::from_js(asset)?;
-        self.inner
-            .download_post_asset(&asset.into())
-            .await
-            .map_err(Into::into)
+        signal: Option<AbortSignal>,
+    ) -> Result<Vec<u8>, JsValue> {
+        let asset = PostAsset::from_js(asset).map_err(Error::from)?;
+        with_abort_signal(self.inner.download_post_asset(&asset.into()), signal).await
     }
 
     #[wasm_bindgen(js_name = downloadAvatar)]
@@ -1397,12 +1395,15 @@ impl SpaceAccountCtxHandle {
         &self,
         asset: <PostAsset as Tsify>::JsType,
         viewer_space_id: Option<String>,
-    ) -> Result<Vec<u8>, Error> {
-        let asset = PostAsset::from_js(asset)?;
-        self.inner
-            .download_post_asset(&asset.into(), viewer_space_id.as_deref())
-            .await
-            .map_err(Into::into)
+        signal: Option<AbortSignal>,
+    ) -> Result<Vec<u8>, JsValue> {
+        let asset = PostAsset::from_js(asset).map_err(Error::from)?;
+        with_abort_signal(
+            self.inner
+                .download_post_asset(&asset.into(), viewer_space_id.as_deref()),
+            signal,
+        )
+        .await
     }
 
     #[wasm_bindgen(js_name = downloadSpaceAvatar)]

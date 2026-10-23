@@ -58,7 +58,8 @@ export const CreateAlbumDialog: React.FC<CreateAlbumDialogProps> = ({
             } catch {
                 showNotification({
                     color: "critical",
-                    title: t("generic_error_retry"),
+                    title: t("error"),
+                    caption: t("generic_error_retry"),
                 });
             }
         })();
@@ -68,7 +69,6 @@ export const CreateAlbumDialog: React.FC<CreateAlbumDialogProps> = ({
         <>
             <SingleInputDialog
                 {...{ open, onClose }}
-                variant="v2"
                 title={t("new_album")}
                 label={t("album_name")}
                 submitButtonTitle={t("create")}

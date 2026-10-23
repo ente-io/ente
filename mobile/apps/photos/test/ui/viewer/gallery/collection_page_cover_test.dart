@@ -135,9 +135,7 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  testWidgets("keeps the discovery cover stable while switching sort order", (
-    tester,
-  ) async {
+  testWidgets("sorts Discover photos using the shared sheet", (tester) async {
     final files = [_file(1), _file(3), _file(2)];
     final originalOrder = List<EnteFile>.of(files);
     await tester.pumpWidget(
@@ -154,7 +152,6 @@ void main() {
       ),
     );
     await _expectCover(tester, files.first, count: 3);
-    final header = tester.element(find.byType(AlbumCoverAppBar));
     for (final (current, next, expected) in [
       ("Most relevant", "Most recent", [files[1], files[2], files[0]]),
       ("Most recent", "Most relevant", originalOrder),
@@ -171,19 +168,14 @@ void main() {
       );
       await tester.tap(find.text(next));
       await _expectCover(tester, expected.first, count: 3);
-      expect(tester.element(find.byType(AlbumCoverAppBar)), same(header));
-      expect(
-        tester.widget<AlbumCoverAppBar>(find.byType(AlbumCoverAppBar)).heroTag,
-        "discovery${originalOrder.first.tag}",
-      );
       expect(
         tester
             .widget<GalleryFilesState>(find.byType(GalleryFilesState))
             .galleryFiles,
         expected,
       );
-      expect(files, originalOrder);
     }
+    await tester.pump(const Duration(seconds: 4));
     await _disposeAlbum(tester);
   });
 

@@ -192,7 +192,6 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                 placeholder={t("enter_name")}
                 autoComplete="name"
                 initialValue={name}
-                submitButtonColor="primary"
                 submitButtonTitle={t("rename")}
                 onSubmit={handleRename}
             />
@@ -415,7 +414,6 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 label={t("add_name")}
                 placeholder={t("enter_name")}
                 autoComplete="name"
-                submitButtonColor="primary"
                 submitButtonTitle={t("add")}
                 onSubmit={handleAddPersonWithName}
             />

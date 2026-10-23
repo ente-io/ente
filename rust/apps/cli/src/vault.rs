@@ -260,7 +260,9 @@ fn lock(home: &Path) -> Result<File> {
 
 fn environment_key() -> Result<Option<Key>> {
     match env::var("ENTE_CLI_VAULT_KEY") {
-        Ok(value) => decode_key(&Zeroizing::new(value)).map(Some),
+        Ok(value) => decode_key(&Zeroizing::new(value))
+            .context("ENTE_CLI_VAULT_KEY must be standard padded base64 of exactly 32 bytes")
+            .map(Some),
         Err(env::VarError::NotPresent) => Ok(None),
         Err(env::VarError::NotUnicode(_)) => {
             bail!("ENTE_CLI_VAULT_KEY must be standard padded base64 of exactly 32 bytes")
@@ -269,10 +271,8 @@ fn environment_key() -> Result<Option<Key>> {
 }
 
 fn decode_key(value: &str) -> Result<Key> {
-    let bytes = Zeroizing::new(b64::decode(value).map_err(|_| {
-        anyhow::anyhow!("ENTE_CLI_VAULT_KEY must be standard padded base64 of exactly 32 bytes")
-    })?);
-    Key::try_from_slice(&bytes).context("ENTE_CLI_VAULT_KEY must decode to exactly 32 bytes")
+    let bytes = Zeroizing::new(b64::decode(value)?);
+    Ok(Key::try_from_slice(&bytes)?)
 }
 
 fn load_key(
@@ -285,12 +285,23 @@ fn load_key(
     }
     let entry = entry().map_err(|error| keyring_error(error, exists))?;
     match entry.get_secret() {
-        Ok(bytes) => Key::try_from_slice(&Zeroizing::new(bytes))
-            .context("system vault key is invalid; restore the original key"),
+        Ok(bytes) => {
+            let bytes = Zeroizing::new(bytes);
+            if bytes.len() == Key::BYTES {
+                Key::try_from_slice(&bytes).map_err(Into::into)
+            } else {
+                std::str::from_utf8(&bytes)
+                    .map_err(anyhow::Error::from)
+                    .and_then(decode_key)
+            }
+            .context(
+                "system vault key is invalid; reset the saved key and CLI home, then log in again",
+            )
+        }
         Err(keyring::Error::NoEntry) if !exists => {
             let key = Key::generate();
             entry
-                .set_secret(key.as_bytes())
+                .set_secret(Zeroizing::new(b64::encode(key.as_bytes())).as_bytes())
                 .map_err(|error| keyring_error(error, false))?;
             Ok(key)
         }
@@ -362,11 +373,16 @@ mod tests {
                 expected
             );
 
-            let entry = keyring::Entry::new_with_credential(Box::new(
-                keyring::mock::MockCredential::default(),
-            ));
-            entry.set_secret(expected.as_bytes()).unwrap();
-            assert_eq!(load_key(None, exists, || Ok(entry)).unwrap(), expected);
+            for stored in [
+                expected.as_bytes().to_vec(),
+                b64::encode(expected.as_bytes()).into_bytes(),
+            ] {
+                let entry = keyring::Entry::new_with_credential(Box::new(
+                    keyring::mock::MockCredential::default(),
+                ));
+                entry.set_secret(&stored).unwrap();
+                assert_eq!(load_key(None, exists, || Ok(entry)).unwrap(), expected);
+            }
         }
         let entry = || {
             Ok(keyring::Entry::new_with_credential(Box::new(

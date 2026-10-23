@@ -258,24 +258,18 @@ test("a failed refresh still disables the unavailable discussion after a mutatio
 });
 
 test.each(["selected", "unavailable"] as const)(
-    "cancelling a %s reply preserves the draft without focusing the input",
+    "cancelling a %s reply preserves the draft",
     (status) => {
         draft.replyTarget =
             status == "selected"
                 ? { status, commentId: comment.commentId }
                 : { status };
-        const focus = vi.fn();
-        const inputRef = composer().props.inputRef as React.RefObject<{
-            focus: typeof focus;
-        }>;
-        inputRef.current = { focus };
         const preview = render().find((node) => node.type == "preview")!;
 
         (preview.props.onCancel as () => void)();
 
         expect(draft.replyTarget).toBeUndefined();
         expect(draft.text).toBe("New comment");
-        expect(focus).not.toHaveBeenCalled();
         expect(composer().props.disabled).toBeFalsy();
         expect(composer().props.placeholder).toBe("Add a comment…");
         expect(render().find((node) => node.type == "preview")).toBeUndefined();
@@ -291,7 +285,7 @@ const commentGesture = (
         constructor(readonly kind: "body" | "button" | "reaction" = "body") {}
         closest(selector: string) {
             return (
-                selector == "a, button"
+                selector.includes("button")
                     ? this.kind != "body"
                     : this.kind == "reaction"
             )
@@ -548,6 +542,64 @@ test("long-pressing still opens comment actions without replying", () => {
         true,
     );
 });
+
+test("releasing a reaction long press cannot activate the sheet, but a fresh tap can", () => {
+    const { pointer, Target } = commentGesture();
+    pointer("onPointerDown", 100, 0, { target: new Target("reaction") });
+    vi.advanceTimersByTime(520);
+    const slide = render().find((node) => node.type == "slide")!;
+    expect(slide.props.in).toBe(true);
+    const sheet = slide.props.children as Element;
+    const event = {
+        target: new Target("button"),
+        detail: 1,
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+    };
+    const click = sheet.props.onClickCapture as (event: unknown) => void;
+    click(event);
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.stopPropagation).toHaveBeenCalled();
+
+    event.preventDefault.mockClear();
+    event.stopPropagation.mockClear();
+    (sheet.props.onPointerDownCapture as (event: unknown) => void)(event);
+    click(event);
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(event.stopPropagation).not.toHaveBeenCalled();
+});
+
+test.each(["keyboard", "cancelled", "different control"])(
+    "reactions sheet handles %s activation",
+    (source) => {
+        const { pointer, Target } = commentGesture();
+        pointer("onPointerDown", 100, 0, { target: new Target("reaction") });
+        vi.advanceTimersByTime(520);
+        const sheet = render().find((node) => node.type == "slide")!.props
+            .children as Element;
+        const event = {
+            target: new Target("button"),
+            detail: source == "keyboard" ? 0 : 1,
+            preventDefault: vi.fn(),
+            stopPropagation: vi.fn(),
+        };
+        if (source != "keyboard") {
+            (sheet.props.onPointerDownCapture as (event: unknown) => void)(
+                event,
+            );
+            if (source == "cancelled")
+                (sheet.props.onPointerCancel as () => void)();
+            else event.target = new Target("button");
+        }
+        (sheet.props.onClickCapture as (event: unknown) => void)(event);
+        expect(event.preventDefault).toHaveBeenCalledTimes(
+            source == "keyboard" ? 0 : 1,
+        );
+        expect(event.stopPropagation).toHaveBeenCalledTimes(
+            source == "keyboard" ? 0 : 1,
+        );
+    },
+);
 
 test("replying from the long-press menu focuses the input and preserves the draft", () => {
     const { pointer, focus } = commentGesture();

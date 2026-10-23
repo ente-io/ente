@@ -3,7 +3,7 @@
 Export your library to a directory:
 
 ```sh
-ente photos export "$HOME/Pictures/Ente" --account personal
+ente photos export "$HOME/Pictures/Ente"
 ```
 
 Progress goes to the terminal while originals download:
@@ -21,8 +21,8 @@ An album copy is a photo placed in an album; a photo in two albums is two copies
 ## Choose albums
 
 ```sh
-ente photos export "$HOME/Pictures/Ente" --album Holidays --album Family --account personal
-ente photos export "$HOME/Pictures/Ente" --exclude-album Screenshots --exclude-shared --exclude-hidden --account personal
+ente photos export "$HOME/Pictures/Ente" --album Holidays --album Family
+ente photos export "$HOME/Pictures/Ente" --exclude-album Screenshots --exclude-shared --exclude-hidden
 ```
 
 An album selector is an album ID or its exact, case-sensitive name; find both with `ente photos album list`. `--exclude-shared` leaves out albums owned by other accounts, and `--exclude-hidden` leaves out hidden albums; files hidden individually inside an exported album are still exported. Filters apply to the run you pass them to; files already exported from an album you now exclude stay where they are.
@@ -60,7 +60,7 @@ Run the same command again. Unchanged files are reused, new files are exported, 
 ## Save space with hard links
 
 ```sh
-ente photos export "$HOME/Pictures/Ente" --hardlinks --account personal
+ente photos export "$HOME/Pictures/Ente" --hardlinks
 ```
 
 A photo that is in several albums is stored once and linked from each exported album folder; the copy it links to can also be in `Trash/` or in an album you no longer export. Linked files share contents, timestamps and permissions: editing one changes every copy. Later runs without the flag keep the links. The destination filesystem must support hard links.
@@ -75,17 +75,17 @@ Error: cannot open Photos export /home/alice/Pictures/Ente: This folder contains
 
 1. Stop the previous CLI job or the desktop app's export.
 2. Log in with the account that made the export.
-3. Run `ente photos export "$HOME/Pictures/Ente" --adopt --account personal`, with the same album filters as before or none. The CLI checks the existing files before taking over.
+3. Run `ente photos export "$HOME/Pictures/Ente" --adopt`, with the same album filters as before or none. The CLI checks the existing files before taking over.
 
 The flag cannot adopt an arbitrary folder of photos; the folder must contain an export it recognises. Learn more in [Migration](./migration.md#take-over-a-photos-export).
 
 ## Find and download a file
 
 ```sh
-ente photos album list --account personal
-ente photos file list --album Holidays --account personal
-ente photos file view IMG_0001.jpg --account personal
-ente photos file download 1580559962386999 --output ./IMG_0001.jpg --account personal
+ente photos album list
+ente photos file list --album Holidays
+ente photos file view IMG_0001.jpg
+ente photos file download 1580559962386999 --output ./IMG_0001.jpg
 ```
 
 A file selector is a file ID or an exact name; when several files share a name, the CLI lists the candidates and you pick an ID. Download prints `Downloaded "IMG_0001.jpg" to ./IMG_0001.jpg.` and refuses to overwrite an existing file. A Live Photo downloads as a ZIP archive. Lists show 100 results and then print `Showing first 100 results; use --limit N or --all to see more.` on the terminal.

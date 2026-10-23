@@ -237,7 +237,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             if (uploadManager.isUploadInProgress()) {
                 showNotification({
                     color: "critical",
-                    title: t("wait_for_active_upload_to_finish"),
+                    title: t("uploads_in_progress"),
+                    caption: t("wait_for_active_upload_to_finish"),
                 });
                 return false;
             }

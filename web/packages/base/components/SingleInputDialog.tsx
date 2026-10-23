@@ -1,8 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Dialog,
-    DialogContent,
-    DialogTitle,
     IconButton,
     Stack,
     Typography,
@@ -21,7 +19,7 @@ import {
 import { SingleInputForm, type SingleInputFormProps } from "./SingleInputForm";
 
 type SingleInputDialogProps = ModalVisibilityProps &
-    Omit<SingleInputFormProps, "onCancel"> & {
+    Omit<SingleInputFormProps, "onCancel" | "variant" | "submitButtonColor"> & {
         title: string;
         sx?: SxProps<Theme>;
     };
@@ -32,7 +30,6 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
     onSubmit,
     title,
     sx,
-    variant = "default",
     ...rest
 }) => {
     const titleID = useId();
@@ -44,58 +41,36 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
         [onClose, onSubmit],
     );
 
-    if (variant !== "default") {
-        return (
-            <Dialog
-                open={open}
-                onClose={onClose}
-                maxWidth={false}
-                aria-labelledby={titleID}
-                sx={sx}
-                slotProps={{ paper: { sx: v2PaperSx } }}
-            >
-                <Stack sx={{ p: "20px", gap: "20px" }}>
-                    <Stack direction="row" sx={v2HeaderRowSx}>
-                        <Typography id={titleID} sx={v2TitleSx}>
-                            {title}
-                        </Typography>
-                        <IconButton
-                            aria-label={t("close")}
-                            onClick={onClose}
-                            sx={v2CloseButtonSx}
-                        >
-                            <CloseIcon sx={{ fontSize: 18 }} />
-                        </IconButton>
-                    </Stack>
-                    <SingleInputForm
-                        key={open ? "open" : "closed"}
-                        variant={variant}
-                        onCancel={onClose}
-                        onSubmit={handleSubmit}
-                        {...rest}
-                    />
-                </Stack>
-            </Dialog>
-        );
-    }
-
     return (
         <Dialog
             open={open}
             onClose={onClose}
-            maxWidth="xs"
-            fullWidth
+            maxWidth={false}
+            aria-labelledby={titleID}
             sx={sx}
-            slotProps={{ paper: { sx: { p: "8px 4px 4px 4px" } } }}
+            slotProps={{ paper: { sx: v2PaperSx } }}
         >
-            <DialogTitle>{title}</DialogTitle>
-            <DialogContent sx={{ "&&&": { pt: 0 } }}>
+            <Stack sx={{ p: "20px", gap: "20px" }}>
+                <Stack direction="row" sx={v2HeaderRowSx}>
+                    <Typography id={titleID} sx={v2TitleSx}>
+                        {title}
+                    </Typography>
+                    <IconButton
+                        aria-label={t("close")}
+                        onClick={onClose}
+                        sx={v2CloseButtonSx}
+                    >
+                        <CloseIcon sx={{ fontSize: 18 }} />
+                    </IconButton>
+                </Stack>
                 <SingleInputForm
+                    key={open ? "open" : "closed"}
+                    variant="v2"
                     onCancel={onClose}
                     onSubmit={handleSubmit}
                     {...rest}
                 />
-            </DialogContent>
+            </Stack>
         </Dialog>
     );
 };
