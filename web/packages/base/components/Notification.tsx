@@ -26,7 +26,7 @@ import React from "react";
 export interface NotificationAttributes {
     captionFirst?: boolean;
     color: ButtonProps["color"];
-    /** Set to null to omit the leading icon. */
+    // Set to null to omit the leading icon.
     startIcon?: React.ReactNode;
     title: React.ReactNode;
     caption?: React.ReactNode;
