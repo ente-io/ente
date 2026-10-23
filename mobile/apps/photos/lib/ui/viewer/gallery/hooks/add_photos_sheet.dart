@@ -45,7 +45,7 @@ Future<dynamic> showAddPhotosSheet(
   );
 }
 
-const double _sheetHeightFactor = 0.95;
+const double _sheetHeightFactor = 0.98;
 
 class AddPhotosPhotoWidget extends StatefulWidget {
   final Collection collection;
