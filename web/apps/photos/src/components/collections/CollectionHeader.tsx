@@ -1,4 +1,3 @@
-import { ContextMenu, ContextMenuItem } from "@/components/ContextMenu";
 import type { RemotePullOpts } from "@/components/gallery";
 import { downloadAndSaveCollectionFiles } from "@/services/save";
 import {
@@ -29,6 +28,7 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PublicIcon from "@mui/icons-material/Public";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
+import { ContextMenu, ContextMenuItem } from "ente-base/components/ContextMenu";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";

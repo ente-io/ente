@@ -1,4 +1,3 @@
-import { ContextMenu, ContextMenuItem } from "@/components/ContextMenu";
 import type { FileContextAction } from "@/utils/file-actions";
 import {
     AddSquareIcon,
@@ -20,6 +19,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { ListItemIcon, ListItemText } from "@mui/material";
+import { ContextMenu, ContextMenuItem } from "ente-base/components/ContextMenu";
 import { t } from "i18next";
 import React, { memo, useCallback, useMemo } from "react";
 

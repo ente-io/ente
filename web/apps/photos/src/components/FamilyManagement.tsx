@@ -1,4 +1,3 @@
-import { ContextMenu, ContextMenuItem } from "@/components/ContextMenu";
 import { avatarTextColor } from "@/services/avatar";
 import {
     createFamily,
@@ -23,6 +22,7 @@ import {
     styled,
     Typography,
 } from "@mui/material";
+import { ContextMenu, ContextMenuItem } from "ente-base/components/ContextMenu";
 import {
     v2CancelButtonSx,
     v2CloseButtonSx,
