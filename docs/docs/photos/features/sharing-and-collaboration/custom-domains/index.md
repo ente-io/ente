@@ -80,6 +80,17 @@ Once the DNS changes have been applied, then you can take any public link to you
 
 You don't need to do this manually though, the apps will do it for you. More on this in the next section. But first, some troubleshooting tips.
 
+### Using your root domain
+
+Some DNS providers don't allow a CNAME record on a root domain, such as `example.org`. If adding a CNAME for `@` fails with an error like "Conflicts with pre-existing RRset", use one of these options instead:
+
+- **Use a subdomain.** Link a subdomain, such as `pics.example.org`, in Ente and add a CNAME for it. This works with every DNS provider.
+- **Use an ALIAS record.** If your provider supports ALIAS (sometimes called ANAME or CNAME flattening), add an ALIAS record for `@` pointing to `my.ente.com`.
+
+Don't use an A record with Ente's IP addresses. These addresses can change, and your domain would then stop working.
+
+Some providers can't use ALIAS records together with DNSSEC, and ask you to turn DNSSEC off first. Turning it off is safe for an album domain: Ente serves your albums over HTTPS, so visitors would see a certificate warning rather than a fake site. If you'd rather keep DNSSEC on, use a subdomain with a CNAME instead.
+
 ### Troubleshooting
 
 If your domain is not working, go through the following checklist.
@@ -87,6 +98,8 @@ If your domain is not working, go through the following checklist.
 - The CNAME should be from your domain to my.ente.com, not the other way around. That is, `pics.example.org => my.ente.com`.
 
 - If you're using Cloudflare DNS, make sure that the "Orange" proxy status toggle is off, and the Proxy status is the "Grey" DNS only.
+
+- If your provider rejects a CNAME on your root domain, see [Using your root domain](#using-your-root-domain).
 
 ## Using
 
