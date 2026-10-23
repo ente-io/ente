@@ -1,5 +1,6 @@
 import { publishCastPayload, revokeAllCastTokens } from "@/services/cast";
 import { loadCast } from "@/utils/chromecast-sender";
+import { externalLink } from "@/utils/link";
 import {
     AlertCircleIcon,
     ArrowLeft02Icon,
@@ -13,7 +14,6 @@ import {
     Box,
     Dialog,
     IconButton,
-    Link,
     Stack,
     Typography,
     type Theme,
@@ -326,15 +326,7 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                             <Typography sx={instructionSx}>
                                 <Trans
                                     i18nKey="visit_cast_url"
-                                    components={{
-                                        a: (
-                                            <Link
-                                                target="_blank"
-                                                rel="noopener"
-                                                href={castURL}
-                                            />
-                                        ),
-                                    }}
+                                    components={{ a: externalLink(castURL) }}
                                     values={{ url: castHost }}
                                 />
                             </Typography>
