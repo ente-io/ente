@@ -1,8 +1,7 @@
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
-import { DialogTitle, Paper, Snackbar, Stack, Typography } from "@mui/material";
-import { FilledIconButton } from "ente-base/components/mui";
+import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Box } from "@mui/material";
+import { Notification } from "ente-base/components/Notification";
 import { t } from "i18next";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -52,43 +51,33 @@ export const QuickLinkCreatedNotification: React.FC<
     };
 
     return (
-        <Snackbar
+        <Notification
             open={open}
-            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        >
-            <Paper sx={{ width: "min(360px, 100svw)" }}>
-                <DialogTitle>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                        }}
-                    >
-                        <Typography variant="h3">
-                            {t("link_created")}
-                        </Typography>
-                        <Stack direction="row" sx={{ gap: 1 }}>
-                            <FilledIconButton
-                                aria-label={t("copy_link")}
-                                onClick={handleCopy}
-                            >
-                                {copied ? (
-                                    <CheckIcon sx={{ color: "success.main" }} />
-                                ) : (
-                                    <ContentCopyOutlinedIcon />
-                                )}
-                            </FilledIconButton>
-                            <FilledIconButton
-                                aria-label={t("close")}
-                                onClick={onClose}
-                            >
-                                <CloseIcon />
-                            </FilledIconButton>
-                        </Stack>
-                    </Stack>
-                </DialogTitle>
-            </Paper>
-        </Snackbar>
+            onClose={onClose}
+            keepOpenOnClick
+            attributes={{
+                color: "inherit",
+                startIcon: null,
+                title: t("link_created"),
+                endIcon: copied ? (
+                    <Box sx={{ color: "success.main", display: "flex" }}>
+                        <HugeiconsIcon
+                            icon={Tick02Icon}
+                            size={22}
+                            strokeWidth={1.8}
+                        />
+                    </Box>
+                ) : (
+                    <HugeiconsIcon
+                        icon={Copy01Icon}
+                        size={18}
+                        strokeWidth={1.8}
+                    />
+                ),
+                endIconLabel: t("copy_link"),
+                onEndIconClick: handleCopy,
+                showCloseButtonWithEndIcon: true,
+            }}
+        />
     );
 };

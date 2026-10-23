@@ -6,7 +6,8 @@ import {
     FeedIcon,
     ShareIcon,
 } from "@/public-album/components/ActionIcons";
-import CheckIcon from "@mui/icons-material/Check";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
@@ -79,7 +80,13 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                     horizontal="left"
                     attributes={{
                         color: "secondary",
-                        startIcon: <CheckIcon />,
+                        startIcon: (
+                            <HugeiconsIcon
+                                icon={Tick02Icon}
+                                size={24}
+                                strokeWidth={1.8}
+                            />
+                        ),
                         title: "Copied!",
                     }}
                 />

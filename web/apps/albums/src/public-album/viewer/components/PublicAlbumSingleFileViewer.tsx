@@ -1,7 +1,8 @@
 import { LazyNotification } from "@/app/lazy/global-ui";
 import { getEnteURL } from "@/public-album/access/utils/external-links";
 import { downloadManager } from "@/public-album/download/services/download-manager";
-import CheckIcon from "@mui/icons-material/Check";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import ErrorOutlinedIcon from "@mui/icons-material/ErrorOutlined";
@@ -864,7 +865,13 @@ export const PublicAlbumSingleFileViewer: React.FC<
                     horizontal="left"
                     attributes={{
                         color: "secondary",
-                        startIcon: <CheckIcon />,
+                        startIcon: (
+                            <HugeiconsIcon
+                                icon={Tick02Icon}
+                                size={24}
+                                strokeWidth={1.8}
+                            />
+                        ),
                         title: "Copied!",
                     }}
                 />

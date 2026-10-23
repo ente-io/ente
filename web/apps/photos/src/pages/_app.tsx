@@ -15,7 +15,8 @@ import { photosLogout } from "@/services/logout";
 import { runMigrations } from "@/services/migration";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/outfit";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider, useColorScheme } from "@mui/material/styles";
 import { AuthPageProvider } from "ente-accounts/components/auth/AuthPageProvider";
@@ -122,7 +123,13 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
                 showNotification({
                     color: "secondary",
                     title: t("update_available"),
-                    endIcon: <ArrowForwardIcon />,
+                    endIcon: (
+                        <HugeiconsIcon
+                            icon={ArrowRight02Icon}
+                            size={24}
+                            strokeWidth={1.8}
+                        />
+                    ),
                     onClick: () =>
                         showMiniDialog(
                             updateAvailableForDownloadDialogAttributes(update),

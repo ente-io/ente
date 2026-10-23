@@ -28,7 +28,8 @@ import type { FileViewerInitialSidebar } from "@/public-album/viewer/components/
 import type { PublicAlbumSingleFileViewerProps } from "@/public-album/viewer/components/PublicAlbumSingleFileViewer";
 import type { PublicFeedItemClickInfo } from "@/public-album/viewer/components/PublicFeedSidebar";
 import { LazyPublicFeedSidebar } from "@/public-album/viewer/lib/lazy";
-import CheckIcon from "@mui/icons-material/Check";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -1301,7 +1302,13 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                     horizontal="left"
                     attributes={{
                         color: "secondary",
-                        startIcon: <CheckIcon />,
+                        startIcon: (
+                            <HugeiconsIcon
+                                icon={Tick02Icon}
+                                size={24}
+                                strokeWidth={1.8}
+                            />
+                        ),
                         title: "Copied!",
                     }}
                 />

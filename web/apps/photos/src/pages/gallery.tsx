@@ -69,7 +69,8 @@ import {
 import { externalLink } from "@/utils/link";
 import { sortPeople, type PeopleSortBy } from "@/utils/people-sort";
 import { visibleQuickLinks } from "@/utils/quick-links";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Typography } from "@mui/material";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import {
@@ -1455,7 +1456,13 @@ const Page: React.FC = () => {
                 )?.name;
                 showNotification({
                     color: "secondary",
-                    startIcon: <CheckCircleIcon />,
+                    startIcon: (
+                        <HugeiconsIcon
+                            icon={CheckmarkCircle02Icon}
+                            size={24}
+                            strokeWidth={1.8}
+                        />
+                    ),
                     title: t("added_to_person"),
                     caption: personName,
                 });

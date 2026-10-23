@@ -1745,8 +1745,9 @@ export const ChatDialogs = memo(
                         maxWidth: "min(360px, 100vw)",
                         backgroundColor: "transparent",
                         boxShadow: "none",
+                        border: "none",
                         bottom: { xs: 96, md: 24 },
-                        "& .MuiButtonBase-root": {
+                        "& > .MuiPaper-root": {
                             padding: "4px 8px",
                             borderRadius: "999px",
                             minHeight: 0,
@@ -1754,13 +1755,20 @@ export const ChatDialogs = memo(
                             color: "text.base",
                             boxShadow: "none",
                         },
+                        "& .MuiButtonBase-root": { padding: 0, minHeight: 0 },
                         "& .MuiStack-root": { gap: 1 },
-                        "& .MuiStack-root svg": { fontSize: "18px" },
+                        "& .MuiStack-root svg": {
+                            width: 18,
+                            height: 18,
+                            fontSize: "18px",
+                        },
                         "& .MuiTypography-root": {
                             fontSize: "13px",
                             lineHeight: "18px",
                         },
                         "& .MuiIconButton-root": {
+                            width: 28,
+                            height: 28,
                             padding: 0,
                             bgcolor: "transparent",
                         },

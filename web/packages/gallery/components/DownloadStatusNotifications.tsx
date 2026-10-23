@@ -1,11 +1,11 @@
 import {
+    AlertCircleIcon,
     Download01Icon,
     Loading03Icon,
+    ReloadIcon,
     Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import ErrorOutlinedIcon from "@mui/icons-material/ErrorOutlined";
-import ReplayIcon from "@mui/icons-material/Replay";
 import {
     Box,
     Button,
@@ -182,7 +182,13 @@ export const DownloadStatusNotifications: React.FC<
 
                 let startIcon: React.ReactNode;
                 if (hasErrors) {
-                    startIcon = <ErrorOutlinedIcon />;
+                    startIcon = (
+                        <HugeiconsIcon
+                            icon={AlertCircleIcon}
+                            size={24}
+                            strokeWidth={1.8}
+                        />
+                    );
                 } else if (isComplete) {
                     startIcon = (
                         <GlowingIconWrapper>
@@ -216,38 +222,20 @@ export const DownloadStatusNotifications: React.FC<
                         key={group.id}
                         horizontal="left"
                         sx={(theme) => ({
-                            "&&": { bottom: `${index * 80 + 20}px` },
-                            width: "min(400px, 100vw)",
-                            borderRadius: "20px",
-                            "& .MuiButton-root": {
-                                borderRadius: "20px",
-                                padding: "16px 16px 16px 20px",
-                            },
-                            "& .MuiIconButton-root": {
-                                width: "40px",
-                                height: "40px",
-                                "& svg": { fontSize: "22px" },
-                            },
+                            "&&": { bottom: `${index * 96 + 24}px` },
+                            width: "min(400px, calc(100vw - 48px))",
+                            borderRadius: "24px",
                             [theme.breakpoints.down("sm")]: {
                                 "&&": {
-                                    bottom: `${index * 70 + 16}px`,
+                                    bottom: `${index * 96 + 16}px`,
                                     ...(fullWidthOnMobile
                                         ? { left: "8px" }
                                         : {}),
                                 },
                                 width: fullWidthOnMobile
                                     ? "calc(100vw - 16px)"
-                                    : "min(340px, calc(100vw - 16px))",
-                                borderRadius: "16px",
-                                "& .MuiButton-root": {
-                                    borderRadius: "16px",
-                                    padding: "12px 12px 12px 16px",
-                                },
-                                "& .MuiIconButton-root": {
-                                    width: "36px",
-                                    height: "36px",
-                                    "& svg": { fontSize: "20px" },
-                                },
+                                    : "min(340px, calc(100vw - 32px))",
+                                borderRadius: "24px",
                             },
                         })}
                         open={true}
@@ -265,14 +253,16 @@ export const DownloadStatusNotifications: React.FC<
                             caption,
                             onClick: createOnClick(group),
                             endIcon: canRetry ? (
-                                <ReplayIcon
-                                    titleAccess={t("retry")}
-                                    sx={{ color: "white" }}
+                                <HugeiconsIcon
+                                    icon={ReloadIcon}
+                                    size={22}
+                                    strokeWidth={1.8}
                                 />
                             ) : undefined,
                             onEndIconClick: canRetry
                                 ? () => group.retry?.()
                                 : undefined,
+                            endIconLabel: t("retry"),
                             showCloseButtonWithEndIcon: canRetry,
                         }}
                     />
