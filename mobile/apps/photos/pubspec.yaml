@@ -194,7 +194,6 @@ dependencies:
   video_player: 2.10.0
   visibility_detector: 0.4.0+2
   wakelock_plus: 1.3.2
-  wechat_assets_picker: 9.8.0
   widgets_to_image: 1.0.0
   workmanager: 0.9.0+3
   xml: 6.6.1
