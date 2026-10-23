@@ -1,17 +1,11 @@
 use ente_core::crypto::hpke;
 
-/// Decrypt a notification into the caller's output buffer; return -1 on failure.
-///
-/// # Safety
-/// `private_key` must point to 32 readable bytes, `ciphertext` to `ciphertext_len`
-/// readable bytes, and `plaintext` to `plaintext_capacity` writable bytes.
-/// The input and output buffers must not overlap.
 #[expect(
     unsafe_code,
     reason = "C callers provide buffers according to this FFI contract"
 )]
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn ente_notification_decrypt(
+unsafe extern "C" fn ente_notification_decrypt(
     private_key: *const u8,
     ciphertext: *const u8,
     ciphertext_len: usize,
@@ -27,7 +21,6 @@ pub unsafe extern "C" fn ente_notification_decrypt(
     {
         return -1;
     }
-    // SAFETY: The caller provides the valid, non-overlapping buffers above.
     let (private_key, ciphertext) = unsafe {
         (
             std::slice::from_raw_parts(private_key, hpke::SecretKey::BYTES),
@@ -39,7 +32,6 @@ pub unsafe extern "C" fn ente_notification_decrypt(
     else {
         return -1;
     };
-    // SAFETY: The validated capacity fits the authenticated plaintext.
     unsafe { std::ptr::copy_nonoverlapping(decrypted.as_ptr(), plaintext, decrypted.len()) };
     decrypted.len() as isize
 }
