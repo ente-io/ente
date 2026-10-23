@@ -10,12 +10,12 @@ import {
     Paper,
     Snackbar,
     Stack,
+    Tooltip,
     Typography,
     type ButtonProps,
     type SxProps,
     type Theme,
 } from "@mui/material";
-import { EllipsizedTypography } from "ente-base/components/Typography";
 import { RippleDisabledButton } from "ente-base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type {} from "ente-base/components/utils/mui-theme";
@@ -105,18 +105,20 @@ export const Notification: React.FC<NotificationProps> = ({
     };
 
     const captionElement = caption && (
-        <EllipsizedTypography
-            variant="small"
-            title={typeof caption === "string" ? caption : undefined}
-            sx={{
-                fontFamily: "inherit",
-                fontSize: 14,
-                lineHeight: "20px",
-                color: neutral ? "text.muted" : "inherit",
-            }}
-        >
-            {caption}
-        </EllipsizedTypography>
+        <Tooltip title={caption} describeChild>
+            <Typography
+                variant="small"
+                noWrap
+                sx={{
+                    fontFamily: "inherit",
+                    fontSize: 14,
+                    lineHeight: "20px",
+                    color: neutral ? "text.muted" : "inherit",
+                }}
+            >
+                {caption}
+            </Typography>
+        </Tooltip>
     );
 
     const content = (
