@@ -85,13 +85,12 @@ export const CollectionShareView: React.FC = () => {
         error,
         collectionInfo,
         selectedItem,
-        notificationAttributes,
+        notificationProps,
         handleItemClick,
         handleCloseItem,
         handleDownload,
         handleSubmitPassword,
         handleCopyContent,
-        setNotificationAttributes,
     } = useCollectionShare();
     const passwordTitle = translatedOrFallback("password", "Password");
     const passwordDescription = translatedOrFallback(
@@ -393,11 +392,7 @@ export const CollectionShareView: React.FC = () => {
                     </Box>
                 )}
 
-            <Notification
-                open={!!notificationAttributes}
-                onClose={() => setNotificationAttributes(undefined)}
-                attributes={notificationAttributes}
-            />
+            <Notification {...notificationProps} />
         </PublicShareScaffold>
     );
 };

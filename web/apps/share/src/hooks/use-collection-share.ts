@@ -1,5 +1,5 @@
-import type { NotificationAttributes } from "ente-base/components/Notification";
 import type { SingleInputFormProps } from "ente-base/components/SingleInputForm";
+import { useNotification } from "ente-base/components/utils/hooks-app";
 import {
     HTTPError,
     isHTTP401Error,
@@ -37,15 +37,12 @@ interface UseCollectionShareResult {
     error: string | null;
     collectionInfo: PublicCollectionShareInfo | null;
     selectedItem: SharedCollectionItemInfo | null;
-    notificationAttributes: NotificationAttributes | undefined;
+    notificationProps: ReturnType<typeof useNotification>["notificationProps"];
     handleItemClick: (item: SharedCollectionItemInfo) => void;
     handleCloseItem: () => void;
     handleDownload: () => Promise<void>;
     handleSubmitPassword: SingleInputFormProps["onSubmit"];
     handleCopyContent: (content: string) => Promise<void>;
-    setNotificationAttributes: (
-        attributes: NotificationAttributes | undefined,
-    ) => void;
 }
 
 interface CollectionShareLoadError {
@@ -205,8 +202,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
     const [collectionKey, setCollectionKey] = useState<string | null>(null);
     const [passwordProtectedPublicURL, setPasswordProtectedPublicURL] =
         useState<PublicURL | null>(null);
-    const [notificationAttributes, setNotificationAttributes] =
-        useState<NotificationAttributes>();
+    const { showNotification, notificationProps } = useNotification();
     const requiresPassword = !!passwordProtectedPublicURL && !accessTokenJWT;
     const clearLoadedState = useCallback(() => {
         setCollectionInfo(null);
@@ -499,7 +495,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
                 await loadCollection({ accessToken, collectionKey });
                 return;
             }
-            setNotificationAttributes({
+            showNotification({
                 color: "critical",
                 title:
                     err instanceof Error
@@ -531,10 +527,7 @@ export const useCollectionShare = (): UseCollectionShareResult => {
         try {
             await navigator.clipboard.writeText(content);
         } catch {
-            setNotificationAttributes({
-                color: "critical",
-                title: "Failed to copy",
-            });
+            showNotification({ color: "critical", title: "Failed to copy" });
         }
     };
 
@@ -577,12 +570,11 @@ export const useCollectionShare = (): UseCollectionShareResult => {
         error,
         collectionInfo,
         selectedItem,
-        notificationAttributes,
+        notificationProps,
         handleItemClick,
         handleCloseItem,
         handleDownload,
         handleSubmitPassword,
         handleCopyContent,
-        setNotificationAttributes,
     };
 };

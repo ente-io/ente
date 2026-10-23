@@ -36,6 +36,8 @@ export interface NotificationAttributes {
 
 type NotificationProps = ModalVisibilityProps & {
     attributes: NotificationAttributes | undefined;
+    /** A new event restarts the timeout, even when its message is unchanged. */
+    notificationID?: number;
     keepOpenOnClick?: boolean;
     horizontal?: "left" | "right";
     autoHideDuration?: number | null;
@@ -59,6 +61,7 @@ const actionButtonSx = {
 
 export const Notification: React.FC<NotificationProps> = ({
     open,
+    notificationID,
     onClose,
     horizontal = "right",
     autoHideDuration,
@@ -162,6 +165,7 @@ export const Notification: React.FC<NotificationProps> = ({
 
     return (
         <Snackbar
+            key={notificationID}
             open={open}
             autoHideDuration={resolvedAutoHideDuration}
             onClose={(_, reason) => {
