@@ -66,10 +66,11 @@ import {
     visibleAlbumFilters,
     type AlbumFilter,
 } from "@/utils/album-filters";
+import { externalLink } from "@/utils/link";
 import { sortPeople, type PeopleSortBy } from "@/utils/people-sort";
 import { visibleQuickLinks } from "@/utils/quick-links";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Link, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import {
     getAndClearIsFirstLogin,
@@ -2651,21 +2652,13 @@ const createAppDownloadFooter = (): FileListHeaderOrFooter => ({
             }}
         >
             <Trans
-                i18nKey={"install_mobile_app"}
+                i18nKey="install_mobile_app"
                 components={{
-                    a: (
-                        <Link
-                            href="https://play.google.com/store/apps/details?id=io.ente.photos"
-                            target="_blank"
-                            rel="noopener"
-                        />
+                    a: externalLink(
+                        "https://play.google.com/store/apps/details?id=io.ente.photos",
                     ),
-                    b: (
-                        <Link
-                            href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                            target="_blank"
-                            rel="noopener"
-                        />
+                    b: externalLink(
+                        "https://apps.apple.com/in/app/ente-photos/id1542026904",
                     ),
                 }}
             />
