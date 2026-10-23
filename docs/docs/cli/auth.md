@@ -7,6 +7,8 @@ ente account login --app auth
 ente auth export "$HOME/Backups/Auth"
 ```
 
+> Login uses the selected account. Add `--account NAME` to choose another saved account or add one under a new name.
+
 The CLI asks for an export password and its confirmation, refreshes your codes from the server, and prints:
 
 ```
