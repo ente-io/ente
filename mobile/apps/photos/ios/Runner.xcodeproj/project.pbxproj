@@ -177,6 +177,7 @@
 		074CACA23088DD8200DF0FD6 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Generated/.gitignore,
 				Info.plist,
 			);
 			target = 074CAC963088DD8200DF0FD6 /* NotificationServiceExtension */;
@@ -925,7 +926,7 @@
 			files = ();
 			inputPaths = ();
 			name = "Build notification crypto";
-			outputPaths = ("$(TARGET_TEMP_DIR)/notification_rust/libente_notification_ffi.a", );
+			outputPaths = ("$(TARGET_TEMP_DIR)/notification_rust/libnotifications.a", );
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/bin/bash \"$SRCROOT/../scripts/build-notification-rust.sh\"\n";
@@ -1858,12 +1859,13 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libente_notification_ffi.a", "-framework", Security, );
+				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libnotifications.a", "-framework", Security, );
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug.NotificationServiceExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_OBJC_BRIDGING_HEADER = NotificationServiceExtension/NotificationCrypto.h;
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/NotificationServiceExtension/Generated/notificationsFFI.modulemap";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/NotificationServiceExtension/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1886,12 +1888,13 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libente_notification_ffi.a", "-framework", Security, );
+				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libnotifications.a", "-framework", Security, );
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.NotificationServiceExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "$(NOTIFICATION_SERVICE_EXTENSION_APP_STORE_PROFILE_SPECIFIER)";
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = NotificationServiceExtension/NotificationCrypto.h;
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/NotificationServiceExtension/Generated/notificationsFFI.modulemap";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/NotificationServiceExtension/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1914,11 +1917,12 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libente_notification_ffi.a", "-framework", Security, );
+				OTHER_LDFLAGS = ("$(inherited)", "$(TARGET_TEMP_DIR)/notification_rust/libnotifications.a", "-framework", Security, );
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.NotificationServiceExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = NotificationServiceExtension/NotificationCrypto.h;
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/NotificationServiceExtension/Generated/notificationsFFI.modulemap";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/NotificationServiceExtension/Generated";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -54,17 +54,8 @@ private struct NotificationEvent: Decodable {
       let ciphertext = Data(base64Encoded: ciphertext), ciphertext.count > 1136,
       let privateKey = Data(base64Encoded: recipient.privateKey)
     else { return nil }
-    var plaintext = [UInt8](repeating: 0, count: ciphertext.count - 1136)
-    let count = privateKey.withUnsafeBytes { key in
-      ciphertext.withUnsafeBytes { ciphertext in
-        plaintext.withUnsafeMutableBufferPointer { plaintext in
-          ente_notification_decrypt(key.bindMemory(to: UInt8.self).baseAddress,
-            ciphertext.bindMemory(to: UInt8.self).baseAddress, ciphertext.count,
-            plaintext.baseAddress, plaintext.count)
-        }
-      }
-    }
-    guard count >= 0, count <= plaintext.count else { return nil }
-    return try? JSONDecoder().decode(Self.self, from: Data(plaintext.prefix(count)))
+    guard let plaintext = try? decryptNotification(ciphertext: ciphertext, privateKey: privateKey)
+    else { return nil }
+    return try? JSONDecoder().decode(Self.self, from: plaintext)
   }
 }

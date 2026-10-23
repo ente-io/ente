@@ -1,6 +1,5 @@
 {
     "rust/apps/ensu/src-tauri/src/logging.rs": ["clippy::expect_used"],
-    "rust/bindings/ffi/notifications/src/lib.rs": ["unsafe_code"],
     "rust/bindings/frb/locker/src/lib.rs": [
         "clippy::allow_attributes",
         "clippy::allow_attributes_without_reason",
