@@ -1,6 +1,6 @@
 # Install Ente CLI
 
-Download the archive for your system from the latest [Ente CLI release](https://github.com/ente/ente/releases?q=tag%3Aente-cli-v), verify it, extract the `ente` executable, and run `ente --version`.
+Download the archive for your system from the latest [Ente CLI release](https://github.com/ente/ente/releases?q=tag%3Aente-cli-v0), verify it, extract the `ente` executable, and run `ente --version`.
 
 | System              | Archive name ends with |
 | ------------------- | ---------------------- |
