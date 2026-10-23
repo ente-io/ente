@@ -37,6 +37,7 @@ import {
     playViewerOpen,
     viewerCornerRadii,
     viewerOriginKey,
+    viewerVideoFrame,
 } from "components/viewer-transition";
 import log from "ente-base/log";
 import { useCommentCount } from "hooks/use-comment-count";
@@ -266,12 +267,8 @@ interface ViewerMotion {
     reveal?: () => void;
 }
 
-const endOpenFlight = (
-    motion: ViewerMotion,
-    root: HTMLElement,
-    fadeOut = false,
-) => {
-    motion.flight?.release(fadeOut);
+const endOpenFlight = (motion: ViewerMotion, root: HTMLElement) => {
+    motion.flight?.release();
     motion.flight = undefined;
     delete root.dataset.spaceViewerFlying;
     delete root.dataset.spaceViewerWaiting;
@@ -290,15 +287,13 @@ const handOverOpenFlight = (
     const image = content?.element;
     const isShown =
         content?.isError() ||
-        (content?.data.type == "video" &&
-            content.state == "loaded" &&
-            image?.isConnected) ||
+        (content?.data.type == "video" && image?.isConnected) ||
         (image instanceof HTMLImageElement &&
             image.complete &&
             image.naturalWidth > 0 &&
             image.isConnected &&
             !content?.isDecoding);
-    if (isShown) endOpenFlight(motion, root, content?.data.type == "video");
+    if (isShown) endOpenFlight(motion, root);
 };
 
 const viewerTouchPoint = (event: Event) => {
@@ -810,11 +805,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             viewerPhotosRef.current[pswp?.currIndex ?? activePhotoIndex];
         const element = pswp?.currSlide?.content.element;
         const video = element?.querySelector("video");
-        const preview =
-            element instanceof HTMLImageElement
-                ? element
-                : element?.querySelector("img");
-        const fadeFromVideo = Boolean(video && !motion.flight);
         let from: ViewerPhotoState | undefined = motion.flight?.current();
         let src = from ? motion.flight?.src : undefined;
         const rect = element?.getBoundingClientRect();
@@ -825,8 +815,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             rect &&
             rect.width > 0 &&
             rect.height > 0 &&
-            preview?.complete &&
-            preview.naturalWidth > 0
+            ((element instanceof HTMLImageElement &&
+                element.complete &&
+                element.naturalWidth > 0) ||
+                video)
         ) {
             const scale = Number(pswp.currSlide?.container.style.scale) || 1;
             from = shownPhotoState(
@@ -834,7 +826,10 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 { x: 0, y: 0, w: window.innerWidth, h: window.innerHeight },
                 viewerCornerRadii(element, scale),
             );
-            src = preview.currentSrc || preview.src;
+            src =
+                element instanceof HTMLImageElement
+                    ? element.currentSrc || element.src
+                    : (viewerVideoFrame(video) ?? video?.poster);
         }
         window.scrollTo({ ...pageScrollRef.current, behavior: "instant" });
         const origin =
@@ -859,7 +854,6 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 {
                     origin,
                     src,
-                    fadeFromVideo,
                     photo: {
                         width: item.width ?? defaultPhotoWidth,
                         height: item.height ?? defaultPhotoHeight,
@@ -868,11 +862,9 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 from,
                 throwVelocity,
                 startBackground,
-                () => {
-                    if (root.isConnected) onCloseRef.current();
-                },
             );
-        } else onCloseRef.current();
+        }
+        onCloseRef.current();
     };
 
     React.useImperativeHandle(
@@ -1547,15 +1539,13 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             pswp.on("contentLoad", (event) => {
                 if (event.content.data.type != "video") return;
                 event.preventDefault();
-                event.content.state = "loading";
                 videos.get(event.content)?.destroy();
                 const item = viewerPhotosRef.current[event.content.index]!;
-                const video = createSpaceVideoContent(
-                    item,
-                    (asset) => videoLoaderRef.current!(asset),
-                    { onReady: () => event.content.onLoaded() },
+                const video = createSpaceVideoContent(item, (asset) =>
+                    videoLoaderRef.current!(asset),
                 );
                 event.content.element = video.element;
+                event.content.onLoaded();
                 videos.set(event.content, video);
             });
             pswp.on("contentActivate", ({ content }) =>

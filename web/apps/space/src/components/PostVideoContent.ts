@@ -10,13 +10,11 @@ export const createSpaceVideoContent = (
         inline = false,
         onPlay,
         onPause,
-        onReady,
         onTogglePlayback,
     }: {
         inline?: boolean;
         onPlay?: () => Promise<void> | void;
         onPause?: () => void;
-        onReady?: () => void;
         onTogglePlayback?: (play: boolean) => void;
     } = {},
 ) => {
@@ -109,33 +107,12 @@ export const createSpaceVideoContent = (
     }
     supportMessage.style.marginTop = "2px";
     errorMessage.append(errorTitle, supportMessage);
-    const cover =
-        !inline && item.imageUrl ? document.createElement("img") : undefined;
-    if (cover) {
-        video.style.position = "relative";
-        cover.alt = "";
-        cover.src = item.imageUrl!;
-        Object.assign(cover.style, {
-            position: "absolute",
-            inset: "0",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            pointerEvents: "none",
-        });
-        element.append(cover);
-    }
     element.append(video, button, loading, errorMessage);
     let generation = 0;
     let sourceGeneration = 0;
     let pendingLoad: Promise<void> | undefined;
     let ownedURL: string | undefined;
     let disposed = false;
-    void (cover?.decode() ?? Promise.resolve())
-        .catch(() => cover?.remove())
-        .then(() => {
-            if (!disposed) onReady?.();
-        });
     let active = false;
     let autoplayBlocked = false;
     let failure: "error" | "rate-limit" | undefined;

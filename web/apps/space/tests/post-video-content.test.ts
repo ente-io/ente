@@ -52,11 +52,6 @@ class Video extends Element {
     load = vi.fn();
 }
 
-class Cover extends Element {
-    decode = () => Promise.resolve();
-    remove = vi.fn();
-}
-
 let contents: ReturnType<typeof createSpaceVideoContent>[];
 let load: ReturnType<typeof vi.fn<SpacePostAssetURLLoader>>;
 let revokeURL: ReturnType<typeof vi.spyOn>;
@@ -73,11 +68,7 @@ beforeEach(() => {
         Object.assign(new EventTarget(), {
             hidden: false,
             createElement: (tag: string) =>
-                tag == "video"
-                    ? new Video()
-                    : tag == "img"
-                      ? new Cover()
-                      : new Element(),
+                tag == "video" ? new Video() : new Element(),
         }),
     );
 });
@@ -108,7 +99,7 @@ const create = (
     contents.push(content);
     const [video, button, loading, error] = (
         content.element as unknown as Element
-    ).children.filter((child) => !(child instanceof Cover));
+    ).children;
     return {
         ...content,
         video: video as Video,
