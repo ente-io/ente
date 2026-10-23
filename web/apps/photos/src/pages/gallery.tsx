@@ -2559,20 +2559,18 @@ const Page: React.FC = () => {
                     }}
                     onSubmit={handleAlbumNameSubmit}
                 />
-                <QuickLinkCreatedNotification
-                    open={publicLinkToast.open}
-                    onCopy={() => {
-                        if (publicLinkToast.url) {
-                            void navigator.clipboard.writeText(
-                                publicLinkToast.url,
-                            );
-                        }
-                    }}
-                    onClose={() =>
-                        setPublicLinkToast((prev) => ({ ...prev, open: false }))
-                    }
-                />
             </FullScreenDropZone>
+            <QuickLinkCreatedNotification
+                open={publicLinkToast.open}
+                onCopy={() => {
+                    if (publicLinkToast.url) {
+                        void navigator.clipboard.writeText(publicLinkToast.url);
+                    }
+                }}
+                onClose={() =>
+                    setPublicLinkToast((prev) => ({ ...prev, open: false }))
+                }
+            />
             <AlbumAddedNotification
                 open={addToAlbumProgress.open}
                 onClose={() =>
