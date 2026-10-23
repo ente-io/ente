@@ -1,8 +1,6 @@
 // TODO: Audit this file (the code here is mostly fine, but needs revisiting
 // the file it depends on have been audited and their interfaces fixed).
 /* eslint-disable react-hooks/exhaustive-deps */
-import type { AddToAlbumPhase } from "@/components/AlbumAddedNotification";
-import { AlbumAddedNotification } from "@/components/AlbumAddedNotification";
 import { AuthenticateUser } from "@/components/AuthenticateUser";
 import {
     CollectionSelector,
@@ -342,12 +340,6 @@ const Page: React.FC = () => {
         })();
     }, [mapEnabled, onGenericError, showCollectionMap]);
 
-    const [addToAlbumProgress, setAddToAlbumProgress] = useState<{
-        open: boolean;
-        phase: AddToAlbumPhase;
-        albumId?: number;
-        albumName?: string;
-    }>({ open: false, phase: "processing" });
     const [publicLinkToast, setPublicLinkToast] = useState<{
         open: boolean;
         url?: string;
@@ -1207,11 +1199,11 @@ const Page: React.FC = () => {
                         silent: true,
                         source: "single-file-add-new-album",
                     });
-                    setAddToAlbumProgress({
-                        open: true,
-                        phase: "done",
-                        albumId: collection.id,
-                        albumName: collection.name,
+                    showNotification({
+                        color: "inherit",
+                        startIcon: null,
+                        title: t("added_to_album"),
+                        caption: collection.name,
                     });
                     setOpenCollectionSelector(false);
                     setPostCreateAlbumOp(undefined);
@@ -2061,7 +2053,6 @@ const Page: React.FC = () => {
 
             const handleSelect = async (collection: Collection) => {
                 try {
-                    setAddToAlbumProgress({ open: true, phase: "processing" });
                     showLoadingBar();
                     await performCollectionOp(
                         "add",
@@ -2073,11 +2064,11 @@ const Page: React.FC = () => {
                         silent: true,
                         source: "single-file-add-to-album",
                     });
-                    setAddToAlbumProgress({
-                        open: true,
-                        phase: "done",
-                        albumId: collection.id,
-                        albumName: collection.name,
+                    showNotification({
+                        color: "inherit",
+                        startIcon: null,
+                        title: t("added_to_album"),
+                        caption: collection.name,
                     });
                 } catch (e) {
                     onGenericError(e);
@@ -2104,7 +2095,12 @@ const Page: React.FC = () => {
                 },
             });
         },
-        [handleOpenCollectionSelector, remotePull, onGenericError],
+        [
+            handleOpenCollectionSelector,
+            remotePull,
+            onGenericError,
+            showNotification,
+        ],
     );
 
     const showAppDownloadFooter =
@@ -2573,14 +2569,6 @@ const Page: React.FC = () => {
                     }
                 />
             </FullScreenDropZone>
-            <AlbumAddedNotification
-                open={addToAlbumProgress.open}
-                onClose={() =>
-                    setAddToAlbumProgress((s) => ({ ...s, open: false }))
-                }
-                phase={addToAlbumProgress.phase}
-                albumName={addToAlbumProgress.albumName}
-            />
             <EditLocationDialog
                 {...editLocationVisibilityProps}
                 files={selectedFilesInView}
