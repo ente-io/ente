@@ -1,4 +1,3 @@
-import { ContextMenu, ContextMenuItem } from "@/components/ContextMenu";
 import { ArrowDown02Icon, ArrowUp02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import SortIcon from "@mui/icons-material/Sort";
@@ -9,6 +8,7 @@ import {
     type Theme,
 } from "@mui/material";
 import type { MenuProps } from "@mui/material/Menu";
+import { ContextMenu, ContextMenuItem } from "ente-base/components/ContextMenu";
 import { t } from "i18next";
 import React, { useRef, useState } from "react";
 
