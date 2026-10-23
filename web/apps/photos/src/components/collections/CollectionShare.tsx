@@ -48,10 +48,7 @@ import {
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
-import {
-    SingleInputForm,
-    type SingleInputFormProps,
-} from "ente-base/components/SingleInputForm";
+import type { SingleInputFormProps } from "ente-base/components/SingleInputForm";
 import { useClipboardCopy } from "ente-base/components/utils/hooks";
 import {
     useModalVisibility,
@@ -85,12 +82,10 @@ import {
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { wait } from "ente-utils/promise";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, {
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useRef,
@@ -2355,7 +2350,7 @@ const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
             />
             <SetPublicLinkPassword
                 {...setPasswordVisibilityProps}
-                {...{ variant, publicURL, onUpdate }}
+                {...{ publicURL, onUpdate }}
             />
         </>
     );
@@ -2380,16 +2375,14 @@ const PublicLinkSwitch: React.FC<
     );
 
 type SetPublicLinkPasswordProps = ModalVisibilityProps &
-    ManagePublicLinkSettingProps;
+    Omit<ManagePublicLinkSettingProps, "variant">;
 
 const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
-    variant,
     open,
     onClose,
     publicURL,
     onUpdate,
 }) => {
-    const inPanel = !!useContext(SidebarPanelContext);
     const savePassword: SingleInputFormProps["onSubmit"] = async (password) => {
         await enablePublicUrlPassword(password);
         publicURL.passwordEnabled = true;
@@ -2404,33 +2397,6 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
             memLimit: kek.memLimit,
         });
     };
-
-    if (inPanel && variant != "inline") {
-        return (
-            <TitledNestedSidebarDrawer
-                anchor="right"
-                {...{ open, onClose }}
-                onRootClose={onClose}
-                title={t("password_lock")}
-            >
-                <Stack sx={{ gap: 3, p: 1.5 }}>
-                    <SingleInputForm
-                        key={open ? "open" : "closed"}
-                        inputType="password"
-                        label={t("password")}
-                        submitButtonTitle={t("lock")}
-                        onCancel={onClose}
-                        onSubmit={async (password, setFieldError) => {
-                            await savePassword(password, setFieldError);
-                            onClose();
-                            // Keep the submitting state through the close animation.
-                            return wait(1000);
-                        }}
-                    />
-                </Stack>
-            </TitledNestedSidebarDrawer>
-        );
-    }
 
     return (
         <SingleInputDialog
