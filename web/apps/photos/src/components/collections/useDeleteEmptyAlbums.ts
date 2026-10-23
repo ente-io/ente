@@ -93,7 +93,8 @@ export const useDeleteEmptyAlbums = (
         } else if (refreshFailed) {
             showNotification({
                 color: "critical",
-                title: t("delete_empty_albums_refresh_failed"),
+                title: t("error"),
+                caption: t("delete_empty_albums_refresh_failed"),
             });
         }
     };
