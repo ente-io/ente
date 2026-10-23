@@ -53,6 +53,20 @@ jobs:
             COMMIT: ${{ inputs.commit }}
 
         steps:
+            - name: Check release maintainer
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+              run: |
+                  actor_id="$(gh api "/users/${TRIGGERING_ACTOR}" --jq .id)"
+                  case "${actor_id}" in
+                      24503581|254676) ;;
+                      *)
+                          echo "::error::${TRIGGERING_ACTOR} is not a release maintainer"
+                          exit 1
+                          ;;
+                  esac
+
             - name: Validate version input
               shell: bash
               run: |
@@ -69,6 +83,20 @@ jobs:
                       echo "::error::commit must be a full 40-character SHA"
                       exit 1
                   fi
+
+            - name: Verify commit is on main
+              if: inputs.action == 'update'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  status="$(gh api "/repos/${GITHUB_REPOSITORY}/compare/${COMMIT}...main?per_page=1" --jq .status)"
+                  case "${status}" in
+                      ahead|identical) ;;
+                      *)
+                          echo "::error::commit must already be on main"
+                          exit 1
+                          ;;
+                  esac
 
             - name: Checkout main
               if: inputs.action == 'start'

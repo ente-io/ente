@@ -2,6 +2,8 @@
 
 Photos, Auth, Locker, Ensu, Cast, and Photos desktop use the same release process, as described here.
 
+Only primary maintainers can run `app-release.yml`.
+
 > For simplicity, the following assumes we're trying to release Ensu, that main is `0.1.16-beta`, we want to release `0.1.16` and move main to `0.1.17-beta`.
 >
 > To do the same steps for another app, say "auth", you can just mechanically replace "ensu" with that "auth" in the steps.
@@ -47,6 +49,8 @@ The workflow also opens a PR to move `main` to `0.1.17-beta`. Merge that PR afte
 ## Update the RC if needed
 
 Run the update action with the full SHA of the fix to cherry-pick a commit into the release branch and create a new RC build.
+
+The commit must already be on `main`.
 
 ```sh
 gh workflow run app-release.yml \
