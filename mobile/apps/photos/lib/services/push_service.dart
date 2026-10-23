@@ -59,6 +59,8 @@ class PushService {
       unawaited(_configurePushToken());
     });
     await _tokenRefreshSubscription?.cancel();
+    // The server still registers FCM tokens, not Firebase Installation IDs.
+    // ignore: deprecated_member_use
     _tokenRefreshSubscription = FirebaseMessaging.instance.onTokenRefresh
         .listen(
           (_) => unawaited(_configurePushToken()),
@@ -73,6 +75,15 @@ class PushService {
     final sessionToken = Configuration.instance.getToken();
     if (sessionToken == null) return;
     try {
+      String? apnsToken;
+      if (Platform.isIOS) {
+        apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken == null) {
+          _logger.info("APNs token unavailable; deferring push registration");
+          return;
+        }
+      }
+      // ignore: deprecated_member_use
       final String? fcmToken = await FirebaseMessaging.instance.getToken();
       final shouldForceRefreshServerToken =
           DateTime.now().microsecondsSinceEpoch -
@@ -81,9 +92,6 @@ class PushService {
       if (fcmToken != null &&
           (_prefs.getString(kFCMPushToken) != fcmToken ||
               shouldForceRefreshServerToken)) {
-        final String? apnsToken = Platform.isIOS
-            ? await FirebaseMessaging.instance.getAPNSToken()
-            : null;
         _logger.info("Updating token on server");
         await _setPushTokenOnServer(fcmToken, apnsToken);
         if (_prefs.getString(Configuration.tokenKey) != sessionToken) return;
