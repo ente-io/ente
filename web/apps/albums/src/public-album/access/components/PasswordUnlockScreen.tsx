@@ -2,7 +2,6 @@ import {
     PublicAccessLayout,
     PublicAccessLayoutTitle,
 } from "@/public-album/access/components/PublicAccessLayout";
-import { Typography } from "@mui/material";
 import {
     SingleInputForm,
     type SingleInputFormProps,
@@ -18,9 +17,6 @@ export const PasswordUnlockScreen: React.FC<PasswordUnlockScreenProps> = ({
 }) => (
     <PublicAccessLayout>
         <PublicAccessLayoutTitle>{t("password")}</PublicAccessLayoutTitle>
-        <Typography sx={{ color: "text.muted" }}>
-            {t("link_password_description")}
-        </Typography>
         <SingleInputForm
             inputType="password"
             label={t("password")}

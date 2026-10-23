@@ -35,9 +35,6 @@ export const EmbedPasswordForm: React.FC<EmbedPasswordFormProps> = ({
     return (
         <AccountsPageContents paperSx={singleInputPagePaperSx}>
             <Typography sx={v2TitleSx}>{t("password")}</Typography>
-            <Typography sx={{ color: "text.muted" }}>
-                {t("link_password_description")}
-            </Typography>
             <SingleInputForm
                 autoFocus={false}
                 inputType="password"

@@ -23,6 +23,7 @@ export const singleInputPagePaperSx = ((theme: Theme) => ({
     ...v2PaperSx(theme),
     boxSizing: "border-box",
     p: "20px",
+    [theme.breakpoints.up("sm")]: { padding: "20px" },
     minHeight: "auto",
     display: "flex",
     flexDirection: "column",
