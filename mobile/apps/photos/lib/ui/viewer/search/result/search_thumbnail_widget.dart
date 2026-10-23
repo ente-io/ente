@@ -1,6 +1,4 @@
 import "package:flutter/material.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/local_photos_updated_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_constants.dart";
@@ -29,17 +27,6 @@ class SearchThumbnailWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (searchResult?.type() == ResultType.magic) {
-      return StreamBuilder<LocalPhotosUpdatedEvent>(
-        stream: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-        builder: (context, _) =>
-            _buildThumbnail(context, searchResult!.previewThumbnail()),
-      );
-    }
-    return _buildThumbnail(context, file);
-  }
-
-  Widget _buildThumbnail(BuildContext context, EnteFile? file) {
     return Hero(
       tag: tagPrefix + (file?.tag ?? ""),
       createRectTween: searchResult?.type() == ResultType.magic
@@ -60,7 +47,7 @@ class SearchThumbnailWidget extends StatelessWidget {
                         clusterID: (searchResult as GenericSearchResult)
                             .params[kClusterParamId],
                       )
-                    : ThumbnailWidget(file)
+                    : ThumbnailWidget(file!)
               : const NoThumbnailWidget(addBorder: false),
         ),
       ),

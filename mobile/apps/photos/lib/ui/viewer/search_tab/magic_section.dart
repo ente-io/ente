@@ -3,9 +3,7 @@ import "dart:async";
 import "package:ente_components/ente_components.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/event_bus.dart";
 import "package:photos/events/event.dart";
-import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
@@ -113,13 +111,6 @@ class MagicRecommendation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<LocalPhotosUpdatedEvent>(
-      stream: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      builder: (context, _) => _buildCard(context),
-    );
-  }
-
-  Widget _buildCard(BuildContext context) {
     final heroTag =
         magicSearchResult.heroTag() +
         (magicSearchResult.previewThumbnail()?.tag ?? "");
