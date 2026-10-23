@@ -25,10 +25,12 @@ export const SpaceInlinePostVideo: React.FC<{
         const content = createSpaceVideoContent(
             { video },
             onLoadVideo
-                ? (asset) => {
+                ? (asset, signal) => {
                       queuedLoad?.cancel();
-                      queuedLoad = queueFeedVideoLoad(container, () =>
-                          onLoadVideo(asset),
+                      queuedLoad = queueFeedVideoLoad(
+                          container,
+                          (signal) => onLoadVideo(asset, signal),
+                          signal,
                       );
                       return queuedLoad.promise;
                   }

@@ -54,8 +54,11 @@ const enqueue = (name: string, top: number, slideOffset = 0) => {
                 : null,
     } as unknown as HTMLElement;
     const download = Promise.withResolvers<string>();
-    const load = vi.fn(() => {
+    const load = vi.fn((signal: AbortSignal) => {
         started.push(name);
+        signal.addEventListener("abort", () => download.reject(signal.reason), {
+            once: true,
+        });
         return download.promise;
     });
     const control = queueFeedVideoLoad(element, load);
@@ -205,18 +208,32 @@ test("a detached video is canceled even when it is the only queued request", asy
     });
 });
 
-test("an in-flight download retains its slot when its post is unmounted", async () => {
+test("unmounting a post aborts its download and releases its slot", async () => {
     const first = enqueue("first", 100);
     enqueue("second", 500);
     enqueue("third", 900);
     flush();
     first.cancel();
+    expect(first.load.mock.calls[0]![0].aborted).toBe(true);
     flush();
     expect(started).toEqual(["first", "second"]);
-    first.download.resolve("blob:first");
-    await expect(first.promise).resolves.toBe("blob:first");
+    await expect(first.promise).rejects.toMatchObject({ name: "AbortError" });
     flush();
     expect(started).toEqual(["first", "second", "third"]);
+});
+
+test("canceling a player's source removes its queued preload", async () => {
+    const controller = new AbortController();
+    const load = vi.fn(() => Promise.resolve("blob:video"));
+    const request = queueFeedVideoLoad(
+        {} as HTMLElement,
+        load,
+        controller.signal,
+    );
+    controller.abort();
+    await expect(request.promise).rejects.toMatchObject({ name: "AbortError" });
+    flush();
+    expect(load).not.toHaveBeenCalled();
 });
 
 test("a failed download releases its slot for the next video", async () => {

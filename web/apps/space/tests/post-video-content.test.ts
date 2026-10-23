@@ -212,6 +212,29 @@ test("leaving the preload range releases a download that finishes later", async 
     expect(content.video.play).not.toHaveBeenCalled();
 });
 
+test.each(["destroy", "deactivate"] as const)(
+    "fullscreen %s cancels its unfinished download",
+    async (action) => {
+        load.mockImplementation(
+            (_, signal) =>
+                new Promise((_, reject) => {
+                    signal!.addEventListener(
+                        "abort",
+                        () => reject(signal!.reason as Error),
+                        { once: true },
+                    );
+                }),
+        );
+        const content = create(false);
+        const preload = content.preload();
+        const signal = load.mock.calls[0]![1]!;
+        content[action]();
+        expect(signal.aborted).toBe(true);
+        await expect(preload).rejects.toMatchObject({ name: "AbortError" });
+        expect(content.video.getAttribute("src")).toBeNull();
+    },
+);
+
 test("a failed background preload can be retried by playback", async () => {
     load.mockRejectedValueOnce(new Error("offline"));
     const content = create();

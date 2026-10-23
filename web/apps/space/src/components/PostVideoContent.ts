@@ -111,6 +111,7 @@ export const createSpaceVideoContent = (
     let generation = 0;
     let sourceGeneration = 0;
     let pendingLoad: Promise<void> | undefined;
+    let loadController: AbortController | undefined;
     let ownedURL: string | undefined;
     let disposed = false;
     let active = false;
@@ -175,6 +176,8 @@ export const createSpaceVideoContent = (
     };
     const reset = () => {
         sourceGeneration++;
+        loadController?.abort();
+        loadController = undefined;
         pendingLoad = undefined;
         pause();
         video.removeAttribute("src");
@@ -225,7 +228,8 @@ export const createSpaceVideoContent = (
             let url = media.url ?? ownedURL;
             if (!url) {
                 if (!media.asset || !load) throw new Error("Video unavailable");
-                url = await load(media.asset);
+                loadController = new AbortController();
+                url = await load(media.asset, loadController.signal);
                 if (sourceGeneration != current) {
                     URL.revokeObjectURL(url);
                     return;
@@ -235,7 +239,10 @@ export const createSpaceVideoContent = (
             video.preload = "auto";
             video.src = url;
         })().finally(() => {
-            if (sourceGeneration == current) pendingLoad = undefined;
+            if (sourceGeneration == current) {
+                pendingLoad = undefined;
+                loadController = undefined;
+            }
         });
         return pendingLoad;
     };

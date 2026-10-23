@@ -1,6 +1,7 @@
 interface VideoLoad {
     element: HTMLElement;
-    load: () => Promise<string>;
+    load: (signal: AbortSignal) => Promise<string>;
+    controller: AbortController;
     start: () => void;
     resolve: (url: string) => void;
     reject: (error: unknown) => void;
@@ -45,7 +46,9 @@ const schedule = () => {
             request.start();
             void (async () => {
                 try {
-                    request.resolve(await request.load());
+                    request.resolve(
+                        await request.load(request.controller.signal),
+                    );
                 } catch (error) {
                     request.reject(error);
                 } finally {
@@ -61,19 +64,35 @@ const schedule = () => {
 export const queueFeedVideoLoad = (
     element: HTMLElement,
     load: VideoLoad["load"],
+    signal?: AbortSignal,
 ) => {
+    const controller = new AbortController();
     let start: () => void;
     const started = new Promise<void>((resolve) => {
         start = resolve;
     });
     let request: VideoLoad;
     const promise = new Promise<string>((resolve, reject) => {
-        request = { element, load, start, resolve, reject };
+        request = { element, load, controller, start, resolve, reject };
         queued.add(request);
         schedule();
     });
+    const cancel = () => {
+        controller.abort();
+        if (foreground == request) foreground = undefined;
+        if (!queued.delete(request)) return;
+        request.reject(controller.signal.reason);
+        if (!queued.size && frame != undefined) {
+            cancelAnimationFrame(frame);
+            frame = undefined;
+        }
+    };
+    if (signal?.aborted) cancel();
+    else signal?.addEventListener("abort", cancel, { once: true });
     return {
-        promise,
+        promise: promise.finally(() =>
+            signal?.removeEventListener("abort", cancel),
+        ),
         prioritize: () => {
             if (queued.has(request)) {
                 foreground = request;
@@ -84,16 +103,6 @@ export const queueFeedVideoLoad = (
         deprioritize: () => {
             if (foreground == request) foreground = undefined;
         },
-        cancel: () => {
-            if (foreground == request) foreground = undefined;
-            if (!queued.delete(request)) return;
-            request.reject(
-                new DOMException("Video preload canceled", "AbortError"),
-            );
-            if (!queued.size && frame != undefined) {
-                cancelAnimationFrame(frame);
-                frame = undefined;
-            }
-        },
+        cancel,
     };
 };

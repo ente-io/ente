@@ -1500,11 +1500,15 @@ const FeedItem: React.FC<FeedItemProps> = ({
                                 onOpenPhoto ? () => openPhoto(index) : undefined
                             }
                             shouldLoad={
-                                (shouldPreloadVideo && Boolean(photo.video)) ||
+                                (shouldPreloadVideo &&
+                                    index == photoIndex &&
+                                    Boolean(photo.video)) ||
                                 (shouldLoadMedia &&
                                     Math.abs(index - photoIndex) <= 1)
                             }
-                            shouldPreloadVideo={shouldPreloadVideo}
+                            shouldPreloadVideo={
+                                shouldPreloadVideo && index == photoIndex
+                            }
                             thumbHash={photo.thumbHash}
                             video={photo.video}
                             viewerOrigin={
