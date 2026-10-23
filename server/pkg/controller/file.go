@@ -215,6 +215,13 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 			if err != nil {
 				return file, stacktrace.Propagate(err, "")
 			}
+			_, existingApp, err := c.FileRepo.GetOwnerAndApp(existing.ID)
+			if err != nil {
+				return file, stacktrace.Propagate(err, "")
+			}
+			if existingApp != "" && existingApp != app {
+				return file, stacktrace.Propagate(ente.ErrPermissionDenied, "file app does not match request app")
+			}
 			file, err = c.onDuplicateObjectDetected(ctx, file, existing, hotDC)
 			if err != nil {
 				return file, stacktrace.Propagate(err, "")
@@ -251,11 +258,11 @@ func (c *FileController) Update(ctx context.Context, userID int64, file ente.Fil
 	if err != nil {
 		return response, stacktrace.Propagate(err, "")
 	}
-	ownerID, err := c.FileRepo.GetOwnerID(file.ID)
+	ownerID, fileApp, err := c.FileRepo.GetOwnerAndApp(file.ID)
 	if err != nil {
 		return response, stacktrace.Propagate(err, "")
 	}
-	if ownerID != userID {
+	if ownerID != userID || (fileApp != "" && fileApp != app) {
 		return response, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
 	file.OwnerID = ownerID
@@ -316,7 +323,7 @@ func (c *FileController) Update(ctx context.Context, userID int64, file ente.Fil
 			ThumbnailSize: thumbnailSize,
 		}
 	}
-	err = c.FileRepo.Update(file, fileSize, thumbnailSize, diff, oldObjects, stagedObjects)
+	err = c.FileRepo.Update(file, fileSize, thumbnailSize, diff, oldObjects, stagedObjects, app)
 	if err != nil {
 		return response, stacktrace.Propagate(err, "")
 	}
@@ -703,11 +710,11 @@ func (c *FileController) UpdateThumbnail(ctx *gin.Context, fileID int64, newThum
 	if !strings.HasPrefix(newThumbnail.ObjectKey, objectPathPrefix) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
 	}
-	ownerID, err := c.FileRepo.GetOwnerID(fileID)
+	ownerID, fileApp, err := c.FileRepo.GetOwnerAndApp(fileID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if ownerID != userID {
+	if ownerID != userID || (fileApp != "" && fileApp != app) {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
 	existingThumbnailObject, err := c.ObjectRepo.GetObject(fileID, ente.THUMBNAIL)
@@ -732,7 +739,7 @@ func (c *FileController) UpdateThumbnail(ctx *gin.Context, fileID int64, newThum
 	if existingThumbnailObjectKey != newThumbnail.ObjectKey {
 		oldObject = &existingThumbnailObjectKey
 	}
-	err = c.FileRepo.UpdateThumbnail(ctx, fileID, userID, newThumbnail, newThumbnailSize, diff, oldObject)
+	err = c.FileRepo.UpdateThumbnail(ctx, fileID, userID, newThumbnail, newThumbnailSize, diff, oldObject, app)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
