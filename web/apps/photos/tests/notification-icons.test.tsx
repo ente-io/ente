@@ -1,5 +1,4 @@
 import { Copy01Icon, ReloadIcon, Tick02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { ThemeProvider } from "@mui/material";
 import {
     Notification,
@@ -54,26 +53,6 @@ describe("notification icons", () => {
                 "color:var(--mui-palette-success-main)",
             );
         }
-    });
-
-    test("preserves custom icon elements and their sizing", () => {
-        const markup = renderNotification({
-            startIcon: null,
-            endIcon: (
-                <span data-testid="custom-copy">
-                    <HugeiconsIcon
-                        icon={Copy01Icon}
-                        size={18}
-                        strokeWidth={2}
-                    />
-                </span>
-            ),
-        });
-        expect(markup).toContain('data-testid="custom-copy"');
-        const icons = markup.match(/<svg\b[^>]*>/g) ?? [];
-        expect(icons).toHaveLength(2);
-        expect(icons[0]).toContain('width="18"');
-        expect(icons[0]).toContain('stroke-width="2"');
     });
 
     test("keeps the default leading icon and allows explicitly omitting it", () => {

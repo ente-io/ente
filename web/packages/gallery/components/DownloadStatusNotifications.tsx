@@ -5,15 +5,7 @@ import {
     ReloadIcon,
     Tick02Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-    Box,
-    Button,
-    Dialog,
-    keyframes,
-    styled,
-    Typography,
-} from "@mui/material";
+import { Box, Button, Dialog, styled, Typography } from "@mui/material";
 import {
     Notification,
     type NotificationAttributes,
@@ -186,22 +178,14 @@ export const DownloadStatusNotifications: React.FC<
                 if (hasErrors) {
                     startIcon = AlertCircleIcon;
                 } else if (isComplete) {
-                    startIcon = (
-                        <GlowingIconWrapper>
-                            <HugeiconsIcon icon={Tick02Icon} size={28} />
-                        </GlowingIconWrapper>
-                    );
+                    startIcon = Tick02Icon;
                 } else if (
                     group.total === 1 ||
                     (isZipDownload && !group.isDownloadingZip)
                 ) {
-                    startIcon = <SpinningIcon />;
+                    startIcon = Loading03Icon;
                 } else {
-                    startIcon = (
-                        <DroppingIconWrapper>
-                            <HugeiconsIcon icon={Download01Icon} size={28} />
-                        </DroppingIconWrapper>
-                    );
+                    startIcon = Download01Icon;
                 }
 
                 const filesCountTitle = t("files_count", {
@@ -382,47 +366,3 @@ const StopDownloadPrimaryButton = styled(Button)(({ theme }) => ({
     color: theme.vars.palette.critical.contrastText,
     "&:hover": { backgroundColor: theme.vars.palette.critical.dark },
 }));
-
-const spinAnimation = keyframes`
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-`;
-
-const dropAnimation = keyframes`
-    0% { transform: translateY(-100%); opacity: 0.15; }
-    50% { transform: translateY(10%); opacity: 0.6; }
-    100% { transform: translateY(0); opacity: 1; }
-`;
-
-const glowAnimation = keyframes`
-    0% { color: var(--mui-palette-fixed-success); }
-    100% { color: inherit; }
-`;
-
-const fadeInAnimation = keyframes`
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-`;
-
-const DroppingIconWrapper = styled("span")`
-    display: inline-flex;
-    animation: ${dropAnimation} 0.8s ease-out forwards;
-`;
-
-const GlowingIconWrapper = styled("span")`
-    display: inline-flex;
-    animation: ${glowAnimation} 2s ease-out forwards;
-`;
-
-const SpinningIconWrapper = styled("span")`
-    display: inline-flex;
-    animation:
-        ${fadeInAnimation} 0.5s ease-out forwards,
-        ${spinAnimation} 3s linear infinite;
-`;
-
-const SpinningIcon: React.FC = () => (
-    <SpinningIconWrapper>
-        <HugeiconsIcon icon={Loading03Icon} size={28} />
-    </SpinningIconWrapper>
-);
