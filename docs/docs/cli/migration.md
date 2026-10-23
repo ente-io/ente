@@ -13,7 +13,7 @@ A typical switch, for someone whose previous CLI keeps a Photos export up to dat
 
 Each step, every command and option change, and scripts that parse output are covered below.
 
-Instructions for the previous CLI remain available for [Photos exports](/photos/features/utilities/cli) and [self-hosted servers](/self-hosting/administration/cli).
+Instructions for the previous CLI remain available for [Photos exports](/photos/features/utilities/cli), [self-hosted servers](/self-hosting/administration/cli) and [keyring troubleshooting](/self-hosting/troubleshooting/cli).
 
 ## Identify which executable runs
 
