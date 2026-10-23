@@ -1,8 +1,6 @@
 // TODO: Audit this file (the code here is mostly fine, but needs revisiting
 // the file it depends on have been audited and their interfaces fixed).
 /* eslint-disable react-hooks/exhaustive-deps */
-import type { AddToAlbumPhase } from "@/components/AlbumAddedNotification";
-import { AlbumAddedNotification } from "@/components/AlbumAddedNotification";
 import { AuthenticateUser } from "@/components/AuthenticateUser";
 import {
     CollectionSelector,
@@ -81,6 +79,7 @@ import { isSessionInvalid } from "ente-accounts/services/session";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import { Notification } from "ente-base/components/Notification";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
@@ -342,12 +341,10 @@ const Page: React.FC = () => {
         })();
     }, [mapEnabled, onGenericError, showCollectionMap]);
 
-    const [addToAlbumProgress, setAddToAlbumProgress] = useState<{
+    const [albumAddedNotification, setAlbumAddedNotification] = useState<{
         open: boolean;
-        phase: AddToAlbumPhase;
-        albumId?: number;
         albumName?: string;
-    }>({ open: false, phase: "processing" });
+    }>({ open: false });
     const [publicLinkToast, setPublicLinkToast] = useState<{
         open: boolean;
         url?: string;
@@ -1207,10 +1204,8 @@ const Page: React.FC = () => {
                         silent: true,
                         source: "single-file-add-new-album",
                     });
-                    setAddToAlbumProgress({
+                    setAlbumAddedNotification({
                         open: true,
-                        phase: "done",
-                        albumId: collection.id,
                         albumName: collection.name,
                     });
                     setOpenCollectionSelector(false);
@@ -2061,7 +2056,7 @@ const Page: React.FC = () => {
 
             const handleSelect = async (collection: Collection) => {
                 try {
-                    setAddToAlbumProgress({ open: true, phase: "processing" });
+                    setAlbumAddedNotification({ open: false });
                     showLoadingBar();
                     await performCollectionOp(
                         "add",
@@ -2073,10 +2068,8 @@ const Page: React.FC = () => {
                         silent: true,
                         source: "single-file-add-to-album",
                     });
-                    setAddToAlbumProgress({
+                    setAlbumAddedNotification({
                         open: true,
-                        phase: "done",
-                        albumId: collection.id,
                         albumName: collection.name,
                     });
                 } catch (e) {
@@ -2573,13 +2566,18 @@ const Page: React.FC = () => {
                     }
                 />
             </FullScreenDropZone>
-            <AlbumAddedNotification
-                open={addToAlbumProgress.open}
+            <Notification
+                open={albumAddedNotification.open}
                 onClose={() =>
-                    setAddToAlbumProgress((s) => ({ ...s, open: false }))
+                    setAlbumAddedNotification((s) => ({ ...s, open: false }))
                 }
-                phase={addToAlbumProgress.phase}
-                albumName={addToAlbumProgress.albumName}
+                keepOpenOnClick
+                attributes={{
+                    color: "inherit",
+                    startIcon: null,
+                    title: t("added_to_album"),
+                    caption: albumAddedNotification.albumName,
+                }}
             />
             <EditLocationDialog
                 {...editLocationVisibilityProps}
