@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.1 - Oct 2026
+
+- Fixed saved logins becoming unreadable when using KeePassXC for system secret storage on Linux.
+
 ## v0.4.0 - Oct 2026
 
 - Export your Photos library to a folder and keep it up to date. Take over an export made by the previous CLI or the desktop app with `--adopt`.
