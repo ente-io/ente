@@ -3,7 +3,7 @@ import {
     Cancel01Icon,
     InformationCircleIcon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
     Box,
     IconButton,
@@ -23,15 +23,17 @@ import { isSxArray } from "ente-base/components/utils/sx";
 import { t } from "i18next";
 import React from "react";
 
+type NotificationIcon = IconSvgElement | React.ReactElement | null;
+
 export interface NotificationAttributes {
     captionFirst?: boolean;
     color: ButtonProps["color"];
     // Set to null to omit the leading icon.
-    startIcon?: React.ReactNode;
+    startIcon?: NotificationIcon;
     title: React.ReactNode;
     caption?: React.ReactNode;
     onClick?: () => void;
-    endIcon?: React.ReactNode;
+    endIcon?: NotificationIcon;
     endIconLabel?: string;
     showCloseButtonWithEndIcon?: boolean;
     onEndIconClick?: () => void;
@@ -45,6 +47,13 @@ type NotificationProps = ModalVisibilityProps & {
     autoHideDuration?: number;
     sx?: SxProps<Theme>;
 };
+
+const renderIcon = (icon: NotificationIcon | undefined, size: number) =>
+    React.isValidElement(icon) || icon == null ? (
+        icon
+    ) : (
+        <HugeiconsIcon icon={icon} size={size} strokeWidth={1.8} />
+    );
 
 const actionButtonSx = {
     width: 38,
@@ -127,13 +136,7 @@ export const Notification: React.FC<NotificationProps> = ({
                         svg: { width: 24, height: 24, fontSize: 24 },
                     }}
                 >
-                    {startIcon ?? (
-                        <HugeiconsIcon
-                            icon={InformationCircleIcon}
-                            size={24}
-                            strokeWidth={1.8}
-                        />
-                    )}
+                    {renderIcon(startIcon ?? InformationCircleIcon, 24)}
                 </Stack>
             )}
             <Stack
@@ -250,7 +253,7 @@ export const Notification: React.FC<NotificationProps> = ({
                             }}
                             sx={buttonSx}
                         >
-                            {endIcon}
+                            {renderIcon(endIcon, 22)}
                         </IconButton>
                     )}
                     {(!endIcon || showCloseButtonWithEndIcon) && (
@@ -262,11 +265,7 @@ export const Notification: React.FC<NotificationProps> = ({
                             }}
                             sx={buttonSx}
                         >
-                            <HugeiconsIcon
-                                icon={Cancel01Icon}
-                                size={22}
-                                strokeWidth={1.8}
-                            />
+                            {renderIcon(Cancel01Icon, 22)}
                         </IconButton>
                     )}
                 </Stack>

@@ -7,7 +7,6 @@ import {
     ShareIcon,
 } from "@/public-album/components/ActionIcons";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { t } from "i18next";
@@ -105,13 +104,7 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
                     horizontal="left"
                     attributes={{
                         color: "secondary",
-                        startIcon: (
-                            <HugeiconsIcon
-                                icon={Tick02Icon}
-                                size={24}
-                                strokeWidth={1.8}
-                            />
-                        ),
+                        startIcon: Tick02Icon,
                         title: "Copied!",
                     }}
                 />

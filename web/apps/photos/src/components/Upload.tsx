@@ -22,7 +22,6 @@ import {
 } from "@/services/upload-manager";
 import watcher from "@/services/watch";
 import { Database02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { Dialog, type DialogProps } from "@mui/material";
 import type { LocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
@@ -1130,13 +1129,7 @@ export const Upload: React.FC<UploadProps> = ({
                     caption: t("storage_quota_exceeded"),
                     title: t("upgrade_now"),
                     onClick: onShowPlanSelector,
-                    startIcon: (
-                        <HugeiconsIcon
-                            icon={Database02Icon}
-                            size={24}
-                            strokeWidth={1.8}
-                        />
-                    ),
+                    startIcon: Database02Icon,
                 });
                 break;
             default:

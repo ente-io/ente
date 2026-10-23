@@ -14,7 +14,10 @@ import {
     styled,
     Typography,
 } from "@mui/material";
-import { Notification } from "ente-base/components/Notification";
+import {
+    Notification,
+    type NotificationAttributes,
+} from "ente-base/components/Notification";
 import { useBaseContext } from "ente-base/context";
 import {
     isSaveComplete,
@@ -180,15 +183,9 @@ export const DownloadStatusNotifications: React.FC<
                     </Box>
                 );
 
-                let startIcon: React.ReactNode;
+                let startIcon: NotificationAttributes["startIcon"];
                 if (hasErrors) {
-                    startIcon = (
-                        <HugeiconsIcon
-                            icon={AlertCircleIcon}
-                            size={24}
-                            strokeWidth={1.8}
-                        />
-                    );
+                    startIcon = AlertCircleIcon;
                 } else if (isComplete) {
                     startIcon = (
                         <GlowingIconWrapper>
@@ -252,13 +249,7 @@ export const DownloadStatusNotifications: React.FC<
                             title: truncatedName,
                             caption,
                             onClick: createOnClick(group),
-                            endIcon: canRetry ? (
-                                <HugeiconsIcon
-                                    icon={ReloadIcon}
-                                    size={22}
-                                    strokeWidth={1.8}
-                                />
-                            ) : undefined,
+                            endIcon: canRetry ? ReloadIcon : undefined,
                             onEndIconClick: canRetry
                                 ? () => group.retry?.()
                                 : undefined,
