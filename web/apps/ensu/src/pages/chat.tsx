@@ -3188,7 +3188,7 @@ const Page: React.FC = () => {
                             collection.status !== "error",
                     )
                     .map((collection) => collection.id);
-                const knowledgeQuery = parseDocumentBlocks(promptText)
+                const knowledgeQuery = parseDocumentBlocks(parentMessage.text)
                     .text.replaceAll(MEDIA_MARKER, "")
                     .replace(/\[\d+ image attachments? provided\]/gi, "")
                     .trim();
