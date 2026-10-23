@@ -215,18 +215,7 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 			if err != nil {
 				return file, stacktrace.Propagate(err, "")
 			}
-			_, existingApp, err := c.FileRepo.GetOwnerAndApp(existing.ID)
-			if err != nil {
-				return file, stacktrace.Propagate(err, "")
-			}
-			if existingApp != "" && existingApp != app {
-				return file, stacktrace.Propagate(ente.ErrPermissionDenied, "file app does not match request app")
-			}
-			file, err = c.onDuplicateObjectDetected(ctx, file, existing, hotDC)
-			if err != nil {
-				return file, stacktrace.Propagate(err, "")
-			}
-			return file, nil
+			return c.onDuplicateObjectDetected(ctx, file, existing, hotDC, app)
 		}
 		return file, stacktrace.Propagate(err, "")
 	}
@@ -968,7 +957,7 @@ func (c *FileController) sizeOf(ctx context.Context, objectKey string) (int64, e
 	return -1, stacktrace.Propagate(err, "")
 }
 
-func (c *FileController) onDuplicateObjectDetected(ctx *gin.Context, file ente.File, existing ente.File, hotDC string) (ente.File, error) {
+func (c *FileController) onDuplicateObjectDetected(ctx *gin.Context, file ente.File, existing ente.File, hotDC string, app ente.App) (ente.File, error) {
 	newJSON, _ := json.Marshal(file)
 	existingJSON, _ := json.Marshal(existing)
 	log.Info("Comparing " + string(newJSON) + " against " + string(existingJSON))
@@ -981,12 +970,18 @@ func (c *FileController) onDuplicateObjectDetected(ctx *gin.Context, file ente.F
 		file.Metadata.EncryptedData == existing.Metadata.EncryptedData &&
 		file.Metadata.DecryptionHeader == existing.Metadata.DecryptionHeader &&
 		file.OwnerID == existing.OwnerID {
+		_, existingApp, err := c.FileRepo.GetOwnerAndApp(existing.ID)
+		if err != nil {
+			return file, stacktrace.Propagate(err, "")
+		}
+		if existingApp != "" && existingApp != app {
+			return file, stacktrace.Propagate(ente.ErrPermissionDenied, "file app does not match request app")
+		}
 		file.ID = existing.ID
 		return file, nil
-	} else {
-		go c.onExistingObjectsReplaced(ctx, file, hotDC)
-		return ente.File{}, ente.ErrBadRequest
 	}
+	go c.onExistingObjectsReplaced(ctx, file, hotDC)
+	return ente.File{}, ente.ErrBadRequest
 }
 
 func (c *FileController) safeAlert(msg string) {

@@ -147,13 +147,15 @@ func TestFileUpdateUploadBinding(t *testing.T) {
 
 func TestDuplicateFileRegistrationAppBinding(t *testing.T) {
 	for _, tc := range []struct {
-		name   string
-		app    ente.App
-		legacy bool
+		name      string
+		app       ente.App
+		legacy    bool
+		collision bool
 	}{
 		{name: "photos", app: ente.Photos},
 		{name: "wrong app", app: ente.Locker},
 		{name: "legacy cross-app", app: ente.Locker, legacy: true},
+		{name: "cross-app collision", app: ente.Locker, collision: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			controller, file, db := setupFileUploadBindingTest(t, ente.Photos)
@@ -168,14 +170,31 @@ func TestDuplicateFileRegistrationAppBinding(t *testing.T) {
 				_, err := db.Exec(`UPDATE collections SET app = 'locker' WHERE collection_id = $1`, file.CollectionID)
 				require.NoError(t, err)
 			}
+			_, err := db.Exec(`UPDATE object_copies SET wasabi = 1`)
+			require.NoError(t, err)
+			if tc.collision {
+				file.File.DecryptionHeader = "replacement-header"
+			}
 			ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
 			ctx.Request = httptest.NewRequest(http.MethodPost, "/files", nil)
 			result, err := controller.Create(ctx, file.OwnerID, file, "test", tc.app)
-			if tc.legacy || tc.app == ente.Photos {
+			if tc.collision {
+				require.ErrorIs(t, err, ente.ErrBadRequest)
+				require.Eventually(t, func() bool {
+					var pending int
+					err := db.QueryRow(`SELECT COUNT(*) FROM object_copies WHERE wasabi IS NULL`).Scan(&pending)
+					return err == nil && pending == 2
+				}, 2*time.Second, 10*time.Millisecond)
+			} else if tc.legacy || tc.app == ente.Photos {
 				require.NoError(t, err)
 				require.Equal(t, fileID, result.ID)
 			} else {
 				require.ErrorIs(t, err, ente.ErrPermissionDenied)
+			}
+			if !tc.collision {
+				var replicated int
+				require.NoError(t, db.QueryRow(`SELECT COUNT(*) FROM object_copies WHERE wasabi = 1`).Scan(&replicated))
+				require.Equal(t, 2, replicated)
 			}
 		})
 	}
@@ -184,6 +203,10 @@ func TestDuplicateFileRegistrationAppBinding(t *testing.T) {
 func setupFileUploadBindingTest(t *testing.T, app ente.App) (*FileController, ente.File, *sql.DB) {
 	t.Helper()
 	s3Server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && r.URL.Query().Has("versions") {
+			_, _ = w.Write([]byte(`<ListVersionsResult/>`))
+			return
+		}
 		if r.Method != http.MethodHead {
 			t.Errorf("unexpected storage request: %s", r.Method)
 			w.WriteHeader(http.StatusBadRequest)
