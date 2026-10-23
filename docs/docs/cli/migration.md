@@ -1,6 +1,6 @@
 # Migration
 
-Ente's original CLI was written in Go. The new CLI, written in Rust, was introduced in October 2026 starting with version 0.4.0. The previous CLI (the `cli-v0.x` releases) keeps working and stays supported during the transition, but new development happens only in the new CLI.
+Ente's original CLI was written in Go. The new CLI, written in Rust, was introduced in October 2026 starting with version 0.4.0. The previous CLI (the `cli-v0.3.x` releases) keeps working and stays supported during the transition, but new development happens only in the new CLI.
 
 The two can be installed side by side, and nothing changes until you act: the new CLI does not read the previous CLI's settings or credentials, and it leaves your exports alone until you ask it to adopt them. Commands have changed; `ente help migration` prints each old command next to its replacement.
 
@@ -12,6 +12,8 @@ A typical switch, for someone whose previous CLI keeps a Photos export up to dat
 4. Point the scheduled job at the new CLI, then remove the previous one.
 
 Each step, every command and option change, and scripts that parse output are covered below.
+
+Instructions for the previous CLI remain available for [Photos exports](/photos/features/utilities/cli) and [self-hosted servers](/self-hosting/administration/cli).
 
 ## Identify which executable runs
 
@@ -34,19 +36,19 @@ See all command changes with:
 ## Log in again
 
 ```sh
-ente account login --account personal --app photos
-ente account login --account personal --app auth
+ente account login --app photos
+ente account login --app auth
 ```
 
-Each app needs its own login. Accounts are selected by a local name with `--account`, not by email. The CLI home replaces the previous configuration directory: set `ENTE_CLI_HOME` where you used `ENTE_CLI_CONFIG_DIR`. `ENTE_CLI_SECRETS_PATH` has no equivalent; for a headless machine, use `ENTE_CLI_VAULT_KEY` as described in [Accounts](./accounts.md#set-up-a-headless-machine). Learn more in [Accounts](./accounts.md).
+Each app needs its own login. Commands use the selected account. Use `--account NAME` to choose another saved account by its local name. The CLI home replaces the previous configuration directory: set `ENTE_CLI_HOME` where you used `ENTE_CLI_CONFIG_DIR`. `ENTE_CLI_SECRETS_PATH` has no equivalent; for a headless machine, use `ENTE_CLI_VAULT_KEY` as described in [Accounts](./accounts.md#set-up-a-headless-machine). Learn more in [Accounts](./accounts.md).
 
 ## Replace saved export jobs
 
 The previous CLI stored an export directory per account (`account update --dir`) and exported every account with one `export` command. The new CLI takes the destination on each run, one command per account and app:
 
 ```sh
-ente photos export "$HOME/Pictures/Ente" --account personal
-ente auth export "$HOME/Backups/Auth" --account personal
+ente photos export "$HOME/Pictures/Ente"
+ente auth export "$HOME/Backups/Auth"
 ```
 
 Update your cron jobs or scheduled tasks accordingly. Learn more in [Automation](./automation.md).
@@ -57,8 +59,8 @@ The new CLI can adopt (`--adopt`) an export made by the previous CLI and keep ma
 
 1. Stop the previous CLI's export job, and any schedule that runs it.
 2. Keep a copy of the export directory if you want a way back.
-3. Log in: `ente account login --account personal --app photos`.
-4. Run `ente photos export "$HOME/Pictures/Ente" --adopt --account personal`. Pass the same album filters the previous job used (`--album` for each album, `--exclude-album`, `--exclude-shared`, `--exclude-hidden`), or none when it exported everything. The CLI checks the existing files before taking over.
+3. Log in: `ente account login --app photos`.
+4. Run `ente photos export "$HOME/Pictures/Ente" --adopt`. Pass the same album filters the previous job used (`--album` for each album, `--exclude-album`, `--exclude-shared`, `--exclude-hidden`), or none when it exported everything. The CLI checks the existing files before taking over.
 5. Check the summary line: every album copy should be complete with no failures, and the previous CLI's files should be in place under their album folders.
 6. Point your schedule at the new command without `--adopt` but with the same album filters; a run without them exports every album.
 

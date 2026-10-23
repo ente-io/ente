@@ -3,13 +3,13 @@
 Log in to Photos:
 
 ```sh
-ente account login --account personal --app photos
+ente account login --app photos
 ```
 
 The CLI asks for your email and password, then for an email verification code or an authenticator code when your account requires one. When it works, it prints the saved account:
 
 ```
-Name       personal
+Name       alice@example.com
 Email      alice@example.com
 Host       https://api.ente.com
 Logged in  photos
@@ -26,7 +26,7 @@ If your account uses a passkey, the CLI opens your browser, or prints the link i
 Each app has its own login. Log the same account into Auth:
 
 ```sh
-ente account login --account personal --app auth
+ente account login --app auth
 ```
 
 `Logged in` now shows `photos,auth`.
@@ -46,23 +46,23 @@ ente account list
 ```
 
 ```
-SELECTED  NAME         EMAIL              HOST                     LOGGED IN    ID
-*         personal     alice@example.com  https://api.ente.com     photos,auth  1580559962386438
-          home-server  alice@example.com  https://api.example.org  photos       3
+SELECTED  NAME               EMAIL              HOST                     LOGGED IN    ID
+          alice@example.com  alice@example.com  https://api.ente.com     photos,auth  1580559962386438
+*         home-server        alice@example.com  https://api.example.org  photos       3
 ```
 
-Commands use the selected account. Adding an account selects it; logging in to an existing one keeps the selection. Change the selection with `ente account switch home-server`, or pick an account for one command with `--account NAME` after the subcommand. `ente account rename personal alice` changes a local name.
+Commands use the selected account. Adding an account selects it; logging in to an existing one keeps the selection. Change the selection with `ente account switch home-server`, or pick an account for one command with `--account NAME` after the subcommand. `ente account rename alice@example.com personal` changes a local name.
 
 ## Create an account
 
 ```sh
-ente account create --account personal --app photos
+ente account create --app photos
 ```
 
-The CLI asks for your email, consent to the terms, the verification code it emails you, and a password. It prints `Created personal and signed into Ente Photos.` Then print and store your recovery key:
+The CLI asks for your email, consent to the terms, the verification code it emails you, and a password. It prints `Created alice@example.com and signed into Ente Photos.` Then print and store your recovery key:
 
 ```sh
-ente account recovery-key --account personal
+ente account recovery-key
 ```
 
 If creation is interrupted, run the same `account create` command again with the same CLI home and password; it resumes with its saved keys. If the server already has the account, run `ente account login` instead; it completes the login and clears the unfinished creation.
@@ -91,7 +91,7 @@ ente account login --account personal --app photos --input credentials.json --no
 ## Protect login with an authenticator
 
 ```sh
-ente account totp enable --account personal
+ente account totp enable
 ```
 
 The CLI prints a secret to add to your authenticator app, asks for a code from it, and prints `Authenticator protection is enabled.` Without prompts, run `ente account totp setup` to get the secret, then `ente account totp enable --input -` with `{"secret": "...", "totp": "..."}`. `ente account totp status` shows the current setting. This protects your account login and is separate from the codes stored in Auth.
@@ -99,7 +99,7 @@ The CLI prints a secret to add to your authenticator app, asks for a code from i
 ## Get a token
 
 ```sh
-ente account token --account personal --app photos
+ente account token --app photos
 ```
 
 Prints the saved API token for that app login. It is a secret. With `--json` the result is `{"token": "..."}`.
@@ -107,10 +107,10 @@ Prints the saved API token for that app login. It is a secret. With `--json` the
 ## Log out
 
 ```sh
-ente account logout --account personal --app auth
+ente account logout --app auth
 ```
 
-Prints `Logged out of Ente Auth for "personal".` Without `--app`, the CLI logs out of every app and removes the account and its local data: `Logged out of Ente Photos and Ente Auth. Removed account "personal" from this device.` `ente account logout --account personal --local` forgets the account on this computer without contacting the server; it cannot be combined with `--app`.
+Prints `Logged out of Ente Auth for "alice@example.com".` Without `--app`, the CLI logs out of every app and removes the account and its local data: `Logged out of Ente Photos and Ente Auth. Removed account "alice@example.com" from this device.` `ente account logout --local` forgets the account on this computer without contacting the server; it cannot be combined with `--app`.
 
 ## CLI home
 

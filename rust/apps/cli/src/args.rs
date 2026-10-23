@@ -5,7 +5,12 @@ use clap_complete::Shell;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
-#[command(name = "ente", version, about = "Ente client for terminals and agents")]
+#[command(
+    name = "ente",
+    version,
+    about = "Ente client for terminals and agents",
+    after_help = "Documentation: https://ente.com/help/cli/"
+)]
 pub struct Cli {
     #[command(flatten, next_help_heading = "Global options")]
     pub options: Options,
