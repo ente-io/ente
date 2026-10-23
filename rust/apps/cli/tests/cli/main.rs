@@ -1036,6 +1036,15 @@ fn native_keyring_survives_separate_processes() {
             assert_eq!(account["id"], "42");
             assert_eq!(account["email"], "new@example.org");
             assert_eq!(account["apps"], json!(["photos"]));
+            #[cfg(target_os = "linux")]
+            {
+                let stored = keyring::Entry::new("io.ente.cli", &path.to_string_lossy())
+                    .unwrap()
+                    .get_password()
+                    .unwrap();
+                let key = Key::try_from_slice(&b64::decode(&stored).unwrap()).unwrap();
+                blob::decrypt_combined(&home.read_encrypted_vault(), &key).unwrap();
+            }
             verify.assert_async().await;
             attrs.assert_async().await;
         });

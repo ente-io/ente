@@ -1,0 +1,1 @@
+- Fixed saved logins becoming unreadable when using KeePassXC for system secret storage on Linux.
