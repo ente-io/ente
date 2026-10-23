@@ -89,6 +89,7 @@ export const Notification: React.FC<NotificationProps> = ({
                 : 3000
             : autoHideDuration;
     const neutral = !color || color === "inherit";
+    const isClickable = !!onClick || !keepOpenOnClick;
     const buttonSx = {
         ...actionButtonSx,
         ...(neutral && {
@@ -194,7 +195,12 @@ export const Notification: React.FC<NotificationProps> = ({
             ]}
         >
             <Paper
+                onClick={isClickable ? handleClick : undefined}
                 sx={{
+                    cursor: isClickable ? "pointer" : undefined,
+                    "&:hover": {
+                        bgcolor: isClickable ? "action.hover" : undefined,
+                    },
                     width: "100%",
                     minWidth: 0,
                     display: "flex",
@@ -210,18 +216,18 @@ export const Notification: React.FC<NotificationProps> = ({
                     fontFamily: '"Outfit Variable", sans-serif',
                 }}
             >
-                {onClick || !keepOpenOnClick ? (
+                {isClickable ? (
                     <RippleDisabledButton
                         variant="text"
                         color="inherit"
                         aria-labelledby={contentID}
-                        onClick={handleClick}
                         sx={{
                             flex: 1,
                             minWidth: 0,
                             p: 0,
                             fontFamily: "inherit",
                             textAlign: "left",
+                            "&:hover": { bgcolor: "transparent" },
                             "&.Mui-focusVisible": {
                                 outline: "2px solid currentColor",
                                 outlineOffset: 2,
