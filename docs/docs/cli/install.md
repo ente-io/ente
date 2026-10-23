@@ -27,6 +27,12 @@ Use the name of the archive you downloaded. On Linux, `sha256sum --check --ignor
 
 On Linux, keep the CLI in its own directory: `/usr/bin/ente` may belong to the Ente Photos desktop app.
 
+On macOS, if you downloaded the archive with a browser, the first run is refused. Remove the quarantine flag, then run it again:
+
+```sh
+xattr -d com.apple.quarantine ~/.local/opt/ente-cli/bin/ente
+```
+
 **On Windows (PowerShell):** download the archive and `SHA256SUMS` from the release page, then:
 
 ```powershell
