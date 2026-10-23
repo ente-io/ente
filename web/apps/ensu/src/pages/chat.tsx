@@ -220,9 +220,17 @@ const IMAGE_SELECTOR_EXTENSIONS = [
 ] as const;
 const MAX_IMAGE_ATTACHMENTS_PER_MESSAGE = 2;
 
-const buildPromptWithImages = (text: string, imageCount: number) => {
-    if (imageCount <= 0) return text;
+const buildPromptWithImages = (
+    text: string,
+    imageCount: number,
+    documents: DocumentAttachment[],
+) => {
     let prompt = text;
+    if (imageCount > 0 && !prompt.trim()) {
+        prompt = "Describe the attached images.";
+    }
+    prompt = buildPromptWithDocuments(prompt, documents);
+    if (imageCount <= 0) return prompt;
     prompt += `\n\n[${imageCount} image attachment${imageCount === 1 ? "" : "s"} provided]`;
     for (let index = 0; index < imageCount; index += 1) {
         prompt += `\n${MEDIA_MARKER}`;
@@ -3185,7 +3193,7 @@ const Page: React.FC = () => {
                             collection.status !== "error",
                     )
                     .map((collection) => collection.id);
-                const knowledgeQuery = parseDocumentBlocks(promptText)
+                const knowledgeQuery = parseDocumentBlocks(parentMessage.text)
                     .text.replaceAll(MEDIA_MARKER, "")
                     .replace(/\[\d+ image attachments? provided\]/gi, "")
                     .trim();
@@ -4297,8 +4305,9 @@ const Page: React.FC = () => {
                 await refreshSessions();
             }
 
+            const userText = trimmed.replaceAll("\0", "");
             const messageText = buildPromptWithDocuments(
-                trimmed.replaceAll("\0", ""),
+                userText,
                 pendingDocuments,
             );
             const persistedAttachmentIds = new Set(
@@ -4403,8 +4412,9 @@ const Page: React.FC = () => {
             }
 
             const promptText = buildPromptWithImages(
-                messageText,
+                userText,
                 inferenceImagePaths.length,
+                pendingDocuments,
             );
 
             composerRef.current?.setText("");
