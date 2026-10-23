@@ -30,10 +30,12 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/guest_view_event.dart';
 import "package:photos/locale.dart";
 import 'package:photos/module/upload/service/file_uploader.dart';
 import 'package:photos/module/upload/service/local_file_update_service.dart';
@@ -177,7 +179,10 @@ Future<void> _runInForeground(
         enabled:
             await LockScreenSettings.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
-        onUnlock: () => unawaited(localSettings.setOnGuestView(false)),
+        onUnlock: () {
+          unawaited(localSettings.setOnGuestView(false));
+          Bus.instance.fire(GuestViewEvent(false, false));
+        },
         locale: locale,
         supportedLocales: appSupportedLocales,
         localizationsDelegates: const [
