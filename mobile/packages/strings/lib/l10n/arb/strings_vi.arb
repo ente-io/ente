@@ -133,6 +133,7 @@
       "count": {}
     }
   },
+  "addItems": "Thêm mục",
   "addLocation": "Thêm vị trí",
   "addLocationButton": "Thêm",
   "addMember": "Thêm thành viên",
@@ -168,6 +169,7 @@
   "addTo": "Thêm vào",
   "addToAlbum": "Thêm vào album",
   "addToCollection": "Thêm vào bộ sưu tập",
+  "addToCollections": "Thêm vào bộ sưu tập",
   "addToEnte": "Thêm vào Ente",
   "addToHiddenAlbum": "Thêm vào album ẩn",
   "addToPerson": "Thêm vào người",
@@ -435,6 +437,10 @@
   "backupFailed": "Sao lưu thất bại",
   "backupFile": "Sao lưu tệp",
   "backupFolderLabel": "Thư mục sao lưu:",
+  "backupLatestPhotos": "Sao lưu những ảnh gần nhất",
+  "@backupLatestPhotos": {
+    "description": "Button on the photo permission screen that backs up only recent photos"
+  },
   "backupLocationChoiceDescription": "Bạn muốn lưu bản sao lưu của mình ở đâu?",
   "backupMode": "Chế độ sao lưu",
   "backupModeBackingUpItems": "{count, plural, other{Đang sao lưu {formattedCount} mục}}",
@@ -595,6 +601,10 @@
   "checkStatus": "Kiểm tra trạng thái",
   "@checkStatus": {
     "description": "Check status button label"
+  },
+  "chooseAlbumsToBackup": "Chọn album để sao lưu",
+  "@chooseAlbumsToBackup": {
+    "description": "Button on the photo permission screen that opens album selection for backup"
   },
   "chooseARecoveryTime": "Chọn thời điểm khôi phục",
   "chooseBackupLocation": "Chọn nơi sao lưu",
@@ -1084,6 +1094,8 @@
   "disablingTwofactorAuthentication": "Đang vô hiệu hóa xác thực 2 bước...",
   "discardChanges": "Huy bo",
   "discardEditsQuestion": "Bỏ chỉnh sửa?",
+  "discardUploadMessage": "Không thể lưu những mục bạn đã chọn.",
+  "discardUploadTitle": "Hủy việc tải lên?",
   "discover": "Khám phá",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -1496,23 +1508,6 @@
       }
     }
   },
-  "memoryLaneCaptionNow": "{name} {now}",
-  "@memoryLaneCaptionNow": {
-    "description": "Memory Lane caption for a photo taken less than a year ago, without a number. Keep both placeholders in the natural word order for your language.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "now": {
-        "type": "String",
-        "description": "The localized word for now, rendered in a handwritten style. Keep this placeholder rather than writing the word directly."
-      }
-    }
-  },
-  "memoryLaneNow": "bây giờ",
-  "@memoryLaneNow": {
-    "description": "The current moment in a Memory Lane caption, such as Ashil now. This word is styled separately from the person's name."
-  },
   "facesTimelinePlaybackPause": "Dừng",
   "@facesTimelinePlaybackPause": {
     "description": "Tooltip or semantics label for the pause button"
@@ -1871,6 +1866,9 @@
   "grantPermissionDesc": "Vui lòng cho phép Ente truy cập thư viện của bạn để chúng tôi có thể sắp xếp bằng nhận diện khuôn mặt. Toàn bộ quá trình này diễn ra trên thiết bị của bạn.",
   "greenery": "Cây cối",
   "grid": "Lưới",
+  "photosInOriginalProportions": "Ảnh ở tỷ lệ ban đầu",
+  "squarePhotos": "Ảnh vuông",
+  "photosPerRow": "Số lượng ảnh mỗi hàng",
   "groupBy": "Phân nhóm theo",
   "groupByDay": "Ngày",
   "groupByMonth": "Tháng",
@@ -2121,6 +2119,7 @@
       }
     }
   },
+  "itemsLabel": "Mục",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Trên các mục là số ngày còn lại trước khi xóa vĩnh viễn",
   "itemsStored": "Những mục đã lưu trữ",
   "itemsWillBeDeletedFromAllCollections": "{count, plural, other{Các mục này sẽ bị xóa khỏi tất cả các bộ sưu tập. Bạn có thể khôi phục chúng từ Thùng rác.}}",
@@ -2627,7 +2626,10 @@
   "mlConsent": "Bật học máy",
   "mlConsentConfirmation": "Tôi hiểu và muốn bật học máy",
   "mlConsentDescription": "Nếu bạn bật học máy, Ente sẽ trích xuất thông tin như hình dạng khuôn mặt từ các tệp, gồm cả những tệp mà bạn được chia sẻ.\n\nViệc này sẽ diễn ra trên thiết bị của bạn, với mọi thông tin sinh trắc học tạo ra đều được mã hóa đầu cuối.",
-  "mlConsentPrivacy": "Vui lòng nhấn vào đây để biết thêm chi tiết về tính năng này trong chính sách quyền riêng tư của chúng tôi",
+  "mlConsentPrivacyDetails": "Vui lòng <policy>nhấn vào đây</policy> để biết thêm chi tiết về chính sách bảo mật",
+  "@mlConsentPrivacyDetails": {
+    "description": "Machine learning consent screen sentence; only the text inside the policy tags is tappable and opens the privacy policy"
+  },
   "mlCouldNotProcessItems": "{count, plural, other{Không thể xử lý {count} mục}}",
   "@mlCouldNotProcessItems": {
     "description": "Title shown when machine learning could not process one or more items",
@@ -3232,6 +3234,7 @@
     }
   },
   "publicLink": "Liên kết công khai",
+  "publicCollectionLinkAccessDescription": "Bất kỳ ai có liên kết đều có thể mở bộ sưu tập mà không cần tài khoản Ente.",
   "publicLinkAccessDescription": "Bất kỳ ai có liên kết đều có thể mở album mà không cần tài khoản Ente.",
   "publicLinkCollectDescription": "Bất kỳ ai có liên kết đều có thể thêm ảnh vào album của bạn.",
   "publicLinkEnabled": "Liên kết công khai đã được bật",
@@ -4245,6 +4248,7 @@
   "sortAToZ": "A-Z",
   "sortNewestFirst": "Mới nhất trước",
   "sortOldestFirst": "Cũ nhất trước",
+  "sortPhotos": "Sắp xếp ảnh",
   "sortZToA": "Z-A",
   "speed": "Tốc độ",
   "sportsAction": "Trò chơi",
@@ -4584,6 +4588,7 @@
   "unavailableReferralCode": "Mã này đã được dùng",
   "uncategorized": "Chưa phân loại",
   "uncategorizedItemsWillShowUpHere": "Những mục chưa phân loại sẽ hiển thị ở đây",
+  "uncategorizedUploadHint": "Nếu bạn bỏ qua, các mục sẽ được cho vào Chưa phân loại",
   "undo": "Hoàn tác",
   "unhide": "Hiện lại",
   "unhideToAlbum": "Hiện lại trong album",
@@ -4682,6 +4687,7 @@
     }
   },
   "uploadingSingleMemory": "Đang lưu giữ 1 kỷ niệm...",
+  "uploadItemsRemoved": "Không còn mục nào để tải lên",
   "uploadIsIgnoredDueToIgnorereason": "Tải lên bị bỏ qua do {ignoreReason}",
   "@uploadIsIgnoredDueToIgnorereason": {
     "placeholders": {
@@ -4949,12 +4955,12 @@
       }
     }
   },
-  "legacyKitSheetIntro": "Nếu có lúc tôi không còn ở bên hoặc mất quyền truy cập vào tài khoản, tờ giấy này sẽ giúp bạn khôi phục ảnh, tài liệu và nhiều nội dung khác của tôi.",
+  "legacyKitSheetIntro": "Nếu tôi ngủm hoặc mất quyền truy cập vào tài khoản, bảng tính này sẽ giúp bạn khôi phục ảnh, tài liệu và nhiều thứ khác của tôi.",
   "@legacyKitSheetIntro": {
     "description": "Written in the voice of the account owner, addressed to the sheet holder"
   },
   "legacyKitSheetHowToRecover": "Cách khôi phục tài khoản của tôi",
-  "legacyKitSheetStepGetAnother": "Đây là tờ thứ {index} trong tổng số {total} tờ. Hãy hỏi xin {names} tờ của họ — bạn chỉ cần thêm một tờ nữa.",
+  "legacyKitSheetStepGetAnother": "Đây là {index} trong {total} bảng tính. Hỏi {names} về cái của họ — bạn chỉ cần thêm một cái nữa.",
   "@legacyKitSheetStepGetAnother": {
     "description": "First recovery step. {names} is a list of the other sheet holders, already joined and emphasised",
     "placeholders": {
@@ -4990,7 +4996,7 @@
       }
     }
   },
-  "legacyKitSheetStepScan": "Quét {count} tờ giấy.",
+  "legacyKitSheetStepScan": "Quét {count} bảng tính.",
   "@legacyKitSheetStepScan": {
     "description": "Third recovery step. {count} is how many sheets must be scanned together",
     "placeholders": {
@@ -5066,7 +5072,7 @@
   "permissions": "Quyền truy cập",
   "viewerRoleDescription": "Xem và tải xuống ảnh",
   "collaboratorRoleDescription": "Thêm ảnh của họ",
-  "adminRoleDescription": "Ngoài ra, có thể thêm và xóa người",
+  "adminRoleDescription": "Thêm ảnh của họ và xóa người",
   "addAsViewers": "{count, plural, other{Thêm làm người xem}}",
   "@addAsViewers": {
     "placeholders": {

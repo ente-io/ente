@@ -1,8 +1,4 @@
 {
-  "bringMemoriesTogether": "Breng je herinneringen samen",
-  "createMyAccount": "Mijn account aanmaken",
-  "localGalleryPermissionDesc": "Geef toestemming om je foto's te openen en met gezichtsherkenning te ordenen. Alle verwerking vindt plaats op je apparaat.",
-  "onboardingOrganizeDesc": "Organiseer je foto's en video's. Al je herinneringen op één plek.",
   "about": "Over",
   "acceptTrustInvite": "Uitnodiging accepteren",
   "accountCredentials": "Geheim",
@@ -1527,7 +1523,6 @@
   "mlConsent": "Schakel machine learning in",
   "mlConsentConfirmation": "Ik begrijp het, en wil machine learning inschakelen",
   "mlConsentDescription": "Als u machine learning inschakelt, zal Ente informatie zoals gezichtsgeometrie uit bestanden extraheren, inclusief degenen die met u gedeeld worden.\n\nDit gebeurt op uw apparaat, en alle gegenereerde biometrische informatie zal end-to-end versleuteld worden.",
-  "mlConsentPrivacy": "Klik hier voor meer details over deze functie in ons privacybeleid.",
   "mlProgressBannerDescription": "Je foto's worden op je apparaat verwerkt om gezichten, objecten en meer te detecteren.",
   "mlProgressBannerTitle": "Hou vol!",
   "moderateStrength": "Matig",

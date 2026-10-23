@@ -1,8 +1,4 @@
 {
-  "bringMemoriesTogether": "Reuneix els teus records",
-  "createMyAccount": "Crea el meu compte",
-  "localGalleryPermissionDesc": "Dona permís per accedir a les teves fotos i organitzar-les amb reconeixement facial. Tot el processament es fa al teu dispositiu.",
-  "onboardingOrganizeDesc": "Organitza les teves fotos i vídeos. Cada record, en un sol lloc.",
   "about": "Sobre",
   "acceptTrustInvite": "Accepta invitació",
   "account": "Compte",
@@ -1161,7 +1157,6 @@
   "mlConsent": "Activa aprenentatge automàtic",
   "mlConsentConfirmation": "Ho entenc, i vull activar l'aprenentatge automàtic",
   "mlConsentDescription": "Si actives l'aprenentatge automàtic, Ente extreurà informació com la geometria facial dels fitxers, inclosos els compartits amb tu.\n\nAixò passarà al teu dispositiu, i qualsevol informació biomètrica generada estarà xifrada d'extrem a extrem.",
-  "mlConsentPrivacy": "Si us plau, fes clic aquí per a més detalls sobre aquesta funció a la nostra política de privadesa",
   "moderateStrength": "Moderada",
   "@moderateStrength": {
     "description": "Moderate password strength label"

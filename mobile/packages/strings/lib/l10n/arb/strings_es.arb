@@ -1,8 +1,4 @@
 {
-  "bringMemoriesTogether": "Reúne tus recuerdos",
-  "createMyAccount": "Crear mi cuenta",
-  "localGalleryPermissionDesc": "Concede permiso para acceder y organizar tus fotos mediante reconocimiento facial. Todo el procesamiento se realiza en tu dispositivo.",
-  "onboardingOrganizeDesc": "Organiza tus fotos y vídeos. Todos tus recuerdos en un solo lugar.",
   "wallpaper": "Fondo de pantalla",
   "setWallpaper": "Establecer fondo de pantalla",
   "wallpaperHome": "Pantalla de inicio",
@@ -102,7 +98,7 @@
   "@addPage": {
     "description": "Button to capture another page in the document scanner"
   },
-  "addPeopleWidgetPrompt": "Añadir un widget de personas a la pantalla de inicio para personalizarlo aquí.",
+  "addPeopleWidgetPrompt": "Añadir un widget de álbum a la pantalla de inicio para personalizarlo aquí.",
   "addPerson": "Añadir persona",
   "@addPerson": {
     "description": "Title for the manual tagging flow where user selects a person to tag files with."
@@ -156,7 +152,6 @@
   "albumsOnDevicePermissionCta": "Permitir acceso",
   "albumsOnEnteEmptyCta": "Selecciona los álbumes que respaldar en Ente",
   "albumsOnEnteEmptyTitle": "Respalda tus recuerdos",
-  "albumsReceivedEmptyTitle": "Ver recuerdos compartidos contigo",
   "albumsWidgetDesc": "Selecciona los álbumes que quieres ver en tu pantalla de inicio.",
   "albumTitle": "Título del álbum",
   "albumUpdated": "Álbum actualizado",
@@ -176,7 +171,7 @@
   "allowDownloads": "Permitir descargas",
   "allowJoining": "Permitir unirse",
   "allowJoiningAlbum": "Permitir unirse al álbum",
-  "allowJoiningDescription": "Quienes pueden ver tu álbum y tienen una cuenta de Ente pueden unirse a él y mantenerse al día",
+  "allowJoiningDescription": "Los usuarios con una cuenta de Ente pueden unirse a tu álbum y mantenerse actualizados",
   "allowPermBody": "Por favor, permite el acceso a tus fotos desde Ajustes para que Ente pueda mostrar y hacer una copia de seguridad de tu biblioteca.",
   "allowPermTitle": "Permitir el acceso a las fotos",
   "allPersonGroupingWillReset": "Se eliminarán todas las agrupaciones para esta persona, y se eliminarán todas sus sugerencias",
@@ -1667,7 +1662,6 @@
   "mlConsent": "Habilitar aprendizaje automático",
   "mlConsentConfirmation": "Entiendo y deseo habilitar el aprendizaje automático",
   "mlConsentDescription": "Si habilitas el aprendizaje automático, Ente extraerá información como la geometría de la cara de los archivos, incluyendo aquellos compartidos contigo.\n\nEsto sucederá en tu dispositivo, y cualquier información biométrica generada será encriptada de extremo a extremo.",
-  "mlConsentPrivacy": "Por favor, haz clic aquí para más detalles sobre esta característica en nuestra política de privacidad",
   "mlProgressBannerDescription": "Tus fotos están siendo procesadas en el dispositivo para detectar caras, objetos y más.",
   "mlProgressBannerStatus": "{indexed} de {total} fotos procesadas",
   "@mlProgressBannerStatus": {
