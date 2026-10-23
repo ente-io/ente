@@ -2,6 +2,23 @@
 
 export const sidebar = [
     {
+        text: "CLI",
+        collapsed: true,
+        items: [
+            { text: "Overview", link: "/cli/" },
+            { text: "Install", link: "/cli/install" },
+            { text: "Accounts", link: "/cli/accounts" },
+            { text: "Photos", link: "/cli/photos" },
+            { text: "Auth", link: "/cli/auth" },
+            { text: "Paste", link: "/cli/paste" },
+            { text: "Administration", link: "/cli/admin" },
+            { text: "Automation", link: "/cli/automation" },
+            { text: "Migration", link: "/cli/migration" },
+            { text: "Troubleshooting", link: "/cli/troubleshooting" },
+            { text: "Changelog", link: "/cli/changelog" },
+        ],
+    },
+    {
         text: "Photos",
         items: [
             { text: "Introduction", link: "/photos/" },

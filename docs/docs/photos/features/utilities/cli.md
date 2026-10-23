@@ -7,6 +7,8 @@ description: Ente's command-line tool for advanced users
 
 The Ente CLI is a command-line tool for advanced users that provides programmatic access to Ente Photos. It's particularly useful for automation, server environments, and power users who prefer terminal-based tools.
 
+This guide uses the new CLI introduced with `ente-cli-v0.4.0`. If you use the previous Go CLI, read the [migration guide](/cli/migration) before switching. The new CLI does not reuse its settings or credentials.
+
 ## What is the CLI?
 
 The Ente CLI allows you to:
@@ -28,16 +30,16 @@ The CLI is particularly useful for:
 
 ## Installation
 
-Ente's CLI is distributed directly over [GitHub](https://github.com/ente/ente/releases?q=tag%3Acli-v0).
+Ente's CLI is distributed directly over [GitHub](https://github.com/ente/ente/releases?q=tag%3Aente-cli-v).
 
 **Steps:**
 
-1. Go to the [CLI releases page](https://github.com/ente/ente/releases?q=tag%3Acli-v0)
+1. Go to the [CLI releases page](https://github.com/ente/ente/releases?q=tag%3Aente-cli-v)
 2. Download the appropriate version for your platform:
     - Linux (x64, ARM64)
     - macOS (Intel, Apple Silicon)
     - Windows (x64)
-3. Follow the installation instructions in the [CLI README](https://github.com/ente/ente/tree/main/cli#readme)
+3. Follow the installation instructions in the [CLI guides](/cli/)
 
 ## Basic usage
 
@@ -46,25 +48,24 @@ Ente's CLI is distributed directly over [GitHub](https://github.com/ente/ente/re
 Before using the CLI, you need to authenticate:
 
 ```sh
-ente account login
+ente account login --account personal --app photos
 ```
 
 This will prompt for your email and password, then store your session securely.
 
 ### Exporting photos
 
-The CLI supports **incremental exports**, downloading only new or changed files. Set or change the destination directory per account, then run the export:
+The CLI supports **incremental exports**, reusing unchanged files. Pass the destination on each run:
 
 ```sh
-# Configure the export directory for your account (run once)
-ente account update --app photos --email you@example.com --dir /path/to/backup
+# Export all photos
+ente photos export /path/to/backup --account personal
 
-# Export all photos to the configured directory
-ente export
-
-# Export specific albums
-ente export --albums "Album Name","Another Album"
+# Export specific albums (exact, case-sensitive names or album IDs)
+ente photos export /path/to/backup --album "Album Name" --album "Another Album" --account personal
 ```
+
+To take over an export made by the previous CLI or desktop app, stop its export job first, preserve a copy if you want a way back, then run the new export command with `--adopt`. See [reconnect or adopt an export](/cli/photos#reconnect-or-adopt-an-export).
 
 **Key features:**
 
@@ -73,7 +74,7 @@ ente export --albums "Album Name","Another Album"
 - Safe to stop and restart without re-downloading
 - Preserves album structure and metadata
 
-For complete command documentation, see the [CLI README](https://github.com/ente/ente/tree/main/cli#readme).
+For complete command documentation, see the [CLI guides](/cli/).
 
 ## Automated exports
 
@@ -81,14 +82,11 @@ For complete command documentation, see the [CLI README](https://github.com/ente
 
 You can automate exports using cron (Linux/macOS) or Task Scheduler (Windows).
 
-Set the export directory for the account once (outside cron) and then schedule `ente export`:
+Log in once, then schedule the export command with its destination. For headless jobs, configure the CLI home and vault key using the [automation guide](/cli/automation).
 
 ```sh
-# Run once to set the directory the export job should use
-/usr/local/bin/ente account update --app photos --email you@example.com --dir /nas/ente-backup
-
-# Daily export at 2 AM
-0 2 * * * /usr/local/bin/ente export
+# Daily export at 2 AM; use the same CLI home and vault key as the initial login
+0 2 * * * /usr/local/bin/ente photos export /nas/ente-backup --account personal --no-input
 ```
 
 **Steps to set up:**
@@ -112,8 +110,7 @@ The recommended approach for keeping NAS and Ente synced is to use the CLI to **
 **Example for daily NAS sync:**
 
 ```sh
-/usr/local/bin/ente account update --app photos --email you@example.com --dir /nas/ente-backup
-0 2 * * * /usr/local/bin/ente export
+0 2 * * * /usr/local/bin/ente photos export /nas/ente-backup --account personal --no-input
 ```
 
 > [!IMPORTANT]
@@ -124,17 +121,17 @@ The recommended approach for keeping NAS and Ente synced is to use the CLI to **
 
 ### Album structure preservation
 
-Exports maintain your exact album structure from Ente. Each album becomes a separate folder.
+Each album becomes a separate folder. Characters that are not portable across filesystems are replaced with `_`, and name collisions receive numeric suffixes.
 
 ### Metadata handling
 
-Metadata is exported as JSON files in the same format as Google Takeout, making it compatible with tools that support Google Takeout imports.
+Metadata is exported as JSON sidecars alongside album records. See the [CLI export layout](/cli/photos#export-layout) for fields and Live Photo handling.
 
 **Format:**
 
 ```
-photo.jpg
-.meta/photo.jpg.json
+Album/photo.jpg
+Album/metadata/photo.jpg.json
 ```
 
 Learn more in the [Export feature guide](/photos/features/backup-and-sync/export).
@@ -167,8 +164,8 @@ Learn more in the [Export feature guide](/photos/features/backup-and-sync/export
 
 The CLI is open source and part of the Ente project:
 
-- **Source code**: [GitHub](https://github.com/ente/ente/tree/main/cli)
-- **Documentation**: [CLI README](https://github.com/ente/ente/tree/main/cli#readme)
+- **Source code**: [GitHub](https://github.com/ente/ente/tree/main/rust/cli)
+- **Documentation**: [CLI guides](/cli/)
 - **Report issues**: [GitHub Issues](https://github.com/ente/ente/issues)
 
 You can review, contribute to, or extend the CLI for your specific needs.

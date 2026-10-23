@@ -13,8 +13,6 @@ export default defineConfig({
         ["link", { rel: "icon", type: "image/png", href: "/help/favicon.png" }],
     ],
     cleanUrls: true,
-    // TODO: Remove after publishing the first CLI release.
-    srcExclude: ["cli/**"],
     ignoreDeadLinks: "localhostLinks",
     sitemap: {
         hostname: `${docsBaseUrl}/`,

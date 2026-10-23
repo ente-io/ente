@@ -5,76 +5,43 @@ description: Guide to configuring Ente CLI for Self Hosted Instance
 
 # Ente CLI for self-hosted instance
 
-If you are self-hosting, you can configure Ente CLI to export data & perform basic administrative actions.
+Use Ente CLI to export data and administer your own server. These instructions use the new CLI introduced with `ente-cli-v0.4.0`. For the previous Go CLI, read the [migration guide](/cli/migration) before switching; the new CLI does not read its configuration or saved credentials.
 
-> [!TIP]
->
-> **Installing Ente CLI**
->
-> For instructions on installing the Ente CLI, see the [README available on Github](https://github.com/ente/ente/tree/main/cli/README.md).
+## Step 1: Install the CLI
 
-## Step 1: Configure endpoint
-
-To do this, first configure the CLI to use your server's endpoint.
-
-Define `config.yaml` and place it in `~/.ente/` or the directory specified by `ENTE_CLI_CONFIG_DIR`.
-
-`ENTE_CLI_CONFIG_DIR` selects both configuration and saved accounts; `ENTE_CLI_CONFIG_PATH` is the legacy fallback. Use the existing account directory, e.g. `ENTE_CLI_CONFIG_DIR=/path/to/existing-cli-directory ente export`. Network commands stop if a separate working-directory config exists. If it contains your intended Ente settings, migrate them into that existing directory and remove or rename the old file; otherwise run from another directory. Local account commands remain available. Invalid trusted configuration must be corrected first.
-
-```yaml
-# Set the API endpoint to your domain where Museum is being served.
-endpoint:
-    api: http://localhost:8080
-```
+Follow [Install Ente CLI](/cli/install) for your platform.
 
 ## Step 2: Whitelist admins
 
-You can whitelist administrator users by following this [guide](/self-hosting/administration/users#whitelist-admins).
+Whitelist your administrator account using [Whitelist admins](/self-hosting/administration/users#whitelist-admins).
 
-## Step 3: Add an account
+## Step 3: Log in to your server
 
-> [!NOTE]
->
-> You can not create new accounts using Ente CLI.
->
-> You can only log in to your existing accounts.
->
-> To create a new account, use Ente Photos (or Ente Auth) web application, desktop or mobile.
-
-You can add your existing account using Ente CLI.
+Pass your Museum API endpoint at login. The CLI saves it with the account and uses it for subsequent commands:
 
 ```sh
-ente account add
+ente account login --account home-server --app photos --host https://api.example.org
 ```
 
-This should prompt you for authentication details and export directory. Your account should be added after successful authentication.
+Use an existing verified account. The new CLI also supports [account creation](/cli/accounts#create-an-account). Each app needs its own login; use `--app auth` for Auth exports.
 
-It can be used for exporting data (for plain-text backup), managing Ente Auth and performing administrative actions.
+See [Accounts](/cli/accounts#use-a-self-hosted-server) for multiple accounts and headless setup, and [Photos](/cli/photos) for exports.
 
-## Step 4: Increase storage and account validity
+## Step 4: Change storage and account validity
 
-You can use `ente admin update-subscription` to increase storage quota and account validity (duration).
-
-For infinite storage and validity, use the following command:
+For a user on a free subscription:
 
 ```sh
-ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --no-limit
+ente admin user update-subscription user@example.com --no-limit --account home-server
 
-# Set a limit
-ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --no-limit False
+# Set explicit limits instead
+ente admin user update-subscription user@example.com --storage 500GB --expires 2027-12-31 --account home-server
 ```
 
-> [!NOTE]
->
-> The users must be registered on the server with same e-mail address.
->
-> If the commands are failing, ensure:
->
-> 1. `<admin-user-mail>` is whitelisted as administrator user in `museum.yaml`. For more information, check this [guide](/self-hosting/administration/users#whitelist-admins).
-> 2. `<user-email-to-update>` is a registered user with completed verification.
+`--no-limit` sets 100 TB of storage and an expiry 100 years from now, rather than literal unlimited storage. An omitted storage or expiry value stays unchanged. Paid plans are rejected. The command shows the proposed change and asks for confirmation.
 
-For more information, check out the documentation for setting [storage and account validity](https://github.com/ente/ente/blob/main/cli/docs/generated/ente_admin_update-subscription.md) using the CLI.
+The administrator must be whitelisted and the target user must be registered and verified on the same server.
 
-## References
+## Other administrative tasks
 
-1. [Ente CLI Documentation](https://github.com/ente/ente/blob/main/cli/docs/generated)
+See [Administration](/cli/admin) for listing users, resetting login factors, deleting users, testing email, and running changes unattended. See [Migration](/cli/migration#administrator-commands) for replacements for previous administrative commands.
