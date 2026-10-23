@@ -32,6 +32,7 @@ import {
 } from "ente-base/components/loaders";
 import { AttributedMiniDialog } from "ente-base/components/MiniDialog";
 import { Notification } from "ente-base/components/Notification";
+import { NotificationStackProvider } from "ente-base/components/NotificationStackProvider";
 import { ThemedLoadingBar } from "ente-base/components/ThemedLoadingBar";
 import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
 import {
@@ -174,39 +175,44 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
 
     return (
         <ThemeProvider theme={photosTheme}>
-            <CustomHeadPhotos {...{ title }} />
-            <CssBaseline enableColorScheme />
+            <NotificationStackProvider>
+                <CustomHeadPhotos {...{ title }} />
+                <CssBaseline enableColorScheme />
 
-            <ThemedLoadingBar ref={loadingBarRef} />
-            <AttributedMiniDialog {...miniDialogProps} appearance="centered" />
-            <Notification {...notificationProps} />
+                <ThemedLoadingBar ref={loadingBarRef} />
+                <AttributedMiniDialog
+                    {...miniDialogProps}
+                    appearance="centered"
+                />
+                <Notification {...notificationProps} />
 
-            {isDesktop && (
-                <WindowTitlebar {...{ isFileViewerOpen }}>
-                    {title}
-                </WindowTitlebar>
-            )}
-            <BaseContext value={baseContext}>
-                <PhotosAppContext value={appContext}>
-                    <AuthPageProvider value={authPageConfig}>
-                        {!isI18nReady ? (
-                            <LoadingIndicator />
-                        ) : isDesktop ? (
-                            <DesktopMainContent
-                                Component={Component}
-                                pageProps={pageProps}
-                                isChangingRoute={isChangingRoute}
-                            />
-                        ) : (
-                            <WebMainContent
-                                Component={Component}
-                                pageProps={pageProps}
-                                isChangingRoute={isChangingRoute}
-                            />
-                        )}
-                    </AuthPageProvider>
-                </PhotosAppContext>
-            </BaseContext>
+                {isDesktop && (
+                    <WindowTitlebar {...{ isFileViewerOpen }}>
+                        {title}
+                    </WindowTitlebar>
+                )}
+                <BaseContext value={baseContext}>
+                    <PhotosAppContext value={appContext}>
+                        <AuthPageProvider value={authPageConfig}>
+                            {!isI18nReady ? (
+                                <LoadingIndicator />
+                            ) : isDesktop ? (
+                                <DesktopMainContent
+                                    Component={Component}
+                                    pageProps={pageProps}
+                                    isChangingRoute={isChangingRoute}
+                                />
+                            ) : (
+                                <WebMainContent
+                                    Component={Component}
+                                    pageProps={pageProps}
+                                    isChangingRoute={isChangingRoute}
+                                />
+                            )}
+                        </AuthPageProvider>
+                    </PhotosAppContext>
+                </BaseContext>
+            </NotificationStackProvider>
         </ThemeProvider>
     );
 };

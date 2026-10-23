@@ -8,6 +8,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { staticAppTitle } from "ente-base/app";
 import { CustomHeadAlbums } from "ente-base/components/Head";
 import { LoadingIndicator } from "ente-base/components/loaders";
+import { NotificationStackProvider } from "ente-base/components/NotificationStackProvider";
 import { ThemedLoadingBar } from "ente-base/components/ThemedLoadingBar";
 import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
 import {
@@ -43,22 +44,24 @@ export const AlbumsAppProviders: React.FC<PropsWithChildren> = ({
 
     return (
         <ThemeProvider theme={photosTheme}>
-            <CustomHeadAlbums {...{ title }} />
-            <CssBaseline enableColorScheme />
+            <NotificationStackProvider>
+                <CustomHeadAlbums {...{ title }} />
+                <CssBaseline enableColorScheme />
 
-            <ThemedLoadingBar ref={loadingBarRef} />
-            {miniDialogProps.open && (
-                <LazyAttributedMiniDialog {...miniDialogProps} />
-            )}
-            {notificationProps.notifications.length > 0 && (
-                <LazyNotification {...notificationProps} />
-            )}
+                <ThemedLoadingBar ref={loadingBarRef} />
+                {miniDialogProps.open && (
+                    <LazyAttributedMiniDialog {...miniDialogProps} />
+                )}
+                {notificationProps.notifications.length > 0 && (
+                    <LazyNotification {...notificationProps} />
+                )}
 
-            <BaseContext value={baseContext}>
-                <AlbumsAppContext value={appContext}>
-                    {!isI18nReady ? <LoadingIndicator /> : children}
-                </AlbumsAppContext>
-            </BaseContext>
+                <BaseContext value={baseContext}>
+                    <AlbumsAppContext value={appContext}>
+                        {!isI18nReady ? <LoadingIndicator /> : children}
+                    </AlbumsAppContext>
+                </BaseContext>
+            </NotificationStackProvider>
         </ThemeProvider>
     );
 };

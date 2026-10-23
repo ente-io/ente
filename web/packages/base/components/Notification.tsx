@@ -19,10 +19,11 @@ import { EllipsizedTypography } from "ente-base/components/Typography";
 import { RippleDisabledButton } from "ente-base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type {} from "ente-base/components/utils/mui-theme";
-import { useNotificationStack } from "ente-base/components/utils/notification-stack";
+import { useNotificationContainer } from "ente-base/components/utils/notification-container";
 import { isSxArray } from "ente-base/components/utils/sx";
 import { t } from "i18next";
 import React from "react";
+import { createPortal } from "react-dom";
 
 export interface NotificationAttributes {
     color: ButtonProps["color"];
@@ -92,11 +93,7 @@ const NotificationItem: React.FC<NotificationProps> = ({
     onExited,
 }) => {
     const contentID = React.useId();
-    const [present, setPresent] = React.useState(open);
-    const { ref, offset } = useNotificationStack(
-        !!attributes && (open || present),
-        horizontal,
-    );
+    const container = useNotificationContainer(horizontal);
     if (!attributes) return <></>;
 
     const {
@@ -191,20 +188,11 @@ const NotificationItem: React.FC<NotificationProps> = ({
         </Stack>
     );
 
-    return (
+    const notification = (
         <Snackbar
             key={notificationID}
             open={open}
-            ref={ref}
-            slotProps={{
-                transition: {
-                    onEnter: () => setPresent(true),
-                    onExited: () => {
-                        setPresent(false);
-                        onExited?.();
-                    },
-                },
-            }}
+            slotProps={{ transition: { onExited } }}
             autoHideDuration={resolvedAutoHideDuration}
             onClose={(_, reason) => {
                 if (reason === "timeout") onClose();
@@ -215,7 +203,17 @@ const NotificationItem: React.FC<NotificationProps> = ({
                     width: "min(340px, calc(100vw - 32px))",
                     left: horizontal === "left" ? { xs: 16, sm: 24 } : "auto",
                     right: horizontal === "right" ? { xs: 16, sm: 24 } : "auto",
-                    bottom: { xs: 16 + offset, sm: 24 + offset },
+                    bottom: { xs: 16, sm: 24 },
+                    ...(container && {
+                        "&&": {
+                            position: "relative",
+                            left: "auto",
+                            right: "auto",
+                            bottom: "auto",
+                            transform: "none",
+                        },
+                    }),
+                    pointerEvents: "auto",
                     borderRadius: "24px",
                     border: "1px solid",
                     borderColor: "rgba(0, 0, 0, 0.06)",
@@ -317,4 +315,5 @@ const NotificationItem: React.FC<NotificationProps> = ({
             </Paper>
         </Snackbar>
     );
+    return container ? createPortal(notification, container) : notification;
 };

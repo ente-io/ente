@@ -3,6 +3,7 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { staticAppTitle } from "ente-base/app";
 import { CustomHead } from "ente-base/components/Head";
+import { NotificationStackProvider } from "ente-base/components/NotificationStackProvider";
 import {
     useSetupI18n,
     useSetupLogs,
@@ -22,9 +23,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             // Avoid persisting a manual override; always follow the system theme.
             storageManager={null}
         >
-            <CustomHead title={staticAppTitle} />
-            <CssBaseline enableColorScheme />
-            <Component {...pageProps} />
+            <NotificationStackProvider>
+                <CustomHead title={staticAppTitle} />
+                <CssBaseline enableColorScheme />
+                <Component {...pageProps} />
+            </NotificationStackProvider>
         </ThemeProvider>
     );
 };
