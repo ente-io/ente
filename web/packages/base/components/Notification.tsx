@@ -36,7 +36,6 @@ export interface NotificationAttributes {
 
 type NotificationProps = ModalVisibilityProps & {
     attributes: NotificationAttributes | undefined;
-    // A new event restarts the timeout, even when its message is unchanged.
     notificationID?: number;
     keepOpenOnClick?: boolean;
     horizontal?: "left" | "right";
