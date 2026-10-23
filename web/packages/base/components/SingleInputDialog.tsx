@@ -19,8 +19,9 @@ import {
 import { SingleInputForm, type SingleInputFormProps } from "./SingleInputForm";
 
 type SingleInputDialogProps = ModalVisibilityProps &
-    Omit<SingleInputFormProps, "onCancel" | "variant" | "submitButtonColor"> & {
+    Omit<SingleInputFormProps, "onCancel"> & {
         title: string;
+        description?: string;
         sx?: SxProps<Theme>;
     };
 
@@ -29,14 +30,21 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
     onClose,
     onSubmit,
     title,
+    description,
+    inputProps,
     sx,
     ...rest
 }) => {
     const titleID = useId();
+    const descriptionID = useId();
     const handleSubmit: SingleInputFormProps["onSubmit"] = useCallback(
         async (value, setFieldError) => {
-            await onSubmit(value, setFieldError);
-            onClose();
+            const submission = { hasError: false };
+            await onSubmit(value, (message) => {
+                submission.hasError = true;
+                setFieldError(message);
+            });
+            if (!submission.hasError) onClose();
         },
         [onClose, onSubmit],
     );
@@ -47,6 +55,7 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
             onClose={onClose}
             maxWidth={false}
             aria-labelledby={titleID}
+            aria-describedby={description ? descriptionID : undefined}
             sx={sx}
             slotProps={{ paper: { sx: v2PaperSx } }}
         >
@@ -63,11 +72,25 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
                         <CloseIcon sx={{ fontSize: 18 }} />
                     </IconButton>
                 </Stack>
+                {description && (
+                    <Typography id={descriptionID} sx={{ color: "text.muted" }}>
+                        {description}
+                    </Typography>
+                )}
                 <SingleInputForm
                     key={open ? "open" : "closed"}
-                    variant="v2"
                     onCancel={onClose}
                     onSubmit={handleSubmit}
+                    inputProps={{
+                        ...inputProps,
+                        "aria-describedby":
+                            [
+                                inputProps?.["aria-describedby"],
+                                description ? descriptionID : undefined,
+                            ]
+                                .filter(Boolean)
+                                .join(" ") || undefined,
+                    }}
                     {...rest}
                 />
             </Stack>

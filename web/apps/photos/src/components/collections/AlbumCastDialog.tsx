@@ -345,7 +345,6 @@ const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                         </Stack>
                     </Stack>
                     <SingleInputForm
-                        variant="v2"
                         label={t("code")}
                         placeholder={ut("123456")}
                         submitButtonTitle={t("pair_device_to_tv")}

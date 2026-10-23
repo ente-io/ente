@@ -19,6 +19,16 @@ export const v2PaperSx = ((theme: Theme) => ({
         backgroundColor: "#1b1b1b",
     }),
 })) satisfies SxProps<Theme>;
+export const singleInputPagePaperSx = ((theme: Theme) => ({
+    ...v2PaperSx(theme),
+    boxSizing: "border-box",
+    p: "20px",
+    minHeight: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+})) satisfies SxProps<Theme>;
+
 export const v2HeaderRowSx = {
     alignItems: "center",
     justifyContent: "space-between",

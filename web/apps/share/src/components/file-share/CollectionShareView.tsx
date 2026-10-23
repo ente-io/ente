@@ -175,7 +175,7 @@ export const CollectionShareView: React.FC = () => {
                         <SingleInputForm
                             inputType="password"
                             label={passwordTitle}
-                            submitButtonColor="primary"
+
                             submitButtonTitle={unlockLabel}
                             onSubmit={handleSubmitPassword}
                         />
