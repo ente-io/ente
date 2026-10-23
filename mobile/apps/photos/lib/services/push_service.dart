@@ -59,7 +59,6 @@ class PushService {
       unawaited(_configurePushToken());
     });
     await _tokenRefreshSubscription?.cancel();
-    // The server still registers FCM tokens, not Firebase Installation IDs.
     // ignore: deprecated_member_use
     _tokenRefreshSubscription = FirebaseMessaging.instance.onTokenRefresh
         .listen(
