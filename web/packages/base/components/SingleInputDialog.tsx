@@ -92,6 +92,7 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
                                 .join(" ") || undefined,
                     }}
                     {...rest}
+                    disabled={!open || rest.disabled}
                 />
             </Stack>
         </Dialog>

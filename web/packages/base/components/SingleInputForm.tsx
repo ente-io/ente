@@ -23,7 +23,7 @@ import { ShowHidePasswordInputAdornment } from "./mui/PasswordInputAdornment";
 
 export type SingleInputFormProps = Pick<
     TextFieldProps,
-    "label" | "placeholder" | "autoComplete" | "autoFocus"
+    "label" | "placeholder" | "autoComplete" | "autoFocus" | "disabled"
 > & {
     inputProps?: InputBaseProps["inputProps"];
     endAdornment?: React.ReactNode;
@@ -45,6 +45,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     inputType,
     initialValue,
     autoFocus,
+    disabled,
     endAdornment,
     selectOnFocus,
     submitButtonTitle,
@@ -125,7 +126,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                     placeholder={rest.placeholder}
                     autoComplete={rest.autoComplete}
                     autoFocus={autoFocus ?? true}
-                    disabled={formik.isSubmitting}
+                    disabled={disabled || formik.isSubmitting}
                     error={!!error}
                     sx={v2InputSx}
                     endAdornment={
@@ -151,7 +152,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 {onCancel && (
                     <ButtonBase
                         onClick={onCancel}
-                        disabled={formik.isSubmitting}
+                        disabled={disabled || formik.isSubmitting}
                         sx={[v2CancelButtonSx, peopleActionFocusSx]}
                     >
                         {t("cancel")}
@@ -159,7 +160,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 )}
                 <ButtonBase
                     type="submit"
-                    disabled={formik.isSubmitting}
+                    disabled={disabled || formik.isSubmitting}
                     sx={[v2SubmitButtonSx, peopleActionFocusSx]}
                 >
                     {formik.isSubmitting ? (
