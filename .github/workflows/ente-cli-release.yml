@@ -119,7 +119,7 @@ jobs:
                       "$NOTES" > "$RUNNER_TEMP/release-notes.md"
                   cd assets
                   sha256sum *.tar.gz *.zip > SHA256SUMS
-                  gh release create "$tag" --target "$GITHUB_SHA" --title "Ente CLI $VERSION" --notes-file "$RUNNER_TEMP/release-notes.md" --latest=false *
+                  gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes-file "$RUNNER_TEMP/release-notes.md" --latest=false *
             - name: Open release follow-up PR
               env:
                   GH_TOKEN: ${{ steps.app-token.outputs.token }}
