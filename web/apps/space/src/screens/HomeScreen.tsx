@@ -15,6 +15,7 @@ import {
     focusFeedPost,
     registerFeedPost,
 } from "components/feed-video-playback";
+import { feedVideoPreloadIndices } from "components/feed-video-preloading";
 import {
     SpaceFileViewer,
     type SpaceFileViewerController,
@@ -671,6 +672,7 @@ const FeedPhoto: React.FC<{
     onLoadVideo?: SpacePostAssetURLLoader;
     onOpenPhoto?: () => void;
     shouldLoad: boolean;
+    shouldMountVideo: boolean;
     shouldPreloadVideo: boolean;
     thumbHash?: string;
     viewerOrigin?: string;
@@ -684,6 +686,7 @@ const FeedPhoto: React.FC<{
     onLoadVideo,
     onOpenPhoto,
     shouldLoad,
+    shouldMountVideo,
     shouldPreloadVideo,
     thumbHash,
     video,
@@ -820,11 +823,12 @@ const FeedPhoto: React.FC<{
                     }}
                 />
             )}
-            {!isPostUnavailable && video && shouldPreloadVideo && (
+            {!isPostUnavailable && video && shouldMountVideo && (
                 <SpaceInlinePostVideo
                     imageUrl={displayImageUrl}
                     video={video}
                     isActive={isActive}
+                    shouldPreload={shouldPreloadVideo}
                     muted={muted}
                     onLoadVideo={onLoadVideo}
                 />
@@ -902,6 +906,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
     const feedPhotos = photos ?? [{ imageUrl, thumbHash }];
     const hasVideo = feedPhotos.some((photo) => Boolean(photo.video));
     const activePhoto = feedPhotos[photoIndex]!;
+    const videoPreloadIndices = feedVideoPreloadIndices(feedPhotos, photoIndex);
     const carouselRef = React.useRef<HTMLDivElement | null>(null);
     React.useEffect(() => registerFeedPost(carouselRef.current!), []);
     const photoAnimationRef = React.useRef<number | null>(null);
@@ -1500,11 +1505,16 @@ const FeedItem: React.FC<FeedItemProps> = ({
                                 onOpenPhoto ? () => openPhoto(index) : undefined
                             }
                             shouldLoad={
-                                (shouldPreloadVideo && Boolean(photo.video)) ||
+                                (shouldPreloadVideo &&
+                                    videoPreloadIndices.includes(index)) ||
                                 (shouldLoadMedia &&
                                     Math.abs(index - photoIndex) <= 1)
                             }
-                            shouldPreloadVideo={shouldPreloadVideo}
+                            shouldMountVideo={shouldPreloadVideo}
+                            shouldPreloadVideo={
+                                shouldPreloadVideo &&
+                                videoPreloadIndices.includes(index)
+                            }
                             thumbHash={photo.thumbHash}
                             video={photo.video}
                             viewerOrigin={

@@ -164,6 +164,7 @@ test("switching carousel slides preserves the loaded video for its next activati
     const content = create();
     content.play();
     await vi.advanceTimersByTimeAsync(0);
+    content.video.currentTime = 0.5;
     content.deactivate();
     expect(content.video.paused).toBe(true);
     expect(revokeURL).not.toHaveBeenCalled();
@@ -171,6 +172,7 @@ test("switching carousel slides preserves the loaded video for its next activati
     await vi.advanceTimersByTimeAsync(0);
     expect(load).toHaveBeenCalledTimes(1);
     expect(content.video.play).toHaveBeenCalledTimes(2);
+    expect(content.video.currentTime).toBe(0.5);
 });
 
 test("deactivating during a download keeps the preload without starting playback", async () => {
