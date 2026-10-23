@@ -2529,6 +2529,11 @@ final class ChatViewModel: ObservableObject {
         var prompt = text
         let documents = attachments.filter { $0.kind == .document }
         let images = attachments.filter { $0.kind == .image }
+        let imageFiles = images.compactMap { $0.url }
+
+        if !imageFiles.isEmpty && text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            prompt = "Describe the attached images."
+        }
 
         for (index, attachment) in documents.enumerated() {
             prompt += "\n\n----- BEGIN DOCUMENT: Document \(index + 1) -----\n"
@@ -2536,11 +2541,7 @@ final class ChatViewModel: ObservableObject {
             prompt += "----- END DOCUMENT: Document \(index + 1) -----"
         }
 
-        let imageFiles = images.compactMap { $0.url }
         if !imageFiles.isEmpty {
-            if prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                prompt = "Describe the attached images."
-            }
             let mediaMarker = "<__media__>"
             prompt += "\n\n[\(imageFiles.count) image attachment"
             if imageFiles.count > 1 { prompt += "s" }
