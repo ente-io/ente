@@ -272,7 +272,7 @@ networks:
 
 > Thats it. Run `docker compose up -d`. Wait until every container becomes healthy. Open a web browser. Make sure tailscale is installed on the machine. Visit https://ente.xyz.ts.net/ping. It will pong. All good if you see it. First time it will take minute or two to get SSL cert. Downnload Desktop or mobile app. Tap 7 time on the screen, which will prompt developer mode. Add https://ente.xyz.ts.net. Add new user. When asked for OTP, go to your linux terminal and run `docker logs ente-museum-1`. Search for userauth. Feed the six digit and Done.
 
-> For getting 100TB (limitless) storage, install ente-cli for windows. Extract it and add folder. Name it **export**. Add config.yaml file along and populate it with the following:
+> For getting 100TB (limitless) storage, install ente-cli for windows. Extract it and add folder. Name it **export**. Create a `.ente` folder in your user profile directory and add `%USERPROFILE%\.ente\config.yaml` with the following:
 
 ```
 endpoint:
