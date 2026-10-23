@@ -72,7 +72,9 @@ export const SpaceInlinePostVideo: React.FC<{
     }, [shouldPreload, onLoadVideo, video]);
 
     useEffect(() => {
-        player.current!.setPoster(imageUrl);
+        const element = player.current!.video;
+        if (imageUrl) element.poster = imageUrl;
+        else element.removeAttribute("poster");
     }, [imageUrl, onLoadVideo, video]);
 
     useEffect(() => {

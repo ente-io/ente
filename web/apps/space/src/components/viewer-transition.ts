@@ -14,6 +14,7 @@ const openDuration = 0.48;
 const openBounce = 0.26;
 const closeDuration = 0.36;
 const swapFadeMs = 220;
+const coverFadeMs = 150;
 const closingFlights = new WeakMap<HTMLElement, () => void>();
 
 export const viewerOriginKey = (spaceId?: string, postId?: number) =>
@@ -28,25 +29,10 @@ export const findViewerOrigin = (key: string | undefined) =>
 
 interface ViewerFlightTarget {
     origin: HTMLElement;
-    src: string | HTMLCanvasElement;
+    src: string;
+    fadeFromVideo?: boolean;
     photo: { width: number; height: number };
 }
-
-export const viewerVideoFrame = (
-    video: HTMLVideoElement | null | undefined,
-) => {
-    if (
-        !video ||
-        video.readyState < video.HAVE_CURRENT_DATA ||
-        video.dataset.spaceVideoFrameVisible != "true"
-    )
-        return undefined;
-    const frame = document.createElement("canvas");
-    frame.width = video.videoWidth;
-    frame.height = video.videoHeight;
-    frame.getContext("2d")!.drawImage(video, 0, 0);
-    return frame;
-};
 
 const rectOf = (element: Element): ViewerRect => {
     const { left, top, width, height } = element.getBoundingClientRect();
@@ -129,11 +115,7 @@ const runSpring = ({
 };
 
 // A cropping window and the photo inside it, both moved with transforms.
-const createFlyer = (
-    root: HTMLElement,
-    src: string | HTMLCanvasElement,
-    base: ViewerRect,
-) => {
+const createFlyer = (root: HTMLElement, src: string, base: ViewerRect) => {
     const flyer = document.createElement("div");
     flyer.setAttribute("aria-hidden", "true");
     Object.assign(flyer.style, {
@@ -148,10 +130,9 @@ const createFlyer = (
         willChange: "transform",
         zIndex: "1",
     });
-    const image =
-        typeof src == "string"
-            ? Object.assign(document.createElement("img"), { alt: "", src })
-            : src;
+    const image = document.createElement("img");
+    image.alt = "";
+    image.src = src;
     Object.assign(image.style, {
         display: "block",
         height: `${base.h}px`,
@@ -314,14 +295,13 @@ export const playViewerOpen = (
         tileImage?.complete && tileImage.naturalWidth > 0
             ? tileImage
             : thumbnail;
-    const flightSrc =
-        viewerVideoFrame(origin.querySelector("video")) ??
-        (preview?.currentSrc || src);
+    const flightSrc = preview?.currentSrc || src;
     const { flyer, image, draw } = createFlyer(root, flightSrc, to);
     let rider: ReturnType<typeof createRider>;
     let started = false;
     let disposed = false;
     let stopSpring: () => void = () => undefined;
+    let fade: Animation | undefined;
     const drawAt = (value: number) => {
         const state = mixPhotoState(from, end, value);
         draw(state);
@@ -332,38 +312,58 @@ export const playViewerOpen = (
     drawAt(0);
     setProgress(0);
 
-    const release = () => {
+    const release = (fadeOut = false) => {
         disposed = true;
-        flyer.remove();
+        fade?.cancel();
         rider?.remove();
+        if (fadeOut) {
+            fade = flyer.animate([{ opacity: 1 }, { opacity: 0 }], {
+                duration: coverFadeMs,
+                easing: "ease",
+                fill: "forwards",
+            });
+            fade.addEventListener("finish", () => flyer.remove(), {
+                once: true,
+            });
+        } else flyer.remove();
     };
     const reveal = () => {
         origin.style.opacity = "";
         rider?.reveal();
     };
-    void ("decode" in image ? image.decode() : Promise.resolve()).then(
+    const start = () => {
+        if (disposed) return;
+        origin.style.opacity = "0";
+        delete root.dataset.spaceViewerWaiting;
+        stopSpring = runSpring({
+            from: 0,
+            to: 1,
+            velocity: 0,
+            duration: openDuration,
+            bounce: openBounce,
+            restDelta: 1.5 / Math.max(1, photoStateTravel(from, end)),
+            onUpdate: (value) => {
+                t = value;
+                drawAt(t);
+                setProgress(t);
+            },
+            onDone: onLanded,
+        });
+    };
+    void image.decode().then(
         () => {
             if (disposed) return;
             started = true;
             flyer.style.visibility = "";
-            origin.style.opacity = "0";
-            delete root.dataset.spaceViewerWaiting;
             rider = createRider(flyer, origin);
             drawAt(0);
-            stopSpring = runSpring({
-                from: 0,
-                to: 1,
-                velocity: 0,
-                duration: openDuration,
-                bounce: openBounce,
-                restDelta: 1.5 / Math.max(1, photoStateTravel(from, end)),
-                onUpdate: (value) => {
-                    t = value;
-                    drawAt(t);
-                    setProgress(t);
-                },
-                onDone: onLanded,
-            });
+            if (origin.querySelector("video")) {
+                fade = image.animate([{ opacity: 0 }, { opacity: 1 }], {
+                    duration: coverFadeMs,
+                    easing: "ease",
+                });
+                fade.addEventListener("finish", start, { once: true });
+            } else start();
         },
         () => {
             if (!disposed) onLanded();
@@ -389,12 +389,16 @@ export const playViewerOpen = (
 // throwVelocity is in px per ms. A photo other than the tile's fades into it.
 export const playViewerClose = (
     viewerRoot: HTMLElement,
-    { origin, src, photo }: ViewerFlightTarget,
+    { origin, src, photo, fadeFromVideo }: ViewerFlightTarget,
     from: ViewerPhotoState,
     throwVelocity: { x: number; y: number },
     startBackground: number,
+    onStart: () => void = () => undefined,
 ) => {
-    if (prefersReducedMotion() || !isOnScreen(origin)) return undefined;
+    if (prefersReducedMotion() || !isOnScreen(origin)) {
+        onStart();
+        return;
+    }
 
     const root = document.createElement("div");
     root.setAttribute("aria-hidden", "true");
@@ -419,8 +423,8 @@ export const playViewerClose = (
         rider?.draw(state, t);
         root.style.backgroundColor = `rgb(0 0 0 / ${startBackground * viewerBackgroundOpacity(t)})`;
     };
-    origin.style.opacity = "0";
-    drawAt(1);
+    draw(from);
+    rider?.draw(from, 1);
 
     const dx =
         end.visible.x +
@@ -436,7 +440,9 @@ export const playViewerClose = (
     const tileImage = origin.querySelector<HTMLImageElement>(
         "img:not([aria-hidden])",
     );
-    const isTilePhoto = tileImage?.currentSrc == src || tileImage?.src == src;
+    const isTilePhoto =
+        !origin.querySelector("video") &&
+        (tileImage?.currentSrc == src || tileImage?.src == src);
     let fade: Animation | undefined;
 
     const cleanUp = () => {
@@ -447,29 +453,44 @@ export const playViewerClose = (
         root.remove();
         closingFlights.delete(origin);
     };
-    const stopSpring = runSpring({
-        from: 1,
-        to: 0,
-        velocity: Math.min(1.2, Math.max(-8, -toward / distance)),
-        duration: closeDuration,
-        bounce: 0,
-        restDelta: 0.5 / Math.max(1, photoStateTravel(from, end)),
-        onUpdate: drawAt,
-        onDone: () => {
-            origin.style.opacity = "";
-            rider?.reveal();
-            if (isTilePhoto) {
-                cleanUp();
-            } else {
-                fade = root.animate([{ opacity: 1 }, { opacity: 0 }], {
-                    duration: swapFadeMs,
-                    easing: "ease",
-                    fill: "forwards",
-                });
-                fade.addEventListener("finish", cleanUp, { once: true });
-            }
-        },
-    });
+    let stopSpring: () => void = () => undefined;
+    const start = () => {
+        root.style.zIndex = "1299";
+        origin.style.opacity = "0";
+        drawAt(1);
+        onStart();
+        stopSpring = runSpring({
+            from: 1,
+            to: 0,
+            velocity: Math.min(1.2, Math.max(-8, -toward / distance)),
+            duration: closeDuration,
+            bounce: 0,
+            restDelta: 0.5 / Math.max(1, photoStateTravel(from, end)),
+            onUpdate: drawAt,
+            onDone: () => {
+                origin.style.opacity = "";
+                rider?.reveal();
+                if (isTilePhoto) {
+                    cleanUp();
+                } else {
+                    fade = root.animate([{ opacity: 1 }, { opacity: 0 }], {
+                        duration: swapFadeMs,
+                        easing: "ease",
+                        fill: "forwards",
+                    });
+                    fade.addEventListener("finish", cleanUp, { once: true });
+                }
+            },
+        });
+    };
+    if (fadeFromVideo) {
+        root.style.zIndex = "1301";
+        fade = flyer.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: coverFadeMs,
+            easing: "ease",
+        });
+        fade.addEventListener("finish", start, { once: true });
+    } else start();
     closingFlights.set(origin, () => {
         stopSpring();
         cleanUp();

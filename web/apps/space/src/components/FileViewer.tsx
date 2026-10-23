@@ -37,7 +37,6 @@ import {
     playViewerOpen,
     viewerCornerRadii,
     viewerOriginKey,
-    viewerVideoFrame,
 } from "components/viewer-transition";
 import log from "ente-base/log";
 import { useCommentCount } from "hooks/use-comment-count";
@@ -267,8 +266,12 @@ interface ViewerMotion {
     reveal?: () => void;
 }
 
-const endOpenFlight = (motion: ViewerMotion, root: HTMLElement) => {
-    motion.flight?.release();
+const endOpenFlight = (
+    motion: ViewerMotion,
+    root: HTMLElement,
+    fadeOut = false,
+) => {
+    motion.flight?.release(fadeOut);
     motion.flight = undefined;
     delete root.dataset.spaceViewerFlying;
     delete root.dataset.spaceViewerWaiting;
@@ -295,7 +298,7 @@ const handOverOpenFlight = (
             image.naturalWidth > 0 &&
             image.isConnected &&
             !content?.isDecoding);
-    if (isShown) endOpenFlight(motion, root);
+    if (isShown) endOpenFlight(motion, root, content?.data.type == "video");
 };
 
 const viewerTouchPoint = (event: Event) => {
@@ -807,6 +810,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             viewerPhotosRef.current[pswp?.currIndex ?? activePhotoIndex];
         const element = pswp?.currSlide?.content.element;
         const video = element?.querySelector("video");
+        const preview =
+            element instanceof HTMLImageElement
+                ? element
+                : element?.querySelector("img");
+        const fadeFromVideo = Boolean(video && !motion.flight);
         let from: ViewerPhotoState | undefined = motion.flight?.current();
         let src = from ? motion.flight?.src : undefined;
         const rect = element?.getBoundingClientRect();
@@ -817,10 +825,8 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
             rect &&
             rect.width > 0 &&
             rect.height > 0 &&
-            ((element instanceof HTMLImageElement &&
-                element.complete &&
-                element.naturalWidth > 0) ||
-                video)
+            preview?.complete &&
+            preview.naturalWidth > 0
         ) {
             const scale = Number(pswp.currSlide?.container.style.scale) || 1;
             from = shownPhotoState(
@@ -828,10 +834,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 { x: 0, y: 0, w: window.innerWidth, h: window.innerHeight },
                 viewerCornerRadii(element, scale),
             );
-            src =
-                element instanceof HTMLImageElement
-                    ? element.currentSrc || element.src
-                    : (viewerVideoFrame(video) ?? video?.poster);
+            src = preview.currentSrc || preview.src;
         }
         window.scrollTo({ ...pageScrollRef.current, behavior: "instant" });
         const origin =
@@ -856,6 +859,7 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 {
                     origin,
                     src,
+                    fadeFromVideo,
                     photo: {
                         width: item.width ?? defaultPhotoWidth,
                         height: item.height ?? defaultPhotoHeight,
@@ -864,9 +868,11 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 from,
                 throwVelocity,
                 startBackground,
+                () => {
+                    if (root.isConnected) onCloseRef.current();
+                },
             );
-        }
-        onCloseRef.current();
+        } else onCloseRef.current();
     };
 
     React.useImperativeHandle(

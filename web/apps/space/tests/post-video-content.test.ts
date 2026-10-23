@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { createSpaceVideoContent } from "../src/components/PostVideoContent";
-import { viewerVideoFrame } from "../src/components/viewer-transition";
 import { SpaceMediaRateLimitError } from "../src/services/media-load";
 import type {
     SpacePostAsset,
@@ -10,8 +9,7 @@ import type {
 vi.mock("ente-base/log-web", () => ({ logToDisk: vi.fn() }));
 
 class Element extends EventTarget {
-    style: Record<string, string> = {};
-    dataset: Record<string, string> = {};
+    style = {};
     attributes = new Map<string, string>();
     children: Element[] = [];
     disabled = false;
@@ -32,28 +30,16 @@ class Element extends EventTarget {
 }
 
 class Video extends Element {
-    HAVE_CURRENT_DATA = 2;
-    readyState = 0;
     preload = "none";
     paused = true;
     ended = false;
     currentTime = 0;
     onpause?: () => void;
     onplaying?: () => void;
-    onloadeddata?: () => void;
-    onseeked?: () => void;
-    onended?: () => void;
-    get poster() {
-        return this.getAttribute("poster") ?? "";
-    }
-    set poster(value: string) {
-        this.setAttribute("poster", value);
-    }
     set src(value: string) {
         this.setAttribute("src", value);
     }
     play = vi.fn(() => {
-        this.readyState = this.HAVE_CURRENT_DATA;
         this.paused = false;
         this.onplaying?.();
         return Promise.resolve();
@@ -63,28 +49,21 @@ class Video extends Element {
         this.paused = true;
         this.onpause?.();
     }
-    load = vi.fn(() => {
-        this.readyState = 0;
-    });
+    load = vi.fn();
 }
 
-class Poster extends Element {
-    decode = () => decodePoster();
-}
-
-class Canvas extends Element {
-    getContext = () => ({ drawImage: vi.fn() });
+class Cover extends Element {
+    decode = () => Promise.resolve();
+    remove = vi.fn();
 }
 
 let contents: ReturnType<typeof createSpaceVideoContent>[];
 let load: ReturnType<typeof vi.fn<SpacePostAssetURLLoader>>;
 let revokeURL: ReturnType<typeof vi.spyOn>;
-let decodePoster: ReturnType<typeof vi.fn<() => Promise<void>>>;
 
 beforeEach(() => {
     vi.useFakeTimers();
     contents = [];
-    decodePoster = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
     load = vi.fn<SpacePostAssetURLLoader>().mockResolvedValue("blob:video");
     revokeURL = vi
         .spyOn(URL, "revokeObjectURL")
@@ -97,10 +76,8 @@ beforeEach(() => {
                 tag == "video"
                     ? new Video()
                     : tag == "img"
-                      ? new Poster()
-                      : tag == "canvas"
-                        ? new Canvas()
-                        : new Element(),
+                      ? new Cover()
+                      : new Element(),
         }),
     );
 });
@@ -129,15 +106,12 @@ const create = (
         { ...options, inline },
     );
     contents.push(content);
-    const children = (content.element as unknown as Element).children;
-    const poster = children.find((child) => child instanceof Poster);
-    const [video, button, loading, error] = children.filter(
-        (child) => child != poster,
-    );
+    const [video, button, loading, error] = (
+        content.element as unknown as Element
+    ).children.filter((child) => !(child instanceof Cover));
     return {
         ...content,
         video: video as Video,
-        poster,
         button: button!,
         loading: loading!,
         error: error!,
@@ -165,200 +139,6 @@ test("a video can download and play before its cover image is available", async 
     expect(load).toHaveBeenCalledTimes(1);
     expect(content.video.paused).toBe(false);
     expect(content.video.getAttribute("poster")).toBeNull();
-});
-
-test("viewer content waits for its cover to decode before handing over the flyer", async () => {
-    const decoded = Promise.withResolvers<undefined>();
-    decodePoster.mockReturnValue(decoded.promise);
-    const onReady = vi.fn(() => expect(content.poster?.hidden).toBe(false));
-    const content = create(false, "blob:poster", { onReady });
-    await vi.advanceTimersByTimeAsync(0);
-    expect(onReady).not.toHaveBeenCalled();
-    expect(content.poster?.hidden).toBe(true);
-
-    decoded.resolve(undefined);
-    await vi.advanceTimersByTimeAsync(0);
-    expect(onReady).toHaveBeenCalledOnce();
-    expect(content.video.readyState).toBe(0);
-    expect(content.video.play).not.toHaveBeenCalled();
-});
-
-test("playback can hand over before its cover finishes loading", async () => {
-    const decoded = Promise.withResolvers<undefined>();
-    decodePoster.mockReturnValue(decoded.promise);
-    const onReady = vi.fn();
-    const content = create(false, "blob:poster", { onReady });
-    content.video.readyState = content.video.HAVE_CURRENT_DATA;
-    content.video.onloadeddata?.();
-    expect(onReady).not.toHaveBeenCalled();
-    expect(content.video.style.opacity).toBe("0");
-    expect(
-        viewerVideoFrame(content.video as unknown as HTMLVideoElement),
-    ).toBeUndefined();
-    content.play();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(onReady).toHaveBeenCalledOnce();
-    expect(content.poster?.hidden).toBe(true);
-
-    decoded.resolve(undefined);
-    await vi.advanceTimersByTimeAsync(0);
-    expect(onReady).toHaveBeenCalledOnce();
-    expect(content.poster?.hidden).toBe(true);
-});
-
-test.each(["ready", "failed"])(
-    "blocked autoplay waits for a pending cover to become %s",
-    async (result) => {
-        const decoded = Promise.withResolvers<undefined>();
-        decodePoster.mockReturnValue(decoded.promise);
-        const onReady = vi.fn();
-        const content = create(false, "blob:poster", { onReady });
-        content.video.play.mockRejectedValue(
-            new DOMException("Blocked", "NotAllowedError"),
-        );
-        content.play();
-        await vi.advanceTimersByTimeAsync(0);
-        expect(content.button.getAttribute("aria-hidden")).toBe("false");
-        expect(onReady).not.toHaveBeenCalled();
-
-        if (result == "ready") decoded.resolve(undefined);
-        else decoded.reject(new Error("decode failed"));
-        await vi.advanceTimersByTimeAsync(0);
-        expect(onReady).toHaveBeenCalledOnce();
-        expect(content.poster?.hidden).toBe(result != "ready");
-        expect(content.video.style.opacity).toBe("0");
-    },
-);
-
-test.each(["", "blob:failed-poster"])(
-    "blocked autoplay without a usable cover (%s) hands over to Play",
-    async (url) => {
-        decodePoster.mockRejectedValue(new Error("decode failed"));
-        const onReady = vi.fn();
-        const content = create(false, url, { onReady });
-        await vi.advanceTimersByTimeAsync(0);
-        expect(onReady).not.toHaveBeenCalled();
-        content.video.play.mockRejectedValue(
-            new DOMException("Blocked", "NotAllowedError"),
-        );
-        content.play();
-        await vi.advanceTimersByTimeAsync(0);
-        expect(onReady).toHaveBeenCalledOnce();
-        expect(content.button.getAttribute("aria-hidden")).toBe("false");
-        expect(content.error.hidden).toBe(true);
-    },
-);
-
-test("the viewer cover yields to playback and returns when the video resets", async () => {
-    const onReady = vi.fn();
-    const content = create(false, "blob:poster", { onReady });
-    await vi.advanceTimersByTimeAsync(0);
-    expect(content.poster?.hidden).toBe(false);
-    content.play();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(content.poster?.hidden).toBe(true);
-
-    content.pause();
-    expect(content.poster?.hidden).toBe(true);
-    expect(
-        viewerVideoFrame(content.video as unknown as HTMLVideoElement),
-    ).toBeInstanceOf(Canvas);
-
-    content.deactivate();
-    expect(content.poster?.hidden).toBe(false);
-    expect(
-        viewerVideoFrame(content.video as unknown as HTMLVideoElement),
-    ).toBeUndefined();
-    expect(onReady).toHaveBeenCalledOnce();
-});
-
-test("feed snapshots follow the displayed cover, playing frame, and paused frame", async () => {
-    const content = create();
-    await content.preload();
-    content.video.readyState = content.video.HAVE_CURRENT_DATA;
-    content.video.onloadeddata?.();
-    expect(content.video.style.opacity).toBe("0");
-    expect(
-        viewerVideoFrame(content.video as unknown as HTMLVideoElement),
-    ).toBeUndefined();
-
-    content.play();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(content.video.style.opacity).toBe("1");
-    expect(
-        viewerVideoFrame(content.video as unknown as HTMLVideoElement),
-    ).toBeInstanceOf(Canvas);
-    content.deactivate();
-    expect(content.video.style.opacity).toBe("1");
-    expect(
-        viewerVideoFrame(content.video as unknown as HTMLVideoElement),
-    ).toBeInstanceOf(Canvas);
-
-    content.video.onended?.();
-    content.video.readyState = content.video.HAVE_CURRENT_DATA;
-    content.video.onloadeddata?.();
-    expect(content.video.style.opacity).toBe("0");
-    expect(
-        viewerVideoFrame(content.video as unknown as HTMLVideoElement),
-    ).toBeUndefined();
-});
-
-test("a late feed cover replaces only a frame that has not played or been sought", () => {
-    const content = create(true, "");
-    content.video.readyState = content.video.HAVE_CURRENT_DATA;
-    content.video.onloadeddata?.();
-    expect(content.video.style.opacity).toBe("1");
-    content.setPoster("blob:late-poster");
-    expect(content.video.style.opacity).toBe("0");
-    expect(
-        viewerVideoFrame(content.video as unknown as HTMLVideoElement),
-    ).toBeUndefined();
-
-    content.video.onseeked?.();
-    expect(content.video.style.opacity).toBe("1");
-    expect(
-        viewerVideoFrame(content.video as unknown as HTMLVideoElement),
-    ).toBeInstanceOf(Canvas);
-    content.setPoster("blob:new-poster");
-    expect(content.video.style.opacity).toBe("1");
-});
-
-test("destroyed viewer content cannot hand over after late cover or video readiness", async () => {
-    const decoded = Promise.withResolvers<undefined>();
-    decodePoster.mockReturnValue(decoded.promise);
-    const onReady = vi.fn();
-    const content = create(false, "blob:poster", { onReady });
-    content.destroy();
-    decoded.resolve(undefined);
-    await vi.advanceTimersByTimeAsync(0);
-    content.video.readyState = content.video.HAVE_CURRENT_DATA;
-    content.video.onloadeddata?.();
-    expect(onReady).not.toHaveBeenCalled();
-    expect(content.poster?.hidden).toBe(true);
-});
-
-test("a failed cover waits for a video frame before handing over", async () => {
-    decodePoster.mockRejectedValue(new Error("decode failed"));
-    const onReady = vi.fn();
-    const content = create(false, "blob:poster", { onReady });
-    await vi.advanceTimersByTimeAsync(0);
-    expect(onReady).not.toHaveBeenCalled();
-
-    content.video.readyState = content.video.HAVE_CURRENT_DATA;
-    content.video.onloadeddata?.();
-    expect(onReady).toHaveBeenCalledOnce();
-    expect(content.poster?.hidden).toBe(true);
-});
-
-test("failed cover and video loading hand over to the visible error", async () => {
-    decodePoster.mockRejectedValue(new Error("decode failed"));
-    load.mockRejectedValue(new Error("Offline"));
-    const onReady = vi.fn(() => expect(content.error.hidden).toBe(false));
-    const content = create(false, "blob:poster", { onReady });
-    content.play();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(onReady).toHaveBeenCalledOnce();
-    expect(content.errorTitle.textContent).toBe("Couldn't play video.");
 });
 
 test("autoplay joins an in-flight preload without downloading the video again", async () => {
