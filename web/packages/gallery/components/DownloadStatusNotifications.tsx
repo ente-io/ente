@@ -249,7 +249,6 @@ export const DownloadStatusNotifications: React.FC<
                                 ? () => group.retry?.()
                                 : undefined,
                             endIconLabel: t("retry"),
-                            showCloseButtonWithEndIcon: canRetry,
                         }}
                     />
                 );

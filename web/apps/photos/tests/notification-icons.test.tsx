@@ -30,7 +30,6 @@ describe("notification icons", () => {
             startIcon: Tick02Icon,
             endIcon: ReloadIcon,
             endIconLabel: "Retry",
-            showCloseButtonWithEndIcon: true,
         });
         const icons = markup.match(/<svg\b[^>]*>/g) ?? [];
         expect(icons).toHaveLength(3);
@@ -47,7 +46,6 @@ describe("notification icons", () => {
                 color: "inherit",
                 startIcon: null,
                 endIcon,
-                showCloseButtonWithEndIcon: true,
             });
             const icons = markup.match(/<svg\b[^>]*>/g) ?? [];
             expect(icons).toHaveLength(2);
@@ -73,7 +71,7 @@ describe("notification icons", () => {
         });
         expect(markup).toContain('data-testid="custom-copy"');
         const icons = markup.match(/<svg\b[^>]*>/g) ?? [];
-        expect(icons).toHaveLength(1);
+        expect(icons).toHaveLength(2);
         expect(icons[0]).toContain('width="18"');
         expect(icons[0]).toContain('stroke-width="2"');
     });

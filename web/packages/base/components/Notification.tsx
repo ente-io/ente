@@ -26,7 +26,6 @@ import React from "react";
 type NotificationIcon = IconSvgElement | React.ReactElement | null;
 
 export interface NotificationAttributes {
-    captionFirst?: boolean;
     color: ButtonProps["color"];
     // Set to null to omit the leading icon.
     startIcon?: NotificationIcon;
@@ -35,7 +34,6 @@ export interface NotificationAttributes {
     onClick?: () => void;
     endIcon?: NotificationIcon;
     endIconLabel?: string;
-    showCloseButtonWithEndIcon?: boolean;
     onEndIconClick?: () => void;
 }
 
@@ -84,14 +82,12 @@ export const Notification: React.FC<NotificationProps> = ({
     if (!attributes) return <></>;
 
     const {
-        captionFirst,
         color,
         startIcon,
         title,
         caption,
         endIcon,
         endIconLabel,
-        showCloseButtonWithEndIcon,
         onClick,
         onEndIconClick,
     } = attributes;
@@ -149,8 +145,8 @@ export const Notification: React.FC<NotificationProps> = ({
                     overflow: "hidden",
                 }}
             >
-                {captionFirst && captionElement}
                 <Typography
+                    noWrap
                     sx={{
                         fontFamily: "inherit",
                         fontSize: 18,
@@ -160,7 +156,7 @@ export const Notification: React.FC<NotificationProps> = ({
                 >
                     {title}
                 </Typography>
-                {!captionFirst && captionElement}
+                {captionElement}
             </Stack>
         </Stack>
     );
@@ -257,18 +253,16 @@ export const Notification: React.FC<NotificationProps> = ({
                             {renderIcon(endIcon, 22)}
                         </IconButton>
                     )}
-                    {(!endIcon || showCloseButtonWithEndIcon) && (
-                        <IconButton
-                            aria-label={t("close")}
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                onClose();
-                            }}
-                            sx={buttonSx}
-                        >
-                            {renderIcon(Cancel01Icon, 22)}
-                        </IconButton>
-                    )}
+                    <IconButton
+                        aria-label={t("close")}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onClose();
+                        }}
+                        sx={buttonSx}
+                    >
+                        {renderIcon(Cancel01Icon, 22)}
+                    </IconButton>
                 </Stack>
             </Paper>
         </Snackbar>

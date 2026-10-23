@@ -1115,7 +1115,6 @@ export const Upload: React.FC<UploadProps> = ({
             case subscriptionExpiredErrorMessage:
                 showNotification({
                     color: "critical",
-                    captionFirst: true,
                     caption: t("subscription_expired"),
                     title: t("renew_now"),
                     onClick: () =>
@@ -1125,7 +1124,6 @@ export const Upload: React.FC<UploadProps> = ({
             case storageLimitExceededErrorMessage:
                 showNotification({
                     color: "critical",
-                    captionFirst: true,
                     caption: t("storage_quota_exceeded"),
                     title: t("upgrade_now"),
                     onClick: onShowPlanSelector,

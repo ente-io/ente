@@ -61,7 +61,6 @@ export const QuickLinkCreatedNotification: React.FC<
                 endIcon: copied ? Tick02Icon : Copy01Icon,
                 endIconLabel: t("copy_link"),
                 onEndIconClick: handleCopy,
-                showCloseButtonWithEndIcon: true,
             }}
         />
     );
