@@ -25,7 +25,14 @@ import CheckIcon from "@mui/icons-material/Check";
 import LinkIcon from "@mui/icons-material/Link";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PublicIcon from "@mui/icons-material/Public";
-import { Box, IconButton, Stack, Tooltip } from "@mui/material";
+import {
+    Box,
+    IconButton,
+    Stack,
+    Tooltip,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import { ContextMenu, ContextMenuItem } from "ente-base/components/ContextMenu";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -42,9 +49,12 @@ import {
 import type { CollectionSortBy } from "ente-media/collection-sort";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
+    AlbumDescription,
+    GalleryItemsCoverTile,
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
+import { ItemCard } from "ente-new/photos/components/Tiles";
 import {
     cleanUncategorized,
     defaultHiddenCollectionUserFacingName,
@@ -94,8 +104,10 @@ export interface CollectionHeaderProps {
 export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
     const { activeCollection, collectionSummary, onDescriptionHeightChange } =
         props;
+    const showCover = useMediaQuery(useTheme().breakpoints.up("sm"));
 
     const { name, type, attributes, fileCount } = collectionSummary;
+    const isAlbum = isAlbumSummary(collectionSummary);
     const description =
         activeCollection?.pubMagicMetadata?.data.caption?.trim();
 
@@ -122,10 +134,28 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
 
     return (
         <GalleryItemsHeaderAdapter>
-            <SpacedRow>
+            <SpacedRow
+                sx={
+                    isAlbum
+                        ? {
+                              display: "grid",
+                              gridTemplateColumns: "minmax(0, 1fr) auto",
+                              gridTemplateAreas:
+                                  '"summary actions" "description description"',
+                              columnGap: 2,
+                              alignItems: "start",
+                          }
+                        : { gap: 2, alignItems: "center" }
+                }
+            >
                 <Stack
                     direction="row"
-                    sx={{ gap: 1, alignItems: "center", minWidth: 0 }}
+                    sx={{
+                        gap: isAlbum ? 2 : 1,
+                        alignItems: "center",
+                        minWidth: 0,
+                        ...(isAlbum && { gridArea: "summary" }),
+                    }}
                 >
                     {(type == "hiddenItems" || type == "archiveItems") && (
                         <Tooltip title={t("go_back")}>
@@ -138,22 +168,58 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
                             </IconButton>
                         </Tooltip>
                     )}
+                    {isAlbum && showCover && (
+                        <Box
+                            aria-hidden
+                            sx={{ flexShrink: 0, alignSelf: "flex-start" }}
+                        >
+                            <ItemCard
+                                key={`${collectionSummary.id}-${collectionSummary.coverFile?.id ?? "empty"}`}
+                                TileComponent={GalleryItemsCoverTile}
+                                coverFile={collectionSummary.coverFile}
+                            />
+                        </Box>
+                    )}
                     <GalleryItemsSummary
+                        nameProps={
+                            isAlbum
+                                ? { sx: { overflowWrap: "anywhere" } }
+                                : undefined
+                        }
                         name={name}
-                        description={description}
+                        description={isAlbum ? undefined : description}
                         descriptionMaxWidth={480}
+                        onDescriptionHeightChange={
+                            isAlbum ? undefined : onDescriptionHeightChange
+                        }
                         fileCount={fileCount}
                         endIcon={<EndIcon />}
-                        onDescriptionHeightChange={onDescriptionHeightChange}
                     />
                 </Stack>
                 {shouldShowOptions(type) && (
-                    <CollectionHeaderOptions {...props} />
+                    <Box sx={isAlbum ? { gridArea: "actions" } : undefined}>
+                        <CollectionHeaderOptions {...props} />
+                    </Box>
+                )}
+                {isAlbum && (
+                    <AlbumDescription
+                        description={description}
+                        onHeightChange={onDescriptionHeightChange}
+                        sx={{
+                            gridArea: "description",
+                            pt: 1,
+                            maxWidth: 480,
+                            color: "text.faint",
+                        }}
+                    />
                 )}
             </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
 };
+
+const isAlbumSummary = ({ type }: CollectionSummary) =>
+    type == "album" || type == "folder" || type == "sharedIncoming";
 
 const shouldShowOptions = (type: CollectionSummaryType) =>
     type != "all" && type != "archiveItems";
@@ -677,7 +743,16 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const validMenuOptions = menuOptions.filter((o) => !!o);
 
     return (
-        <Box sx={{ display: "inline-flex", gap: "16px" }}>
+        <Box
+            sx={{
+                display: "inline-flex",
+                gap: "16px",
+                flexShrink: 0,
+                mt: isAlbumSummary(collectionSummary)
+                    ? { xs: 0, sm: "3px" }
+                    : 0,
+            }}
+        >
             <QuickOptions
                 collectionSummary={collectionSummary}
                 isQuickLinkAlbum={isQuickLinkAlbum}
@@ -697,6 +772,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             {validMenuOptions.length > 0 && (
                 <>
                     <IconButton
+                        aria-label={t("more_options")}
                         id="collection-options-trigger"
                         aria-controls={
                             menuAnchorEl ? "collection-options" : undefined

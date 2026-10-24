@@ -11,6 +11,7 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import SearchIcon from "@mui/icons-material/Search";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
+    Box,
     Dialog,
     DialogActions,
     DialogContent,
@@ -27,6 +28,7 @@ import {
     Tooltip,
     Typography,
     useMediaQuery,
+    useTheme,
 } from "@mui/material";
 import { CenteredFill, SpacedRow } from "ente-base/components/containers";
 import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
@@ -47,6 +49,7 @@ import {
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import {
+    GalleryItemsCoverTile,
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
@@ -93,7 +96,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
 }) => {
     return (
         <GalleryItemsHeaderAdapter>
-            <SpacedRow>
+            <SpacedRow sx={{ gap: 2 }}>
                 {person.type == "cgroup" ? (
                     person.isHidden ? (
                         <IgnoredPersonHeader person={person} />
@@ -108,6 +111,44 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                 )}
             </SpacedRow>
         </GalleryItemsHeaderAdapter>
+    );
+};
+
+const PersonHeaderSummary = ({
+    person,
+    ...summaryProps
+}: { person: Person } & Pick<
+    React.ComponentProps<typeof GalleryItemsSummary>,
+    "name" | "nameProps" | "onNameClick"
+>) => {
+    const showCover = useMediaQuery(useTheme().breakpoints.up("sm"));
+    return (
+        <Stack
+            direction="row"
+            sx={{ gap: 2, alignItems: "center", minWidth: 0 }}
+        >
+            {showCover && (
+                <Box
+                    aria-hidden
+                    sx={{ flexShrink: 0, alignSelf: "flex-start" }}
+                >
+                    <ItemCard
+                        key={`${person.id}-${person.displayFaceID}`}
+                        TileComponent={GalleryItemsCoverTile}
+                        coverFile={person.displayFaceFile}
+                        coverFaceID={person.displayFaceID}
+                    />
+                </Box>
+            )}
+            <GalleryItemsSummary
+                {...summaryProps}
+                fileCount={person.fileIDs.length}
+                nameProps={{
+                    ...summaryProps.nameProps,
+                    sx: { overflowWrap: "anywhere" },
+                }}
+            />
+        </Stack>
     );
 };
 
@@ -141,14 +182,12 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
         });
 
     // This view only receives unignored, named people.
-    const name = cgroup.data.name ?? "";
+    const name =
+        person.name?.trim() || cgroup.data.name?.trim() || t("unnamed_person");
 
     return (
         <>
-            <GalleryItemsSummary
-                name={name}
-                fileCount={person.fileIDs.length}
-            />
+            <PersonHeaderSummary person={person} name={name} />
             <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
                     startIcon={<ListAltOutlinedIcon />}
@@ -216,10 +255,10 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
 
     return (
         <>
-            <GalleryItemsSummary
-                name={t("ignored")}
+            <PersonHeaderSummary
+                person={person}
+                name={person.name?.trim() || t("ignored")}
                 nameProps={{ color: "text.muted" }}
-                fileCount={person.fileIDs.length}
             />
             <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
@@ -263,10 +302,10 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
     return (
         <>
-            <GalleryItemsSummary
-                name={t("unnamed_person")}
+            <PersonHeaderSummary
+                person={person}
+                name={person.name?.trim() || t("unnamed_person")}
                 nameProps={{ color: "text.muted" }}
-                fileCount={person.fileIDs.length}
                 onNameClick={showAddPerson}
             />
             <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
