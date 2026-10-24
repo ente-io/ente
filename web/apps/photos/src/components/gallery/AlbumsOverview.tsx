@@ -278,7 +278,7 @@ const AlbumsRow = ({
                                     fontWeight: 500,
                                 }}
                             >
-                                {t("add_new_album_tile")}
+                                {t("new_album")}
                             </Typography>
                         </AlbumButton>
                     );

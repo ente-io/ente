@@ -58,7 +58,6 @@
     "album_items_count_one": "{{count, number}} item",
     "album_items_count_other": "{{count, number}} items",
     "new_album": "New album",
-    "add_new_album_tile": "Add new",
     "create_albums": "Create albums",
     "album_name": "Album name",
     "album_created": "Album created",
