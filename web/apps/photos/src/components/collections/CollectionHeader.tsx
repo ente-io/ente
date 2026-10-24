@@ -15,7 +15,6 @@ import {
     Sorting05Icon,
     StarIcon,
     Unarchive03Icon,
-    UserGroupIcon,
     ViewIcon,
     ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons";
@@ -30,6 +29,7 @@ import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import { ContextMenu, ContextMenuItem } from "ente-base/components/ContextMenu";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
@@ -220,6 +220,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const { showLoadingBar, hideLoadingBar, showNotification } =
         usePhotosAppContext();
     const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
+    const isSmallWidth = useIsSmallWidth();
     const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
@@ -666,16 +667,47 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                     <HugeiconsIcon icon={Delete02Icon} size={20} />
                     {t("delete_album")}
                 </ContextMenuItem>,
-                <ContextMenuItem key="share" onClick={onCollectionShare}>
-                    <HugeiconsIcon icon={UserGroupIcon} size={20} />
-                    {t("share_album")}
-                </ContextMenuItem>,
                 <ContextMenuItem key="cast" onClick={onCollectionCast}>
                     <HugeiconsIcon icon={ModernTvIcon} size={20} />
                     {t("cast_album_to_tv")}
                 </ContextMenuItem>,
             ];
             break;
+    }
+
+    if (isSmallWidth) {
+        menuOptions.unshift(
+            showDownloadQuickOption(collectionSummary) && fileCount > 0 && (
+                <ContextMenuItem
+                    key="download"
+                    disabled={
+                        hasActiveFileSelection ||
+                        isActiveCollectionDownloadInProgress()
+                    }
+                    onClick={downloadCollection}
+                >
+                    {isActiveCollectionDownloadInProgress() ? (
+                        <ActivityIndicator size="20px" />
+                    ) : (
+                        <DownloadIcon />
+                    )}
+                    {downloadOptionLabel(collectionSummary)}
+                </ContextMenuItem>
+            ),
+            showShareQuickOption(collectionSummary) && (
+                <ContextMenuItem
+                    key="share"
+                    onClick={
+                        isQuickLinkAlbum
+                            ? onCollectionManageLink
+                            : onCollectionShare
+                    }
+                >
+                    {isQuickLinkAlbum ? <LinkIcon /> : <ShareIcon />}
+                    {shareOptionLabel(collectionSummary, isQuickLinkAlbum)}
+                </ContextMenuItem>
+            ),
+        );
     }
 
     if (activeCollection)
@@ -797,45 +829,57 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     isQuickLinkAlbum,
     hasActiveFileSelection,
     isDownloadInProgress,
-}) => (
-    <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
-        {showEmptyTrashQuickOption(collectionSummary) && (
-            <EmptyTrashQuickOption
-                disabled={hasActiveFileSelection}
-                onClick={onEmptyTrashClick}
-            />
-        )}
-        {showDownloadQuickOption(collectionSummary) &&
-            collectionSummary.fileCount > 0 &&
-            (isDownloadInProgress() ? (
-                <ActivityIndicator size="20px" sx={{ m: "12px" }} />
-            ) : (
-                <DownloadQuickOption
-                    collectionSummary={collectionSummary}
+}) => {
+    const isSmallWidth = useIsSmallWidth();
+
+    return (
+        <Stack
+            direction="row"
+            sx={{
+                alignItems: "center",
+                gap: "16px",
+                "&:empty": { display: "none" },
+            }}
+        >
+            {showEmptyTrashQuickOption(collectionSummary) && (
+                <EmptyTrashQuickOption
                     disabled={hasActiveFileSelection}
-                    onClick={onDownloadClick}
+                    onClick={onEmptyTrashClick}
                 />
-            ))}
-        {showCleanUncategorizedQuickOption(collectionSummary) && (
-            <CleanUncategorizedQuickOption
-                onClick={onCleanUncategorizedClick}
-            />
-        )}
-        {showMapQuickOption(collectionSummary) && (
-            <MapQuickOption onClick={onMapClick} />
-        )}
-        {showShareQuickOption(collectionSummary) && (
-            <ShareQuickOption
-                collectionSummary={collectionSummary}
-                isQuickLinkAlbum={isQuickLinkAlbum}
-                onClick={onShareClick}
-            />
-        )}
-        {showCastQuickOption(collectionSummary) && (
-            <CastQuickOption onClick={onCastClick} />
-        )}
-    </Stack>
-);
+            )}
+            {!isSmallWidth &&
+                showDownloadQuickOption(collectionSummary) &&
+                collectionSummary.fileCount > 0 &&
+                (isDownloadInProgress() ? (
+                    <ActivityIndicator size="20px" sx={{ m: "12px" }} />
+                ) : (
+                    <DownloadQuickOption
+                        collectionSummary={collectionSummary}
+                        disabled={hasActiveFileSelection}
+                        onClick={onDownloadClick}
+                    />
+                ))}
+            {showCleanUncategorizedQuickOption(collectionSummary) && (
+                <CleanUncategorizedQuickOption
+                    onClick={onCleanUncategorizedClick}
+                />
+            )}
+            {showMapQuickOption(collectionSummary) && (
+                <MapQuickOption onClick={onMapClick} />
+            )}
+            {!isSmallWidth && showShareQuickOption(collectionSummary) && (
+                <ShareQuickOption
+                    collectionSummary={collectionSummary}
+                    isQuickLinkAlbum={isQuickLinkAlbum}
+                    onClick={onShareClick}
+                />
+            )}
+            {showCastQuickOption(collectionSummary) && (
+                <CastQuickOption onClick={onCastClick} />
+            )}
+        </Stack>
+    );
+};
 
 const showEmptyTrashQuickOption = ({ type, fileCount }: CollectionSummary) =>
     type == "trash" && fileCount > 0;
@@ -929,21 +973,11 @@ const DownloadIcon: React.FC = () => (
 );
 
 const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
-    collectionSummary: { type },
+    collectionSummary,
     disabled,
     onClick,
 }) => (
-    <Tooltip
-        title={
-            type == "userFavorites"
-                ? t("download_favorites")
-                : type == "uncategorized"
-                  ? t("download_uncategorized")
-                  : type == "hiddenItems"
-                    ? t("download_hidden_items")
-                    : t("download_album")
-        }
-    >
+    <Tooltip title={downloadOptionLabel(collectionSummary)}>
         <span>
             <IconButton disabled={disabled} onClick={onClick}>
                 <Box
@@ -967,6 +1001,29 @@ const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "folder" ||
     attributes.has("favorites") ||
     attributes.has("shared");
+
+const downloadOptionLabel = ({ type }: CollectionSummary) =>
+    type == "userFavorites"
+        ? t("download_favorites")
+        : type == "uncategorized"
+          ? t("download_uncategorized")
+          : type == "hiddenItems"
+            ? t("download_hidden_items")
+            : t("download_album");
+
+const shareOptionLabel = (
+    { attributes }: CollectionSummary,
+    isQuickLinkAlbum: boolean,
+) =>
+    isQuickLinkAlbum
+        ? t("manage_link")
+        : attributes.has("userFavorites")
+          ? t("share_favorites")
+          : attributes.has("sharedIncoming")
+            ? t("sharing_details")
+            : attributes.has("shared")
+              ? t("modify_sharing")
+              : t("share_album");
 
 const showCastQuickOption = ({ type }: CollectionSummary) =>
     type == "userFavorites";
@@ -1009,23 +1066,11 @@ const SmallShareIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
-    collectionSummary: { attributes },
+    collectionSummary,
     isQuickLinkAlbum,
     onClick,
 }) => (
-    <Tooltip
-        title={
-            isQuickLinkAlbum
-                ? t("manage_link")
-                : attributes.has("userFavorites")
-                  ? t("share_favorites")
-                  : attributes.has("sharedIncoming")
-                    ? t("sharing_details")
-                    : attributes.has("shared")
-                      ? t("modify_sharing")
-                      : t("share_album")
-        }
-    >
+    <Tooltip title={shareOptionLabel(collectionSummary, isQuickLinkAlbum)}>
         <IconButton onClick={onClick}>
             <Box
                 sx={{

@@ -1,9 +1,8 @@
 import { useDeleteEmptyAlbums } from "@/components/collections/useDeleteEmptyAlbums";
 import type { RemotePullOpts } from "@/components/gallery";
 import type { AlbumFilter } from "@/utils/album-filters";
-import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, ImageAdd02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import AddIcon from "@mui/icons-material/Add";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import {
     Box,
@@ -247,21 +246,29 @@ const AlbumsRow = ({
             }}
         >
             {Array.from({ length: end - start }, (_, offset) => {
-                const album = data.albums[start + offset];
-                if (!album)
+                const itemIndex = start + offset;
+                if (data.showCreate && itemIndex === 0)
                     return (
-                        <AlbumButton key="create" onClick={data.onCreateAlbum}>
+                        <AlbumButton
+                            key="create"
+                            aria-label={t("new_album")}
+                            onClick={data.onCreateAlbum}
+                        >
                             <Cover
                                 sx={{
-                                    border: "1.5px dashed",
-                                    borderColor: "stroke.faint",
+                                    bgcolor: "fill.faint",
+                                    color: "text.muted",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    color: "text.muted",
                                 }}
                             >
-                                <AddIcon />
+                                <HugeiconsIcon
+                                    icon={ImageAdd02Icon}
+                                    size={32}
+                                    strokeWidth={1.5}
+                                    aria-hidden
+                                />
                             </Cover>
                             <Typography
                                 component="span"
@@ -269,13 +276,13 @@ const AlbumsRow = ({
                                     fontSize: "var(--album-name-size)",
                                     lineHeight: "20px",
                                     fontWeight: 500,
-                                    color: "text.muted",
                                 }}
                             >
                                 {t("new_album")}
                             </Typography>
                         </AlbumButton>
                     );
+                const album = data.albums[itemIndex - Number(data.showCreate)]!;
                 const badge = album.attributes.has("sharedIncoming")
                     ? t("album_overview_received_title")
                     : album.attributes.has("sharedOutgoing") ||
@@ -383,7 +390,7 @@ const AlbumButton = styled(UnstyledButton)(({ theme }) => ({
     gap: 8,
     color: theme.vars.palette.text.base,
     textAlign: "left",
-    borderRadius: 12,
+    borderRadius: 20,
     "&:hover": { opacity: 0.86 },
     "&:focus-visible": {
         outline: `2px solid ${theme.vars.palette.stroke.base}`,
@@ -395,7 +402,7 @@ const Cover = styled("div")({
     width: "var(--album-tile-width)",
     height: "var(--album-tile-width)",
     flexShrink: 0,
-    borderRadius: 12,
+    borderRadius: 20,
     overflow: "hidden",
     position: "relative",
     "& > img": {
