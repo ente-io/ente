@@ -11,6 +11,7 @@ members = [
     "bindings/uniffi/cast",
     "bindings/uniffi/ensu",
     "bindings/uniffi/log",
+    "bindings/uniffi/notifications",
     "bindings/wasm/auth",
     "bindings/wasm/cast",
     "bindings/wasm/ensu",

@@ -13,8 +13,7 @@ class NotificationKeyService {
   static const _storageKey = 'notification_private_key';
   static Future<String>? _pendingKey;
 
-  static Future<String?> generateNotificationKey() {
-    if (!Platform.isAndroid) return Future.value();
+  static Future<String> generateNotificationKey() {
     return _pendingKey ??= _getOrCreateNotificationKey().whenComplete(() {
       _pendingKey = null;
     });

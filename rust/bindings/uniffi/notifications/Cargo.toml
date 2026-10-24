@@ -1,0 +1,15 @@
+[package]
+name = "ente-notification-uniffi"
+version = "0.1.0"
+edition.workspace = true
+
+[lib]
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+ente-core.workspace = true
+thiserror.workspace = true
+uniffi.workspace = true
+
+[lints]
+workspace = true

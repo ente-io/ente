@@ -25,6 +25,7 @@ enum NativeTarget {
     All,
     Ensu,
     Cast,
+    Notifications,
 }
 
 #[derive(Clone, Copy)]
@@ -49,6 +50,7 @@ fn run() -> Result<(), DynError> {
                 None => NativeTarget::All,
                 Some("ensu") => NativeTarget::Ensu,
                 Some("cast") => NativeTarget::Cast,
+                Some("notifications") => NativeTarget::Notifications,
                 _ => return Err(usage_error()),
             };
             if args.next().is_some() {
@@ -79,7 +81,7 @@ fn run() -> Result<(), DynError> {
 }
 
 fn usage_error() -> DynError {
-    "usage: cargo codegen <native [ensu|cast]|frb [photos|locker]|napi>".into()
+    "usage: cargo codegen <native [ensu|cast|notifications]|frb [photos|locker]|napi>".into()
 }
 
 fn generate_native(target: NativeTarget) -> Result<(), DynError> {
@@ -110,6 +112,17 @@ fn generate_native(target: NativeTarget) -> Result<(), DynError> {
         //     "android/apps/cast/app/src/main/kotlin",
         //     "io/ente/cast/bindings/cast.kt",
         // )?;
+    }
+
+    if matches!(target, NativeTarget::All | NativeTarget::Notifications) {
+        let notifications = UniffiCrate {
+            crate_name: "ente_notification_uniffi",
+            crate_dir: rust_root.join("bindings/uniffi/notifications"),
+        };
+        generate_swift(
+            &notifications,
+            "mobile/apps/photos/ios/NotificationServiceExtension/Generated",
+        )?;
     }
 
     Ok(())
