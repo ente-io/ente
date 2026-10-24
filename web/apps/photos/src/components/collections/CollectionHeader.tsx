@@ -25,7 +25,14 @@ import CheckIcon from "@mui/icons-material/Check";
 import LinkIcon from "@mui/icons-material/Link";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PublicIcon from "@mui/icons-material/Public";
-import { Box, IconButton, Stack, Tooltip } from "@mui/material";
+import {
+    Box,
+    IconButton,
+    Stack,
+    Tooltip,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import { ContextMenu, ContextMenuItem } from "ente-base/components/ContextMenu";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -97,6 +104,7 @@ export interface CollectionHeaderProps {
 export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
     const { activeCollection, collectionSummary, onHeightChange } = props;
     const headerRef = useRef<HTMLDivElement>(null);
+    const showCover = useMediaQuery(useTheme().breakpoints.up("sm"));
 
     useEffect(() => {
         const header = headerRef.current;
@@ -172,15 +180,19 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
                             </IconButton>
                         </Tooltip>
                     )}
-                    {isAlbum && (
-                        <ItemCard
-                            key={`${collectionSummary.id}-${collectionSummary.coverFile?.id ?? "empty"}`}
-                            TileComponent={GalleryItemsCoverTile}
-                            coverFile={collectionSummary.coverFile}
-                        />
+                    {isAlbum && showCover && (
+                        <Box
+                            aria-hidden
+                            sx={{ flexShrink: 0, alignSelf: "flex-start" }}
+                        >
+                            <ItemCard
+                                key={`${collectionSummary.id}-${collectionSummary.coverFile?.id ?? "empty"}`}
+                                TileComponent={GalleryItemsCoverTile}
+                                coverFile={collectionSummary.coverFile}
+                            />
+                        </Box>
                     )}
                     <GalleryItemsSummary
-                        compact={isAlbum}
                         nameProps={
                             isAlbum
                                 ? { sx: { overflowWrap: "anywhere" } }

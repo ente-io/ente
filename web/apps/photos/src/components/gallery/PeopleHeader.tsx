@@ -11,6 +11,7 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import SearchIcon from "@mui/icons-material/Search";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
+    Box,
     Dialog,
     DialogActions,
     DialogContent,
@@ -27,6 +28,7 @@ import {
     Tooltip,
     Typography,
     useMediaQuery,
+    useTheme,
 } from "@mui/material";
 import { CenteredFill, SpacedRow } from "ente-base/components/containers";
 import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
@@ -131,25 +133,37 @@ const PersonHeaderSummary = ({
 }: { person: Person } & Pick<
     React.ComponentProps<typeof GalleryItemsSummary>,
     "name" | "nameProps" | "onNameClick"
->) => (
-    <Stack direction="row" sx={{ gap: 2, alignItems: "center", minWidth: 0 }}>
-        <ItemCard
-            key={`${person.id}-${person.displayFaceID}`}
-            TileComponent={GalleryItemsCoverTile}
-            coverFile={person.displayFaceFile}
-            coverFaceID={person.displayFaceID}
-        />
-        <GalleryItemsSummary
-            {...summaryProps}
-            compact
-            fileCount={person.fileIDs.length}
-            nameProps={{
-                ...summaryProps.nameProps,
-                sx: { overflowWrap: "anywhere" },
-            }}
-        />
-    </Stack>
-);
+>) => {
+    const showCover = useMediaQuery(useTheme().breakpoints.up("sm"));
+    return (
+        <Stack
+            direction="row"
+            sx={{ gap: 2, alignItems: "center", minWidth: 0 }}
+        >
+            {showCover && (
+                <Box
+                    aria-hidden
+                    sx={{ flexShrink: 0, alignSelf: "flex-start" }}
+                >
+                    <ItemCard
+                        key={`${person.id}-${person.displayFaceID}`}
+                        TileComponent={GalleryItemsCoverTile}
+                        coverFile={person.displayFaceFile}
+                        coverFaceID={person.displayFaceID}
+                    />
+                </Box>
+            )}
+            <GalleryItemsSummary
+                {...summaryProps}
+                fileCount={person.fileIDs.length}
+                nameProps={{
+                    ...summaryProps.nameProps,
+                    sx: { overflowWrap: "anywhere" },
+                }}
+            />
+        </Stack>
+    );
+};
 
 interface CGroupPersonHeaderProps {
     person: CGroupPerson;
