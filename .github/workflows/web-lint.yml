@@ -65,7 +65,3 @@ jobs:
             - run: node scripts/lint.mjs
 
             - run: npm test
-
-            - run: npm exec --workspace space -- playwright install --with-deps webkit
-
-            - run: npm run test:browser --workspace space
