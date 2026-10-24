@@ -82,6 +82,7 @@ import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_visibility_scope.dart";
 import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/utils/collection_util.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -1217,7 +1218,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _buildTabHeroMode(int tabIndex, int selectedTabIndex, Widget child) {
     return ClipRect(
-      child: HeroMode(enabled: tabIndex == selectedTabIndex, child: child),
+      child: GalleryVisibilityScope(
+        visible: tabIndex == selectedTabIndex,
+        child: HeroMode(enabled: tabIndex == selectedTabIndex, child: child),
+      ),
     );
   }
 
