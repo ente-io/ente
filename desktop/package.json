@@ -35,7 +35,7 @@
         "lru-cache": "11.5.1",
         "next-electron-server": "1.0.0",
         "node-stream-zip": "1.15.0",
-        "zod": "4.4.3"
+        "zod": "4.6.6"
     },
     "devDependencies": {
         "@eslint/js": "10.0.1",
