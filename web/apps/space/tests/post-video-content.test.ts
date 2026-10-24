@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { createSpaceVideoContent } from "../src/components/PostVideoContent";
+import { cachedSpaceMediaBlobURLIfPresent } from "../src/services/media-cache";
 import { SpaceMediaRateLimitError } from "../src/services/media-load";
 import type {
     SpacePostAsset,
@@ -7,6 +8,13 @@ import type {
 } from "../src/services/space";
 
 vi.mock("ente-base/log-web", () => ({ logToDisk: vi.fn() }));
+vi.mock("../src/services/media-cache", () => ({
+    cachedSpaceMediaBlobURLIfPresent: vi.fn(),
+    spacePostMediaCacheKey: (spaceId: string, objectKey: string) =>
+        ["post", spaceId, objectKey].join(":"),
+}));
+
+const loadCached = vi.mocked(cachedSpaceMediaBlobURLIfPresent);
 
 class Element extends EventTarget {
     style = {};
@@ -36,6 +44,14 @@ class Video extends Element {
     currentTime = 0;
     onpause?: () => void;
     onplaying?: () => void;
+    onloadeddata?: () => void;
+    onended?: () => void;
+    get poster() {
+        return this.getAttribute("poster") ?? "";
+    }
+    set poster(value: string) {
+        this.setAttribute("poster", value);
+    }
     set src(value: string) {
         this.setAttribute("src", value);
     }
@@ -60,6 +76,7 @@ beforeEach(() => {
     vi.useFakeTimers();
     contents = [];
     load = vi.fn<SpacePostAssetURLLoader>().mockResolvedValue("blob:video");
+    loadCached.mockReset().mockResolvedValue(undefined);
     revokeURL = vi
         .spyOn(URL, "revokeObjectURL")
         .mockImplementation(() => undefined);
@@ -89,7 +106,11 @@ const create = (
         {
             imageUrl,
             video: {
-                asset: { objectKey: "video" } as SpacePostAsset,
+                asset: {
+                    spaceId: "space",
+                    objectKey: "video",
+                    mediaType: "video/mp4",
+                } as SpacePostAsset,
                 durationMs: 1000,
             },
         },
@@ -130,6 +151,109 @@ test("a video can download and play before its cover image is available", async 
     expect(load).toHaveBeenCalledTimes(1);
     expect(content.video.paused).toBe(false);
     expect(content.video.getAttribute("poster")).toBeNull();
+});
+
+test("a preloaded viewer video shows its decoded frame before activation", async () => {
+    loadCached.mockResolvedValue("blob:cached-video");
+    const content = create(false);
+    await content.preload({ cachedOnly: true });
+    expect(loadCached).toHaveBeenCalledExactlyOnceWith(
+        "post:space:video",
+        "video/mp4",
+        expect.any(AbortSignal),
+    );
+    expect(content.video.getAttribute("src")).toBe("blob:cached-video");
+    expect(content.video.poster).toBe("blob:poster");
+    content.video.onloadeddata?.();
+    expect(content.video.getAttribute("poster")).toBeNull();
+    expect(content.video.play).not.toHaveBeenCalled();
+    content.play();
+    await vi.advanceTimersByTimeAsync(0);
+    content.deactivate();
+    expect(content.video.getAttribute("poster")).toBeNull();
+    content.play();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(content.video.getAttribute("poster")).toBeNull();
+    expect(load).not.toHaveBeenCalled();
+});
+
+test("preparing an uncached viewer slide does not start a download", async () => {
+    const content = create(false);
+    await content.preload({ cachedOnly: true });
+    expect(load).not.toHaveBeenCalled();
+    expect(content.video.getAttribute("src")).toBeNull();
+    expect(content.video.play).not.toHaveBeenCalled();
+    content.play();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(content.video.paused).toBe(false);
+});
+
+test.each(["blob:cached-video", undefined])(
+    "activation waits for the cache lookup and downloads only on a miss: %s",
+    async (cachedURL) => {
+        const lookup = Promise.withResolvers<string | undefined>();
+        loadCached.mockReturnValue(lookup.promise);
+        const content = create(false);
+        const preload = content.preload({ cachedOnly: true });
+        content.play();
+        expect(load).not.toHaveBeenCalled();
+        expect(content.video.play).not.toHaveBeenCalled();
+        lookup.resolve(cachedURL);
+        await preload;
+        await vi.advanceTimersByTimeAsync(0);
+        expect(load).toHaveBeenCalledTimes(cachedURL ? 0 : 1);
+        expect(content.video.getAttribute("src")).toBe(
+            cachedURL ?? "blob:video",
+        );
+        expect(content.video.play).toHaveBeenCalledTimes(1);
+    },
+);
+
+test("closing the viewer releases a cached video that becomes available later", async () => {
+    const lookup = Promise.withResolvers<string | undefined>();
+    loadCached.mockReturnValue(lookup.promise);
+    const content = create(false);
+    const preload = content.preload({ cachedOnly: true });
+    content.destroy();
+    lookup.resolve("blob:cached-video");
+    await preload;
+    expect(revokeURL).toHaveBeenCalledExactlyOnceWith("blob:cached-video");
+    expect(content.video.getAttribute("src")).toBeNull();
+    expect(load).not.toHaveBeenCalled();
+});
+
+test("closing the viewer cancels its subscription to an existing video preload", async () => {
+    loadCached.mockImplementation(
+        (_, __, signal) =>
+            new Promise((_, reject) => {
+                signal!.addEventListener("abort", () =>
+                    reject(signal!.reason as Error),
+                );
+            }),
+    );
+    const content = create(false);
+    const preload = content.preload({ cachedOnly: true });
+    content.destroy();
+    await expect(preload).rejects.toMatchObject({ name: "AbortError" });
+    expect(loadCached.mock.calls[0]![2]!.aborted).toBe(true);
+    expect(content.video.getAttribute("src")).toBeNull();
+    expect(load).not.toHaveBeenCalled();
+});
+
+test("ending a viewer video restores its cover for replay", async () => {
+    const content = create(false);
+    content.play();
+    await vi.advanceTimersByTimeAsync(0);
+    content.video.onloadeddata?.();
+    content.video.onended?.();
+    expect(content.video.poster).toBe("blob:poster");
+    expect(content.video.getAttribute("src")).toBeNull();
+    content.play(true);
+    await vi.advanceTimersByTimeAsync(0);
+    content.video.onloadeddata?.();
+    expect(content.video.getAttribute("poster")).toBeNull();
+    expect(content.video.paused).toBe(false);
 });
 
 test("autoplay joins an in-flight preload without downloading the video again", async () => {
@@ -300,15 +424,25 @@ test("leaving a queued video clears its priority and does not start a stale time
     expect(content.video.play).not.toHaveBeenCalled();
 });
 
-test("fullscreen video still releases its source on deactivation", async () => {
+test("swiping between viewer videos preserves their frames until destruction", async () => {
     const content = create(false);
     content.play();
     await vi.advanceTimersByTimeAsync(0);
+    content.video.currentTime = 0.5;
     content.deactivate();
     expect(content.video.paused).toBe(true);
+    expect(content.video.getAttribute("src")).toBe("blob:video");
+    expect(content.video.load).not.toHaveBeenCalled();
+    expect(revokeURL).not.toHaveBeenCalled();
+    expect(content.button.getAttribute("aria-hidden")).toBe("true");
+    content.play();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(content.video.currentTime).toBe(0.5);
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(content.video.play).toHaveBeenCalledTimes(2);
+    content.destroy();
     expect(content.video.getAttribute("src")).toBeNull();
     expect(revokeURL).toHaveBeenCalledExactlyOnceWith("blob:video");
-    expect(content.button.getAttribute("aria-hidden")).toBe("true");
 });
 
 test("blocked autoplay preserves the source and offers manual playback", async () => {
