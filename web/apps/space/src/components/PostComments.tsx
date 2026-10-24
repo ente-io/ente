@@ -209,7 +209,8 @@ const CommentRow: React.FC<{
     const canOpenActions = !disabled && !comment.deleted;
     const reactions = commentReactionGroups(comment.reactions, ownReaction);
     const reactionColumns = Math.min(reactions.length, 6);
-    const largeEmoji = isEmojiOnlyComment(comment.text ?? "");
+    const largeEmoji =
+        !comment.parentId && isEmojiOnlyComment(comment.text ?? "");
     const previousReaction = React.useRef(ownReaction);
     const [poppingReaction, setPoppingReaction] = React.useState<string>();
     React.useEffect(() => {
