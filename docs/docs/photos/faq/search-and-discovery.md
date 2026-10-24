@@ -5,6 +5,14 @@ description: Frequently asked questions about finding photos using map, face rec
 
 # Search and Discovery
 
+## General Search
+
+### How do I view only photos, videos or Live Photos? {#filter-by-file-type}
+
+On mobile, open **Search** and scroll to **File types**. Select **Photos**, **Videos**, or **Live** to view that type. You can also select a file extension, such as **JPG** or **MP4**.
+
+These shortcuts search your library. They do not change an album's contents.
+
 ## Map View
 
 ### Why doesn't the map show all my photos? {#missing-photos}
