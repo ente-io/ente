@@ -1,6 +1,5 @@
 export const thumbnailGap = 4;
 export const thumbnailGridPadding = 24;
-const thumbnailMaxHeight = 180;
 const thumbnailMaxWidth = 180;
 const thumbnailLayoutMinColumns = 4;
 
@@ -16,22 +15,30 @@ export interface ThumbnailGridLayoutParams {
 
 export const computeThumbnailGridLayoutParams = (
     containerWidth: number,
+    { fixedThumbnailSize }: { fixedThumbnailSize?: number } = {},
 ): ThumbnailGridLayoutParams => {
-    const isSmallerLayout = !(
-        containerWidth >
-        thumbnailLayoutMinColumns * thumbnailMaxWidth
-    );
     const paddingInline = thumbnailGridPadding;
-    const fittableColumns = getFractionFittableColumns(containerWidth);
+    const targetSize = fixedThumbnailSize ?? thumbnailMaxWidth;
+    const availableWidth = containerWidth - 2 * paddingInline;
+    const fittableColumns =
+        (availableWidth + thumbnailGap) / (targetSize + thumbnailGap);
 
     let columns = Math.floor(fittableColumns);
     if (columns < thumbnailLayoutMinColumns) {
         columns = thumbnailLayoutMinColumns;
     }
 
-    const shrinkRatio = getShrinkRatio(containerWidth, columns);
-    const itemHeight = thumbnailMaxHeight * shrinkRatio;
-    const itemWidth = thumbnailMaxWidth * shrinkRatio;
+    const fittedSize =
+        (availableWidth - (columns - 1) * thumbnailGap) / columns;
+    // Fixed-size grids leave unused space at the end instead of stretching.
+    const itemSize =
+        fixedThumbnailSize === undefined
+            ? fittedSize
+            : Math.min(fixedThumbnailSize, Math.max(0, fittedSize));
+    const isSmallerLayout =
+        fixedThumbnailSize === undefined
+            ? !(containerWidth > thumbnailLayoutMinColumns * thumbnailMaxWidth)
+            : itemSize < fixedThumbnailSize;
     const gap = thumbnailGap;
 
     return {
@@ -39,16 +46,8 @@ export const computeThumbnailGridLayoutParams = (
         isSmallerLayout,
         paddingInline,
         columns,
-        itemWidth,
-        itemHeight,
+        itemWidth: itemSize,
+        itemHeight: itemSize,
         gap,
     };
 };
-
-const getFractionFittableColumns = (width: number): number =>
-    (width - 2 * thumbnailGridPadding + thumbnailGap) /
-    (thumbnailMaxWidth + thumbnailGap);
-
-const getShrinkRatio = (width: number, columns: number) =>
-    (width - 2 * thumbnailGridPadding - (columns - 1) * thumbnailGap) /
-    (columns * thumbnailMaxWidth);

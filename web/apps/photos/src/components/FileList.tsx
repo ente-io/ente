@@ -17,7 +17,6 @@ import {
     handleSelectCreator,
     handleSelectCreatorMulti,
 } from "@/utils/photoFrame";
-import { computePhotosThumbnailGridLayoutParams } from "@/utils/thumbnail-grid-layout";
 import { StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
@@ -40,6 +39,7 @@ import {
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import {
+    computeThumbnailGridLayoutParams,
     thumbnailGap,
     type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
@@ -187,7 +187,10 @@ export const FileList: React.FC<FileListProps> = ({
     const outerRef = useRef<HTMLDivElement | null>(null);
 
     const layoutParams = useMemo(
-        () => computePhotosThumbnailGridLayoutParams(width),
+        () =>
+            computeThumbnailGridLayoutParams(width, {
+                fixedThumbnailSize: 200,
+            }),
         [width],
     );
 
