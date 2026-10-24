@@ -336,17 +336,68 @@ test("a carousel swipe supersedes an earlier manual video selection", () => {
     expect([...playing]).toEqual(["carousel"]);
 });
 
-test("the interacted carousel keeps focus until it leaves the viewport", () => {
-    const carousel = addVideo("carousel", 100, false);
-    addVideo("lower", 500);
+test.each([
+    [0, "upper"],
+    [800, "lower"],
+] as const)(
+    "vertical scroll to %i releases a visible carousel's priority",
+    (y, next) => {
+        addVideo("upper", 100, true, 300);
+        const carousel = addVideo("carousel", 540, true, 300);
+        const second = addVideo("second", 540, false, 300, carousel.post);
+        addVideo("lower", 980, true, 300);
+        flush();
+        scrollTo(440);
+        focusFeedPost(carousel.post.element);
+        carousel.control.setActive(false);
+        second.control.setActive(true);
+        flush(false);
+        expect([...playing]).toEqual(["second"]);
+        scrollTo(y, false);
+        expect(playing.size).toBe(0);
+        vi.advanceTimersByTime(120);
+        expect([...playing]).toEqual([next]);
+    },
+);
+
+test("scrolling releases a cancelled swipe that did not change slides", () => {
+    addVideo("upper", 100);
+    const carousel = addVideo("carousel", 400);
     flush();
     focusFeedPost(carousel.post.element);
-    carousel.control.setActive(true);
-    flush();
-    scrollTo(250);
+    flush(false);
     expect([...playing]).toEqual(["carousel"]);
-    scrollTo(351);
-    expect([...playing]).toEqual(["lower"]);
+    scrollTo(10);
+    expect([...playing]).toEqual(["upper"]);
+});
+
+test("a carousel swipe replaces pending autoplay without waiting", () => {
+    addVideo("upper", 100);
+    const carousel = addVideo("carousel", 400);
+    flush(false);
+    focusFeedPost(carousel.post.element);
+    flush(false);
+    expect([...playing]).toEqual(["carousel"]);
+    vi.advanceTimersByTime(120);
+    expect(transitions).toEqual(["play carousel"]);
+});
+
+test("rapid sideways swipes start only the latest active slide", () => {
+    const first = addVideo("first", 100);
+    const second = addVideo("second", 100, false, 250, first.post);
+    const third = addVideo("third", 100, false, 250, first.post);
+    flush();
+    focusFeedPost(first.post.element);
+    first.control.setActive(false);
+    second.control.setActive(true);
+    second.control.setActive(false);
+    third.control.setActive(true);
+    flush(false);
+    expect(transitions).toEqual(["play first", "stop first", "play third"]);
+    third.control.setActive(false);
+    first.control.setActive(true);
+    flush(false);
+    expect([...playing]).toEqual(["first"]);
 });
 
 test("unmounting the interacted post releases its playback priority", () => {

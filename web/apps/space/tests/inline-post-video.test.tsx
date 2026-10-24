@@ -65,12 +65,17 @@ const container = { append: vi.fn() };
 const button = { tabIndex: -1 };
 const content = {
     element: { querySelector: () => button, remove: vi.fn() },
-    video: {
+    video: Object.assign(new EventTarget(), {
         tabIndex: -1,
         muted: true,
         currentTime: 0,
-        removeAttribute: vi.fn(),
-    },
+        readyState: 0,
+        HAVE_CURRENT_DATA: 2,
+        poster: "",
+        removeAttribute: vi.fn((name: string) => {
+            if (name == "poster") content.video.poster = "";
+        }),
+    }),
     preload: vi.fn<() => Promise<void>>(),
     destroy: vi.fn(),
 };
@@ -89,6 +94,8 @@ beforeEach(() => {
     mocks.effects = [];
     mocks.pendingEffects = [];
     content.video.currentTime = 0;
+    content.video.readyState = 0;
+    content.video.poster = "";
     mocks.create.mockImplementation((_, load: SpacePostAssetURLLoader) => {
         content.preload.mockImplementation(() =>
             load(asset).then(() => undefined),
@@ -105,7 +112,11 @@ const unmount = () => {
 
 afterEach(unmount);
 
-const render = (shouldPreload: boolean, isActive = false) => {
+const render = (
+    shouldPreload: boolean,
+    isActive = false,
+    imageUrl: string | undefined = "blob:cover",
+) => {
     mocks.refIndex = 0;
     mocks.effectIndex = 0;
     const element = SpaceInlinePostVideo({
@@ -114,6 +125,7 @@ const render = (shouldPreload: boolean, isActive = false) => {
         shouldPreload,
         isActive,
         muted: true,
+        imageUrl,
     }) as ReactElement<{ ref: RefObject<unknown> }>;
     element.props.ref.current = container;
     mocks.pendingEffects.splice(0).forEach((effect) => effect());
@@ -159,4 +171,50 @@ test("leaving the post releases its player and cancels its load", () => {
     expect(content.destroy).toHaveBeenCalledOnce();
     expect(request.cancel).toHaveBeenCalledOnce();
     expect(registration.unregister).toHaveBeenCalledOnce();
+});
+
+test("a preloaded slide shows its video frame as soon as it is decoded", () => {
+    render(true);
+    expect(content.video.poster).toBe("blob:cover");
+    content.video.readyState = 2;
+    content.video.dispatchEvent(new Event("loadeddata"));
+    expect(content.video.poster).toBe("");
+    expect(registration.setActive).toHaveBeenLastCalledWith(false);
+    render(true, true);
+    expect(content.video.poster).toBe("");
+    expect(content.destroy).not.toHaveBeenCalled();
+});
+
+test("a late cover does not replace an already decoded video frame", () => {
+    render(true, false, "");
+    content.video.readyState = 2;
+    content.video.dispatchEvent(new Event("loadeddata"));
+    render(true, false, "blob:late-cover");
+    expect(content.video.poster).toBe("");
+});
+
+test("swiping back keeps the paused frame and playback position", () => {
+    render(true, true);
+    content.video.readyState = 4;
+    content.video.dispatchEvent(new Event("loadeddata"));
+    content.video.currentTime = 0.5;
+    render(false);
+    render(true, true);
+    expect(content.video.poster).toBe("");
+    expect(content.video.currentTime).toBe(0.5);
+    expect(mocks.create).toHaveBeenCalledOnce();
+});
+
+test("an emptied video restores its latest cover and removes listeners on unmount", () => {
+    render(true);
+    content.video.readyState = 2;
+    content.video.dispatchEvent(new Event("loadeddata"));
+    render(true, false, "blob:latest-cover");
+    content.video.readyState = 0;
+    content.video.dispatchEvent(new Event("emptied"));
+    expect(content.video.poster).toBe("blob:latest-cover");
+    unmount();
+    content.video.readyState = 2;
+    content.video.dispatchEvent(new Event("loadeddata"));
+    expect(content.video.poster).toBe("blob:latest-cover");
 });
