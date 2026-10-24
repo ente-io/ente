@@ -81,34 +81,21 @@ import type {
     PreviewableCluster,
 } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import type { GalleryBarImplProps } from "./BarImpl";
 
 type PeopleHeaderProps = Pick<
     GalleryBarImplProps,
     "people" | "onSelectPerson"
-> & { person: Person; onHeightChange?: (height: number) => void };
+> & { person: Person };
 
 export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     people,
     onSelectPerson,
     person,
-    onHeightChange,
 }) => {
-    const headerRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-        const header = headerRef.current;
-        if (!header || !onHeightChange) return;
-        const report = () =>
-            onHeightChange(Math.max(72, header.offsetHeight + 12));
-        report();
-        const observer = new ResizeObserver(report);
-        observer.observe(header);
-        return () => observer.disconnect();
-    }, [onHeightChange]);
-
     return (
-        <GalleryItemsHeaderAdapter ref={headerRef}>
+        <GalleryItemsHeaderAdapter>
             <SpacedRow sx={{ gap: 2 }}>
                 {person.type == "cgroup" ? (
                     person.isHidden ? (

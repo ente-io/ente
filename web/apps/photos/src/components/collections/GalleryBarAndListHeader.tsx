@@ -98,7 +98,9 @@ export const GalleryBarAndListHeader: React.FC<
         collectionShareVisibilityProps.onClose();
     }, [collectionShareVisibilityProps]);
 
-    const [headerHeight, setHeaderHeight] = useState(72);
+    const albumDescription =
+        activeCollection?.pubMagicMetadata?.data.caption?.trim();
+    const [descriptionHeight, setDescriptionHeight] = useState(0);
 
     useEffect(() => {
         if (shouldHide || mode == "links") return;
@@ -129,7 +131,7 @@ export const GalleryBarAndListHeader: React.FC<
                     onCollectionCast={showCollectionCast}
                     onEditAlbumDetails={onEditAlbumDetails}
                     hasActiveFileSelection={hasActiveFileSelection}
-                    onHeightChange={setHeaderHeight}
+                    onDescriptionHeightChange={setDescriptionHeight}
                 />
             ) : mode != "people" && collectionSummary ? (
                 <GalleryItemsHeaderAdapter>
@@ -141,17 +143,13 @@ export const GalleryBarAndListHeader: React.FC<
             ) : activePerson ? (
                 <PeopleHeader
                     person={activePerson}
-                    onHeightChange={setHeaderHeight}
                     people={people}
                     onSelectPerson={onSelectPerson}
                 />
             ) : (
                 <></>
             ),
-            height:
-                shouldRenderCollectionHeader || activePerson
-                    ? headerHeight
-                    : 72,
+            height: 72 + (albumDescription ? descriptionHeight : 0),
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -172,7 +170,8 @@ export const GalleryBarAndListHeader: React.FC<
         onCollectionSlideshow,
         onBackToAlbums,
         onEditAlbumDetails,
-        headerHeight,
+        albumDescription,
+        descriptionHeight,
         // TODO: Cluster
         // This causes a loop since it is an array dep
         // people,

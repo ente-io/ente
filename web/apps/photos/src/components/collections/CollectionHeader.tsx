@@ -80,7 +80,7 @@ import {
 import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
 export interface CollectionHeaderProps {
@@ -98,25 +98,13 @@ export interface CollectionHeaderProps {
     onAddSaveGroup: AddSaveGroup;
     onShowMap: () => void;
     onBackToAlbums: () => void;
-    onHeightChange?: (height: number) => void;
+    onDescriptionHeightChange?: (height: number) => void;
 }
 
 export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
-    const { activeCollection, collectionSummary, onHeightChange } = props;
-    const headerRef = useRef<HTMLDivElement>(null);
+    const { activeCollection, collectionSummary, onDescriptionHeightChange } =
+        props;
     const showCover = useMediaQuery(useTheme().breakpoints.up("sm"));
-
-    useEffect(() => {
-        const header = headerRef.current;
-        if (!header || !onHeightChange) return;
-        // Include the adapter's bottom margin in the virtualized header height.
-        const report = () =>
-            onHeightChange(Math.max(72, header.offsetHeight + 12));
-        report();
-        const observer = new ResizeObserver(report);
-        observer.observe(header);
-        return () => observer.disconnect();
-    }, [onHeightChange]);
 
     const { name, type, attributes, fileCount } = collectionSummary;
     const isAlbum = isAlbumSummary(collectionSummary);
@@ -145,7 +133,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
     };
 
     return (
-        <GalleryItemsHeaderAdapter ref={headerRef}>
+        <GalleryItemsHeaderAdapter>
             <SpacedRow
                 sx={
                     isAlbum
@@ -201,6 +189,9 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
                         name={name}
                         description={isAlbum ? undefined : description}
                         descriptionMaxWidth={480}
+                        onDescriptionHeightChange={
+                            isAlbum ? undefined : onDescriptionHeightChange
+                        }
                         fileCount={fileCount}
                         endIcon={<EndIcon />}
                     />
@@ -213,6 +204,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
                 {isAlbum && (
                     <AlbumDescription
                         description={description}
+                        onHeightChange={onDescriptionHeightChange}
                         sx={{
                             gridArea: "description",
                             pt: 1,
