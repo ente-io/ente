@@ -139,7 +139,18 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
     return (
         <GalleryItemsHeaderAdapter ref={headerRef}>
             <SpacedRow
-                sx={{ gap: 2, alignItems: isAlbum ? "flex-start" : "center" }}
+                sx={
+                    isAlbum
+                        ? {
+                              display: "grid",
+                              gridTemplateColumns: "minmax(0, 1fr) auto",
+                              gridTemplateAreas:
+                                  '"summary actions" "description description"',
+                              columnGap: 2,
+                              alignItems: "start",
+                          }
+                        : { gap: 2, alignItems: "center" }
+                }
             >
                 <Stack
                     direction="row"
@@ -147,6 +158,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
                         gap: isAlbum ? 2 : 1,
                         alignItems: "center",
                         minWidth: 0,
+                        ...(isAlbum && { gridArea: "summary" }),
                     }}
                 >
                     {(type == "hiddenItems" || type == "archiveItems") && (
@@ -182,15 +194,22 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
                     />
                 </Stack>
                 {shouldShowOptions(type) && (
-                    <CollectionHeaderOptions {...props} />
+                    <Box sx={isAlbum ? { gridArea: "actions" } : undefined}>
+                        <CollectionHeaderOptions {...props} />
+                    </Box>
+                )}
+                {isAlbum && (
+                    <AlbumDescription
+                        description={description}
+                        sx={{
+                            gridArea: "description",
+                            pt: 1,
+                            maxWidth: 480,
+                            color: "text.faint",
+                        }}
+                    />
                 )}
             </SpacedRow>
-            {isAlbum && (
-                <AlbumDescription
-                    description={description}
-                    sx={{ pt: 1, maxWidth: 480, color: "text.faint" }}
-                />
-            )}
         </GalleryItemsHeaderAdapter>
     );
 };
@@ -725,7 +744,9 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 display: "inline-flex",
                 gap: "16px",
                 flexShrink: 0,
-                mt: isAlbumSummary(collectionSummary) ? "3px" : 0,
+                mt: isAlbumSummary(collectionSummary)
+                    ? { xs: 0, sm: "3px" }
+                    : 0,
             }}
         >
             <QuickOptions

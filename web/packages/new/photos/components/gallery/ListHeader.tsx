@@ -168,7 +168,9 @@ export const GalleryItemsHeaderAdapter = styled("div")`
 `;
 
 /** A compact cover shared by album and person gallery headers. */
-export const GalleryItemsCoverTile = styled("div")({
+export const GalleryItemsCoverTile = styled("div")(({ theme }) => ({
+    display: "none",
+    [theme.breakpoints.up("sm")]: { display: "block" },
     width: 54,
     height: 54,
     flexShrink: 0,
@@ -177,4 +179,4 @@ export const GalleryItemsCoverTile = styled("div")({
     position: "relative",
     alignSelf: "flex-start",
     "& > img": { width: "100%", height: "100%", objectFit: "cover" },
-});
+}));
