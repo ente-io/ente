@@ -376,6 +376,8 @@ interface SearchCategoryProps {
     };
 }
 
+const searchTabs = searchCategories.filter((category) => category !== "people");
+
 function SearchMenu(props: MenuProps<SearchOption, false>) {
     const {
         searchCategory: { category, setCategory },
@@ -422,7 +424,7 @@ function SearchMenu(props: MenuProps<SearchOption, false>) {
                         },
                     }}
                 >
-                    {searchCategories.map((category) => (
+                    {searchTabs.map((category) => (
                         <Tab
                             key={category}
                             value={category}
