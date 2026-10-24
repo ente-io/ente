@@ -3,12 +3,12 @@ import { SearchBar, type SearchBarProps } from "@/components/SearchBar";
 import { useIsOffline } from "@/components/utils/use-is-offline";
 import { uploadManager } from "@/services/upload-manager";
 import {
-    Album02Icon,
+    DashboardSquare01Icon,
     Home01Icon,
-    Link05Icon,
+    Link04Icon,
     Settings01Icon,
     Upload01Icon,
-    UserGroupIcon,
+    User02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import CloudOffIcon from "@mui/icons-material/CloudOff";
@@ -409,10 +409,10 @@ const NormalNavigationRail: React.FC<
                         <HugeiconsIcon
                             icon={
                                 item == "albums"
-                                    ? Album02Icon
+                                    ? DashboardSquare01Icon
                                     : item == "links"
-                                      ? Link05Icon
-                                      : UserGroupIcon
+                                      ? Link04Icon
+                                      : User02Icon
                             }
                             size={20}
                             strokeWidth={1.8}

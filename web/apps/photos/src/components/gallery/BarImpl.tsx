@@ -6,12 +6,16 @@ import {
     type albumFilters,
 } from "@/utils/album-filters";
 import type { PeopleSortBy } from "@/utils/people-sort";
-import { Link05Icon, PinIcon, StarIcon } from "@hugeicons/core-free-icons";
+import {
+    ArrowDown01Icon,
+    Link05Icon,
+    PinIcon,
+    StarIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PeopleIcon from "@mui/icons-material/People";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -334,9 +338,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                     sx={{ flexShrink: 0 }}
                 >
                     <CardText>{filter.label()}</CardText>
-                    <ExpandMoreIcon
+                    <Box
+                        component={HugeiconsIcon}
+                        icon={ArrowDown01Icon}
+                        size={16}
+                        strokeWidth={1.8}
                         sx={{
-                            fontSize: 16,
                             color: "text.muted",
                             transform:
                                 displayedAlbumFilter == filter.value
