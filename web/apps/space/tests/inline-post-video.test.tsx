@@ -65,12 +65,12 @@ const container = { append: vi.fn() };
 const button = { tabIndex: -1 };
 const content = {
     element: { querySelector: () => button, remove: vi.fn() },
-    video: {
+    video: Object.assign(new EventTarget(), {
         tabIndex: -1,
         muted: true,
         currentTime: 0,
         removeAttribute: vi.fn(),
-    },
+    }),
     preload: vi.fn<() => Promise<void>>(),
     destroy: vi.fn(),
 };

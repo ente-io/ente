@@ -73,8 +73,18 @@ export const SpaceInlinePostVideo: React.FC<{
 
     useEffect(() => {
         const element = player.current!.video;
-        if (imageUrl) element.poster = imageUrl;
-        else element.removeAttribute("poster");
+        const updatePoster = () => {
+            if (imageUrl && element.readyState < element.HAVE_CURRENT_DATA)
+                element.poster = imageUrl;
+            else element.removeAttribute("poster");
+        };
+        updatePoster();
+        element.addEventListener("loadeddata", updatePoster);
+        element.addEventListener("emptied", updatePoster);
+        return () => {
+            element.removeEventListener("loadeddata", updatePoster);
+            element.removeEventListener("emptied", updatePoster);
+        };
     }, [imageUrl, onLoadVideo, video]);
 
     useEffect(() => {
