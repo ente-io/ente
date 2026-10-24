@@ -187,10 +187,7 @@ export const FileList: React.FC<FileListProps> = ({
     const outerRef = useRef<HTMLDivElement | null>(null);
 
     const layoutParams = useMemo(
-        () =>
-            computeThumbnailGridLayoutParams(width, {
-                fixedThumbnailSize: 200,
-            }),
+        () => computeThumbnailGridLayoutParams(width),
         [width],
     );
 
