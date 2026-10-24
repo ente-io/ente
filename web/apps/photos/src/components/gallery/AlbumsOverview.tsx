@@ -3,7 +3,6 @@ import type { RemotePullOpts } from "@/components/gallery";
 import type { AlbumFilter } from "@/utils/album-filters";
 import { Delete02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import AddIcon from "@mui/icons-material/Add";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import {
     Box,
@@ -247,21 +246,23 @@ const AlbumsRow = ({
             }}
         >
             {Array.from({ length: end - start }, (_, offset) => {
-                const album = data.albums[start + offset];
-                if (!album)
+                const itemIndex = start + offset;
+                if (data.showCreate && itemIndex === 0)
                     return (
-                        <AlbumButton key="create" onClick={data.onCreateAlbum}>
+                        <AlbumButton
+                            key="create"
+                            aria-label={t("new_album")}
+                            onClick={data.onCreateAlbum}
+                        >
                             <Cover
                                 sx={{
-                                    border: "1.5px dashed",
-                                    borderColor: "stroke.faint",
+                                    bgcolor: "fill.faint",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    color: "text.muted",
                                 }}
                             >
-                                <AddIcon />
+                                <CreateAlbumIcon />
                             </Cover>
                             <Typography
                                 component="span"
@@ -269,13 +270,13 @@ const AlbumsRow = ({
                                     fontSize: "var(--album-name-size)",
                                     lineHeight: "20px",
                                     fontWeight: 500,
-                                    color: "text.muted",
                                 }}
                             >
-                                {t("new_album")}
+                                {t("add_new_album_tile")}
                             </Typography>
                         </AlbumButton>
                     );
+                const album = data.albums[itemIndex - Number(data.showCreate)]!;
                 const badge = album.attributes.has("sharedIncoming")
                     ? t("album_overview_received_title")
                     : album.attributes.has("sharedOutgoing") ||
@@ -375,6 +376,54 @@ const AlbumsRow = ({
     );
 };
 
+/** The image and plus glyph from the album creation tile in the design. */
+const CreateAlbumIcon = () => (
+    <Box
+        aria-hidden
+        sx={{ position: "relative", width: 42, height: 46, flexShrink: 0 }}
+    >
+        {[
+            { name: "frame", left: 7, top: 7 },
+            { name: "sun", left: 23, top: 13 },
+            { name: "landscape", left: 8.68, top: 24.25 },
+            { name: "hill", left: 23.13, top: 27.25 },
+        ].map(({ name, left, top }) => (
+            <Box
+                key={name}
+                component="img"
+                src={`/images/create-album/${name}.svg`}
+                alt=""
+                sx={{ position: "absolute", left, top }}
+            />
+        ))}
+        <Box
+            sx={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: 19,
+                height: 19,
+                borderRadius: "50%",
+                bgcolor: "background.default",
+                backgroundImage: (theme) =>
+                    `linear-gradient(${theme.vars.palette.fill.faint}, ${theme.vars.palette.fill.faint})`,
+                display: "grid",
+                placeItems: "center",
+            }}
+        >
+            <Box
+                sx={{
+                    width: 17.5,
+                    height: 17.5,
+                    mask: "url(/images/create-album/plus.svg) center / contain no-repeat",
+                    bgcolor: "accent.main",
+                    transform: "scale(0.395833)",
+                }}
+            />
+        </Box>
+    </Box>
+);
+
 const AlbumButton = styled(UnstyledButton)(({ theme }) => ({
     width: "var(--album-tile-width)",
     display: "flex",
@@ -383,7 +432,7 @@ const AlbumButton = styled(UnstyledButton)(({ theme }) => ({
     gap: 8,
     color: theme.vars.palette.text.base,
     textAlign: "left",
-    borderRadius: 12,
+    borderRadius: 20,
     "&:hover": { opacity: 0.86 },
     "&:focus-visible": {
         outline: `2px solid ${theme.vars.palette.stroke.base}`,
@@ -395,7 +444,7 @@ const Cover = styled("div")({
     width: "var(--album-tile-width)",
     height: "var(--album-tile-width)",
     flexShrink: 0,
-    borderRadius: 12,
+    borderRadius: 20,
     overflow: "hidden",
     position: "relative",
     "& > img": {
