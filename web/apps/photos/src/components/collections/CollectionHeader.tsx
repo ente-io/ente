@@ -42,9 +42,12 @@ import {
 import type { CollectionSortBy } from "ente-media/collection-sort";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
+    AlbumDescription,
+    GalleryItemsCoverTile,
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
+import { ItemCard } from "ente-new/photos/components/Tiles";
 import {
     cleanUncategorized,
     defaultHiddenCollectionUserFacingName,
@@ -70,7 +73,7 @@ import {
 import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
 export interface CollectionHeaderProps {
@@ -88,14 +91,27 @@ export interface CollectionHeaderProps {
     onAddSaveGroup: AddSaveGroup;
     onShowMap: () => void;
     onBackToAlbums: () => void;
-    onDescriptionHeightChange?: (height: number) => void;
+    onHeightChange?: (height: number) => void;
 }
 
 export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
-    const { activeCollection, collectionSummary, onDescriptionHeightChange } =
-        props;
+    const { activeCollection, collectionSummary, onHeightChange } = props;
+    const headerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const header = headerRef.current;
+        if (!header || !onHeightChange) return;
+        // Include the adapter's bottom margin in the virtualized header height.
+        const report = () =>
+            onHeightChange(Math.max(72, header.offsetHeight + 12));
+        report();
+        const observer = new ResizeObserver(report);
+        observer.observe(header);
+        return () => observer.disconnect();
+    }, [onHeightChange]);
 
     const { name, type, attributes, fileCount } = collectionSummary;
+    const isAlbum = isAlbumSummary(collectionSummary);
     const description =
         activeCollection?.pubMagicMetadata?.data.caption?.trim();
 
@@ -121,11 +137,17 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
     };
 
     return (
-        <GalleryItemsHeaderAdapter>
-            <SpacedRow>
+        <GalleryItemsHeaderAdapter ref={headerRef}>
+            <SpacedRow
+                sx={{ gap: 2, alignItems: isAlbum ? "flex-start" : "center" }}
+            >
                 <Stack
                     direction="row"
-                    sx={{ gap: 1, alignItems: "center", minWidth: 0 }}
+                    sx={{
+                        gap: isAlbum ? 2 : 1,
+                        alignItems: "center",
+                        minWidth: 0,
+                    }}
                 >
                     {(type == "hiddenItems" || type == "archiveItems") && (
                         <Tooltip title={t("go_back")}>
@@ -138,22 +160,43 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
                             </IconButton>
                         </Tooltip>
                     )}
+                    {isAlbum && (
+                        <ItemCard
+                            key={`${collectionSummary.id}-${collectionSummary.coverFile?.id ?? "empty"}`}
+                            TileComponent={GalleryItemsCoverTile}
+                            coverFile={collectionSummary.coverFile}
+                        />
+                    )}
                     <GalleryItemsSummary
+                        compact={isAlbum}
+                        nameProps={
+                            isAlbum
+                                ? { sx: { overflowWrap: "anywhere" } }
+                                : undefined
+                        }
                         name={name}
-                        description={description}
+                        description={isAlbum ? undefined : description}
                         descriptionMaxWidth={480}
                         fileCount={fileCount}
                         endIcon={<EndIcon />}
-                        onDescriptionHeightChange={onDescriptionHeightChange}
                     />
                 </Stack>
                 {shouldShowOptions(type) && (
                     <CollectionHeaderOptions {...props} />
                 )}
             </SpacedRow>
+            {isAlbum && (
+                <AlbumDescription
+                    description={description}
+                    sx={{ pt: 1, maxWidth: 480, color: "text.faint" }}
+                />
+            )}
         </GalleryItemsHeaderAdapter>
     );
 };
+
+const isAlbumSummary = ({ type }: CollectionSummary) =>
+    type == "album" || type == "folder" || type == "sharedIncoming";
 
 const shouldShowOptions = (type: CollectionSummaryType) =>
     type != "all" && type != "archiveItems";
@@ -645,7 +688,14 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const validMenuOptions = menuOptions.filter((o) => !!o);
 
     return (
-        <Box sx={{ display: "inline-flex", gap: "16px" }}>
+        <Box
+            sx={{
+                display: "inline-flex",
+                gap: "16px",
+                flexShrink: 0,
+                mt: isAlbumSummary(collectionSummary) ? "3px" : 0,
+            }}
+        >
             <QuickOptions
                 collectionSummary={collectionSummary}
                 isQuickLinkAlbum={isQuickLinkAlbum}
@@ -665,6 +715,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             {validMenuOptions.length > 0 && (
                 <>
                     <IconButton
+                        aria-label={t("more_options")}
                         id="collection-options-trigger"
                         aria-controls={
                             menuAnchorEl ? "collection-options" : undefined

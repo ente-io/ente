@@ -47,6 +47,7 @@ import {
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import {
+    GalleryItemsCoverTile,
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
@@ -78,22 +79,35 @@ import type {
     PreviewableCluster,
 } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import type { GalleryBarImplProps } from "./BarImpl";
 
 type PeopleHeaderProps = Pick<
     GalleryBarImplProps,
     "people" | "onSelectPerson"
-> & { person: Person };
+> & { person: Person; onHeightChange?: (height: number) => void };
 
 export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     people,
     onSelectPerson,
     person,
+    onHeightChange,
 }) => {
+    const headerRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const header = headerRef.current;
+        if (!header || !onHeightChange) return;
+        const report = () =>
+            onHeightChange(Math.max(72, header.offsetHeight + 12));
+        report();
+        const observer = new ResizeObserver(report);
+        observer.observe(header);
+        return () => observer.disconnect();
+    }, [onHeightChange]);
+
     return (
-        <GalleryItemsHeaderAdapter>
-            <SpacedRow>
+        <GalleryItemsHeaderAdapter ref={headerRef}>
+            <SpacedRow sx={{ gap: 2 }}>
                 {person.type == "cgroup" ? (
                     person.isHidden ? (
                         <IgnoredPersonHeader person={person} />
@@ -110,6 +124,32 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
         </GalleryItemsHeaderAdapter>
     );
 };
+
+const PersonHeaderSummary = ({
+    person,
+    ...summaryProps
+}: { person: Person } & Pick<
+    React.ComponentProps<typeof GalleryItemsSummary>,
+    "name" | "nameProps" | "onNameClick"
+>) => (
+    <Stack direction="row" sx={{ gap: 2, alignItems: "center", minWidth: 0 }}>
+        <ItemCard
+            key={`${person.id}-${person.displayFaceID}`}
+            TileComponent={GalleryItemsCoverTile}
+            coverFile={person.displayFaceFile}
+            coverFaceID={person.displayFaceID}
+        />
+        <GalleryItemsSummary
+            {...summaryProps}
+            compact
+            fileCount={person.fileIDs.length}
+            nameProps={{
+                ...summaryProps.nameProps,
+                sx: { overflowWrap: "anywhere" },
+            }}
+        />
+    </Stack>
+);
 
 interface CGroupPersonHeaderProps {
     person: CGroupPerson;
@@ -141,14 +181,12 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
         });
 
     // This view only receives unignored, named people.
-    const name = cgroup.data.name ?? "";
+    const name =
+        person.name?.trim() || cgroup.data.name?.trim() || t("unnamed_person");
 
     return (
         <>
-            <GalleryItemsSummary
-                name={name}
-                fileCount={person.fileIDs.length}
-            />
+            <PersonHeaderSummary person={person} name={name} />
             <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
                     startIcon={<ListAltOutlinedIcon />}
@@ -216,10 +254,10 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
 
     return (
         <>
-            <GalleryItemsSummary
-                name={t("ignored")}
+            <PersonHeaderSummary
+                person={person}
+                name={person.name?.trim() || t("ignored")}
                 nameProps={{ color: "text.muted" }}
-                fileCount={person.fileIDs.length}
             />
             <OverflowMenu ariaID="person-options">
                 <OverflowMenuOption
@@ -263,10 +301,10 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
     return (
         <>
-            <GalleryItemsSummary
-                name={t("unnamed_person")}
+            <PersonHeaderSummary
+                person={person}
+                name={person.name?.trim() || t("unnamed_person")}
                 nameProps={{ color: "text.muted" }}
-                fileCount={person.fileIDs.length}
                 onNameClick={showAddPerson}
             />
             <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>

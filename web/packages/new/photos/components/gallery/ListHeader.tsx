@@ -11,6 +11,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 interface GalleryItemsSummaryProps {
     name: string;
+    compact?: boolean;
     description?: string;
     descriptionMaxWidth?: number;
     nameProps?: TypographyProps;
@@ -23,6 +24,7 @@ interface GalleryItemsSummaryProps {
 
 export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
     name,
+    compact = false,
     description,
     descriptionMaxWidth,
     nameProps,
@@ -58,8 +60,8 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
             sx={{
                 gap: 1.5,
                 // Keep the header height stable without an end icon.
-                minHeight: "24px",
-                mt: "4px",
+                minHeight: compact ? "20px" : "24px",
+                mt: compact ? "2px" : "4px",
             }}
         >
             <Typography
@@ -68,7 +70,7 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
                     color: "text.muted",
                     fontSize: "14px",
                     fontWeight: 500,
-                    lineHeight: "18px",
+                    lineHeight: compact ? "20px" : "18px",
                 }}
             >
                 {t("photos_count", { count: fileCount })}
@@ -164,3 +166,15 @@ export const GalleryItemsHeaderAdapter = styled("div")`
     width: 100%;
     margin-bottom: 12px;
 `;
+
+/** A compact cover shared by album and person gallery headers. */
+export const GalleryItemsCoverTile = styled("div")({
+    width: 54,
+    height: 54,
+    flexShrink: 0,
+    borderRadius: 12,
+    overflow: "hidden",
+    position: "relative",
+    alignSelf: "flex-start",
+    "& > img": { width: "100%", height: "100%", objectFit: "cover" },
+});
