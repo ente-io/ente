@@ -1,7 +1,7 @@
 import { useDeleteEmptyAlbums } from "@/components/collections/useDeleteEmptyAlbums";
 import type { RemotePullOpts } from "@/components/gallery";
 import type { AlbumFilter } from "@/utils/album-filters";
-import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, ImageAdd02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import {
@@ -257,12 +257,18 @@ const AlbumsRow = ({
                             <Cover
                                 sx={{
                                     bgcolor: "fill.faint",
+                                    color: "text.muted",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                 }}
                             >
-                                <CreateAlbumIcon />
+                                <HugeiconsIcon
+                                    icon={ImageAdd02Icon}
+                                    size={32}
+                                    strokeWidth={1.5}
+                                    aria-hidden
+                                />
                             </Cover>
                             <Typography
                                 component="span"
@@ -375,54 +381,6 @@ const AlbumsRow = ({
         </div>
     );
 };
-
-/** The image and plus glyph from the album creation tile in the design. */
-const CreateAlbumIcon = () => (
-    <Box
-        aria-hidden
-        sx={{ position: "relative", width: 42, height: 46, flexShrink: 0 }}
-    >
-        {[
-            { name: "frame", left: 7, top: 7 },
-            { name: "sun", left: 23, top: 13 },
-            { name: "landscape", left: 8.68, top: 24.25 },
-            { name: "hill", left: 23.13, top: 27.25 },
-        ].map(({ name, left, top }) => (
-            <Box
-                key={name}
-                component="img"
-                src={`/images/create-album/${name}.svg`}
-                alt=""
-                sx={{ position: "absolute", left, top }}
-            />
-        ))}
-        <Box
-            sx={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: 19,
-                height: 19,
-                borderRadius: "50%",
-                bgcolor: "background.default",
-                backgroundImage: (theme) =>
-                    `linear-gradient(${theme.vars.palette.fill.faint}, ${theme.vars.palette.fill.faint})`,
-                display: "grid",
-                placeItems: "center",
-            }}
-        >
-            <Box
-                sx={{
-                    width: 17.5,
-                    height: 17.5,
-                    mask: "url(/images/create-album/plus.svg) center / contain no-repeat",
-                    bgcolor: "accent.main",
-                    transform: "scale(0.395833)",
-                }}
-            />
-        </Box>
-    </Box>
-);
 
 const AlbumButton = styled(UnstyledButton)(({ theme }) => ({
     width: "var(--album-tile-width)",
