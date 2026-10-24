@@ -30,12 +30,13 @@ class SearchThumbnailWidget extends StatelessWidget {
     final isLocation =
         searchResult?.type() == ResultType.location ||
         searchResult?.type() == ResultType.locationSuggestion;
+    final hasCover = isLocation || searchResult?.type() == ResultType.magic;
     return Hero(
       tag: isLocation ? tagPrefix : tagPrefix + (file?.tag ?? ""),
-      createRectTween: isLocation
+      createRectTween: hasCover
           ? (begin, end) => RectTween(begin: begin, end: end)
           : null,
-      transitionOnUserGestures: isLocation,
+      transitionOnUserGestures: hasCover,
       child: SizedBox(
         height: size,
         width: size,
