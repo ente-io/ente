@@ -1,5 +1,9 @@
 import type { SpaceViewerPhoto } from "components/FileViewer";
 import { logToDisk } from "ente-base/log-web";
+import {
+    cachedSpaceMediaBlobURLIfPresent,
+    spacePostMediaCacheKey,
+} from "services/media-cache";
 import { SpaceMediaRateLimitError } from "services/media-load";
 import type { SpacePostAssetURLLoader } from "services/space";
 
@@ -108,6 +112,7 @@ export const createSpaceVideoContent = (
     supportMessage.style.marginTop = "2px";
     errorMessage.append(errorTitle, supportMessage);
     element.append(video, button, loading, errorMessage);
+    const cacheReadController = new AbortController();
     let generation = 0;
     let sourceGeneration = 0;
     let pendingLoad: Promise<void> | undefined;
@@ -177,6 +182,7 @@ export const createSpaceVideoContent = (
         sourceGeneration++;
         pendingLoad = undefined;
         pause();
+        if (item.imageUrl) video.poster = item.imageUrl;
         video.removeAttribute("src");
         video.load();
     };
@@ -216,16 +222,27 @@ export const createSpaceVideoContent = (
         if (document.hidden) pause();
     };
     document.addEventListener("visibilitychange", visibility);
-    const preload = () => {
+    const preload = ({ cachedOnly = false } = {}): Promise<void> => {
         if (disposed || failure || video.getAttribute("src"))
             return Promise.resolve();
-        if (pendingLoad) return pendingLoad;
+        if (pendingLoad)
+            return cachedOnly ? pendingLoad : pendingLoad.then(() => preload());
         const current = sourceGeneration;
         pendingLoad = (async () => {
             let url = media.url ?? ownedURL;
             if (!url) {
                 if (!media.asset || !load) throw new Error("Video unavailable");
-                url = await load(media.asset);
+                url = cachedOnly
+                    ? await cachedSpaceMediaBlobURLIfPresent(
+                          spacePostMediaCacheKey(
+                              media.asset.spaceId,
+                              media.asset.objectKey,
+                          ),
+                          media.asset.mediaType,
+                          cacheReadController.signal,
+                      )
+                    : await load(media.asset);
+                if (!url) return;
                 if (sourceGeneration != current) {
                     URL.revokeObjectURL(url);
                     return;
@@ -322,6 +339,7 @@ export const createSpaceVideoContent = (
     video.onloadedmetadata = () => {
         if (media.start) video.currentTime = media.start;
     };
+    video.onloadeddata = () => video.removeAttribute("poster");
     video.ontimeupdate = () => {
         if (media.end != undefined && video.currentTime >= media.end) {
             if (inline) video.currentTime = media.start ?? 0;
@@ -339,13 +357,12 @@ export const createSpaceVideoContent = (
         play,
         pause,
         deactivate: () => {
-            if (inline) {
-                active = false;
-                pause();
-            } else clear();
+            active = false;
+            pause();
         },
         destroy: () => {
             disposed = true;
+            cacheReadController.abort();
             clearTimeout(retryTimer);
             clear();
             document.removeEventListener("visibilitychange", visibility);

@@ -1547,6 +1547,18 @@ export const SpaceFileViewer: React.FC<SpaceFileViewerProps> = ({
                 event.content.element = video.element;
                 event.content.onLoaded();
                 videos.set(event.content, video);
+                void video
+                    .preload({ cachedOnly: true })
+                    .catch((error: unknown) => {
+                        if (!(
+                            error instanceof DOMException &&
+                            error.name == "AbortError"
+                        ))
+                            log.warn(
+                                "Failed to prepare cached viewer video",
+                                error,
+                            );
+                    });
             });
             pswp.on("contentActivate", ({ content }) =>
                 videos.get(content)?.play(),
