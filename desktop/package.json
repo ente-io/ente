@@ -46,7 +46,7 @@
         "concurrently": "10.0.4",
         "cross-env": "10.1.0",
         "electron": "42.11.18",
-        "electron-builder": "26.15.3",
+        "electron-builder": "26.18.0",
         "eslint": "10.4.1",
         "prettier": "3.8.3",
         "prettier-plugin-organize-imports": "4.3.0",
