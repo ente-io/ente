@@ -173,7 +173,7 @@ test("leaving the post releases its player and cancels its load", () => {
     expect(registration.unregister).toHaveBeenCalledOnce();
 });
 
-test("a preloaded slide shows its video frame as soon as it is decoded", () => {
+test("a preloaded slide removes its poster as soon as a frame is decoded", () => {
     render(true);
     expect(content.video.poster).toBe("blob:cover");
     content.video.readyState = 2;

@@ -4,7 +4,8 @@
     "private": true,
     "scripts": {
         "build:post": "mv out/404.html out/_next/404.html",
-        "test": "vitest --run"
+        "test": "vitest --run",
+        "test:browser": "node --test tests/browser/inline-post-video.mts"
     },
     "dependencies": {
         "@ffmpeg/ffmpeg": "0.12.15",
@@ -26,6 +27,8 @@
     },
     "devDependencies": {
         "ente-build-config": "*",
+        "playwright": "1.64.1",
+        "vite": "8.3.4",
         "vite-plugin-wasm": "3.6.0",
         "vitest": "5.0.4"
     }
