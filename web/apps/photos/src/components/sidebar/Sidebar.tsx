@@ -448,9 +448,11 @@ function RootSidebarContents({
                     sx: {
                         width: "min(1200px, calc(100vw - 48px))",
                         maxWidth: "calc(100vw - 48px)",
-                        height: "min(900px, calc(100dvh - 48px))",
-                        maxHeight: "calc(100dvh - 48px)",
+                        height: "min(900px, calc(100dvh - 48px - env(titlebar-area-height, 0px)))",
+                        maxHeight:
+                            "calc(100dvh - 48px - env(titlebar-area-height, 0px))",
                         m: 3,
+                        mt: "calc(24px + env(titlebar-area-height, 0px))",
                         p: 2,
                         gap: 2,
                         boxSizing: "border-box",
