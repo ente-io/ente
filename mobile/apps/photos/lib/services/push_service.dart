@@ -59,6 +59,7 @@ class PushService {
       unawaited(_configurePushToken());
     });
     await _tokenRefreshSubscription?.cancel();
+    // ignore: deprecated_member_use
     _tokenRefreshSubscription = FirebaseMessaging.instance.onTokenRefresh
         .listen(
           (_) => unawaited(_configurePushToken()),
@@ -73,6 +74,7 @@ class PushService {
     final sessionToken = Configuration.instance.getToken();
     if (sessionToken == null) return;
     try {
+      // ignore: deprecated_member_use
       final String? fcmToken = await FirebaseMessaging.instance.getToken();
       final shouldForceRefreshServerToken =
           DateTime.now().microsecondsSinceEpoch -
