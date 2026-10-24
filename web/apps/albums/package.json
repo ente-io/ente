@@ -48,7 +48,7 @@
         "react-virtualized-auto-sizer": "1.0.26",
         "react-window": "1.8.11",
         "sanitize-filename": "1.6.4",
-        "zod": "4.6.5"
+        "zod": "4.6.6"
     },
     "devDependencies": {
         "@types/heic-convert": "2.1.1",
